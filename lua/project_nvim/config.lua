@@ -1,50 +1,66 @@
-local M = {}
-
 ---@class ProjectOptions
-M.defaults = {
-  -- Manual mode doesn't automatically change your root directory, so you have
-  -- the option to manually do so using `:ProjectRoot` command.
-  manual_mode = false,
+---@field manual_mode? boolean
+---@field detection_methods? ("lsp"|"pattern")[]
+---@field patterns? string[]
+---@field ignore_lsp? string[]
+---@field exclude_dirs? string[]
+---@field show_hidden? boolean
+---@field silent_chdir? boolean
+---@field datapath? `vim.fn.stdpath("data")`|string
 
-  -- Methods of detecting the root directory. **"lsp"** uses the native neovim
-  -- lsp, while **"pattern"** uses vim-rooter like glob pattern matching. Here
-  -- order matters: if one is not detected, the other is used as fallback. You
-  -- can also delete or rearangne the detection methods.
-  detection_methods = { "lsp", "pattern" },
+---@class Project
+---@field defaults ProjectOptions
+---@field options ProjectOptions
+---@field setup fun(options: ProjectOptions)
 
-  -- All the patterns used to detect root dir, when **"pattern"** is in
-  -- detection_methods
-  patterns = { ".git", "_darcs", ".hg", ".bzr", ".svn", "Makefile", "package.json" },
+---@type Project
+---@diagnostic disable-next-line:missing-fields
+local M = {
+  defaults = {
+    -- Manual mode doesn't automatically change your root directory, so you have
+    -- the option to manually do so using `:ProjectRoot` command.
+    manual_mode = false,
 
-  -- Table of lsp clients to ignore by name
-  -- eg: { "efm", ... }
-  ignore_lsp = {},
+    -- Methods of detecting the root directory. **"lsp"** uses the native neovim
+    -- lsp, while **"pattern"** uses vim-rooter like glob pattern matching. Here
+    -- order matters: if one is not detected, the other is used as fallback. You
+    -- can also delete or rearangne the detection methods.
+    detection_methods = { "lsp", "pattern" },
 
-  -- Don't calculate root dir on specific directories
-  -- Ex: { "~/.cargo/*", ... }
-  exclude_dirs = {},
+    -- All the patterns used to detect root dir, when **"pattern"** is in
+    -- detection_methods
+    patterns = { ".git", "_darcs", ".hg", ".bzr", ".svn", "Makefile", "package.json" },
 
-  -- Show hidden files in telescope
-  show_hidden = false,
+    -- Table of lsp clients to ignore by name
+    -- eg: { "efm", ... }
+    ignore_lsp = {},
 
-  -- When set to false, you will get a message when project.nvim changes your
-  -- directory.
-  silent_chdir = true,
+    -- Don't calculate root dir on specific directories
+    -- Ex: { "~/.cargo/*", ... }
+    exclude_dirs = {},
 
-  -- What scope to change the directory, valid options are
-  -- * global (default)
-  -- * tab
-  -- * win
-  scope_chdir = "global",
+    -- Show hidden files in telescope
+    show_hidden = false,
 
-  -- Path where project.nvim will store the project history for use in
-  -- telescope
-  datapath = vim.fn.stdpath("data"),
+    -- When set to false, you will get a message when project.nvim changes your
+    -- directory.
+    silent_chdir = true,
+
+    -- What scope to change the directory, valid options are
+    -- * global (default)
+    -- * tab
+    -- * win
+    scope_chdir = "global",
+
+    -- Path where project.nvim will store the project history for use in
+    -- telescope
+    datapath = vim.fn.stdpath("data"),
+  },
+
+  options = {},
 }
 
----@type ProjectOptions
-M.options = {}
-
+---@param options ProjectOptions
 M.setup = function(options)
   M.options = vim.tbl_deep_extend("force", M.defaults, options or {})
 
