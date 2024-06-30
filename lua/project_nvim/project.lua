@@ -2,7 +2,7 @@ local config = require("project_nvim.config")
 local history = require("project_nvim.utils.history")
 local glob = require("project_nvim.utils.globtopattern")
 local path = require("project_nvim.utils.path")
-local uv = vim.loop
+local uv = vim.uv or vim.loop
 local M = {}
 
 -- Internal states
