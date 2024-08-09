@@ -101,19 +101,19 @@ function M.find_pattern_root()
   ---@param identifier string
   ---@return boolean
   local function is(dir, identifier)
-    dir = dir:match(".*/(.*)")
-    return dir == identifier
+    return dir:match(".*/(.*)") == identifier
   end
 
   ---@param dir string
   ---@param identifier string
   local function sub(dir, identifier)
     local path_str = get_parent(dir)
+    local current = ""
     while true do
       if is(path_str, identifier) then
         return true
       end
-      local current = path_str
+      current = path_str
       path_str = get_parent(path_str)
       if current == path_str then
         return false
@@ -234,7 +234,7 @@ function M.set_pwd(dir, method)
         return
       end
 
-      if config.options.silent_chdir == false then
+      if not config.options.silent_chdir then
         vim.notify("Set CWD to " .. dir .. " using " .. method)
       end
     end
@@ -271,18 +271,12 @@ function M.is_file()
   local buf_type = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
 
   local whitelisted_buf_type = { "", "acwrite" }
-  local is_in_whitelist = false
   for _, wtype in ipairs(whitelisted_buf_type) do
     if buf_type == wtype then
-      is_in_whitelist = true
-      break
+      return true
     end
   end
-  if not is_in_whitelist then
-    return false
-  end
-
-  return true
+  return false
 end
 
 function M.on_buf_enter()
