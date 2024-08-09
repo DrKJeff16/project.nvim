@@ -133,7 +133,7 @@ end
 
 local function setup_watch()
   -- Only runs once
-  if M.has_watch_setup == false then
+  if not M.has_watch_setup then
     M.has_watch_setup = true
     local event = uv.new_fs_event()
     if event == nil then
@@ -143,7 +143,7 @@ local function setup_watch()
       if err ~= nil then
         return
       end
-      if events["change"] then
+      if events.change then
         M.recent_projects = nil
         M.read_projects_from_history()
       end
