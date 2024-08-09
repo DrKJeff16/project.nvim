@@ -1,19 +1,29 @@
 -- Credits for this module goes to: David Manura
 -- https://github.com/davidm/lua-glob-pattern
 
+---@class Project.Utils.GlobPattern
+---@field _TYPE string
+---@field _NAME string
+---@field _VERSION string
+---@field globtopattern fun(g: string): (p: string)
+
+---@type Project.Utils.GlobPattern
+---@diagnostic disable-next-line:missing-fields
 local M = { _TYPE = "module", _NAME = "globtopattern", _VERSION = "0.2.1.20120406" }
 
+-- Some useful references:
+-- - apr_fnmatch in Apache APR.  For example,
+--   http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html
+--   which cites POSIX 1003.2-1992, section B.6.
+---@param g string
+---@return string p
 function M.globtopattern(g)
-  -- Some useful references:
-  -- - apr_fnmatch in Apache APR.  For example,
-  --   http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html
-  --   which cites POSIX 1003.2-1992, section B.6.
-
   local p = "^" -- pattern being built
   local i = 0 -- index in g
-  local c -- char at index i in g.
+  local c = "" -- char at index i in g.
 
   -- unescape glob char
+  ---@return boolean
   local function unescape()
     if c == "\\" then
       i = i + 1
@@ -27,11 +37,14 @@ function M.globtopattern(g)
   end
 
   -- escape pattern char
+  ---@param char string
+  ---@return string
   local function escape(char)
     return char:match("^%w$") and c or "%" .. c
   end
 
   -- Convert tokens at end of charset.
+  ---@return boolean
   local function charset_end()
     while 1 do
       if c == "" then
@@ -80,6 +93,7 @@ function M.globtopattern(g)
   end
 
   -- Convert tokens in charset.
+  ---@return boolean
   local function charset()
     i = i + 1
     c = g:sub(i, i)
