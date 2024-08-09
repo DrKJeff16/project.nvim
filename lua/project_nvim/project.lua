@@ -3,12 +3,31 @@ local history = require("project_nvim.utils.history")
 local glob = require("project_nvim.utils.globtopattern")
 local path = require("project_nvim.utils.path")
 local uv = vim.uv or vim.loop
+
+-- TODO(DrKJeff16): Figure out a more appropriate name
+---@class Project.LSP
+---@field init fun()
+---@field attached_lsp boolean
+---@field last_project string|nil
+---@field find_lsp_root fun(): ((string|nil),string?)
+---@field find_pattern_root fun(): ((string|nil),string?)
+---@field on_attach_lsp fun(client: vim.lsp.Client, bufnr: integer)
+---@field attach_to_lsp fun(): (integer?,string?)
+---@field set_pwd fun(dir: string, method: string): boolean?
+---@field get_project_root fun(): (string|nil,string?)
+---@field is_file fun(): boolean
+---@field on_buf_enter fun()
+---@field add_project_manually fun()
+
+---@type Project.LSP
+---@diagnostic disable-next-line:missing-fields
 local M = {}
 
 -- Internal states
 M.attached_lsp = false
 M.last_project = nil
 
+---@return (string|nil),string?
 function M.find_lsp_root()
   -- Get lsp client for current buffer
   -- Returns nil or string
@@ -21,6 +40,7 @@ function M.find_lsp_root()
   end
 
   for _, client in pairs(clients) do
+    ---@type string[]
     local filetypes = client.config.filetypes
     if filetypes and vim.tbl_contains(filetypes, buf_ft) then
       if not vim.tbl_contains(config.options.ignore_lsp, client.name) then
@@ -32,6 +52,7 @@ function M.find_lsp_root()
   return nil
 end
 
+---@return (string|nil),string?
 function M.find_pattern_root()
   local search_dir = vim.fn.expand("%:p:h", true)
   if vim.fn.has("win32") > 0 then
@@ -39,8 +60,11 @@ function M.find_pattern_root()
   end
 
   local last_dir_cache = ""
+  ---@type string[]
   local curr_dir_cache = {}
 
+  ---@param path_str string
+  ---@return string path_str
   local function get_parent(path_str)
     path_str = path_str:match("^(.*)/")
     if path_str == "" then
@@ -49,17 +73,22 @@ function M.find_pattern_root()
     return path_str
   end
 
+  ---@param file_dir string
   local function get_files(file_dir)
     last_dir_cache = file_dir
     curr_dir_cache = {}
 
+    ---@type uv_fs_t|nil
     local dir = uv.fs_scandir(file_dir)
     if dir == nil then
       return
     end
 
+    ---@type string|nil
+    local file
+
     while true do
-      local file = uv.fs_scandir_next(dir)
+      file = uv.fs_scandir_next(dir)
       if file == nil then
         return
       end
@@ -68,11 +97,16 @@ function M.find_pattern_root()
     end
   end
 
+  ---@param dir string
+  ---@param identifier string
+  ---@return boolean
   local function is(dir, identifier)
     dir = dir:match(".*/(.*)")
     return dir == identifier
   end
 
+  ---@param dir string
+  ---@param identifier string
   local function sub(dir, identifier)
     local path_str = get_parent(dir)
     while true do
@@ -87,10 +121,14 @@ function M.find_pattern_root()
     end
   end
 
+  ---@param dir string
+  ---@param identifier string
   local function child(dir, identifier)
     return is(get_parent(dir), identifier)
   end
 
+  ---@param dir string
+  ---@param identifier string
   local function has(dir, identifier)
     if last_dir_cache ~= dir then
       get_files(dir)
@@ -104,6 +142,9 @@ function M.find_pattern_root()
     return false
   end
 
+  ---@param dir string
+  ---@param pattern string
+  ---@return boolean
   local function match(dir, pattern)
     local first_char = pattern:sub(1, 1)
     if first_char == "=" then
@@ -143,11 +184,13 @@ function M.find_pattern_root()
   end
 end
 
----@diagnostic disable-next-line: unused-local
+---@param client vim.lsp.Client
+---@param bufnr integer
 local on_attach_lsp = function(client, bufnr)
   M.on_buf_enter() -- Recalculate root dir after lsp attaches
 end
 
+---@return integer?,string?
 function M.attach_to_lsp()
   if M.attached_lsp then
     return
@@ -171,6 +214,9 @@ function M.attach_to_lsp()
   M.attached_lsp = true
 end
 
+---@param dir string
+---@param method string
+---@return boolean
 function M.set_pwd(dir, method)
   if dir ~= nil then
     M.last_project = dir
@@ -198,6 +244,7 @@ function M.set_pwd(dir, method)
   return false
 end
 
+---@return (string|nil),string?
 function M.get_project_root()
   -- returns project root, as well as method
   for _, detection_method in ipairs(config.options.detection_methods) do
@@ -213,8 +260,11 @@ function M.get_project_root()
       end
     end
   end
+
+  return nil
 end
 
+---@return boolean
 function M.is_file()
   local bufnr = vim.api.nvim_get_current_buf()
 

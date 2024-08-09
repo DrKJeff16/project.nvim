@@ -1,19 +1,20 @@
----@class ProjectOptions
+---@class Project.Config.Options
 ---@field manual_mode? boolean
 ---@field detection_methods? ("lsp"|"pattern")[]
 ---@field patterns? string[]
 ---@field ignore_lsp? string[]
 ---@field exclude_dirs? string[]
 ---@field show_hidden? boolean
+---@field scope_chdir? "global"|"tab"|"win"
 ---@field silent_chdir? boolean
----@field datapath? `vim.fn.stdpath("data")`|string
+---@field datapath? string
 
----@class Project
----@field defaults ProjectOptions
----@field options ProjectOptions
----@field setup fun(options: ProjectOptions)
+---@class Project.Config
+---@field defaults Project.Config.Options
+---@field options Project.Config.Options
+---@field setup fun(options: Project.Config.Options)
 
----@type Project
+---@type Project.Config
 ---@diagnostic disable-next-line:missing-fields
 local M = {
   defaults = {
@@ -60,7 +61,7 @@ local M = {
   options = {},
 }
 
----@param options ProjectOptions
+---@param options Project.Config.Options
 M.setup = function(options)
   M.options = vim.tbl_deep_extend("force", M.defaults, options or {})
 
