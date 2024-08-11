@@ -1,3 +1,5 @@
+<!--vim:ts=2:sts=2:sw=2:et:-->>
+
 # 🗃️ project.nvim
 
 **project.nvim** is an all in one neovim plugin written in lua that provides
