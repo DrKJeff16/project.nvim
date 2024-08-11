@@ -14,9 +14,9 @@ that provides superior project management.
 
 ## ✨ Features
 
-- Automagically cd to the project root directory using nvim LSP
+- Automagically cd to project directory using nvim lsp
+- If no lsp then uses pattern matching to cd to root directory
   - Dependency free, does not rely on [lspconfig](https://github.com/neovim/nvim-lspconfig)
-- If no LSP is available then it'll try using pattern matching to cd to the project root directory instead
 - [Telescope integration](#telescope-integration) `:Telescope projects`
   - Access your recently opened projects from telescope!
   - Asynchronous file IO so it will not slow down neovim when reading the history file on startup.
