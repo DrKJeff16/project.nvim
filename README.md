@@ -14,9 +14,9 @@ superior project management.
 
 ## ✨ Features
 
-- Automagically cd to project directory using nvim lsp
-- If no lsp then uses pattern matching to cd to root directory
+- Automagically cd to the project root directory using nvim LSP
   - Dependency free, does not rely on [lspconfig](https://github.com/neovim/nvim-lspconfig)
+- If no LSP is available then it'll try using pattern matching to cd to the project root directory instead
 - [Telescope integration](#telescope-integration) `:Telescope projects`
   - Access your recently opened projects from telescope!
   - Asynchronous file IO so it will not slow down neovim when reading the history file on startup.
@@ -115,16 +115,16 @@ use {
   manual_mode = false,
 
   -- Methods of detecting the root directory. **"lsp"** uses the native neovim
-  -- lsp, while **"pattern"** uses vim-rooter like glob pattern matching. Here
+  -- LSP, while **"pattern"** uses vim-rooter like glob pattern matching. Here
   -- order matters: if one is not detected, the other is used as fallback. You
   -- can also delete or rearangne the detection methods.
   detection_methods = { "lsp", "pattern" },
 
-  -- All the patterns used to detect root dir, when **"pattern"** is in
-  -- detection_methods
+  -- All the patterns used to detect root dir, when `"pattern"` is in
+  -- `detection_methods`
   patterns = { ".git", "_darcs", ".hg", ".bzr", ".svn", "Makefile", "package.json" },
 
-  -- Table of lsp clients to ignore by name
+  -- Table of LSP clients to ignore by name
   -- eg: { "efm", ... }
   ignore_lsp = {},
 
@@ -204,7 +204,9 @@ require("telescope").load_extension("projects")
 ```
 
 #### Telescope Projects Picker
-To use the projects picker
+
+To use the projects picker execute the following Lua code:
+
 ```lua
 require("telescope").extensions.projects.projects{}
 ```
