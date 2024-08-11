@@ -2,7 +2,7 @@
 
 # 🗃️ project.nvim
 
-**project.nvim** is an all in one neovim plugin written in lua that provides
+**project.nvim** is an all in one [Neovim](https://github.com/neovim/neovim) plugin written in Lua that provides
 superior project management.
 
 ![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png)
@@ -10,42 +10,42 @@ superior project management.
 ## ⚡ Requirements
 
 - Neovim >= 0.5.0
+- [telescope.nvim](nvim-telescope/telescope.nvim) (optional if you don't want to use the Telescope picker)
 
 ## ✨ Features
 
 - Automagically cd to project directory using nvim lsp
-  - Dependency free, does not rely on lspconfig
 - If no lsp then uses pattern matching to cd to root directory
-- Telescope integration `:Telescope projects`
+  - Dependency free, does not rely on [lspconfig](https://github.com/neovim/nvim-lspconfig)
+- [Telescope integration](#telescope-integration) `:Telescope projects`
   - Access your recently opened projects from telescope!
-  - Asynchronous file io so it will not slow down vim when reading the history
-    file on startup.
-- ~~Nvim-tree.lua support/integration~~
-  - Please add the following to your config instead:
-    ```vim
-    " Vim Script
-    lua << EOF
-    require("nvim-tree").setup({
-      sync_root_with_cwd = true,
-      respect_buf_cwd = true,
-      update_focused_file = {
-        enable = true,
-        update_root = true
-      },
-    })
-    EOF
-    ```
-    ```lua
-    -- lua
-    require("nvim-tree").setup({
-      sync_root_with_cwd = true,
-      respect_buf_cwd = true,
-      update_focused_file = {
-        enable = true,
-        update_root = true
-      },
-    })
-    ```
+  - Asynchronous file IO so it will not slow down neovim when reading the history file on startup.
+- ~~Nvim-tree.lua support/integration~~ Make sure these flags are enabled
+  in your `nvim-tree.lua` config instead:
+  ```vim
+  " Vim Script
+  lua << EOF
+  require("nvim-tree").setup({
+    sync_root_with_cwd = true,
+    respect_buf_cwd = true,
+    update_focused_file = {
+      enable = true,
+      update_root = true
+    },
+  })
+  EOF
+  ```
+  ```lua
+  -- Lua
+  require("nvim-tree").setup({
+    sync_root_with_cwd = true,
+    respect_buf_cwd = true,
+    update_focused_file = {
+      enable = true,
+      update_root = true
+    },
+  })
+  ```
 
 ## 📦 Installation
 
@@ -121,7 +121,7 @@ use {
   -- * global (default)
   -- * tab
   -- * win
-  scope_chdir = 'global',
+  scope_chdir = "global",
 
   -- Path where project.nvim will store the project history for use in
   -- telescope
@@ -176,14 +176,15 @@ List your exclusions before the patterns you do want.
 ### Telescope Integration
 
 To enable telescope integration:
+
 ```lua
-require('telescope').load_extension('projects')
+require("telescope").load_extension("projects")
 ```
 
 #### Telescope Projects Picker
 To use the projects picker
 ```lua
-require'telescope'.extensions.projects.projects{}
+require("telescope").extensions.projects.projects{}
 ```
 
 #### Telescope mappings
@@ -192,12 +193,12 @@ require'telescope'.extensions.projects.projects{}
 
 | Normal mode | Insert mode | Action                     |
 | ----------- | ----------- | -------------------------- |
-| f           | \<c-f\>     | find\_project\_files       |
-| b           | \<c-b\>     | browse\_project\_files     |
-| d           | \<c-d\>     | delete\_project            |
-| s           | \<c-s\>     | search\_in\_project\_files |
-| r           | \<c-r\>     | recent\_project\_files     |
-| w           | \<c-w\>     | change\_working\_directory |
+| f           | \<c-f\>     | `find_project_files`       |
+| b           | \<c-b\>     | `browse_project_files`     |
+| d           | \<c-d\>     | `delete_project`           |
+| s           | \<c-s\>     | `search_in_project_files`  |
+| r           | \<c-r\>     | `recent_project_files`     |
+| w           | \<c-w\>     | `change_working_directory` |
 
 ## API
 
