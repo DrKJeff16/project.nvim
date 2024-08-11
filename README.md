@@ -66,6 +66,28 @@ lua << EOF
 EOF
 ```
 
+### [lazy.nvim](https://github.com/folke/lazy.nvim)
+
+```lua
+-- Lua
+require("lazy").setup({
+  spec = {
+    -- Other plugins
+    {
+      "ahmedkhalf/project.nvim",
+      config = function()
+        require("project_nvim").setup {
+          -- your configuration comes here
+          -- or leave it empty to use the default settings
+          -- refer to the configuration section below
+        }
+      end,
+    },
+  },
+  -- ...
+})
+```
+
 ### [packer](https://github.com/wbthomason/packer.nvim)
 
 ```lua
