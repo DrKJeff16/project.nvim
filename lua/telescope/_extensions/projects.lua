@@ -41,6 +41,7 @@ local function create_finder()
     },
   })
 
+  ---@param entry table
   local function make_display(entry)
     return displayer({ entry.name, { entry.value, "Comment" } })
   end
@@ -59,6 +60,8 @@ local function create_finder()
   })
 end
 
+---@param prompt_bufnr integer
+---@param prompt boolean
 local function change_working_directory(prompt_bufnr, prompt)
   local selected_entry = state.get_selected_entry(prompt_bufnr)
   if selected_entry == nil then
@@ -75,6 +78,7 @@ local function change_working_directory(prompt_bufnr, prompt)
   return project_path, cd_successful
 end
 
+---@param prompt_bufnr integer
 local function find_project_files(prompt_bufnr)
   local project_path, cd_successful = change_working_directory(prompt_bufnr, true)
   local opt = {
@@ -87,6 +91,7 @@ local function find_project_files(prompt_bufnr)
   end
 end
 
+---@param prompt_bufnr integer
 local function browse_project_files(prompt_bufnr)
   local project_path, cd_successful = change_working_directory(prompt_bufnr, true)
   local opt = {
@@ -98,6 +103,7 @@ local function browse_project_files(prompt_bufnr)
   end
 end
 
+---@param prompt_bufnr integer
 local function search_in_project_files(prompt_bufnr)
   local project_path, cd_successful = change_working_directory(prompt_bufnr, true)
   local opt = {
@@ -110,6 +116,7 @@ local function search_in_project_files(prompt_bufnr)
   end
 end
 
+---@param prompt_bufnr integer
 local function recent_project_files(prompt_bufnr)
   local _, cd_successful = change_working_directory(prompt_bufnr, true)
   local opt = {
@@ -121,6 +128,7 @@ local function recent_project_files(prompt_bufnr)
   end
 end
 
+---@param prompt_bufnr integer
 local function delete_project(prompt_bufnr)
   local selectedEntry = state.get_selected_entry(prompt_bufnr)
   if selectedEntry == nil then
@@ -150,6 +158,8 @@ local function projects(opts)
       finder = create_finder(),
       previewer = false,
       sorter = telescope_config.generic_sorter(opts),
+      ---@param prompt_bufnr integer
+      ---@param map fun(mode: string, lhs: string, rhs: string|fun())
       attach_mappings = function(prompt_bufnr, map)
         map("n", "f", find_project_files)
         map("n", "b", browse_project_files)
