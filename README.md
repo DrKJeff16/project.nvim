@@ -2,14 +2,14 @@
 
 # 🗃️ project.nvim
 
-**project.nvim** is an all in one [Neovim](https://github.com/neovim/neovim) plugin written in Lua that provides
-superior project management.
+**project.nvim** is an all in one [Neovim](https://github.com/neovim/neovim) plugin written in Lua
+that provides superior project management.
 
 ![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png)
 
 ## ⚡ Requirements
 
-- Neovim >= 0.5.0
+- Neovim >= 0.9.0
 - [telescope.nvim](nvim-telescope/telescope.nvim) (optional if you don't want to use the Telescope picker)
 
 ## ✨ Features
@@ -22,6 +22,19 @@ superior project management.
   - Asynchronous file IO so it will not slow down neovim when reading the history file on startup.
 - ~~Nvim-tree.lua support/integration~~ Make sure these flags are enabled
   in your `nvim-tree.lua` config instead:
+  ```lua
+  -- Lua
+  require("nvim-tree").setup({
+    sync_root_with_cwd = true,
+    respect_buf_cwd = true,
+    update_focused_file = {
+      enable = true,
+      update_root = true
+    },
+  })
+  ```
+  <!-- NOTE(DrKJeff16): I think it's a bit redundantm to put the same instruction back to back, only
+                        in a different language
   ```vim
   " Vim Script
   lua << EOF
@@ -35,23 +48,16 @@ superior project management.
   })
   EOF
   ```
-  ```lua
-  -- Lua
-  require("nvim-tree").setup({
-    sync_root_with_cwd = true,
-    respect_buf_cwd = true,
-    update_focused_file = {
-      enable = true,
-      update_root = true
-    },
-  })
-  ```
+  -->
 
 ## 📦 Installation
 
 Install the plugin with your preferred package manager:
 
-### [vim-plug](https://github.com/junegunn/vim-plug)
+<details>
+<summary>
+<a href="https://github.com/junegunn/vim-plug">vim-plug</a>
+</summary>
 
 ```vim
 " Vim Script
@@ -66,7 +72,12 @@ lua << EOF
 EOF
 ```
 
-### [lazy.nvim](https://github.com/folke/lazy.nvim)
+</details>
+
+<details>
+<summary>
+<a href="https://github.com/folke/lazy.nvim">lazy.nvim</a>
+</summary>
 
 ```lua
 -- Lua
@@ -88,7 +99,12 @@ require("lazy").setup({
 })
 ```
 
-### [packer](https://github.com/wbthomason/packer.nvim)
+</details>
+
+<details>
+<summary>
+<a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>
+</summary>
 
 ```lua
 -- Lua
@@ -104,7 +120,17 @@ use {
 }
 ```
 
+</details>
+
 ## ⚙️ Configuration
+
+To enable the plugin you must call `setup{}`:
+
+```lua
+require("project_nvim").setup{
+  -- Options
+}
+```
 
 **project.nvim** comes with the following defaults:
 
@@ -156,51 +182,47 @@ called for the plugin to start.
 
 ### Pattern Matching
 
-**project.nvim**'s pattern engine uses the same expressions as vim-rooter, but
-for your convenience, I will copy paste them here:
+**project.nvim**'s pattern engine uses the same expressions as **vim-rooter**, but
+for your convenience I will copy-paste them here:
 
-To specify the root is a certain directory, prefix it with `=`.
-
-```lua
-patterns = { "=src" }
-```
-
-To specify the root has a certain directory or file (which may be a glob), just
-give the name:
-
-```lua
-patterns = { ".git", "Makefile", "*.sln", "build/env.sh" }
-```
-
-To specify the root has a certain directory as an ancestor (useful for
-excluding directories), prefix it with `^`:
-
-```lua
-patterns = { "^fixtures" }
-```
-
-To specify the root has a certain directory as its direct ancestor / parent
-(useful when you put working projects in a common directory), prefix it with
-`>`:
-
-```lua
-patterns = { ">Latex" }
-```
-
-To exclude a pattern, prefix it with `!`.
-
-```lua
-patterns = { "!.git/worktrees", "!=extras", "!^fixtures", "!build/env.sh" }
-```
-
-List your exclusions before the patterns you do want.
+- To specify the root is a certain directory, prefix it with `=`:
+  ```lua
+  patterns = { "=src" }
+  ```
+- To specify the root has a certain directory or file (which may be a glob), just
+  give the name:
+  ```lua
+  patterns = { ".git", "Makefile", "*.sln", "build/env.sh" }
+  ```
+- To specify the root has a certain directory as an ancestor (useful for
+  excluding directories), prefix it with `^`:
+  ```lua
+  patterns = { "^fixtures" }
+  ```
+- To specify the root has a certain directory as its direct ancestor / parent
+  (useful when you put working projects in a common directory), prefix it with
+  `>`:
+  ```lua
+  patterns = { ">Latex" }
+  ```
+- To exclude a pattern, prefix it with `!`.
+  ```lua
+  patterns = { "!.git/worktrees", "!=extras", "!^fixtures", "!build/env.sh" }
+  ```
+  **NOTE**: Make sure to put your pattern exclusions first, and then the patterns you do want included.
 
 ### Telescope Integration
 
-To enable telescope integration:
+To enable [Telescope](https://github.com/nvim-telescope/telescope.nvim) integration run the following code in your config:
 
 ```lua
 require("telescope").load_extension("projects")
+```
+
+After that you can now call it from the command line:
+
+```vim
+:Telescope projects
 ```
 
 #### Telescope Projects Picker
@@ -213,7 +235,7 @@ require("telescope").extensions.projects.projects{}
 
 #### Telescope mappings
 
-**project.nvim** comes with the following mappings:
+**project.nvim** comes with the following mappings for Telescope:
 
 | Normal mode | Insert mode | Action                     |
 | ----------- | ----------- | -------------------------- |
@@ -226,7 +248,7 @@ require("telescope").extensions.projects.projects{}
 
 ## API
 
-Get a list of recent projects:
+You can get a list of recent projects by running the code below:
 
 ```lua
 local project_nvim = require("project_nvim")
@@ -234,6 +256,8 @@ local recent_projects = project_nvim.get_recent_projects()
 
 print(vim.inspect(recent_projects))
 ```
+
+Where `recent_projects` is either an empty table `{}` or a string array `{ "/path/to/project", ... }`
 
 ## 🤝 Contributing
 
