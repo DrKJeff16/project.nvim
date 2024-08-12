@@ -305,30 +305,50 @@ function M.add_project_manually()
 end
 
 function M.init()
+  ---@type { integer: string|string[], integer: vim.api.keyset.create_autocmd }[]
   local autocmds = {}
+
+  -- Create the augroup, clear it
+  local augroup = vim.api.nvim_create_augroup("project_nvim", { clear = true })
+
   if not config.options.manual_mode then
-    autocmds[#autocmds + 1] = 'autocmd VimEnter,BufEnter * ++nested lua require("project_nvim.project").on_buf_enter()'
+    table.insert(autocmds, {
+      { "VimEnter", "BufEnter" },
+      {
+        pattern = "*",
+        group = augroup,
+        nested = true,
+        callback = function()
+          require("project_nvim.project").on_buf_enter()
+        end,
+      },
+    })
 
     if vim.tbl_contains(config.options.detection_methods, "lsp") then
       M.attach_to_lsp()
     end
   end
 
+  -- TODO(DrKJeff16): Rewrite this statement using Lua
   vim.cmd([[
     command! ProjectRoot lua require("project_nvim.project").on_buf_enter()
     command! AddProject lua require("project_nvim.project").add_project_manually()
   ]])
 
-  autocmds[#autocmds + 1] =
-    'autocmd VimLeavePre * lua require("project_nvim.utils.history").write_projects_to_history()'
+  table.insert(autocmds, {
+    "VimLeavePre",
+    {
+      pattern = "*",
+      group = augroup,
+      callback = function()
+        require("project_nvim.utils.history").write_projects_to_history()
+      end,
+    },
+  })
 
-  vim.cmd([[augroup project_nvim
-            au!
-  ]])
   for _, value in ipairs(autocmds) do
-    vim.cmd(value)
+    vim.api.nvim_create_autocmd(value[1], value[2])
   end
-  vim.cmd("augroup END")
 
   history.read_projects_from_history()
 end
