@@ -1,3 +1,5 @@
+-- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
+
 -- Inspiration from:
 -- https://github.com/nvim-telescope/telescope-project.nvim
 local has_telescope, telescope = pcall(require, "telescope")
