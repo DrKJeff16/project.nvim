@@ -72,7 +72,12 @@ lua << EOF
 EOF
 ```
 
-### [lazy.nvim](https://github.com/folke/lazy.nvim)
+</details>
+
+<details>
+<summary>
+<a href="https://github.com/folke/lazy.nvim">lazy.nvim</a>
+</summary>
 
 ```lua
 -- Lua
@@ -94,7 +99,12 @@ require("lazy").setup({
 })
 ```
 
-### [packer](https://github.com/wbthomason/packer.nvim)
+</details>
+
+<details>
+<summary>
+<a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>
+</summary>
 
 ```lua
 -- Lua
