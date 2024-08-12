@@ -69,7 +69,7 @@ local function change_working_directory(prompt_bufnr, prompt)
     return
   end
   local project_path = selected_entry.value
-  if prompt == true then
+  if prompt then
     actions._close(prompt_bufnr, true)
   else
     actions.close(prompt_bufnr)
