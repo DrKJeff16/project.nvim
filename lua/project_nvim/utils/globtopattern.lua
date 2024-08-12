@@ -1,3 +1,5 @@
+-- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
+
 -- Credits for this module goes to: David Manura
 -- https://github.com/davidm/lua-glob-pattern
 
