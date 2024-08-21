@@ -14,7 +14,7 @@
 ---@class Project.Config
 ---@field defaults Project.Config.Options
 ---@field options Project.Config.Options
----@field setup fun(options: Project.Config.Options)
+---@field setup fun(options: (table|Project.Config.Options)?)
 
 ---@type Project.Config
 ---@diagnostic disable-next-line:missing-fields
@@ -63,18 +63,21 @@ local M = {
   options = {},
 }
 
----@param options Project.Config.Options
-M.setup = function(options)
-  M.options = vim.tbl_deep_extend("force", M.defaults, options or {})
+---@param options? table|Project.Config.Options
+function M.setup(options)
+  M.options = vim.tbl_deep_extend("keep", options or {}, M.defaults)
 
   local glob = require("project_nvim.utils.globtopattern")
   local home = vim.fn.expand("~")
-  M.options.exclude_dirs = vim.tbl_map(function(pattern)
+  ---@param pattern string
+  ---@return string
+  local function pattern_exclude(pattern)
     if vim.startswith(pattern, "~/") then
       pattern = home .. "/" .. pattern:sub(3, #pattern)
     end
     return glob.globtopattern(pattern)
-  end, M.options.exclude_dirs)
+  end
+  M.options.exclude_dirs = vim.tbl_map(pattern_exclude, M.options.exclude_dirs)
 
   vim.opt.autochdir = false -- implicitly unset autochdir
 

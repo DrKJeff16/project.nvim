@@ -7,6 +7,8 @@ local history = require("project_nvim.utils.history")
 ---@field setup fun(options: Project.Config.Options)
 ---@field get_recent_projects fun(): string[]
 
+---@type Project
+---@diagnostic disable-next-line:missing-fields
 local M = {}
 
 M.setup = config.setup
