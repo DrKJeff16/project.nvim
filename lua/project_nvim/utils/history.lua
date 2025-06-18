@@ -1,7 +1,6 @@
--- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
-
 ---@alias OpenMode
 ---|integer
+---|string
 ---|"a"
 ---|"a+"
 ---|"ax"
@@ -25,8 +24,8 @@
 ---@field value string
 
 ---@class Project.Utils.History
----@field recent_projects nil|(string|nil)[]
----@field session_projects nil|(string|nil)[]
+---@field recent_projects (string|nil)[]|nil
+---@field session_projects (string|nil)[]|nil
 ---@field has_watch_setup boolean
 ---@field read_projects_from_history fun()
 ---@field write_projects_to_history fun()
@@ -35,15 +34,19 @@
 
 local path = require('project_nvim.utils.path')
 local uv = vim.uv or vim.loop
-local is_windows = vim.fn.has('win32') or vim.fn.has('wsl')
+local is_windows = (uv.os_uname().version:match('Windows') ~= nil or vim.fn.has('wsl')) -- Thanks to `folke` for
+-- that code
 
 ---@type Project.Utils.History
 ---@diagnostic disable-next-line:missing-fields
-local M = {}
+local M = {
+    -- projects from previous neovim sessions
+    recent_projects = nil,
 
-M.recent_projects = nil -- projects from previous neovim sessions
-M.session_projects = {} -- projects from current neovim session
-M.has_watch_setup = false
+    -- projects from current neovim session
+    session_projects = {},
+    has_watch_setup = false,
+}
 
 ---@param mode OpenMode
 ---@param callback? fun(err: string|nil, fd: integer|nil)
@@ -63,10 +66,8 @@ end
 ---@return boolean
 local function dir_exists(dir)
     local stat = uv.fs_stat(dir)
-    if stat ~= nil and stat.type == 'directory' then
-        return true
-    end
-    return false
+
+    return (stat ~= nil and stat.type == 'directory')
 end
 
 ---@param path_to_normalise string
@@ -86,7 +87,7 @@ end
 local function delete_duplicates(tbl)
     ---@type table<string, integer|nil>
     local cache_dict = {}
-    for _, v in ipairs(tbl) do
+    for _, v in next, tbl do
         local normalised_path = normalise_path(v)
         if cache_dict[normalised_path] == nil then
             cache_dict[normalised_path] = 1
@@ -97,7 +98,7 @@ local function delete_duplicates(tbl)
 
     ---@type string[]
     local res = {}
-    for _, v in ipairs(tbl) do
+    for _, v in next, tbl do
         local normalised_path = normalise_path(v)
         if cache_dict[normalised_path] == 1 then
             table.insert(res, normalised_path)
@@ -110,7 +111,7 @@ end
 
 ---@param project ProjParam
 function M.delete_project(project)
-    for k, v in ipairs(M.recent_projects) do
+    for k, v in next, M.recent_projects do
         if v == project.value then
             M.recent_projects[k] = nil
         end
@@ -173,6 +174,7 @@ end
 local function sanitize_projects()
     ---@type string[]
     local tbl = {}
+
     if M.recent_projects ~= nil then
         vim.list_extend(tbl, M.recent_projects)
         vim.list_extend(tbl, M.session_projects)
@@ -184,7 +186,7 @@ local function sanitize_projects()
 
     ---@type string[]
     local real_tbl = {}
-    for _, dir in ipairs(tbl) do
+    for _, dir in next, tbl do
         if dir_exists(dir) then
             table.insert(real_tbl, dir)
         end
@@ -220,7 +222,7 @@ function M.write_projects_to_history()
 
         -- Transform table to string
         local out = ''
-        for _, v in ipairs(tbl_out) do
+        for _, v in next, tbl_out do
             out = out .. v .. '\n'
         end
 

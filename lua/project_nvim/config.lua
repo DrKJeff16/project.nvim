@@ -1,5 +1,3 @@
--- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
-
 ---@class Project.Config.Options
 ---@field manual_mode? boolean
 ---@field detection_methods? ("lsp"|"pattern")[]

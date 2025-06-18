@@ -1,5 +1,3 @@
--- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
-
 local config = require('project_nvim.config')
 local history = require('project_nvim.utils.history')
 

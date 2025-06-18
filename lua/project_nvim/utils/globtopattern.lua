@@ -1,5 +1,3 @@
--- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
-
 -- Credits for this module goes to: David Manura
 -- https://github.com/davidm/lua-glob-pattern
 
@@ -43,10 +41,11 @@ function M.globtopattern(g)
     ---@return string
     local function escape(char) return char:match('^%w$') and c or '%' .. c end
 
+    -- TODO(DrKJeff16): Let's simplify this in the future
     -- Convert tokens at end of charset.
     ---@return boolean
     local function charset_end()
-        while 1 do
+        while true do
             if c == '' then
                 p = '[^]'
                 return false
@@ -121,7 +120,7 @@ function M.globtopattern(g)
     end
 
     -- Convert tokens.
-    while 1 do
+    while true do
         i = i + 1
         c = g:sub(i, i)
         if c == '' then
@@ -147,6 +146,7 @@ function M.globtopattern(g)
             p = p .. escape(c)
         end
     end
+
     return p
 end
 
