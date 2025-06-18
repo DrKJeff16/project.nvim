@@ -41,7 +41,7 @@ function M.find_lsp_root()
         return nil
     end
 
-    for _, client in pairs(clients) do
+    for _, client in next, clients do
         ---@type string[]
         local filetypes = client.config.filetypes
         if filetypes and vim.tbl_contains(filetypes, buf_ft) then
@@ -132,7 +132,7 @@ function M.find_pattern_root()
             get_files(dir)
         end
         local pattern = glob.globtopattern(identifier)
-        for _, file in ipairs(curr_dir_cache) do
+        for _, file in next, curr_dir_cache do
             if file:match(pattern) ~= nil then
                 return true
             end
@@ -158,7 +158,7 @@ function M.find_pattern_root()
 
     -- breadth-first search
     while true do
-        for _, pattern in ipairs(config.options.patterns) do
+        for _, pattern in next, config.options.patterns do
             local exclude = false
             if pattern:sub(1, 1) == '!' then
                 exclude = true
@@ -245,7 +245,7 @@ end
 ---@return (string|nil),string?
 function M.get_project_root()
     -- returns project root, as well as method
-    for _, detection_method in ipairs(config.options.detection_methods) do
+    for _, detection_method in next, config.options.detection_methods do
         if detection_method == 'lsp' then
             local root, lsp_name = M.find_lsp_root()
             if root ~= nil then
@@ -269,7 +269,7 @@ function M.is_file()
     local buf_type = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
 
     local whitelisted_buf_type = { '', 'acwrite' }
-    for _, wtype in ipairs(whitelisted_buf_type) do
+    for _, wtype in next, whitelisted_buf_type do
         if buf_type == wtype then
             return true
         end
@@ -314,7 +314,7 @@ function M.init()
                 pattern = '*',
                 group = augroup,
                 nested = true,
-                callback = function() require('project_nvim.project').on_buf_enter() end,
+                callback = function() M.on_buf_enter() end,
             },
         })
 
@@ -325,8 +325,8 @@ function M.init()
 
     -- TODO(DrKJeff16): Rewrite this statement using Lua
     vim.cmd([[
-    command! ProjectRoot lua require("project_nvim.project").on_buf_enter()
-    command! AddProject lua require("project_nvim.project").add_project_manually()
+  command! ProjectRoot lua require("project_nvim.project").on_buf_enter()
+  command! AddProject lua require("project_nvim.project").add_project_manually()
   ]])
 
     table.insert(autocmds, {
@@ -334,11 +334,11 @@ function M.init()
         {
             pattern = '*',
             group = augroup,
-            callback = function() require('project_nvim.utils.history').write_projects_to_history() end,
+            callback = function() history.write_projects_to_history() end,
         },
     })
 
-    for _, value in ipairs(autocmds) do
+    for _, value in next, autocmds do
         vim.api.nvim_create_autocmd(value[1], value[2])
     end
 
