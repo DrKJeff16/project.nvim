@@ -7,7 +7,7 @@ local path = require('project_nvim.utils.path')
 
 local uv = vim.uv or vim.loop
 
--- TODO(DrKJeff16): Figure out a more appropriate name
+-- TODO: (DrKJeff16) Figure out a more appropriate name
 ---@class Project.LSP
 ---@field init fun()
 ---@field attached_lsp boolean
