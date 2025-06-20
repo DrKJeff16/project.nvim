@@ -29,7 +29,7 @@
 ---@field has_watch_setup boolean
 ---@field read_projects_from_history fun()
 ---@field write_projects_to_history fun()
----@field get_recent_projects fun(): string[]
+---@field get_recent_projects fun(): table|string[]
 ---@field delete_project fun(project: ProjParam)
 
 local path = require('project_nvim.utils.path')

@@ -1,15 +1,16 @@
+---@diagnostic disable:missing-fields
+
 local config = require('project_nvim.config')
 local history = require('project_nvim.utils.history')
 
 ---@class Project
----@field setup fun(options: Project.Config.Options)
----@field get_recent_projects fun(): string[]
+---@field setup fun(options: table|Project.Config.Options)
+---@field get_recent_projects fun(): table|string[]
 
 ---@type Project
----@diagnostic disable-next-line:missing-fields
-local M = {}
+local Project = {}
 
-M.setup = config.setup
-M.get_recent_projects = history.get_recent_projects
+Project.setup = config.setup
+Project.get_recent_projects = history.get_recent_projects
 
-return M
+return Project
