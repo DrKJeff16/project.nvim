@@ -42,20 +42,22 @@ function M.find_lsp_root()
         return nil
     end
 
-    local buf_ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
+    local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
 
     for _, client in next, clients do
         ---@type table|string[]
         ---@diagnostic disable-next-line:undefined-field
         local filetypes = client.config.filetypes -- For whatever reason this field is not declared in the type...
 
-        if
-            filetypes
-            and in_tbl(filetypes, buf_ft)
-            and not in_tbl(config.options.ignore_lsp, client.name)
-        then
+        if type(filetypes) ~= 'table' or vim.tbl_isempty(filetypes) then
+            goto continue
+        end
+
+        if in_tbl(filetypes, ft) and not in_tbl(config.options.ignore_lsp, client.name) then
             return client.config.root_dir, client.name
         end
+
+        ::continue::
     end
 
     return nil
@@ -76,10 +78,8 @@ function M.find_pattern_root()
     ---@return string path_str
     local function get_parent(path_str)
         path_str = path_str:match('^(.*)/')
-        if path_str == '' then
-            path_str = '/'
-        end
-        return path_str
+
+        return (path_str ~= '') and path_str or '/'
     end
 
     ---@param file_dir string
@@ -116,6 +116,7 @@ function M.find_pattern_root()
     local function sub(dir, identifier)
         local path_str = get_parent(dir)
         local current = ''
+
         -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
         while true do
             if is(path_str, identifier) then
@@ -194,7 +195,7 @@ end
 
 ---@param client vim.lsp.Client
 ---@param bufnr integer
-local on_attach_lsp = function(client, bufnr)
+local function on_attach_lsp(client, bufnr)
     M.on_buf_enter() -- Recalculate root dir after lsp attaches
 end
 
@@ -229,30 +230,31 @@ end
 ---@param method string
 ---@return boolean?
 function M.set_pwd(dir, method)
-    if dir ~= nil then
-        M.last_project = dir
-        table.insert(history.session_projects, dir)
-
-        if vim.fn.getcwd() ~= dir then
-            local scope_chdir = config.options.scope_chdir
-            if scope_chdir == 'global' then
-                vim.api.nvim_set_current_dir(dir)
-            elseif scope_chdir == 'tab' then
-                vim.cmd('tcd ' .. dir)
-            elseif scope_chdir == 'win' then
-                vim.cmd('lcd ' .. dir)
-            else
-                return
-            end
-
-            if not config.options.silent_chdir then
-                vim.notify('Set CWD to ' .. dir .. ' using ' .. method)
-            end
-        end
-        return true
+    if dir == nil then
+        return false
     end
 
-    return false
+    M.last_project = dir
+    table.insert(history.session_projects, dir)
+
+    if vim.fn.getcwd() ~= dir then
+        local scope_chdir = config.options.scope_chdir
+        if scope_chdir == 'global' then
+            vim.api.nvim_set_current_dir(dir)
+        elseif scope_chdir == 'tab' then
+            vim.cmd('tcd ' .. dir)
+        elseif scope_chdir == 'win' then
+            vim.cmd('lcd ' .. dir)
+        else
+            return
+        end
+
+        if not config.options.silent_chdir then
+            vim.notify(string.format('Set CWD to %s using %s\n', dir, method), vim.log.levels.INFO)
+        end
+    end
+
+    return true
 end
 
 ---@return (string|nil),string?
@@ -262,7 +264,7 @@ function M.get_project_root()
         if detection_method == 'lsp' then
             local root, lsp_name = M.find_lsp_root()
             if root ~= nil then
-                return root, '"' .. lsp_name .. '"' .. ' lsp'
+                return root, string.format('"%s" lsp\n', lsp_name)
             end
         elseif detection_method == 'pattern' then
             local root, method = M.find_pattern_root()
@@ -287,6 +289,7 @@ function M.is_file()
             return true
         end
     end
+
     return false
 end
 
