@@ -19,6 +19,8 @@ local uv = vim.uv or vim.loop
 ---@field on_buf_enter fun()
 ---@field add_project_manually fun()
 
+local in_tbl = vim.tbl_contains
+
 ---@type Project.LSP
 ---@diagnostic disable-next-line:missing-fields
 local M = {}
@@ -33,19 +35,23 @@ function M.find_lsp_root()
     -- Returns nil or string
     local bufnr = vim.api.nvim_get_current_buf()
 
-    local buf_ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
     if next(clients) == nil then
         return nil
     end
 
+    local buf_ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
+
     for _, client in next, clients do
         ---@type string[]
         local filetypes = client.config.filetypes
-        if filetypes and vim.tbl_contains(filetypes, buf_ft) then
-            if not vim.tbl_contains(config.options.ignore_lsp, client.name) then
-                return client.config.root_dir, client.name
-            end
+
+        if
+            filetypes
+            and in_tbl(filetypes, buf_ft)
+            and not in_tbl(config.options.ignore_lsp, client.name)
+        then
+            return client.config.root_dir, client.name
         end
     end
 
@@ -316,16 +322,14 @@ function M.init()
             },
         })
 
-        if vim.tbl_contains(config.options.detection_methods, 'lsp') then
+        if in_tbl(config.options.detection_methods, 'lsp') then
             M.attach_to_lsp()
         end
     end
 
     -- TODO(DrKJeff16): Rewrite this statement using Lua
-    vim.cmd([[
-  command! ProjectRoot lua require("project_nvim.project").on_buf_enter()
-  command! AddProject lua require("project_nvim.project").add_project_manually()
-  ]])
+    vim.cmd('command! ProjectRoot lua require("project_nvim.project").on_buf_enter()')
+    vim.cmd('command! AddProject lua require("project_nvim.project").add_project_manually()')
 
     table.insert(autocmds, {
         'VimLeavePre',
