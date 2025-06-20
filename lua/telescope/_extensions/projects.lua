@@ -1,5 +1,3 @@
--- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
-
 -- Inspiration from:
 -- https://github.com/nvim-telescope/telescope-project.nvim
 local has_telescope, telescope = pcall(require, 'telescope')
@@ -24,6 +22,7 @@ local config = require('project_nvim.config')
 -- Actions
 ----------
 
+---@return table
 local function create_finder()
     local results = history.get_recent_projects()
 
@@ -62,6 +61,7 @@ end
 
 ---@param prompt_bufnr integer
 ---@param prompt boolean
+---@return unknown|nil,boolean?
 local function change_working_directory(prompt_bufnr, prompt)
     local selected_entry = state.get_selected_entry(prompt_bufnr)
     if selected_entry == nil then
@@ -69,11 +69,9 @@ local function change_working_directory(prompt_bufnr, prompt)
         return
     end
     local project_path = selected_entry.value
-    if prompt then
-        actions._close(prompt_bufnr, true)
-    else
-        actions.close(prompt_bufnr)
-    end
+
+    -- FIXME: `_close()` is deprecated!!! (what did this conditional do beforehand????)
+    actions.close(prompt_bufnr)
     local cd_successful = project.set_pwd(project_path, 'telescope')
     return project_path, cd_successful
 end
@@ -135,17 +133,23 @@ local function delete_project(prompt_bufnr)
         actions.close(prompt_bufnr)
         return
     end
-    local choice =
-        vim.fn.confirm("Delete '" .. selectedEntry.value .. "' from project list?", '&Yes\n&No', 2)
 
-    if choice == 1 then
-        history.delete_project(selectedEntry)
+    local choice = vim.fn.confirm(
+        string.format("Delete '%s' from project list?", selectedEntry.value),
+        '&Yes\n&No',
+        2
+    )
 
-        local finder = create_finder()
-        state.get_current_picker(prompt_bufnr):refresh(finder, {
-            reset_prompt = true,
-        })
+    if choice ~= 1 then
+        return
     end
+
+    history.delete_project(selectedEntry)
+
+    local finder = create_finder()
+    state.get_current_picker(prompt_bufnr):refresh(finder, {
+        reset_prompt = true,
+    })
 end
 
 ---Main entrypoint for Telescope.
@@ -184,8 +188,4 @@ local function projects(opts)
         :find()
 end
 
-return telescope.register_extension({
-    exports = {
-        projects = projects,
-    },
-})
+return telescope.register_extension({ exports = { projects = projects } })
