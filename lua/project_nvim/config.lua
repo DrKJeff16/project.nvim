@@ -1,86 +1,147 @@
+---@diagnostic disable:missing-fields
+
+local glob = require('project_nvim.utils.globtopattern')
+
 ---@class Project.Config.Options
+-- If `true` your root directory won't be changed automatically,
+-- so you have the option to manually do so using `:ProjectRoot` command.
+-- ---
+-- Default: `false`
+-- ---
 ---@field manual_mode? boolean
----@field detection_methods? ("lsp"|"pattern")[]
+-- Methods of detecting the root directory. `'lsp'` uses the native neovim
+-- lsp, while `'pattern'` uses vim-rooter like glob pattern matching. Here
+-- order matters: if one is not detected, the other is used as fallback. You
+-- can also delete or rearangne the detection methods.
+-- ---
+-- Default: `{ 'lsp' , 'pattern' }`
+-- ---
+---@field detection_methods? ('lsp'|'pattern')[]
+-- All the patterns used to detect root dir, when **'pattern'** is in
+-- detection_methods
+-- ---
+-- Default:
+-- ```lua
+-- {
+--     '.git',
+--     '.github',
+--     '_darcs',
+--     '.hg',
+--     '.bzr',
+--     '.svn',
+--     'package.json',
+--     '.stylua.toml',
+--     'stylua.toml',
+-- }
+-- ```
+-- ---
+-- See `:h project.nvim-pattern-matching`
+-- ---
 ---@field patterns? string[]
+-- Table of lsp clients to ignore by name
+-- e.g. `{ 'efm', ... }`
+-- ---
+-- Default: `{}`
+-- ---
+-- If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
+-- for a list of servers
+-- ---
 ---@field ignore_lsp? string[]
+-- Don't calculate root dir on specific directories
+-- e.g. `{ '~/.cargo/*', ... }`
+-- ---
+-- Default: `{}`
+-- ---
 ---@field exclude_dirs? string[]
+-- Make hidden files visible when using the `telescope` picker
+-- ---
+-- Default: `false`
+-- ---
 ---@field show_hidden? boolean
----@field scope_chdir? "global"|"tab"|"win"
+-- If `false`, you'll get a _notification_ every time
+-- `project.nvim` changes directory
+-- ---
+-- Default: `true`
+-- ---
 ---@field silent_chdir? boolean
+-- What scope to change the directory, valid options are
+-- * `global`
+-- * `tab`
+-- * `win`
+-- ---
+-- Default: `'global'`
+-- ---
+---@field scope_chdir? 'global'|'tab'|'win'
+-- Path where `project.nvim` will store the project history for
+-- future use with the `telescope` picker
+-- ---
+-- Default: `vim.fn.stdpath('data')`
+-- ---
 ---@field datapath? string
 
 ---@class Project.Config
 ---@field defaults Project.Config.Options
----@field options Project.Config.Options
----@field setup fun(options: (table|Project.Config.Options)?)
+-- Options defined after running `require('project_nvim').setup()`
+-- ---
+-- Default: `{}` (before calling `setup()`)
+-- ---
+---@field options table|Project.Config.Options
+-- The function called when running `require('project_nvim').setup()`
+-- ---
+---@field setup fun(options: table|Project.Config.Options?)
+
+---@param pattern string
+---@return string
+local function pattern_exclude(pattern)
+    local HOME_EXPAND = vim.fn.expand('~')
+
+    if vim.startswith(pattern, '~/') then
+        pattern = string.format('%s/%s', HOME_EXPAND, pattern:sub(3, #pattern))
+    end
+
+    return glob.globtopattern(pattern)
+end
 
 ---@type Project.Config
----@diagnostic disable-next-line:missing-fields
-local M = {
-    defaults = {
-        -- Manual mode doesn't automatically change your root directory, so you have
-        -- the option to manually do so using `:ProjectRoot` command.
-        manual_mode = false,
+local Config = {}
+Config.defaults = {
+    manual_mode = false,
+    detection_methods = { 'lsp', 'pattern' },
 
-        -- Methods of detecting the root directory. **"lsp"** uses the native neovim
-        -- lsp, while **"pattern"** uses vim-rooter like glob pattern matching. Here
-        -- order matters: if one is not detected, the other is used as fallback. You
-        -- can also delete or rearangne the detection methods.
-        detection_methods = { 'lsp', 'pattern' },
-
-        -- All the patterns used to detect root dir, when **"pattern"** is in
-        -- detection_methods
-        patterns = { '.git', '_darcs', '.hg', '.bzr', '.svn', 'Makefile', 'package.json' },
-
-        -- Table of lsp clients to ignore by name
-        -- eg: { "efm", ... }
-        ignore_lsp = {},
-
-        -- Don't calculate root dir on specific directories
-        -- Ex: { "~/.cargo/*", ... }
-        exclude_dirs = {},
-
-        -- Show hidden files in telescope
-        show_hidden = false,
-
-        -- When set to false, you will get a message when project.nvim changes your
-        -- directory.
-        silent_chdir = true,
-
-        -- What scope to change the directory, valid options are
-        -- * global (default)
-        -- * tab
-        -- * win
-        scope_chdir = 'global',
-
-        -- Path where project.nvim will store the project history for use in
-        -- telescope
-        datapath = vim.fn.stdpath('data'),
+    patterns = {
+        '.git',
+        '.github',
+        '_darcs',
+        '.hg',
+        '.bzr',
+        '.svn',
+        'package.json',
+        '.stylua.toml',
+        'stylua.toml',
     },
 
-    options = {},
+    ignore_lsp = {},
+    exclude_dirs = {},
+    show_hidden = false,
+    silent_chdir = true,
+    scope_chdir = 'global',
+    datapath = vim.fn.stdpath('data'),
 }
 
+Config.options = {}
+
 ---@param options? table|Project.Config.Options
-function M.setup(options)
-    M.options = vim.tbl_deep_extend('keep', options or {}, M.defaults)
+function Config.setup(options)
+    options = type(options) == 'table' and options or {}
 
-    local glob = require('project_nvim.utils.globtopattern')
-    local home = vim.fn.expand('~')
-    ---@param pattern string
-    ---@return string
-    local function pattern_exclude(pattern)
-        if vim.startswith(pattern, '~/') then
-            pattern = home .. '/' .. pattern:sub(3, #pattern)
-        end
-        return glob.globtopattern(pattern)
-    end
-    M.options.exclude_dirs = vim.tbl_map(pattern_exclude, M.options.exclude_dirs)
+    Config.options = vim.tbl_deep_extend('keep', options, Config.defaults)
+    Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
 
-    vim.opt.autochdir = false -- implicitly unset autochdir
+    -- Implicitly unset autochdir
+    vim.opt.autochdir = false
 
     require('project_nvim.utils.path').init()
     require('project_nvim.project').init()
 end
 
-return M
+return Config
