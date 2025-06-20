@@ -1,20 +1,23 @@
+---@diagnostic disable:missing-fields
+
 local config = require('project_nvim.config')
 local history = require('project_nvim.utils.history')
 local glob = require('project_nvim.utils.globtopattern')
 local path = require('project_nvim.utils.path')
+
 local uv = vim.uv or vim.loop
 
 -- TODO(DrKJeff16): Figure out a more appropriate name
 ---@class Project.LSP
 ---@field init fun()
 ---@field attached_lsp boolean
----@field last_project string|nil
----@field find_lsp_root fun(): ((string|nil),string?)
+---@field last_project string?
+---@field find_lsp_root fun(): (string?,string?)
 ---@field find_pattern_root fun(): ((string|nil),string?)
 ---@field on_attach_lsp fun(client: vim.lsp.Client, bufnr: integer)
 ---@field attach_to_lsp fun(): (integer?,string?)
 ---@field set_pwd fun(dir: string, method: string): boolean?
----@field get_project_root fun(): (string|nil,string?)
+---@field get_project_root fun(): (string?,string?)
 ---@field is_file fun(): boolean
 ---@field on_buf_enter fun()
 ---@field add_project_manually fun()
@@ -22,7 +25,6 @@ local uv = vim.uv or vim.loop
 local in_tbl = vim.tbl_contains
 
 ---@type Project.LSP
----@diagnostic disable-next-line:missing-fields
 local M = {}
 
 -- Internal states
@@ -43,8 +45,9 @@ function M.find_lsp_root()
     local buf_ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
 
     for _, client in next, clients do
-        ---@type string[]
-        local filetypes = client.config.filetypes
+        ---@type table|string[]
+        ---@diagnostic disable-next-line:undefined-field
+        local filetypes = client.config.filetypes -- For whatever reason this field is not declared in the type...
 
         if
             filetypes
@@ -113,12 +116,14 @@ function M.find_pattern_root()
     local function sub(dir, identifier)
         local path_str = get_parent(dir)
         local current = ''
+        -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
         while true do
             if is(path_str, identifier) then
                 return true
             end
             current = path_str
             path_str = get_parent(path_str)
+
             if current == path_str then
                 return false
             end
@@ -160,6 +165,7 @@ function M.find_pattern_root()
         end
     end
 
+    -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
     -- breadth-first search
     while true do
         for _, pattern in next, config.options.patterns do
@@ -192,13 +198,16 @@ local on_attach_lsp = function(client, bufnr)
     M.on_buf_enter() -- Recalculate root dir after lsp attaches
 end
 
+-- WARN: (DrKJeff16) Honestly I'm not feeling good about this one, chief
 ---@return integer?,string?
 function M.attach_to_lsp()
     if M.attached_lsp then
         return
     end
 
+    -- Backup old `start_client` function
     local _start_client = vim.lsp.start_client
+
     ---@param lsp_config vim.lsp.ClientConfig
     vim.lsp.start_client = function(lsp_config)
         if lsp_config.on_attach == nil then
@@ -218,7 +227,7 @@ end
 
 ---@param dir string
 ---@param method string
----@return boolean
+---@return boolean?
 function M.set_pwd(dir, method)
     if dir ~= nil then
         M.last_project = dir
