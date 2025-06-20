@@ -313,7 +313,7 @@ function M.init()
 
     if not config.options.manual_mode then
         table.insert(autocmds, {
-            { 'VimEnter', 'BufEnter' },
+            { 'VimEnter', 'BufEnter', 'WinEnter' },
             {
                 pattern = '*',
                 group = augroup,
