@@ -9,7 +9,7 @@ local uv = vim.uv or vim.loop
 
 -- TODO: (DrKJeff16) Figure out a more appropriate name
 ---@class Project.LSP
----@field init fun()
+---@field init fun(self: Project.LSP)
 ---@field attached_lsp boolean
 ---@field last_project string?
 ---@field find_lsp_root fun(): (string?,string?)
@@ -316,12 +316,12 @@ function M.add_project_manually()
     M.set_pwd(current_dir, 'manual')
 end
 
-function M.init()
-    ---@type { integer: string|string[], integer: vim.api.keyset.create_autocmd }[]
+function M:init()
+    ---@type { [integer]: string[]|string, [integer]: vim.api.keyset.create_autocmd }[]
     local autocmds = {}
 
     -- Create the augroup, clear it
-    local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = true })
+    local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = false })
 
     if not config.options.manual_mode then
         table.insert(autocmds, {
@@ -330,12 +330,12 @@ function M.init()
                 pattern = '*',
                 group = augroup,
                 nested = true,
-                callback = function() M.on_buf_enter() end,
+                callback = self.on_buf_enter,
             },
         })
 
         if in_tbl(config.options.detection_methods, 'lsp') then
-            M.attach_to_lsp()
+            self.attach_to_lsp()
         end
     end
 
@@ -348,7 +348,7 @@ function M.init()
         {
             pattern = '*',
             group = augroup,
-            callback = function() history.write_projects_to_history() end,
+            callback = require('project_nvim.utils.history').write_projects_to_history,
         },
     })
 
@@ -356,7 +356,7 @@ function M.init()
         vim.api.nvim_create_autocmd(value[1], value[2])
     end
 
-    history.read_projects_from_history()
+    require('project_nvim.utils.history').read_projects_from_history()
 end
 
 return M

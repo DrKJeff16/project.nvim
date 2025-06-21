@@ -53,11 +53,11 @@ local M = {
 ---@return integer|nil
 local function open_history(mode, callback)
     if callback ~= nil then -- async
-        path.create_scaffolding(
+        path:create_scaffolding(
             function(_, _) uv.fs_open(path.historyfile, mode, 438, callback) end
         )
     else -- sync
-        path.create_scaffolding()
+        path:create_scaffolding()
         return uv.fs_open(path.historyfile, mode, 438)
     end
 end

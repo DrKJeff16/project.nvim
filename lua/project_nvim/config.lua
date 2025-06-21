@@ -1,7 +1,5 @@
 ---@diagnostic disable:missing-fields
 
-local glob = require('project_nvim.utils.globtopattern')
-
 ---@class Project.Config.Options
 -- If `true` your root directory won't be changed automatically,
 -- so you have the option to manually do so using `:ProjectRoot` command.
@@ -89,10 +87,13 @@ local glob = require('project_nvim.utils.globtopattern')
 -- The function called when running `require('project_nvim').setup()`
 -- ---
 ---@field setup fun(options: table|Project.Config.Options?)
+---@field _setup fun(self: Project.Config, options: table|Project.Config.Options?)
 
 ---@param pattern string
 ---@return string
 local function pattern_exclude(pattern)
+    local glob = require('project_nvim.utils.globtopattern')
+
     local HOME_EXPAND = vim.fn.expand('~')
 
     if vim.startswith(pattern, '~/') then
@@ -130,18 +131,29 @@ Config.defaults = {
 
 Config.options = {}
 
+---@param self Project.Config
 ---@param options? table|Project.Config.Options
-function Config.setup(options)
+function Config:_setup(options)
     options = type(options) == 'table' and options or {}
 
-    Config.options = vim.tbl_deep_extend('keep', options, Config.defaults)
-    Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
+    self.options = vim.tbl_deep_extend('keep', options, self.defaults)
+    self.options.exclude_dirs = vim.tbl_map(pattern_exclude, self.options.exclude_dirs)
 
     -- Implicitly unset autochdir
     vim.opt.autochdir = false
 
-    require('project_nvim.utils.path').init()
-    require('project_nvim.project').init()
+    local Path = require('project_nvim.utils.path')
+    local Proj = require('project_nvim.project')
+
+    Path:init()
+    Proj:init()
+end
+
+---@param options? table|Project.Config.Options
+function Config.setup(options)
+    options = type(options) == 'table' and options or {}
+
+    Config:_setup(options)
 end
 
 return Config
