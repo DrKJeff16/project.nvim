@@ -1,50 +1,71 @@
-# 🗃️ project.nvim
-
-**project.nvim** is an all in one [Neovim](https://github.com/neovim/neovim) plugin written in Lua
-that provides superior project management.
-
-![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png)
-
-## ⚡ Requirements
-
-- Neovim >= 0.9.0
-- [telescope.nvim](nvim-telescope/telescope.nvim) (optional if you don't want to use the Telescope picker)
-
-## ✨ Features
-
-- Automagically cd to the project root directory using `vim.lsp`
-- If no LSP is available then it'll try using pattern matching to cd to the project root directory instead
-- [Telescope integration](#telescope-integration) `:Telescope projects`
-  - Access your recently opened projects from telescope!
-  - Asynchronous file IO so it will not slow down neovim when reading the history file on startup.
-- ~~Nvim-tree.lua support/integration~~ Make sure these flags are enabled to support [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.la):
-  ```lua
-  -- Lua
-  require('nvim-tree').setup({
-    sync_root_with_cwd = true,
-    respect_buf_cwd = true,
-    update_focused_file = {
-      enable = true,
-      update_root = true
-    },
-  })
-  ```
-
-## 📦 Installation
-
-Install the plugin with your preferred package manager:
+<div align="center">
+<h1 id="project-nvim">🗃️ project.nvim</h1>
+</div>
 
 <!--
 NOTE: Original author: https://github.com/ahmedkhalf
 -->
 
-<details>
-<summary>
+`project.nvim` is an all in one [Neovim](neovim/neovim) plugin written in Lua
+that provides superior project management.
+
+![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png)
+
+---
+
+## Table of Contents
+
+1. [Features](#features)
+2. [Installation](#installation)
+    1. [Requirements](#requirements)
+    2. [`vim-plug`](#vim-plug)
+    3. [`lazy.nvim`](#lazy-nvim)
+    4. [`pckr.nvim`](#pckr-nvim)
+3. [Configuration](#configuration)
+    1. [Pattern Matching](#pattern-matching)
+    2. [`nvim-tree.lua` Integration](#nvim-tree-integration)
+    3. [`telescope.nvim` Integration](#telescope-integration)
+        1. [Telescope Projects Picker](#telescope-projects-picker)
+        2. [Telescope Mappings](#telescope-mappings)
+4. [API](#api)
+5. [Contributing](#contributing)
+6. [Addendum](#addendum)
+
+---
+
+## ✨ Features
+
+- Automagically `cd` to the project root directory using `vim.lsp`
+- If no LSP is available then it'll try using pattern matching to `cd` to the project root directory instead
+- [Telescope Integration](#telescope-integration) `:Telescope projects`
+- Asynchronous file IO so it will not slow down neovim when reading the history file on startup.
+- [`nvim-tree` integration](#nvim-tree-integration)
+
+## 📦 Installation
+
+### ⚡ Requirements
+
+- Neovim >= 0.11.0
+- [`telescope.nvim`](nvim-telescope/telescope.nvim) **(optional)**
+- [`nvim-tree.lua`](nvim-tree/nvim-tree.lua) **(optional)**
+
+---
+
+<div align="center">
+<b><ins>WARNING: DO NOT LAZY-LOAD THIS PLUGIN</ins></b>
+
+The cwd might not update otherwise.
+</div>
+
+---
+
+Install the plugin with your preferred package manager:
+
+<h3 id="vim-plug">
 <a href="https://github.com/junegunn/vim-plug">vim-plug</a>
-</summary>
+</h3>
 
 ```vim
-" Vim Script
 Plug 'DrKJeff16/project.nvim'
 
 " OPTIONAL
@@ -59,20 +80,17 @@ lua << EOF
 EOF
 ```
 
-</details>
-
-<details>
-<summary>
+<h3 id="lazy-nvim">
 <a href="https://github.com/folke/lazy.nvim">lazy.nvim</a>
-</summary>
+</h3>
 
 ```lua
--- Lua
 require('lazy').setup({
   spec = {
     -- Other plugins
     {
      'DrKJeff16/project.nvim',
+     lazy = false,  -- WARN: IMPORTANT NOT TO LAZY-LOAD THIS PLUGIN
       dependencies = {
           'plenary.nvim',
           'nvim-telescope/telescope.nvim',
@@ -89,19 +107,11 @@ require('lazy').setup({
 })
 ```
 
-</details>
-
-<!--
-TODO: Replace next section with 'pckr.nvim'
-     "https://github.com/lewis6991/pckr.nvim"
--->
-<details>
-<summary>
+<h3 id="pckr-nvim">
 <a href="https://github.com/lewis6991/pckr.nvim">pckr.nvim</a>
-</summary>
+</h3>
 
 ```lua
--- Lua
 require('pckr').add({
   -- Other plugins
   {
@@ -121,8 +131,6 @@ require('pckr').add({
 })
 ```
 
-</details>
-
 ---
 
 ## ⚙️ Configuration
@@ -135,7 +143,7 @@ require('project_nvim').setup({
 })
 ```
 
-**project.nvim** comes with the following defaults:
+`project.nvim` comes with the following defaults:
 
 ```lua
 {
@@ -202,15 +210,15 @@ called for the plugin to start.
 
 ### Pattern Matching
 
-**project.nvim**'s pattern engine uses the same expressions as **vim-rooter**, but
-for your convenience I will copy-paste them here:
+`project.nvim` comes with a pattern matching engine that uses the same expressions
+as `vim-rooter`, but for your convenience here come some examples:
 
 - To specify the root is a certain directory, prefix it with `=`:
   ```lua
   patterns = { '=src' }
   ```
 - To specify the root has a certain directory or file (which may be a glob), just
-  give the name:
+  add it to the pattern list:
   ```lua
   patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
   ```
@@ -220,21 +228,40 @@ for your convenience I will copy-paste them here:
   patterns = { '^fixtures' }
   ```
 - To specify the root has a certain directory as its direct ancestor / parent
-  (useful when you put working projects in a common directory), prefix it with
-  `>`:
+  (useful when you put working projects in a common directory), prefix it with `>`:
   ```lua
   patterns = { '>Latex' }
   ```
-- To exclude a pattern, prefix it with `!`.
+- To exclude a pattern, prefix it with `!`:
   ```lua
   patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
   ```
 
 **NOTE**: <ins>Make sure to put your pattern exclusions first, and then the patterns you do want included.</ins>
 
-### Telescope Integration
+<h3 id="nvim-tree-integration">
+<a href="https://github.com/nvim-tree/nvim-tree.lua">nvim-tree.lua</a> Integration
+</h3>
 
-To enable [Telescope](https://github.com/nvim-telescope/telescope.nvim) integration run the following code in your config:
+<ins>Make sure these flags are enabled to support [`nvim-tree.lua`](nvim-tree/nvim-tree.lua):</ins>
+
+```lua
+require('nvim-tree').setup({
+    sync_root_with_cwd = true,
+    respect_buf_cwd = true,
+    update_focused_file = {
+        enable = true,
+        update_root = true,
+    },
+})
+```
+
+<h3 id="telescope-integration">
+<a href="https://github.com/nvim-telescope/telescope.nvim"><code>telescope.nvim</code></a> Integration
+</h3>
+
+To enable [`telescope.nvim`](nvim-telescope/telescope.nvim) integration use the following
+code in your config:
 
 ```lua
 require('telescope').setup(...)
@@ -256,18 +283,20 @@ To use the projects picker execute the following Lua code:
 require('telescope').extensions.projects.projects{}
 ```
 
-#### Telescope mappings
+#### Telescope Mappings
 
-**project.nvim** comes with the following mappings for Telescope:
+`project.nvim` comes with the following mappings for Telescope:
 
 | Normal mode | Insert mode | Action                     |
 | ----------- | ----------- | -------------------------- |
-| f           | \<c-f\>     | `find_project_files`       |
-| b           | \<c-b\>     | `browse_project_files`     |
-| d           | \<c-d\>     | `delete_project`           |
-| s           | \<c-s\>     | `search_in_project_files`  |
-| r           | \<c-r\>     | `recent_project_files`     |
-| w           | \<c-w\>     | `change_working_directory` |
+| f           | \<C-f\>     | `find_project_files`       |
+| b           | \<C-b\>     | `browse_project_files`     |
+| d           | \<C-d\>     | `delete_project`           |
+| s           | \<C-s\>     | `search_in_project_files`  |
+| r           | \<C-r\>     | `recent_project_files`     |
+| w           | \<C-w\>     | `change_working_directory` |
+
+---
 
 ## API
 
@@ -276,22 +305,29 @@ You can get a list of recent projects by running the code below:
 ```lua
 -- Using `vim.notify()`
 vim.notify(
-    vim.inspect(require('project_nvim').get_recent_projects())
+    vim.inspect(require('project_nvim').get_recent_projects()),
+    vim.log.levels.INFO
 )
 
--- Or using `vim.print()`
+-- Using `vim.print()`
 vim.print(
     vim.inspect(require('project_nvim').get_recent_projects())
 )
 ```
 
-Where `get_recent_projects` returns either an empty table `{}` or a string array `{ '/path/to/project', ... }`
+Where `get_recent_projects()` returns either an empty table `{}` or a string array `{ '/path/to/project', ... }`
 
-## 🤝 Contributing
+---
 
-- All pull requests are welcome.
-- If you encounter bugs please open an issue.
+## Contributing
+
+- All pull requests are welcome
+- If you encounter bugs please open an issue
+
+---
 
 ## Addendum
 
-Thanks for the support to this fork <3
+(DrKJeff16) Thanks for the support to this fork <3
+
+Also, thanks to the original creator, [ahmedkhalf](https://github.com/ahmedkhalf)!
