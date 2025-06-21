@@ -33,7 +33,7 @@ that provides superior project management.
 
 ---
 
-## ✨ Features
+## Features
 
 - Automagically `cd` to the project root directory using `vim.lsp`
 - If no LSP is available then it'll try using pattern matching to `cd` to the project root directory instead
@@ -41,9 +41,9 @@ that provides superior project management.
 - Asynchronous file IO so it will not slow down neovim when reading the history file on startup.
 - [`nvim-tree` integration](#nvim-tree-integration)
 
-## 📦 Installation
+## Installation
 
-### ⚡ Requirements
+### Requirements
 
 - Neovim >= 0.11.0
 - [`telescope.nvim`](nvim-telescope/telescope.nvim) **(optional)**
@@ -133,7 +133,7 @@ require('pckr').add({
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 To enable the plugin you must call `setup{}`:
 
