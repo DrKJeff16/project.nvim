@@ -135,7 +135,7 @@ require('pckr').add({
 
 ## Configuration
 
-To enable the plugin you must call `setup{}`:
+To enable the plugin you must call `setup()`:
 
 ```lua
 require('project_nvim').setup({
@@ -280,7 +280,7 @@ After that you can now call it from the command line:
 To use the projects picker execute the following Lua code:
 
 ```lua
-require('telescope').extensions.projects.projects{}
+require('telescope').extensions.projects.projects()
 ```
 
 #### Telescope Mappings
