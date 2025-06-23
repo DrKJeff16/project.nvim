@@ -7,9 +7,8 @@ local path = require('project_nvim.utils.path')
 
 local uv = vim.uv or vim.loop
 
--- TODO: (DrKJeff16) Figure out a more appropriate name
----@class Project.LSP
----@field init fun(self: Project.LSP)
+---@class Project.Proj
+---@field init fun(self: Project.Proj)
 ---@field attached_lsp boolean
 ---@field last_project string?
 ---@field find_lsp_root fun(): (string?,string?)
@@ -24,7 +23,7 @@ local uv = vim.uv or vim.loop
 
 local in_tbl = vim.tbl_contains
 
----@type Project.LSP
+---@type Project.Proj
 local M = {}
 
 -- Internal states
