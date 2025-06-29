@@ -88,6 +88,7 @@
 -- ---
 ---@field setup fun(options: table|Project.Config.Options?)
 ---@field _setup fun(self: Project.Config, options: table|Project.Config.Options?)
+---@field setup_called? boolean
 
 ---@param pattern string
 ---@return string
@@ -157,6 +158,8 @@ function Config.setup(options)
     options = (options ~= nil and type(options) == 'table') and options or {}
 
     Config:_setup(options)
+
+    Config.setup_called = true
 end
 
 return Config
