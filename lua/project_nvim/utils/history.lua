@@ -37,6 +37,8 @@ local uv = vim.uv or vim.loop
 local is_windows = (uv.os_uname().version:match('Windows') ~= nil or vim.fn.has('wsl')) -- Thanks to `folke` for
 -- that code
 
+local ERROR = vim.log.levels.ERROR
+
 ---@type Project.Utils.History
 ---@diagnostic disable-next-line:missing-fields
 local M = {}
@@ -51,14 +53,16 @@ M.has_watch_setup = false
 ---@param mode OpenMode
 ---@param callback? fun(err: string|nil, fd: integer|nil)
 ---@return integer|nil
-local function open_history(mode, callback)
+function M.open_history(mode, callback)
+    local histfile = path.historyfile
+
     if callback ~= nil then -- async
-        path:create_scaffolding(
-            function(_, _) uv.fs_open(path.historyfile, mode, 438, callback) end
+        path.create_scaffolding(
+            function(_, _) uv.fs_open(histfile, mode, tonumber('644', 8), callback) end
         )
     else -- sync
-        path:create_scaffolding()
-        return uv.fs_open(path.historyfile, mode, 438)
+        path.create_scaffolding()
+        return uv.fs_open(histfile, mode, tonumber('644', 8))
     end
 end
 
@@ -76,8 +80,7 @@ local function normalise_path(path_to_normalise)
     local normalised_path = path_to_normalise:gsub('\\', '/'):gsub('//', '/')
 
     if is_windows then
-        normalised_path =
-            string.format('%s%s', normalised_path:sub(1, 1):lower(), normalised_path:sub(2))
+        normalised_path = normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)
     end
 
     return normalised_path
@@ -88,6 +91,7 @@ end
 local function delete_duplicates(tbl)
     ---@type table<string, integer|nil>
     local cache_dict = {}
+
     for _, v in next, tbl do
         local normalised_path = normalise_path(v)
         if cache_dict[normalised_path] == nil then
@@ -99,6 +103,7 @@ local function delete_duplicates(tbl)
 
     ---@type string[]
     local res = {}
+
     for _, v in next, tbl do
         local normalised_path = normalise_path(v)
         if cache_dict[normalised_path] == 1 then
@@ -107,6 +112,7 @@ local function delete_duplicates(tbl)
             cache_dict[normalised_path] = cache_dict[normalised_path] - 1
         end
     end
+
     return res
 end
 
@@ -135,22 +141,24 @@ local function deserialize_history(history_data)
 
     projects = delete_duplicates(projects)
 
-    M.recent_projects = projects
+    M.recent_projects = vim.deepcopy(projects)
 end
 
 local function setup_watch()
     -- Only runs once
     if not M.has_watch_setup then
         M.has_watch_setup = true
+
         local event = uv.new_fs_event()
         if event == nil then
             return
         end
+
         event:start(path.projectpath, {}, function(err, _, events)
             if err ~= nil then
                 return
             end
-            if events.change then
+            if events['change'] then
                 M.recent_projects = nil
                 M.read_projects_from_history()
             end
@@ -159,18 +167,22 @@ local function setup_watch()
 end
 
 function M.read_projects_from_history()
-    open_history('r', function(_, fd)
+    M.open_history('r', function(_, fd)
         setup_watch()
-        if fd ~= nil then
-            uv.fs_fstat(fd, function(_, stat)
-                if stat ~= nil then
-                    uv.fs_read(fd, stat.size, -1, function(_, data)
-                        uv.fs_close(fd, function(_, _) end)
-                        deserialize_history(data)
-                    end)
-                end
-            end)
+        if fd == nil then
+            return
         end
+
+        uv.fs_fstat(fd, function(_, stat)
+            if stat == nil then
+                return
+            end
+
+            uv.fs_read(fd, stat.size, -1, function(_, data)
+                uv.fs_close(fd, function(_, _) end)
+                deserialize_history(data)
+            end)
+        end)
     end)
 end
 
@@ -205,8 +217,8 @@ function M.get_recent_projects() return sanitize_projects() end
 function M.write_projects_to_history()
     -- Unlike read projects, write projects is synchronous
     -- because it runs when vim ends
-    local mode = M.recent_projects ~= nil and 'a' or 'w'
-    local file = open_history(mode)
+    local mode = M.recent_projects == nil and 'a' or 'w'
+    local file = M.open_history(mode)
 
     if file == nil then
         vim.notify(
