@@ -302,7 +302,7 @@ require('telescope').extensions.projects.projects()
 ## API
 
 <h3 id="get-recent-projects">
-`get_recent_projects()`
+<code>get_recent_projects()</code>
 </h3>
 
 You can get a list of recent projects by running the code below:
@@ -323,7 +323,7 @@ vim.print(
 Where `get_recent_projects()` returns either an empty table `{}` or a string array `{ '/path/to/project', ... }`
 
 <h3 id="get-config">
-`get_config()`
+<code>get_config()</code>
 </h3>
 
 **If** `setup()` **has been called**, it returns a table containing the currently set options.
@@ -343,7 +343,7 @@ vim.print(
 ```
 
 <h3 id="get-history-paths">
-`get_history_paths()`
+<code>get_history_paths()</code>
 </h3>
 
 This will return the following table:
