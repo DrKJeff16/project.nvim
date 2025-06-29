@@ -40,6 +40,8 @@ that provides superior project management.
 
 ## Features
 
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
 - Automagically `cd` to the project root directory using `vim.lsp`
 - If no LSP is available then it'll try using pattern matching to `cd` to the project root directory instead
 - [Telescope Integration](#telescope-integration) `:Telescope projects`
@@ -49,6 +51,8 @@ that provides superior project management.
 ## Installation
 
 ### Requirements
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
 
 - Neovim >= 0.11.0
 - [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(optional)**
@@ -70,6 +74,8 @@ Install the plugin with your preferred package manager:
 <a href="https://github.com/junegunn/vim-plug">vim-plug</a>
 </h3>
 
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
 ```vim
 Plug 'DrKJeff16/project.nvim'
 
@@ -88,6 +94,8 @@ EOF
 <h3 id="lazy-nvim">
 <a href="https://github.com/folke/lazy.nvim">lazy.nvim</a>
 </h3>
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
 
 ```lua
 require('lazy').setup({
@@ -116,6 +124,8 @@ require('lazy').setup({
 <a href="https://github.com/lewis6991/pckr.nvim">pckr.nvim</a>
 </h3>
 
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
 ```lua
 require('pckr').add({
   -- Other plugins
@@ -139,6 +149,8 @@ require('pckr').add({
 ---
 
 ## Configuration
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
 
 To enable the plugin you must call `setup()`:
 
@@ -215,6 +227,8 @@ called for the plugin to start.
 
 ### Pattern Matching
 
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
 `project.nvim` comes with a pattern matching engine that uses the same expressions
 as `vim-rooter`, but for your convenience here come some examples:
 
@@ -248,6 +262,8 @@ as `vim-rooter`, but for your convenience here come some examples:
 <a href="https://github.com/nvim-tree/nvim-tree.lua">nvim-tree.lua</a> Integration
 </h3>
 
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
 <ins>Make sure these flags are enabled to support [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua):</ins>
 
 ```lua
@@ -264,6 +280,8 @@ require('nvim-tree').setup({
 <h3 id="telescope-integration">
 <a href="https://github.com/nvim-telescope/telescope.nvim"><code>telescope.nvim</code></a> Integration
 </h3>
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
 
 To enable [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) integration use the following
 code in your config:
@@ -282,6 +300,8 @@ After that you can now call it from the command line:
 
 #### Telescope Projects Picker
 
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
 To use the projects picker execute the following Lua code:
 
 ```lua
@@ -289,6 +309,8 @@ require('telescope').extensions.projects.projects()
 ```
 
 #### Telescope Mappings
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
 
 `project.nvim` comes with the following mappings for Telescope:
 
@@ -308,6 +330,8 @@ require('telescope').extensions.projects.projects()
 <h3 id="get-recent-projects">
 <code>get_recent_projects()</code>
 </h3>
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
 
 You can get a list of recent projects by running the code below:
 
@@ -330,6 +354,8 @@ Where `get_recent_projects()` returns either an empty table `{}` or a string arr
 <code>get_config()</code>
 </h3>
 
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
 **If** `setup()` **has been called**, it returns a table containing the currently set options.
 Otherwise it will return `nil`.
 
@@ -349,6 +375,8 @@ vim.print(
 <h3 id="get-history-paths">
 <code>get_history_paths()</code>
 </h3>
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
 
 **This function will always return `nil`** unless the following values are passed:
 
@@ -372,6 +400,8 @@ vim.print(get_history_paths('historyfile'))
 
 ### History File Not Created
 
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
 Make sure you have **read, write and access permissions** (`rwx`) for the `projectpath` directory.
 
 You can get the value of `projectpath` by running
@@ -380,12 +410,16 @@ in the cmdline.
 
 ## Contributing
 
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
 - All pull requests are welcome
 - If you encounter bugs please open an issue
 
 ---
 
 ## Addendum
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
 
 (DrKJeff16) Thanks for the support to this fork <3
 
