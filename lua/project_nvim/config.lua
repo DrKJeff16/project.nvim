@@ -105,6 +105,8 @@ end
 
 ---@type Project.Config
 local Config = {}
+
+---@type Project.Config.Options
 Config.defaults = {
     manual_mode = false,
     detection_methods = { 'lsp', 'pattern' },
@@ -129,12 +131,13 @@ Config.defaults = {
     datapath = vim.fn.stdpath('data'),
 }
 
+---@type table|Project.Config.Options
 Config.options = {}
 
 ---@param self Project.Config
 ---@param options? table|Project.Config.Options
 function Config:_setup(options)
-    options = type(options) == 'table' and options or {}
+    options = (options ~= nil and type(options) == 'table') and options or {}
 
     self.options = vim.tbl_deep_extend('keep', options, self.defaults)
     self.options.exclude_dirs = vim.tbl_map(pattern_exclude, self.options.exclude_dirs)
@@ -151,7 +154,7 @@ end
 
 ---@param options? table|Project.Config.Options
 function Config.setup(options)
-    options = type(options) == 'table' and options or {}
+    options = (options ~= nil and type(options) == 'table') and options or {}
 
     Config:_setup(options)
 end
