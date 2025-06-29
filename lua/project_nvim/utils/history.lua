@@ -39,14 +39,14 @@ local is_windows = (uv.os_uname().version:match('Windows') ~= nil or vim.fn.has(
 
 ---@type Project.Utils.History
 ---@diagnostic disable-next-line:missing-fields
-local M = {
-    -- projects from previous neovim sessions
-    recent_projects = nil,
+local M = {}
 
-    -- projects from current neovim session
-    session_projects = {},
-    has_watch_setup = false,
-}
+-- projects from previous neovim sessions
+M.recent_projects = nil
+
+-- projects from current neovim session
+M.session_projects = {}
+M.has_watch_setup = false
 
 ---@param mode OpenMode
 ---@param callback? fun(err: string|nil, fd: integer|nil)
@@ -76,7 +76,8 @@ local function normalise_path(path_to_normalise)
     local normalised_path = path_to_normalise:gsub('\\', '/'):gsub('//', '/')
 
     if is_windows then
-        normalised_path = normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)
+        normalised_path =
+            string.format('%s%s', normalised_path:sub(1, 1):lower(), normalised_path:sub(2))
     end
 
     return normalised_path
@@ -111,11 +112,14 @@ end
 
 ---@param project ProjParam
 function M.delete_project(project)
+    local new_tbl = {}
     for k, v in next, M.recent_projects do
-        if v == project.value then
-            M.recent_projects[k] = nil
+        if v ~= project.value then
+            new_tbl[k] = v
         end
     end
+
+    M.recent_projects = vim.deepcopy(new_tbl)
 end
 
 ---@param history_data string
@@ -201,35 +205,38 @@ function M.get_recent_projects() return sanitize_projects() end
 function M.write_projects_to_history()
     -- Unlike read projects, write projects is synchronous
     -- because it runs when vim ends
-    local mode = 'w'
-    if M.recent_projects == nil then
-        mode = 'a'
-    end
+    local mode = M.recent_projects ~= nil and 'a' or 'w'
     local file = open_history(mode)
 
-    if file ~= nil then
-        local res = sanitize_projects()
-
-        -- Trim table to last 100 entries
-        local len_res = #res
-        ---@type string[]
-        local tbl_out
-        if #res > 100 then
-            tbl_out = vim.list_slice(res, len_res - 100, len_res)
-        else
-            tbl_out = res
-        end
-
-        -- Transform table to string
-        local out = ''
-        for _, v in next, tbl_out do
-            out = out .. v .. '\n'
-        end
-
-        -- Write string out to file and close
-        uv.fs_write(file, out, -1)
-        uv.fs_close(file)
+    if file == nil then
+        vim.notify(
+            '(project_nvim.utils.history.write_projects_to_history): Unable to write to file!',
+            vim.log.levels.ERROR
+        )
+        return
     end
+
+    local res = sanitize_projects()
+
+    -- Trim table to last 100 entries
+    local len_res = #res
+    ---@type string[]
+    local tbl_out
+    if #res > 100 then
+        tbl_out = vim.list_slice(res, len_res - 100, len_res)
+    else
+        tbl_out = res
+    end
+
+    -- Transform table to string
+    local out = ''
+    for _, v in next, tbl_out do
+        out = out .. v .. '\n'
+    end
+
+    -- Write string out to file and close
+    uv.fs_write(file, out, -1)
+    uv.fs_close(file)
 end
 
 return M
