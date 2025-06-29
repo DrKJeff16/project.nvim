@@ -19,7 +19,7 @@ file is not created (see [`history.lua`](lua/project_nvim/utils/history.lua))</i
 NOTE: Original author: https://github.com/ahmedkhalf
 -->
 
-`project.nvim` is an all in one [Neovim](neovim/neovim) plugin written in Lua
+`project.nvim` is an all in one [Neovim](https://github.com/neovim/neovim) plugin written in Lua
 that provides superior project management.
 
 ![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png)
@@ -59,8 +59,8 @@ that provides superior project management.
 ### Requirements
 
 - Neovim >= 0.11.0
-- [`telescope.nvim`](nvim-telescope/telescope.nvim) **(optional)**
-- [`nvim-tree.lua`](nvim-tree/nvim-tree.lua) **(optional)**
+- [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(optional)**
+- [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(optional)**
 
 ---
 
@@ -256,7 +256,7 @@ as `vim-rooter`, but for your convenience here come some examples:
 <a href="https://github.com/nvim-tree/nvim-tree.lua">nvim-tree.lua</a> Integration
 </h3>
 
-<ins>Make sure these flags are enabled to support [`nvim-tree.lua`](nvim-tree/nvim-tree.lua):</ins>
+<ins>Make sure these flags are enabled to support [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua):</ins>
 
 ```lua
 require('nvim-tree').setup({
@@ -273,7 +273,7 @@ require('nvim-tree').setup({
 <a href="https://github.com/nvim-telescope/telescope.nvim"><code>telescope.nvim</code></a> Integration
 </h3>
 
-To enable [`telescope.nvim`](nvim-telescope/telescope.nvim) integration use the following
+To enable [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) integration use the following
 code in your config:
 
 ```lua
