@@ -29,8 +29,12 @@ that provides superior project management.
         1. [Telescope Projects Picker](#telescope-projects-picker)
         2. [Telescope Mappings](#telescope-mappings)
 4. [API](#api)
-5. [Contributing](#contributing)
-6. [Addendum](#addendum)
+    1. [`get_recent_projects()`](#get-recent-projects)
+    2. [`get_config()`](#get-config)
+    3. [`get_history_paths()`](#get-history-paths)
+5. [Troubleshooting](#troubleshooting)
+6. [Contributing](#contributing)
+7. [Addendum](#addendum)
 
 ---
 
@@ -346,22 +350,33 @@ vim.print(
 <code>get_history_paths()</code>
 </h3>
 
-This will return the following table:
+**This function will always return `nil`** unless the following values are passed:
 
 ```lua
-{
-    -- The directory where `project_nvim` sets its `datapath`
-    datapath = require('project_nvim.utils.path').datapath,
+---@type fun(path: 'datapath'|'projectpath'|'historyfile'): string|nil
+local get_history_paths = require('project_nvim').get_history_paths
 
-    -- The directory where `project_nvim` saves the project history
-    projectpath = require('project_nvim.utils.path').projectpath,
+-- The directory where `project_nvim` sets its `datapath`
+vim.print(get_history_paths('datapath'))
 
-    -- The path to where `project_nvim` saves its recent projects history
-    historyfile = require('project_nvim.utils.path').historyfile,
-}
+-- The directory where `project_nvim` saves the project history
+vim.print(get_history_paths('projectpath'))
+
+-- The path to where `project_nvim` saves its recent projects history
+vim.print(get_history_paths('historyfile'))
 ```
 
 ---
+
+## Troubleshooting
+
+### History File Not Created
+
+Make sure you have **read, write and access permissions** (`rwx`) for the `projectpath` directory.
+
+You can get the value of `projectpath` by running
+`:lua vim.print(require('project_nvim').get_history_paths().projectpath)`
+in the cmdline.
 
 ## Contributing
 

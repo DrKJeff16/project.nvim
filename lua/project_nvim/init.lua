@@ -6,7 +6,7 @@
 ---@class Project
 ---@field setup fun(options: table|Project.Config.Options?)
 ---@field get_recent_projects fun(): table|string[]
----@field get_history_paths fun(): { ['datapath']: string, ['projectpath']: string, ['historyfile']: string }
+---@field get_history_paths fun(path: 'datapath'|'projectpath'|'historyfile'): string|nil
 ---@field get_config fun(): Project.Config.Options|nil
 
 ---@type Project
@@ -31,15 +31,16 @@ function Project.get_config()
     return Config.setup_called and Config.options or nil
 end
 
----@return { ['datapath']: string, ['projectpath']: string, ['historyfile']: string }
-function Project.get_history_paths()
-    local Path = require('project_nvim.utils.path')
+---@param path 'datapath'|'projectpath'|'historyfile'
+---@return string|nil
+function Project.get_history_paths(path)
+    local valid = { 'datapath', 'projectpath', 'historyfile' }
 
-    return {
-        datapath = Path.datapath,
-        projectpath = Path.projectpath,
-        historyfile = Path.historyfile,
-    }
+    if path == nil or type(path) ~= 'string' or not vim.tbl_contains(valid, path) then
+        return nil
+    end
+
+    return require('project_nvim.utils.path')[path]
 end
 
 return Project
