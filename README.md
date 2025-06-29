@@ -301,6 +301,10 @@ require('telescope').extensions.projects.projects()
 
 ## API
 
+<h3 id="get-recent-projects">
+`get_recent_projects()`
+</h3>
+
 You can get a list of recent projects by running the code below:
 
 ```lua
@@ -317,6 +321,45 @@ vim.print(
 ```
 
 Where `get_recent_projects()` returns either an empty table `{}` or a string array `{ '/path/to/project', ... }`
+
+<h3 id="get-config">
+`get_config()`
+</h3>
+
+**If** `setup()` **has been called**, it returns a table containing the currently set options.
+Otherwise it will return `nil`.
+
+```lua
+-- Using `vim.notify()`
+vim.notify(
+    vim.inspect(require('project_nvim').get_config()),
+    vim.log.levels.INFO
+)
+
+-- Using `vim.print()`
+vim.print(
+    vim.inspect(require('project_nvim').get_config())
+)
+```
+
+<h3 id="get-history-paths">
+`get_history_paths()`
+</h3>
+
+This will return the following table:
+
+```lua
+{
+    -- The directory where `project_nvim` sets its `datapath`
+    datapath = require('project_nvim.utils.path').datapath,
+
+    -- The directory where `project_nvim` saves the project history
+    projectpath = require('project_nvim.utils.path').projectpath,
+
+    -- The path to where `project_nvim` saves its recent projects history
+    historyfile = require('project_nvim.utils.path').historyfile,
+}
+```
 
 ---
 
