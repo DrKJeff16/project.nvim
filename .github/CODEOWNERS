@@ -1,4 +1,5 @@
 README.md @ahmedkhalf
+.github/ @DrKJeff16
 .pre-commit-config.yaml @DrKJeff16
 .stylua.toml @DrKJeff16
 lua/telescope/_extensions/projects.lua @ahmedkhalf
