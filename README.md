@@ -6,10 +6,10 @@
 
 <div align="center">
 
-    **WARNING (DrKJeff16)**
+**WARNING (DrKJeff16)**
 
 <ins>I need help from you folks to fix a bug where the history
-    file is not created (see [`history.lua`](lua/project_nvim/utils/history.lua))</ins>
+file is not created (see [`history.lua`](lua/project_nvim/utils/history.lua))</ins>
 
 </div>
 
