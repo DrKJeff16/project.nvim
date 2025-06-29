@@ -2,18 +2,6 @@
 <h1 id="project-nvim">project.nvim</h1>
 </div>
 
-<hr/>
-
-<div align="center">
-
-**WARNING (DrKJeff16)**
-
-<ins>I need help from you folks to fix a bug where the history
-file is not created (see [`history.lua`](lua/project_nvim/utils/history.lua))</ins>
-
-</div>
-
-<hr/>
 
 <!--
 NOTE: Original author: https://github.com/ahmedkhalf
