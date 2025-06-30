@@ -401,7 +401,7 @@ vim.print(get_history_paths('historyfile'))
 Make sure you have **read, write and access permissions** (`rwx`) for the `projectpath` directory.
 
 You can get the value of `projectpath` by running
-`:lua vim.print(require('project_nvim').get_history_paths().projectpath)`
+`:lua vim.print(require('project_nvim').get_history_paths('projectpath'))`
 in the cmdline.
 
 If you lack any permission for that directory, you can:
