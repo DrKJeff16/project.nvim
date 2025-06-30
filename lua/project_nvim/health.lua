@@ -39,7 +39,7 @@ local function format_per_type(t, data, sep)
     sep = is_type('string', sep) and sep or ''
 
     if t == 'string' then
-        return string.format('%s`%s`', sep, data)
+        return string.format('%s`"%s"`', sep, data)
     end
 
     if t == 'number' or t == 'boolean' then
@@ -70,7 +70,7 @@ local function format_per_type(t, data, sep)
         if not is_type('string', v) then
             msg = msg .. string.format('%s', format_per_type(type(v), v, sep))
         else
-            msg = msg .. string.format('%s`', v)
+            msg = msg .. string.format('"%s"`', v)
         end
     end
 
@@ -120,16 +120,16 @@ function Health.history_check()
         local stat = uv.fs_stat(v[2])
 
         if is_type('nil', stat) then
-            health.error(string.format('%s: %s is missing or not readable!', v[1], v[2]))
+            health.error(string.format('%s: `"%s"` is missing or not readable!', v[1], v[2]))
             goto continue
         end
 
         if stat.type ~= v[3] then
-            health.error(string.format('%s: %s is not a %s!', v[1], v[2], v[3]))
+            health.error(string.format('%s: `"%s"` is not a %s!', v[1], v[2], v[3]))
             goto continue
         end
 
-        health.ok(string.format('%s: `%s`', v[1], v[2]))
+        health.ok(string.format('%s: `"%s"`', v[1], v[2]))
 
         ::continue::
     end
