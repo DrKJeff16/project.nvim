@@ -3,6 +3,9 @@
 
 local health = vim.health
 local uv = vim.uv or vim.loop
+local ERROR = vim.log.levels.ERROR
+
+local empty = vim.tbl_isempty
 
 ---@param t 'nil'|'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'
 ---@param data any
@@ -31,15 +34,49 @@ local function is_type(t, data)
     return (data ~= nil and type(data) == t)
 end
 
+---@param T table|string[]
+---@return table|string[]
+local function dedup(T)
+    if not is_type('table', T) then
+        error('(project_nvim.health.dedup): Attempting to dedup data that is not a table!', ERROR)
+    end
+
+    if empty(T) then
+        return T
+    end
+
+    local t = {}
+
+    for _, v in next, T do
+        if not vim.tbl_contains(t, v) then
+            table.insert(t, v)
+        end
+    end
+
+    return t
+end
+
 ---@param t 'number'|'string'|'boolean'|'table'
 ---@param data number|string|boolean|table
 ---@param sep? string
+---@param constraints? string[]
 ---@return string
-local function format_per_type(t, data, sep)
+---@return true?
+local function format_per_type(t, data, sep, constraints)
     sep = is_type('string', sep) and sep or ''
+    constraints = is_type('table', constraints) and constraints or nil
 
     if t == 'string' then
-        return string.format('%s`"%s"`', sep, data)
+        local res = string.format('%s`"%s"`', sep, data)
+        if not is_type('table', constraints) then
+            return res
+        end
+
+        if is_type('table', constraints) and vim.tbl_contains(constraints, data) then
+            return res
+        end
+
+        return res, true
     end
 
     if t == 'number' or t == 'boolean' then
@@ -48,15 +85,17 @@ local function format_per_type(t, data, sep)
 
     local msg = ''
 
+    if t == 'nil' then
+        return sep .. msg .. ' `nil`'
+    end
+
     if t ~= 'table' then
         return sep .. msg .. ' `?`'
     end
 
     if vim.tbl_isempty(data) then
-        return sep .. msg .. '`{}`'
+        return sep .. msg .. ' `{}`'
     end
-
-    msg = ''
 
     sep = sep .. '  '
 
@@ -101,7 +140,24 @@ function Health.options_check()
 
     for k, v in next, Options do
         k = is_type('string', k) and k or ''
-        health.info(k .. ': ' .. format_per_type(type(v), v))
+
+        ---@type table|string[]|nil
+        local constraints = nil
+
+        if k == 'scope_chdir' then
+            constraints = { 'global', 'tab', 'win' }
+        end
+
+        local str
+        local warn
+
+        str, warn = format_per_type(type(v), v, nil, constraints)
+
+        if is_type('boolean', warn) and warn then
+            health.warn(' - ' .. k .. ': ' .. str)
+        else
+            health.ok(' - ' .. k .. ': ' .. str)
+        end
     end
 end
 
@@ -150,8 +206,24 @@ function Health.setup_check()
     return setup_called
 end
 
+function Health.project_check()
+    health.start('Active Sessions')
+
+    local History = require('project_nvim.utils.history')
+    local active = History.has_watch_setup
+    local projects = History.session_projects
+
+    if active and not empty(projects) then
+        projects = dedup(vim.deepcopy(projects))
+        health.info('Session Projects:' .. format_per_type(type(projects), projects))
+    else
+        health.warn('No active session projects!')
+    end
+end
+
 function Health.check()
     if Health.setup_check() then
+        Health.project_check()
         Health.history_check()
         Health.options_check()
     end

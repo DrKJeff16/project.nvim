@@ -25,12 +25,13 @@
 
 ---@class Project.Utils.History
 ---@field recent_projects (string|nil)[]|nil
----@field session_projects (string|nil)[]|nil
+---@field session_projects string[]|table
 ---@field has_watch_setup boolean
 ---@field read_projects_from_history fun()
 ---@field write_projects_to_history fun()
 ---@field get_recent_projects fun(): table|string[]
 ---@field delete_project fun(project: ProjParam)
+---@field sanitize_projects fun(self: Project.Utils.History): string[]
 
 local path = require('project_nvim.utils.path')
 local uv = vim.uv or vim.loop
@@ -86,6 +87,20 @@ local function normalise_path(path_to_normalise)
     return normalised_path
 end
 
+---@param T table|string[]
+---@return table|string[]
+local function dedup(T)
+    local t = {}
+
+    for _, v in next, T do
+        if not vim.tbl_contains(t, v) then
+            table.insert(t, v)
+        end
+    end
+
+    return t
+end
+
 ---@param tbl string[]
 ---@return string[] res
 local function delete_duplicates(tbl)
@@ -101,7 +116,7 @@ local function delete_duplicates(tbl)
         end
     end
 
-    ---@type string[]
+    ---@type table|string[]
     local res = {}
 
     for _, v in next, tbl do
@@ -113,7 +128,7 @@ local function delete_duplicates(tbl)
         end
     end
 
-    return res
+    return dedup(res)
 end
 
 ---@param project ProjParam
@@ -186,16 +201,17 @@ function M.read_projects_from_history()
     end)
 end
 
+---@param self Project.Utils.History
 ---@return string[] real_tbl
-local function sanitize_projects()
+function M:sanitize_projects()
     ---@type string[]
     local tbl = {}
 
-    if M.recent_projects ~= nil then
-        vim.list_extend(tbl, M.recent_projects)
-        vim.list_extend(tbl, M.session_projects)
+    if self.recent_projects ~= nil then
+        vim.list_extend(tbl, self.recent_projects)
+        vim.list_extend(tbl, self.session_projects)
     else
-        tbl = M.session_projects
+        tbl = self.session_projects
     end
 
     tbl = delete_duplicates(tbl)
@@ -208,11 +224,11 @@ local function sanitize_projects()
         end
     end
 
-    return real_tbl
+    return dedup(real_tbl)
 end
 
 ---@return string[]
-function M.get_recent_projects() return sanitize_projects() end
+function M.get_recent_projects() return M:sanitize_projects() end
 
 function M.write_projects_to_history()
     -- Unlike read projects, write projects is synchronous
@@ -228,7 +244,7 @@ function M.write_projects_to_history()
         return
     end
 
-    local res = sanitize_projects()
+    local res = M:sanitize_projects()
 
     -- Trim table to last 100 entries
     local len_res = #res
