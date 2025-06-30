@@ -1,11 +1,17 @@
 ---@diagnostic disable:missing-fields
 
-local config = require('project_nvim.config')
-local history = require('project_nvim.utils.history')
-local glob = require('project_nvim.utils.globtopattern')
-local path = require('project_nvim.utils.path')
+local Config = require('project_nvim.config')
+local History = require('project_nvim.utils.history')
+local Glob = require('project_nvim.utils.globtopattern')
+local Path = require('project_nvim.utils.path')
 
 local uv = vim.uv or vim.loop
+
+local in_tbl = vim.tbl_contains
+
+---@class AutocmdTuple
+---@field [1] string[]|string
+---@field [2] vim.api.keyset.create_autocmd
 
 ---@class Project.Project
 ---@field init fun(self: Project.Project)
@@ -21,8 +27,6 @@ local uv = vim.uv or vim.loop
 ---@field on_buf_enter fun()
 ---@field add_project_manually fun()
 
-local in_tbl = vim.tbl_contains
-
 ---@type Project.Project
 local Proj = {}
 
@@ -30,7 +34,8 @@ local Proj = {}
 Proj.attached_lsp = false
 Proj.last_project = nil
 
----@return (string|nil),string?
+---@return string?
+---@return string?
 function Proj.find_lsp_root()
     -- Get lsp client for current buffer
     -- Returns nil or string
@@ -52,7 +57,7 @@ function Proj.find_lsp_root()
             goto continue
         end
 
-        if in_tbl(filetypes, ft) and not in_tbl(config.options.ignore_lsp, client.name) then
+        if in_tbl(filetypes, ft) and not in_tbl(Config.options.ignore_lsp, client.name) then
             return client.config.root_dir, client.name
         end
 
@@ -74,7 +79,7 @@ function Proj.find_pattern_root()
     local curr_dir_cache = {}
 
     ---@param path_str string
-    ---@return string path_str
+    ---@return string
     local function get_parent(path_str)
         path_str = path_str:match('^(.*)/')
 
@@ -140,7 +145,7 @@ function Proj.find_pattern_root()
         if last_dir_cache ~= dir then
             get_files(dir)
         end
-        local pattern = glob.globtopattern(identifier)
+        local pattern = Glob.globtopattern(identifier)
         for _, file in next, curr_dir_cache do
             if file:match(pattern) ~= nil then
                 return true
@@ -168,7 +173,7 @@ function Proj.find_pattern_root()
     -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
     -- breadth-first search
     while true do
-        for _, pattern in next, config.options.patterns do
+        for _, pattern in next, Config.options.patterns do
             local exclude = false
             if pattern:sub(1, 1) == '!' then
                 exclude = true
@@ -235,10 +240,10 @@ function Proj.set_pwd(dir, method)
     end
 
     Proj.last_project = dir
-    table.insert(history.session_projects, dir)
+    table.insert(History.session_projects, dir)
 
     if vim.fn.getcwd() ~= dir then
-        local scope_chdir = config.options.scope_chdir
+        local scope_chdir = Config.options.scope_chdir
         if scope_chdir == 'global' then
             vim.api.nvim_set_current_dir(dir)
         elseif scope_chdir == 'tab' then
@@ -249,7 +254,7 @@ function Proj.set_pwd(dir, method)
             return
         end
 
-        if not config.options.silent_chdir then
+        if not Config.options.silent_chdir then
             vim.notify(string.format('Set CWD to %s using %s\n', dir, method), vim.log.levels.INFO)
         end
     end
@@ -257,10 +262,11 @@ function Proj.set_pwd(dir, method)
     return true
 end
 
----@return (string|nil),string?
+---@return string?
+---@return string?
 function Proj.get_project_root()
     -- returns project root, as well as method
-    for _, detection_method in next, config.options.detection_methods do
+    for _, detection_method in next, Config.options.detection_methods do
         if detection_method == 'lsp' then
             local root, lsp_name = Proj.find_lsp_root()
             if root ~= nil then
@@ -300,7 +306,7 @@ function Proj.on_buf_enter()
 
     local current_dir = vim.fn.expand('%:p:h', true)
 
-    if not path.exists(current_dir) or path.is_excluded(current_dir) then
+    if not Path.exists(current_dir) or Path.is_excluded(current_dir) then
         return
     end
 
@@ -315,17 +321,13 @@ end
 
 ---@param self Project.Project
 function Proj:init()
-    ---@class AutocmdTuple
-    ---@field [1] string[]|string
-    ---@field [2] vim.api.keyset.create_autocmd
-
     ---@type AutocmdTuple[]
     local autocmds = {}
 
     -- Create the augroup, clear it
     local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = false })
 
-    if not config.options.manual_mode then
+    if not Config.options.manual_mode then
         table.insert(autocmds, {
             { 'VimEnter', 'BufEnter', 'WinEnter' },
             {
@@ -336,7 +338,7 @@ function Proj:init()
             },
         })
 
-        if in_tbl(config.options.detection_methods, 'lsp') then
+        if in_tbl(Config.options.detection_methods, 'lsp') then
             self.attach_to_lsp()
         end
     end
