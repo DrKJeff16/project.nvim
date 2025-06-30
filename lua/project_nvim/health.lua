@@ -135,9 +135,26 @@ function Health.history_check()
     end
 end
 
+---@return boolean
+function Health.setup_check()
+    health.start('Setup')
+
+    local setup_called = require('project_nvim.config').setup_called == nil and false or true
+
+    if setup_called then
+        health.ok("`require('project_nvim').setup()` has been called")
+    else
+        health.error("`require('project_nvim').setup()` has not been called!")
+    end
+
+    return setup_called
+end
+
 function Health.check()
-    Health.history_check()
-    Health.options_check()
+    if Health.setup_check() then
+        Health.history_check()
+        Health.options_check()
+    end
 end
 
 return Health
