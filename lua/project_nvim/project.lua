@@ -7,8 +7,8 @@ local path = require('project_nvim.utils.path')
 
 local uv = vim.uv or vim.loop
 
----@class Project.Proj
----@field init fun(self: Project.Proj)
+---@class Project.Project
+---@field init fun(self: Project.Project)
 ---@field attached_lsp boolean
 ---@field last_project string?
 ---@field find_lsp_root fun(): (string?,string?)
@@ -23,15 +23,15 @@ local uv = vim.uv or vim.loop
 
 local in_tbl = vim.tbl_contains
 
----@type Project.Proj
-local M = {}
+---@type Project.Project
+local Proj = {}
 
 -- Internal states
-M.attached_lsp = false
-M.last_project = nil
+Proj.attached_lsp = false
+Proj.last_project = nil
 
 ---@return (string|nil),string?
-function M.find_lsp_root()
+function Proj.find_lsp_root()
     -- Get lsp client for current buffer
     -- Returns nil or string
     local bufnr = vim.api.nvim_get_current_buf()
@@ -63,7 +63,7 @@ function M.find_lsp_root()
 end
 
 ---@return (string|nil),string?
-function M.find_pattern_root()
+function Proj.find_pattern_root()
     local search_dir = vim.fn.expand('%:p:h', true)
     if vim.fn.has('win32') > 0 then
         search_dir = search_dir:gsub('\\', '/')
@@ -195,20 +195,21 @@ end
 ---@param client vim.lsp.Client
 ---@param bufnr integer
 local function on_attach_lsp(client, bufnr)
-    M.on_buf_enter() -- Recalculate root dir after lsp attaches
+    Proj.on_buf_enter() -- Recalculate root dir after lsp attaches
 end
 
 -- WARN: (DrKJeff16) Honestly I'm not feeling good about this one, chief
----@return integer?,string?
-function M.attach_to_lsp()
-    if M.attached_lsp then
+---@return integer?
+---@return string?
+function Proj.attach_to_lsp()
+    if Proj.attached_lsp then
         return
     end
 
     -- Backup old `start_client` function
     local _start_client = vim.lsp.start_client
 
-    ---@param lsp_config vim.lsp.ClientConfig
+    ---@type fun(lsp_config: vim.lsp.ClientConfig)
     vim.lsp.start_client = function(lsp_config)
         if lsp_config.on_attach == nil then
             lsp_config.on_attach = on_attach_lsp
@@ -222,18 +223,18 @@ function M.attach_to_lsp()
         return _start_client(lsp_config)
     end
 
-    M.attached_lsp = true
+    Proj.attached_lsp = true
 end
 
 ---@param dir string
 ---@param method string
 ---@return boolean?
-function M.set_pwd(dir, method)
+function Proj.set_pwd(dir, method)
     if dir == nil then
         return false
     end
 
-    M.last_project = dir
+    Proj.last_project = dir
     table.insert(history.session_projects, dir)
 
     if vim.fn.getcwd() ~= dir then
@@ -257,16 +258,16 @@ function M.set_pwd(dir, method)
 end
 
 ---@return (string|nil),string?
-function M.get_project_root()
+function Proj.get_project_root()
     -- returns project root, as well as method
     for _, detection_method in next, config.options.detection_methods do
         if detection_method == 'lsp' then
-            local root, lsp_name = M.find_lsp_root()
+            local root, lsp_name = Proj.find_lsp_root()
             if root ~= nil then
                 return root, string.format('"%s" lsp\n', lsp_name)
             end
         elseif detection_method == 'pattern' then
-            local root, method = M.find_pattern_root()
+            local root, method = Proj.find_pattern_root()
             if root ~= nil then
                 return root, method
             end
@@ -277,7 +278,7 @@ function M.get_project_root()
 end
 
 ---@return boolean
-function M.is_file()
+function Proj.is_file()
     local bufnr = vim.api.nvim_get_current_buf()
 
     local buf_type = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
@@ -292,31 +293,33 @@ function M.is_file()
     return false
 end
 
-function M.on_buf_enter()
-    if vim.v.vim_did_enter == 0 then
-        return
-    end
-
-    if not M.is_file() then
+function Proj.on_buf_enter()
+    if vim.v.vim_did_enter == 0 or not Proj.is_file() then
         return
     end
 
     local current_dir = vim.fn.expand('%:p:h', true)
+
     if not path.exists(current_dir) or path.is_excluded(current_dir) then
         return
     end
 
-    local root, method = M.get_project_root()
-    M.set_pwd(root, method)
+    local root, method = Proj.get_project_root()
+    Proj.set_pwd(root, method)
 end
 
-function M.add_project_manually()
+function Proj.add_project_manually()
     local current_dir = vim.fn.expand('%:p:h', true)
-    M.set_pwd(current_dir, 'manual')
+    Proj.set_pwd(current_dir, 'manual')
 end
 
-function M:init()
-    ---@type { [integer]: string[]|string, [integer]: vim.api.keyset.create_autocmd }[]
+---@param self Project.Project
+function Proj:init()
+    ---@class AutocmdTuple
+    ---@field [1] string[]|string
+    ---@field [2] vim.api.keyset.create_autocmd
+
+    ---@type AutocmdTuple[]
     local autocmds = {}
 
     -- Create the augroup, clear it
@@ -338,7 +341,7 @@ function M:init()
         end
     end
 
-    -- TODO(DrKJeff16): Rewrite this statement using Lua
+    -- TODO: (DrKJeff16) Rewrite this statement using Lua
     vim.cmd('command! ProjectRoot lua require("project_nvim.project").on_buf_enter()')
     vim.cmd('command! AddProject lua require("project_nvim.project").add_project_manually()')
 
@@ -358,4 +361,4 @@ function M:init()
     require('project_nvim.utils.history').read_projects_from_history()
 end
 
-return M
+return Proj
