@@ -42,8 +42,9 @@ that provides superior project management.
 
 - Automagically `cd` to the project root directory using `vim.lsp`
 - If no LSP is available then it'll try using pattern matching to `cd` to the project root directory instead
-- [Telescope Integration](#telescope-integration) `:Telescope projects`
 - Asynchronous file IO so it will not slow down neovim when reading the history file on startup.
+- Functional `checkhealth` hook (`:checkhealth project_nvim`)
+- [Telescope Integration](#telescope-integration) `:Telescope projects`
 - [`nvim-tree` integration](#nvim-tree-integration)
 
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
