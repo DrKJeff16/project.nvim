@@ -2,7 +2,6 @@
 <h1 id="project-nvim">project.nvim</h1>
 </div>
 
-
 <!--
 NOTE: Original author: https://github.com/ahmedkhalf
 -->
@@ -33,6 +32,7 @@ that provides superior project management.
     2. [`get_config()`](#get-config)
     3. [`get_history_paths()`](#get-history-paths)
 5. [Troubleshooting](#troubleshooting)
+    1. [History File Not Created](#history-file-not-created)
 6. [Contributing](#contributing)
 7. [Addendum](#addendum)
 
@@ -403,6 +403,11 @@ Make sure you have **read, write and access permissions** (`rwx`) for the `proje
 You can get the value of `projectpath` by running
 `:lua vim.print(require('project_nvim').get_history_paths().projectpath)`
 in the cmdline.
+
+If you lack any permission for that directory, you can:
+
+1. Delete that directory **(RECOMMENDED)**
+2. Run `chmod 755 <project/path>`
 
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
 
