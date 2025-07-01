@@ -8,6 +8,7 @@
 ---@field get_recent_projects fun(): table|string[]
 ---@field get_history_paths fun(path: 'datapath'|'projectpath'|'historyfile'): string|{ ['datapath']: string, ['projectpath']: string, ['historyfile']: string }
 ---@field get_config fun(): Project.Config.Options|nil
+---@field get_project_root fun(): (string?,string?)
 
 local Util = require('project_nvim.utils.util')
 
@@ -22,6 +23,9 @@ function Project.setup(options)
 
     require('project_nvim.config').setup(options)
 end
+
+-- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/112
+Project.get_project_root = require('project_nvim.project').get_project_root
 
 ---@return table|string[]
 function Project.get_recent_projects()
