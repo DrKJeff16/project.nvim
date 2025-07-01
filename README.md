@@ -6,7 +6,7 @@
 NOTE: Original author: https://github.com/ahmedkhalf
 -->
 
-`project.nvim` is an all in one [Neovim](https://github.com/neovim/neovim) plugin written in Lua
+`project.nvim` is an all-in-one [Neovim](https://github.com/neovim/neovim) plugin written in Lua
 that provides superior project management.
 
 ![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png)
@@ -75,18 +75,20 @@ Install the plugin with your preferred package manager:
 </h3>
 
 ```vim
-Plug 'DrKJeff16/project.nvim'
+if has('nvim-0.11')
+    Plug 'DrKJeff16/project.nvim'
 
-" OPTIONAL
-Plug 'nvim-telescope/telescope.nvim' | Plug 'plenary.nvim'
+    " OPTIONAL
+    Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-lua/plenary.nvim'
 
-lua << EOF
-  require('project_nvim').setup({
-    -- your configuration comes here
-    -- or leave it empty to use the default settings
-    -- refer to the configuration section below
-  })
-EOF
+    lua << EOF
+        require('project_nvim').setup({
+            -- your configuration comes here
+            -- or leave it empty to use the default settings
+            -- refer to the configuration section below
+        })
+    EOF
+endif
 ```
 
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
@@ -97,24 +99,25 @@ EOF
 
 ```lua
 require('lazy').setup({
-  spec = {
-    -- Other plugins
-    {
-     'DrKJeff16/project.nvim',
-     lazy = false,  -- WARN: IMPORTANT NOT TO LAZY-LOAD THIS PLUGIN
-      dependencies = {
-          'plenary.nvim',
-          'nvim-telescope/telescope.nvim',
-      }, -- OPTIONAL
-      config = function()
-        require('project_nvim').setup({
-          -- your configuration comes here
-          -- or leave it empty to use the default settings
-          -- refer to the configuration section below
-        })
-      end,
+    spec = {
+        -- Other plugins
+        {
+            'DrKJeff16/project.nvim',
+            lazy = false,  -- WARN: IMPORTANT NOT TO LAZY-LOAD THIS PLUGIN
+            dependencies = {
+                'nvim-lua/plenary.nvim',
+                'nvim-telescope/telescope.nvim',
+            }, -- OPTIONAL
+            config = function()
+                require('project_nvim').setup({
+                    -- your configuration comes here
+                    -- or leave it empty to use the default settings
+                    -- refer to the configuration section below
+                })
+            end,
+            cond = vim.fn.has('nvim-0.11') == 1,
+        },
     },
-  },
 })
 ```
 
@@ -125,23 +128,24 @@ require('lazy').setup({
 </h3>
 
 ```lua
-require('pckr').add({
-  -- Other plugins
-  {
-      'DrKJeff16/project.nvim',
-      requires = {
-          'nvim-lua/plenary.nvim',
-          'nvim-telescope/telescope.nvim',
-      }, -- OPTIONAL
-      config = function()
-        require('project_nvim').setup({
-          -- your configuration comes here
-          -- or leave it empty to use the default settings
-          -- refer to the configuration section below
-        })
-      end,
-  };
-})
+if vim.fn.has('nvim-0.11') == 1 then
+    require('pckr').add({
+        {
+            'DrKJeff16/project.nvim',
+            requires = {
+                'nvim-lua/plenary.nvim',
+                'nvim-telescope/telescope.nvim',
+            }, -- OPTIONAL
+            config = function()
+                require('project_nvim').setup({
+                    -- your configuration comes here
+                    -- or leave it empty to use the default settings
+                    -- refer to the configuration section below
+                })
+            end,
+        };
+    })
+end
 ```
 
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
