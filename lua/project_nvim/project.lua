@@ -273,16 +273,32 @@ function Proj.set_pwd(dir, method)
     end
 
     Proj.last_project = dir
-    table.insert(History.session_projects, dir)
+
+    if not in_tbl(History.session_projects, dir) then
+        table.insert(History.session_projects, dir)
+    elseif #History.session_projects > 1 then -- HACK: Move project to start of table
+        ---@type integer
+        local old_pos
+
+        for k, v in next, History.session_projects do
+            if v == dir then
+                old_pos = k
+                break
+            end
+        end
+
+        table.remove(History.session_projects, old_pos)
+        table.insert(History.session_projects, 1, dir)
+    end
 
     if vim.fn.getcwd() ~= dir then
         local scope_chdir = Config.options.scope_chdir
         if scope_chdir == 'global' then
             vim.api.nvim_set_current_dir(dir)
         elseif scope_chdir == 'tab' then
-            vim.cmd('tcd ' .. dir)
+            vim.cmd.tcd(dir)
         elseif scope_chdir == 'win' then
-            vim.cmd('lcd ' .. dir)
+            vim.cmd.lcd(dir)
         else
             return
         end
