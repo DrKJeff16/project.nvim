@@ -1,8 +1,9 @@
--- Inspiration from:
--- https://github.com/nvim-telescope/telescope-project.nvim
-local has_telescope, _ = pcall(require, 'telescope')
+local Util = require('project_nvim.utils.util')
 
-if not has_telescope then
+local mod_exists = Util.mod_exists
+local is_type = Util.is_type
+
+if not mod_exists('telescope') then
     return
 end
 
@@ -24,33 +25,6 @@ local Config = require('project_nvim.config')
 ----------
 -- Actions
 ----------
-
----@param t 'nil'|'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'
----@param data any
----@return boolean
-local function is_type(t, data)
-    local types = {
-        'nil',
-        'number',
-        'string',
-        'boolean',
-        'table',
-        'function',
-        'thread',
-        'userdata',
-    }
-
-    if t == nil or type(t) ~= 'string' or not vim.tbl_contains(types, t) then
-        return false
-    end
-
-    -- `nil` is a special case
-    if t == 'nil' then
-        return data == nil
-    end
-
-    return (data ~= nil and type(data) == t)
-end
 
 ---@return table
 local function create_finder()

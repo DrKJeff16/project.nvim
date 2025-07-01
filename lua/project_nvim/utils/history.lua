@@ -1,3 +1,5 @@
+---@diagnostic disable:missing-fields
+
 ---@alias OpenMode
 ---|integer
 ---|string
@@ -33,36 +35,34 @@
 ---@field delete_project fun(project: ProjParam)
 ---@field sanitize_projects fun(self: Project.Utils.History): string[]
 
-local path = require('project_nvim.utils.path')
+local Util = require('project_nvim.utils.util')
+local Path = require('project_nvim.utils.path')
 local uv = vim.uv or vim.loop
 local is_windows = (uv.os_uname().version:match('Windows') ~= nil or vim.fn.has('wsl')) -- Thanks to `folke` for
 -- that code
 
-local ERROR = vim.log.levels.ERROR
-
 ---@type Project.Utils.History
----@diagnostic disable-next-line:missing-fields
-local M = {}
+local History = {}
 
 -- projects from previous neovim sessions
-M.recent_projects = nil
+History.recent_projects = nil
 
 -- projects from current neovim session
-M.session_projects = {}
-M.has_watch_setup = false
+History.session_projects = {}
+History.has_watch_setup = false
 
 ---@param mode OpenMode
 ---@param callback? fun(err: string|nil, fd: integer|nil)
 ---@return integer|nil
-function M.open_history(mode, callback)
-    local histfile = path.historyfile
+function History.open_history(mode, callback)
+    local histfile = Path.historyfile
 
     if callback ~= nil then -- async
-        path.create_scaffolding(
+        Path.create_scaffolding(
             function(_, _) uv.fs_open(histfile, mode, tonumber('644', 8), callback) end
         )
     else -- sync
-        path.create_scaffolding()
+        Path.create_scaffolding()
         return uv.fs_open(histfile, mode, tonumber('644', 8))
     end
 end
@@ -85,20 +85,6 @@ local function normalise_path(path_to_normalise)
     end
 
     return normalised_path
-end
-
----@param T table|string[]
----@return table|string[]
-local function dedup(T)
-    local t = {}
-
-    for _, v in next, T do
-        if not vim.tbl_contains(t, v) then
-            table.insert(t, v)
-        end
-    end
-
-    return t
 end
 
 ---@param tbl string[]
@@ -128,19 +114,19 @@ local function delete_duplicates(tbl)
         end
     end
 
-    return dedup(res)
+    return Util.dedup(res)
 end
 
 ---@param project ProjParam
-function M.delete_project(project)
+function History.delete_project(project)
     local new_tbl = {}
-    for k, v in next, M.recent_projects do
+    for k, v in next, History.recent_projects do
         if v ~= project.value then
             new_tbl[k] = v
         end
     end
 
-    M.recent_projects = vim.deepcopy(new_tbl)
+    History.recent_projects = vim.deepcopy(new_tbl)
 end
 
 ---@param history_data string
@@ -149,40 +135,40 @@ local function deserialize_history(history_data)
     ---@type string[]
     local projects = {}
     for s in history_data:gmatch('[^\r\n]+') do
-        if not path.is_excluded(s) and dir_exists(s) then
+        if not Path.is_excluded(s) and dir_exists(s) then
             table.insert(projects, s)
         end
     end
 
     projects = delete_duplicates(projects)
 
-    M.recent_projects = vim.deepcopy(projects)
+    History.recent_projects = vim.deepcopy(projects)
 end
 
 local function setup_watch()
     -- Only runs once
-    if not M.has_watch_setup then
-        M.has_watch_setup = true
+    if not History.has_watch_setup then
+        History.has_watch_setup = true
 
         local event = uv.new_fs_event()
         if event == nil then
             return
         end
 
-        event:start(path.projectpath, {}, function(err, _, events)
+        event:start(Path.projectpath, {}, function(err, _, events)
             if err ~= nil then
                 return
             end
             if events['change'] then
-                M.recent_projects = nil
-                M.read_projects_from_history()
+                History.recent_projects = nil
+                History.read_projects_from_history()
             end
         end)
     end
 end
 
-function M.read_projects_from_history()
-    M.open_history('r', function(_, fd)
+function History.read_projects_from_history()
+    History.open_history('r', function(_, fd)
         setup_watch()
         if fd == nil then
             return
@@ -203,7 +189,7 @@ end
 
 ---@param self Project.Utils.History
 ---@return string[] real_tbl
-function M:sanitize_projects()
+function History:sanitize_projects()
     ---@type string[]
     local tbl = {}
 
@@ -224,17 +210,17 @@ function M:sanitize_projects()
         end
     end
 
-    return dedup(real_tbl)
+    return Util.dedup(real_tbl)
 end
 
 ---@return string[]
-function M.get_recent_projects() return M:sanitize_projects() end
+function History.get_recent_projects() return History:sanitize_projects() end
 
-function M.write_projects_to_history()
+function History.write_projects_to_history()
     -- Unlike read projects, write projects is synchronous
     -- because it runs when vim ends
-    local mode = M.recent_projects == nil and 'a' or 'w'
-    local file = M.open_history(mode)
+    local mode = History.recent_projects == nil and 'a' or 'w'
+    local file = History.open_history(mode)
 
     if file == nil then
         vim.notify(
@@ -244,7 +230,7 @@ function M.write_projects_to_history()
         return
     end
 
-    local res = M:sanitize_projects()
+    local res = History:sanitize_projects()
 
     -- Trim table to last 100 entries
     local len_res = #res
@@ -267,4 +253,4 @@ function M.write_projects_to_history()
     uv.fs_close(file)
 end
 
-return M
+return History

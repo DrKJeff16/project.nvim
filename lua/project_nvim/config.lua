@@ -93,7 +93,7 @@
 ---@param pattern string
 ---@return string
 local function pattern_exclude(pattern)
-    local glob = require('project_nvim.utils.globtopattern')
+    local globtopattern = require('project_nvim.utils.globtopattern').globtopattern
 
     local HOME_EXPAND = vim.fn.expand('~')
 
@@ -101,7 +101,7 @@ local function pattern_exclude(pattern)
         pattern = string.format('%s/%s', HOME_EXPAND, pattern:sub(3, #pattern))
     end
 
-    return glob.globtopattern(pattern)
+    return globtopattern(pattern)
 end
 
 ---@type Project.Config

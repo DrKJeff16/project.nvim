@@ -1,3 +1,5 @@
+---@diagnostic disable:missing-fields
+
 -- Credits for this module goes to: David Manura
 -- https://github.com/davidm/lua-glob-pattern
 
@@ -8,8 +10,7 @@
 ---@field globtopattern fun(g: string): (p: string)
 
 ---@type Project.Utils.GlobPattern
----@diagnostic disable-next-line:missing-fields
-local M = { _TYPE = 'module', _NAME = 'globtopattern', _VERSION = '0.2.1.20120406' }
+local Glob = { _TYPE = 'module', _NAME = 'globtopattern', _VERSION = '0.2.1.20120406' }
 
 -- Some useful references:
 -- - apr_fnmatch in Apache APR.  For example,
@@ -17,7 +18,7 @@ local M = { _TYPE = 'module', _NAME = 'globtopattern', _VERSION = '0.2.1.2012040
 --   which cites POSIX 1003.2-1992, section B.6.
 ---@param g string
 ---@return string p
-function M.globtopattern(g)
+function Glob.globtopattern(g)
     local p = '^' -- pattern being built
     local i = 0 -- index in g
     local c = '' -- char at index i in g.
@@ -150,4 +151,4 @@ function M.globtopattern(g)
     return p
 end
 
-return M
+return Glob

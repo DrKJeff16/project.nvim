@@ -3,118 +3,15 @@
 
 local health = vim.health
 local uv = vim.uv or vim.loop
-local ERROR = vim.log.levels.ERROR
 
 local empty = vim.tbl_isempty
 
----@param t 'nil'|'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'
----@param data any
----@return boolean
-local function is_type(t, data)
-    local types = {
-        'nil',
-        'number',
-        'string',
-        'boolean',
-        'table',
-        'function',
-        'thread',
-        'userdata',
-    }
+local Util = require('project_nvim.utils.util')
 
-    if t == nil or type(t) ~= 'string' or not vim.tbl_contains(types, t) then
-        return false
-    end
-
-    -- `nil` is a special case
-    if t == 'nil' then
-        return data == nil
-    end
-
-    return (data ~= nil and type(data) == t)
-end
-
----@param T table|string[]
----@return table|string[]
-local function dedup(T)
-    if not is_type('table', T) then
-        error('(project_nvim.health.dedup): Attempting to dedup data that is not a table!', ERROR)
-    end
-
-    if empty(T) then
-        return T
-    end
-
-    local t = {}
-
-    for _, v in next, T do
-        if not vim.tbl_contains(t, v) then
-            table.insert(t, v)
-        end
-    end
-
-    return t
-end
-
----@param t 'number'|'string'|'boolean'|'table'
----@param data number|string|boolean|table
----@param sep? string
----@param constraints? string[]
----@return string
----@return true?
-local function format_per_type(t, data, sep, constraints)
-    sep = is_type('string', sep) and sep or ''
-    constraints = is_type('table', constraints) and constraints or nil
-
-    if t == 'string' then
-        local res = string.format('%s`"%s"`', sep, data)
-        if not is_type('table', constraints) then
-            return res
-        end
-
-        if is_type('table', constraints) and vim.tbl_contains(constraints, data) then
-            return res
-        end
-
-        return res, true
-    end
-
-    if t == 'number' or t == 'boolean' then
-        return string.format('%s`%s`', sep, tostring(data))
-    end
-
-    local msg = ''
-
-    if t == 'nil' then
-        return sep .. msg .. ' `nil`'
-    end
-
-    if t ~= 'table' then
-        return sep .. msg .. ' `?`'
-    end
-
-    if vim.tbl_isempty(data) then
-        return sep .. msg .. ' `{}`'
-    end
-
-    sep = sep .. '  '
-
-    for k, v in next, data do
-        if is_type('number', k) then
-            k = tostring(k)
-        end
-
-        msg = msg .. string.format('%s\n[%s]: `', sep, k)
-
-        if not is_type('string', v) then
-            msg = msg .. string.format('%s', format_per_type(type(v), v, sep))
-        else
-            msg = msg .. string.format('"%s"`', v)
-        end
-    end
-
-    return msg
-end
+local is_type = Util.is_type
+local dedup = Util.dedup
+local format_per_type = Util.format_per_type
+local mod_exists = Util.mod_exists
 
 local Health = {}
 
@@ -153,10 +50,12 @@ function Health.options_check()
 
         str, warn = format_per_type(type(v), v, nil, constraints)
 
+        str = string.format(' - %s: %s', k, str)
+
         if is_type('boolean', warn) and warn then
-            health.warn(' - ' .. k .. ': ' .. str)
+            health.warn(str)
         else
-            health.ok(' - ' .. k .. ': ' .. str)
+            health.ok(str)
         end
     end
 end
@@ -195,7 +94,8 @@ end
 function Health.setup_check()
     health.start('Setup')
 
-    local setup_called = require('project_nvim.config').setup_called == nil and false or true
+    local setup_called = is_type('nil', require('project_nvim.config').setup_called) and false
+        or true
 
     if setup_called then
         health.ok("`require('project_nvim').setup()` has been called")
