@@ -185,61 +185,68 @@ require('project_nvim').setup({
 
 ```lua
 {
-  -- Manual mode doesn't automatically change your root directory, so you have
-  -- the option to manually do so using `:ProjectRoot` command.
-  ---@type boolean
-  manual_mode = false,
+    -- Manual mode doesn't automatically change your root directory, so you have
+    -- the option to manually do so using `:ProjectRoot` command.
+    ---@type boolean
+    manual_mode = false,
 
-  -- Methods of detecting the root directory. **'lsp'** uses the native neovim
-  -- LSP, while **'pattern'** uses vim-rooter like glob pattern matching. Here
-  -- order matters: if one is not detected, the other is used as fallback. You
-  -- can also delete or rearrange the detection methods.
-  ---@type ('lsp'|'pattern')[]|table
-  detection_methods = { 'lsp', 'pattern' },
+    -- Methods of detecting the root directory. **'lsp'** uses the native neovim
+    -- LSP, while **'pattern'** uses vim-rooter like glob pattern matching. Here
+    -- order matters: if one is not detected, the other is used as fallback. You
+    -- can also delete or rearrange the detection methods.
+    ---@type ('lsp'|'pattern')[]|table
+    detection_methods = { 'lsp', 'pattern' },
 
-  -- All the patterns used to detect root dir, when `'pattern'` is in
-  -- `detection_methods`
-  ---@type string[]
-  patterns = {
-      '.git',
-      '.github',
-      '_darcs',
-      '.hg',
-      '.bzr',
-      '.svn',
-      'package.json',
-  },
+    -- All the patterns used to detect root dir, when `'pattern'` is in
+    -- `detection_methods`
+    ---@type string[]
+    patterns = {
+        '.git',
+        '.github',
+        '_darcs',
+        '.hg',
+        '.bzr',
+        '.svn',
+        'package.json',
+    },
 
-  -- Table of LSP clients to ignore by name
-  -- eg: { 'efm', ... }
-  ---@type string[]|table
-  ignore_lsp = {},
+    -- Table of LSP clients to ignore by name
+    -- eg: { 'efm', ... }
+    ---@type string[]|table
+    ignore_lsp = {},
 
-  -- Don't calculate root dir on specific directories
-  -- Ex: { '~/.cargo/*', ... }
-  ---@type string[]|table
-  exclude_dirs = {},
+    -- Don't calculate root dir on specific directories
+    -- Ex: { '~/.cargo/*', ... }
+    ---@type string[]|table
+    exclude_dirs = {},
 
-  -- Show hidden files in telescope
-  ---@type boolean
-  show_hidden = false,
+    -- If `false`, it won't add a project if its root does not
+    -- match the current user **(UNIX only)**
+    -- ---
+    -- Default: `true`
+    -- ---
+    allow_different_owners = true,
 
-  -- When set to false, you will get a message when project.nvim changes your
-  -- directory.
-  ---@type boolean
-  silent_chdir = true,
+    -- Show hidden files in telescope
+    ---@type boolean
+    show_hidden = false,
 
-  -- What scope to change the directory, valid options are
-  -- * global (default)
-  -- * tab
-  -- * win
-  ---@type 'global'|'tab'|'win'
-  scope_chdir = 'global',
+    -- When set to false, you will get a message when project.nvim changes your
+    -- directory.
+    ---@type boolean
+    silent_chdir = true,
 
-  -- Path where project.nvim will store the project history for use in
-  -- telescope
-  ---@type string
-  datapath = vim.fn.stdpath('data'),
+    -- What scope to change the directory, valid options are
+    -- * global (default)
+    -- * tab
+    -- * win
+    ---@type 'global'|'tab'|'win'
+    scope_chdir = 'global',
+
+    -- Path where project.nvim will store the project history for use in
+    -- telescope
+    ---@type string
+    datapath = vim.fn.stdpath('data'),
 }
 ```
 

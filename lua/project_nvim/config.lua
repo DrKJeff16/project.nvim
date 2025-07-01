@@ -77,7 +77,7 @@
 -- ---
 ---@field datapath? string
 -- If `false`, it won't add a project if its root does not
--- match the current user **(Linux only)**
+-- match the current user **(UNIX only)**
 -- ---
 -- Default: `true`
 -- ---
