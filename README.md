@@ -473,8 +473,8 @@ in the cmdline.
 
 If you lack any permission for that directory, you can:
 
-1. Delete that directory **(RECOMMENDED)**
-2. Run `chmod 755 <project/path>`
+* Delete that directory **(RECOMMENDED)**
+* Run `chmod 755 <project/path>`
 
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
 
