@@ -16,26 +16,27 @@ that provides superior project management.
 ## Table of Contents
 
 1. [Features](#features)
-2. [Installation](#installation)
+2. [Roadmap](#roadmap)
+3. [Installation](#installation)
     1. [Requirements](#requirements)
     2. [`vim-plug`](#vim-plug)
     3. [`lazy.nvim`](#lazy-nvim)
     4. [`pckr.nvim`](#pckr-nvim)
-3. [Configuration](#configuration)
+4. [Configuration](#configuration)
     1. [Pattern Matching](#pattern-matching)
     2. [`nvim-tree.lua` Integration](#nvim-tree-integration)
     3. [`telescope.nvim` Integration](#telescope-integration)
         1. [Telescope Projects Picker](#telescope-projects-picker)
         2. [Telescope Mappings](#telescope-mappings)
-4. [API](#api)
+5. [API](#api)
     1. [`project_nvim.utils.util`](#util)
     2. [`get_recent_projects()`](#get-recent-projects)
     3. [`get_config()`](#get-config)
     4. [`get_history_paths()`](#get-history-paths)
-5. [Troubleshooting](#troubleshooting)
+6. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
-6. [Contributing](#contributing)
-7. [Addendum](#addendum)
+7. [Contributing](#contributing)
+8. [Addendum](#addendum)
 
 ---
 
@@ -49,6 +50,23 @@ that provides superior project management.
 - [`nvim-tree` integration](#nvim-tree-integration)
 
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
+
+## Roadmap
+
+- [X] Fix deprecated `vim.lsp` calls (**_CRITICAL_**)
+- [X] Fix bug with history not working
+- [X] `vim.health` integration, AKA `:checkhealth project_nvim`
+- [X] Extend API
+    - [X] Expose `project_nvim.project.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
+- [ ] Extend Telescope picker configuration
+    - [X] Fix `file_browser` mapping (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/107)**)
+    - [ ] Add `--open-buffers` option ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/155))
+- [ ] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
+- [ ] Disable per filetype ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/135), **_low priority_**)
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
+---
 
 ## Installation
 
@@ -441,6 +459,8 @@ If you lack any permission for that directory, you can:
 2. Run `chmod 755 <project/path>`
 
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
+
+---
 
 ## Contributing
 
