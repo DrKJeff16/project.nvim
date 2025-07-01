@@ -97,7 +97,8 @@ local function browse_project_files(prompt_bufnr)
         hidden = Config.options.show_hidden,
     }
     if cd_successful then
-        Builtin.file_browser(opt)
+        -- Source: https://github.com/ahmedkhalf/project.nvim/pull/107
+        require('telescope').extensions.file_browser.file_browser(opt)
     end
 end
 
