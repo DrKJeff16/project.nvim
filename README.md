@@ -28,9 +28,10 @@ that provides superior project management.
         1. [Telescope Projects Picker](#telescope-projects-picker)
         2. [Telescope Mappings](#telescope-mappings)
 4. [API](#api)
-    1. [`get_recent_projects()`](#get-recent-projects)
-    2. [`get_config()`](#get-config)
-    3. [`get_history_paths()`](#get-history-paths)
+    1. [`project_nvim.utils.util`](#util)
+    2. [`get_recent_projects()`](#get-recent-projects)
+    3. [`get_config()`](#get-config)
+    4. [`get_history_paths()`](#get-history-paths)
 5. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
 6. [Contributing](#contributing)
@@ -325,6 +326,31 @@ require('telescope').extensions.projects.projects()
 ---
 
 ## API
+
+<h3 id="util">
+<code>project_nvim.utils.util</code>
+</h3>
+
+A set of utilities that get repeated across the board.
+
+These utilities are in part inspired by my own utilities
+found in **[`Jnvim`](https://github.com/DrKJeff16/Jnvim)**, particularly
+the **[`User API`](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)**.
+
+You can import them the follow way:
+
+```lua
+local ProjUtil = require('project_nvim.utils.util')
+
+-- ...
+```
+
+See [`project_nvim/utils/util.lua`](./lua/project_nvim/utils/util.lua) for
+further reference.
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
+
+---
 
 <h3 id="get-recent-projects">
 <code>get_recent_projects()</code>
