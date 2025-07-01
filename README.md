@@ -30,9 +30,10 @@ that provides superior project management.
         2. [Telescope Mappings](#telescope-mappings)
 5. [API](#api)
     1. [`project_nvim.utils.util`](#util)
-    2. [`get_recent_projects()`](#get-recent-projects)
-    3. [`get_config()`](#get-config)
-    4. [`get_history_paths()`](#get-history-paths)
+    2. [`get_project_root()`](#get-project-root)
+    3. [`get_recent_projects()`](#get-recent-projects)
+    4. [`get_config()`](#get-config)
+    5. [`get_history_paths()`](#get-history-paths)
 6. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
 7. [Contributing](#contributing)
@@ -373,6 +374,20 @@ further reference.
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
 
 ---
+
+<h3 id="get-project-root">
+<code>get_project_root()</code>
+</h3>
+
+The API now has [`project.lua`](./lua/project_nvim/project.lua)'s
+`get_project_root()` function exposed:
+
+```lua
+---@type fun(): (string|nil,string?)
+local root, lsp_or_method = require('project_nvim').get_project_root()
+```
+
+<div align="right"><a href="#project-nvim">Go To Top</a></div>
 
 <h3 id="get-recent-projects">
 <code>get_recent_projects()</code>
