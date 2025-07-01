@@ -438,12 +438,21 @@ vim.print(
 <code>get_history_paths()</code>
 </h3>
 
-**This function will always return `nil`** unless the following values are passed:
+If no valid args are passed to this function, it will return the following dictionary:
 
 ```lua
----@type fun(path: 'datapath'|'projectpath'|'historyfile'): string|nil
+---@type fun(path: ('datapath'|'projectpath'|'historyfile')?): string|{ ['datapath']: string, ['projectpath']: string, ['historyfile']: string }
 local get_history_paths = require('project_nvim').get_history_paths
 
+-- A dictionary table containing all return values below
+vim.print(vim.inspect(get_history_paths()))
+--- { datapath = <datapath>, projectpath = <projectpath>, historyfile = <historyfile> }
+```
+
+Otherwise, if `'datapath'`, `'projectpath'` or `'historyfile'` are passed,
+it will return the string value of said arg:
+
+```lua
 -- The directory where `project_nvim` sets its `datapath`
 vim.print(get_history_paths('datapath'))
 
