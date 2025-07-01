@@ -25,16 +25,6 @@ function Health.options_check()
         return
     end
 
-    -- ignore_lsp: table|string[]
-    -- datapath: string
-    -- exclude_dirs: table|string[]
-    -- scope_chdir: 'global'|'tab'|'win'
-    -- patterns: string[]
-    -- show_hidden: boolean
-    -- manual_mode: boolean
-    -- silent_chdir: boolean
-    -- detection_methods: string[]
-
     for k, v in next, Options do
         k = is_type('string', k) and k or ''
 
