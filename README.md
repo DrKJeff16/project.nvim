@@ -396,16 +396,13 @@ local root, lsp_or_method = require('project_nvim').get_project_root()
 You can get a list of recent projects by running the code below:
 
 ```lua
+local recent_projects = require('project_nvim').get_recent_projects()
+
 -- Using `vim.notify()`
-vim.notify(
-    vim.inspect(require('project_nvim').get_recent_projects()),
-    vim.log.levels.INFO
-)
+vim.notify(vim.inspect(recent_projects))
 
 -- Using `vim.print()`
-vim.print(
-    vim.inspect(require('project_nvim').get_recent_projects())
-)
+vim.print(vim.inspect(recent_projects))
 ```
 
 Where `get_recent_projects()` returns either an empty table `{}` or a string array `{ '/path/to/project', ... }`
@@ -420,16 +417,13 @@ Where `get_recent_projects()` returns either an empty table `{}` or a string arr
 Otherwise it will return `nil`.
 
 ```lua
+local config = require('project_nvim').get_config()
+
 -- Using `vim.notify()`
-vim.notify(
-    vim.inspect(require('project_nvim').get_config()),
-    vim.log.levels.INFO
-)
+vim.notify(vim.inspect(config))
 
 -- Using `vim.print()`
-vim.print(
-    vim.inspect(require('project_nvim').get_config())
-)
+vim.print(vim.inspect(config))
 ```
 
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
