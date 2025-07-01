@@ -96,6 +96,10 @@
 ---@field _setup fun(self: Project.Config, options: table|Project.Config.Options?)
 ---@field setup_called? boolean
 
+local Util = require('project_nvim.utils.util')
+
+local is_type = Util.is_type
+
 ---@param pattern string
 ---@return string
 local function pattern_exclude(pattern)
@@ -146,7 +150,7 @@ Config.options = {}
 ---@param self Project.Config
 ---@param options? table|Project.Config.Options
 function Config:_setup(options)
-    options = (options ~= nil and type(options) == 'table') and options or {}
+    options = is_type('table', options) and options or {}
 
     self.options = vim.tbl_deep_extend('keep', options, self.defaults)
     self.options.exclude_dirs = vim.tbl_map(pattern_exclude, self.options.exclude_dirs)
@@ -163,7 +167,7 @@ end
 
 ---@param options? table|Project.Config.Options
 function Config.setup(options)
-    options = (options ~= nil and type(options) == 'table') and options or {}
+    options = is_type('table', options) and options or {}
 
     Config:_setup(options)
 
