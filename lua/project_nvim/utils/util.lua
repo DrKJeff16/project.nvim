@@ -11,10 +11,14 @@
 ---|'userdata'
 
 ---@class Project.Utils.Util
+--- Check whether `data` is of type `t` or not
 ---@field is_type fun(t: Project.Utils.Util.AllTypes, data: any): boolean
+--- Get rid of all duplicates in input table.
+--- If table is empty, just returns it
 ---@field dedup fun(T: table|string[]): table|string[]
----@field format_per_type fun(t: 'number'|'string'|'table'|'boolean', data: number|string|table|boolean, sep: string?, constraints: string[]?): string?,boolean?
+--- Check if module `mod` is available
 ---@field mod_exists fun(mod: string): boolean
+---@field format_per_type fun(t: 'number'|'string'|'table'|'boolean', data: number|string|table|boolean, sep: string?, constraints: string[]?): string?,boolean?
 
 local ERROR = vim.log.levels.ERROR
 local empty = vim.tbl_isempty
