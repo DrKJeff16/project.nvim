@@ -121,11 +121,26 @@ function Health.project_check()
     end
 end
 
+function Health.telescope_check()
+    if not mod_exists('telescope') then
+        return
+    end
+
+    health.start('Telescope')
+
+    if mod_exists('telescope._extensions.projects') then
+        health.ok('Extension loaded')
+    else
+        health.warn('Extension is missing', 'Have you set it up?')
+    end
+end
+
 function Health.check()
     if Health.setup_check() then
         Health.project_check()
         Health.history_check()
         Health.options_check()
+        Health.telescope_check()
     end
 end
 
