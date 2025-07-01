@@ -4,10 +4,18 @@ local Config = require('project_nvim.config')
 local History = require('project_nvim.utils.history')
 local Glob = require('project_nvim.utils.globtopattern')
 local Path = require('project_nvim.utils.path')
+local Util = require('project_nvim.utils.util')
+
+local is_type = Util.is_type
 
 local uv = vim.uv or vim.loop
 
 local in_tbl = vim.tbl_contains
+
+---@class HistoryPaths
+---@field datapath string
+---@field projectpath string
+---@field historyfile string
 
 ---@class AutocmdTuple
 ---@field [1] string[]|string
@@ -23,6 +31,7 @@ local in_tbl = vim.tbl_contains
 ---@field attach_to_lsp fun(): (integer?,string?)
 ---@field set_pwd fun(dir: string, method: string): boolean?
 ---@field get_project_root fun(): (string?,string?)
+---@field get_history_paths fun(path: ('datapath'|'projectpath'|'historyfile')?): string|HistoryPaths
 ---@field is_file fun(): boolean
 ---@field on_buf_enter fun()
 ---@field add_project_manually fun()
@@ -260,6 +269,22 @@ function Proj.set_pwd(dir, method)
     end
 
     return true
+end
+
+---@param path? 'datapath'|'projectpath'|'historyfile'
+---@return string|HistoryPaths
+function Proj.get_history_paths(path)
+    local valid = { 'datapath', 'projectpath', 'historyfile' }
+
+    if is_type('string', path) and vim.tbl_contains(valid, path) then
+        return Path[path]
+    end
+
+    return {
+        datapath = Path.datapath,
+        projectpath = Path.projectpath,
+        historyfile = Path.historyfile,
+    }
 end
 
 ---@return string?

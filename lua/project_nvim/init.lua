@@ -1,12 +1,13 @@
 ---@diagnostic disable:missing-fields
 
 ---@module 'project_nvim.config'
+---@module 'project_nvim.project'
 
 -- `project_nvim` module
 ---@class Project
 ---@field setup fun(options: table|Project.Config.Options?)
 ---@field get_recent_projects fun(): table|string[]
----@field get_history_paths fun(path: 'datapath'|'projectpath'|'historyfile'): string|{ ['datapath']: string, ['projectpath']: string, ['historyfile']: string }
+---@field get_history_paths fun(path: ('datapath'|'projectpath'|'historyfile')?): string|HistoryPaths
 ---@field get_config fun(): Project.Config.Options|nil
 ---@field get_project_root fun(): (string?,string?)
 
@@ -27,6 +28,8 @@ end
 -- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/112
 Project.get_project_root = require('project_nvim.project').get_project_root
 
+Project.get_history_paths = require('project_nvim.project').get_history_paths
+
 ---@return table|string[]
 function Project.get_recent_projects()
     return require('project_nvim.utils.history').get_recent_projects()
@@ -37,24 +40,6 @@ function Project.get_config()
     local Config = require('project_nvim.config')
 
     return Config.setup_called and Config.options or nil
-end
-
----@param path? 'datapath'|'projectpath'|'historyfile'
----@return string|{ ['datapath']: string, ['projectpath']: string, ['historyfile']: string }
-function Project.get_history_paths(path)
-    local Path = require('project_nvim.utils.path')
-
-    local valid = { 'datapath', 'projectpath', 'historyfile' }
-
-    if is_type('string', path) and vim.tbl_contains(valid, path) then
-        return Path[path]
-    end
-
-    return {
-        datapath = Path.datapath,
-        projectpath = Path.projectpath,
-        historyfile = Path.historyfile,
-    }
 end
 
 return Project
