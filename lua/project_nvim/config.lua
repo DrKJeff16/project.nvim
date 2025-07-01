@@ -76,6 +76,12 @@
 -- Default: `vim.fn.stdpath('data')`
 -- ---
 ---@field datapath? string
+-- If `false`, it won't add a project if its root does not
+-- match the current user **(Linux only)**
+-- ---
+-- Default: `true`
+-- ---
+---@field allow_different_owners? boolean
 
 ---@class Project.Config
 ---@field defaults Project.Config.Options
@@ -123,6 +129,8 @@ Config.defaults = {
         '.stylua.toml',
         'stylua.toml',
     },
+
+    allow_different_owners = true,
 
     ignore_lsp = {},
     exclude_dirs = {},

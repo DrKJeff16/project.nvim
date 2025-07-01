@@ -9,6 +9,7 @@ local Util = require('project_nvim.utils.util')
 local is_type = Util.is_type
 
 local uv = vim.uv or vim.loop
+local WARN = vim.log.levels.WARN
 
 local in_tbl = vim.tbl_contains
 
@@ -74,6 +75,20 @@ function Proj.find_lsp_root()
     end
 
     return nil
+end
+
+---@param dir string
+---@return boolean
+function Proj.verify_owner(dir)
+    if vim.fn.has('win32') == 1 then
+        return true
+    end
+
+    local stat = uv.fs_stat(dir)
+
+    assert(stat ~= nil)
+
+    return stat.uid == uv.getuid()
 end
 
 ---@return (string|nil),string?
@@ -244,8 +259,17 @@ end
 ---@param method string
 ---@return boolean?
 function Proj.set_pwd(dir, method)
-    if dir == nil then
+    if not is_type('string', dir) then
         return false
+    end
+
+    if not Config.options.allow_different_owners then
+        local valid = Proj.verify_owner(dir)
+
+        if not valid then
+            vim.notify('Project root is owned by a different user, aborting `cd`', WARN)
+            return false
+        end
     end
 
     Proj.last_project = dir
