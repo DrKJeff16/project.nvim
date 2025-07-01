@@ -62,7 +62,7 @@ that provides superior project management.
 - [ ] Extend Telescope picker configuration
     - [X] Fix `file_browser` mapping (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/107)**)
     - [ ] Add `--open-buffers` option ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/155))
-- [ ] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
+- [X] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
 - [ ] Disable per filetype ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/135), **_low priority_**)
 
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
