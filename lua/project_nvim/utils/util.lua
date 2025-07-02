@@ -151,10 +151,10 @@ function Util.format_per_type(t, data, sep, constraints)
 
     for k, v in next, data do
         if is_type('number', k) then
-            k = tostring(k)
+            k = '[' .. tostring(k) .. ']'
         end
 
-        msg = msg .. string.format('%s\n[%s]: `', sep, k)
+        msg = msg .. string.format('%s\n%s: `', sep, k)
 
         if not is_type('string', v) then
             msg = msg .. string.format('%s', Util.format_per_type(type(v), v, sep))
