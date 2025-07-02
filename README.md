@@ -2,12 +2,14 @@
 <h1 id="project-nvim">project.nvim</h1>
 </div>
 
-<!--
-NOTE: Original author: https://github.com/ahmedkhalf
--->
+<!-- NOTE: Original author: https://github.com/ahmedkhalf -->
 
 `project.nvim` is an all-in-one [Neovim](https://github.com/neovim/neovim) plugin written in Lua
 that provides superior project management.
+
+This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf).
+
+**_Looking for other maintainers in case I'm unable to keep this repo up to date_**
 
 ---
 
@@ -228,6 +230,7 @@ require('project_nvim').setup({
     -- ---
     -- Default: `true`
     -- ---
+    ---@type boolean
     allow_different_owners = true,
 
     -- Show hidden files in telescope
