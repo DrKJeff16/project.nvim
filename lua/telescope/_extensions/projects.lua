@@ -46,7 +46,7 @@ local function create_finder()
     return Finders.new_table({
         results = results,
         entry_maker = function(entry)
-            local name = vim.fn.fnamemodify(entry, ':t')
+            local name = vim.fn.fnamemodify(entry, ':h:t') .. '/' .. vim.fn.fnamemodify(entry, ':t')
             return {
                 display = make_display,
                 name = name,
@@ -93,6 +93,7 @@ local function browse_project_files(prompt_bufnr)
     local opt = {
         cwd = project_path,
         hidden = Config.options.show_hidden,
+        hide_parent_dir = true,
     }
     if cd_successful then
         -- Source: https://github.com/ahmedkhalf/project.nvim/pull/107
@@ -161,6 +162,7 @@ local function projects(opts)
         finder = create_finder(),
         previewer = false,
         sorter = telescope_config.generic_sorter(opts),
+
         ---@param prompt_bufnr integer
         ---@param map fun(mode: string, lhs: string, rhs: string|fun())
         attach_mappings = function(prompt_bufnr, map)
@@ -179,7 +181,9 @@ local function projects(opts)
             map('i', '<c-w>', change_working_directory)
 
             local on_project_selected = function() find_project_files(prompt_bufnr) end
+
             Actions.select_default:replace(on_project_selected)
+
             return true
         end,
     }):find()
