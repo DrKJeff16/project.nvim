@@ -89,6 +89,16 @@ function Health.setup_check()
 
     if setup_called then
         health.ok("`require('project_nvim').setup()` has been called")
+
+        if Util.is_windows() then
+            health.warn(
+                string.format(
+                    '%s\n\n\t%s',
+                    'Running on Windows. Issues might occur.',
+                    'Please report any issues to the maintainers'
+                )
+            )
+        end
     else
         health.error("`require('project_nvim').setup()` has not been called!")
     end
