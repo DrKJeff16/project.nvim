@@ -11,13 +11,18 @@
 ---|'userdata'
 
 ---@class Project.Utils.Util
---- Check whether `data` is of type `t` or not
+-- Check whether `data` is of type `t` or not
 ---@field is_type fun(t: Project.Utils.Util.AllTypes, data: any): boolean
---- Get rid of all duplicates in input table.
---- If table is empty, just returns it
+-- Get rid of all duplicates in input table
+--
+-- If table is empty, just returns it
 ---@field dedup fun(T: table|string[]): table|string[]
---- Check if module `mod` is available
+-- Check if module `mod` is available
 ---@field mod_exists fun(mod: string): boolean
+-- Reverse a table
+--
+-- If table is empty, return it
+---@field reverse fun(T: table): table
 ---@field format_per_type fun(t: 'number'|'string'|'table'|'boolean', data: number|string|table|boolean, sep: string?, constraints: string[]?): string?,boolean?
 
 local ERROR = vim.log.levels.ERROR
@@ -153,6 +158,26 @@ function Util.format_per_type(t, data, sep, constraints)
     end
 
     return msg
+end
+
+---@param T table
+---@return table
+function Util.reverse(T)
+    if not Util.is_type('table', T) then
+        error('project_nvim.utils.util.reverse: Arg is not a table', ERROR)
+    end
+
+    if empty(T) then
+        return T
+    end
+
+    local len = #T
+
+    for i = 1, math.floor(len / 2) do
+        T[i], T[len - i + 1] = T[len - i + 1], T[i]
+    end
+
+    return T
 end
 
 return Util
