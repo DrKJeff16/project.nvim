@@ -63,11 +63,12 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
 - [X] Fix bug with history not working
 - [X] `vim.health` integration, AKA `:checkhealth project_nvim`
 - [X] Extend API
+- [X] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
     - [X] Expose `project_nvim.project.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
 - [ ] Extend Telescope picker configuration
     - [X] Fix `file_browser` mapping (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/107)**)
+    - [X] Add option to control picker sorting order ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/140))
     - [ ] Add `--open-buffers` option ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/155), **_low priority_**)
-- [X] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
 - [ ] Disable per filetype ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/135), **_low priority_**)
 
 <div align="right"><a href="#project-nvim">Go To Top</a></div>
