@@ -63,7 +63,7 @@ function Proj.find_lsp_root()
         ---@diagnostic disable-next-line:undefined-field
         local filetypes = client.config.filetypes -- For whatever reason this field is not declared in the type...
 
-        if type(filetypes) ~= 'table' or vim.tbl_isempty(filetypes) then
+        if not is_type('table', filetypes) or vim.tbl_isempty(filetypes) then
             goto continue
         end
 
