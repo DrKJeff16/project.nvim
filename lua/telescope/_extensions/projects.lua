@@ -41,7 +41,9 @@ end
 local function create_finder()
     local results = History.get_recent_projects()
 
-    results = reverse(vim.deepcopy(results))
+    if Config.options.telescope.sort == 'newest' then
+        results = reverse(vim.deepcopy(results))
+    end
 
     return Finders.new_table({
         results = results,

@@ -1,5 +1,8 @@
 ---@diagnostic disable:missing-fields
 
+---@class Project.Config.Options.Telescope
+---@field sort? 'oldest'|'newest'
+
 ---@class Project.Config.Options
 -- If `true` your root directory won't be changed automatically,
 -- so you have the option to manually do so using `:ProjectRoot` command.
@@ -82,6 +85,7 @@
 -- Default: `true`
 -- ---
 ---@field allow_different_owners? boolean
+---@field telescope? Project.Config.Options.Telescope
 
 ---@class Project.Config
 ---@field defaults Project.Config.Options
@@ -135,6 +139,10 @@ Config.defaults = {
     },
 
     allow_different_owners = true,
+
+    telescope = {
+        sort = 'newest',
+    },
 
     ignore_lsp = {},
     exclude_dirs = {},
