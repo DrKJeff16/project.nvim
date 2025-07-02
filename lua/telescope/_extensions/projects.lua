@@ -2,6 +2,7 @@ local Util = require('project_nvim.utils.util')
 
 local mod_exists = Util.mod_exists
 local is_type = Util.is_type
+local reverse = Util.reverse
 
 if not mod_exists('telescope') then
     return
@@ -26,24 +27,21 @@ local Config = require('project_nvim.config')
 -- Actions
 ----------
 
----@return table
-local function create_finder()
-    local results = History.get_recent_projects()
-
-    local len = #results
-
-    -- Reverse results
-    for i = 1, math.floor(len / 2) do
-        results[i], results[len - i + 1] = results[len - i + 1], results[i]
-    end
-
+---@param entry table
+local function make_display(entry)
     local displayer = Entry_display.create({
         separator = ' ',
         items = { { width = 30 }, { remaining = true } },
     })
 
-    ---@param entry table
-    local function make_display(entry) return displayer({ entry.name, { entry.value, 'Comment' } }) end
+    return displayer({ entry.name, { entry.value, 'Comment' } })
+end
+
+---@return table
+local function create_finder()
+    local results = History.get_recent_projects()
+
+    results = reverse(vim.deepcopy(results))
 
     return Finders.new_table({
         results = results,
