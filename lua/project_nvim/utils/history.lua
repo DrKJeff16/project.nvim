@@ -22,8 +22,7 @@
 ---|"xw"
 ---|"xw+"
 
----@class ProjParam
----@field value string
+---@alias ProjParam { ['value']: string }
 
 ---@class Project.Utils.History
 ---@field recent_projects (string|nil)[]|nil
@@ -38,8 +37,10 @@
 local Util = require('project_nvim.utils.util')
 local Path = require('project_nvim.utils.path')
 local uv = vim.uv or vim.loop
-local is_windows = (uv.os_uname().version:match('Windows') ~= nil or vim.fn.has('wsl')) -- Thanks to `folke` for
--- that code
+local is_windows = (uv.os_uname().version:match('Windows') ~= nil or vim.fn.has('wsl')) -- Thanks to `folke`
+
+local ERROR = vim.log.levels.ERROR
+local INFO = vim.log.levels.INFO
 
 ---@type Project.Utils.History
 local History = {}
@@ -126,7 +127,7 @@ function History.delete_project(project)
         end
     end
 
-    History.recent_projects = vim.deepcopy(new_tbl)
+    History.recent_projects = new_tbl
 end
 
 ---@param history_data string
@@ -200,7 +201,7 @@ function History:sanitize_projects()
         tbl = self.session_projects
     end
 
-    tbl = delete_duplicates(tbl)
+    tbl = delete_duplicates(vim.deepcopy(tbl))
 
     ---@type string[]
     local real_tbl = {}
@@ -225,7 +226,7 @@ function History.write_projects_to_history()
     if file == nil then
         vim.notify(
             '(project_nvim.utils.history.write_projects_to_history): Unable to write to file!',
-            vim.log.levels.ERROR
+            ERROR
         )
         return
     end
