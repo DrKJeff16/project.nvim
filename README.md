@@ -233,6 +233,20 @@ require('project_nvim').setup({
     ---@type boolean
     allow_different_owners = true,
 
+    -- Table of options used for the telescope picker
+    ---@class Project.Config.Options.Telescope
+    -- Determines whether the newest projects come first in the
+    -- telescope picker, or the oldest
+    -- ---
+    -- Default: `'newest'`
+    -- ---
+    ---@field sort? 'oldest'|'newest'
+    telescope = {
+        sort = 'newest',
+    },
+
+    -- Table of options used for the telescope picker
+
     -- Show hidden files in telescope
     ---@type boolean
     show_hidden = false,

@@ -1,6 +1,12 @@
 ---@diagnostic disable:missing-fields
 
+-- Table of options used for the telescope picker
 ---@class Project.Config.Options.Telescope
+-- Determines whether the newest projects come first in the
+-- telescope picker, or the oldest
+-- ---
+-- Default: `'newest'`
+-- ---
 ---@field sort? 'oldest'|'newest'
 
 ---@class Project.Config.Options
@@ -85,6 +91,7 @@
 -- Default: `true`
 -- ---
 ---@field allow_different_owners? boolean
+-- Table of options used for the telescope picker
 ---@field telescope? Project.Config.Options.Telescope
 
 ---@class Project.Config
