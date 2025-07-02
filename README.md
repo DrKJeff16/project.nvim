@@ -62,8 +62,8 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
 - [X] Fix deprecated `vim.lsp` calls (**_CRITICAL_**)
 - [X] Fix bug with history not working
 - [X] `vim.health` integration, AKA `:checkhealth project_nvim`
-- [X] Extend API
 - [X] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
+- [X] Extend API
     - [X] Expose `project_nvim.project.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
 - [ ] Extend Telescope picker configuration
     - [X] Fix `file_browser` mapping (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/107)**)
