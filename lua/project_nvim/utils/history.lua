@@ -40,7 +40,6 @@ local uv = vim.uv or vim.loop
 local is_windows = (uv.os_uname().version:match('Windows') ~= nil or vim.fn.has('wsl')) -- Thanks to `folke`
 
 local ERROR = vim.log.levels.ERROR
-local INFO = vim.log.levels.INFO
 
 ---@type Project.Utils.History
 local History = {}
@@ -237,7 +236,7 @@ function History.write_projects_to_history()
     local len_res = #res
     ---@type string[]
     local tbl_out
-    if #res > 100 then
+    if len_res > 100 then
         tbl_out = vim.list_slice(res, len_res - 100, len_res)
     else
         tbl_out = res
@@ -246,7 +245,7 @@ function History.write_projects_to_history()
     -- Transform table to string
     local out = ''
     for _, v in next, tbl_out do
-        out = out .. v .. '\n'
+        out = string.format('%s%s\n', out, v)
     end
 
     -- Write string out to file and close
