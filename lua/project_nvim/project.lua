@@ -408,9 +408,17 @@ function Proj:init()
         end
     end
 
-    -- TODO: (DrKJeff16) Rewrite this statement using Lua
-    vim.cmd('command! ProjectRoot lua require("project_nvim.project").on_buf_enter()')
-    vim.cmd('command! AddProject lua require("project_nvim.project").add_project_manually()')
+    vim.api.nvim_create_user_command(
+        'ProjectRoot',
+        'lua require("project_nvim.project").on_buf_enter()',
+        { bang = true }
+    )
+
+    vim.api.nvim_create_user_command(
+        'AddProject',
+        'lua require("project_nvim.project").add_project_manually()',
+        { bang = true }
+    )
 
     table.insert(autocmds, {
         'VimLeavePre',
