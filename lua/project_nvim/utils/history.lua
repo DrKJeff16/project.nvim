@@ -37,9 +37,9 @@
 local Util = require('project_nvim.utils.util')
 local Path = require('project_nvim.utils.path')
 local uv = vim.uv or vim.loop
-local is_windows = (uv.os_uname().version:match('Windows') ~= nil or vim.fn.has('wsl')) -- Thanks to `folke`
 
 local ERROR = vim.log.levels.ERROR
+local is_windows = Util.is_windows()
 
 ---@type Project.Utils.History
 local History = {}

@@ -11,6 +11,8 @@
 ---|'userdata'
 
 ---@class Project.Utils.Util
+-- Return whether nvim is running on Windows/WSL
+---@field is_windows fun(): boolean
 -- Check whether `data` is of type `t` or not
 ---@field is_type fun(t: Project.Utils.Util.AllTypes, data: any): boolean
 -- Get rid of all duplicates in input table
@@ -25,12 +27,19 @@
 ---@field reverse fun(T: table): table
 ---@field format_per_type fun(t: 'number'|'string'|'table'|'boolean', data: number|string|table|boolean, sep: string?, constraints: string[]?): string?,boolean?
 
+local uv = vim.uv
 local ERROR = vim.log.levels.ERROR
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
 
 ---@type Project.Utils.Util
 local Util = {}
+
+-- Return whether nvim is running on Windows/WSL
+---@return boolean
+function Util.is_windows()
+    return uv.os_uname().version:match('Windows') ~= nil or vim.fn.has('wsl') -- Thanks to `folke`
+end
 
 ---@param t Project.Utils.Util.AllTypes
 ---@param data any

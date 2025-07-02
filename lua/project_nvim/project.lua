@@ -7,9 +7,11 @@ local Path = require('project_nvim.utils.path')
 local Util = require('project_nvim.utils.util')
 
 local is_type = Util.is_type
+local is_windows = Util.is_windows
 
 local uv = vim.uv or vim.loop
 local WARN = vim.log.levels.WARN
+local ERROR = vim.log.levels.ERROR
 
 local in_tbl = vim.tbl_contains
 
@@ -80,13 +82,15 @@ end
 ---@param dir string
 ---@return boolean
 function Proj.verify_owner(dir)
-    if vim.fn.has('win32') == 1 then
+    if is_windows() then
         return true
     end
 
     local stat = uv.fs_stat(dir)
 
-    assert(stat ~= nil)
+    if stat == nil then
+        error('project_nvim.project.verify_owner: Directory unreachable', ERROR)
+    end
 
     return stat.uid == uv.getuid()
 end
@@ -94,7 +98,7 @@ end
 ---@return (string|nil),string?
 function Proj.find_pattern_root()
     local search_dir = vim.fn.expand('%:p:h', true)
-    if vim.fn.has('win32') > 0 then
+    if is_windows() then
         search_dir = search_dir:gsub('\\', '/')
     end
 
