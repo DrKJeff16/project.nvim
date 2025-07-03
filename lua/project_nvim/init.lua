@@ -30,10 +30,7 @@ Project.get_project_root = require('project_nvim.project').get_project_root
 
 Project.get_history_paths = require('project_nvim.project').get_history_paths
 
----@return table|string[]
-function Project.get_recent_projects()
-    return require('project_nvim.utils.history').get_recent_projects()
-end
+Project.get_recent_projects = require('project_nvim.utils.history').get_recent_projects
 
 ---@return Project.Config.Options|nil
 function Project.get_config()
