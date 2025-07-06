@@ -21,9 +21,8 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
 
 <!-- ![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png) -->
 
-> Telescope Integration
-
-![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
+* Telescope Integration
+  ![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
 
 ---
 
