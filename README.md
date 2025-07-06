@@ -4,16 +4,25 @@
 
 <!-- NOTE: Original author: https://github.com/ahmedkhalf -->
 
+<div align="center">
+
+**_Looking for other maintainers in case I'm unable to keep this repo up to date_**
+
+</div>
+
+---
+
 `project.nvim` is an all-in-one [Neovim](https://github.com/neovim/neovim) plugin written in Lua
 that provides superior project management.
 
 This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf).
 
-**_Looking for other maintainers in case I'm unable to keep this repo up to date_**
-
 ---
 
 <!-- ![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png) -->
+
+> Telescope Integration
+
 ![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
 
 ---
