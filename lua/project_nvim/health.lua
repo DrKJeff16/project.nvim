@@ -140,8 +140,8 @@ function Health.check()
     if Health.setup_check() then
         Health.project_check()
         Health.history_check()
-        Health.options_check()
         Health.telescope_check()
+        Health.options_check()
     end
 end
 
