@@ -119,7 +119,7 @@ function Proj.find_pattern_root()
         last_dir_cache = file_dir
         curr_dir_cache = {}
 
-        ---@type uv_fs_t|nil
+        ---@type uv.uv_fs_t|nil
         local dir = uv.fs_scandir(file_dir)
         if dir == nil then
             return
@@ -242,7 +242,7 @@ function Proj.attach_to_lsp()
     -- Backup old `start_client` function
     local _start_client = vim.lsp.start_client
 
-    ---@type fun(lsp_config: vim.lsp.ClientConfig)
+    ---@type fun(lsp_config: vim.lsp.ClientConfig): integer?,string?
     vim.lsp.start_client = function(lsp_config)
         if lsp_config.on_attach == nil then
             lsp_config.on_attach = on_attach_lsp
