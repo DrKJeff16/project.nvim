@@ -1,14 +1,12 @@
 <div align="center">
-<h1 id="project-nvim">project.nvim</h1>
-</div>
 
-<!-- NOTE: Original author: https://github.com/ahmedkhalf -->
-
-<div align="center">
+# project.nvim
 
 **_Looking for other maintainers in case I'm unable to keep this repo up to date_**
 
 </div>
+
+<!-- NOTE: Original author: https://github.com/ahmedkhalf -->
 
 ---
 
@@ -23,7 +21,8 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
 
 * Checkhealth Support (`:checkhealth project_nvim`)
   ![Checkhealth Support](https://github.com/user-attachments/assets/6e2d91c8-c48a-48a7-b630-23d187189faf)
-* Telescope Integration
+
+* Telescope Integration (`:Telescope project`)
   ![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
 
 ---
@@ -65,7 +64,11 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
 - [Telescope Integration](#telescope-integration) `:Telescope projects`
 - [`nvim-tree` integration](#nvim-tree-integration)
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 ## Roadmap
 
@@ -73,6 +76,7 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
 - [X] Fix bug with history not working
 - [X] `vim.health` integration, AKA `:checkhealth project_nvim`
 - [X] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
+- [ ] Add info for `:ProjectRoot` and `:AddProject` commands ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/133))
 - [X] Extend API
     - [X] Expose `project_nvim.project.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
 - [ ] Extend Telescope picker configuration
@@ -81,7 +85,11 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
     - [ ] Add `--open-buffers` option ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/155), **_low priority_**)
 - [ ] Disable per filetype ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/135), **_low priority_**)
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 ---
 
@@ -96,17 +104,19 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
 ---
 
 <div align="center">
-<b><ins>WARNING: DO NOT LAZY-LOAD THIS PLUGIN</ins></b>
+
+**_WARNING: DO NOT LAZY-LOAD THIS PLUGIN_**
 
 The cwd might not update otherwise.
+
 </div>
 
 ---
 
-Install the plugin with your preferred package manager:
-
 <h3 id="vim-plug">
-<a href="https://github.com/junegunn/vim-plug">vim-plug</a>
+
+[vim-plug](https://github.com/junegunn/vim-plug)
+
 </h3>
 
 ```vim
@@ -126,10 +136,16 @@ if has('nvim-0.11')
 endif
 ```
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 <h3 id="lazy-nvim">
-<a href="https://github.com/folke/lazy.nvim">lazy.nvim</a>
+
+[lazy.nvim](https://github.com/folke/lazy.nvim)
+
 </h3>
 
 ```lua
@@ -156,10 +172,16 @@ require('lazy').setup({
 })
 ```
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 <h3 id="pckr-nvim">
-<a href="https://github.com/lewis6991/pckr.nvim">pckr.nvim</a>
+
+[pckr.nvim](https://github.com/lewis6991/pckr.nvim)
+
 </h3>
 
 ```lua
@@ -183,7 +205,11 @@ if vim.fn.has('nvim-0.11') == 1 then
 end
 ```
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 ---
 
@@ -284,7 +310,11 @@ require('project_nvim').setup({
 Even if you are pleased with the defaults, please note that `setup()` must be
 called for the plugin to start.
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 ### Pattern Matching
 
@@ -317,10 +347,16 @@ as `vim-rooter`, but for your convenience here come some examples:
 
 **NOTE**: <ins>Make sure to put your pattern exclusions first, and then the patterns you do want included.</ins>
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 <h3 id="nvim-tree-integration">
-<a href="https://github.com/nvim-tree/nvim-tree.lua">nvim-tree.lua</a> Integration
+
+[`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) Integration
+
 </h3>
 
 <ins>Make sure these flags are enabled to support [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua):</ins>
@@ -336,10 +372,16 @@ require('nvim-tree').setup({
 })
 ```
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 <h3 id="telescope-integration">
-<a href="https://github.com/nvim-telescope/telescope.nvim"><code>telescope.nvim</code></a> Integration
+
+[`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) Integration
+
 </h3>
 
 To enable [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) integration use the following
@@ -357,7 +399,11 @@ After that you can now call it from the command line:
 :Telescope projects
 ```
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 #### Telescope Projects Picker
 
@@ -367,7 +413,11 @@ To use the projects picker execute the following Lua code:
 require('telescope').extensions.projects.projects()
 ```
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 #### Telescope Mappings
 
@@ -382,14 +432,20 @@ require('telescope').extensions.projects.projects()
 | r           | \<C-r\>     | `recent_project_files`     |
 | w           | \<C-w\>     | `change_working_directory` |
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 ---
 
 ## API
 
 <h3 id="util">
-<code>project_nvim.utils.util</code>
+
+`project_nvim.utils.util`
+
 </h3>
 
 A set of utilities that get repeated across the board.
@@ -409,12 +465,18 @@ local ProjUtil = require('project_nvim.utils.util')
 See [`project_nvim/utils/util.lua`](./lua/project_nvim/utils/util.lua) for
 further reference.
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 ---
 
 <h3 id="get-project-root">
-<code>get_project_root()</code>
+
+`get_project_root()`
+
 </h3>
 
 The API now has [`project.lua`](./lua/project_nvim/project.lua)'s
@@ -425,10 +487,16 @@ The API now has [`project.lua`](./lua/project_nvim/project.lua)'s
 local root, lsp_or_method = require('project_nvim').get_project_root()
 ```
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 <h3 id="get-recent-projects">
-<code>get_recent_projects()</code>
+
+`get_recent_projects()`
+
 </h3>
 
 You can get a list of recent projects by running the code below:
@@ -445,10 +513,16 @@ vim.print(vim.inspect(recent_projects))
 
 Where `get_recent_projects()` returns either an empty table `{}` or a string array `{ '/path/to/project', ... }`
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 <h3 id="get-config">
-<code>get_config()</code>
+
+`get_config()`
+
 </h3>
 
 **If** `setup()` **has been called**, it returns a table containing the currently set options.
@@ -464,10 +538,16 @@ vim.notify(vim.inspect(config))
 vim.print(vim.inspect(config))
 ```
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 <h3 id="get-history-paths">
-<code>get_history_paths()</code>
+
+`get_history_paths()`
+
 </h3>
 
 If no valid args are passed to this function, it will return the following dictionary:
@@ -495,7 +575,11 @@ vim.print(get_history_paths('projectpath'))
 vim.print(get_history_paths('historyfile'))
 ```
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 ---
 
@@ -514,7 +598,11 @@ If you lack any permission for that directory, you can:
 * Delete that directory **(RECOMMENDED)**
 * Run `chmod 755 <project/path>`
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 ---
 
@@ -523,7 +611,11 @@ If you lack any permission for that directory, you can:
 - All pull requests are welcome
 - If you encounter bugs please open an issue
 
-<div align="right"><a href="#project-nvim">Go To Top</a></div>
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
 
 ---
 
@@ -533,4 +625,8 @@ If you lack any permission for that directory, you can:
 
 Also, thanks to the original creator, [ahmedkhalf](https://github.com/ahmedkhalf)!
 
-<div align="center"><a href="#project-nvim">Go To Top</a></div>
+<div align="center">
+
+[Go To Top](#project-nvim)
+
+</div>
