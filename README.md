@@ -42,16 +42,19 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
     3. [`telescope.nvim` Integration](#telescope-integration)
         1. [Telescope Projects Picker](#telescope-projects-picker)
         2. [Telescope Mappings](#telescope-mappings)
-5. [API](#api)
+5. [Manual Mode](#manual-mode)
+    1. [`:AddProject`](#addproject)
+    2. [`:ProjectRoot`](#projectroot)
+6. [API](#api)
     1. [`project_nvim.utils.util`](#util)
     2. [`get_project_root()`](#get-project-root)
     3. [`get_recent_projects()`](#get-recent-projects)
     4. [`get_config()`](#get-config)
     5. [`get_history_paths()`](#get-history-paths)
-6. [Troubleshooting](#troubleshooting)
+7. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
-7. [Contributing](#contributing)
-8. [Addendum](#addendum)
+8. [Contributing](#contributing)
+9. [Addendum](#addendum)
 
 ---
 
@@ -76,7 +79,7 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
 - [X] Fix bug with history not working
 - [X] `vim.health` integration, AKA `:checkhealth project_nvim`
 - [X] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
-- [ ] Add info for `:ProjectRoot` and `:AddProject` commands ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/133))
+- [X] Add info for `:ProjectRoot` and `:AddProject` commands ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/133))
 - [X] Extend API
     - [X] Expose `project_nvim.project.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
 - [ ] Extend Telescope picker configuration
@@ -431,6 +434,66 @@ require('telescope').extensions.projects.projects()
 | s           | \<C-s\>     | `search_in_project_files`  |
 | r           | \<C-r\>     | `recent_project_files`     |
 | w           | \<C-w\>     | `change_working_directory` |
+
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
+
+---
+
+## Manual Mode
+
+There are two user commands you can call from the cmdline:
+
+<h3 id="addproject">
+
+`:AddProject`
+
+</h3>
+
+This command is a manual hook to add to session projects, then
+subsequently `cd` to the current file's project directory
+(provided) it actually could.
+
+The command is essentially a wrapper for the following function:
+
+```vim
+" vimscript
+
+" `:AddProject` does the next line
+:lua require('project_nvim.project').add_project_manually()
+```
+
+See [_`project.lua`_](./lua/project_nvim/project.lua) for more info on `add_project_manually()`
+
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
+
+<h3 id="projectroot">
+
+`:ProjectRoot`
+
+</h3>
+
+This command is a manual hook to set the working directory to the current
+file's root, attempting to use any of the `setup()` detection methods
+set by the user.
+
+The command is essentially a wrapper for the following function:
+
+```vim
+" vimscript
+
+" `:ProjectRoot` does the next line
+:lua require('project_nvim.project').on_buf_enter()
+```
+
+See [_`project.lua`_](./lua/project_nvim/project.lua) for more info on `on_buf_enter()`
 
 <div align="right">
 
