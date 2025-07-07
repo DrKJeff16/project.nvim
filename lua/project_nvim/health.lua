@@ -99,6 +99,12 @@ function Health.setup_check()
                 )
             )
         end
+
+        if vim.fn.has('nvim-0.11') == 1 then
+            health.ok('nvim version is at least `v0.11`')
+        else
+            health.warn('nvim version is lower than `v0.11`!')
+        end
     else
         health.error("`require('project_nvim').setup()` has not been called!")
     end
