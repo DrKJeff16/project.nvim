@@ -25,14 +25,12 @@
 ---@alias ProjParam { ['value']: string }
 
 ---@class Project.Utils.History
--- Projects from previous neovim sessions
----@field recent_projects string[]|table|nil
--- Projects from current neovim session
+---@field recent_projects (string|nil)[]|nil
 ---@field session_projects string[]|table
 ---@field has_watch_setup boolean
 ---@field read_projects_from_history fun()
 ---@field write_projects_to_history fun()
----@field get_recent_projects fun(): table
+---@field get_recent_projects fun(): table|string[]
 ---@field delete_project fun(project: ProjParam)
 ---@field sanitize_projects fun(self: Project.Utils.History): string[]
 
@@ -46,12 +44,11 @@ local is_windows = Util.is_windows()
 ---@type Project.Utils.History
 local History = {}
 
--- Projects from previous neovim sessions
+-- projects from previous neovim sessions
 History.recent_projects = nil
 
--- Projects from current neovim session
+-- projects from current neovim session
 History.session_projects = {}
-
 History.has_watch_setup = false
 
 ---@param mode OpenMode
@@ -59,13 +56,14 @@ History.has_watch_setup = false
 ---@return integer|nil
 function History.open_history(mode, callback)
     local histfile = Path.historyfile
-    local flag = tonumber('644', 8)
 
     if callback ~= nil then -- async
-        Path.create_scaffolding(function(_, _) uv.fs_open(histfile, mode, flag, callback) end)
+        Path.create_scaffolding(
+            function(_, _) uv.fs_open(histfile, mode, tonumber('644', 8), callback) end
+        )
     else -- sync
         Path.create_scaffolding()
-        return uv.fs_open(histfile, mode, flag)
+        return uv.fs_open(histfile, mode, tonumber('644', 8))
     end
 end
 
