@@ -32,7 +32,7 @@
 ---@field write_projects_to_history fun()
 ---@field get_recent_projects fun(): table|string[]
 ---@field delete_project fun(project: ProjParam)
----@field sanitize_projects fun(self: Project.Utils.History): string[]
+---@field sanitize_projects fun(): string[]
 
 local Util = require('project_nvim.utils.util')
 local Path = require('project_nvim.utils.path')
@@ -187,17 +187,16 @@ function History.read_projects_from_history()
     end)
 end
 
----@param self Project.Utils.History
 ---@return string[] real_tbl
-function History:sanitize_projects()
+function History.sanitize_projects()
     ---@type string[]
     local tbl = {}
 
-    if self.recent_projects ~= nil then
-        vim.list_extend(tbl, self.recent_projects)
-        vim.list_extend(tbl, self.session_projects)
+    if History.recent_projects ~= nil then
+        vim.list_extend(tbl, History.recent_projects)
+        vim.list_extend(tbl, History.session_projects)
     else
-        tbl = self.session_projects
+        tbl = History.session_projects
     end
 
     tbl = delete_duplicates(vim.deepcopy(tbl))
@@ -215,7 +214,7 @@ end
 
 ---@return string[]
 function History.get_recent_projects()
-    return History:sanitize_projects()
+    return History.sanitize_projects()
 end
 
 function History.write_projects_to_history()
