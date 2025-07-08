@@ -11,14 +11,14 @@
 ---|'userdata'
 
 ---@class Project.Utils.Util
--- Return whether nvim is running on Windows/WSL
+-- Return whether nvim is running on Windows
 ---@field is_windows fun(): boolean
 -- Check whether `data` is of type `t` or not
 ---@field is_type fun(t: Project.Utils.Util.AllTypes, data: any): boolean
 -- Get rid of all duplicates in input table
 --
 -- If table is empty, just returns it
----@field dedup fun(T: table|string[]): table|string[]
+---@field dedup fun(T: table): table
 -- Check if module `mod` is available
 ---@field mod_exists fun(mod: string): boolean
 -- Reverse a table
@@ -67,7 +67,9 @@ end
 
 ---@param mod string
 ---@return boolean
-function Util.mod_exists(mod)
+function Util.mod_exists(
+    mod --[[@as string]]
+)
     local is_type = Util.is_type
 
     if not is_type('string', mod) or mod == '' then
@@ -79,8 +81,8 @@ function Util.mod_exists(mod)
     return ok
 end
 
----@param T table|string[]
----@return table|string[]
+---@param T table
+---@return table
 function Util.dedup(T)
     if not Util.is_type('table', T) then
         error(

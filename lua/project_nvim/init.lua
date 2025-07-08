@@ -6,20 +6,18 @@
 -- `project_nvim` module
 ---@class Project
 ---@field setup fun(options: table|Project.Config.Options?)
----@field get_recent_projects fun(): table|string[]
+---@field get_recent_projects fun(): table
 ---@field get_history_paths fun(path: ('datapath'|'projectpath'|'historyfile')?): string|HistoryPaths
 ---@field get_config fun(): Project.Config.Options|nil
 ---@field get_project_root fun(): (string?,string?)
-
-local Util = require('project_nvim.utils.util')
-
-local is_type = Util.is_type
 
 ---@type Project
 local Project = {}
 
 ---@param options? table|Project.Config.Options
 function Project.setup(options)
+    local is_type = require('project_nvim.utils.util').is_type
+
     options = is_type('table', options) and options or {}
 
     require('project_nvim.config').setup(options)

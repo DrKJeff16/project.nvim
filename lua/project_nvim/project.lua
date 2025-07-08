@@ -15,10 +15,7 @@ local ERROR = vim.log.levels.ERROR
 
 local in_tbl = vim.tbl_contains
 
----@class HistoryPaths
----@field datapath string
----@field projectpath string
----@field historyfile string
+---@alias HistoryPaths { ['datapath']: string, ['projectpath']: string, ['historyfile']: string }
 
 ---@class AutocmdTuple
 ---@field [1] string[]|string
