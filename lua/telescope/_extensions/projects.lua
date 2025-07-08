@@ -182,7 +182,9 @@ local function projects(opts)
             map('i', '<c-r>', recent_project_files)
             map('i', '<c-w>', change_working_directory)
 
-            local on_project_selected = function() find_project_files(prompt_bufnr) end
+            local on_project_selected = function()
+                find_project_files(prompt_bufnr)
+            end
 
             Actions.select_default:replace(on_project_selected)
 

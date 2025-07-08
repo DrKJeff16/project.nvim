@@ -58,9 +58,9 @@ function History.open_history(mode, callback)
     local histfile = Path.historyfile
 
     if callback ~= nil then -- async
-        Path.create_scaffolding(
-            function(_, _) uv.fs_open(histfile, mode, tonumber('644', 8), callback) end
-        )
+        Path.create_scaffolding(function(_, _)
+            uv.fs_open(histfile, mode, tonumber('644', 8), callback)
+        end)
     else -- sync
         Path.create_scaffolding()
         return uv.fs_open(histfile, mode, tonumber('644', 8))
@@ -214,7 +214,9 @@ function History:sanitize_projects()
 end
 
 ---@return string[]
-function History.get_recent_projects() return History:sanitize_projects() end
+function History.get_recent_projects()
+    return History:sanitize_projects()
+end
 
 function History.write_projects_to_history()
     -- Unlike read projects, write projects is synchronous

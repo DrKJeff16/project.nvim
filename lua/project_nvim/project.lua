@@ -141,7 +141,9 @@ function Proj.find_pattern_root()
     ---@param dir string
     ---@param identifier string
     ---@return boolean
-    local function is(dir, identifier) return dir:match('.*/(.*)') == identifier end
+    local function is(dir, identifier)
+        return dir:match('.*/(.*)') == identifier
+    end
 
     ---@param dir string
     ---@param identifier string
@@ -165,7 +167,9 @@ function Proj.find_pattern_root()
 
     ---@param dir string
     ---@param identifier string
-    local function child(dir, identifier) return is(get_parent(dir), identifier) end
+    local function child(dir, identifier)
+        return is(get_parent(dir), identifier)
+    end
 
     ---@param dir string
     ---@param identifier string
@@ -295,14 +299,17 @@ function Proj.set_pwd(dir, method)
         table.insert(History.session_projects, 1, dir)
     end
 
-    if vim.fn.getcwd() ~= dir then
+    local tab = vim.api.nvim_get_current_tabpage()
+    local win = vim.api.nvim_get_current_win()
+
+    if vim.fn.getcwd(win, tab) ~= dir then
         local scope_chdir = Config.options.scope_chdir
         if scope_chdir == 'global' then
             vim.api.nvim_set_current_dir(dir)
         elseif scope_chdir == 'tab' then
-            vim.cmd.tcd(dir)
+            vim.cmd('tcd ' .. dir)
         elseif scope_chdir == 'win' then
-            vim.cmd.lcd(dir)
+            vim.cmd('lcd ' .. dir)
         else
             return
         end
@@ -373,7 +380,7 @@ function Proj.on_buf_enter()
         return
     end
 
-    local current_dir = vim.fn.expand('%:p:h', true)
+    local current_dir = vim.fn.expand('%:p:h')
 
     if not Path.exists(current_dir) or Path.is_excluded(current_dir) then
         return
@@ -384,7 +391,7 @@ function Proj.on_buf_enter()
 end
 
 function Proj.add_project_manually()
-    local current_dir = vim.fn.expand('%:p:h', true)
+    local current_dir = vim.fn.expand('%:p:h')
     Proj.set_pwd(current_dir, 'manual')
 end
 
@@ -394,11 +401,11 @@ function Proj:init()
     local autocmds = {}
 
     -- Create the augroup, clear it
-    local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = false })
+    local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = true })
 
     if not Config.options.manual_mode then
         table.insert(autocmds, {
-            { 'VimEnter', 'BufEnter', 'WinEnter' },
+            { 'VimEnter', 'BufEnter', 'WinEnter', 'BufWinEnter' },
             {
                 pattern = '*',
                 group = augroup,

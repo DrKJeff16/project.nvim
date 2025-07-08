@@ -36,7 +36,9 @@ local Util = {}
 
 -- Return whether nvim is running on Windows/WSL
 ---@return boolean
-function Util.is_windows() return vim.fn.has('win32') == 1 end
+function Util.is_windows()
+    return vim.fn.has('win32') == 1
+end
 
 ---@param t Project.Utils.Util.AllTypes
 ---@param data any

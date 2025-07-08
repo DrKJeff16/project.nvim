@@ -46,7 +46,9 @@ end
 
 ---@param path string
 ---@return boolean
-function Path.exists(path) return vim.fn.empty(vim.fn.glob(path)) == 0 end
+function Path.exists(path)
+    return vim.fn.empty(vim.fn.glob(path)) == 0
+end
 
 function Path:init()
     local Config = require('project_nvim.config')

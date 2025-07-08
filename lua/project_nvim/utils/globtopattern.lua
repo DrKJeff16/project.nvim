@@ -40,7 +40,9 @@ function Glob.globtopattern(g)
     -- escape pattern char
     ---@param char string
     ---@return string
-    local function escape(char) return char:match('^%w$') and c or '%' .. c end
+    local function escape(char)
+        return char:match('^%w$') and c or '%' .. c
+    end
 
     -- TODO(DrKJeff16): Let's simplify this in the future
     -- Convert tokens at end of charset.
