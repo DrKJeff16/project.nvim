@@ -55,26 +55,44 @@ function Health.history_check()
 
     local Path = require('project_nvim.utils.path')
 
+    ---@class HistoryChecks
+    ---@field name 'datapath'|'projectpath'|'historyfile'
+    ---@field value string
+    ---@field type 'file'|'directory'
+
+    ---@type HistoryChecks[]
     local P = {
-        { 'datapath', Path.datapath, 'directory' },
-        { 'projectpath', Path.projectpath, 'directory' },
-        { 'historyfile', Path.historyfile, 'file' },
+        {
+            name = 'datapath',
+            type = 'directory',
+            value = Path.datapath,
+        },
+        {
+            name = 'projectpath',
+            type = 'directory',
+            value = Path.projectpath,
+        },
+        {
+            name = 'historyfile',
+            type = 'file',
+            value = Path.historyfile,
+        },
     }
 
     for _, v in next, P do
-        local stat = uv.fs_stat(v[2])
+        local stat = uv.fs_stat(v.value)
 
         if is_type('nil', stat) then
-            health.error(string.format('%s: `"%s"` is missing or not readable!', v[1], v[2]))
+            health.error(string.format('%s: `%s` is missing or not readable!', v.name, v.value))
             goto continue
         end
 
-        if stat.type ~= v[3] then
-            health.error(string.format('%s: `"%s"` is not a %s!', v[1], v[2], v[3]))
+        if stat.type ~= v.type then
+            health.error(string.format('%s: `%s` is not of type `%s`!', v.name, v.value, v.type))
             goto continue
         end
 
-        health.ok(string.format('%s: `"%s"`', v[1], v[2]))
+        health.ok(string.format('%s: `%s`', v.name, v.value))
 
         ::continue::
     end
@@ -121,7 +139,10 @@ function Health.project_check()
 
     if active and not empty(projects) then
         projects = dedup(vim.deepcopy(projects))
-        health.info('Session Projects:' .. format_per_type(type(projects), projects))
+
+        for k, v in next, projects do
+            health.info(string.format('`[%s]`: `%s`', tostring(k), v))
+        end
     else
         health.warn('No active session projects!')
     end
