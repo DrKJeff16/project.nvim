@@ -25,7 +25,7 @@ local in_tbl = vim.tbl_contains
 ---@field [2] vim.api.keyset.create_autocmd
 
 ---@class Project.Project
----@field init fun(self: Project.Project)
+---@field init fun()
 ---@field attached_lsp boolean
 ---@field last_project string?
 ---@field find_lsp_root fun(): (string?,string?)
@@ -420,8 +420,7 @@ function Proj.add_project_manually()
     Proj.set_pwd(current_dir, 'manual')
 end
 
----@param self Project.Project
-function Proj:init()
+function Proj.init()
     ---@type AutocmdTuple[]
     local autocmds = {}
 
@@ -435,12 +434,12 @@ function Proj:init()
                 pattern = '*',
                 group = augroup,
                 nested = true,
-                callback = self.on_buf_enter,
+                callback = Proj.on_buf_enter,
             },
         })
 
         if in_tbl(Config.options.detection_methods, 'lsp') then
-            self.attach_to_lsp()
+            Proj.attach_to_lsp()
         end
     end
 

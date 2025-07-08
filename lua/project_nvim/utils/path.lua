@@ -6,7 +6,7 @@ local DATAPATH = vim.fn.stdpath('data')
 ---@field datapath string
 ---@field projectpath string
 ---@field historyfile string
----@field init fun(self: Project.Utils.Path)
+---@field init fun()
 ---@field create_scaffolding fun(callback: (fun(err: string|nil, success: boolean|nil))?)
 ---@field is_excluded fun(dir: string): boolean
 ---@field exists fun(path: string): boolean
@@ -50,12 +50,12 @@ function Path.exists(path)
     return vim.fn.empty(vim.fn.glob(path)) == 0
 end
 
-function Path:init()
+function Path.init()
     local Config = require('project_nvim.config')
 
-    self.datapath = Config.options.datapath or DATAPATH
-    self.projectpath = string.format('%s/project_nvim', self.datapath) -- directory
-    self.historyfile = string.format('%s/project_history', self.projectpath) -- file
+    Path.datapath = Config.options.datapath or DATAPATH
+    Path.projectpath = string.format('%s/project_nvim', Path.datapath) -- directory
+    Path.historyfile = string.format('%s/project_history', Path.projectpath) -- file
 end
 
 return Path

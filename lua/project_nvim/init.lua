@@ -11,19 +11,10 @@
 ---@field get_config fun(): Project.Config.Options|nil
 ---@field get_project_root fun(): (string?,string?)
 
-local Util = require('project_nvim.utils.util')
-
-local is_type = Util.is_type
-
 ---@type Project
 local Project = {}
 
----@param options? table|Project.Config.Options
-function Project.setup(options)
-    options = is_type('table', options) and options or {}
-
-    require('project_nvim.config').setup(options)
-end
+Project.setup = require('project_nvim.config').setup
 
 -- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/112
 Project.get_project_root = require('project_nvim.project').get_project_root
