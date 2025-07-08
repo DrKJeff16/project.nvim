@@ -299,23 +299,48 @@ function Proj.set_pwd(dir, method)
         table.insert(History.session_projects, 1, dir)
     end
 
-    local tab = vim.api.nvim_get_current_tabpage()
-    local win = vim.api.nvim_get_current_win()
+    local silent = Config.options.silent_chdir
 
-    if vim.fn.getcwd(win, tab) ~= dir then
+    ---@type string
+    local msg = ''
+
+    if vim.fn.getcwd() ~= dir then
         local scope_chdir = Config.options.scope_chdir
+        local ok
+        local _
+
         if scope_chdir == 'global' then
-            vim.api.nvim_set_current_dir(dir)
+            ok, _ = pcall(vim.api.nvim_set_current_dir, dir)
+
+            if not silent then
+                msg = 'chdir to `' .. dir .. '`: '
+                msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
+            end
         elseif scope_chdir == 'tab' then
-            vim.cmd('tcd ' .. dir)
+            ok, _ = pcall(vim.cmd.tchdir, dir)
+
+            if not silent then
+                msg = 'tchdir to `' .. dir .. '`: '
+                msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
+            end
         elseif scope_chdir == 'win' then
-            vim.cmd('lcd ' .. dir)
+            ok, _ = pcall(vim.cmd.lchdir, dir)
+
+            if not silent then
+                msg = 'lchdir to `' .. dir .. '`: '
+                msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
+            end
         else
+            msg = 'INVALID value for `scope_chdir`. Aborting'
             return
         end
 
-        if not Config.options.silent_chdir then
+        if not silent then
             vim.notify(string.format('Set CWD to %s using %s\n', dir, method), vim.log.levels.INFO)
+
+            if msg ~= '' then
+                vim.notify(msg, WARN)
+            end
         end
     end
 
