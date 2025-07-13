@@ -1,12 +1,15 @@
-README.md @ahmedkhalf
+CONTRIBUTING.md @DrKJeff16
 .github/ @DrKJeff16
 .pre-commit-config.yaml @DrKJeff16
 .stylua.toml @DrKJeff16
-lua/telescope/_extensions/projects.lua @ahmedkhalf
-lua/project_nvim/init.lua @ahmedkhalf
+lua/project_nvim/utils/util.lua @DrKJeff16
 scripts/ @DrKJeff16
+
+README.md @ahmedkhalf
 lua/project_nvim/config.lua @ahmedkhalf
+lua/project_nvim/init.lua @ahmedkhalf
 lua/project_nvim/project.lua @ahmedkhalf
+lua/project_nvim/utils/globpattern.lua @ahmedkhalf
 lua/project_nvim/utils/history.lua @ahmedkhalf
-lua/project_nvim/globpattern.lua @ahmedkhalf
-lua/project_nvim/path.lua @ahmedkhalf
+lua/project_nvim/utils/path.lua @ahmedkhalf
+lua/telescope/_extensions/projects.lua @ahmedkhalf
