@@ -4,6 +4,7 @@ README.md @ahmedkhalf
 .stylua.toml @DrKJeff16
 lua/telescope/_extensions/projects.lua @ahmedkhalf
 lua/project_nvim/init.lua @ahmedkhalf
+scripts/ @DrKJeff16
 lua/project_nvim/config.lua @ahmedkhalf
 lua/project_nvim/project.lua @ahmedkhalf
 lua/project_nvim/utils/history.lua @ahmedkhalf
