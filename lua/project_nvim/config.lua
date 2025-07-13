@@ -1,7 +1,7 @@
 ---@diagnostic disable:missing-fields
 
 -- Table of options used for the telescope picker
----@class Project.Config.Options.Telescope
+---@class (exact) Project.Config.Options.Telescope
 -- Determines whether the newest projects come first in the
 -- telescope picker, or the oldest
 -- ---
@@ -107,22 +107,10 @@
 ---@field setup_called? boolean
 
 local Util = require('project_nvim.utils.util')
+local Glob = require('project_nvim.utils.globtopattern')
 
 local is_type = Util.is_type
-
----@param pattern string
----@return string
-local function pattern_exclude(pattern)
-    local globtopattern = require('project_nvim.utils.globtopattern').globtopattern
-
-    local HOME_EXPAND = vim.fn.expand('~')
-
-    if vim.startswith(pattern, '~/') then
-        pattern = string.format('%s/%s', HOME_EXPAND, pattern:sub(3, #pattern))
-    end
-
-    return globtopattern(pattern)
-end
+local pattern_exclude = Glob.pattern_exclude
 
 ---@type Project.Config
 local Config = {}

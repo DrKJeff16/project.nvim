@@ -3,11 +3,12 @@
 -- Credits for this module goes to: David Manura
 -- https://github.com/davidm/lua-glob-pattern
 
----@class Project.Utils.GlobPattern
+---@class (exact) Project.Utils.GlobPattern
 ---@field _TYPE string
 ---@field _NAME string
 ---@field _VERSION string
----@field globtopattern fun(g: string): (p: string)
+---@field globtopattern fun(g: string): (pattern: string)
+---@field pattern_exclude fun(pattern: string): string
 
 ---@type Project.Utils.GlobPattern
 local Glob = { _TYPE = 'module', _NAME = 'globtopattern', _VERSION = '0.2.1.20120406' }
@@ -17,9 +18,9 @@ local Glob = { _TYPE = 'module', _NAME = 'globtopattern', _VERSION = '0.2.1.2012
 --   http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html
 --   which cites POSIX 1003.2-1992, section B.6.
 ---@param g string
----@return string p
+---@return string pattern
 function Glob.globtopattern(g)
-    local p = '^' -- pattern being built
+    local pattern = '^'
     local i = 0 -- index in g
     local c = '' -- char at index i in g.
 
@@ -30,7 +31,7 @@ function Glob.globtopattern(g)
             i = i + 1
             c = g:sub(i, i)
             if c == '' then
-                p = '[^]'
+                pattern = '[^]'
                 return false
             end
         end
@@ -50,10 +51,10 @@ function Glob.globtopattern(g)
     local function charset_end()
         while true do
             if c == '' then
-                p = '[^]'
+                pattern = '[^]'
                 return false
             elseif c == ']' then
-                p = p .. ']'
+                pattern = pattern .. ']'
                 break
             else
                 if not unescape() then
@@ -63,28 +64,28 @@ function Glob.globtopattern(g)
                 i = i + 1
                 c = g:sub(i, i)
                 if c == '' then
-                    p = '[^]'
+                    pattern = '[^]'
                     return false
                 elseif c == '-' then
                     i = i + 1
                     c = g:sub(i, i)
                     if c == '' then
-                        p = '[^]'
+                        pattern = '[^]'
                         return false
                     elseif c == ']' then
-                        p = p .. escape(c1) .. '%-]'
+                        pattern = pattern .. escape(c1) .. '%-]'
                         break
                     else
                         if not unescape() then
                             break
                         end
-                        p = p .. escape(c1) .. '-' .. escape(c)
+                        pattern = pattern .. escape(c1) .. '-' .. escape(c)
                     end
                 elseif c == ']' then
-                    p = p .. escape(c1) .. ']'
+                    pattern = pattern .. escape(c1) .. ']'
                     break
                 else
-                    p = p .. escape(c1)
+                    pattern = pattern .. escape(c1)
                     i = i - 1 -- put back
                 end
             end
@@ -100,7 +101,7 @@ function Glob.globtopattern(g)
         i = i + 1
         c = g:sub(i, i)
         if c == '' or c == ']' then
-            p = '[^]'
+            pattern = '[^]'
             return false
         elseif c == '^' or c == '!' then
             i = i + 1
@@ -108,13 +109,13 @@ function Glob.globtopattern(g)
             if c == ']' then
             -- ignored
             else
-                p = p .. '[^'
+                pattern = pattern .. '[^'
                 if not charset_end() then
                     return false
                 end
             end
         else
-            p = p .. '['
+            pattern = pattern .. '['
             if not charset_end() then
                 return false
             end
@@ -127,12 +128,12 @@ function Glob.globtopattern(g)
         i = i + 1
         c = g:sub(i, i)
         if c == '' then
-            p = p .. '$'
+            pattern = pattern .. '$'
             break
         elseif c == '?' then
-            p = p .. '.'
+            pattern = pattern .. '.'
         elseif c == '*' then
-            p = p .. '.*'
+            pattern = pattern .. '.*'
         elseif c == '[' then
             if not charset() then
                 break
@@ -141,16 +142,28 @@ function Glob.globtopattern(g)
             i = i + 1
             c = g:sub(i, i)
             if c == '' then
-                p = p .. '\\$'
+                pattern = pattern .. '\\$'
                 break
             end
-            p = p .. escape(c)
+            pattern = pattern .. escape(c)
         else
-            p = p .. escape(c)
+            pattern = pattern .. escape(c)
         end
     end
 
-    return p
+    return pattern
+end
+
+---@param pattern string
+---@return string
+function Glob.pattern_exclude(pattern)
+    local HOME_EXPAND = vim.fn.expand('~')
+
+    if vim.startswith(pattern, '~/') then
+        pattern = string.format('%s/%s', HOME_EXPAND, pattern:sub(3, #pattern))
+    end
+
+    return Glob.globtopattern(pattern)
 end
 
 return Glob
