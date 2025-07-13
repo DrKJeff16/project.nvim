@@ -10,10 +10,11 @@
 
 ---
 
-`project.nvim` is an all-in-one [Neovim](https://github.com/neovim/neovim) plugin written in Lua
+`project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
 that provides superior project management.
 
-This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf).
+This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf).
+I will be maintaining this plugin for the foreseeable future.
 
 ---
 
@@ -54,7 +55,8 @@ This is a currently maintained fork of [ahmedkhalf/project.nvim](https://github.
 7. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
 8. [Contributing](#contributing)
-9. [Addendum](#addendum)
+9. [Credits](#credits)
+10. [Addendum](#addendum)
 
 ---
 
@@ -650,16 +652,19 @@ vim.print(get_history_paths('historyfile'))
 
 ### History File Not Created
 
-Make sure you have **read, write and access permissions** (`rwx`) for the `projectpath` directory.
+**If you're in a UNIX environment, make sure you have **read, write and access permissions**
+(`rwx`) for the `projectpath` directory.
 
 You can get the value of `projectpath` by running
 `:lua vim.print(require('project_nvim').get_history_paths('projectpath'))`
 in the cmdline.
 
-If you lack any permission for that directory, you can:
+The **default** value is `$XDG_DATA_HOME/nvim/project_nvim`
+
+If you lack the required permissions for that directory, you can either:
 
 * Delete that directory **(RECOMMENDED)**
-* Run `chmod 755 <project/path>`
+* Run `chmod 755 <project/path>` **(NOT SURE IF THIS WILL FIX)**
 
 <div align="right">
 
@@ -671,8 +676,25 @@ If you lack any permission for that directory, you can:
 
 ## Contributing
 
-- All pull requests are welcome
-- If you encounter bugs please open an issue
+<div align="center">
+
+**Please refer to [`CONTRIBUTING.md`](./CONTRIBUTING.md)**
+
+</div>
+
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
+
+---
+
+## Credits
+
+- [@ahmedkhalf](https://github.com/ahmedkhalf): The author of the plugin this is based from
+- [@jay-babu](https://github.com/jay-babu): Solved many issues in [their fork](https://github.com/jay-babu/project.nvim)
+  much earlier
 
 <div align="right">
 
@@ -686,7 +708,7 @@ If you lack any permission for that directory, you can:
 
 (DrKJeff16) Thanks for the support to this fork <3
 
-Also, thanks to the original creator, [ahmedkhalf](https://github.com/ahmedkhalf)!
+Also, thanks to the original creator, [@ahmedkhalf](https://github.com/ahmedkhalf)!
 
 <div align="center">
 
