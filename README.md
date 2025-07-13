@@ -82,13 +82,14 @@ I will be maintaining this plugin for the foreseeable future.
 - [X] `vim.health` integration, AKA `:checkhealth project_nvim`
 - [X] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
 - [X] Add info for `:ProjectRoot` and `:AddProject` commands ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/133))
+- [ ] Disable per filetype ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/135), **_low priority_**)
+- [ ] Finish [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - [X] Extend API
     - [X] Expose `project_nvim.project.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
 - [ ] Extend Telescope picker configuration
     - [X] Fix `file_browser` mapping (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/107)**)
     - [X] Add option to control picker sorting order ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/140))
     - [ ] Add `--open-buffers` option ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/155), **_low priority_**)
-- [ ] Disable per filetype ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/135), **_low priority_**)
 
 <div align="right">
 
