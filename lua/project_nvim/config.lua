@@ -85,8 +85,8 @@
 -- Default: `vim.fn.stdpath('data')`
 -- ---
 ---@field datapath? string
--- If `false`, it won't add a project if its root does not
--- match the current user **(UNIX only)**
+-- If `false`, it won't add a project if its root is not owned by the
+-- current nvim UID **(UNIX only)**
 -- ---
 -- Default: `true`
 -- ---
