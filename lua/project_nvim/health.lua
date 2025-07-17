@@ -13,6 +13,17 @@ local dedup = Util.dedup
 local format_per_type = Util.format_per_type
 local mod_exists = Util.mod_exists
 
+---@class Project.Health
+-- This is called when running `:checkhealth project_nvim`
+-- ---
+---@field check fun()
+---@field setup_check fun(): boolean
+---@field options_check fun()
+---@field history_check fun()
+---@field project_check fun()
+---@field telescope_check fun()
+
+---@type Project.Health
 local Health = {}
 
 function Health.options_check()
@@ -100,10 +111,9 @@ end
 
 ---@return boolean
 function Health.setup_check()
-    health.start('Setup')
+    local setup_called = require('project_nvim.config').setup_called or false
 
-    local setup_called = is_type('nil', require('project_nvim.config').setup_called) and false
-        or true
+    health.start('Setup')
 
     if setup_called then
         health.ok("`require('project_nvim').setup()` has been called")
@@ -161,8 +171,23 @@ function Health.telescope_check()
     end
 
     health.ok('Extension loaded')
+
+    local Opts = require('project_nvim.config').options
+
+    if not is_type('table', Opts.telescope) then
+        health.warn('`project_nvim` does not have telescope options set up')
+        return
+    end
+
+    if not vim.tbl_contains({ 'newest', 'oldest' }, Opts.telescope.sort) then
+        health.warn('Telescope setup option not configured correctly!')
+    end
+
+    health.ok(string.format("Sorting order: `'%s'`", Opts.telescope.sort))
 end
 
+-- This is called when running `:checkhealth project_nvim`
+-- ---
 function Health.check()
     if Health.setup_check() then
         Health.project_check()

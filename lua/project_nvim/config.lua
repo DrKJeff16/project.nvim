@@ -164,6 +164,8 @@ function Config.setup(options)
 
     Path.init()
     Proj.init()
+
+    Config.setup_called = true
 end
 
 return Config
