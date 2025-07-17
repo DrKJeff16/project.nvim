@@ -696,6 +696,7 @@ If you lack the required permissions for that directory, you can either:
 - [@ahmedkhalf](https://github.com/ahmedkhalf): The author of the plugin this is based from
 - [@jay-babu](https://github.com/jay-babu): Solved many issues in [their fork](https://github.com/jay-babu/project.nvim)
   much earlier
+- [@ldfwbebp](https://github.com/ldfwbebp): Integrated options for telescope picker
 - [@steinbrueckri](https://github.com/steinbrueckri): Thank you for your support!
 - [@gmelodie](https://github.com/gmelodie): Thank you for your support!
 
