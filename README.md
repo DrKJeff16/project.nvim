@@ -13,7 +13,7 @@
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
 that provides superior project management.
 
-This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf).
+This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
 I will be maintaining this plugin for the foreseeable future.
 
 ---
