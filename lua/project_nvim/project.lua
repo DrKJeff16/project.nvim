@@ -10,8 +10,9 @@ local is_type = Util.is_type
 local is_windows = Util.is_windows
 
 local uv = vim.uv or vim.loop
-local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
+local INFO = vim.log.levels.INFO
+local WARN = vim.log.levels.WARN
 
 local in_tbl = vim.tbl_contains
 
@@ -38,6 +39,7 @@ local in_tbl = vim.tbl_contains
 ---@field is_file fun(): boolean
 ---@field on_buf_enter fun()
 ---@field add_project_manually fun()
+---@field verify_owner fun(dir: string): boolean
 
 ---@type Project.Project
 local Proj = {}
@@ -246,18 +248,27 @@ function Proj.attach_to_lsp()
     -- Backup old `start_client` function
     local _start_client = vim.lsp.start_client
 
-    ---@type fun(lsp_config: vim.lsp.ClientConfig): integer?,string?
-    vim.lsp.start_client = function(lsp_config)
-        if lsp_config.on_attach == nil then
-            lsp_config.on_attach = on_attach_lsp
-        else
-            local _on_attach = lsp_config.on_attach
-            lsp_config.on_attach = function(client, bufnr)
+    ---@param config vim.lsp.ClientConfig
+    ---@return integer?
+    ---@return string?
+    vim.lsp.start_client = function(config)
+        if config.on_attach ~= nil then
+            ---@type fun(client: vim.lsp.Client, bufnr: integer)
+            local _on_attach = config.on_attach
+
+            ---@param client vim.lsp.Client
+            ---@param bufnr integer
+            config.on_attach = function(client, bufnr)
                 on_attach_lsp(client, bufnr)
                 _on_attach(client, bufnr)
             end
+        else
+            config.on_attach = on_attach_lsp
         end
-        return _start_client(lsp_config)
+
+        vim.notify('Ran Through project.nvim!', INFO)
+
+        return _start_client(config)
     end
 
     Proj.attached_lsp = true
