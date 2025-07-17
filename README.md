@@ -18,8 +18,6 @@ I will be maintaining this plugin for the foreseeable future.
 
 ---
 
-<!-- ![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png) -->
-
 * Checkhealth Support (`:checkhealth project_nvim`)
   ![Checkhealth Support](https://github.com/user-attachments/assets/6e2d91c8-c48a-48a7-b630-23d187189faf)
 
