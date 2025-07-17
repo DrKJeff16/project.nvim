@@ -1,7 +1,7 @@
 ---@diagnostic disable:missing-fields
 
 ---@module 'project_nvim.config'
----@module 'project_nvim.project'
+---@module 'project_nvim.api'
 
 -- `project_nvim` module
 ---@class Project
@@ -17,9 +17,9 @@ local Project = {}
 Project.setup = require('project_nvim.config').setup
 
 -- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/112
-Project.get_project_root = require('project_nvim.project').get_project_root
+Project.get_project_root = require('project_nvim.api').get_project_root
 
-Project.get_history_paths = require('project_nvim.project').get_history_paths
+Project.get_history_paths = require('project_nvim.api').get_history_paths
 
 Project.get_recent_projects = require('project_nvim.utils.history').get_recent_projects
 

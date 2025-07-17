@@ -25,7 +25,7 @@ local in_tbl = vim.tbl_contains
 ---@field [1] string[]|string
 ---@field [2] vim.api.keyset.create_autocmd
 
----@class Project.Project
+---@class Project.API
 ---@field init fun()
 ---@field attached_lsp boolean
 ---@field last_project string?
@@ -41,7 +41,7 @@ local in_tbl = vim.tbl_contains
 ---@field add_project_manually fun()
 ---@field verify_owner fun(dir: string): boolean
 
----@type Project.Project
+---@type Project.API
 local Proj = {}
 
 -- Internal states

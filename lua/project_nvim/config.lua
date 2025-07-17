@@ -160,10 +160,10 @@ function Config.setup(options)
     vim.opt.autochdir = false
 
     local Path = require('project_nvim.utils.path')
-    local Proj = require('project_nvim.project')
+    local API = require('project_nvim.api')
 
     Path.init()
-    Proj.init()
+    API.init()
 
     Config.setup_called = true
 end

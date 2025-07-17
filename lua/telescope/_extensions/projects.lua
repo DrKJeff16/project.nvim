@@ -20,7 +20,7 @@ local Entry_display = require('telescope.pickers.entry_display')
 local telescope_config = require('telescope.config').values
 
 local History = require('project_nvim.utils.history')
-local Project = require('project_nvim.project')
+local Api = require('project_nvim.api')
 local Config = require('project_nvim.config')
 
 ----------
@@ -72,7 +72,7 @@ local function change_working_directory(prompt_bufnr)
 
     local project_path = selected_entry.value
 
-    local cd_successful = Project.set_pwd(project_path, 'telescope')
+    local cd_successful = Api.set_pwd(project_path, 'telescope')
     return project_path, cd_successful
 end
 
