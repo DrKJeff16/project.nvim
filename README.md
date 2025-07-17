@@ -30,31 +30,28 @@ I will be maintaining this plugin for the foreseeable future.
 
 1. [Features](#features)
 2. [Roadmap](#roadmap)
-3. [Installation](#installation)
-    1. [Requirements](#requirements)
-    2. [`vim-plug`](#vim-plug)
-    3. [`lazy.nvim`](#lazy-nvim)
-    4. [`pckr.nvim`](#pckr-nvim)
-4. [Configuration](#configuration)
+3. [Requirements](#requirements)
+4. [Installation](#installation)
+5. [Configuration](#configuration)
     1. [Pattern Matching](#pattern-matching)
-    2. [`nvim-tree.lua` Integration](#nvim-tree-integration)
-    3. [`telescope.nvim` Integration](#telescope-integration)
+    2. [Nvim Tree Integration](#nvim-tree-integration)
+    3. [Telescope Integration](#telescope-integration)
         1. [Telescope Projects Picker](#telescope-projects-picker)
         2. [Telescope Mappings](#telescope-mappings)
-5. [Manual Mode](#manual-mode)
+6. [Manual Mode](#manual-mode)
     1. [`:AddProject`](#addproject)
     2. [`:ProjectRoot`](#projectroot)
-6. [API](#api)
+7. [API](#api)
     1. [`project_nvim.utils.util`](#util)
     2. [`get_project_root()`](#get-project-root)
     3. [`get_recent_projects()`](#get-recent-projects)
     4. [`get_config()`](#get-config)
     5. [`get_history_paths()`](#get-history-paths)
-7. [Troubleshooting](#troubleshooting)
+8. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
-8. [Contributing](#contributing)
-9. [Credits](#credits)
-10. [Addendum](#addendum)
+9. [Contributing](#contributing)
+10. [Credits](#credits)
+11. [Addendum](#addendum)
 
 ---
 
@@ -97,13 +94,11 @@ I will be maintaining this plugin for the foreseeable future.
 
 ---
 
-## Installation
-
-### Requirements
+## Requirements
 
 - Neovim >= 0.11.0
-- [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(optional)**
-- [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(optional)**
+- [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
+- [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(OPTIONAL)**
 
 ---
 
@@ -115,13 +110,12 @@ The cwd might not update otherwise.
 
 </div>
 
+## Installation
+
 ---
 
-<h3 id="vim-plug">
-
-[vim-plug](https://github.com/junegunn/vim-plug)
-
-</h3>
+<details>
+<summary><a href="https://github.com/junegunn/vim-plug">vim-plug</a></summary>
 
 ```vim
 if has('nvim-0.11')
@@ -140,17 +134,10 @@ if has('nvim-0.11')
 endif
 ```
 
-<div align="right">
+</details>
 
-[Go To Top](#project-nvim)
-
-</div>
-
-<h3 id="lazy-nvim">
-
-[lazy.nvim](https://github.com/folke/lazy.nvim)
-
-</h3>
+<details>
+<summary><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a></summary>
 
 ```lua
 require('lazy').setup({
@@ -158,7 +145,8 @@ require('lazy').setup({
         -- Other plugins
         {
             'DrKJeff16/project.nvim',
-            lazy = false,  -- WARN: IMPORTANT NOT TO LAZY-LOAD THIS PLUGIN
+            -- WARN: IMPORTANT NOT TO LAZY-LOAD THIS PLUGIN
+            lazy = false,
             dependencies = {
                 'nvim-lua/plenary.nvim',
                 'nvim-telescope/telescope.nvim',
@@ -176,17 +164,10 @@ require('lazy').setup({
 })
 ```
 
-<div align="right">
+</details>
 
-[Go To Top](#project-nvim)
-
-</div>
-
-<h3 id="pckr-nvim">
-
-[pckr.nvim](https://github.com/lewis6991/pckr.nvim)
-
-</h3>
+<details>
+<summary><a href="https://github.com/lewis6991/pckr.nvim">pckr.nvim</a></summary>
 
 ```lua
 if vim.fn.has('nvim-0.11') == 1 then
@@ -208,6 +189,8 @@ if vim.fn.has('nvim-0.11') == 1 then
     })
 end
 ```
+
+</details>
 
 <div align="right">
 
@@ -357,13 +340,9 @@ as `vim-rooter`, but for your convenience here come some examples:
 
 </div>
 
-<h3 id="nvim-tree-integration">
+### Nvim Tree Integration
 
-[`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) Integration
-
-</h3>
-
-<ins>Make sure these flags are enabled to support [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua):</ins>
+> Make sure these flags are enabled to support [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua):
 
 ```lua
 require('nvim-tree').setup({
@@ -382,11 +361,7 @@ require('nvim-tree').setup({
 
 </div>
 
-<h3 id="telescope-integration">
-
-[`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) Integration
-
-</h3>
+### Telescope Integration
 
 To enable [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) integration use the following
 code in your config:
@@ -395,6 +370,27 @@ code in your config:
 require('telescope').setup(...)
 -- Other stuff may come here...
 require('telescope').load_extension('projects')
+```
+
+Also you can configure the picker when calling `require('telescope').setup()`
+(CREDITS: @ldfwbebp https://github.com/ahmedkhalf/project.nvim/pull/160):
+
+```lua
+require('telescope').setup({
+    -- ...
+    extensions = {
+        projects = {
+            layout_strategy = "horizontal",
+            layout_config = {
+                anchor = "N",
+                height = 0.25,
+                width = 0.6,
+                prompt_position = "bottom",
+            },
+            prompt_prefix = "󱎸  ",
+        }
+    }
+})
 ```
 
 After that you can now call it from the command line:
