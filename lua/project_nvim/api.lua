@@ -30,12 +30,15 @@ local curr_buf = vim.api.nvim_get_current_buf
 ---@field init fun()
 ---@field attached_lsp boolean
 ---@field last_project string?
+---@field current_project string|nil
 ---@field find_lsp_root fun(): (string?,string?)
 ---@field find_pattern_root fun(): ((string|nil),string?)
 ---@field on_attach_lsp fun(client: vim.lsp.Client, bufnr: integer)
 ---@field attach_to_lsp fun()
 ---@field set_pwd fun(dir: string, method: string): boolean?
 ---@field get_project_root fun(): (string?,string?)
+-- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
+---@field get_current_project fun(): (string|nil)
 ---@field get_history_paths fun(path: ('datapath'|'projectpath'|'historyfile')?): string|HistoryPaths
 ---@field is_file fun(): boolean
 ---@field on_buf_enter fun(verbose: boolean?)
@@ -50,6 +53,7 @@ local Api = {}
 -- Internal states
 Api.attached_lsp = false
 Api.last_project = nil
+Api.current_project = nil
 
 ---@return string?
 ---@return string?
@@ -395,6 +399,14 @@ function Api.get_project_root()
     return nil
 end
 
+-- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
+---@return string|nil
+function Api.get_current_project()
+    local root_dir, _ = Api.get_project_root()
+
+    return root_dir ~= nil and root_dir:match('([^/]+)$') or nil
+end
+
 ---@return boolean
 function Api.is_file()
     local bufnr = curr_buf()
@@ -426,6 +438,7 @@ function Api.on_buf_enter(verbose)
     end
 
     local root, method = Api.get_project_root()
+    Api.current_project = root
 
     if verbose then
         vim.notify(string.format('Root: %s\nMethod: %s', root or 'NONE', method or 'NONE'), INFO)
