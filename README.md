@@ -11,7 +11,7 @@
 ---
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
-that provides superior project management.
+that provides a dynamic project management solution.
 
 This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
 I will be maintaining this plugin for the foreseeable future.
@@ -77,10 +77,11 @@ I will be maintaining this plugin for the foreseeable future.
 - [X] `vim.health` integration, AKA `:checkhealth project_nvim`
 - [X] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
 - [X] Add info for `:ProjectRoot` and `:AddProject` commands ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/133))
+- [X] Renamed `project.lua` to `api.lua`
 - [ ] Disable per filetype ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/135), **_low priority_**)
 - [ ] Finish [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - [X] Extend API
-    - [X] Expose `project_nvim.project.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
+    - [X] Expose `project_nvim.api.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
 - [ ] Extend Telescope picker configuration
     - [X] Fix `file_browser` mapping (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/107)**)
     - [X] Add option to control picker sorting order ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/140))
@@ -460,10 +461,10 @@ The command is essentially a wrapper for the following function:
 " vimscript
 
 " `:AddProject` does the next line
-:lua require('project_nvim.project').add_project_manually()
+:lua require('project_nvim.api').add_project_manually()
 ```
 
-See [_`project.lua`_](./lua/project_nvim/project.lua) for more info on `add_project_manually()`
+See [_`project_nvim/api.lua`_](./lua/project_nvim/api.lua) for more info on `add_project_manually()`
 
 <div align="right">
 
@@ -487,10 +488,10 @@ The command is essentially a wrapper for the following function:
 " vimscript
 
 " `:ProjectRoot` does the next line
-:lua require('project_nvim.project').on_buf_enter()
+:lua require('project_nvim.api').on_buf_enter()
 ```
 
-See [_`project.lua`_](./lua/project_nvim/project.lua) for more info on `on_buf_enter()`
+See [_`project_nvim/api.lua`_](./lua/project_nvim/api.lua) for more info on `on_buf_enter()`
 
 <div align="right">
 
@@ -502,6 +503,8 @@ See [_`project.lua`_](./lua/project_nvim/project.lua) for more info on `on_buf_e
 
 ## API
 
+The API can be found in ['lua/project_nvim/api.lua'](./lua/project_nvim/api.lua).
+
 <h3 id="util">
 
 `project_nvim.utils.util`
@@ -510,9 +513,7 @@ See [_`project.lua`_](./lua/project_nvim/project.lua) for more info on `on_buf_e
 
 A set of utilities that get repeated across the board.
 
-These utilities are in part inspired by my own utilities
-found in **[`Jnvim`](https://github.com/DrKJeff16/Jnvim)**, particularly
-the **[`User API`](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)**.
+> These utilities are in part inspired by my own utilities found in **[`Jnvim`](https://github.com/DrKJeff16/Jnvim)**, particularly the **[`User API`](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api) (WIP)**.
 
 You can import them the follow way:
 
@@ -539,7 +540,7 @@ further reference.
 
 </h3>
 
-The API now has [`project.lua`](./lua/project_nvim/project.lua)'s
+The API now has [`project_nvim/api.lua`](./lua/project_nvim/api.lua)'s
 `get_project_root()` function exposed:
 
 ```lua
