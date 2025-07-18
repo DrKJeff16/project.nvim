@@ -141,6 +141,19 @@ function Health.setup_check()
 end
 
 function Health.project_check()
+    health.start('Current Project')
+
+    local curr = require('project_nvim').current_project()
+    local msg = ''
+
+    if curr == nil then
+        msg = 'No current project'
+    else
+        msg = string.format('Current project: `%s`\n', curr)
+    end
+
+    health.info(msg)
+
     health.start('Active Sessions')
 
     local History = require('project_nvim.utils.history')
