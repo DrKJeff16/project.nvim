@@ -15,6 +15,7 @@ local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
 
 local in_tbl = vim.tbl_contains
+local curr_buf = vim.api.nvim_get_current_buf
 
 ---@class HistoryPaths
 ---@field datapath string
@@ -32,28 +33,30 @@ local in_tbl = vim.tbl_contains
 ---@field find_lsp_root fun(): (string?,string?)
 ---@field find_pattern_root fun(): ((string|nil),string?)
 ---@field on_attach_lsp fun(client: vim.lsp.Client, bufnr: integer)
----@field attach_to_lsp fun(): (integer?,string?)
+---@field attach_to_lsp fun()
 ---@field set_pwd fun(dir: string, method: string): boolean?
 ---@field get_project_root fun(): (string?,string?)
 ---@field get_history_paths fun(path: ('datapath'|'projectpath'|'historyfile')?): string|HistoryPaths
 ---@field is_file fun(): boolean
----@field on_buf_enter fun()
----@field add_project_manually fun()
+---@field on_buf_enter fun(verbose: boolean?)
+---@field add_project_manually fun(verbose: boolean?)
 ---@field verify_owner fun(dir: string): boolean
 
+local MODSTR = 'project_nvim.api'
+
 ---@type Project.API
-local Proj = {}
+local Api = {}
 
 -- Internal states
-Proj.attached_lsp = false
-Proj.last_project = nil
+Api.attached_lsp = false
+Api.last_project = nil
 
 ---@return string?
 ---@return string?
-function Proj.find_lsp_root()
+function Api.find_lsp_root()
     -- Get lsp client for current buffer
     -- Returns nil or string
-    local bufnr = vim.api.nvim_get_current_buf()
+    local bufnr = curr_buf()
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
     if next(clients) == nil then
@@ -83,7 +86,7 @@ end
 
 ---@param dir string
 ---@return boolean
-function Proj.verify_owner(dir)
+function Api.verify_owner(dir)
     if is_windows() then
         return true
     end
@@ -91,14 +94,14 @@ function Proj.verify_owner(dir)
     local stat = uv.fs_stat(dir)
 
     if stat == nil then
-        error('project_nvim.project.verify_owner: Directory unreachable', ERROR)
+        error(string.format('(%s.verify_owner): Directory unreachable', MODSTR), ERROR)
     end
 
     return stat.uid == uv.getuid()
 end
 
 ---@return (string|nil),string?
-function Proj.find_pattern_root()
+function Api.find_pattern_root()
     local search_dir = vim.fn.expand('%:p:h', true)
     if is_windows() then
         search_dir = search_dir:gsub('\\', '/')
@@ -234,20 +237,18 @@ end
 ---@param client vim.lsp.Client
 ---@param bufnr integer
 local function on_attach_lsp(client, bufnr)
-    Proj.on_buf_enter() -- Recalculate root dir after lsp attaches
+    Api.on_buf_enter() -- Recalculate root dir after lsp attaches
 end
 
--- WARN: (DrKJeff16) Honestly I'm not feeling good about this one, chief
----@return integer?
----@return string?
-function Proj.attach_to_lsp()
-    if Proj.attached_lsp then
+function Api.attach_to_lsp()
+    if Api.attached_lsp then
         return
     end
 
     -- Backup old `start_client` function
     local _start_client = vim.lsp.start_client
 
+    -- WARN: (DrKJeff16) Honestly I'm not feeling good about this one, chief
     ---@param config vim.lsp.ClientConfig
     ---@return integer?
     ---@return string?
@@ -271,27 +272,30 @@ function Proj.attach_to_lsp()
         return _start_client(config)
     end
 
-    Proj.attached_lsp = true
+    Api.attached_lsp = true
 end
 
 ---@param dir string
 ---@param method string
 ---@return boolean?
-function Proj.set_pwd(dir, method)
+function Api.set_pwd(dir, method)
     if not is_type('string', dir) then
         return false
     end
 
     if not Config.options.allow_different_owners then
-        local valid = Proj.verify_owner(dir)
+        local valid = Api.verify_owner(dir)
 
         if not valid then
-            vim.notify('Project root is owned by a different user, aborting `cd`', WARN)
+            vim.notify(
+                string.format('(%s.set_pwd): Project root is owned by a different user', MODSTR),
+                WARN
+            )
             return false
         end
     end
 
-    Proj.last_project = dir
+    Api.last_project = dir
 
     if not in_tbl(History.session_projects, dir) then
         table.insert(History.session_projects, dir)
@@ -313,54 +317,50 @@ function Proj.set_pwd(dir, method)
     local silent = Config.options.silent_chdir
 
     ---@type string
-    local msg = ''
+    local msg = string.format('(%s.set_pwd):', MODSTR)
 
-    if vim.fn.getcwd() ~= dir then
-        local scope_chdir = Config.options.scope_chdir
-        local ok
-        local _
-
-        if scope_chdir == 'global' then
-            ok, _ = pcall(vim.api.nvim_set_current_dir, dir)
-
-            if not silent then
-                msg = 'chdir to `' .. dir .. '`: '
-                msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
-            end
-        elseif scope_chdir == 'tab' then
-            ok, _ = pcall(vim.cmd.tchdir, dir)
-
-            if not silent then
-                msg = 'tchdir to `' .. dir .. '`: '
-                msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
-            end
-        elseif scope_chdir == 'win' then
-            ok, _ = pcall(vim.cmd.lchdir, dir)
-
-            if not silent then
-                msg = 'lchdir to `' .. dir .. '`: '
-                msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
-            end
-        else
-            msg = 'INVALID value for `scope_chdir`. Aborting'
-            return
-        end
-
-        if not silent then
-            vim.notify(string.format('Set CWD to %s using %s\n', dir, method), vim.log.levels.INFO)
-
-            if msg ~= '' then
-                vim.notify(msg, WARN)
-            end
-        end
+    if vim.fn.getcwd() == dir then
+        return true
     end
 
-    return true
+    local scope_chdir = Config.options.scope_chdir
+    local ok
+    local _
+
+    if scope_chdir == 'global' then
+        ok, _ = pcall(vim.api.nvim_set_current_dir, dir)
+
+        msg = silent and msg or string.format('%s chdir to `%s`: ', msg, dir)
+    elseif scope_chdir == 'tab' then
+        ok, _ = pcall(vim.cmd.tchdir, dir)
+
+        msg = silent and msg or string.format('%s tchdir to `%s`: ', msg, dir)
+    elseif scope_chdir == 'win' then
+        ok, _ = pcall(vim.cmd.lchdir, dir)
+
+        msg = silent and msg or string.format('%s lchdir to `%s`: ', msg, dir)
+    else
+        vim.notify(string.format('%s INVALID value for `scope_chdir`', msg), WARN)
+        return
+    end
+
+    msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
+
+    if not silent then
+        vim.notify(
+            string.format('(%s.set_pwd): Set CWD to %s using %s\n', MODSTR, dir, method),
+            INFO
+        )
+
+        if msg:sub(-6) == 'FAILED' then
+            vim.notify(msg, WARN)
+        end
+    end
 end
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|HistoryPaths
-function Proj.get_history_paths(path)
+function Api.get_history_paths(path)
     local valid = { 'datapath', 'projectpath', 'historyfile' }
 
     if is_type('string', path) and vim.tbl_contains(valid, path) then
@@ -376,16 +376,16 @@ end
 
 ---@return string?
 ---@return string?
-function Proj.get_project_root()
+function Api.get_project_root()
     -- returns project root, as well as method
     for _, detection_method in next, Config.options.detection_methods do
         if detection_method == 'lsp' then
-            local root, lsp_name = Proj.find_lsp_root()
+            local root, lsp_name = Api.find_lsp_root()
             if root ~= nil then
                 return root, string.format('"%s" lsp\n', lsp_name)
             end
         elseif detection_method == 'pattern' then
-            local root, method = Proj.find_pattern_root()
+            local root, method = Api.find_pattern_root()
             if root ~= nil then
                 return root, method
             end
@@ -396,8 +396,8 @@ function Proj.get_project_root()
 end
 
 ---@return boolean
-function Proj.is_file()
-    local bufnr = vim.api.nvim_get_current_buf()
+function Api.is_file()
+    local bufnr = curr_buf()
 
     local buf_type = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
 
@@ -411,8 +411,11 @@ function Proj.is_file()
     return false
 end
 
-function Proj.on_buf_enter()
-    if vim.v.vim_did_enter == 0 or not Proj.is_file() then
+---@param verbose? boolean
+function Api.on_buf_enter(verbose)
+    verbose = is_type('boolean', verbose) and verbose or false
+
+    if vim.v.vim_did_enter == 0 or not Api.is_file() then
         return
     end
 
@@ -422,16 +425,29 @@ function Proj.on_buf_enter()
         return
     end
 
-    local root, method = Proj.get_project_root()
-    Proj.set_pwd(root, method)
+    local root, method = Api.get_project_root()
+
+    if verbose then
+        vim.notify(string.format('Root: %s\nMethod: %s', root or 'NONE', method or 'NONE'), INFO)
+    end
+
+    Api.set_pwd(root, method)
 end
 
-function Proj.add_project_manually()
+---@param verbose? boolean
+function Api.add_project_manually(verbose)
+    verbose = is_type('boolean', verbose) and verbose or false
+
     local current_dir = vim.fn.expand('%:p:h')
-    Proj.set_pwd(current_dir, 'manual')
+
+    if verbose then
+        vim.notify(string.format('Attempting to process `%s`', current_dir), INFO)
+    end
+
+    Api.set_pwd(current_dir, 'manual')
 end
 
-function Proj.init()
+function Api.init()
     ---@type AutocmdTuple[]
     local autocmds = {}
 
@@ -445,26 +461,21 @@ function Proj.init()
                 pattern = '*',
                 group = augroup,
                 nested = true,
-                callback = Proj.on_buf_enter,
+                callback = Api.on_buf_enter,
             },
         })
 
         if in_tbl(Config.options.detection_methods, 'lsp') then
-            Proj.attach_to_lsp()
+            Api.attach_to_lsp()
         end
     end
 
-    vim.api.nvim_create_user_command(
-        'ProjectRoot',
-        'lua require("project_nvim.project").on_buf_enter()',
-        { bang = true }
-    )
-
-    vim.api.nvim_create_user_command(
-        'AddProject',
-        'lua require("project_nvim.project").add_project_manually()',
-        { bang = true }
-    )
+    vim.api.nvim_create_user_command('ProjectRoot', function()
+        Api.on_buf_enter(true)
+    end, { bang = true })
+    vim.api.nvim_create_user_command('AddProject', function()
+        Api.add_project_manually(true)
+    end, { bang = true })
 
     table.insert(autocmds, {
         'VimLeavePre',
@@ -482,4 +493,4 @@ function Proj.init()
     require('project_nvim.utils.history').read_projects_from_history()
 end
 
-return Proj
+return Api
