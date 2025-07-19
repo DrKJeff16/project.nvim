@@ -16,11 +16,8 @@ that provides a dynamic project management solution.
 This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
 I will be maintaining this plugin for the foreseeable future.
 
----
-
 * Checkhealth Support (`:checkhealth project_nvim`)
   ![Checkhealth Support](https://github.com/user-attachments/assets/10508903-6d95-443f-843c-f2ce4c7f7360)
-
 
 * Telescope Integration (`:Telescope project`)
   ![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
