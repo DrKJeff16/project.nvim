@@ -1,23 +1,24 @@
-<div align="center">
-
 # CONTRIBUTING
-
-</div>
 
 ## Table of Contents
 
 1. [What I Will Not Accept](#what-i-will-not-accept)
+2. [Recommendations](#recommendations)
+    1. [StyLua](#stylua)
+    2. [`pre-commit`](#pre-commit)
+3. [Code Annotations](#code-annotations)
 
 ---
 
 ## What I Will Not Accept
 
 - **UNCREDITED CODE**. If pulling from somewhere else, _**paste the reference URL in a comment**_
-- **NO LUA ANNOTATIONS**. Annotate your Lua code, follow [this reference](https://luals.github.io/wiki/annotations/)
-- **UNSIGNED COMMITS**. Read [this guide](https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key)
+- **NO LUA ANNOTATIONS**. See [Code Annotations](#code-annotations)
+- **MERGE COMMITS**. Favour `git rebase` instead
+- **UNSIGNED COMMITS**. Read this guide[^2]
   to sign your commits
-- **UNTESTED CHANGES** (if warranted). Make sure to test your changes before making a PR
-- **UNFORMATTED CODE**. Run `stylua` in the root of the repository (`stylua .`). See [`.stylua.toml`](./.stylua.toml)
+- **UNTESTED CHANGES** _(if warranted)_. Make sure to test your changes before making a PR
+- **UNFORMATTED CODE**. See [StyLua](#stylua)
 - **NON-`LF` LINE ENDINGS**. Make sure to set the following through `git config`:
     ```sh
     # If you want to enforce this only in this repository
@@ -28,7 +29,7 @@
     git config --global core.autocrlf false
     git config --global core.eol lf
     ```
-    (Recommended) and set this in your Nvim config:
+    And set this in your nvim config (recommended):
     ```lua
     -- init.lua, for instance
     vim.opt.fileformat = 'unix'
@@ -39,6 +40,87 @@
     set fileformat=unix
     ```
 
-## Instructions
+## Recommendations
 
-> **TODO**
+### StyLua
+
+**This one's a requirement**. You can install it through your package manager or by following
+[these instructions](https://github.com/JohnnyMorganz/StyLua#installation).
+
+To run it, you must be in the root of the repository and simply run the following command:
+
+```sh
+stylua .
+```
+
+This will format any Lua file that needs it.
+
+> **NOTE**: I will not accept any changes to `.stylua.toml`.
+
+### `pre-commit`
+
+Preferably use `pre-commit` to run the hooks contained in [`.pre-commit-config.yaml`](./.pre-commit-config.yaml).
+
+To install it, follow [these instructions](https://pre-commit.com/#install) in the `pre-commit` website.
+
+After that, run the following command in your terminal (make sure to be in the root of the repository):
+
+```
+pre-commit install
+```
+
+And now every time you run `git commit` the hooks contained in `.pre-commit-config.yaml` will run.
+
+---
+
+## Code Annotations
+
+Please refer to LuaLS code annotations to understand the syntax.[^1]
+
+Let's say you create a new submodule `lua/project_nvim/foo.lua`. If said module returns a table
+with fields, the optimal way to document is to do it in the same file, and following this format:
+
+```lua
+-- A table that contains `foo`
+---@class Project.Foo
+
+---@type Project.Foo
+local Foo = {}
+
+return Foo
+```
+
+If any fields are defined, please include them:
+
+```lua
+-- A table that contains `foo` and more
+---@class Project.Foo
+-- A function that does `Foo`
+---@field do_foo fun(x: any, y_optional: table?)
+-- An **OPTIONAL** function that does `Bar`
+---@field do_bar? fun(...)
+-- A data field containing stuff
+---@field stuff any
+-- An **OPTIONAL** data field containing things
+---@field things? table
+
+---@type Project.Foo
+local Foo = {}
+
+---@param x any
+---@param y_optional? table
+function Foo.do_foo(x, y_optional)
+    -- Blah blah blah
+end
+
+Foo.stuff = 'A string, for instance'
+
+-- Blah blah blah
+
+return Foo
+```
+
+---
+
+[^1]: https://luals.github.io/wiki/annotations/
+[^2]: https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
