@@ -1,7 +1,6 @@
 ---@diagnostic disable:missing-fields
 
 local Config = require('project_nvim.config')
-local History = require('project_nvim.utils.history')
 local Glob = require('project_nvim.utils.globtopattern')
 local Path = require('project_nvim.utils.path')
 local Util = require('project_nvim.utils.util')
@@ -27,10 +26,11 @@ local curr_buf = vim.api.nvim_get_current_buf
 ---@field [2] vim.api.keyset.create_autocmd
 
 ---@class Project.API
----@field init fun()
 ---@field attached_lsp boolean
----@field last_project string?
+---@field last_project string|nil
 ---@field current_project string|nil
+---@field current_method string|nil
+---@field init fun()
 ---@field find_lsp_root fun(): (string?,string?)
 ---@field find_pattern_root fun(): ((string|nil),string?)
 ---@field on_attach_lsp fun(client: vim.lsp.Client, bufnr: integer)
@@ -38,7 +38,8 @@ local curr_buf = vim.api.nvim_get_current_buf
 ---@field set_pwd fun(dir: string, method: string): boolean?
 ---@field get_project_root fun(): (string?,string?)
 -- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
----@field get_current_project fun(): (string|nil)
+---@field get_last_project fun(): last: string|nil
+---@field get_current_project fun(): (curr: string|nil, method: string|nil, last: string|nil)
 ---@field get_history_paths fun(path: ('datapath'|'projectpath'|'historyfile')?): string|HistoryPaths
 ---@field is_file fun(): boolean
 ---@field on_buf_enter fun(verbose: boolean?)
@@ -54,6 +55,7 @@ local Api = {}
 Api.attached_lsp = false
 Api.last_project = nil
 Api.current_project = nil
+Api.current_method = nil
 
 ---@return string?
 ---@return string?
@@ -287,6 +289,8 @@ function Api.set_pwd(dir, method)
         return false
     end
 
+    local History = require('project_nvim.utils.history')
+
     if not Config.options.allow_different_owners then
         local valid = Api.verify_owner(dir)
 
@@ -298,8 +302,6 @@ function Api.set_pwd(dir, method)
             return false
         end
     end
-
-    Api.last_project = dir
 
     if not in_tbl(History.session_projects, dir) then
         table.insert(History.session_projects, dir)
@@ -383,28 +385,47 @@ end
 function Api.get_project_root()
     -- returns project root, as well as method
     for _, detection_method in next, Config.options.detection_methods do
+        local root
+        local lsp_name
+        local method
+
         if detection_method == 'lsp' then
-            local root, lsp_name = Api.find_lsp_root()
+            root, lsp_name = Api.find_lsp_root()
             if root ~= nil then
-                return root, string.format('"%s" lsp\n', lsp_name)
+                return root, string.format('"%s" lsp', lsp_name)
             end
         elseif detection_method == 'pattern' then
-            local root, method = Api.find_pattern_root()
+            root, method = Api.find_pattern_root()
             if root ~= nil then
                 return root, method
             end
         end
     end
 
-    return nil
+    return nil, nil
+end
+
+---@return string|nil
+function Api.get_last_project()
+    local recent = require('project_nvim.utils.history').get_recent_projects()
+    local last = nil
+
+    if #recent > 1 then
+        recent = Util.reverse(vim.deepcopy(recent))
+        last = recent[2]
+    end
+
+    return last
 end
 
 -- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
----@return string|nil
+---@return string|nil curr
+---@return string|nil method
+---@return string|nil last
 function Api.get_current_project()
-    local root_dir, _ = Api.get_project_root()
+    local curr, method = Api.get_project_root()
 
-    return root_dir ~= nil and root_dir:match('([^/]+)$') or nil
+    return curr, method, Api.get_last_project()
 end
 
 ---@return boolean
@@ -427,7 +448,8 @@ end
 function Api.on_buf_enter(verbose)
     verbose = is_type('boolean', verbose) and verbose or false
 
-    if vim.v.vim_did_enter == 0 or not Api.is_file() then
+    -- vim.v.vim_did_enter == 0 or
+    if not Api.is_file() then
         return
     end
 
@@ -437,14 +459,24 @@ function Api.on_buf_enter(verbose)
         return
     end
 
-    local root, method = Api.get_project_root()
-    Api.current_project = root
+    Api.current_project, Api.current_method, Api.last_project = Api.get_current_project()
 
     if verbose then
-        vim.notify(string.format('Root: %s\nMethod: %s', root or 'NONE', method or 'NONE'), INFO)
+        vim.notify(
+            string.format(
+                'Root: %s\nMethod: %s',
+                Api.current_project or 'NONE',
+                Api.current_method or 'NONE'
+            ),
+            INFO
+        )
     end
 
-    Api.set_pwd(root, method)
+    Api.set_pwd(Api.current_project, Api.current_method)
+
+    vim.schedule(function()
+        require('project_nvim.utils.history').write_projects_to_history()
+    end)
 end
 
 ---@param verbose? boolean
@@ -461,11 +493,20 @@ function Api.add_project_manually(verbose)
 end
 
 function Api.init()
-    ---@type AutocmdTuple[]
-    local autocmds = {}
-
     -- Create the augroup, clear it
-    local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = true })
+    local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = false })
+
+    ---@type AutocmdTuple[]
+    local autocmds = {
+        {
+            'VimLeavePre',
+            {
+                pattern = '*',
+                group = augroup,
+                callback = require('project_nvim.utils.history').write_projects_to_history,
+            },
+        },
+    }
 
     if not Config.options.manual_mode then
         table.insert(autocmds, {
@@ -489,15 +530,6 @@ function Api.init()
     vim.api.nvim_create_user_command('AddProject', function()
         Api.add_project_manually(true)
     end, { bang = true })
-
-    table.insert(autocmds, {
-        'VimLeavePre',
-        {
-            pattern = '*',
-            group = augroup,
-            callback = require('project_nvim.utils.history').write_projects_to_history,
-        },
-    })
 
     for _, value in next, autocmds do
         vim.api.nvim_create_autocmd(value[1], value[2])
