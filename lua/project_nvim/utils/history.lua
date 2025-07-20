@@ -33,6 +33,8 @@
 ---@field get_recent_projects fun(): table|string[]
 ---@field delete_project fun(project: ProjParam)
 ---@field sanitize_projects fun(): string[]
+---@field open_history fun(mode: OpenMode, callback: fun(err: string|nil, fd: integer|nil)?): integer|nil
+---@field setup_watch fun()
 
 local Util = require('project_nvim.utils.util')
 local Path = require('project_nvim.utils.path')
@@ -142,34 +144,36 @@ local function deserialize_history(history_data)
 
     projects = delete_duplicates(projects)
 
-    History.recent_projects = vim.deepcopy(projects)
+    History.recent_projects = projects
 end
 
-local function setup_watch()
+function History.setup_watch()
     -- Only runs once
-    if not History.has_watch_setup then
-        History.has_watch_setup = true
+    if History.has_watch_setup then
+        return
+    end
 
-        local event = uv.new_fs_event()
-        if event == nil then
+    History.has_watch_setup = true
+
+    local event = uv.new_fs_event()
+    if event == nil then
+        return
+    end
+
+    event:start(Path.projectpath, {}, function(err, _, events)
+        if err ~= nil then
             return
         end
-
-        event:start(Path.projectpath, {}, function(err, _, events)
-            if err ~= nil then
-                return
-            end
-            if events['change'] then
-                History.recent_projects = nil
-                History.read_projects_from_history()
-            end
-        end)
-    end
+        if events['change'] then
+            History.recent_projects = nil
+            History.read_projects_from_history()
+        end
+    end)
 end
 
 function History.read_projects_from_history()
     History.open_history('r', function(_, fd)
-        setup_watch()
+        History.setup_watch()
         if fd == nil then
             return
         end
@@ -231,12 +235,13 @@ function History.write_projects_to_history()
         return
     end
 
-    local res = History:sanitize_projects()
+    local res = History.sanitize_projects()
 
-    -- Trim table to last 100 entries
-    local len_res = #res
     ---@type string[]
     local tbl_out
+    local len_res = #res
+
+    -- Trim table to last 100 entries
     if len_res > 100 then
         tbl_out = vim.list_slice(res, len_res - 100, len_res)
     else
