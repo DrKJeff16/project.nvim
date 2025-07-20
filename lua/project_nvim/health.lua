@@ -143,13 +143,29 @@ end
 function Health.project_check()
     health.start('Current Project')
 
-    local curr = require('project_nvim').current_project()
+    local curr, method, last = require('project_nvim').current_project()
     local msg = ''
 
     if curr == nil then
-        msg = 'No current project'
+        msg = 'Current project: **No current project**'
     else
-        msg = string.format('Current project: `%s`\n', curr)
+        msg = string.format('Current project: `%s`', curr)
+    end
+
+    health.info(msg)
+
+    if method == nil then
+        msg = 'Method used: **No method available**'
+    else
+        msg = string.format('Method used: `%s`', method)
+    end
+
+    health.info(msg)
+
+    if last == nil then
+        msg = 'Last project: **No method available**\n'
+    else
+        msg = string.format('Last project: `%s`\n', last)
     end
 
     health.info(msg)
