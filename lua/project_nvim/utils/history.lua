@@ -41,7 +41,9 @@ local Path = require('project_nvim.utils.path')
 local uv = vim.uv or vim.loop
 
 local ERROR = vim.log.levels.ERROR
-local is_windows = Util.is_windows()
+
+local dir_exists = Util.dir_exists
+local normalise_path = Util.normalise_path
 
 ---@type Project.Utils.History
 local History = {}
@@ -67,26 +69,6 @@ function History.open_history(mode, callback)
         Path.create_scaffolding()
         return uv.fs_open(histfile, mode, tonumber('644', 8))
     end
-end
-
----@param dir string
----@return boolean
-local function dir_exists(dir)
-    local stat = uv.fs_stat(dir)
-
-    return (stat ~= nil and stat.type == 'directory')
-end
-
----@param path_to_normalise string
----@return string normalised_path
-local function normalise_path(path_to_normalise)
-    local normalised_path = path_to_normalise:gsub('\\', '/'):gsub('//', '/')
-
-    if is_windows then
-        normalised_path = normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)
-    end
-
-    return normalised_path
 end
 
 ---@param tbl string[]

@@ -26,6 +26,10 @@
 -- If table is empty, return it
 ---@field reverse fun(T: table): table
 ---@field format_per_type fun(t: 'number'|'string'|'table'|'boolean', data: number|string|table|boolean, sep: string?, constraints: string[]?): string?,boolean?
+---@field dir_exists fun(dir: string): boolean
+---@field normalise_path fun(path_to_normalise: string): (normalised_path: string)
+
+local uv = vim.uv or vim.loop
 
 local ERROR = vim.log.levels.ERROR
 local empty = vim.tbl_isempty
@@ -186,6 +190,26 @@ function Util.reverse(T)
     end
 
     return T
+end
+
+---@param dir string
+---@return boolean
+function Util.dir_exists(dir)
+    local stat = uv.fs_stat(dir)
+
+    return (stat ~= nil and stat.type == 'directory')
+end
+
+---@param path_to_normalise string
+---@return string normalised_path
+function Util.normalise_path(path_to_normalise)
+    local normalised_path = path_to_normalise:gsub('\\', '/'):gsub('//', '/')
+
+    if Util.is_windows() then
+        normalised_path = normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)
+    end
+
+    return normalised_path
 end
 
 return Util
