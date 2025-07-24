@@ -3,3 +3,6 @@ contact_links:
   - name: Ask a question
     url: https://github.com/DrKJeff16/project.nvim/discussions
     about: Use Github discussions instead
+  - name: GitHub Security Bug Bounty
+    url: https://bounty.github.com/
+    about: Please report security vulnerabilities here.
