@@ -77,7 +77,7 @@ local function change_working_directory(prompt_bufnr)
 
     Actions.close(prompt_bufnr)
 
-    if is_type('nil', selected_entry) then
+    if selected_entry == nil then
         return
     end
 
@@ -142,7 +142,7 @@ end
 ---@param prompt_bufnr integer
 local function delete_project(prompt_bufnr)
     local active_entry = State.get_selected_entry()
-    if is_type('nil', active_entry) then
+    if active_entry == nil then
         Actions.close(prompt_bufnr)
         return
     end

@@ -1,5 +1,4 @@
 ---@diagnostic disable:missing-fields
----@diagnostic disable:need-check-nil
 
 local health = vim.health
 local uv = vim.uv or vim.loop
@@ -93,7 +92,7 @@ function Health.history_check()
     for _, v in next, P do
         local stat = uv.fs_stat(v.value)
 
-        if is_type('nil', stat) then
+        if stat == nil then
             health.error(string.format('%s: `%s` is missing or not readable!', v.name, v.value))
             goto continue
         end

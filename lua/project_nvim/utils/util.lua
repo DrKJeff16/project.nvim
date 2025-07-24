@@ -1,7 +1,6 @@
 ---@diagnostic disable:missing-fields
 
----@alias Project.Utils.Util.AllTypes
----|'nil'
+---@alias Project.Utils.Util.Types
 ---|'number'
 ---|'string'
 ---|'boolean'
@@ -14,7 +13,7 @@
 -- Return whether nvim is running on Windows/WSL
 ---@field is_windows fun(): boolean
 -- Check whether `data` is of type `t` or not
----@field is_type fun(t: Project.Utils.Util.AllTypes, data: any): boolean
+---@field is_type fun(t: Project.Utils.Util.Types, data: any): boolean
 -- Get rid of all duplicates in input table
 --
 -- If table is empty, just returns it
@@ -44,12 +43,11 @@ function Util.is_windows()
     return vim.fn.has('win32') == 1
 end
 
----@param t Project.Utils.Util.AllTypes
+---@param t Project.Utils.Util.Types
 ---@param data any
 ---@return boolean
 function Util.is_type(t, data)
     local TYPES = {
-        'nil',
         'number',
         'string',
         'boolean',
@@ -59,13 +57,8 @@ function Util.is_type(t, data)
         'userdata',
     }
 
-    if t == nil or type(t) ~= 'string' or not in_tbl(TYPES, t) then
+    if t == nil or not (type(t) == 'string' and in_tbl(TYPES, t)) then
         return false
-    end
-
-    -- `nil` is a special case
-    if t == 'nil' then
-        return data == nil
     end
 
     return (data ~= nil and type(data) == t)
