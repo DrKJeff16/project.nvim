@@ -75,7 +75,7 @@ And now every time you run `git commit` the hooks contained in `.pre-commit-conf
 
 ## Code Annotations
 
-Please refer to LuaLS code annotations to understand the syntax.[^1]
+Please refer to LuaLS' code annotations to understand the syntax.[^1]
 
 Let's say you create a new submodule `lua/project_nvim/foo.lua`. If said module returns a table
 with fields, the optimal way to document is to do it in the same file, and following this format:
@@ -90,7 +90,7 @@ local Foo = {}
 return Foo
 ```
 
-If any fields are defined, please include them:
+If any fields are defined, preferably define them as below:
 
 ```lua
 -- A table that contains `foo` and more
@@ -118,6 +118,23 @@ Foo.stuff = 'A string, for instance'
 -- Blah blah blah
 
 return Foo
+```
+
+The other, _less recommended_ method for `class` definitions is:
+
+```lua
+---@class Bar
+local Bar = {}
+
+---@param str string
+---@return table
+function Bar.get_tbl(str)
+    -- ...
+end
+
+-- Blah blah blah
+
+return Bar
 ```
 
 ---
