@@ -6,8 +6,6 @@
 
 </div>
 
-<!-- NOTE: Original author: https://github.com/ahmedkhalf -->
-
 ---
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
@@ -16,25 +14,19 @@ that provides a dynamic project management solution.
 This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
 I will be maintaining this plugin for the foreseeable future.
 
-<ul>
-<li>
 <details>
-<summary>Checkhealth Support (<code>:checkhealth project_nvim</code>)</summary>
+<summary><b>Checkhealth Support</b> <i>(<code>:checkhealth project_nvim</code>)</i></summary>
 
   ![Checkhealth Support](https://github.com/user-attachments/assets/10508903-6d95-443f-843c-f2ce4c7f7360)
 
 </details>
-</li>
 
-<li>
 <details>
-<summary>Telescope Integration (<code>:Telescope project</code>)</summary>
+<summary><b>Telescope Integration</b> <i>(<code>:Telescope project</code>)</i></summary>
 
   ![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
 
 </details>
-</li>
-</ul>
 
 ---
 
