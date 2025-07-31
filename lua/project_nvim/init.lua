@@ -25,7 +25,7 @@ Project.get_history_paths = require('project_nvim.api').get_history_paths
 
 Project.get_last_project = require('project_nvim.api').get_last_project
 
-Project.get_recent_projects = require('project_nvim.utils.history').get_recent_projects
+Project.get_recent_projects = require('project_nvim.api').get_recent_projects
 
 -- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 ---@return string|nil

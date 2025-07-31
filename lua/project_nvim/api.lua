@@ -1,5 +1,7 @@
 ---@diagnostic disable:missing-fields
 
+local MODSTR = 'project_nvim.api'
+
 local Config = require('project_nvim.config')
 local Glob = require('project_nvim.utils.globtopattern')
 local Path = require('project_nvim.utils.path')
@@ -41,14 +43,11 @@ local curr_buf = vim.api.nvim_get_current_buf
 ---@field get_last_project fun(): last: string|nil
 ---@field get_current_project fun(): (curr: string|nil, method: string|nil, last: string|nil)
 ---@field get_history_paths fun(path: ('datapath'|'projectpath'|'historyfile')?): string|HistoryPaths
+---@field get_recent_projects fun(): string[]|table
 ---@field is_file fun(): boolean
 ---@field on_buf_enter fun(verbose: boolean?)
 ---@field add_project_manually fun(verbose: boolean?)
 ---@field verify_owner fun(dir: string): boolean
-
-local MODSTR = 'project_nvim.api'
-
----@type Project.API
 local Api = {}
 
 -- Internal states
@@ -56,6 +55,8 @@ Api.attached_lsp = false
 Api.last_project = nil
 Api.current_project = nil
 Api.current_method = nil
+
+Api.get_recent_projects = require('project_nvim.utils.history').get_recent_projects
 
 ---@return string?
 ---@return string?
@@ -407,7 +408,7 @@ end
 
 ---@return string|nil
 function Api.get_last_project()
-    local recent = require('project_nvim.utils.history').get_recent_projects()
+    local recent = Api.get_recent_projects()
     local last = nil
 
     if #recent > 1 then
