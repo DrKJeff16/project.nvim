@@ -16,11 +16,25 @@ that provides a dynamic project management solution.
 This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
 I will be maintaining this plugin for the foreseeable future.
 
-* Checkhealth Support (`:checkhealth project_nvim`)
+<ul>
+<li>
+<details>
+<summary>Checkhealth Support (<code>:checkhealth project_nvim</code>)</summary>
+
   ![Checkhealth Support](https://github.com/user-attachments/assets/10508903-6d95-443f-843c-f2ce4c7f7360)
 
-* Telescope Integration (`:Telescope project`)
+</details>
+</li>
+
+<li>
+<details>
+<summary>Telescope Integration (<code>:Telescope project</code>)</summary>
+
   ![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
+
+</details>
+</li>
+</ul>
 
 ---
 
@@ -34,13 +48,12 @@ I will be maintaining this plugin for the foreseeable future.
     1. [Pattern Matching](#pattern-matching)
     2. [Nvim Tree Integration](#nvim-tree-integration)
     3. [Telescope Integration](#telescope-integration)
-        1. [Telescope Projects Picker](#telescope-projects-picker)
-        2. [Telescope Mappings](#telescope-mappings)
+        1. [Telescope Mappings](#telescope-mappings)
 6. [Manual Mode](#manual-mode)
     1. [`:AddProject`](#addproject)
     2. [`:ProjectRoot`](#projectroot)
 7. [API](#api)
-    1. [`project_nvim.utils.util`](#util)
+    1. [Utils](#utils)
     2. [`get_project_root()`](#get-project-root)
     3. [`get_recent_projects()`](#get-recent-projects)
     4. [`get_config()`](#get-config)
@@ -395,25 +408,15 @@ require('telescope').setup({
 })
 ```
 
+<div align="center">
+
 After that you can now call it from the command line:
 
 ```vim
 :Telescope projects
 ```
 
-<div align="right">
-
-[Go To Top](#project-nvim)
-
 </div>
-
-#### Telescope Projects Picker
-
-To use the projects picker execute the following Lua code:
-
-```lua
-require('telescope').extensions.projects.projects()
-```
 
 <div align="right">
 
@@ -434,6 +437,8 @@ require('telescope').extensions.projects.projects()
 | r           | \<C-r\>     | `recent_project_files`     |
 | w           | \<C-w\>     | `change_working_directory` |
 
+See more in [`lua/telescope/_extensions/projects.lua`](./lua/telescope/_extensions/projects.lua)
+
 <div align="right">
 
 [Go To Top](#project-nvim)
@@ -446,11 +451,7 @@ require('telescope').extensions.projects.projects()
 
 There are two user commands you can call from the cmdline:
 
-<h3 id="addproject">
-
-`:AddProject`
-
-</h3>
+### AddProject
 
 This command is a manual hook to add to session projects, then
 subsequently `cd` to the current file's project directory
@@ -465,7 +466,7 @@ The command is essentially a wrapper for the following function:
 :lua require('project_nvim.api').add_project_manually()
 ```
 
-See [_`project_nvim/api.lua`_](./lua/project_nvim/api.lua) for more info on `add_project_manually()`
+See [_`api.lua`_](./lua/project_nvim/api.lua) for more info on `add_project_manually()`
 
 <div align="right">
 
@@ -473,11 +474,7 @@ See [_`project_nvim/api.lua`_](./lua/project_nvim/api.lua) for more info on `add
 
 </div>
 
-<h3 id="projectroot">
-
-`:ProjectRoot`
-
-</h3>
+### ProjectRoot
 
 This command is a manual hook to set the working directory to the current
 file's root, attempting to use any of the `setup()` detection methods
@@ -492,7 +489,7 @@ The command is essentially a wrapper for the following function:
 :lua require('project_nvim.api').on_buf_enter()
 ```
 
-See [_`project_nvim/api.lua`_](./lua/project_nvim/api.lua) for more info on `on_buf_enter()`
+See [_`api.lua`_](./lua/project_nvim/api.lua) for more info on `on_buf_enter()`
 
 <div align="right">
 
@@ -506,25 +503,20 @@ See [_`project_nvim/api.lua`_](./lua/project_nvim/api.lua) for more info on `on_
 
 The API can be found in ['lua/project_nvim/api.lua'](./lua/project_nvim/api.lua).
 
-<h3 id="util">
-
-`project_nvim.utils.util`
-
-</h3>
+### Utils
 
 A set of utilities that get repeated across the board.
 
-> These utilities are in part inspired by my own utilities found in **[`Jnvim`](https://github.com/DrKJeff16/Jnvim)**, particularly the **[`User API`](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api) (WIP)**.
+> _These utilities are in part inspired by my own utilities found in **[`Jnvim`](https://github.com/DrKJeff16/Jnvim)**, my own Nvim configuration;**,
+> particularly the **[`User API`](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)**_.
 
 You can import them the follow way:
 
 ```lua
 local ProjUtil = require('project_nvim.utils.util')
-
--- ...
 ```
 
-See [`project_nvim/utils/util.lua`](./lua/project_nvim/utils/util.lua) for
+See [`lua/project_nvim/utils/util.lua`](./lua/project_nvim/utils/util.lua) for
 further reference.
 
 <div align="right">
@@ -564,16 +556,17 @@ local root, lsp_or_method = require('project_nvim').get_project_root()
 You can get a list of recent projects by running the code below:
 
 ```lua
+---@type string[]|table
 local recent_projects = require('project_nvim').get_recent_projects()
 
 -- Using `vim.notify()`
 vim.notify(vim.inspect(recent_projects))
 
 -- Using `vim.print()`
-vim.print(vim.inspect(recent_projects))
+vim.print(recent_projects)
 ```
 
-Where `get_recent_projects()` returns either an empty table `{}` or a string array `{ '/path/to/project', ... }`
+Where `get_recent_projects()` returns either an empty table `{}` or a string array `{ '/path/to/project1', ... }`
 
 <div align="right">
 
@@ -597,7 +590,7 @@ local config = require('project_nvim').get_config()
 vim.notify(vim.inspect(config))
 
 -- Using `vim.print()`
-vim.print(vim.inspect(config))
+vim.print(config)
 ```
 
 <div align="right">
@@ -615,15 +608,15 @@ vim.print(vim.inspect(config))
 If no valid args are passed to this function, it will return the following dictionary:
 
 ```lua
----@type fun(path: ('datapath'|'projectpath'|'historyfile')?): string|{ ['datapath']: string, ['projectpath']: string, ['historyfile']: string }
+---@type fun(path: ('datapath'|'projectpath'|'historyfile')?): string|{ datapath: string, projectpath: string, historyfile: string }
 local get_history_paths = require('project_nvim').get_history_paths
 
 -- A dictionary table containing all return values below
-vim.print(vim.inspect(get_history_paths()))
+vim.print(get_history_paths())
 --- { datapath = <datapath>, projectpath = <projectpath>, historyfile = <historyfile> }
 ```
 
-Otherwise, if `'datapath'`, `'projectpath'` or `'historyfile'` are passed,
+Otherwise, if either `'datapath'`, `'projectpath'` or `'historyfile'` are passed,
 it will return the string value of said arg:
 
 ```lua
@@ -649,19 +642,20 @@ vim.print(get_history_paths('historyfile'))
 
 ### History File Not Created
 
-**If you're in a UNIX environment, make sure you have **read, write and access permissions**
+If you're in a UNIX environment, make sure you have _**read, write and access permissions**_
 (`rwx`) for the `projectpath` directory.
 
 You can get the value of `projectpath` by running
 `:lua vim.print(require('project_nvim').get_history_paths('projectpath'))`
 in the cmdline.
 
-The **default** value is `$XDG_DATA_HOME/nvim/project_nvim`
+> The **default** value is `$XDG_DATA_HOME/nvim/project_nvim`.
+> See `:h stdpath()` for more info
 
 If you lack the required permissions for that directory, you can either:
 
-* Delete that directory **(RECOMMENDED)**
-* Run `chmod 755 <project/path>` **(NOT SURE IF THIS WILL FIX)**
+- Delete that directory **(RECOMMENDED)**
+- Run `chmod 755 <project/path>` **(NOT SURE IF THIS WILL FIX IT)**
 
 <div align="right">
 
