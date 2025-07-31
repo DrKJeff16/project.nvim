@@ -1,7 +1,12 @@
 ---@diagnostic disable:missing-fields
 
-local health = vim.health
 local uv = vim.uv or vim.loop
+
+local start = vim.health.start or vim.health.report_start
+local ok = vim.health.ok or vim.health.report_ok
+local info = vim.health.info or vim.health.report_info
+local warn = vim.health.warn or vim.health.report_warn
+local h_error = vim.health.error or vim.health.report_error
 
 local empty = vim.tbl_isempty
 
@@ -21,17 +26,16 @@ local mod_exists = Util.mod_exists
 ---@field history_check fun()
 ---@field project_check fun()
 ---@field telescope_check fun()
-
----@type Project.Health
+---@field recent_proj_check fun()
 local Health = {}
 
 function Health.options_check()
-    health.start('Config')
+    start('Config')
 
     local Options = require('project_nvim.config').options
 
     if not is_type('table', Options) then
-        health.error('The config table is missing!')
+        h_error('The config table is missing!')
         return
     end
 
@@ -45,30 +49,27 @@ function Health.options_check()
             constraints = { 'global', 'tab', 'win' }
         end
 
-        local str
-        local warn
-
-        str, warn = format_per_type(type(v), v, nil, constraints)
+        local str, warning = format_per_type(type(v), v, nil, constraints)
 
         str = string.format(' - %s: %s', k, str)
 
-        if is_type('boolean', warn) and warn then
-            health.warn(str)
+        if is_type('boolean', warn) and warning then
+            warn(str)
         else
-            health.ok(str)
+            ok(str)
         end
     end
 end
 
 function Health.history_check()
-    health.start('History')
+    start('History')
 
     local Path = require('project_nvim.utils.path')
 
     ---@class HistoryChecks
     ---@field name 'datapath'|'projectpath'|'historyfile'
-    ---@field value string
     ---@field type 'file'|'directory'
+    ---@field value string
 
     ---@type HistoryChecks[]
     local P = {
@@ -90,19 +91,21 @@ function Health.history_check()
     }
 
     for _, v in next, P do
-        local stat = uv.fs_stat(v.value)
+        local fname, ftype, value = v.name, v.type, v.value
+
+        local stat = uv.fs_stat(value)
 
         if stat == nil then
-            health.error(string.format('%s: `%s` is missing or not readable!', v.name, v.value))
+            h_error(string.format('%s: `%s` is missing or not readable!', fname, value))
             goto continue
         end
 
-        if stat.type ~= v.type then
-            health.error(string.format('%s: `%s` is not of type `%s`!', v.name, v.value, v.type))
+        if stat.type ~= ftype then
+            h_error(string.format('%s: `%s` is not of type `%s`!', fname, value, ftype))
             goto continue
         end
 
-        health.ok(string.format('%s: `%s`', v.name, v.value))
+        ok(string.format('%s: `%s`', fname, value))
 
         ::continue::
     end
@@ -110,15 +113,15 @@ end
 
 ---@return boolean
 function Health.setup_check()
+    start('Setup')
+
     local setup_called = require('project_nvim.config').setup_called or false
 
-    health.start('Setup')
-
     if setup_called then
-        health.ok("`require('project_nvim').setup()` has been called")
+        ok("`require('project_nvim').setup()` has been called")
 
         if Util.is_windows() then
-            health.warn(
+            warn(
                 string.format(
                     '%s\n\n\t%s',
                     'Running on Windows. Issues might occur.',
@@ -128,19 +131,19 @@ function Health.setup_check()
         end
 
         if vim.fn.has('nvim-0.11') == 1 then
-            health.ok('nvim version is at least `v0.11`')
+            ok('nvim version is at least `v0.11`')
         else
-            health.warn('nvim version is lower than `v0.11`!')
+            warn('nvim version is lower than `v0.11`!')
         end
     else
-        health.error("`require('project_nvim').setup()` has not been called!")
+        h_error("`require('project_nvim').setup()` has not been called!")
     end
 
     return setup_called
 end
 
 function Health.project_check()
-    health.start('Current Project')
+    start('Current Project')
 
     local curr, method, last = require('project_nvim').current_project()
     local msg = ''
@@ -151,7 +154,7 @@ function Health.project_check()
         msg = string.format('Current project: `%s`', curr)
     end
 
-    health.info(msg)
+    info(msg)
 
     if method == nil then
         msg = 'Method used: **No method available**'
@@ -159,7 +162,7 @@ function Health.project_check()
         msg = string.format('Method used: `%s`', method)
     end
 
-    health.info(msg)
+    info(msg)
 
     if last == nil then
         msg = 'Last project: **No method available**\n'
@@ -167,9 +170,9 @@ function Health.project_check()
         msg = string.format('Last project: `%s`\n', last)
     end
 
-    health.info(msg)
+    info(msg)
 
-    health.start('Active Sessions')
+    start('Active Sessions')
 
     local History = require('project_nvim.utils.history')
     local active = History.has_watch_setup
@@ -179,10 +182,10 @@ function Health.project_check()
         projects = dedup(vim.deepcopy(projects))
 
         for k, v in next, projects do
-            health.info(string.format('`[%s]`: `%s`', tostring(k), v))
+            info(string.format('`[%s]`: `%s`', tostring(k), v))
         end
     else
-        health.warn('No active session projects!')
+        warn('No active session projects!')
     end
 end
 
@@ -191,38 +194,64 @@ function Health.telescope_check()
         return
     end
 
-    health.start('Telescope')
+    start('Telescope')
 
     if not mod_exists('telescope._extensions.projects') then
-        health.warn('Extension is missing', 'Have you set it up?')
+        warn('Extension is missing', 'Have you set it up?')
         return
     end
 
-    health.ok('Extension loaded')
+    ok('Extension loaded')
 
     local Opts = require('project_nvim.config').options
 
     if not is_type('table', Opts.telescope) then
-        health.warn('`project_nvim` does not have telescope options set up')
+        warn('`project_nvim` does not have telescope options set up')
         return
     end
 
     if not vim.tbl_contains({ 'newest', 'oldest' }, Opts.telescope.sort) then
-        health.warn('Telescope setup option not configured correctly!')
+        warn('Telescope setup option not configured correctly!')
     end
 
-    health.ok(string.format("Sorting order: `'%s'`", Opts.telescope.sort))
+    ok(string.format("Sorting order: `'%s'`", Opts.telescope.sort))
+end
+
+function Health.recent_proj_check()
+    start('Recent Projects')
+
+    local recents = require('project_nvim.api').get_recent_projects()
+
+    if vim.tbl_isempty(recents) then
+        warn(
+            '**No projects found in history!**\n'
+                .. '_If this is your first time using this plugin,_\n'
+                .. '_or you just set a different `historypath` for your plugin,_\n'
+                .. '_then you can ignore this._\n\n'
+                .. 'If this keeps appearing though, check your config and if needed create an issue.'
+        )
+        return
+    end
+
+    recents = Util.reverse(vim.deepcopy(recents))
+
+    for i, project in next, recents do
+        info(string.format('%s. `%s`', tostring(i), project))
+    end
 end
 
 -- This is called when running `:checkhealth project_nvim`
 -- ---
 function Health.check()
-    if Health.setup_check() then
-        Health.project_check()
-        Health.history_check()
-        Health.telescope_check()
-        Health.options_check()
+    if not Health.setup_check() then
+        return
     end
+
+    Health.history_check()
+    Health.project_check()
+    Health.telescope_check()
+    Health.options_check()
+    Health.recent_proj_check()
 end
 
 return Health
