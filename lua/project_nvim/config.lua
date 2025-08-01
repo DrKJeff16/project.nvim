@@ -1,5 +1,20 @@
 ---@diagnostic disable:missing-fields
 
+local Util = require('project_nvim.utils.util')
+local Glob = require('project_nvim.utils.globtopattern')
+
+local is_type = Util.is_type
+local pattern_exclude = Glob.pattern_exclude
+
+local copy = vim.deepcopy
+
+---@alias Project.Config.Options.DetectionMethods
+---|table
+---|{ [1]: 'lsp' }
+---|{ [1]: 'pattern' }
+---|{ [1]: 'lsp', [2]: 'pattern' }
+---|{ [1]: 'pattern', [2]: 'lsp' }
+
 -- Table of options used for the telescope picker
 ---@class (exact) Project.Config.Options.Telescope
 -- Determines whether the newest projects come first in the
@@ -23,7 +38,7 @@
 -- ---
 -- Default: `{ 'lsp' , 'pattern' }`
 -- ---
----@field detection_methods? ('lsp'|'pattern')[]
+---@field detection_methods? Project.Config.Options.DetectionMethods
 -- All the patterns used to detect root dir, when **'pattern'** is in
 -- detection_methods
 -- ---
@@ -104,18 +119,10 @@
 -- The function called when running `require('project_nvim').setup()`
 -- ---
 ---@field setup fun(options: table|Project.Config.Options?)
+---@field trim_methods fun(methods: string[]|Project.Config.Options.DetectionMethods): Project.Config.Options.DetectionMethods
 ---@field setup_called? boolean
-
-local Util = require('project_nvim.utils.util')
-local Glob = require('project_nvim.utils.globtopattern')
-
-local is_type = Util.is_type
-local pattern_exclude = Glob.pattern_exclude
-
----@type Project.Config
 local Config = {}
 
----@type Project.Config.Options
 Config.defaults = {
     manual_mode = false,
     detection_methods = { 'lsp', 'pattern' },
@@ -146,8 +153,42 @@ Config.defaults = {
     datapath = vim.fn.stdpath('data'),
 }
 
----@type table|Project.Config.Options
 Config.options = {}
+
+---@param methods string[]|Project.Config.Options.DetectionMethods
+---@return Project.Config.Options.DetectionMethods
+function Config.trim_methods(methods)
+    if not is_type('table', methods) or vim.tbl_isempty(methods) then
+        return {}
+    end
+
+    local res = {}
+    local checker = { lsp = false, pattern = false }
+
+    for _, v in next, methods do
+        if checker.lsp and checker.pattern then
+            break
+        end
+
+        if not is_type('string', v) then
+            goto continue
+        end
+
+        if v == 'lsp' and not checker.lsp then
+            table.insert(res, v)
+            checker.lsp = true
+        end
+
+        if v == 'pattern' and not checker.pattern then
+            table.insert(res, v)
+            checker.pattern = true
+        end
+
+        ::continue::
+    end
+
+    return res
+end
 
 ---@param options? table|Project.Config.Options
 function Config.setup(options)
@@ -155,6 +196,8 @@ function Config.setup(options)
 
     Config.options = vim.tbl_deep_extend('keep', options, Config.defaults)
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
+
+    Config.options.detection_methods = Config.trim_methods(copy(Config.options.detection_methods))
 
     -- Implicitly unset autochdir
     vim.opt.autochdir = false
