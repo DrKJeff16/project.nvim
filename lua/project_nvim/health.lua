@@ -5,7 +5,7 @@ local uv = vim.uv or vim.loop
 local start = vim.health.start or vim.health.report_start
 local ok = vim.health.ok or vim.health.report_ok
 local info = vim.health.info or vim.health.report_info
-local warn = vim.health.warn or vim.health.report_warn
+local h_warn = vim.health.warn or vim.health.report_warn
 local h_error = vim.health.error or vim.health.report_error
 
 local empty = vim.tbl_isempty
@@ -53,8 +53,8 @@ function Health.options_check()
 
         str = string.format(' - %s: %s', k, str)
 
-        if is_type('boolean', warn) and warning then
-            warn(str)
+        if is_type('boolean', warning) and warning then
+            h_warn(str)
         else
             ok(str)
         end
@@ -121,7 +121,7 @@ function Health.setup_check()
         ok("`require('project_nvim').setup()` has been called")
 
         if Util.is_windows() then
-            warn(
+            h_warn(
                 string.format(
                     '%s\n\n\t%s',
                     'Running on Windows. Issues might occur.',
@@ -133,7 +133,7 @@ function Health.setup_check()
         if vim.fn.has('nvim-0.11') == 1 then
             ok('nvim version is at least `v0.11`')
         else
-            warn('nvim version is lower than `v0.11`!')
+            h_warn('nvim version is lower than `v0.11`!')
         end
     else
         h_error("`require('project_nvim').setup()` has not been called!")
@@ -185,33 +185,34 @@ function Health.project_check()
             info(string.format('`[%s]`: `%s`', tostring(k), v))
         end
     else
-        warn('No active session projects!')
+        h_warn('No active session projects!')
     end
 end
 
 function Health.telescope_check()
-    if not mod_exists('telescope') then
-        return
-    end
-
     start('Telescope')
 
-    if not mod_exists('telescope._extensions.projects') then
-        warn('Extension is missing', 'Have you set it up?')
+    if not mod_exists('telescope') then
+        h_warn('Telescope is not installed')
         return
     end
 
-    ok('Extension loaded')
+    if not mod_exists('telescope._extensions.projects') then
+        h_warn('`projects` Telescope picker is missing!\nHave you set it up?')
+        return
+    end
+
+    ok('`projects` picker extension loaded')
 
     local Opts = require('project_nvim.config').options
 
     if not is_type('table', Opts.telescope) then
-        warn('`project_nvim` does not have telescope options set up')
+        h_warn('`project_nvim` does not have telescope options set up')
         return
     end
 
     if not vim.tbl_contains({ 'newest', 'oldest' }, Opts.telescope.sort) then
-        warn('Telescope setup option not configured correctly!')
+        h_warn('Telescope setup option not configured correctly!')
     end
 
     ok(string.format("Sorting order: `'%s'`", Opts.telescope.sort))
@@ -223,7 +224,7 @@ function Health.recent_proj_check()
     local recents = require('project_nvim.api').get_recent_projects()
 
     if vim.tbl_isempty(recents) then
-        warn(
+        h_warn(
             '**No projects found in history!**\n'
                 .. '_If this is your first time using this plugin,_\n'
                 .. '_or you just set a different `historypath` for your plugin,_\n'
@@ -246,6 +247,8 @@ function Health.check()
     if not Health.setup_check() then
         return
     end
+
+    -- NOTE: Order matters below!
 
     Health.history_check()
     Health.project_check()
