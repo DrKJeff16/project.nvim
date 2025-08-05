@@ -363,6 +363,8 @@ function Api.set_pwd(dir, method)
             vim.notify(msg, WARN)
         end
     end
+
+    return true
 end
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
