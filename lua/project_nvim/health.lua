@@ -18,15 +18,6 @@ local format_per_type = Util.format_per_type
 local mod_exists = Util.mod_exists
 
 ---@class Project.Health
--- This is called when running `:checkhealth project_nvim`
--- ---
----@field check fun()
----@field setup_check fun(): boolean
----@field options_check fun()
----@field history_check fun()
----@field project_check fun()
----@field telescope_check fun()
----@field recent_proj_check fun()
 local Health = {}
 
 function Health.options_check()
