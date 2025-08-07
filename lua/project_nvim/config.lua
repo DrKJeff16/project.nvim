@@ -1,5 +1,3 @@
----@diagnostic disable:missing-fields
-
 local Util = require('project_nvim.utils.util')
 local Glob = require('project_nvim.utils.globtopattern')
 
@@ -8,125 +6,52 @@ local pattern_exclude = Glob.pattern_exclude
 
 local copy = vim.deepcopy
 
----@alias Project.Config.Options.DetectionMethods
----|table
----|{ [1]: 'lsp' }
----|{ [1]: 'pattern' }
----|{ [1]: 'lsp', [2]: 'pattern' }
----|{ [1]: 'pattern', [2]: 'lsp' }
-
--- Table of options used for the telescope picker
----@class (exact) Project.Config.Options.Telescope
--- Determines whether the newest projects come first in the
--- telescope picker, or the oldest
--- ---
--- Default: `'newest'`
--- ---
----@field sort? 'oldest'|'newest'
-
----@class Project.Config.Options
--- If `true` your root directory won't be changed automatically,
--- so you have the option to manually do so using `:ProjectRoot` command.
--- ---
--- Default: `false`
--- ---
----@field manual_mode? boolean
--- Methods of detecting the root directory. `'lsp'` uses the native neovim
--- lsp, while `'pattern'` uses vim-rooter like glob pattern matching. Here
--- order matters: if one is not detected, the other is used as fallback. You
--- can also delete or rearrange the detection methods.
--- ---
--- Default: `{ 'lsp' , 'pattern' }`
--- ---
----@field detection_methods? Project.Config.Options.DetectionMethods
--- All the patterns used to detect root dir, when **'pattern'** is in
--- detection_methods
--- ---
--- Default:
--- ```lua
--- {
---     '.git',
---     '.github',
---     '_darcs',
---     '.hg',
---     '.bzr',
---     '.svn',
---     'package.json',
---     '.stylua.toml',
---     'stylua.toml',
--- }
--- ```
--- ---
--- See `:h project.nvim-pattern-matching`
--- ---
----@field patterns? string[]
--- Table of lsp clients to ignore by name
--- e.g. `{ 'efm', ... }`
--- ---
--- Default: `{}`
--- ---
--- If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
--- for a list of servers
--- ---
----@field ignore_lsp? string[]
--- Don't calculate root dir on specific directories
--- e.g. `{ '~/.cargo/*', ... }`
--- ---
--- Default: `{}`
--- ---
----@field exclude_dirs? string[]
--- Make hidden files visible when using the `telescope` picker
--- ---
--- Default: `false`
--- ---
----@field show_hidden? boolean
--- If `false`, you'll get a _notification_ every time
--- `project.nvim` changes directory
--- ---
--- Default: `true`
--- ---
----@field silent_chdir? boolean
--- What scope to change the directory, valid options are
--- * `global`
--- * `tab`
--- * `win`
--- ---
--- Default: `'global'`
--- ---
----@field scope_chdir? 'global'|'tab'|'win'
--- Path where `project.nvim` will store the project history for
--- future use with the `telescope` picker
--- ---
--- Default: `vim.fn.stdpath('data')`
--- ---
----@field datapath? string
--- If `false`, it won't add a project if its root is not owned by the
--- current nvim UID **(UNIX only)**
--- ---
--- Default: `true`
--- ---
----@field allow_different_owners? boolean
--- Table of options used for the telescope picker
----@field telescope? Project.Config.Options.Telescope
+---@alias Project.Config.Options.DetectionMethods ("lsp"|"pattern")[]|table
 
 ---@class Project.Config
----@field defaults Project.Config.Options
--- Options defined after running `require('project_nvim').setup()`
--- ---
--- Default: `{}` (before calling `setup()`)
--- ---
----@field options table|Project.Config.Options
--- The function called when running `require('project_nvim').setup()`
--- ---
----@field setup fun(options: table|Project.Config.Options?)
----@field trim_methods fun(methods: string[]|Project.Config.Options.DetectionMethods): Project.Config.Options.DetectionMethods
 ---@field setup_called? boolean
 local Config = {}
 
+---@class Project.Config.Options
 Config.defaults = {
+    ---If `true` your root directory won't be changed automatically,
+    ---so you have the option to manually do so using `:ProjectRoot` command.
+    --- ---
+    ---Default: `false`
+    --- ---
     manual_mode = false,
+
+    ---Methods of detecting the root directory. `'lsp'` uses the native neovim
+    ---LSP, while `'pattern'` uses vim-rooter like glob pattern matching. Here
+    ---order matters: if one is not detected, the other is used as fallback. You
+    ---can also delete or rearrange the detection methods.
+    --- ---
+    ---Default: `{ 'lsp' , 'pattern' }`
+    --- ---
+    ---@type Project.Config.Options.DetectionMethods
     detection_methods = { 'lsp', 'pattern' },
 
+    ---All the patterns used to detect root dir, when **'pattern'** is in
+    ---detection_methods.
+    --- ---
+    ---Default:
+    ---```lua
+    ---{
+    ---    '.git',
+    ---    '.github',
+    ---    '_darcs',
+    ---    '.hg',
+    ---    '.bzr',
+    ---    '.svn',
+    ---    'package.json',
+    ---    '.stylua.toml',
+    ---    'stylua.toml',
+    ---}
+    ---```
+    --- ---
+    ---See `:h project.nvim-pattern-matching`
+    --- ---
+    ---@type string[]
     patterns = {
         '.git',
         '.github',
@@ -139,20 +64,83 @@ Config.defaults = {
         'stylua.toml',
     },
 
+    ---If `false`, it won't add a project if its root is not owned by the
+    ---current nvim UID **(UNIX only)**.
+    --- ---
+    ---Default: `true`
+    --- ---
     allow_different_owners = true,
 
+    ---Table of options used for the telescope picker.
+    --- ---
+    ---@class Project.Config.Options.Telescope
     telescope = {
+        ---Determines whether the newest projects come first in the
+        ---telescope picker, or the oldest.
+        --- ---
+        ---Default: `'newest'`
+        --- ---
+        ---@type 'oldest'|'newest'
         sort = 'newest',
     },
 
+    ---Table of lsp clients to ignore by name,
+    ---e.g. `{ 'efm', ... }`.
+    --- ---
+    ---Default: `{}`
+    --- ---
+    ---If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
+    ---for a list of servers.
+    --- ---
+    ---@type string[]|table
     ignore_lsp = {},
+
+    ---Don't calculate root dir on specific directories,
+    ---e.g. `{ '~/.cargo/*', ... }`.
+    --- ---
+    ---Default: `{}`
+    --- ---
+    ---@type string[]|table
     exclude_dirs = {},
+
+    ---Make hidden files visible when using the `telescope` picker.
+    --- ---
+    ---Default: `false`
+    --- ---
     show_hidden = false,
+
+    ---If `false`, you'll get a _notification_ every time
+    ---`project.nvim` changes directory.
+    --- ---
+    ---Default: `true`
+    --- ---
     silent_chdir = true,
+
+    ---Determines the scope for changing the directory.
+    ---
+    ---Valid options are:
+    --- - `'global'`
+    --- - `'tab'`
+    --- - `'win'`
+    --- ---
+    ---Default: `'global'`
+    --- ---
+    ---@type 'global'|'tab'|'win'
     scope_chdir = 'global',
+
+    ---Path where `project.nvim` will store the project history.
+    --- ---
+    ---Default: `vim.fn.stdpath('data')`
+    --- ---
+    ---@type string
     datapath = vim.fn.stdpath('data'),
 }
 
+---Options defined after running `require('project_nvim').setup()`.
+--- ---
+---Default: `{}` (before calling `setup()`)
+--- ---
+---@type table|Project.Config.Options
 Config.options = {}
 
 ---@param methods string[]|Project.Config.Options.DetectionMethods
@@ -190,6 +178,7 @@ function Config.trim_methods(methods)
     return res
 end
 
+---The function called when running `require('project_nvim').setup()`
 ---@param options? table|Project.Config.Options
 function Config.setup(options)
     options = is_type('table', options) and options or {}

@@ -1,22 +1,12 @@
----@diagnostic disable:missing-fields
-
--- Credits for this module goes to: David Manura
--- https://github.com/davidm/lua-glob-pattern
-
----@class (exact) Project.Utils.GlobPattern
----@field _TYPE string
----@field _NAME string
----@field _VERSION string
----@field globtopattern fun(g: string): (pattern: string)
----@field pattern_exclude fun(pattern: string): string
-
----@type Project.Utils.GlobPattern
+---Credits for this module goes to: David Manura
+---https://github.com/davidm/lua-glob-pattern
+---@class Project.Utils.GlobPattern
 local Glob = { _TYPE = 'module', _NAME = 'globtopattern', _VERSION = '0.2.1.20120406' }
 
--- Some useful references:
--- - apr_fnmatch in Apache APR.  For example,
---   http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html
---   which cites POSIX 1003.2-1992, section B.6.
+---Some useful references:
+--- - apr_fnmatch in Apache APR.  For example,
+---   http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html
+---   which cites POSIX 1003.2-1992, section B.6.
 ---@param g string
 ---@return string pattern
 function Glob.globtopattern(g)
@@ -24,7 +14,7 @@ function Glob.globtopattern(g)
     local i = 0 -- index in g
     local c = '' -- char at index i in g.
 
-    -- unescape glob char
+    ---Unescape glob char.
     ---@return boolean
     local function unescape()
         if c == '\\' then
@@ -38,7 +28,7 @@ function Glob.globtopattern(g)
         return true
     end
 
-    -- escape pattern char
+    ---Escape pattern char.
     ---@param char string
     ---@return string
     local function escape(char)
@@ -95,7 +85,7 @@ function Glob.globtopattern(g)
         return true
     end
 
-    -- Convert tokens in charset.
+    ---Convert tokens in charset.
     ---@return boolean
     local function charset()
         i = i + 1
@@ -123,7 +113,7 @@ function Glob.globtopattern(g)
         return true
     end
 
-    -- Convert tokens.
+    ---Convert tokens.
     while true do
         i = i + 1
         c = g:sub(i, i)
@@ -158,9 +148,10 @@ end
 ---@return string
 function Glob.pattern_exclude(pattern)
     local HOME_EXPAND = vim.fn.expand('~')
+    local pattern_len = string.len(pattern)
 
     if vim.startswith(pattern, '~/') then
-        pattern = string.format('%s/%s', HOME_EXPAND, pattern:sub(3, #pattern))
+        pattern = string.format('%s/%s', HOME_EXPAND, pattern:sub(3, pattern_len))
     end
 
     return Glob.globtopattern(pattern)

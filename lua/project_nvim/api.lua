@@ -18,48 +18,29 @@ local WARN = vim.log.levels.WARN
 local in_tbl = vim.tbl_contains
 local curr_buf = vim.api.nvim_get_current_buf
 
----@class HistoryPaths
----@field datapath string
----@field projectpath string
----@field historyfile string
-
 ---@class AutocmdTuple
 ---@field [1] string[]|string
 ---@field [2] vim.api.keyset.create_autocmd
 
 ---@class Project.API
----@field attached_lsp boolean
----@field last_project string|nil
----@field current_project string|nil
----@field current_method string|nil
----@field init fun()
----@field find_lsp_root fun(): (string?,string?)
----@field find_pattern_root fun(): ((string|nil),string?)
----@field on_attach_lsp fun(client: vim.lsp.Client, bufnr: integer)
----@field attach_to_lsp fun()
----@field set_pwd fun(dir: string, method: string): boolean?
----@field get_project_root fun(): (string?,string?)
--- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
----@field get_last_project fun(): last: string|nil
----@field get_current_project fun(): (curr: string|nil, method: string|nil, last: string|nil)
----@field get_history_paths fun(path: ('datapath'|'projectpath'|'historyfile')?): string|HistoryPaths
----@field get_recent_projects fun(): string[]|table
----@field is_file fun(): boolean
----@field on_buf_enter fun(verbose: boolean?)
----@field add_project_manually fun(verbose: boolean?)
----@field verify_owner fun(dir: string): boolean
 local Api = {}
 
 -- Internal states
 Api.attached_lsp = false
+
+---@type string|nil
 Api.last_project = nil
+
+---@type string|nil
 Api.current_project = nil
+
+---@type string|nil
 Api.current_method = nil
 
 Api.get_recent_projects = require('project_nvim.utils.history').get_recent_projects
 
----@return string?
----@return string?
+---@return string|nil
+---@return string|nil
 function Api.find_lsp_root()
     -- Get lsp client for current buffer
     -- Returns nil or string
@@ -75,7 +56,7 @@ function Api.find_lsp_root()
     for _, client in next, clients do
         ---@type table|string[]
         ---@diagnostic disable-next-line:undefined-field
-        local filetypes = client.config.filetypes -- For whatever reason this field is not declared in the type...
+        local filetypes = client.config.filetypes
 
         if not is_type('table', filetypes) or vim.tbl_isempty(filetypes) then
             goto continue
@@ -107,7 +88,8 @@ function Api.verify_owner(dir)
     return stat.uid == uv.getuid()
 end
 
----@return (string|nil),string?
+---@return string|nil
+---@return string|nil
 function Api.find_pattern_root()
     local search_dir = vim.fn.expand('%:p:h', true)
     if is_windows() then
@@ -203,15 +185,20 @@ function Api.find_pattern_root()
     ---@return boolean
     local function match(dir, pattern)
         local first_char = pattern:sub(1, 1)
+
         if first_char == '=' then
             return is(dir, pattern:sub(2))
-        elseif first_char == '^' then
-            return sub(dir, pattern:sub(2))
-        elseif first_char == '>' then
-            return child(dir, pattern:sub(2))
-        else
-            return has(dir, pattern)
         end
+
+        if first_char == '^' then
+            return sub(dir, pattern:sub(2))
+        end
+
+        if first_char == '>' then
+            return child(dir, pattern:sub(2))
+        end
+
+        return has(dir, pattern)
     end
 
     -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
@@ -244,7 +231,7 @@ end
 ---@param client vim.lsp.Client
 ---@param bufnr integer
 local function on_attach_lsp(client, bufnr)
-    Api.on_buf_enter() -- Recalculate root dir after lsp attaches
+    Api.on_buf_enter() -- Recalculate root dir after LSP attaches
 end
 
 function Api.attach_to_lsp()
@@ -252,13 +239,9 @@ function Api.attach_to_lsp()
         return
     end
 
-    -- Backup old `start_client` function
+    ---Backup old `start_client` function
     local _start_client = vim.lsp.start_client
 
-    -- WARN: (DrKJeff16) Honestly I'm not feeling good about this one, chief
-    ---@param config vim.lsp.ClientConfig
-    ---@return integer?
-    ---@return string?
     vim.lsp.start_client = function(config)
         if config.on_attach ~= nil then
             ---@type fun(client: vim.lsp.Client, bufnr: integer)
@@ -284,7 +267,7 @@ end
 
 ---@param dir string
 ---@param method string
----@return boolean?
+---@return boolean|nil
 function Api.set_pwd(dir, method)
     if not is_type('string', dir) then
         return false
@@ -368,7 +351,7 @@ function Api.set_pwd(dir, method)
 end
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
----@return string|HistoryPaths
+---@return string|{ datapath: string, projectpath: string, historyfile: string }
 function Api.get_history_paths(path)
     local valid = { 'datapath', 'projectpath', 'historyfile' }
 
@@ -383,8 +366,8 @@ function Api.get_history_paths(path)
     }
 end
 
----@return string?
----@return string?
+---@return string|nil
+---@return string|nil
 function Api.get_project_root()
     -- returns project root, as well as method
     for _, detection_method in next, Config.options.detection_methods do
@@ -408,9 +391,11 @@ function Api.get_project_root()
     return nil, nil
 end
 
----@return string|nil
+---@return string|nil last
 function Api.get_last_project()
     local recent = Api.get_recent_projects()
+
+    ---@type string|nil
     local last = nil
 
     if #recent > 1 then
@@ -421,14 +406,15 @@ function Api.get_last_project()
     return last
 end
 
--- CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
+---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
 function Api.get_current_project()
     local curr, method = Api.get_project_root()
+    local last = Api.get_last_project()
 
-    return curr, method, Api.get_last_project()
+    return curr, method, last
 end
 
 ---@return boolean
@@ -451,7 +437,6 @@ end
 function Api.on_buf_enter(verbose)
     verbose = is_type('boolean', verbose) and verbose or false
 
-    -- vim.v.vim_did_enter == 0 or
     if not Api.is_file() then
         return
     end
@@ -496,7 +481,6 @@ function Api.add_project_manually(verbose)
 end
 
 function Api.init()
-    -- Create the augroup, clear it
     local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = false })
 
     ---@type AutocmdTuple[]
@@ -527,9 +511,12 @@ function Api.init()
         end
     end
 
+    -- `:ProjectRoot`
     vim.api.nvim_create_user_command('ProjectRoot', function()
         Api.on_buf_enter(true)
     end, { bang = true })
+
+    -- `:AddProject`
     vim.api.nvim_create_user_command('AddProject', function()
         Api.add_project_manually(true)
     end, { bang = true })

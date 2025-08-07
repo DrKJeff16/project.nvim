@@ -22,19 +22,7 @@
 ---|"xw"
 ---|"xw+"
 
----@alias ProjParam { ['value']: string }
-
----@class Project.Utils.History
----@field recent_projects (string|nil)[]|nil
----@field session_projects string[]|table
----@field has_watch_setup boolean
----@field read_projects_from_history fun()
----@field write_projects_to_history fun()
----@field get_recent_projects fun(): table|string[]
----@field delete_project fun(project: ProjParam)
----@field sanitize_projects fun(): string[]
----@field open_history fun(mode: OpenMode, callback: fun(err: string|nil, fd: integer|nil)?): integer|nil
----@field setup_watch fun()
+---@alias ProjParam { value: string }
 
 local Util = require('project_nvim.utils.util')
 local Path = require('project_nvim.utils.path')
@@ -45,14 +33,17 @@ local ERROR = vim.log.levels.ERROR
 local dir_exists = Util.dir_exists
 local normalise_path = Util.normalise_path
 
----@type Project.Utils.History
+---@class Project.Utils.History
 local History = {}
 
 -- projects from previous neovim sessions
+---@type (string|nil)[]|nil
 History.recent_projects = nil
 
 -- projects from current neovim session
+---@type string[]|table
 History.session_projects = {}
+
 History.has_watch_setup = false
 
 ---@param mode OpenMode
@@ -72,7 +63,7 @@ function History.open_history(mode, callback)
 end
 
 ---@param tbl string[]
----@return string[] res
+---@return string[]
 local function delete_duplicates(tbl)
     ---@type table<string, integer|nil>
     local cache_dict = {}
@@ -173,7 +164,7 @@ function History.read_projects_from_history()
     end)
 end
 
----@return string[] real_tbl
+---@return string[]
 function History.sanitize_projects()
     ---@type string[]
     local tbl = {}

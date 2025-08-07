@@ -9,32 +9,13 @@
 ---|'thread'
 ---|'userdata'
 
----@class Project.Utils.Util
--- Return whether nvim is running on Windows/WSL
----@field is_windows fun(): boolean
--- Check whether `data` is of type `t` or not
----@field is_type fun(t: Project.Utils.Util.Types, data: any): boolean
--- Get rid of all duplicates in input table
---
--- If table is empty, just returns it
----@field dedup fun(T: table|string[]): table|string[]
--- Check if module `mod` is available
----@field mod_exists fun(mod: string): boolean
--- Reverse a table
---
--- If table is empty, return it
----@field reverse fun(T: table): table
----@field format_per_type fun(t: 'number'|'string'|'table'|'boolean', data: number|string|table|boolean, sep: string?, constraints: string[]?): string?,boolean?
----@field dir_exists fun(dir: string): boolean
----@field normalise_path fun(path_to_normalise: string): (normalised_path: string)
-
 local uv = vim.uv or vim.loop
 
 local ERROR = vim.log.levels.ERROR
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
 
----@type Project.Utils.Util
+---@class Project.Utils.Util
 local Util = {}
 
 -- Return whether nvim is running on Windows/WSL
@@ -43,6 +24,7 @@ function Util.is_windows()
     return vim.fn.has('win32') == 1
 end
 
+---Check whether `data` is of type `t` or not.
 ---@param t Project.Utils.Util.Types
 ---@param data any
 ---@return boolean
@@ -64,6 +46,7 @@ function Util.is_type(t, data)
     return (data ~= nil and type(data) == t)
 end
 
+---Check if module `mod` is available.
 ---@param mod string
 ---@return boolean
 function Util.mod_exists(mod)
@@ -78,6 +61,9 @@ function Util.mod_exists(mod)
     return ok
 end
 
+---Get rid of all duplicates in input table.
+---
+---If table is empty, just returns it.
 ---@param T table|string[]
 ---@return table|string[]
 function Util.dedup(T)
@@ -165,6 +151,9 @@ function Util.format_per_type(t, data, sep, constraints)
     return msg
 end
 
+---Reverses a table.
+---
+---If table is empty, returns it.
 ---@param T table
 ---@return table
 function Util.reverse(T)
