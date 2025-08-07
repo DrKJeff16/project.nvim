@@ -680,6 +680,7 @@ If you lack the required permissions for that directory, you can either:
 - [@D7ry](https://github.com/D7ry): Made the original `get_current_project()` hook
 - [@steinbrueckri](https://github.com/steinbrueckri): Thank you for your support!
 - [@gmelodie](https://github.com/gmelodie): Thank you for your support!
+- [@pandar00](https://github.com/pandar00): **CONTRIBUTOR** (#4)
 
 <div align="right">
 
