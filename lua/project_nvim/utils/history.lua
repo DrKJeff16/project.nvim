@@ -102,6 +102,8 @@ function History.delete_project(project)
     end
 
     History.recent_projects = new_tbl
+
+    History.write_projects_to_history()
 end
 
 ---@param history_data string
