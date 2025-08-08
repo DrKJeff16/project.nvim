@@ -461,7 +461,7 @@ function Api.on_buf_enter(verbose)
 
     Api.set_pwd(Api.current_project, Api.current_method)
 
-        require('project_nvim.utils.history').write_projects_to_history()
+    require('project_nvim.utils.history').write_projects_to_history()
 end
 
 ---@param verbose? boolean
