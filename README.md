@@ -82,14 +82,15 @@ I will be maintaining this plugin for the foreseeable future.
 - [X] Add info for `:ProjectRoot` and `:AddProject` commands ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/133))
 - [X] Renamed `project.lua` to `api.lua`
 - [X] Extend API
-    - [X] Expose `project_nvim.api.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
-    - [X] Add utility to display the current project
-        `project_nvim.api.current_project` or `project_nvim.api.get_current_project()`
-        (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/149)**)
+  - [X] Expose `project_nvim.api.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
+  - [X] Add utility to display the current project
+      `project_nvim.api.current_project` or `project_nvim.api.get_current_project()`
+      (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/149)**)
 - [X] Extend Telescope picker configuration
-    - [X] Fix `file_browser` mapping (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/107)**)
-    - [X] Add option to control picker sorting order ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/140))
+  - [X] Fix `file_browser` mapping (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/107)**)
+  - [X] Add option to control picker sorting order ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/140))
 - [ ] Finish [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- [ ] Add more user commands
 
 <div align="right">
 
@@ -111,7 +112,7 @@ I will be maintaining this plugin for the foreseeable future.
 
 **_WARNING: DO NOT LAZY-LOAD THIS PLUGIN_**
 
-The cwd might not update otherwise.
+You might have issues with your `cwd` otherwise.
 
 </div>
 
@@ -124,18 +125,18 @@ The cwd might not update otherwise.
 
 ```vim
 if has('nvim-0.11')
-    Plug 'DrKJeff16/project.nvim'
+  Plug 'DrKJeff16/project.nvim'
 
-    " OPTIONAL
-    Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-lua/plenary.nvim'
+  " OPTIONAL
+  Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-lua/plenary.nvim'
 
-    lua << EOF
-        require('project_nvim').setup({
-            -- your configuration comes here
-            -- or leave it empty to use the default settings
-            -- refer to the configuration section below
-        })
-    EOF
+  lua << EOF
+  require('project_nvim').setup({
+    -- your configuration comes here
+    -- or leave it empty to use the default settings
+    -- refer to the configuration section below
+  })
+  EOF
 endif
 ```
 
@@ -146,26 +147,25 @@ endif
 
 ```lua
 require('lazy').setup({
-    spec = {
-        -- Other plugins
-        {
-            'DrKJeff16/project.nvim',
-            -- WARN: IMPORTANT NOT TO LAZY-LOAD THIS PLUGIN
-            lazy = false,
-            dependencies = {
-                'nvim-lua/plenary.nvim',
-                'nvim-telescope/telescope.nvim',
-            }, -- OPTIONAL
-            config = function()
-                require('project_nvim').setup({
-                    -- your configuration comes here
-                    -- or leave it empty to use the default settings
-                    -- refer to the configuration section below
-                })
-            end,
-            cond = vim.fn.has('nvim-0.11') == 1,
-        },
+  spec = {
+    -- Other plugins
+    {
+      'DrKJeff16/project.nvim',
+      -- WARN: IMPORTANT NOT TO LAZY-LOAD THIS PLUGIN
+      lazy = false,
+      dependencies = {
+        'nvim-lua/plenary.nvim',
+        'nvim-telescope/telescope.nvim',
+      }, -- OPTIONAL
+      ---@type Project.Config.Options
+      opts = {
+        -- your configuration comes here
+        -- or leave it empty to use the default settings
+        -- refer to the configuration section below
+      },
+      cond = vim.fn.has('nvim-0.11') == 1, -- RECOMMENDED
     },
+  },
 })
 ```
 
@@ -176,22 +176,22 @@ require('lazy').setup({
 
 ```lua
 if vim.fn.has('nvim-0.11') == 1 then
-    require('pckr').add({
-        {
-            'DrKJeff16/project.nvim',
-            requires = {
-                'nvim-lua/plenary.nvim',
-                'nvim-telescope/telescope.nvim',
-            }, -- OPTIONAL
-            config = function()
-                require('project_nvim').setup({
-                    -- your configuration comes here
-                    -- or leave it empty to use the default settings
-                    -- refer to the configuration section below
-                })
-            end,
-        };
-    })
+  require('pckr').add({
+    {
+      'DrKJeff16/project.nvim',
+      requires = {
+        'nvim-lua/plenary.nvim',
+        'nvim-telescope/telescope.nvim',
+      }, -- OPTIONAL
+      config = function()
+        require('project_nvim').setup({
+          -- your configuration comes here
+          -- or leave it empty to use the default settings
+          -- refer to the configuration section below
+        })
+      end,
+    };
+  })
 end
 ```
 
@@ -219,83 +219,116 @@ require('project_nvim').setup({
 
 ```lua
 {
-    -- Manual mode doesn't automatically change your root directory, so you have
-    -- the option to manually do so using `:ProjectRoot` command.
-    ---@type boolean
-    manual_mode = false,
+  ---If `true` your root directory won't be changed automatically,
+  ---so you have the option to manually do so using `:ProjectRoot` command.
+  --- ---
+  ---Default: `false`
+  --- ---
+  ---@type boolean
+  manual_mode = false,
 
-    -- Methods of detecting the root directory. **'lsp'** uses the native neovim
-    -- LSP, while **'pattern'** uses vim-rooter like glob pattern matching. Here
-    -- order matters: if one is not detected, the other is used as fallback. You
-    -- can also delete or rearrange the detection methods.
-    ---@type ('lsp'|'pattern')[]|table
-    detection_methods = { 'lsp', 'pattern' },
+  ---Methods of detecting the root directory. `'lsp'` uses the native neovim
+  ---LSP, while `'pattern'` uses vim-rooter like glob pattern matching. Here
+  ---order matters: if one is not detected, the other is used as fallback. You
+  ---can also delete or rearrange the detection methods.
+  --- ---
+  ---Default: `{ 'lsp' , 'pattern' }`
+  --- ---
+  ---@type ("lsp"|"pattern")[]
+  detection_methods = { 'lsp', 'pattern' },
 
-    -- All the patterns used to detect root dir, when `'pattern'` is in
-    -- `detection_methods`
-    ---@type string[]
-    patterns = {
-        '.git',
-        '.github',
-        '_darcs',
-        '.hg',
-        '.bzr',
-        '.svn',
-        'package.json',
-    },
+  ---All the patterns used to detect root dir, when **'pattern'** is in
+  ---detection_methods.
+  ---
+  ---See `:h project.nvim-pattern-matching`.
+  --- ---
+  ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn' }`
+  --- ---
+  ---@type string[]
+  patterns = {
+    '.git',
+    '.github',
+    '_darcs',
+    '.hg',
+    '.bzr',
+    '.svn',
+  },
 
-    -- Table of LSP clients to ignore by name
-    -- eg: { 'efm', ... }
-    ---@type string[]|table
-    ignore_lsp = {},
+  ---If `false`, it won't add a project if its root is not owned by the
+  ---current nvim UID **(UNIX only)**.
+  --- ---
+  ---Default: `true`
+  --- ---
+  ---@type boolean
+  allow_different_owners = true,
 
-    -- Don't calculate root dir on specific directories
-    -- Ex: { '~/.cargo/*', ... }
-    ---@type string[]|table
-    exclude_dirs = {},
+  ---Table of options used for the telescope picker.
+  --- ---
+  ---@class Project.Config.Options.Telescope
+  telescope = {
+    ---Determines whether the newest projects come first in the
+    ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
+    --- ---
+    ---Default: `'newest'`
+    --- ---
+    ---@type 'oldest'|'newest'
+    sort = 'newest',
+  },
 
-    -- If `false`, it won't add a project if its root does not
-    -- match the current user **(UNIX only)**
-    -- ---
-    -- Default: `true`
-    -- ---
-    ---@type boolean
-    allow_different_owners = true,
+  ---Table of lsp clients to ignore by name,
+  ---e.g. `{ 'efm', ... }`.
+  ---
+  ---If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
+  ---for a list of servers.
+  --- ---
+  ---Default: `{}`
+  --- ---
+  ---@type string[]|table
+  ignore_lsp = {},
 
-    -- Table of options used for the telescope picker
-    ---@class Project.Config.Options.Telescope
-    -- Determines whether the newest projects come first in the
-    -- telescope picker, or the oldest
-    -- ---
-    -- Default: `'newest'`
-    -- ---
-    ---@field sort? 'oldest'|'newest'
-    telescope = {
-        sort = 'newest',
-    },
+  ---Don't calculate root dir on specific directories,
+  ---e.g. `{ '~/.cargo/*', ... }`.
+  --- ---
+  ---Default: `{}`
+  --- ---
+  ---@type string[]|table
+  exclude_dirs = {},
 
-    -- Table of options used for the telescope picker
+  ---Make hidden files visible when using the `telescope` picker.
+  --- ---
+  ---Default: `false`
+  --- ---
+  ---@type boolean
+  show_hidden = false,
 
-    -- Show hidden files in telescope
-    ---@type boolean
-    show_hidden = false,
+  ---If `false`, you'll get a _notification_ every time
+  ---`project.nvim` changes directory.
+  --- ---
+  ---Default: `true`
+  --- ---
+  ---@type boolean
+  silent_chdir = true,
 
-    -- When set to false, you will get a message when project.nvim changes your
-    -- directory.
-    ---@type boolean
-    silent_chdir = true,
+  ---Determines the scope for changing the directory.
+  ---
+  ---Valid options are:
+  --- - `'global'`
+  --- - `'tab'`
+  --- - `'win'`
+  --- ---
+  ---Default: `'global'`
+  --- ---
+  ---@type 'global'|'tab'|'win'
+  scope_chdir = 'global',
 
-    -- What scope to change the directory, valid options are
-    -- * global (default)
-    -- * tab
-    -- * win
-    ---@type 'global'|'tab'|'win'
-    scope_chdir = 'global',
-
-    -- Path where project.nvim will store the project history for use in
-    -- telescope
-    ---@type string
-    datapath = vim.fn.stdpath('data'),
+  ---Path where `project.nvim` will store the project history.
+  ---
+  --- For more info, run `:lua vim.print(require('project_nvim').get_history_paths())`
+  --- ---
+  ---Default: `vim.fn.stdpath('data')`
+  --- ---
+  ---@type string
+  datapath = vim.fn.stdpath('data'),
 }
 ```
 
@@ -337,7 +370,7 @@ as `vim-rooter`, but for your convenience here come some examples:
   patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
   ```
 
-**NOTE**: <ins>Make sure to put your pattern exclusions first, and then the patterns you do want included.</ins>
+**NOTE**: Make sure to put your pattern exclusions first, and then the patterns you do want included.
 
 <div align="right">
 
@@ -351,12 +384,12 @@ as `vim-rooter`, but for your convenience here come some examples:
 
 ```lua
 require('nvim-tree').setup({
-    sync_root_with_cwd = true,
-    respect_buf_cwd = true,
-    update_focused_file = {
-        enable = true,
-        update_root = true,
-    },
+  sync_root_with_cwd = true,
+  respect_buf_cwd = true,
+  update_focused_file = {
+    enable = true,
+    update_root = true,
+  },
 })
 ```
 

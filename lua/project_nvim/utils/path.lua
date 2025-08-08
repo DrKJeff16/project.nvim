@@ -6,11 +6,11 @@ local DATAPATH = vim.fn.stdpath('data')
 local Path = {}
 
 --- The directory where the project dir will be saved.
----
+--- ---
 Path.datapath = DATAPATH
 
 --- The directory where the project history will be saved.
----
+--- ---
 Path.projectpath = string.format('%s/project_nvim', Path.datapath)
 
 --- The project history file.

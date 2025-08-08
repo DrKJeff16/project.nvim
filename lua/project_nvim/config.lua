@@ -6,8 +6,6 @@ local pattern_exclude = Glob.pattern_exclude
 
 local copy = vim.deepcopy
 
----@alias Project.Config.Options.DetectionMethods ("lsp"|"pattern")[]|table
-
 ---@class Project.Config
 ---@field setup_called? boolean
 local Config = {}
@@ -19,6 +17,7 @@ Config.defaults = {
     --- ---
     ---Default: `false`
     --- ---
+    ---@type boolean
     manual_mode = false,
 
     ---Methods of detecting the root directory. `'lsp'` uses the native neovim
@@ -28,28 +27,15 @@ Config.defaults = {
     --- ---
     ---Default: `{ 'lsp' , 'pattern' }`
     --- ---
-    ---@type Project.Config.Options.DetectionMethods
+    ---@type ("lsp"|"pattern")[]
     detection_methods = { 'lsp', 'pattern' },
 
     ---All the patterns used to detect root dir, when **'pattern'** is in
     ---detection_methods.
-    --- ---
-    ---Default:
-    ---```lua
-    ---{
-    ---    '.git',
-    ---    '.github',
-    ---    '_darcs',
-    ---    '.hg',
-    ---    '.bzr',
-    ---    '.svn',
-    ---    'package.json',
-    ---    '.stylua.toml',
-    ---    'stylua.toml',
-    ---}
-    ---```
-    --- ---
+    ---
     ---See `:h project.nvim-pattern-matching`
+    --- ---
+    ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn' }`
     --- ---
     ---@type string[]
     patterns = {
@@ -59,9 +45,6 @@ Config.defaults = {
         '.hg',
         '.bzr',
         '.svn',
-        'package.json',
-        '.stylua.toml',
-        'stylua.toml',
     },
 
     ---If `false`, it won't add a project if its root is not owned by the
@@ -69,6 +52,7 @@ Config.defaults = {
     --- ---
     ---Default: `true`
     --- ---
+    ---@type boolean
     allow_different_owners = true,
 
     ---Table of options used for the telescope picker.
@@ -76,7 +60,7 @@ Config.defaults = {
     ---@class Project.Config.Options.Telescope
     telescope = {
         ---Determines whether the newest projects come first in the
-        ---telescope picker, or the oldest.
+        ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
         --- ---
         ---Default: `'newest'`
         --- ---
@@ -86,11 +70,11 @@ Config.defaults = {
 
     ---Table of lsp clients to ignore by name,
     ---e.g. `{ 'efm', ... }`.
-    --- ---
-    ---Default: `{}`
-    --- ---
+    ---
     ---If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
     ---for a list of servers.
+    --- ---
+    ---Default: `{}`
     --- ---
     ---@type string[]|table
     ignore_lsp = {},
@@ -107,6 +91,7 @@ Config.defaults = {
     --- ---
     ---Default: `false`
     --- ---
+    ---@type boolean
     show_hidden = false,
 
     ---If `false`, you'll get a _notification_ every time
@@ -114,6 +99,7 @@ Config.defaults = {
     --- ---
     ---Default: `true`
     --- ---
+    ---@type boolean
     silent_chdir = true,
 
     ---Determines the scope for changing the directory.
@@ -143,8 +129,8 @@ Config.defaults = {
 ---@type table|Project.Config.Options
 Config.options = {}
 
----@param methods string[]|Project.Config.Options.DetectionMethods
----@return Project.Config.Options.DetectionMethods
+---@param methods (string|'lsp'|'pattern')[]
+---@return ('lsp'|'pattern')[]
 function Config.trim_methods(methods)
     if not is_type('table', methods) or vim.tbl_isempty(methods) then
         return {}

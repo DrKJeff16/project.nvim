@@ -23,10 +23,8 @@ local curr_buf = vim.api.nvim_get_current_buf
 ---@field [2] vim.api.keyset.create_autocmd
 
 ---@class Project.API
+---@field attached_lsp? boolean
 local Api = {}
-
--- Internal states
-Api.attached_lsp = false
 
 ---@type string|nil
 Api.last_project = nil
@@ -239,6 +237,8 @@ function Api.attach_to_lsp()
         return
     end
 
+    --- TODO: Instead of messing with `vim.lsp.start_client`, could we hook to the `LspAttach` autocmd?
+
     ---Backup old `start_client` function
     local _start_client = vim.lsp.start_client
 
@@ -267,7 +267,7 @@ end
 
 ---@param dir string
 ---@param method string
----@return boolean|nil
+---@return boolean
 function Api.set_pwd(dir, method)
     if not is_type('string', dir) then
         return false
@@ -287,7 +287,15 @@ function Api.set_pwd(dir, method)
         end
     end
 
-    if not in_tbl(History.session_projects, dir) then
+    local silent = Config.options.silent_chdir
+
+    ---@type string
+    local msg = string.format('(%s.set_pwd):', MODSTR)
+    local old_cwd = vim.fn.getcwd()
+
+    if vim.tbl_isempty(History.session_projects) then
+        History.session_projects = { dir }
+    elseif not in_tbl(History.session_projects, dir) then
         table.insert(History.session_projects, dir)
     elseif #History.session_projects > 1 then -- HACK: Move project to start of table
         ---@type integer
@@ -302,15 +310,6 @@ function Api.set_pwd(dir, method)
 
         table.remove(History.session_projects, old_pos)
         table.insert(History.session_projects, 1, dir)
-    end
-
-    local silent = Config.options.silent_chdir
-
-    ---@type string
-    local msg = string.format('(%s.set_pwd):', MODSTR)
-
-    if vim.fn.getcwd() == dir then
-        return true
     end
 
     local scope_chdir = Config.options.scope_chdir
@@ -331,7 +330,7 @@ function Api.set_pwd(dir, method)
         msg = silent and msg or string.format('%s lchdir to `%s`: ', msg, dir)
     else
         vim.notify(string.format('%s INVALID value for `scope_chdir`', msg), WARN)
-        return
+        return false
     end
 
     msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
@@ -462,9 +461,7 @@ function Api.on_buf_enter(verbose)
 
     Api.set_pwd(Api.current_project, Api.current_method)
 
-    vim.schedule(function()
         require('project_nvim.utils.history').write_projects_to_history()
-    end)
 end
 
 ---@param verbose? boolean
