@@ -2,31 +2,27 @@
 
 # project.nvim
 
-**_Looking for other maintainers in case I'm unable to keep this repo up to date_**
-
-</div>
-
----
-
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
 that provides a dynamic project management solution.
 
 This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
 I will be maintaining this plugin for the foreseeable future.
 
-<details>
-<summary><b>Checkhealth Support</b> <i>(<code>:checkhealth project_nvim</code>)</i></summary>
+> **_Looking for other maintainers in case I'm unable to keep this repo up to date!_**
 
-  ![Checkhealth Support](https://github.com/user-attachments/assets/10508903-6d95-443f-843c-f2ce4c7f7360)
+</div>
 
-</details>
+## Checkhealth Support
 
-<details>
-<summary><b>Telescope Integration</b> <i>(<code>:Telescope project</code>)</i></summary>
+`:checkhealth project_nvim`:
 
-  ![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
+![Checkhealth Support](https://github.com/user-attachments/assets/10508903-6d95-443f-843c-f2ce4c7f7360)
 
-</details>
+## Telescope Integration
+
+`:Telescope project`:
+
+![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
 
 ---
 
@@ -77,6 +73,7 @@ I will be maintaining this plugin for the foreseeable future.
 
 - [X] Fix deprecated `vim.lsp` calls (**_CRITICAL_**)
 - [X] Fix bug with history not working
+- [X] Fix history not being deleted consistently when using Telescope picker
 - [X] `vim.health` integration, AKA `:checkhealth project_nvim`
 - [X] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
 - [X] Add info for `:ProjectRoot` and `:AddProject` commands ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/133))
