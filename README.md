@@ -231,6 +231,8 @@ require('project_nvim').setup({
   ---LSP, while `'pattern'` uses vim-rooter like glob pattern matching. Here
   ---order matters: if one is not detected, the other is used as fallback. You
   ---can also delete or rearrange the detection methods.
+  ---
+  ---The detection methods get filtered and rid of duplicates during runtime.
   --- ---
   ---Default: `{ 'lsp' , 'pattern' }`
   --- ---

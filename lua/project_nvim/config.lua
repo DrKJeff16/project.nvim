@@ -24,6 +24,8 @@ Config.defaults = {
     ---LSP, while `'pattern'` uses vim-rooter like glob pattern matching. Here
     ---order matters: if one is not detected, the other is used as fallback. You
     ---can also delete or rearrange the detection methods.
+    ---
+    ---The detection methods get filtered and rid of duplicates during runtime.
     --- ---
     ---Default: `{ 'lsp' , 'pattern' }`
     --- ---
@@ -81,6 +83,8 @@ Config.defaults = {
 
     ---Don't calculate root dir on specific directories,
     ---e.g. `{ '~/.cargo/*', ... }`.
+    ---
+    ---See the `Pattern Matching` section in the `README.md` for more info.
     --- ---
     ---Default: `{}`
     --- ---
@@ -130,13 +134,14 @@ Config.defaults = {
 Config.options = {}
 
 ---@param methods (string|'lsp'|'pattern')[]
----@return ('lsp'|'pattern')[]
+---@return ('lsp'|'pattern')[]|table res
 function Config.trim_methods(methods)
+    local res = {}
+
     if not is_type('table', methods) or vim.tbl_isempty(methods) then
-        return {}
+        return res
     end
 
-    local res = {}
     local checker = { lsp = false, pattern = false }
 
     for _, v in next, methods do
@@ -165,11 +170,11 @@ function Config.trim_methods(methods)
 end
 
 ---The function called when running `require('project_nvim').setup()`
----@param options? table|Project.Config.Options
+---@param options? Project.Config.Options
 function Config.setup(options)
     options = is_type('table', options) and options or {}
 
-    Config.options = vim.tbl_deep_extend('keep', options, Config.defaults)
+    Config.options = vim.tbl_deep_extend('force', copy(Config.defaults), options)
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
 
     Config.options.detection_methods = Config.trim_methods(copy(Config.options.detection_methods))
@@ -177,11 +182,8 @@ function Config.setup(options)
     -- Implicitly unset autochdir
     vim.opt.autochdir = false
 
-    local Path = require('project_nvim.utils.path')
-    local API = require('project_nvim.api')
-
-    Path.init()
-    API.init()
+    require('project_nvim.utils.path').init()
+    require('project_nvim.api').init()
 
     Config.setup_called = true
 end
