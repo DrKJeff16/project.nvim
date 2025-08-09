@@ -38,7 +38,7 @@ Config.defaults = {
     ---
     ---See `:h project.nvim-pattern-matching`
     --- ---
-    ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn' }`
+    ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile' }`
     --- ---
     ---@type string[]
     patterns = {
@@ -48,10 +48,13 @@ Config.defaults = {
         '.hg',
         '.bzr',
         '.svn',
+        'Pipfile',
     },
 
+    ---Determines whether a project will be added if its project root is owned by a different user.
+    ---
     ---If `false`, it won't add a project if its root is not owned by the
-    ---current nvim UID **(UNIX only)**.
+    ---current nvim `UID` **(UNIX only)**.
     --- ---
     ---Default: `true`
     --- ---

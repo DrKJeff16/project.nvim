@@ -238,20 +238,23 @@ require('project_nvim').setup({
   ---
   ---See `:h project.nvim-pattern-matching`
   --- ---
-  ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn' }`
+  ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile' }`
   --- ---
   ---@type string[]
   patterns = {
-      '.git',
-      '.github',
-      '_darcs',
-      '.hg',
-      '.bzr',
-      '.svn',
+    '.git',
+    '.github',
+    '_darcs',
+    '.hg',
+    '.bzr',
+    '.svn',
+    'Pipfile',
   },
 
+  ---Determines whether a project will be added if its project root is owned by a different user.
+  ---
   ---If `false`, it won't add a project if its root is not owned by the
-  ---current nvim UID **(UNIX only)**.
+  ---current nvim `UID` **(UNIX only)**.
   --- ---
   ---Default: `true`
   --- ---
@@ -341,8 +344,8 @@ require('project_nvim').setup({
 }
 ```
 
-Even if you are pleased with the defaults, please note that `setup()` must be
-called for the plugin to start.
+_**Even if you are pleased with the defaults, please note that `setup()` must be
+called for the plugin to start.**_
 
 <div align="right">
 
