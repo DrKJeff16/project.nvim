@@ -20,6 +20,13 @@ local curr_buf = vim.api.nvim_get_current_buf
 ---@field [1] string[]|string
 ---@field [2] vim.api.keyset.create_autocmd
 
+---@param dir string
+---@param identifier string
+---@return boolean
+local function is(dir, identifier)
+    return dir:match('.*/(.*)') == identifier
+end
+
 ---@class Project.API
 ---@field attached_lsp? boolean
 local Api = {}
@@ -128,13 +135,6 @@ function Api.find_pattern_root()
 
             table.insert(curr_dir_cache, file)
         end
-    end
-
-    ---@param dir string
-    ---@param identifier string
-    ---@return boolean
-    local function is(dir, identifier)
-        return dir:match('.*/(.*)') == identifier
     end
 
     ---@param dir string
