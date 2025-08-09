@@ -34,8 +34,8 @@ I will be maintaining this plugin for the foreseeable future.
 4. [Installation](#installation)
 5. [Configuration](#configuration)
     1. [Pattern Matching](#pattern-matching)
-    2. [Nvim Tree Integration](#nvim-tree-integration)
-    3. [Telescope Integration](#telescope-integration)
+    2. [Nvim Tree](#nvim-tree)
+    3. [Telescope](#telescope)
         1. [Telescope Mappings](#telescope-mappings)
 6. [Manual Mode](#manual-mode)
     1. [`:AddProject`](#addproject)
@@ -60,8 +60,8 @@ I will be maintaining this plugin for the foreseeable future.
 - If no LSP is available then it'll try using pattern matching to `cd` to the project root directory instead
 - Asynchronous file IO so it will not slow down neovim when reading the history file on startup.
 - Functional `checkhealth` hook (`:checkhealth project_nvim`)
-- [Telescope Integration](#telescope-integration) `:Telescope projects`
-- [`nvim-tree` integration](#nvim-tree-integration)
+- [Telescope Integration](#telescope) `:Telescope projects`
+- [`nvim-tree` Integration](#nvim-tree)
 
 <div align="right">
 
@@ -75,19 +75,20 @@ I will be maintaining this plugin for the foreseeable future.
 - [X] Fix bug with history not working
 - [X] Fix history not being deleted consistently when using Telescope picker
 - [X] `vim.health` integration, AKA `:checkhealth project_nvim`
-- [X] Only include projects that the current user owns ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/167))
-- [X] Add info for `:ProjectRoot` and `:AddProject` commands ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/133))
+- [X] Only include projects that the current user owns ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/167))
+- [X] Add info for `:ProjectRoot` and `:AddProject` commands ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/133))
 - [X] Renamed `project.lua` to `api.lua`
-- [X] Extend API
-  - [X] Expose `project_nvim.api.get_project_root()` (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/112)**)
-  - [X] Add utility to display the current project
-      `project_nvim.api.current_project` or `project_nvim.api.get_current_project()`
-      (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/149)**)
+- [ ] Extend API
+  - [X] Rename `project.lua` to `api.lua`
+  - [X] Expose `project_nvim.api.get_project_root()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/112))
+  - [X] Add utility to display the current project `get_current_project()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/149))
+  - [ ] Add `enable()`, `disable()` and `toggle()`, or similar utilities
+  - [ ] Implement `delete_project()` wrapper for the end-user to use (_not to be confused with `history.delete_project()`_)
+  - [ ] Add more user commands
 - [X] Extend Telescope picker configuration
-  - [X] Fix `file_browser` mapping (**[CREDITS](https://github.com/ahmedkhalf/project.nvim/pull/107)**)
-  - [X] Add option to control picker sorting order ([should solve this](https://github.com/ahmedkhalf/project.nvim/issues/140))
+  - [X] Fix `file_browser` mapping ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/107))
+  - [X] Add option to control picker sorting order ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/140))
 - [ ] Finish [`CONTRIBUTING.md`](./CONTRIBUTING.md)
-- [ ] Add more user commands
 
 <div align="right">
 
@@ -103,17 +104,13 @@ I will be maintaining this plugin for the foreseeable future.
 - [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
 - [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(OPTIONAL)**
 
+## Installation
+
 ---
 
 <div align="center">
-
-**_WARNING: DO NOT LAZY-LOAD THIS PLUGIN_**
-
-You might have issues with your `cwd` otherwise.
-
+<i><ins><b>WARNING: DO NOT LAZY-LOAD THIS PLUGIN</b><br />You might have issues with your <code>cwd</code> otherwise.</ins></i>
 </div>
-
-## Installation
 
 ---
 
@@ -377,7 +374,7 @@ as `vim-rooter`, but for your convenience here come some examples:
 
 </div>
 
-### Nvim Tree Integration
+### Nvim Tree
 
 > Make sure these flags are enabled to support [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua):
 
@@ -398,7 +395,7 @@ require('nvim-tree').setup({
 
 </div>
 
-### Telescope Integration
+### Telescope
 
 To enable [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) integration use the following
 code in your config:
