@@ -236,18 +236,18 @@ require('project_nvim').setup({
   ---All the patterns used to detect root dir, when **'pattern'** is in
   ---detection_methods.
   ---
-  ---See `:h project.nvim-pattern-matching`.
+  ---See `:h project.nvim-pattern-matching`
   --- ---
   ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn' }`
   --- ---
   ---@type string[]
   patterns = {
-    '.git',
-    '.github',
-    '_darcs',
-    '.hg',
-    '.bzr',
-    '.svn',
+      '.git',
+      '.github',
+      '_darcs',
+      '.hg',
+      '.bzr',
+      '.svn',
   },
 
   ---If `false`, it won't add a project if its root is not owned by the
@@ -262,6 +262,17 @@ require('project_nvim').setup({
   --- ---
   ---@class Project.Config.Options.Telescope
   telescope = {
+    ---Determines whether the `telescope` picker should be called.
+    ---
+    ---If telescope is not installed, this doesn't make a difference.
+    ---
+    ---Note that even if set to `false`, you can still load the extension manually.
+    --- ---
+    ---Default: `true`
+    --- ---
+    ---@type boolean
+    enabled = true,
+
     ---Determines whether the newest projects come first in the
     ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
     --- ---
@@ -284,6 +295,8 @@ require('project_nvim').setup({
 
   ---Don't calculate root dir on specific directories,
   ---e.g. `{ '~/.cargo/*', ... }`.
+  ---
+  ---See the `Pattern Matching` section in the `README.md` for more info.
   --- ---
   ---Default: `{}`
   --- ---
@@ -319,7 +332,7 @@ require('project_nvim').setup({
 
   ---Path where `project.nvim` will store the project history.
   ---
-  --- For more info, run `:lua vim.print(require('project_nvim').get_history_paths())`
+  ---For more info, run `:lua vim.print(require('project_nvim').get_history_paths())`
   --- ---
   ---Default: `vim.fn.stdpath('data')`
   --- ---

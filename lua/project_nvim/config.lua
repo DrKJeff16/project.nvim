@@ -131,6 +131,8 @@ Config.defaults = {
     scope_chdir = 'global',
 
     ---Path where `project.nvim` will store the project history.
+    ---
+    ---For more info, run `:lua vim.print(require('project_nvim').get_history_paths())`
     --- ---
     ---Default: `vim.fn.stdpath('data')`
     --- ---
