@@ -2,6 +2,7 @@ local Util = require('project_nvim.utils.util')
 local Glob = require('project_nvim.utils.globtopattern')
 
 local is_type = Util.is_type
+local mod_exists = Util.mod_exists
 local pattern_exclude = Glob.pattern_exclude
 
 local copy = vim.deepcopy
@@ -61,6 +62,17 @@ Config.defaults = {
     --- ---
     ---@class Project.Config.Options.Telescope
     telescope = {
+        ---Determines whether the `telescope` picker should be called.
+        ---
+        ---If telescope is not installed, this doesn't make a difference.
+        ---
+        ---Note that even if set to `false`, you can still load the extension manually.
+        --- ---
+        ---Default: `true`
+        --- ---
+        ---@type boolean
+        enabled = true,
+
         ---Determines whether the newest projects come first in the
         ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
         --- ---
@@ -185,6 +197,10 @@ function Config.setup(options)
 
     require('project_nvim.utils.path').init()
     require('project_nvim.api').init()
+
+    if Config.options.telescope.enabled and mod_exists('telescope') then
+        require('telescope').load_extension('projects')
+    end
 
     Config.setup_called = true
 end
