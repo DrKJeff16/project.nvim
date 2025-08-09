@@ -169,7 +169,8 @@ function Config.trim_methods(methods)
     return res
 end
 
----The function called when running `require('project_nvim').setup()`
+---The function called when running `require('project_nvim').setup()`.
+--- ---
 ---@param options? Project.Config.Options
 function Config.setup(options)
     options = is_type('table', options) and options or {}

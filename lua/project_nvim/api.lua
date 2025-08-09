@@ -37,11 +37,13 @@ Api.current_method = nil
 
 Api.get_recent_projects = require('project_nvim.utils.history').get_recent_projects
 
+---Get the LSP client for current buffer.
+---
+---Returns `nil` or a string.
+--- ---
 ---@return string|nil
 ---@return string|nil
 function Api.find_lsp_root()
-    -- Get lsp client for current buffer
-    -- Returns nil or string
     local bufnr = curr_buf()
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
