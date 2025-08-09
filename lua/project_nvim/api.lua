@@ -1,5 +1,3 @@
----@diagnostic disable:missing-fields
-
 local MODSTR = 'project_nvim.api'
 
 local Config = require('project_nvim.config')

@@ -1,6 +1,5 @@
----@diagnostic disable:missing-fields
-
--- The `project_nvim` module
+---The `project_nvim` module.
+--- ---
 ---@class Project
 local Project = {}
 

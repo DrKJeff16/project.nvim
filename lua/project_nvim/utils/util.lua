@@ -1,5 +1,3 @@
----@diagnostic disable:missing-fields
-
 ---@alias Project.Utils.Util.Types
 ---|'number'
 ---|'string'
