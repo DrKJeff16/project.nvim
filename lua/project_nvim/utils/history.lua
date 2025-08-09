@@ -168,7 +168,7 @@ function History.read_projects_from_history()
 end
 
 ---@return string[]
-function History.sanitize_projects()
+function History.get_recent_projects()
     ---@type string[]
     local tbl = {}
 
@@ -192,8 +192,6 @@ function History.sanitize_projects()
     return Util.dedup(real_tbl)
 end
 
-History.get_recent_projects = History.sanitize_projects
-
 function History.write_projects_to_history()
     -- Unlike read projects, write projects is synchronous
     -- because it runs when vim ends
@@ -208,7 +206,7 @@ function History.write_projects_to_history()
         return
     end
 
-    local res = History.sanitize_projects()
+    local res = History.get_recent_projects()
 
     ---@type string[]
     local tbl_out
