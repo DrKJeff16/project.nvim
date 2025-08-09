@@ -1,0 +1,46 @@
+local Util = require('project_nvim.utils.util')
+
+local reverse = Util.reverse
+
+local Finders = require('telescope.finders')
+local Entry_display = require('telescope.pickers.entry_display')
+
+---@class Project.Telescope.Util
+local M = {}
+
+---@param entry table
+function M.make_display(entry)
+    local displayer = Entry_display.create({
+        separator = ' ',
+        items = { { width = 30 }, { remaining = true } },
+    })
+
+    return displayer({ entry.name, { entry.value, 'Comment' } })
+end
+
+---@return table
+function M.create_finder()
+    local Config = require('project_nvim.config')
+    local History = require('project_nvim.utils.history')
+
+    local results = History.get_recent_projects()
+
+    if Config.options.telescope.sort == 'newest' then
+        results = reverse(vim.deepcopy(results))
+    end
+
+    return Finders.new_table({
+        results = results,
+        entry_maker = function(entry)
+            local name = vim.fn.fnamemodify(entry, ':h:t') .. '/' .. vim.fn.fnamemodify(entry, ':t')
+            return {
+                display = M.make_display,
+                name = name,
+                value = entry,
+                ordinal = name .. ' ' .. entry,
+            }
+        end,
+    })
+end
+
+return M
