@@ -1,5 +1,3 @@
----@diagnostic disable:missing-fields
-
 ---@alias OpenMode
 ---|integer
 ---|string
@@ -30,10 +28,14 @@ local uv = vim.uv or vim.loop
 
 local ERROR = vim.log.levels.ERROR
 
+local copy = vim.deepcopy
+local in_tbl = vim.tbl_contains
+
 local dir_exists = Util.dir_exists
 local normalise_path = Util.normalise_path
 
 ---@class Project.Utils.History
+---@field has_watch_setup? boolean
 local History = {}
 
 -- projects from previous neovim sessions
@@ -44,22 +46,21 @@ History.recent_projects = nil
 ---@type string[]|table
 History.session_projects = {}
 
-History.has_watch_setup = false
-
 ---@param mode OpenMode
 ---@param callback? fun(err: string|nil, fd: integer|nil)
 ---@return integer|nil
 function History.open_history(mode, callback)
     local histfile = Path.historyfile
+    local flag = tonumber('644', 8)
 
-    if callback ~= nil then -- async
-        Path.create_scaffolding(function(_, _)
-            uv.fs_open(histfile, mode, tonumber('644', 8), callback)
-        end)
-    else -- sync
+    if callback == nil then -- async
         Path.create_scaffolding()
-        return uv.fs_open(histfile, mode, tonumber('644', 8))
+        return uv.fs_open(histfile, mode, flag)
     end
+
+    Path.create_scaffolding(function(_, _)
+        uv.fs_open(histfile, mode, flag, callback)
+    end)
 end
 
 ---@param tbl string[]
@@ -95,13 +96,13 @@ end
 ---@param project ProjParam
 function History.delete_project(project)
     local new_tbl = {}
-    for k, v in next, History.recent_projects do
-        if v ~= project.value then
-            new_tbl[k] = v
+    for _, v in next, History.recent_projects do
+        if v ~= project.value and not in_tbl(new_tbl, v) then
+            table.insert(new_tbl, v)
         end
     end
 
-    History.recent_projects = new_tbl
+    History.recent_projects = copy(new_tbl)
 
     History.write_projects_to_history()
 end
@@ -117,9 +118,9 @@ local function deserialize_history(history_data)
         end
     end
 
-    projects = delete_duplicates(projects)
+    projects = delete_duplicates(copy(projects))
 
-    History.recent_projects = projects
+    History.recent_projects = copy(projects)
 end
 
 function History.setup_watch()
@@ -128,27 +129,27 @@ function History.setup_watch()
         return
     end
 
-    History.has_watch_setup = true
-
     local event = uv.new_fs_event()
     if event == nil then
         return
     end
 
     event:start(Path.projectpath, {}, function(err, _, events)
-        if err ~= nil then
+        if err ~= nil or not events.change then
             return
         end
-        if events['change'] then
-            History.recent_projects = nil
-            History.read_projects_from_history()
-        end
+
+        History.recent_projects = nil
+        History.read_projects_from_history()
     end)
+
+    History.has_watch_setup = true
 end
 
 function History.read_projects_from_history()
     History.open_history('r', function(_, fd)
         History.setup_watch()
+
         if fd == nil then
             return
         end
@@ -178,7 +179,7 @@ function History.sanitize_projects()
         tbl = History.session_projects
     end
 
-    tbl = delete_duplicates(vim.deepcopy(tbl))
+    tbl = delete_duplicates(copy(tbl))
 
     ---@type string[]
     local real_tbl = {}
