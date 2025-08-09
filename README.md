@@ -407,7 +407,9 @@ require('telescope').load_extension('projects')
 ```
 
 Also you can configure the picker when calling `require('telescope').setup()`
-(CREDITS: @ldfwbebp https://github.com/ahmedkhalf/project.nvim/pull/160):
+(**CREDITS**: [@ldfwbebp](https://github.com/ldfwbebp) https://github.com/ahmedkhalf/project.nvim/pull/160).
+
+For example:
 
 ```lua
 require('telescope').setup({
@@ -427,15 +429,12 @@ require('telescope').setup({
 })
 ```
 
-<div align="center">
-
 After that you can now call it from the command line:
 
 ```vim
+" Vimscript
 :Telescope projects
 ```
-
-</div>
 
 <div align="right">
 
