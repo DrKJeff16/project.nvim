@@ -192,10 +192,7 @@ function History.sanitize_projects()
     return Util.dedup(real_tbl)
 end
 
----@return string[]
-function History.get_recent_projects()
-    return History.sanitize_projects()
-end
+History.get_recent_projects = History.sanitize_projects
 
 function History.write_projects_to_history()
     -- Unlike read projects, write projects is synchronous
