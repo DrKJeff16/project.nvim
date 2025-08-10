@@ -27,6 +27,40 @@ local function is(dir, identifier)
     return dir:match('.*/(.*)') == identifier
 end
 
+---@param path_str string
+---@return string
+local function get_parent(path_str)
+    path_str = path_str:match('^(.*)/')
+
+    return (path_str ~= '') and path_str or '/'
+end
+
+---@param dir string
+---@param identifier string
+local function sub(dir, identifier)
+    local path_str = get_parent(dir)
+    local current = ''
+
+    -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
+    while true do
+        if is(path_str, identifier) then
+            return true
+        end
+        current = path_str
+        path_str = get_parent(path_str)
+
+        if current == path_str then
+            return false
+        end
+    end
+end
+
+---@param dir string
+---@param identifier string
+local function child(dir, identifier)
+    return is(get_parent(dir), identifier)
+end
+
 ---@class Project.API
 ---@field attached_lsp? boolean
 local Api = {}
@@ -105,14 +139,6 @@ function Api.find_pattern_root()
     ---@type string[]
     local curr_dir_cache = {}
 
-    ---@param path_str string
-    ---@return string
-    local function get_parent(path_str)
-        path_str = path_str:match('^(.*)/')
-
-        return (path_str ~= '') and path_str or '/'
-    end
-
     ---@param file_dir string
     local function get_files(file_dir)
         last_dir_cache = file_dir
@@ -139,32 +165,6 @@ function Api.find_pattern_root()
 
     ---@param dir string
     ---@param identifier string
-    local function sub(dir, identifier)
-        local path_str = get_parent(dir)
-        local current = ''
-
-        -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
-        while true do
-            if is(path_str, identifier) then
-                return true
-            end
-            current = path_str
-            path_str = get_parent(path_str)
-
-            if current == path_str then
-                return false
-            end
-        end
-    end
-
-    ---@param dir string
-    ---@param identifier string
-    local function child(dir, identifier)
-        return is(get_parent(dir), identifier)
-    end
-
-    ---@param dir string
-    ---@param identifier string
     local function has(dir, identifier)
         if last_dir_cache ~= dir then
             get_files(dir)
@@ -182,18 +182,16 @@ function Api.find_pattern_root()
     ---@param pattern string
     ---@return boolean
     local function match(dir, pattern)
+        local switch = {
+            ['='] = is,
+            ['^'] = sub,
+            ['>'] = child,
+        }
+
         local first_char = pattern:sub(1, 1)
 
-        if first_char == '=' then
-            return is(dir, pattern:sub(2))
-        end
-
-        if first_char == '^' then
-            return sub(dir, pattern:sub(2))
-        end
-
-        if first_char == '>' then
-            return child(dir, pattern:sub(2))
+        if in_tbl(vim.tbl_keys(switch), first_char) then
+            return switch[first_char](dir, pattern:sub(2))
         end
 
         return has(dir, pattern)
