@@ -1,3 +1,5 @@
+local fmt = string.format
+
 local MODSTR = 'project_nvim.api'
 
 local Config = require('project_nvim.config')
@@ -37,6 +39,7 @@ end
 
 ---@param dir string
 ---@param identifier string
+---@return boolean
 local function sub(dir, identifier)
     local path_str = get_parent(dir)
     local current = ''
@@ -57,6 +60,7 @@ end
 
 ---@param dir string
 ---@param identifier string
+---@return boolean
 local function child(dir, identifier)
     return is(get_parent(dir), identifier)
 end
@@ -121,7 +125,7 @@ function Api.verify_owner(dir)
     local stat = uv.fs_stat(dir)
 
     if stat == nil then
-        error(string.format('(%s.verify_owner): Directory unreachable', MODSTR), ERROR)
+        error(fmt('(%s.verify_owner): Directory unreachable', MODSTR), ERROR)
     end
 
     return stat.uid == uv.getuid()
@@ -169,12 +173,15 @@ function Api.find_pattern_root()
         if last_dir_cache ~= dir then
             get_files(dir)
         end
+
         local pattern = Glob.globtopattern(identifier)
+
         for _, file in next, curr_dir_cache do
             if file:match(pattern) ~= nil then
                 return true
             end
         end
+
         return false
     end
 
@@ -202,21 +209,24 @@ function Api.find_pattern_root()
     while true do
         for _, pattern in next, Config.options.patterns do
             local exclude = false
+
             if pattern:sub(1, 1) == '!' then
                 exclude = true
                 pattern = pattern:sub(2)
             end
+
             if match(search_dir, pattern) then
-                if exclude then
-                    break
-                else
+                if not exclude then
                     return search_dir, 'pattern ' .. pattern
                 end
+
+                break
             end
         end
 
         local parent = get_parent(search_dir)
-        if parent == search_dir or parent == nil then
+
+        if parent == nil or parent == search_dir then
             return nil
         end
 
@@ -277,10 +287,7 @@ function Api.set_pwd(dir, method)
         local valid = Api.verify_owner(dir)
 
         if not valid then
-            vim.notify(
-                string.format('(%s.set_pwd): Project root is owned by a different user', MODSTR),
-                WARN
-            )
+            vim.notify(fmt('(%s.set_pwd): Project root is owned by a different user', MODSTR), WARN)
             return false
         end
     end
@@ -288,7 +295,7 @@ function Api.set_pwd(dir, method)
     local silent = Config.options.silent_chdir
 
     ---@type string
-    local msg = string.format('(%s.set_pwd):', MODSTR)
+    local msg = fmt('(%s.set_pwd):', MODSTR)
     local old_cwd = vim.fn.getcwd()
 
     if vim.tbl_isempty(History.session_projects) then
@@ -317,27 +324,24 @@ function Api.set_pwd(dir, method)
     if scope_chdir == 'global' then
         ok, _ = pcall(vim.api.nvim_set_current_dir, dir)
 
-        msg = silent and msg or string.format('%s chdir to `%s`: ', msg, dir)
+        msg = silent and msg or fmt('%s chdir to `%s`: ', msg, dir)
     elseif scope_chdir == 'tab' then
         ok, _ = pcall(vim.cmd.tchdir, dir)
 
-        msg = silent and msg or string.format('%s tchdir to `%s`: ', msg, dir)
+        msg = silent and msg or fmt('%s tchdir to `%s`: ', msg, dir)
     elseif scope_chdir == 'win' then
         ok, _ = pcall(vim.cmd.lchdir, dir)
 
-        msg = silent and msg or string.format('%s lchdir to `%s`: ', msg, dir)
+        msg = silent and msg or fmt('%s lchdir to `%s`: ', msg, dir)
     else
-        vim.notify(string.format('%s INVALID value for `scope_chdir`', msg), WARN)
+        vim.notify(fmt('%s INVALID value for `scope_chdir`', msg), WARN)
         return false
     end
 
     msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
 
     if not silent then
-        vim.notify(
-            string.format('(%s.set_pwd): Set CWD to %s using %s\n', MODSTR, dir, method),
-            INFO
-        )
+        vim.notify(fmt('(%s.set_pwd): Set CWD to %s using %s\n', MODSTR, dir, method), INFO)
 
         if msg:sub(-6) == 'FAILED' then
             vim.notify(msg, WARN)
@@ -375,7 +379,7 @@ function Api.get_project_root()
         if detection_method == 'lsp' then
             root, lsp_name = Api.find_lsp_root()
             if root ~= nil then
-                return root, string.format('"%s" lsp', lsp_name)
+                return root, fmt('"%s" lsp', lsp_name)
             end
         elseif detection_method == 'pattern' then
             root, method = Api.find_pattern_root()
@@ -418,11 +422,11 @@ end
 function Api.is_file()
     local bufnr = curr_buf()
 
-    local buf_type = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
+    local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
 
     local whitelisted_buf_type = { '', 'acwrite' }
     for _, wtype in next, whitelisted_buf_type do
-        if buf_type == wtype then
+        if bt == wtype then
             return true
         end
     end
@@ -448,11 +452,7 @@ function Api.on_buf_enter(verbose)
 
     if verbose then
         vim.notify(
-            string.format(
-                'Root: %s\nMethod: %s',
-                Api.current_project or 'NONE',
-                Api.current_method or 'NONE'
-            ),
+            fmt('Root: %s\nMethod: %s', Api.current_project or 'NONE', Api.current_method or 'NONE'),
             INFO
         )
     end
@@ -469,14 +469,14 @@ function Api.add_project_manually(verbose)
     local current_dir = vim.fn.expand('%:p:h')
 
     if verbose then
-        vim.notify(string.format('Attempting to process `%s`', current_dir), INFO)
+        vim.notify(fmt('Attempting to process `%s`', current_dir), INFO)
     end
 
     Api.set_pwd(current_dir, 'manual')
 end
 
 function Api.init()
-    local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = false })
+    local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = true })
 
     ---@type AutocmdTuple[]
     local autocmds = {
