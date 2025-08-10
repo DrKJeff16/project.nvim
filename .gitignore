@@ -4,6 +4,9 @@
 *.patch
 *.diff
 
+# Custom Scripts
+/scripts/
+
 # Compressed Data
 *.7z
 *.Z
