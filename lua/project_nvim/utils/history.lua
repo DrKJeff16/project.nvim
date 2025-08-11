@@ -92,7 +92,7 @@ local function delete_duplicates(tbl)
         end
     end
 
-    return Util.dedup(res)
+    return dedup(res)
 end
 
 function History.filter_recent_projects()
@@ -207,12 +207,15 @@ function History.get_recent_projects()
         end
     end
 
-    return Util.dedup(real_tbl)
+    return dedup(real_tbl)
 end
 
+---Write projects to history file.
+---
+---Unlike read projects, write projects is synchronous
+---because it runs when Vim ends.
+--- ---
 function History.write_projects_to_history()
-    -- Unlike read projects, write projects is synchronous
-    -- because it runs when vim ends
     local file = History.open_history(History.recent_projects == nil and 'a' or 'w')
 
     if file == nil then

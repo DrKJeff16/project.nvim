@@ -9,6 +9,7 @@ local Util = require('project_nvim.utils.util')
 
 local is_type = Util.is_type
 local is_windows = Util.is_windows
+local reverse = Util.reverse
 
 local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
@@ -17,6 +18,7 @@ local WARN = vim.log.levels.WARN
 
 local in_tbl = vim.tbl_contains
 local curr_buf = vim.api.nvim_get_current_buf
+local copy = vim.deepcopy
 
 ---@class AutocmdTuple
 ---@field [1] string[]|string
@@ -367,22 +369,18 @@ function Api.get_history_paths(path)
     }
 end
 
+---Returns project root, as well as method
 ---@return string|nil
 ---@return string|nil
 function Api.get_project_root()
-    -- returns project root, as well as method
     for _, detection_method in next, Config.options.detection_methods do
-        local root
-        local lsp_name
-        local method
-
         if detection_method == 'lsp' then
-            root, lsp_name = Api.find_lsp_root()
+            local root, lsp_name = Api.find_lsp_root()
             if root ~= nil then
                 return root, fmt('"%s" lsp', lsp_name)
             end
         elseif detection_method == 'pattern' then
-            root, method = Api.find_pattern_root()
+            local root, method = Api.find_pattern_root()
             if root ~= nil then
                 return root, method
             end
@@ -400,7 +398,7 @@ function Api.get_last_project()
     local last = nil
 
     if #recent > 1 then
-        recent = Util.reverse(vim.deepcopy(recent))
+        recent = reverse(copy(recent))
         last = recent[2]
     end
 
@@ -425,8 +423,8 @@ function Api.is_file()
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
 
     local whitelisted_buf_type = { '', 'acwrite' }
-    for _, wtype in next, whitelisted_buf_type do
-        if bt == wtype then
+    for _, buf_type in next, whitelisted_buf_type do
+        if bt == buf_type then
             return true
         end
     end
