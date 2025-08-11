@@ -206,6 +206,7 @@ function Config.setup(options)
 
     Config.options.detection_methods = Config.trim_methods(copy(Config.options.detection_methods))
 
+    ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
     vim.opt.autochdir = Config.options.enable_autochdir
 
     require('project_nvim.utils.path').init()
