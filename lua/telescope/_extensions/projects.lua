@@ -25,12 +25,13 @@ local search_in_project_files = ProjActions.search_in_project_files
 local change_working_directory = ProjActions.change_working_directory
 
 -- CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
-
 local default_opts = {}
 
 ---@param opts table
 local function setup(opts)
-    default_opts = vim.tbl_deep_extend('force', copy(default_opts), opts or {})
+    opts = is_type('table', opts) and opts or {}
+
+    default_opts = vim.tbl_deep_extend('keep', opts, copy(default_opts))
 end
 
 ---Main entrypoint for Telescope.
@@ -41,7 +42,7 @@ end
 local function projects(opts)
     opts = is_type('table', opts) and opts or {}
 
-    opts = vim.tbl_deep_extend('force', default_opts, opts)
+    opts = vim.tbl_deep_extend('keep', copy(opts), default_opts)
 
     Pickers.new(opts, {
         prompt_title = 'Recent Projects',
@@ -50,7 +51,7 @@ local function projects(opts)
         sorter = telescope_config.generic_sorter(opts),
 
         ---@param prompt_bufnr integer
-        ---@param map fun(mode: string, lhs: string, rhs: string|fun(), opts: vim.api.keyset.keymap?)
+        ---@param map fun(mode: string, lhs: string, rhs: string|fun(), opts?: vim.api.keyset.keymap)
         attach_mappings = function(prompt_bufnr, map)
             ---@class PickerMaps
             ---@field n table<string, string|fun()>

@@ -92,6 +92,16 @@ Config.defaults = {
         --- ---
         ---@type 'oldest'|'newest'
         sort = 'newest',
+
+        ---Use `telescope-file-browser.nvim` instead of builtins.
+        ---
+        ---If you have `telescope-file-browser.nvim` installed, you can enable this
+        ---so that the Telescope picker uses it instead of the `find_files` builtin.
+        --- ---
+        ---Default: `false`
+        --- ---
+        ---@type boolean
+        prefer_file_browser = false,
     },
 
     ---Table of lsp clients to ignore by name,
