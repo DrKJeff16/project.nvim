@@ -30,16 +30,18 @@ local ERROR = vim.log.levels.ERROR
 
 local copy = vim.deepcopy
 local in_tbl = vim.tbl_contains
+local notify = vim.notify
 
 local dir_exists = Util.dir_exists
 local normalise_path = Util.normalise_path
+local dedup = Util.dedup
 
 ---@class Project.Utils.History
 ---@field has_watch_setup? boolean
 local History = {}
 
 -- projects from previous neovim sessions
----@type (string|nil)[]|nil
+---@type string[]|table|nil
 History.recent_projects = nil
 
 -- projects from current neovim session
@@ -93,6 +95,21 @@ local function delete_duplicates(tbl)
     return Util.dedup(res)
 end
 
+function History.filter_recent_projects()
+    local recent = dedup(History.recent_projects)
+
+    ---@type string[]|table
+    local new_recent = {}
+
+    for _, v in next, recent do
+        if v ~= nil then
+            table.insert(new_recent, v)
+        end
+    end
+
+    History.recent_projects = copy(new_recent)
+end
+
 ---@param project ProjParam
 function History.delete_project(project)
     local new_tbl = {}
@@ -104,11 +121,12 @@ function History.delete_project(project)
 
     History.recent_projects = copy(new_tbl)
 
+    History.filter_recent_projects()
     History.write_projects_to_history()
 end
 
 ---@param history_data string
-local function deserialize_history(history_data)
+function History.deserialize_history(history_data)
     -- split data to table
     ---@type string[]
     local projects = {}
@@ -161,7 +179,7 @@ function History.read_projects_from_history()
 
             uv.fs_read(fd, stat.size, -1, function(_, data)
                 uv.fs_close(fd, function(_, _) end)
-                deserialize_history(data)
+                History.deserialize_history(data)
             end)
         end)
     end)
@@ -195,14 +213,10 @@ end
 function History.write_projects_to_history()
     -- Unlike read projects, write projects is synchronous
     -- because it runs when vim ends
-    local mode = History.recent_projects == nil and 'a' or 'w'
-    local file = History.open_history(mode)
+    local file = History.open_history(History.recent_projects == nil and 'a' or 'w')
 
     if file == nil then
-        vim.notify(
-            '(project_nvim.utils.history.write_projects_to_history): Unable to write to file!',
-            ERROR
-        )
+        notify('(project_nvim.utils.history.write_projects_to_history): File restricted', ERROR)
         return
     end
 
@@ -216,7 +230,7 @@ function History.write_projects_to_history()
     if len_res > 100 then
         tbl_out = vim.list_slice(res, len_res - 100, len_res)
     else
-        tbl_out = res
+        tbl_out = copy(res)
     end
 
     -- Transform table to string
