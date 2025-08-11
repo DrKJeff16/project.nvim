@@ -112,7 +112,12 @@ end
 
 ---@param project ProjParam
 function History.delete_project(project)
+    if History.recent_projects == nil then
+        return
+    end
+
     local new_tbl = {}
+
     for _, v in next, History.recent_projects do
         if v ~= project.value and not in_tbl(new_tbl, v) then
             table.insert(new_tbl, v)
