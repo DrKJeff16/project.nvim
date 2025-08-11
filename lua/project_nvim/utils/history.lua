@@ -66,7 +66,7 @@ function History.open_history(mode, callback)
 end
 
 ---@param tbl string[]
----@return string[]
+---@return string[] res
 local function delete_duplicates(tbl)
     ---@type table<string, integer|nil>
     local cache_dict = {}
@@ -92,7 +92,9 @@ local function delete_duplicates(tbl)
         end
     end
 
-    return dedup(res)
+    res = dedup(copy(res))
+
+    return res
 end
 
 function History.filter_recent_projects()
@@ -135,6 +137,7 @@ function History.deserialize_history(history_data)
     -- split data to table
     ---@type string[]
     local projects = {}
+
     for s in history_data:gmatch('[^\r\n]+') do
         if not Path.is_excluded(s) and dir_exists(s) then
             table.insert(projects, s)
@@ -147,7 +150,7 @@ function History.deserialize_history(history_data)
 end
 
 function History.setup_watch()
-    -- Only runs once
+    ---Only runs once
     if History.has_watch_setup then
         return
     end
@@ -190,7 +193,7 @@ function History.read_projects_from_history()
     end)
 end
 
----@return string[]
+---@return string[] recents
 function History.get_recent_projects()
     ---@type string[]
     local tbl = {}
@@ -205,14 +208,16 @@ function History.get_recent_projects()
     tbl = delete_duplicates(copy(tbl))
 
     ---@type string[]
-    local real_tbl = {}
+    local recents = {}
     for _, dir in next, tbl do
         if dir_exists(dir) then
-            table.insert(real_tbl, dir)
+            table.insert(recents, dir)
         end
     end
 
-    return dedup(real_tbl)
+    recents = dedup(copy(recents))
+
+    return recents
 end
 
 ---Write projects to history file.
