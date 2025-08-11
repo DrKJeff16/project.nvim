@@ -1,5 +1,3 @@
----@diagnostic disable:missing-fields
-
 local uv = vim.uv or vim.loop
 
 local start = vim.health.start or vim.health.report_start
@@ -241,9 +239,9 @@ function Health.check()
 
     -- NOTE: Order matters below!
 
-    Health.history_check()
-    Health.project_check()
     Health.telescope_check()
+    Health.project_check()
+    Health.history_check()
     Health.options_check()
     Health.recent_proj_check()
 end
