@@ -19,6 +19,7 @@ local WARN = vim.log.levels.WARN
 local in_tbl = vim.tbl_contains
 local curr_buf = vim.api.nvim_get_current_buf
 local copy = vim.deepcopy
+local notify = vim.notify
 
 ---@class AutocmdTuple
 ---@field [1] string[]|string
@@ -267,7 +268,7 @@ function Api.attach_to_lsp()
             config.on_attach = on_attach_lsp
         end
 
-        vim.notify('Ran Through project.nvim!', INFO)
+        notify('Ran Through project.nvim!', INFO)
 
         return _start_client(config)
     end
@@ -289,7 +290,7 @@ function Api.set_pwd(dir, method)
         local valid = Api.verify_owner(dir)
 
         if not valid then
-            vim.notify(fmt('(%s.set_pwd): Project root is owned by a different user', MODSTR), WARN)
+            notify(fmt('(%s.set_pwd): Project root is owned by a different user', MODSTR), WARN)
             return false
         end
     end
@@ -336,17 +337,17 @@ function Api.set_pwd(dir, method)
 
         msg = silent and msg or fmt('%s lchdir to `%s`: ', msg, dir)
     else
-        vim.notify(fmt('%s INVALID value for `scope_chdir`', msg), WARN)
+        notify(fmt('%s INVALID value for `scope_chdir`', msg), WARN)
         return false
     end
 
     msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
 
     if not silent then
-        vim.notify(fmt('(%s.set_pwd): Set CWD to %s using %s\n', MODSTR, dir, method), INFO)
+        notify(fmt('(%s.set_pwd): Set CWD to %s using %s\n', MODSTR, dir, method), INFO)
 
         if msg:sub(-6) == 'FAILED' then
-            vim.notify(msg, WARN)
+            notify(msg, WARN)
         end
     end
 
@@ -449,7 +450,7 @@ function Api.on_buf_enter(verbose)
     Api.current_project, Api.current_method, Api.last_project = Api.get_current_project()
 
     if verbose then
-        vim.notify(
+        notify(
             fmt('Root: %s\nMethod: %s', Api.current_project or 'NONE', Api.current_method or 'NONE'),
             INFO
         )
@@ -467,7 +468,7 @@ function Api.add_project_manually(verbose)
     local current_dir = vim.fn.expand('%:p:h')
 
     if verbose then
-        vim.notify(fmt('Attempting to process `%s`', current_dir), INFO)
+        notify(fmt('Attempting to process `%s`', current_dir), INFO)
     end
 
     Api.set_pwd(current_dir, 'manual')
@@ -504,15 +505,35 @@ function Api.init()
         end
     end
 
-    -- `:ProjectRoot`
-    vim.api.nvim_create_user_command('ProjectRoot', function()
-        Api.on_buf_enter(true)
-    end, { bang = true })
+    ---@class ProjectCommandsList
+    ---@field name string
+    ---@field cmd fun(ctx?: vim.api.keyset.user_command)
+    ---@field opts vim.api.keyset.user_command
 
-    -- `:AddProject`
-    vim.api.nvim_create_user_command('AddProject', function()
-        Api.add_project_manually(true)
-    end, { bang = true })
+    ---@type ProjectCommandsList[]
+    local commands = {
+        --- `:ProjectRoot`
+        {
+            name = 'ProjectRoot',
+            cmd = function()
+                Api.on_buf_enter(true)
+            end,
+            opts = { bang = true },
+        },
+
+        ---`:AddProject`
+        {
+            name = 'AddProject',
+            cmd = function()
+                Api.add_project_manually(true)
+            end,
+            opts = { bang = true },
+        },
+    }
+
+    for _, cmnd in next, commands do
+        vim.api.nvim_create_user_command(cmnd.name, cmnd.cmd, cmnd.opts or {})
+    end
 
     for _, value in next, autocmds do
         vim.api.nvim_create_autocmd(value[1], value[2])
