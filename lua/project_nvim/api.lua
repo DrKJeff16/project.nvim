@@ -490,7 +490,7 @@ function Api.init()
 
     if not Config.options.manual_mode then
         table.insert(autocmds, {
-            { 'VimEnter', 'BufEnter', 'WinEnter', 'BufWinEnter' },
+            { 'BufEnter', 'WinEnter', 'BufWinEnter' },
             {
                 pattern = '*',
                 group = augroup,
