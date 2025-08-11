@@ -261,6 +261,15 @@ require('project_nvim').setup({
   ---@type boolean
   allow_different_owners = true,
 
+  ---If enabled, set `vim.opt.autochdir` to `true`.
+  ---
+  ---This is disabled by default because the plugin implicitly disables `autochdir`.
+  --- ---
+  ---Default: `false`
+  --- ---
+  ---@type boolean
+  enable_autochdir = false,
+
   ---Table of options used for the telescope picker.
   --- ---
   ---@class Project.Config.Options.Telescope

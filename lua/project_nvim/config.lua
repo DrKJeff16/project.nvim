@@ -61,6 +61,15 @@ Config.defaults = {
     ---@type boolean
     allow_different_owners = true,
 
+    ---If enabled, set `vim.opt.autochdir` to `true`.
+    ---
+    ---This is disabled by default because the plugin implicitly disables `autochdir`.
+    --- ---
+    ---Default: `false`
+    --- ---
+    ---@type boolean
+    enable_autochdir = false,
+
     ---Table of options used for the telescope picker.
     --- ---
     ---@class Project.Config.Options.Telescope
@@ -197,12 +206,12 @@ function Config.setup(options)
 
     Config.options.detection_methods = Config.trim_methods(copy(Config.options.detection_methods))
 
-    -- Implicitly unset autochdir
-    vim.opt.autochdir = false
+    vim.opt.autochdir = Config.options.enable_autochdir
 
     require('project_nvim.utils.path').init()
     require('project_nvim.api').init()
 
+    ---Load `projects` Telescope picker if check is true.
     if Config.options.telescope.enabled and mod_exists('telescope') then
         require('telescope').load_extension('projects')
     end
