@@ -2,6 +2,10 @@ name: Action Release
 
 # Controls when the workflow will run
 on:
+  push:
+    tags:
+      - "v*.*.*"
+      - "v*.*.*-*"
   merge_group:
     branches:
       - main
@@ -42,46 +46,63 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Release ZIP Asset
-        uses: actions/upload-release-asset@v1
-        id: upload_zip
-        with:
-          upload_url: ${{ steps.get_current_release.outputs.upload_url }}
-          asset_path: ./project.nvim.zip
-          asset_name: project.nvim.zip
-          asset_content_type: application/zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Release File
+        run: echo ${{ github.sha }} > Release.txt
+      - name: Test Release
+        run: cat Release.txt
 
-      - name: Upload Release Tarball
-        uses: actions/upload-release-asset@v1
-        id: upload_txz
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
-          upload_url: ${{ steps.get_current_release.outputs.upload_url }}
-          asset_path: ./project.nvim.tar.xz
-          asset_name: project.nvim.tar.xz
-          asset_content_type: application/x-xz-compressed-tar
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            Release.txt
+            project.nvim.tar.xz
+            project.nvim.tar.xz.sha512sum
+            project.nvim.zip
+            project.nvim.zip.sha512sum
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Release ZIP Asset sha512sum
-        uses: actions/upload-release-asset@v1
-        id: upload_zip_sha512sum
-        with:
-          upload_url: ${{ steps.get_current_release.outputs.upload_url }}
-          asset_path: ./project.nvim.zip.sha512sum
-          asset_name: project.nvim_zip.sha512sum
-          asset_content_type: text/plain
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Release Tarball sha512sum
-        uses: actions/upload-release-asset@v1
-        id: upload_tar_xz_sha512sum
-        with:
-          upload_url: ${{ steps.get_current_release.outputs.upload_url }}
-          asset_path: ./project.nvim.tar.xz.sha512sum
-          asset_name: project.nvim_txz.sha512sum
-          asset_content_type: text/plain
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Upload Release ZIP Asset
+      #   uses: actions/upload-release-asset@v1
+      #   id: upload_zip
+      #   with:
+      #     upload_url: ${{ steps.get_current_release.outputs.upload_url }}
+      #     asset_path: ./project.nvim.zip
+      #     asset_name: project.nvim.zip
+      #     asset_content_type: application/zip
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #
+      # - name: Upload Release Tarball
+      #   uses: actions/upload-release-asset@v1
+      #   id: upload_txz
+      #   with:
+      #     upload_url: ${{ steps.get_current_release.outputs.upload_url }}
+      #     asset_path: ./project.nvim.tar.xz
+      #     asset_name: project.nvim.tar.xz
+      #     asset_content_type: application/x-xz-compressed-tar
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #
+      # - name: Upload Release ZIP Asset sha512sum
+      #   uses: actions/upload-release-asset@v1
+      #   id: upload_zip_sha512sum
+      #   with:
+      #     upload_url: ${{ steps.get_current_release.outputs.upload_url }}
+      #     asset_path: ./project.nvim.zip.sha512sum
+      #     asset_name: project.nvim_zip.sha512sum
+      #     asset_content_type: text/plain
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #
+      # - name: Upload Release Tarball sha512sum
+      #   uses: actions/upload-release-asset@v1
+      #   id: upload_tar_xz_sha512sum
+      #   with:
+      #     upload_url: ${{ steps.get_current_release.outputs.upload_url }}
+      #     asset_path: ./project.nvim.tar.xz.sha512sum
+      #     asset_name: project.nvim_txz.sha512sum
+      #     asset_content_type: text/plain
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
