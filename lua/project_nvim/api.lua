@@ -20,6 +20,8 @@ local in_tbl = vim.tbl_contains
 local curr_buf = vim.api.nvim_get_current_buf
 local copy = vim.deepcopy
 local notify = vim.notify
+local augroup = vim.api.nvim_create_augroup
+local autocmd = vim.api.nvim_create_autocmd
 
 ---@class AutocmdTuple
 ---@field [1] string[]|string
@@ -69,7 +71,6 @@ local function child(dir, identifier)
 end
 
 ---@class Project.API
----@field attached_lsp? boolean
 local Api = {}
 
 ---@type string|nil
@@ -237,44 +238,14 @@ function Api.find_pattern_root()
     end
 end
 
----@param client vim.lsp.Client
----@param bufnr integer
-local function on_attach_lsp(client, bufnr)
-    Api.on_buf_enter() -- Recalculate root dir after LSP attaches
-end
-
 function Api.attach_to_lsp()
-    if Api.attached_lsp then
-        return
-    end
-
-    --- TODO: Instead of messing with `vim.lsp.start_client`, could we hook to the `LspAttach` autocmd?
-
-    for _, C in next, vim.lsp.get_clients() do
-        local old_config = copy(C.config)
-
-        C.config.on_attach = function(client, bufnr)
-            on_attach_lsp(client, bufnr)
-
-            notify('Ran Through project.nvim!', INFO)
-
-            if old_config.on_attach then
-                return old_config.on_attach(client, bufnr)
-            end
-        end
-
-        ---Copy client here to keep custom `on_attach()`
-        local saved_client = copy(C)
-
-        if saved_client.initialized then
-            vim.lsp.stop_client(saved_client.id, true) -- Forcibly stop current client
-        end
-
-        vim.lsp.config(saved_client.name, saved_client.config) -- Re-run configuration
-        vim.lsp.enable(saved_client.name, saved_client.initialized) -- Only start if previously initialized
-    end
-
-    Api.attached_lsp = true
+    local group = augroup('ProjectAttach', { clear = true })
+    autocmd('LspAttach', {
+        group = group,
+        callback = function()
+            Api.on_buf_enter()
+        end,
+    })
 end
 
 ---@param dir string
@@ -300,7 +271,6 @@ function Api.set_pwd(dir, method)
 
     ---@type string
     local msg = fmt('(%s.set_pwd):', MODSTR)
-    local old_cwd = vim.fn.getcwd()
 
     if vim.tbl_isempty(History.session_projects) then
         History.session_projects = { dir }
@@ -476,7 +446,8 @@ function Api.add_project_manually(verbose)
 end
 
 function Api.init()
-    local augroup = vim.api.nvim_create_augroup('project_nvim', { clear = true })
+    local group = augroup('project_nvim', { clear = true })
+    local detection_methods = Config.options.detection_methods
 
     ---@type AutocmdTuple[]
     local autocmds = {
@@ -484,7 +455,7 @@ function Api.init()
             'VimLeavePre',
             {
                 pattern = '*',
-                group = augroup,
+                group = group,
                 callback = require('project_nvim.utils.history').write_projects_to_history,
             },
         },
@@ -495,13 +466,13 @@ function Api.init()
             { 'BufEnter', 'WinEnter', 'BufWinEnter' },
             {
                 pattern = '*',
-                group = augroup,
+                group = group,
                 nested = true,
                 callback = Api.on_buf_enter,
             },
         })
 
-        if in_tbl(Config.options.detection_methods, 'lsp') then
+        if in_tbl(detection_methods, 'lsp') then
             Api.attach_to_lsp()
         end
     end
@@ -537,7 +508,7 @@ function Api.init()
     end
 
     for _, value in next, autocmds do
-        vim.api.nvim_create_autocmd(value[1], value[2])
+        autocmd(value[1], value[2])
     end
 
     require('project_nvim.utils.history').read_projects_from_history()
