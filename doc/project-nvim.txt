@@ -1,0 +1,585 @@
+==============================================================================
+*project-nvim*		      A dynamic project management solution for neovim
+
+`project.nvim` is a `Neovim` plugin written
+in Lua that provides a dynamic project
+management solution.
+
+This plugin allows you to navigate through projects,
+"bookmark them" them and discard them, depending on
+your needs.
+
+This is forked from `ahmedkhalf/project.nvim`:
+		https://github.com/ahmedkhalf/project.nvim		    ~
+
+		This plugin will be maintained and extended		     ~
+			for the foreseeable future.			     ~
+
+==============================================================================
+Table of Contents					     *project-nvim.toc*
+
+1. Features						|project-nvim.features|
+2. Installation						 |project-nvim.install|
+3. Configuration					  |project-nvim.config|
+    3.1 Defaults				 |project-nvim.config.defaults|
+    3.2 Pattern Matching		 |project-nvim.config.pattern-matching|
+    3.3 Nvim Tree				|project-nvim.config.nvim-tree|
+    3.4 Telescope				       |project-nvim.telescope|
+	3.3.1 Telescope Mappings		  |project-nvim.telescope.maps|
+4. Commands						|project-nvim.commands|
+    4.1 `:ProjectAdd`						  |:ProjectAdd|
+    4.2 `ProjectRoot`						 |:ProjectRoot|
+5. API							     |project-nvim.api|
+    5.1 Utils					       |project-nvim.api.utils|
+	5.1.1 `get_project_root()`	      |project-nvim.get_project_root()|
+	5.1.2 `get_recent_projects()`	   |project-nvim.get_recent_projects()|
+	5.1.3 `get_config()`			    |project-nvim.get_config()|
+	5.1.4 `get_history_paths()`	     |project-nvim.get_history_paths()|
+6. Troubleshooting				 |project-nvim.troubleshooting|
+
+==============================================================================
+Features						*project-nvim.features*
+
+- Automagically `cd` to the project root directory using `vim.lsp`
+- Pattern matching is a fallback in case LSP fails
+- Functional `checkhealth` hook (`:checkhealth project_nvim`)
+- Telescope Integration `:Telescope projects`
+- `nvim-tree` Integration
+
+==============================================================================
+Installation						 *project-nvim.install*
+
+			DO NOT LAZY-LOAD THIS PLUGIN			     ~
+		You might have issues with your `cwd` otherwise.	     ~
+
+------------------------------------------------------------------------------
+vim-plug					*project-nvim.install.vim-plug*
+
+>vim
+    if has('nvim-0.11')
+      Plug 'DrKJeff16/project.nvim'
+
+      " OPTIONAL
+      Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-lua/plenary.nvim'
+
+      lua << EOF
+      require('project_nvim').setup({
+	-- your configuration comes here
+	-- or leave it empty to use the default settings
+	-- refer to the configuration section below
+      })
+      EOF
+    endif
+<
+------------------------------------------------------------------------------
+lazy.nvim				       *project-nvim.install.lazy-nvim*
+
+>lua
+    require('lazy').setup({
+      spec = {
+	-- Other plugins
+	{
+	  'DrKJeff16/project.nvim',
+	  -- WARN: IMPORTANT NOT TO LAZY-LOAD THIS PLUGIN
+	  lazy = false,
+	  dependencies = {
+	    'nvim-lua/plenary.nvim',
+	    'nvim-telescope/telescope.nvim',
+	  }, -- OPTIONAL
+	  ---@type Project.Config.Options
+	  opts = {
+	    -- your configuration comes here
+	    -- or leave it empty to use the default settings
+	    -- refer to the configuration section below
+	  },
+	  cond = vim.fn.has('nvim-0.11') == 1, -- RECOMMENDED
+	},
+      },
+    })
+<
+
+------------------------------------------------------------------------------
+pckr.nvim				       *project-nvim.install.pckr.nvim*
+
+>lua
+    if vim.fn.has('nvim-0.11') == 1 then
+      require('pckr').add({
+	{
+	  'DrKJeff16/project.nvim',
+	  requires = {
+	    'nvim-lua/plenary.nvim',
+	    'nvim-telescope/telescope.nvim',
+	  }, -- OPTIONAL
+	  config = function()
+	    require('project_nvim').setup({
+	      -- your configuration comes here
+	      -- or leave it empty to use the default settings
+	      -- refer to the configuration section below
+	    })
+	  end,
+	};
+      })
+    end
+<
+
+==============================================================================
+Configuration						  *project-nvim.config*
+
+To enable the plugin you must call `setup()`:
+
+>lua
+    require('project_nvim').setup({
+      -- Options
+    })
+<
+
+------------------------------------------------------------------------------
+Defaults					*project-nvim.config.defaults*
+
+`setup()` runs these defaults:
+
+>lua
+    {
+      ---If `true` your root directory won't be changed automatically,
+      ---so you have the option to manually do so using `:ProjectRoot` command.
+      --- ---
+      ---Default: `false`
+      --- ---
+      ---@type boolean
+      manual_mode = false,
+
+      ---Methods of detecting the root directory. `'lsp'` uses the native neovim
+      ---LSP, while `'pattern'` uses vim-rooter like glob pattern matching. Here
+      ---order matters: if one is not detected, the other is used as fallback. You
+      ---can also delete or rearrange the detection methods.
+      ---
+      ---The detection methods get filtered and rid of duplicates during runtime.
+      --- ---
+      ---Default: `{ 'lsp' , 'pattern' }`
+      --- ---
+      ---@type ("lsp"|"pattern")[]
+      detection_methods = { 'lsp', 'pattern' },
+
+      ---All the patterns used to detect root dir, when **'pattern'** is in
+      ---detection_methods.
+      ---
+      ---See `:h project.nvim-pattern-matching`
+      --- ---
+      ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile' }`
+      --- ---
+      ---@type string[]
+      patterns = {
+	'.git',
+	'.github',
+	'_darcs',
+	'.hg',
+	'.bzr',
+	'.svn',
+	'Pipfile',
+      },
+
+      ---Determines whether a project will be added if its project root is owned by a different user.
+      ---
+      ---If `false`, it won't add a project if its root is not owned by the
+      ---current nvim `UID` **(UNIX only)**.
+      --- ---
+      ---Default: `true`
+      --- ---
+      ---@type boolean
+      allow_different_owners = true,
+
+      ---If enabled, set `vim.opt.autochdir` to `true`.
+      ---
+      ---This is disabled by default because the plugin implicitly disables `autochdir`.
+      --- ---
+      ---Default: `false`
+      --- ---
+      ---@type boolean
+      enable_autochdir = false,
+
+      ---Table of options used for the telescope picker.
+      --- ---
+      ---@class Project.Config.Options.Telescope
+      telescope = {
+	---Determines whether the `telescope` picker should be called.
+	---
+	---If telescope is not installed, this doesn't make a difference.
+	---
+	---Note that even if set to `false`, you can still load the extension manually.
+	--- ---
+	---Default: `true`
+	--- ---
+	---@type boolean
+	enabled = true,
+
+	---Determines whether the newest projects come first in the
+	---telescope picker (`'newest'`), or the oldest (`'oldest'`).
+	--- ---
+	---Default: `'newest'`
+	--- ---
+	---@type 'oldest'|'newest'
+	sort = 'newest',
+
+	---Use `telescope-file-browser.nvim` instead of builtins.
+	---
+	---If you have `telescope-file-browser.nvim` installed, you can enable this
+	---so that the Telescope picker uses it instead of the `find_files` builtin.
+	--- ---
+	---Default: `false`
+	--- ---
+	---@type boolean
+	prefer_file_browser = false,
+      },
+
+      ---Table of lsp clients to ignore by name,
+      ---e.g. `{ 'efm', ... }`.
+      ---
+      ---If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
+      ---for a list of servers.
+      --- ---
+      ---Default: `{}`
+      --- ---
+      ---@type string[]|table
+      ignore_lsp = {},
+
+      ---Don't calculate root dir on specific directories,
+      ---e.g. `{ '~/.cargo/*', ... }`.
+      ---
+      ---See the `Pattern Matching` section in the `README.md` for more info.
+      --- ---
+      ---Default: `{}`
+      --- ---
+      ---@type string[]|table
+      exclude_dirs = {},
+
+      ---Make hidden files visible when using the `telescope` picker.
+      --- ---
+      ---Default: `false`
+      --- ---
+      ---@type boolean
+      show_hidden = false,
+
+      ---If `false`, you'll get a _notification_ every time
+      ---`project.nvim` changes directory.
+      --- ---
+      ---Default: `true`
+      --- ---
+      ---@type boolean
+      silent_chdir = true,
+
+      ---Determines the scope for changing the directory.
+      ---
+      ---Valid options are:
+      --- - `'global'`
+      --- - `'tab'`
+      --- - `'win'`
+      --- ---
+      ---Default: `'global'`
+      --- ---
+      ---@type 'global'|'tab'|'win'
+      scope_chdir = 'global',
+
+      ---Path where `project.nvim` will store the project history.
+      ---
+      ---For more info, run `:lua vim.print(require('project_nvim').get_history_paths())`
+      --- ---
+      ---Default: `vim.fn.stdpath('data')`
+      --- ---
+      ---@type string
+      datapath = vim.fn.stdpath('data'),
+    }
+<
+
+Even if you are pleased with the defaults, please note that `setup()` must be
+called for the plugin to start.
+
+
+------------------------------------------------------------------------------
+Pattern Matching			 *project-nvim.config.pattern-matching*
+
+`project.nvim` comes with a pattern matching engine that uses
+the same expressions as `vim-rooter`.
+
+For your convenience here come some examples:
+
+- To specify the root is a certain directory, prefix it with `=`
+
+>lua
+    patterns = { '=src' }
+<
+
+- To specify the root has a certain directory or file
+  (which may be a glob), just add it to the pattern list
+
+>lua
+    patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
+<
+
+- To specify the root has a certain directory as an ancestor (for
+  excluding directories), prefix it with `^`
+
+>lua
+    patterns = { '^fixtures' }
+<
+
+- To specify the root has a certain directory as its direct ancestor / parent
+  (for putting working projects in a common directory),
+  prefix it with `>`
+
+>lua
+    patterns = { '>Latex' }
+<
+
+- To exclude a pattern, prefix it with `!`
+
+>lua
+    patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
+<
+
+NOTE: Make sure to put your pattern exclusions first,
+and then the patterns you do want included.
+
+------------------------------------------------------------------------------
+Nvim Tree					*project-nvim.config.nvim-tree*
+
+Make sure these flags are enabled to support `nvim-tree.lua`:
+
+>lua
+    require('nvim-tree').setup({
+      sync_root_with_cwd = true,
+      respect_buf_cwd = true,
+      update_focused_file = {
+	enable = true,
+	update_root = true,
+      },
+    })
+<
+
+
+------------------------------------------------------------------------------
+Telescope					       *project-nvim.telescope*
+
+To enable `telescope.nvim` integration use the following
+code in your config:
+
+>lua
+    require('telescope').setup(...)
+    -- Other stuff may come here...
+    require('telescope').load_extension('projects')
+<
+
+Also you can configure the picker when calling
+`require('telescope').setup({ telescope = { enabled = true } })`
+(more info in |project-nvim.config|).
+This will call
+
+For example:
+
+>lua
+    require('telescope').setup({
+	-- ...
+	extensions = {
+	    projects = {
+		layout_strategy = "horizontal",
+		layout_config = {
+		    anchor = "N",
+		    height = 0.25,
+		    width = 0.6,
+		    prompt_position = "bottom",
+		},
+		prompt_prefix = "󱎸	",
+	    }
+	}
+    })
+<
+
+After that you can now call it from the command line:
+
+>vim
+    " Vimscript
+    :Telescope projects
+<
+
+------------------------------------------------------------------------------
+Telescope Mappings			      *project-nvim.telescope.mappings*
+
+`project.nvim` comes with the following mappings for Telescope:
+
+ Normal mode	Insert mode   Action					      ~
+ `f`		`<C-f>`       `find_project_files()`
+ `b`		`<C-b>`       `browse_project_files()`
+ `d`		`<C-d>`       `delete_project()`
+ `s`		`<C-s>`       `search_in_project_files()`
+ `r`		`<C-r>`       `recent_project_files()`
+ `w`		`<C-w>`       `change_working_directory()`
+
+`lua/telescope/_extensions/projects.lua`
+
+==============================================================================
+Commands						*project-nvim.commands*
+
+There are two user commands you can call from the cmdline:
+
+:ProjectAdd							  *:ProjectAdd*
+    The `:ProjectAdd` command is a manual hook to add
+    the current root to the session directories table,
+    then subsequently `cd` to the current file's
+    project directory.
+
+    The command does essentially the followitg:
+
+>vim
+	" vimscript
+
+	" `:ProjectAdd` does the next line
+	:lua require('project_nvim.api').add_project_manually()
+<
+
+    See `api.lua` for more info on `add_project_manually()`
+
+
+:ProjectRoot							 *:ProjectRoot*
+    This command is a manual hook to set
+    the working directory to the current file's root,
+    attempting to use any of the `setup()` detection methods
+    set by the user.
+
+    The command does essentially the followitg:
+
+>vim
+	" vimscript
+
+	" `:ProjectRoot` does the next line
+	:lua require('project_nvim.api').on_buf_enter()
+<
+
+    See `api.lua` for more info on `on_buf_enter()`.
+
+==============================================================================
+API							     *project-nvim.api*
+
+This is a set of both internal utilities
+and tools for the user to benefit from.
+
+------------------------------------------------------------------------------
+Utils						       *project-nvim.api.utils*
+
+A set of utilities that get repeated across the board.
+
+These utilities are in part inspired by my own utilities
+found in `Jnvim`, my own Nvim configuration.
+
+For more info check the link below:
+	    https://github.com/DrKJeff16/Jnvim
+
+You can import the utilities like this:
+
+>lua
+    local ProjUtil = require('project_nvim.utils.util')
+<
+
+------------------------------------------------------------------------------
+`get_project_root()`			      *project-nvim.get_project_root()*
+
+The API now has the API's `get_project_root()` function exposed.
+An example on how this can be used could be:
+
+>lua
+    ---@type fun(): (string|nil,string?)
+    local root, lsp_or_method = require('project_nvim').get_project_root()
+<
+
+------------------------------------------------------------------------------
+`get_recent_procjects()`		  *project-nvim.get_recent_procjects()*
+
+You can get a list of recent projects by running the code below:
+
+>lua
+    ---@type string[]|table
+    local recent_projects = require('project_nvim').get_recent_projects()
+
+    -- Using `vim.notify()`
+    vim.notify(vim.inspect(recent_projects))
+
+    -- Using `vim.print()`
+    vim.print(recent_projects)
+<
+
+Where `get_recent_projects()` returns either an empty table `{}`
+or a string array `{ '/path/to/project1', ... }`.
+
+
+------------------------------------------------------------------------------
+`get_config()`					    *project-nvim.get_config()*
+
+If `setup()` has been called, it returns a table containing the
+currently set options. Otherwise it will return `nil`.
+
+>lua
+    local config = require('project_nvim').get_config()
+
+    -- Using `vim.notify()`
+    vim.notify(vim.inspect(config))
+
+    -- Using `vim.print()`
+    vim.print(config)
+<
+
+------------------------------------------------------------------------------
+`get_history_paths()`			     *project-nvim.get_history_paths()*
+
+If no valid args are passed to this function
+it will return the following dictionary:
+
+>lua
+    local get_history_paths = require('project_nvim').get_history_paths
+
+    -- A dictionary table containing all return values below
+    vim.print(get_history_paths())
+    --- {
+    ---     datapath = <datapath>,
+    ---     projectpath = <projectpath>,
+    ---     historyfile = <historyfile>,
+    --- }
+<
+
+Otherwise, if either `'datapath'`, `'projectpath'
+or `'historyfile'` are passed, it will return
+the string value of said arg:
+
+>lua
+    -- The directory where `project_nvim` sets its `datapath`
+    vim.print(get_history_paths('datapath'))
+
+    -- The directory where `project_nvim` saves the project history
+    vim.print(get_history_paths('projectpath'))
+
+    -- The path to where `project_nvim` saves its recent projects history
+    vim.print(get_history_paths('historyfile'))
+<
+
+==============================================================================
+6. Troubleshooting				 *project-nvim.troubleshooting*
+
+
+  History File Not Created ~
+
+  If you're in a UNIX environment make sure you have
+  `read`, `write` and `access` permissions (`rwx`)
+  for the `projectpath` directory.
+
+  You can get the value of `projectpath` by running
+  `:lua vim.print(require('project_nvim').get_history_paths('projectpath'))`
+  in the cmdline.
+
+  - The default value is `$XDG_DATA_HOME/nvim/project_nvim`
+  - See |stdpath()| for more info
+
+  If you lack the required permissions for that directory,
+  you can either:
+
+  - Delete that directory (RECOMMENDED)
+  - Run `chmod 755 <project/path>` (NOT SURE IF THIS WILL FIX IT)
+
+
+ vim:tw=78:isk=!-~,^*,^\|,^\":ts=8:noet:ft=help:norl:

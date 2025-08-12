@@ -1,3 +1,6 @@
+# Vim Helptags
+doc/tags
+
 # Patching
 /patches/
 /.patches/
