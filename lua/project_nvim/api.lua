@@ -521,9 +521,9 @@ function Api.init()
             opts = { bang = true },
         },
 
-        ---`:AddProject`
+        ---`:ProjectAdd`
         {
-            name = 'AddProject',
+            name = 'ProjectAdd',
             cmd = function()
                 Api.add_project_manually(true)
             end,

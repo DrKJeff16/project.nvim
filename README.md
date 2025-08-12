@@ -38,8 +38,8 @@ I will be maintaining this plugin for the foreseeable future.
     3. [Telescope](#telescope)
         1. [Telescope Mappings](#telescope-mappings)
 6. [Manual Mode](#manual-mode)
-    1. [`:AddProject`](#addproject)
-    2. [`:ProjectRoot`](#projectroot)
+    1. [ProjectAdd](#projectadd)
+    2. [ProjectRoot](#projectroot)
 7. [API](#api)
     1. [Utils](#utils)
     2. [`get_project_root()`](#get-project-root)
@@ -76,15 +76,15 @@ I will be maintaining this plugin for the foreseeable future.
 - [X] Fix history not being deleted consistently when using Telescope picker
 - [X] `vim.health` integration, AKA `:checkhealth project_nvim`
 - [X] Only include projects that the current user owns ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/167))
-- [X] Add info for `:ProjectRoot` and `:AddProject` commands ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/133))
+- [X] Add info for `:ProjectRoot` and `:ProjectAdd` commands ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/133))
 - [X] Renamed `project.lua` to `api.lua`
 - [ ] Extend API
   - [X] Rename `project.lua` to `api.lua`
   - [X] Expose `project_nvim.api.get_project_root()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/112))
   - [X] Add utility to display the current project `get_current_project()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/149))
+  - [ ] Add more user commands
   - [ ] Add `enable()`, `disable()` and `toggle()`, or similar utilities
   - [ ] Implement `delete_project()` wrapper for the end-user to use (_not to be confused with `history.delete_project()`_)
-  - [ ] Add more user commands
 - [X] Extend Telescope picker configuration
   - [X] Fix `file_browser` mapping ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/107))
   - [X] Add option to control picker sorting order ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/140))
@@ -507,18 +507,18 @@ See more in [`lua/telescope/_extensions/projects.lua`](./lua/telescope/_extensio
 
 There are two user commands you can call from the cmdline:
 
-### AddProject
+### ProjectAdd
 
-This command is a manual hook to add to session projects, then
+The `:ProjectAdd` command is a manual hook to add to session projects, then
 subsequently `cd` to the current file's project directory
 (provided) it actually could.
 
-The command is essentially a wrapper for the following function:
+The command does essentially the followitg:
 
 ```vim
 " vimscript
 
-" `:AddProject` does the next line
+" `:ProjectAdd` does the next line
 :lua require('project_nvim.api').add_project_manually()
 ```
 
@@ -536,7 +536,7 @@ This command is a manual hook to set the working directory to the current
 file's root, attempting to use any of the `setup()` detection methods
 set by the user.
 
-The command is essentially a wrapper for the following function:
+The command does essentially the followitg:
 
 ```vim
 " vimscript
