@@ -1,11 +1,14 @@
-helptags:
-	nvim -c 'helptags doc/' -c 'qa!' --headless
+TAGS_CMD = -@nvim -c 'helptags doc/' -c 'qa!' --headless
 
-distclean:
-	rm -rf doc/tags
+helptags: doc/project-nvim.txt
+	$(TAGS_CMD)
+
+clean:
+	-@rm -rf doc/tags
 
 all: helptags
 
 .PHONY: \
-	helptags \
-	distclean
+	all \
+	clean \
+	helptags
