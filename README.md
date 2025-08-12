@@ -209,7 +209,8 @@ require('project_nvim').setup({
 })
 ```
 
-`project.nvim` comes with the following defaults:
+<details>
+<summary><ins><code>setup()</code>comes with these defaults.</ins></summary>
 
 ```lua
 {
@@ -362,6 +363,8 @@ require('project_nvim').setup({
   datapath = vim.fn.stdpath('data'),
 }
 ```
+
+</details>
 
 _**Even if you are pleased with the defaults, please note that `setup()` must be
 called for the plugin to start.**_
