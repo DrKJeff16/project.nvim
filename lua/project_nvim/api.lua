@@ -93,7 +93,7 @@ function Api.find_lsp_root()
     local bufnr = curr_buf()
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
-    if next(clients) == nil then
+    if vim.tbl_isempty(clients) then
         return nil
     end
 
