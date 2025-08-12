@@ -250,27 +250,28 @@ function Api.attach_to_lsp()
 
     --- TODO: Instead of messing with `vim.lsp.start_client`, could we hook to the `LspAttach` autocmd?
 
-    ---Backup old `start_client` function
-    local _start_client = vim.lsp.start_client
+    for _, C in next, vim.lsp.get_clients() do
+        local old_config = copy(C.config)
 
-    vim.lsp.start_client = function(config)
-        if config.on_attach ~= nil then
-            ---@type fun(client: vim.lsp.Client, bufnr: integer)
-            local _on_attach = config.on_attach
+        C.config.on_attach = function(client, bufnr)
+            on_attach_lsp(client, bufnr)
 
-            ---@param client vim.lsp.Client
-            ---@param bufnr integer
-            config.on_attach = function(client, bufnr)
-                on_attach_lsp(client, bufnr)
-                _on_attach(client, bufnr)
+            notify('Ran Through project.nvim!', INFO)
+
+            if old_config.on_attach then
+                return old_config.on_attach(client, bufnr)
             end
-        else
-            config.on_attach = on_attach_lsp
         end
 
-        notify('Ran Through project.nvim!', INFO)
+        ---Copy client here to keep custom `on_attach()`
+        local saved_client = copy(C)
 
-        return _start_client(config)
+        if saved_client.initialized then
+            vim.lsp.stop_client(saved_client.id, true) -- Forcibly stop current client
+        end
+
+        vim.lsp.config(saved_client.name, saved_client.config) -- Re-run configuration
+        vim.lsp.enable(saved_client.name, saved_client.initialized) -- Only start if previously initialized
     end
 
     Api.attached_lsp = true
