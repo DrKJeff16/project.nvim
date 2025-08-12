@@ -78,13 +78,11 @@ And now every time you run `git commit` the hooks contained in `.pre-commit-conf
 Please refer to LuaLS' code annotations to understand the syntax.[^1]
 
 Let's say you create a new submodule `lua/project_nvim/foo.lua`. If said module returns a table
-with fields, the optimal way to document is to do it in the same file, and following this format:
+with fields, the optimal way to document is to do it **in the same file**, and following this format:
 
 ```lua
 -- A table that contains `foo`
 ---@class Project.Foo
-
----@type Project.Foo
 local Foo = {}
 
 return Foo
@@ -93,49 +91,45 @@ return Foo
 If any fields are defined, preferably define them as below:
 
 ```lua
--- A table that contains `foo` and more
+---A table that contains `foo` and more.
+--- ---
 ---@class Project.Foo
--- A function that does `Foo`
----@field do_foo fun(x: any, y_optional: table?)
--- An **OPTIONAL** function that does `Bar`
----@field do_bar? fun(...)
--- A data field containing stuff
----@field stuff any
--- An **OPTIONAL** data field containing things
+---An **OPTIONAL** data field containing things.
+--- ---
 ---@field things? table
-
----@type Project.Foo
 local Foo = {}
 
----@param x any
----@param y_optional? table
+---A data field containing stuff.
+--- ---
+Foo.stuff = 1.0 -- Or whatever data should go here
+
+---A function that does `Foo`.
+---@param x any Data containing whatever
+---@param y_optional? table OPTIONAL table containing riches
 function Foo.do_foo(x, y_optional)
-    -- Blah blah blah
+  -- Blah blah blah
+  Foo.things = true
 end
 
-Foo.stuff = 'A string, for instance'
+---A function that does `Bar`.
+--- ---
+---@param verbose? boolean OPTIONAL flag that enables verbose behaviour
+function Foo.do_bar(verbose)
+  -- Blah blah blah
+  Foo.things = false
+end
 
 -- Blah blah blah
 
 return Foo
 ```
 
-The other, _less recommended_ method for `class` definitions is:
+<div align="center">
 
-```lua
----@class Bar
-local Bar = {}
+**BEAR IN MIND ANY FIELD THAT'S NOT EXPLICITLY DEFINED SHOULD GO UNDER THE** `---@class` **ANNOTATION**.
+e.g. `Foo.things` above.
 
----@param str string
----@return table
-function Bar.get_tbl(str)
-    -- ...
-end
-
--- Blah blah blah
-
-return Bar
-```
+</div>
 
 ---
 
