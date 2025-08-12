@@ -1,6 +1,9 @@
 local fmt = string.format
 
 local MODSTR = 'project_nvim.api'
+local ERROR = vim.log.levels.ERROR
+local INFO = vim.log.levels.INFO
+local WARN = vim.log.levels.WARN
 
 local Config = require('project_nvim.config')
 local Glob = require('project_nvim.utils.globtopattern')
@@ -12,9 +15,6 @@ local is_windows = Util.is_windows
 local reverse = Util.reverse
 
 local uv = vim.uv or vim.loop
-local ERROR = vim.log.levels.ERROR
-local INFO = vim.log.levels.INFO
-local WARN = vim.log.levels.WARN
 
 local in_tbl = vim.tbl_contains
 local curr_buf = vim.api.nvim_get_current_buf
@@ -54,8 +54,8 @@ local function sub(dir, identifier)
         if is(path_str, identifier) then
             return true
         end
-        current = path_str
-        path_str = get_parent(path_str)
+
+        current, path_str = path_str, get_parent(path_str)
 
         if current == path_str then
             return false
@@ -477,6 +477,11 @@ function Api.init()
         end
     end
 
+    for _, value in next, autocmds do
+        local events, au_tbl = value[1], value[2]
+        autocmd(events, au_tbl)
+    end
+
     ---@class ProjectCommandsList
     ---@field name string
     ---@field cmd fun(ctx?: vim.api.keyset.user_command)
@@ -501,14 +506,48 @@ function Api.init()
             end,
             opts = { bang = true },
         },
+
+        ---`:ProjectConfig`
+        {
+            name = 'ProjectConfig',
+            cmd = function()
+                local cfg = require('project_nvim').get_config()
+                local inspect = vim.inspect
+
+                notify(inspect(cfg))
+            end,
+            opts = { bang = true },
+        },
+
+        ---`:ProjectRecents`
+        {
+            name = 'ProjectRecents',
+            cmd = function()
+                local recent_proj = Api.get_recent_projects()
+
+                if recent_proj == nil or vim.tbl_isempty(recent_proj) then
+                    notify('{}', WARN)
+                end
+
+                ---@type string[]
+                recent_proj = reverse(copy(recent_proj))
+
+                local len, msg = #recent_proj, ''
+
+                for k, v in next, recent_proj do
+                    msg = fmt('%s %s. %s', msg, tostring(k), v)
+
+                    msg = k < len and fmt('%s\n', msg) or msg
+                end
+
+                notify(msg, INFO)
+            end,
+            opts = { bang = true },
+        },
     }
 
     for _, cmnd in next, commands do
         vim.api.nvim_create_user_command(cmnd.name, cmnd.cmd, cmnd.opts or {})
-    end
-
-    for _, value in next, autocmds do
-        autocmd(value[1], value[2])
     end
 
     require('project_nvim.utils.history').read_projects_from_history()
