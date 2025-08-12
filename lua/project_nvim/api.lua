@@ -35,8 +35,9 @@ local function is(dir, identifier)
 end
 
 ---@param path_str string
----@return string
+---@return string|'/'
 local function get_parent(path_str)
+    ---@type string
     path_str = path_str:match('^(.*)/')
 
     return (path_str ~= '') and path_str or '/'
@@ -46,8 +47,7 @@ end
 ---@param identifier string
 ---@return boolean
 local function sub(dir, identifier)
-    local path_str = get_parent(dir)
-    local current = ''
+    local path_str, current = get_parent(dir), ''
 
     -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
     while true do
@@ -276,7 +276,7 @@ function Api.set_pwd(dir, method)
         History.session_projects = { dir }
     elseif not in_tbl(History.session_projects, dir) then
         table.insert(History.session_projects, dir)
-    elseif #History.session_projects > 1 then -- HACK: Move project to start of table
+    elseif #History.session_projects > 1 then
         ---@type integer
         local old_pos
 
@@ -288,23 +288,22 @@ function Api.set_pwd(dir, method)
         end
 
         table.remove(History.session_projects, old_pos)
-        table.insert(History.session_projects, 1, dir)
+        table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
     end
 
     local scope_chdir = Config.options.scope_chdir
-    local ok
-    local _
+    local ok = true
 
     if scope_chdir == 'global' then
-        ok, _ = pcall(vim.api.nvim_set_current_dir, dir)
+        ok = pcall(vim.api.nvim_set_current_dir, dir)
 
         msg = silent and msg or fmt('%s chdir to `%s`: ', msg, dir)
     elseif scope_chdir == 'tab' then
-        ok, _ = pcall(vim.cmd.tchdir, dir)
+        ok = pcall(vim.cmd.tchdir, dir)
 
         msg = silent and msg or fmt('%s tchdir to `%s`: ', msg, dir)
     elseif scope_chdir == 'win' then
-        ok, _ = pcall(vim.cmd.lchdir, dir)
+        ok = pcall(vim.cmd.lchdir, dir)
 
         msg = silent and msg or fmt('%s lchdir to `%s`: ', msg, dir)
     else
@@ -334,6 +333,7 @@ function Api.get_history_paths(path)
         return Path[path]
     end
 
+    ---@type { datapath: string, projectpath: string, historyfile: string }
     return {
         datapath = Path.datapath,
         projectpath = Path.projectpath,
@@ -485,7 +485,7 @@ function Api.init()
     ---@class ProjectCommandsList
     ---@field name string
     ---@field cmd fun(ctx?: vim.api.keyset.user_command)
-    ---@field opts vim.api.keyset.user_command
+    ---@field opts? vim.api.keyset.user_command
 
     ---@type ProjectCommandsList[]
     local commands = {
