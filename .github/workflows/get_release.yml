@@ -26,8 +26,8 @@ jobs:
         run: |
           zip -r -9 project.nvim.zip lua README.md LICENSE
           tar cvJf project.nvim.tar.xz lua README.md LICENSE
-          sha512sum project.nvim.zip | cut -d ' ' -f1 > project.nvim.zip.sha512sum
-          sha512sum project.nvim.tar.xz | cut -d ' ' -f1 > project.nvim.tar.xz.sha512sum
+          sha512sum project.nvim.zip > project.nvim.zip.sha512sum
+          sha512sum project.nvim.tar.xz > project.nvim.tar.xz.sha512sum
 
       - name: Get Release
         id: get_current_release
