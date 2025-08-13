@@ -1,7 +1,5 @@
-TAGS_CMD = -@nvim -c 'helptags doc/' -c 'qa!' --headless
-
 helptags: doc/project-nvim.txt
-	$(TAGS_CMD)
+	nvim --clean -c 'helptags doc/' -c 'qa!' --headless
 
 clean:
 	-@rm -rf doc/tags
