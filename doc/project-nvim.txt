@@ -28,7 +28,9 @@ Table of Contents					     *project-nvim.toc*
 	3.3.1 Telescope Mappings		  |project-nvim.telescope.maps|
 4. Commands						|project-nvim.commands|
     4.1 `:ProjectAdd`						  |:ProjectAdd|
-    4.2 `ProjectRoot`						 |:ProjectRoot|
+    4.2 `:ProjectRoot`						 |:ProjectRoot|
+    4.3 `:ProjectConfig`				       |:ProjectConfig|
+    4.4 `:ProjectRecents`				      |:ProjectRecents|
 5. API							     |project-nvim.api|
     5.1 Utils					       |project-nvim.api.utils|
 	5.1.1 `get_project_root()`	      |project-nvim.get_project_root()|
@@ -454,6 +456,29 @@ There are two user commands you can call from the cmdline:
 <
 
     See `api.lua` for more info on `on_buf_enter()`.
+
+:ProjectRecents						      *:ProjectRecents*
+
+    The `:ProjectRecents` command is a hook to print a formatted list of your
+    recent projects using `vim.notify()`.
+
+    See `api.lua` for more info.
+
+:ProjectConfig						       *:ProjectConfig*
+
+    The `:ProjectConfig` command is a hook to display your current config
+    using `vim.notify(inspect())`
+
+    The command does essentially the followitg:
+
+>vim
+	" vimscript
+
+	" `:ProjectConfig` does the next line
+	:lua vim.notify(vim.inspect(require('project_nvim').get_config()))
+<
+
+    See `api.lua` for more info.
 
 ==============================================================================
 API							     *project-nvim.api*
