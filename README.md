@@ -40,6 +40,8 @@ I will be maintaining this plugin for the foreseeable future.
 6. [Manual Mode](#manual-mode)
     1. [ProjectAdd](#projectadd)
     2. [ProjectRoot](#projectroot)
+    3. [ProjectRecents](#projectrecents)
+    4. [ProjectConfig](#projectconfig)
 7. [API](#api)
     1. [Utils](#utils)
     2. [`get_project_root()`](#get-project-root)
@@ -532,7 +534,7 @@ See [_`api.lua`_](./lua/project_nvim/api.lua) for more info on `add_project_manu
 
 ### ProjectRoot
 
-This command is a manual hook to set the working directory to the current
+The `:ProjectRoot` command is a manual hook to set the working directory to the current
 file's root, attempting to use any of the `setup()` detection methods
 set by the user.
 
@@ -546,6 +548,41 @@ The command does essentially the followitg:
 ```
 
 See [_`api.lua`_](./lua/project_nvim/api.lua) for more info on `on_buf_enter()`
+
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
+
+### ProjectRecents
+
+The `:ProjectRecents` command is a hook to print a formatted list of your
+recent projects using `vim.notify()`.
+
+See [_`api.lua`_](./lua/project_nvim/api.lua) for more info.
+
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
+
+### ProjectConfig
+
+The `:ProjectConfig` command is a hook to display your current config
+using `vim.notify(inspect())`
+
+The command does essentially the followitg:
+
+```vim
+" vimscript
+
+" `:ProjectConfig` does the next line
+:lua vim.notify(vim.inspect(require('project_nvim').get_config()))
+```
+
+See [_`api.lua`_](./lua/project_nvim/api.lua) for more info.
 
 <div align="right">
 
