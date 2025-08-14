@@ -79,6 +79,7 @@ I will be maintaining this plugin for the foreseeable future.
 - [X] `vim.health` integration, AKA `:checkhealth project_nvim`
 - [X] Only include projects that the current user owns ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/167))
 - [X] Add info for `:ProjectRoot` and `:ProjectAdd` commands ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/133))
+- [X] Create help documentation `:h project-nvim`
 - [X] Renamed `project.lua` to `api.lua`
 - [ ] Extend API
   - [X] Rename `project.lua` to `api.lua`
