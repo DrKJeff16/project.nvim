@@ -7,6 +7,7 @@
 ---|'thread'
 ---|'userdata'
 
+local fmt = string.format
 local uv = vim.uv or vim.loop
 
 local ERROR = vim.log.levels.ERROR
@@ -16,15 +17,17 @@ local in_tbl = vim.tbl_contains
 ---@class Project.Utils.Util
 local Util = {}
 
--- Return whether nvim is running on Windows/WSL
+---Return whether nvim is running on Windows.
+--- ---
 ---@return boolean
 function Util.is_windows()
     return vim.fn.has('win32') == 1
 end
 
 ---Check whether `data` is of type `t` or not.
----@param t Project.Utils.Util.Types
----@param data any
+--- ---
+---@param t Project.Utils.Util.Types Any return value the `type()` function would return
+---@param data any The data to be type-checked
 ---@return boolean
 function Util.is_type(t, data)
     local TYPES = {
@@ -41,20 +44,22 @@ function Util.is_type(t, data)
         return false
     end
 
-    return (data ~= nil and type(data) == t)
+    return data ~= nil and type(data) == t
 end
 
 ---Check if module `mod` is available.
----@param mod string
----@return boolean
+--- ---
+---@param mod string The `require()` argument to be checked
+---@return boolean ok
 function Util.mod_exists(mod)
     local is_type = Util.is_type
+    local ok, _ = false, nil
 
     if not is_type('string', mod) or mod == '' then
-        return false
+        return ok
     end
 
-    local ok, _ = pcall(require, mod)
+    ok, _ = pcall(require, mod)
 
     return ok
 end
@@ -63,20 +68,17 @@ end
 ---
 ---If table is empty, just returns it.
 ---@param T table|string[]
----@return table|string[]
+---@return table|string[] t
 function Util.dedup(T)
     if not Util.is_type('table', T) then
-        error(
-            '(project_nvim.utils.util.dedup): Attempting to dedup data that is not a table!',
-            ERROR
-        )
-    end
-
-    if empty(T) then
-        return T
+        error('(project_nvim.utils.util.dedup): Data is not a table!', ERROR)
     end
 
     local t = {}
+
+    if empty(T) then
+        return t
+    end
 
     for _, v in next, T do
         if not in_tbl(t, v) then
@@ -100,7 +102,7 @@ function Util.format_per_type(t, data, sep, constraints)
     constraints = is_type('table', constraints) and constraints or nil
 
     if t == 'string' then
-        local res = string.format('%s`"%s"`', sep, data)
+        local res = fmt('%s`"%s"`', sep, data)
         if not is_type('table', constraints) then
             return res
         end
@@ -113,36 +115,36 @@ function Util.format_per_type(t, data, sep, constraints)
     end
 
     if t == 'number' or t == 'boolean' then
-        return string.format('%s`%s`', sep, tostring(data))
+        return fmt('%s`%s`', sep, tostring(data))
     end
 
     local msg = ''
 
     if t == 'nil' then
-        return sep .. msg .. ' `nil`'
+        return fmt('%s%s `nil`', sep, msg)
     end
 
     if t ~= 'table' then
-        return sep .. msg .. ' `?`'
+        return fmt('%s%s `?`', sep, msg)
     end
 
     if vim.tbl_isempty(data) then
-        return sep .. msg .. ' `{}`'
+        return fmt('%s%s `{}`', sep, msg)
     end
 
-    sep = sep .. '  '
+    sep = fmt('%s  ', sep)
 
     for k, v in next, data do
         if is_type('number', k) then
-            k = '[' .. tostring(k) .. ']'
+            k = fmt('[%s]', tostring(k))
         end
 
-        msg = msg .. string.format('%s\n%s: `', sep, k)
+        msg = fmt('%s%s\n%s: `', msg, sep, k)
 
         if not is_type('string', v) then
-            msg = msg .. string.format('%s', Util.format_per_type(type(v), v, sep))
+            msg = fmt('%s%s', msg, Util.format_per_type(type(v), v, sep))
         else
-            msg = msg .. string.format('"%s"`', v)
+            msg = fmt('%s"%s"`', msg, v)
         end
     end
 
@@ -151,11 +153,11 @@ end
 
 ---Reverses a table.
 ---
----If table is empty, returns it.
+---If table is empty, returns an empty table.
 ---@param T table
 ---@return table
 function Util.reverse(T)
-    if not Util.is_type('table', T) then
+    if not Util.is_type('table', T) or empty(T) then
         error('project_nvim.utils.util.reverse: Arg is not a table', ERROR)
     end
 
