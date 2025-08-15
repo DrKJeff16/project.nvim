@@ -1,21 +1,17 @@
+local Util = require('project_nvim.utils.util')
 local uv = vim.uv or vim.loop
 
-local DATAPATH = vim.fn.stdpath('data')
-
 ---@class Project.Utils.Path
+---The directory where the project dir will be saved.
+------
+---@field datapath? string
+---The directory where the project history will be saved.
+------
+---@field projectpath? string
+---The project history file.
+------
+---@field historyfile? string
 local Path = {}
-
---- The directory where the project dir will be saved.
---- ---
-Path.datapath = DATAPATH
-
---- The directory where the project history will be saved.
---- ---
-Path.projectpath = string.format('%s/project_nvim', Path.datapath)
-
---- The project history file.
----
-Path.historyfile = string.format('%s/project_history', Path.projectpath)
 
 ---@param callback? fun(err: string|nil, success: boolean|nil)
 function Path.create_scaffolding(callback)
@@ -31,9 +27,9 @@ end
 ---@param dir string
 ---@return boolean
 function Path.is_excluded(dir)
-    local Config = require('project_nvim.config')
+    local exclude_dirs = require('project_nvim.config').options.exclude_dirs
 
-    for _, dir_pattern in next, Config.options.exclude_dirs do
+    for _, dir_pattern in next, exclude_dirs do
         if dir:match(dir_pattern) ~= nil then
             return true
         end
@@ -49,9 +45,13 @@ function Path.exists(path)
 end
 
 function Path.init()
-    local Config = require('project_nvim.config')
+    local datapath = require('project_nvim.config').options.datapath
 
-    Path.datapath = Config.options.datapath or DATAPATH
+    if not Util.dir_exists(datapath) then
+        datapath = vim.fn.stdpath('data')
+    end
+
+    Path.datapath = datapath
     Path.projectpath = string.format('%s/project_nvim', Path.datapath)
     Path.historyfile = string.format('%s/project_history', Path.projectpath)
 end
