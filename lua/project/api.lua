@@ -1,14 +1,14 @@
 local fmt = string.format
 
-local MODSTR = 'project_nvim.api'
+local MODSTR = 'project.api'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
 
-local Config = require('project_nvim.config')
-local Glob = require('project_nvim.utils.globtopattern')
-local Path = require('project_nvim.utils.path')
-local Util = require('project_nvim.utils.util')
+local Config = require('project.config')
+local Glob = require('project.utils.globtopattern')
+local Path = require('project.utils.path')
+local Util = require('project.utils.util')
 
 local is_type = Util.is_type
 local is_windows = Util.is_windows
@@ -82,7 +82,7 @@ Api.current_project = nil
 ---@type string|nil
 Api.current_method = nil
 
-Api.get_recent_projects = require('project_nvim.utils.history').get_recent_projects
+Api.get_recent_projects = require('project.utils.history').get_recent_projects
 
 ---Get the LSP client for current buffer.
 ---
@@ -255,7 +255,7 @@ function Api.set_pwd(dir, method)
         return false
     end
 
-    local History = require('project_nvim.utils.history')
+    local History = require('project.utils.history')
 
     if not (Config.options.allow_different_owners or Api.verify_owner(dir)) then
         notify(fmt('(%s.set_pwd): Project root is owned by a different user', MODSTR), WARN)
@@ -424,7 +424,7 @@ function Api.on_buf_enter(verbose, bufnr)
 
     Api.set_pwd(Api.current_project, Api.current_method)
 
-    require('project_nvim.utils.history').write_projects_to_history()
+    require('project.utils.history').write_projects_to_history()
 end
 
 ---@param verbose? boolean
@@ -441,7 +441,7 @@ function Api.add_project_manually(verbose)
 end
 
 function Api.init()
-    local group = augroup('project_nvim', { clear = true })
+    local group = augroup('project', { clear = true })
     local detection_methods = Config.options.detection_methods
 
     ---@type AutocmdTuple[]
@@ -451,7 +451,7 @@ function Api.init()
             {
                 pattern = '*',
                 group = group,
-                callback = require('project_nvim.utils.history').write_projects_to_history,
+                callback = require('project.utils.history').write_projects_to_history,
             },
         },
     }
@@ -508,7 +508,7 @@ function Api.init()
         {
             name = 'ProjectConfig',
             cmd = function()
-                local cfg = require('project_nvim').get_config()
+                local cfg = require('project').get_config()
                 local inspect = vim.inspect
 
                 notify(inspect(cfg))
@@ -547,7 +547,7 @@ function Api.init()
         vim.api.nvim_create_user_command(cmnd.name, cmnd.cmd, cmnd.opts or {})
     end
 
-    require('project_nvim.utils.history').read_projects_from_history()
+    require('project.utils.history').read_projects_from_history()
 end
 
 return Api

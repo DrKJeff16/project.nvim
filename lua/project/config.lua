@@ -1,5 +1,5 @@
-local Util = require('project_nvim.utils.util')
-local Glob = require('project_nvim.utils.globtopattern')
+local Util = require('project.utils.util')
+local Glob = require('project.utils.globtopattern')
 
 local is_type = Util.is_type
 local mod_exists = Util.mod_exists
@@ -11,7 +11,7 @@ local copy = vim.deepcopy
 ---@field setup_called? boolean
 local Config = {}
 
----Options defined after running `require('project_nvim').setup()`.
+---Options defined after running `require('project').setup()`.
 ---
 ---@class Project.Config.Options
 local DEFAULTS = {
@@ -162,7 +162,7 @@ local DEFAULTS = {
     ---The path where `project.nvim` will store the project history directory,
     ---containing the project history in it.
     ---
-    ---For more info, run `:lua vim.print(require('project_nvim').get_history_paths())`
+    ---For more info, run `:lua vim.print(require('project').get_history_paths())`
     ------
     ---Default: `vim.fn.stdpath('data')`
     ------
@@ -170,7 +170,7 @@ local DEFAULTS = {
     datapath = vim.fn.stdpath('data'),
 }
 
----Get the default options for configuring `project_nvim`.
+---Get the default options for configuring `project`.
 -------
 ---@return Project.Config.Options
 function Config.get_defaults()
@@ -223,7 +223,7 @@ function Config:trim_methods()
     self.options.detection_methods = copy(methods)
 end
 
----The function called when running `require('project_nvim').setup()`.
+---The function called when running `require('project').setup()`.
 --- ---
 ---@param options? Project.Config.Options
 function Config.setup(options)
@@ -237,8 +237,8 @@ function Config.setup(options)
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
     vim.opt.autochdir = Config.options.enable_autochdir
 
-    require('project_nvim.utils.path').init()
-    require('project_nvim.api').init()
+    require('project.utils.path').init()
+    require('project.api').init()
 
     ---Load `projects` Telescope picker if check is `true`.
     if Config.options.telescope.enabled and mod_exists('telescope') then

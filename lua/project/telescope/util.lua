@@ -1,4 +1,4 @@
-local Util = require('project_nvim.utils.util')
+local Util = require('project.utils.util')
 
 local reverse = Util.reverse
 
@@ -20,8 +20,8 @@ end
 
 ---@return table
 function M.create_finder()
-    local Config = require('project_nvim.config')
-    local History = require('project_nvim.utils.history')
+    local Config = require('project.config')
+    local History = require('project.utils.history')
 
     local results = History.get_recent_projects()
 

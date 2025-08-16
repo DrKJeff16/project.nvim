@@ -22,8 +22,8 @@
 
 ---@alias ProjParam { value: string }
 
-local Util = require('project_nvim.utils.util')
-local Path = require('project_nvim.utils.path')
+local Util = require('project.utils.util')
+local Path = require('project.utils.path')
 local uv = vim.uv or vim.loop
 
 local ERROR = vim.log.levels.ERROR
@@ -229,7 +229,7 @@ function History.write_projects_to_history()
     local file = History.open_history(History.recent_projects == nil and 'a' or 'w')
 
     if file == nil then
-        notify('(project_nvim.utils.history.write_projects_to_history): File restricted', ERROR)
+        notify('(project.utils.history.write_projects_to_history): File restricted', ERROR)
         return
     end
 

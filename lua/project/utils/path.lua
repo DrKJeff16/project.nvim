@@ -1,4 +1,4 @@
-local Util = require('project_nvim.utils.util')
+local Util = require('project.utils.util')
 local uv = vim.uv or vim.loop
 
 ---@class Project.Utils.Path
@@ -27,7 +27,7 @@ end
 ---@param dir string
 ---@return boolean
 function Path.is_excluded(dir)
-    local exclude_dirs = require('project_nvim.config').options.exclude_dirs
+    local exclude_dirs = require('project.config').options.exclude_dirs
 
     for _, dir_pattern in next, exclude_dirs do
         if dir:match(dir_pattern) ~= nil then
@@ -45,7 +45,7 @@ function Path.exists(path)
 end
 
 function Path.init()
-    local datapath = require('project_nvim.config').options.datapath
+    local datapath = require('project.config').options.datapath
 
     if not Util.dir_exists(datapath) then
         datapath = vim.fn.stdpath('data')

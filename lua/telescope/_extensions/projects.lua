@@ -1,4 +1,4 @@
-local Util = require('project_nvim.utils.util')
+local Util = require('project.utils.util')
 
 local mod_exists = Util.mod_exists
 local is_type = Util.is_type
@@ -14,8 +14,8 @@ local Pickers = require('telescope.pickers')
 local Actions = require('telescope.actions')
 local telescope_config = require('telescope.config').values
 
-local ProjActions = require('project_nvim.telescope.actions')
-local TelUtil = require('project_nvim.telescope.util')
+local ProjActions = require('project.telescope.actions')
+local TelUtil = require('project.telescope.util')
 
 local browse_project_files = ProjActions.browse_project_files
 local delete_project = ProjActions.delete_project

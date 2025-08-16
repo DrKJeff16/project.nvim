@@ -71,7 +71,7 @@ end
 ---@return table|string[] t
 function Util.dedup(T)
     if not Util.is_type('table', T) then
-        error('(project_nvim.utils.util.dedup): Data is not a table!', ERROR)
+        error('(project.utils.util.dedup): Data is not a table!', ERROR)
     end
 
     local t = {}
@@ -156,7 +156,7 @@ end
 ---@return table
 function Util.reverse(T)
     if not Util.is_type('table', T) then
-        error('project_nvim.utils.util.reverse: Arg is not a table', ERROR)
+        error('project.utils.util.reverse: Arg is not a table', ERROR)
     end
 
     if empty(T) then

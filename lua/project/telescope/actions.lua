@@ -1,5 +1,5 @@
-local Util = require('project_nvim.utils.util')
-local TelUtil = require('project_nvim.telescope.util')
+local Util = require('project.utils.util')
+local TelUtil = require('project.telescope.util')
 
 local reverse = Util.reverse
 
@@ -13,9 +13,9 @@ local Actions = require('telescope.actions')
 local Builtin = require('telescope.builtin')
 local State = require('telescope.actions.state')
 
-local History = require('project_nvim.utils.history')
-local Api = require('project_nvim.api')
-local Config = require('project_nvim.config')
+local History = require('project.utils.history')
+local Api = require('project.api')
+local Config = require('project.config')
 
 local make_display = TelUtil.make_display
 
