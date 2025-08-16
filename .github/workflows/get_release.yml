@@ -24,8 +24,8 @@ jobs:
       - name: Build project assets
         id: checkout
         run: |
-          zip -r -9 project.nvim.zip lua README.md LICENSE
-          tar cvJf project.nvim.tar.xz lua README.md LICENSE
+          zip -r -9 project.nvim.zip lua doc README.md LICENSE
+          tar cvJf project.nvim.tar.xz lua doc README.md LICENSE
           sha512sum project.nvim.zip > project.nvim.zip.sha512sum
           sha512sum project.nvim.tar.xz > project.nvim.tar.xz.sha512sum
 
