@@ -125,13 +125,9 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 
 ## Installation
 
----
+Use any plugin manager of your choosing.
 
-<div align="center">
-<i><ins><b>WARNING: DO NOT LAZY-LOAD THIS PLUGIN</b><br />You might have issues with your <code>cwd</code> otherwise.</ins></i>
-</div>
-
----
+Currently there are instructions for these:
 
 <details>
 <summary><a href="https://github.com/junegunn/vim-plug">vim-plug</a></summary>
