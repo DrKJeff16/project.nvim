@@ -3,13 +3,13 @@ local uv = vim.uv or vim.loop
 
 ---@class Project.Utils.Path
 ---The directory where the project dir will be saved.
-------
+--- ---
 ---@field datapath? string
 ---The directory where the project history will be saved.
-------
+--- ---
 ---@field projectpath? string
 ---The project history file.
-------
+--- ---
 ---@field historyfile? string
 local Path = {}
 

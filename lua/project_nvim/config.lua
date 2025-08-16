@@ -11,8 +11,8 @@ local copy = vim.deepcopy
 ---@field setup_called? boolean
 local Config = {}
 
----The options for `setup()`.
-------
+---Options defined after running `require('project_nvim').setup()`.
+---
 ---@class Project.Config.Options
 local DEFAULTS = {
     ---If `true` your root directory won't be changed automatically,
@@ -177,14 +177,14 @@ function Config.get_defaults()
     return DEFAULTS
 end
 
----Options defined after running `require('project_nvim').setup()`.
-------
 ---Default: `{}` (before calling `setup()`)
-------
+---
 ---@type table|Project.Config.Options
 Config.options = {}
 
 ---Ensure that the `detection_methods` option is valid.
+---This includes non-repeating values, only `'lsp'` and `'pattern'` strings,
+---if any.
 --- ---
 ---@param self Project.Config
 function Config:trim_methods()
@@ -224,7 +224,7 @@ function Config:trim_methods()
 end
 
 ---The function called when running `require('project_nvim').setup()`.
-------
+--- ---
 ---@param options? Project.Config.Options
 function Config.setup(options)
     options = is_type('table', options) and options or {}
