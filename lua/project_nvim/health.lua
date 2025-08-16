@@ -1,4 +1,5 @@
 local uv = vim.uv or vim.loop
+local fmt = string.format
 
 local start = vim.health.start or vim.health.report_start
 local ok = vim.health.ok or vim.health.report_ok
@@ -22,6 +23,7 @@ function Health.options_check()
     start('Config')
 
     local Options = require('project_nvim.config').options
+    table.sort(Options)
 
     if not is_type('table', Options) then
         h_error('The config table is missing!')
@@ -40,7 +42,7 @@ function Health.options_check()
 
         local str, warning = format_per_type(type(v), v, nil, constraints)
 
-        str = string.format(' - %s: %s', k, str)
+        str = fmt(' - %s: %s', k, str)
 
         if is_type('boolean', warning) and warning then
             h_warn(str)
@@ -85,16 +87,16 @@ function Health.history_check()
         local stat = uv.fs_stat(value)
 
         if stat == nil then
-            h_error(string.format('%s: `%s` is missing or not readable!', fname, value))
+            h_error(fmt('%s: `%s` is missing or not readable!', fname, value))
             goto continue
         end
 
         if stat.type ~= ftype then
-            h_error(string.format('%s: `%s` is not of type `%s`!', fname, value, ftype))
+            h_error(fmt('%s: `%s` is not of type `%s`!', fname, value, ftype))
             goto continue
         end
 
-        ok(string.format('%s: `%s`', fname, value))
+        ok(fmt('%s: `%s`', fname, value))
 
         ::continue::
     end
@@ -111,7 +113,7 @@ function Health.setup_check()
 
         if Util.is_windows() then
             h_warn(
-                string.format(
+                fmt(
                     '%s\n\n\t%s',
                     'Running on Windows. Issues might occur.',
                     'Please report any issues to the maintainers'
@@ -140,7 +142,7 @@ function Health.project_check()
     if curr == nil then
         msg = 'Current project: **No current project**'
     else
-        msg = string.format('Current project: `%s`', curr)
+        msg = fmt('Current project: `%s`', curr)
     end
 
     info(msg)
@@ -148,15 +150,15 @@ function Health.project_check()
     if method == nil then
         msg = 'Method used: **No method available**'
     else
-        msg = string.format('Method used: `%s`', method)
+        msg = fmt('Method used: `%s`', method)
     end
 
     info(msg)
 
     if last == nil then
-        msg = 'Last project: **No method available**\n'
+        msg = 'Last project: **No method available**'
     else
-        msg = string.format('Last project: `%s`\n', last)
+        msg = fmt('Last project: `%s`', last)
     end
 
     info(msg)
@@ -171,7 +173,7 @@ function Health.project_check()
         projects = dedup(vim.deepcopy(projects))
 
         for k, v in next, projects do
-            info(string.format('`[%s]`: `%s`', tostring(k), v))
+            info(fmt('`[%s]`: `%s`', tostring(k), v))
         end
     else
         h_warn('No active session projects!')
@@ -204,7 +206,7 @@ function Health.telescope_check()
         h_warn('Telescope setup option not configured correctly!')
     end
 
-    ok(string.format("Sorting order: `'%s'`", Opts.telescope.sort))
+    ok(fmt("Sorting order: `'%s'`", Opts.telescope.sort))
 end
 
 function Health.recent_proj_check()
@@ -213,20 +215,20 @@ function Health.recent_proj_check()
     local recents = require('project_nvim.api').get_recent_projects()
 
     if vim.tbl_isempty(recents) then
-        h_warn(
-            '**No projects found in history!**\n'
-                .. '_If this is your first time using this plugin,_\n'
-                .. '_or you just set a different `historypath` for your plugin,_\n'
-                .. '_then you can ignore this._\n\n'
-                .. 'If this keeps appearing though, check your config and if needed create an issue.'
-        )
+        h_warn([[
+            **No projects found in history!**\n
+            _If this is your first time using this plugin,_\n
+            _or you just set a different `historypath` for your plugin,_\n
+            _then you can ignore this._\n\n
+            If this keeps appearing though, check your config and if needed create an issue.
+                ]])
         return
     end
 
     recents = Util.reverse(vim.deepcopy(recents))
 
     for i, project in next, recents do
-        info(string.format('%s. `%s`', tostring(i), project))
+        info(fmt('%s. `%s`', tostring(i), project))
     end
 end
 
