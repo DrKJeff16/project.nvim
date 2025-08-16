@@ -5,10 +5,13 @@ local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
 
-local Config = require('project.config')
-local Glob = require('project.utils.globtopattern')
-local Path = require('project.utils.path')
-local Util = require('project.utils.util')
+local lazy = require('project.lazy')
+
+local Config = lazy.require('project.config') ---@module 'project.config'
+local Glob = lazy.require('project.utils.globtopattern') ---@module 'project.utils.globtopattern'
+local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
+local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
+local History = lazy.require('project.utils.history') ---@module 'project.utils.history'
 
 local is_type = Util.is_type
 local is_windows = Util.is_windows
@@ -82,7 +85,7 @@ Api.current_project = nil
 ---@type string|nil
 Api.current_method = nil
 
-Api.get_recent_projects = require('project.utils.history').get_recent_projects
+Api.get_recent_projects = History.get_recent_projects
 
 ---Get the LSP client for current buffer.
 ---
@@ -253,8 +256,6 @@ function Api.set_pwd(dir, method)
         return false
     end
 
-    local History = require('project.utils.history')
-
     if not (Config.options.allow_different_owners or Api.verify_owner(dir)) then
         notify(fmt('(%s.set_pwd): Project root is owned by a different user', MODSTR), WARN)
         return false
@@ -422,7 +423,7 @@ function Api.on_buf_enter(verbose, bufnr)
 
     Api.set_pwd(Api.current_project, Api.current_method)
 
-    require('project.utils.history').write_projects_to_history()
+    History.write_projects_to_history()
 end
 
 ---@param verbose? boolean
@@ -449,7 +450,7 @@ function Api.init()
             {
                 pattern = '*',
                 group = group,
-                callback = require('project.utils.history').write_projects_to_history,
+                callback = History.write_projects_to_history,
             },
         },
     }
@@ -545,7 +546,7 @@ function Api.init()
         vim.api.nvim_create_user_command(cmnd.name, cmnd.cmd, cmnd.opts or {})
     end
 
-    require('project.utils.history').read_projects_from_history()
+    History.read_projects_from_history()
 end
 
 return Api
