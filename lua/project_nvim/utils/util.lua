@@ -132,19 +132,17 @@ function Util.format_per_type(t, data, sep, constraints)
         return fmt('%s%s `{}`', sep, msg)
     end
 
-    sep = fmt('%s  ', sep)
+    sep = fmt('%s ', sep)
 
+    ---@cast data table
     for k, v in next, data do
-        if is_type('number', k) then
-            k = fmt('[%s]', tostring(k))
-        end
-
-        msg = fmt('%s%s\n%s: `', msg, sep, k)
+        k = is_type('number', k) and fmt('[%s]', tostring(k)) or k
+        msg = fmt('%s\n%s%s: ', msg, sep, k)
 
         if not is_type('string', v) then
             msg = fmt('%s%s', msg, Util.format_per_type(type(v), v, sep))
         else
-            msg = fmt('%s"%s"`', msg, v)
+            msg = fmt('%s`"%s"`', msg, v)
         end
     end
 
@@ -157,7 +155,7 @@ end
 ---@param T table
 ---@return table
 function Util.reverse(T)
-    if not Util.is_type('table', T) or empty(T) then
+    if not Util.is_type('table', T) then
         error('project_nvim.utils.util.reverse: Arg is not a table', ERROR)
     end
 
@@ -179,7 +177,7 @@ end
 function Util.dir_exists(dir)
     local stat = uv.fs_stat(dir)
 
-    return (stat ~= nil and stat.type == 'directory')
+    return stat ~= nil and stat.type == 'directory'
 end
 
 ---@param path_to_normalise string
