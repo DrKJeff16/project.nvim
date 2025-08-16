@@ -215,8 +215,7 @@ function Api.find_pattern_root()
             local exclude = false
 
             if pattern:sub(1, 1) == '!' then
-                exclude = true
-                pattern = pattern:sub(2)
+                exclude, pattern = true, pattern:sub(2)
             end
 
             if match(search_dir, pattern) then
@@ -242,8 +241,8 @@ function Api.attach_to_lsp()
     local group = augroup('ProjectAttach', { clear = true })
     autocmd('LspAttach', {
         group = group,
-        callback = function()
-            Api.on_buf_enter()
+        callback = function(ev)
+            Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
         end,
     })
 end
@@ -258,13 +257,9 @@ function Api.set_pwd(dir, method)
 
     local History = require('project_nvim.utils.history')
 
-    if not Config.options.allow_different_owners then
-        local valid = Api.verify_owner(dir)
-
-        if not valid then
-            notify(fmt('(%s.set_pwd): Project root is owned by a different user', MODSTR), WARN)
-            return false
-        end
+    if not (Config.options.allow_different_owners or Api.verify_owner(dir)) then
+        notify(fmt('(%s.set_pwd): Project root is owned by a different user', MODSTR), WARN)
+        return false
     end
 
     local silent = Config.options.silent_chdir
@@ -294,31 +289,28 @@ function Api.set_pwd(dir, method)
     local scope_chdir = Config.options.scope_chdir
     local ok = true
 
-    if scope_chdir == 'global' then
-        ok = pcall(vim.api.nvim_set_current_dir, dir)
-
-        msg = silent and msg or fmt('%s chdir to `%s`: ', msg, dir)
-    elseif scope_chdir == 'tab' then
-        ok = pcall(vim.cmd.tchdir, dir)
-
-        msg = silent and msg or fmt('%s tchdir to `%s`: ', msg, dir)
-    elseif scope_chdir == 'win' then
-        ok = pcall(vim.cmd.lchdir, dir)
-
-        msg = silent and msg or fmt('%s lchdir to `%s`: ', msg, dir)
-    else
+    if not in_tbl({ 'global', 'tab', 'win' }, scope_chdir) then
         notify(fmt('%s INVALID value for `scope_chdir`', msg), WARN)
         return false
     end
 
-    msg = not ok and msg .. 'FAILED' or msg .. 'SUCCESS'
+    if scope_chdir == 'global' then
+        ok = pcall(vim.api.nvim_set_current_dir, dir)
+        msg = fmt('%s chdir to `%s`: ', msg, dir)
+    elseif scope_chdir == 'tab' then
+        ok = pcall(vim.cmd.tchdir, dir)
+        msg = fmt('%s tchdir to `%s`: ', msg, dir)
+    elseif scope_chdir == 'win' then
+        ok = pcall(vim.cmd.lchdir, dir)
+        msg = fmt('%s lchdir to `%s`: ', msg, dir)
+    end
+
+    msg = msg .. (ok and 'SUCCESS' or 'FAILED')
 
     if not silent then
-        notify(fmt('(%s.set_pwd): Set CWD to %s using %s\n', MODSTR, dir, method), INFO)
+        notify(fmt('(%s.set_pwd): Set CWD to %s using %s', MODSTR, dir, method), INFO)
 
-        if msg:sub(-6) == 'FAILED' then
-            notify(msg, WARN)
-        end
+        notify(msg, ok and INFO or WARN)
     end
 
     return true
@@ -329,16 +321,16 @@ end
 function Api.get_history_paths(path)
     local valid = { 'datapath', 'projectpath', 'historyfile' }
 
-    if is_type('string', path) and vim.tbl_contains(valid, path) then
-        return Path[path]
+    if not (path and in_tbl(valid, path)) then
+        ---@type { datapath: string, projectpath: string, historyfile: string }
+        return {
+            datapath = Path.datapath,
+            projectpath = Path.projectpath,
+            historyfile = Path.historyfile,
+        }
     end
 
-    ---@type { datapath: string, projectpath: string, historyfile: string }
-    return {
-        datapath = Path.datapath,
-        projectpath = Path.projectpath,
-        historyfile = Path.historyfile,
-    }
+    return Path[path]
 end
 
 ---Returns project root, as well as method
@@ -388,9 +380,10 @@ function Api.get_current_project()
     return curr, method, last
 end
 
+---@param bufnr? integer
 ---@return boolean
-function Api.is_file()
-    local bufnr = curr_buf()
+function Api.is_file(bufnr)
+    bufnr = is_type('number', bufnr) and bufnr or curr_buf()
 
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
 
@@ -405,14 +398,16 @@ function Api.is_file()
 end
 
 ---@param verbose? boolean
-function Api.on_buf_enter(verbose)
+---@param bufnr? integer
+function Api.on_buf_enter(verbose, bufnr)
     verbose = is_type('boolean', verbose) and verbose or false
+    bufnr = is_type('number', bufnr) and bufnr or curr_buf()
 
-    if not Api.is_file() then
+    if not Api.is_file(bufnr) then
         return
     end
 
-    local current_dir = vim.fn.expand('%:p:h')
+    local current_dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
 
     if not Path.exists(current_dir) or Path.is_excluded(current_dir) then
         return
@@ -468,7 +463,9 @@ function Api.init()
                 pattern = '*',
                 group = group,
                 nested = true,
-                callback = Api.on_buf_enter,
+                callback = function(ev)
+                    Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
+                end,
             },
         })
 
