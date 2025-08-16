@@ -143,9 +143,7 @@ function Api.find_pattern_root()
         search_dir = search_dir:gsub('\\', '/')
     end
 
-    local last_dir_cache = ''
-    ---@type string[]
-    local curr_dir_cache = {}
+    local last_dir_cache, curr_dir_cache = '', {}
 
     ---@param file_dir string
     local function get_files(file_dir)
