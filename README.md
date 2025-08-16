@@ -16,14 +16,29 @@ I will be maintaining this plugin for the foreseeable future.
 
 `:checkhealth project`:
 
-![checkhealth_support](https://github.com/user-attachments/assets/7a1c9ca3-e918-422a-987f-bb59238e1d60)
 
+
+https://github.com/user-attachments/assets/1808f20a-789a-41d3-8dbb-bf962c34cf5b
+
+
+
+<!--
+![checkhealth_support](https://github.com/user-attachments/assets/7a1c9ca3-e918-422a-987f-bb59238e1d60)
+-->
 
 ## Telescope Integration
 
 `:Telescope project`:
 
+
+
+https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
+
+
+
+<!--
 ![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
+-->
 
 ---
 
