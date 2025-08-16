@@ -16,7 +16,8 @@ I will be maintaining this plugin for the foreseeable future.
 
 `:checkhealth project_nvim`:
 
-![Checkhealth Support](https://github.com/user-attachments/assets/10508903-6d95-443f-843c-f2ce4c7f7360)
+![checkhealth_support](https://github.com/user-attachments/assets/7a1c9ca3-e918-422a-987f-bb59238e1d60)
+
 
 ## Telescope Integration
 
