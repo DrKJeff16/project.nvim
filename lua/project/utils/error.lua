@@ -1,16 +1,13 @@
 local levels = vim.log.levels
 
-local ERROR, WARN, INFO, DEBUG, TRACE =
-    levels.ERROR, levels.WARN, levels.INFO, levels.DEBUG, levels.TRACE
-
 ---@class Project.Utils.Error
-local M = {}
-
-M.ERROR = ERROR
-M.WARN = WARN
-M.INFO = INFO
-M.DEBUG = DEBUG
-M.TRACE = TRACE
+local M = {
+    ERROR = levels.ERROR,
+    WARN = levels.WARN,
+    INFO = levels.INFO,
+    DEBUG = levels.DEBUG,
+    TRACE = levels.TRACE,
+}
 
 ---@param msg string
 function M.error(msg)
