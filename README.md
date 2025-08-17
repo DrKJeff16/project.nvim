@@ -76,8 +76,9 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 
 - Automagically `cd` to the project root directory using `vim.lsp`
 - If no LSP is available then it'll try using pattern matching to `cd` to the project root directory instead
-- Asynchronous file IO so it will not slow down neovim when reading the history file on startup.
-- Functional `checkhealth` hook (`:checkhealth project`)
+- Asynchronous file IO so it will not slow down neovim when reading the history file on startup
+- Functional `checkhealth` hook `:checkhealth project`
+- Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
 - [Telescope Integration](#telescope) `:Telescope projects`
 - [`nvim-tree` Integration](#nvim-tree)
 
