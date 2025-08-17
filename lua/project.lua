@@ -1,10 +1,6 @@
 local lazy = require('project.lazy')
 local Config = lazy.require('project.config') ---@module 'project.config'
 local Api = lazy.require('project.api') ---@module 'project.api'
-local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
-local Glob = lazy.require('project.utils.globtopattern') ---@module 'project.utils.globtopattern'
-local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
-local History = lazy.require('project.utils.history') ---@module 'project.utils.history'
 
 ---The `project` module.
 --- ---
