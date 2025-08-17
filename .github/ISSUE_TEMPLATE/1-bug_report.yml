@@ -11,8 +11,6 @@ body:
       label: Before we begin...
       description: "Make sure to read every checkbox and answer truthfully:"
       options:
-        - label: I am **NOT** lazy-loading this plugin
-          required: true
         - label: I have checked for existing issues related to this one, whether open or closed
           required: true
         - label: I have read the docs (`README.md`, etc.), and also the ones for `telescope.nvim`
@@ -22,6 +20,8 @@ body:
       label: What is the problem you encountered relate to?
       description: "Check one or more types of concepts your issue relates to:"
       options:
+        - label: The plugin is not detecting directories correctly
+          required: false
         - label: Another plugin interferes with `project.nvim`
           required: false
         - label: Project history broke
