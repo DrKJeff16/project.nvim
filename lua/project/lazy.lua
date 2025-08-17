@@ -1,3 +1,4 @@
+---@class Project.Lazy
 local lazy = {}
 
 --- Require on index.
