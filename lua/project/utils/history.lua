@@ -22,15 +22,16 @@
 
 ---@alias ProjParam { value: string }
 
-local Util = require('project.utils.util')
-local Path = require('project.utils.path')
-local uv = vim.uv or vim.loop
+local lazy = require('project.lazy')
 
-local ERROR = vim.log.levels.ERROR
+local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
+local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
+local Error = lazy.require('project.utils.error') ---@module 'project.utils.error'
+
+local uv = vim.uv or vim.loop
 
 local copy = vim.deepcopy
 local in_tbl = vim.tbl_contains
-local notify = vim.notify
 
 local dir_exists = Util.dir_exists
 local normalise_path = Util.normalise_path
@@ -52,8 +53,7 @@ History.session_projects = {}
 ---@param callback? fun(err: string|nil, fd: integer|nil)
 ---@return integer|nil
 function History.open_history(mode, callback)
-    local histfile = Path.historyfile
-    local flag = tonumber('644', 8)
+    local histfile, flag = Path.historyfile, tonumber('644', 8)
 
     if callback == nil then -- async
         Path.create_scaffolding()
@@ -229,8 +229,7 @@ function History.write_projects_to_history()
     local file = History.open_history(History.recent_projects == nil and 'a' or 'w')
 
     if file == nil then
-        notify('(project.utils.history.write_projects_to_history): File restricted', ERROR)
-        return
+        Error('(project.utils.history.write_projects_to_history): File restricted')
     end
 
     local res = History.get_recent_projects()

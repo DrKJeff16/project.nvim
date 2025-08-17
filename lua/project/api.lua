@@ -1,9 +1,6 @@
 local fmt = string.format
 
 local MODSTR = 'project.api'
-local ERROR = vim.log.levels.ERROR
-local INFO = vim.log.levels.INFO
-local WARN = vim.log.levels.WARN
 
 local lazy = require('project.lazy')
 
@@ -12,6 +9,11 @@ local Glob = lazy.require('project.utils.globtopattern') ---@module 'project.uti
 local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
 local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
 local History = lazy.require('project.utils.history') ---@module 'project.utils.history'
+local Error = lazy.require('project.utils.error') ---@module 'project.utils.error'
+
+local ERROR = Error.ERROR
+local INFO = Error.INFO
+local WARN = Error.WARN
 
 local is_type = Util.is_type
 local is_windows = Util.is_windows

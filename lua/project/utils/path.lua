@@ -1,4 +1,8 @@
-local Util = require('project.utils.util')
+local lazy = require('project.lazy')
+
+local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
+local dir_exists = Util.dir_exists
+
 local uv = vim.uv or vim.loop
 
 ---@class Project.Utils.Path
@@ -30,6 +34,7 @@ function Path.is_excluded(dir)
     local exclude_dirs = require('project.config').options.exclude_dirs
 
     for _, dir_pattern in next, exclude_dirs do
+        ---FIXME: This needs revision
         if dir:match(dir_pattern) ~= nil then
             return true
         end
@@ -47,7 +52,7 @@ end
 function Path.init()
     local datapath = require('project.config').options.datapath
 
-    if not Util.dir_exists(datapath) then
+    if not dir_exists(datapath) then
         datapath = vim.fn.stdpath('data')
     end
 
