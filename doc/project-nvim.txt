@@ -513,7 +513,7 @@ Table of Contents                                             *project-nvim.toc*
     Descrpition ~
 
     The `:ProjectRecents` command is a hook to print a formatted list
-    of your recent projects using `vim.notify()`.
+    of your recent projects using |vim.notify()|.
 
     See `api.lua` for more info.
 
@@ -551,7 +551,7 @@ Table of Contents                                             *project-nvim.toc*
     The arguments can be relative, absolute or un-expanded (`~/...`).
     The command will attempt to parse the args.
     If there's a successful deletion, you'll receive a notification
-    through `vim.notify()`.
+    through |vim.notify()|.
 
     It also features some barebones completion, but I'd like some help
     with how to do the completion parsing.

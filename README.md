@@ -517,7 +517,7 @@ See more in [`lua/telescope/_extensions/projects.lua`](./lua/telescope/_extensio
 
 ## Commands
 
-There are two user commands you can call from the cmdline:
+These are the user commands you can call from the cmdline:
 
 ### ProjectAdd
 
@@ -750,7 +750,7 @@ vim.print(get_history_paths('historyfile'))
 
 ---
 
-### Utils
+## Utils
 
 A set of utilities that get repeated across the board.
 
