@@ -1,3 +1,5 @@
+local fmt = string.format
+
 ---@alias OpenMode
 ---|integer
 ---|string
@@ -36,6 +38,7 @@ local in_tbl = vim.tbl_contains
 local dir_exists = Util.dir_exists
 local normalise_path = Util.normalise_path
 local dedup = Util.dedup
+local is_type = Util.is_type
 
 ---@class Project.Utils.History
 ---@field has_watch_setup? boolean
@@ -112,18 +115,26 @@ function History.filter_recent_projects()
     History.recent_projects = copy(new_recent)
 end
 
----@param project ProjParam
+---@param project Project.ActionEntry|string
 function History.delete_project(project)
     if History.recent_projects == nil then
         return
     end
 
     local new_tbl = {}
+    local found = false
+    local proj = is_type('string', project) and project or project.value
 
     for _, v in next, History.recent_projects do
-        if v ~= project.value and not in_tbl(new_tbl, v) then
+        if v ~= proj and not in_tbl(new_tbl, v) then
             table.insert(new_tbl, v)
+        elseif v == proj then
+            found = true
         end
+    end
+
+    if found then
+        vim.notify(fmt('Deleting project `%s`', proj))
     end
 
     History.recent_projects = copy(new_tbl)
@@ -248,7 +259,7 @@ function History.write_projects_to_history()
     -- Transform table to string
     local out = ''
     for _, v in next, tbl_out do
-        out = string.format('%s%s\n', out, v)
+        out = fmt('%s%s\n', out, v)
     end
 
     -- Write string out to file and close

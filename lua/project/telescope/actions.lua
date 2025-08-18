@@ -2,6 +2,7 @@ local Util = require('project.utils.util')
 local TelUtil = require('project.telescope.util')
 
 local reverse = Util.reverse
+local is_type = Util.is_type
 
 local fmt = string.format
 local copy = vim.deepcopy
@@ -29,14 +30,20 @@ local function create_finder()
 
     return Finders.new_table({
         results = results,
-        entry_maker = function(entry)
-            local name = fmt('%s/%s', fnamemodify(entry, ':h:t'), fnamemodify(entry, ':t'))
-            return {
+
+        ---@param value string
+        entry_maker = function(value)
+            local name = fmt('%s/%s', fnamemodify(value, ':h:t'), fnamemodify(value, ':t'))
+
+            ---@class Project.ActionEntry
+            local action_entry = {
                 display = make_display,
                 name = name,
-                value = entry,
-                ordinal = fmt('%s %s', name, entry),
+                value = value,
+                ordinal = fmt('%s %s', name, value),
             }
+
+            return action_entry
         end,
     })
 end
@@ -48,18 +55,18 @@ local M = {}
 ---@return string|nil
 ---@return boolean?
 function M.change_working_directory(prompt_bufnr)
-    local selected_entry = require('telescope.actions.state').get_selected_entry()
+    ---@type Project.ActionEntry
+    local selected_entry = State.get_selected_entry()
 
     Actions.close(prompt_bufnr)
 
-    if selected_entry == nil then
+    if selected_entry == nil or not is_type('string', selected_entry.value) then
         return
     end
 
-    local project_path = selected_entry.value
-    local cd_successful = Api.set_pwd(project_path, 'telescope')
+    local cd_successful = Api.set_pwd(selected_entry.value, 'telescope')
 
-    return project_path, cd_successful
+    return selected_entry.value, cd_successful
 end
 
 ---@param prompt_bufnr integer
@@ -86,9 +93,10 @@ function M.find_project_files(prompt_bufnr)
     if prefer_file_browser and Telescope.extensions.file_browser then
         ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
         Telescope.extensions.file_browser.file_browser(opts)
-    else
-        Builtin.find_files(opts)
+        return
     end
+
+    Builtin.find_files(opts)
 end
 
 ---@param prompt_bufnr integer
@@ -115,9 +123,10 @@ function M.browse_project_files(prompt_bufnr)
     if prefer_file_browser and Telescope.extensions.file_browser then
         ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
         Telescope.extensions.file_browser.file_browser(opts)
-    else
-        Builtin.find_files(opts)
+        return
     end
+
+    Builtin.find_files(opts)
 end
 
 ---@param prompt_bufnr integer
@@ -155,9 +164,10 @@ end
 
 ---@param prompt_bufnr integer
 function M.delete_project(prompt_bufnr)
+    ---@type Project.ActionEntry
     local active_entry = State.get_selected_entry()
 
-    if active_entry == nil then
+    if active_entry == nil or not is_type('string', active_entry.value) then
         Actions.close(prompt_bufnr)
         return
     end
