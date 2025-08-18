@@ -12,6 +12,8 @@ I will be maintaining this plugin for the foreseeable future.
 
 </div>
 
+---
+
 ## Checkhealth Support
 
 <div align="center">
@@ -90,9 +92,9 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
   - [X] Rename `project.lua` to `api.lua`
   - [X] Expose `project.api.get_project_root()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/112))
   - [X] Add utility to display the current project `get_current_project()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/149))
-  - [ ] Add more user commands
+  - [X] Add more user commands
+  - [X] Implement `delete_project()` wrapper for the end-user to use (_not to be confused with `history.delete_project()`_)
   - [ ] Add `enable()`, `disable()` and `toggle()`, or similar utilities
-  - [ ] Implement `delete_project()` wrapper for the end-user to use (_not to be confused with `history.delete_project()`_)
 - [X] Extend Telescope picker configuration
   - [X] Fix `file_browser` mapping ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/107))
   - [X] Add option to control picker sorting order ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/140))

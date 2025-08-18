@@ -96,7 +96,7 @@ end
 
 ---Get the LSP client for current buffer.
 ---
----Returns `nil` or a string.
+---Returns a tuple of two `string|nil` results.
 --- ---
 ---@return string|nil
 ---@return string|nil
@@ -105,7 +105,7 @@ function Api.find_lsp_root()
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
     if vim.tbl_isempty(clients) then
-        return nil
+        return nil, nil
     end
 
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
@@ -126,7 +126,7 @@ function Api.find_lsp_root()
         ::continue::
     end
 
-    return nil
+    return nil, nil
 end
 
 ---@param dir string
@@ -433,6 +433,11 @@ function Api.on_buf_enter(verbose, bufnr)
     History.write_projects_to_history()
 end
 
+---@param project string|Project.ActionEntry
+function Api.delete_project(project)
+    History.delete_project(project)
+end
+
 ---@param verbose? boolean
 function Api.add_project_manually(verbose)
     verbose = is_type('boolean', verbose) and verbose or false
@@ -559,8 +564,8 @@ function Api.init()
                         path = path:sub(1, string.len(path) - 1)
                     end
 
-                    if dir_exists(path) and in_tbl(History.get_recent_projects(), path) then
-                        History.delete_project(path)
+                    if dir_exists(path) and in_tbl(Api.get_recent_projects(), path) then
+                        Api.delete_project(path)
                     end
                 end
             end,
@@ -574,7 +579,7 @@ function Api.init()
                 complete = function(Arg, Cmd, Pos)
                     ---FIXME: Completions for User Commands are a pain to parse
 
-                    return History.get_recent_projects()
+                    return Api.get_recent_projects()
                 end,
             },
         },

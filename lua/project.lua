@@ -19,6 +19,11 @@ function Project.get_project_root()
     return root, method
 end
 
+---@param project string|Project.ActionEntry
+function Project.delete_project(project)
+    Api.delete_project(project)
+end
+
 ---@return string|{ datapath: string, projectpath: string, historyfile: string }
 function Project.get_history_paths()
     return Api.get_history_paths()
