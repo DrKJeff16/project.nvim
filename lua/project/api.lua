@@ -88,7 +88,11 @@ Api.current_project = nil
 ---@type string|nil
 Api.current_method = nil
 
-Api.get_recent_projects = History.get_recent_projects
+---@return string[] recent
+function Api.get_recent_projects()
+    local recent = History.get_recent_projects()
+    return recent
+end
 
 ---Get the LSP client for current buffer.
 ---
