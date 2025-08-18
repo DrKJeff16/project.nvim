@@ -24,10 +24,13 @@ jobs:
       - name: Build project assets
         id: checkout
         run: |
-          zip -r -9 project.nvim.zip lua doc README.md LICENSE
-          tar cvJf project.nvim.tar.xz lua doc README.md LICENSE
+          mkdir -pv project.nvim
+          cp -rv lua doc README.md LICENSE project.nvim
+          zip -r -9 project.nvim.zip project.nvim
+          tar cvJf project.nvim.tar.xz project.nvim
           sha512sum project.nvim.zip > project.nvim.zip.sha512sum
           sha512sum project.nvim.tar.xz > project.nvim.tar.xz.sha512sum
+          rm -rfv project.nvim
 
       - name: Get Release
         id: get_current_release
