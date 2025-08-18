@@ -18,6 +18,7 @@ local WARN = Error.WARN
 local is_type = Util.is_type
 local is_windows = Util.is_windows
 local reverse = Util.reverse
+local dir_exists = Util.dir_exists
 
 local uv = vim.uv or vim.loop
 
@@ -482,7 +483,7 @@ function Api.init()
 
     ---@class ProjectCommandsList
     ---@field name string
-    ---@field cmd fun(ctx?: vim.api.keyset.user_command)
+    ---@field cmd fun(ctx?: vim.api.keyset.create_user_command.command_args)
     ---@field opts? vim.api.keyset.user_command
 
     ---@type ProjectCommandsList[]
@@ -493,7 +494,7 @@ function Api.init()
             cmd = function()
                 Api.on_buf_enter(true)
             end,
-            opts = { bang = true },
+            opts = {},
         },
 
         ---`:ProjectAdd`
@@ -502,7 +503,7 @@ function Api.init()
             cmd = function()
                 Api.add_project_manually(true)
             end,
-            opts = { bang = true },
+            opts = {},
         },
 
         ---`:ProjectConfig`
@@ -514,7 +515,7 @@ function Api.init()
 
                 notify(inspect(cfg))
             end,
-            opts = { bang = true },
+            opts = {},
         },
 
         ---`:ProjectRecents`
@@ -540,7 +541,38 @@ function Api.init()
 
                 notify(msg, INFO)
             end,
-            opts = { bang = true },
+            opts = {},
+        },
+        ---`:ProjectDelete`
+        {
+            name = 'ProjectDelete',
+            cmd = function(ctx)
+                for _, v in next, ctx.fargs do
+                    local path = vim.fn.fnamemodify(v, ':p')
+
+                    ---HACK: Getting rid of trailing `/` in string
+                    if path:sub(-1) == '/' then
+                        path = path:sub(1, string.len(path) - 1)
+                    end
+
+                    if dir_exists(path) and in_tbl(History.get_recent_projects(), path) then
+                        History.delete_project(path)
+                    end
+                end
+            end,
+            opts = {
+                nargs = '+',
+
+                ---@param Arg string
+                ---@param Cmd string
+                ---@param Pos integer
+                ---@return string[]|table
+                complete = function(Arg, Cmd, Pos)
+                    ---FIXME: Completions for User Commands are a pain to parse
+
+                    return History.get_recent_projects()
+                end,
+            },
         },
     }
 
