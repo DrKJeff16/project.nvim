@@ -40,6 +40,8 @@
     set fileformat=unix
     ```
 
+---
+
 ## Recommendations
 
 ### StyLua
@@ -65,7 +67,7 @@ To install it, follow [these instructions](https://pre-commit.com/#install) in t
 
 After that, run the following command in your terminal (make sure to be in the root of the repository):
 
-```
+```sh
 pre-commit install
 ```
 
