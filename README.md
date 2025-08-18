@@ -8,37 +8,25 @@ that provides a dynamic project management solution.
 This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
 I will be maintaining this plugin for the foreseeable future.
 
-> **_Looking for other maintainers in case I'm unable to keep this repo up to date!_**
+**_Looking for other maintainers in case I'm unable to keep this repo up to date!_**
 
 </div>
 
 ## Checkhealth Support
 
-`:checkhealth project`:
-
-
+<div align="center">
 
 https://github.com/user-attachments/assets/1808f20a-789a-41d3-8dbb-bf962c34cf5b
 
-
-
-<!--
-![checkhealth_support](https://github.com/user-attachments/assets/7a1c9ca3-e918-422a-987f-bb59238e1d60)
--->
+</div>
 
 ## Telescope Integration
 
-`:Telescope project`:
-
-
+<div align="center">
 
 https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 
-
-
-<!--
-![Telescope Integration](https://github.com/user-attachments/assets/1dbaffe3-395d-463b-903e-3b794dd27ea1)
--->
+</div>
 
 ---
 
@@ -53,23 +41,22 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
     2. [Nvim Tree](#nvim-tree)
     3. [Telescope](#telescope)
         1. [Telescope Mappings](#telescope-mappings)
-6. [Manual Mode](#manual-mode)
+6. [Commands](#commands)
     1. [ProjectAdd](#projectadd)
     2. [ProjectRoot](#projectroot)
     3. [ProjectRecents](#projectrecents)
     4. [ProjectConfig](#projectconfig)
     5. [ProjectDelete](#projectdelete)
 7. [API](#api)
-    1. [Utils](#utils)
-    2. [`get_project_root()`](#get-project-root)
-    3. [`get_recent_projects()`](#get-recent-projects)
-    4. [`get_config()`](#get-config)
-    5. [`get_history_paths()`](#get-history-paths)
-8. [Troubleshooting](#troubleshooting)
+  1. [`get_project_root()`](#get-project-root)
+  2. [`get_recent_projects()`](#get-recent-projects)
+  3. [`get_config()`](#get-config)
+  4. [`get_history_paths()`](#get-history-paths)
+8. [Utils](#utils)
+9. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
-9. [Contributing](#contributing)
-10. [Credits](#credits)
-11. [Addendum](#addendum)
+10. [Contributing](#contributing)
+11. [Credits](#credits)
 
 ---
 
@@ -526,7 +513,7 @@ See more in [`lua/telescope/_extensions/projects.lua`](./lua/telescope/_extensio
 
 ---
 
-## Manual Mode
+## Commands
 
 There are two user commands you can call from the cmdline:
 
@@ -620,13 +607,21 @@ The arguments can be relative, absolute or un-expanded (`~/path/to/project`). Th
 to parse the args.
 If there's a successful deletion, you'll recieve a notification through `vim.notify()`.
 
-It also features some barebones completion, but I'd like some help with how to do the completion parsing.
-
 - **Usage**
 
 ```vim
 :ProjectDelete /path/to/first [/path/to/second [...]]
 ```
+
+---
+
+<div align="center">
+
+It also features some barebones completion, but I'd like some help with how to do the completion parsing.
+
+</div>
+
+---
 
 See [_`api.lua`_](./lua/project/api.lua) for more info.
 
@@ -641,30 +636,6 @@ See [_`api.lua`_](./lua/project/api.lua) for more info.
 ## API
 
 The API can be found in ['lua/project/api.lua'](./lua/project/api.lua).
-
-### Utils
-
-A set of utilities that get repeated across the board.
-
-> _These utilities are in part inspired by my own utilities found in **[`Jnvim`](https://github.com/DrKJeff16/Jnvim)**, my own Nvim configuration;**,
-> particularly the **[`User API`](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)**_.
-
-You can import them the follow way:
-
-```lua
-local ProjUtil = require('project.utils.util')
-```
-
-See [`lua/project/utils/util.lua`](./lua/project/utils/util.lua) for
-further reference.
-
-<div align="right">
-
-[Go To Top](#project-nvim)
-
-</div>
-
----
 
 <h3 id="get-project-root">
 
@@ -777,6 +748,29 @@ vim.print(get_history_paths('historyfile'))
 
 ---
 
+### Utils
+
+A set of utilities that get repeated across the board.
+
+> _These utilities are in part inspired by my own utilities found in **[`Jnvim`](https://github.com/DrKJeff16/Jnvim)**, my own Nvim configuration;**,
+> particularly the **[`User API`](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)**_.
+
+You can import them the follow way:
+
+```lua
+local ProjUtil = require('project.utils.util')
+```
+
+See [`lua/project/utils/util.lua`](./lua/project/utils/util.lua) for further reference.
+
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
+
+---
+
 ## Troubleshooting
 
 ### History File Not Created
@@ -832,20 +826,6 @@ If you lack the required permissions for that directory, you can either:
 - [@pandar00](https://github.com/pandar00): **CONTRIBUTOR** (https://github.com/DrKJeff16/project.nvim/pull/4)
 
 <div align="right">
-
-[Go To Top](#project-nvim)
-
-</div>
-
----
-
-## Addendum
-
-(DrKJeff16) Thanks for the support to this fork <3
-
-Also, thanks to the original creator, [@ahmedkhalf](https://github.com/ahmedkhalf)!
-
-<div align="center">
 
 [Go To Top](#project-nvim)
 
