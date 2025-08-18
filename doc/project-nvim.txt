@@ -418,19 +418,21 @@ Table of Contents                                             *project-nvim.toc*
 
 >lua
         require('telescope').setup({
-            -- ...
-            extensions = {
-                projects = {
-                    layout_strategy = "horizontal",
-                    layout_config = {
-                        anchor = "N",
-                        height = 0.25,
-                        width = 0.6,
-                        prompt_position = "bottom",
-                    },
-                    prompt_prefix = "󱎸  ",
-                }
-            }
+          --- ...
+          extensions = {
+            projects = {
+                layout_strategy = "horizontal",
+
+                layout_config = {
+                  anchor = "N",
+                  height = 0.25,
+                  width = 0.6,
+                  prompt_position = "bottom",
+                },
+
+                prompt_prefix = "󱎸  ",
+            },
+          },
         })
 <
 
