@@ -58,6 +58,7 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
     2. [ProjectRoot](#projectroot)
     3. [ProjectRecents](#projectrecents)
     4. [ProjectConfig](#projectconfig)
+    5. [ProjectDelete](#projectdelete)
 7. [API](#api)
     1. [Utils](#utils)
     2. [`get_project_root()`](#get-project-root)
@@ -535,7 +536,7 @@ The `:ProjectAdd` command is a manual hook to add to session projects, then
 subsequently `cd` to the current file's project directory
 (provided) it actually could.
 
-The command does essentially the followitg:
+The command does essentially the following:
 
 ```vim
 " vimscript
@@ -558,7 +559,7 @@ The `:ProjectRoot` command is a manual hook to set the working directory to the 
 file's root, attempting to use any of the `setup()` detection methods
 set by the user.
 
-The command does essentially the followitg:
+The command does essentially the following:
 
 ```vim
 " vimscript
@@ -593,13 +594,38 @@ _See [`api.lua`](./lua/project/api.lua) for more info._
 The `:ProjectConfig` command is a hook to display your current config
 using `vim.notify(inspect())`
 
-The command does essentially the followitg:
+The command does essentially the following:
 
 ```vim
 " vimscript
 
 " `:ProjectConfig` does the next line
 :lua vim.notify(vim.inspect(require('project').get_config()))
+```
+
+See [_`api.lua`_](./lua/project/api.lua) for more info.
+
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
+
+### ProjectDelete
+
+The `:ProjectDelete` command is one that needs at least one argument, and only accepts directories separated
+by a space. The arguments have to be directories that exist in the result of `get_recent_projects()`.
+
+The arguments can be relative, absolute or un-expanded (`~/path/to/project`). The command will attempt
+to parse the args.
+If there's a successful deletion, you'll recieve a notification through `vim.notify()`.
+
+It also features some barebones completion, but I'd like some help with how to do the completion parsing.
+
+- **Usage**
+
+```vim
+:ProjectDelete /path/to/first [/path/to/second [...]]
 ```
 
 See [_`api.lua`_](./lua/project/api.lua) for more info.

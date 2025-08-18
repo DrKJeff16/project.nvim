@@ -23,7 +23,7 @@ Table of Contents                                             *project-nvim.toc*
     2.1 vim-plug                                 |project-nvim.install.vim-plug|
     2.2 lazy.nvim                               |project-nvim.install.lazy-nvim|
     2.3 pckr.nvim                               |project-nvim.install.pckr-nvim|
-3. `setup()`                                                |project-nvim.setup()|
+3. project-nvim.setup()                                   |project-nvim.setup()|
     3.1. `Project.Config.Options`                         |Project.Config.Options|
     3.2. `Project.Config.Telescope`                     |Project.Config.Telescope|
 4. Pattern Matching                              |project-nvim.pattern-matching|
@@ -35,6 +35,7 @@ Table of Contents                                             *project-nvim.toc*
     7.2. `:ProjectRoot`                                             |:ProjectRoot|
     7.3. `:ProjectConfig`                                         |:ProjectConfig|
     7.4. `:ProjectRecents`                                       |:ProjectRecents|
+    7.5. `:ProjectDelete`                                         |:ProjectDelete|
 8. API                                                        |project-nvim.api|
     8.1. `get_project_root()`                    |project-nvim.get_project_root()|
     8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
@@ -124,7 +125,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-3. setup(`{options}`)                                       *project-nvim.setup()*
+3. project-nvim.setup()                                   *project-nvim.setup()*
 
   To enable the plugin you must call `setup()`.
 
@@ -324,31 +325,35 @@ Table of Contents                                             *project-nvim.toc*
 ==============================================================================
 4. Pattern Matching                              *project-nvim.pattern-matching*
 
-`project.nvim` comes with a pattern matching engine that uses
-the same expressions as `vim-rooter`.
+    `project.nvim` comes with a pattern matching engine that uses
+    the same expressions as `vim-rooter`.
 
     Examples ~
 
     For your convenience here come some examples:
 
+
     - To specify the root is a certain directory, prefix it with `=`
 
 >lua
-        patterns = { '=src' }
+    ---Lua
+    patterns = { '=src' }
 <
 
     - To specify the root has a certain directory or file
       (which may be a glob), just add it to the pattern list
 
 >lua
-        patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
+    ---Lua
+    patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
 <
 
     - To specify the root has a certain directory as an ancestor (for
       excluding directories), prefix it with `^`
 
 >lua
-        patterns = { '^fixtures' }
+    ---Lua
+    patterns = { '^fixtures' }
 <
 
     - To specify the root has a certain directory as its direct ancestor / parent
@@ -356,13 +361,15 @@ the same expressions as `vim-rooter`.
       prefix it with `>`
 
 >lua
-        patterns = { '>Latex' }
+    ---Lua
+    patterns = { '>Latex' }
 <
 
     - To exclude a pattern, prefix it with `!`
 
 >lua
-        patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
+    ---Lua
+    patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
 <
 
     NOTE: Make sure to put your pattern exclusions first,
@@ -371,17 +378,17 @@ the same expressions as `vim-rooter`.
 ==============================================================================
 5. Nvim Tree                                            *project-nvim.nvim-tree*
 
-Make sure these flags are enabled to support `nvim-tree.lua`:
+    Make sure these flags are enabled to support `nvim-tree.lua`:
 
 >lua
-    require('nvim-tree').setup({
-        sync_root_with_cwd = true,
-        respect_buf_cwd = true,
-        update_focused_file = {
-            enable = true,
-            update_root = true,
-        },
-    })
+        require('nvim-tree').setup({
+            sync_root_with_cwd = true,
+            respect_buf_cwd = true,
+            update_focused_file = {
+                enable = true,
+                update_root = true,
+            },
+        })
 <
 
 
@@ -399,16 +406,15 @@ Make sure these flags are enabled to support `nvim-tree.lua`:
 
     Also you can configure the picker when calling
     `require('telescope').setup({ telescope = { enabled = true } })`
-    (more info in |project-nvim.setup()|).
+    (see |Project.Config.Telescope| for more options).
 
     This will run:
 
 >lua
-        require('telescope').load_extensions('projects')
+        require('telescope').load_extension('projects')
 <
 
-
-    Example Config ~
+    Example ~
 
 >lua
         require('telescope').setup({
@@ -448,20 +454,26 @@ Make sure these flags are enabled to support `nvim-tree.lua`:
         `r`             `<C-r>`         `recent_project_files()`
         `w`             `<C-w>`         `change_working_directory()`
 
+    All the actions can be found in `project/telescope/actions.lua`.
+
 ==============================================================================
 7. Commands                                              *project-nvim.commands*
 
     There are a bunch of user commands you can call from the cmdline.
     Some of them might be incomplete and/or reworked in the future.
 
-`:ProjectAdd`                                                        *:ProjectAdd*
+
+                                                                   *:ProjectAdd*
+`:ProjectAdd`
+
+    Description ~
 
     The `:ProjectAdd` command is a manual hook to add
     the current root to the session directories table,
     then subsequently `cd` to the current file's
     project directory.
 
-    The command does essentially the followitg:
+    The command does essentially the following:
 
 >vim
         " vimscript
@@ -473,14 +485,17 @@ Make sure these flags are enabled to support `nvim-tree.lua`:
     See `api.lua` for more info on `add_project_manually()`
 
 
-`:ProjectRoot`                                                      *:ProjectRoot*
+                                                                  *:ProjectRoot*
+`:ProjectRoot`
 
-    This command is a manual hook to set
-    the working directory to the current file's root,
-    attempting to use any of the `setup()` detection methods
+    Descrpition ~
+
+    This command is a manual hook to set the current working directory
+    to the current file's root, attempting to use any of the
+    detection methods (|Project.Config.Options.detection_methods|)
     set by the user.
 
-    The command does essentially the followitg:
+    The command does essentially the following:
 
 >vim
         " vimscript
@@ -491,19 +506,27 @@ Make sure these flags are enabled to support `nvim-tree.lua`:
 
     See `api.lua` for more info on `on_buf_enter()`.
 
-`:ProjectRecents`                                                *:ProjectRecents*
 
-    The `:ProjectRecents` command is a hook to print a formatted list of your
-    recent projects using `vim.notify()`.
+                                                               *:ProjectRecents*
+`:ProjectRecents`
+
+    Descrpition ~
+
+    The `:ProjectRecents` command is a hook to print a formatted list
+    of your recent projects using `vim.notify()`.
 
     See `api.lua` for more info.
 
-`:ProjectConfig`                                                  *:ProjectConfig*
+
+                                                                *:ProjectConfig*
+`:ProjectConfig`
+
+    Descrpition ~
 
     The `:ProjectConfig` command is a hook to display your current config
-    using `vim.notify(inspect())`
+    using `vim.notify(vim.inspect(...))`.
 
-    The command does essentially the followitg:
+    The command does essentially the following:
 
 >vim
         " vimscript
@@ -513,6 +536,28 @@ Make sure these flags are enabled to support `nvim-tree.lua`:
 <
 
     See `api.lua` for more info.
+
+
+                                                                *:ProjectDelete*
+`:ProjectDelete /path/to/first [/path/to/second [...]]`
+
+    Descrpition ~
+
+    The `:ProjectDelete` command is one that needs at least one argument,
+    and only accepts directories separated by a space.
+    The arguments have to be directories that exist in the result of
+    |project-nvim.get_recent_projects()|.
+
+    The arguments can be relative, absolute or un-expanded (`~/...`).
+    The command will attempt to parse the args.
+    If there's a successful deletion, you'll receive a notification
+    through `vim.notify()`.
+
+    It also features some barebones completion, but I'd like some help
+    with how to do the completion parsing.
+
+    See `api.lua` for more info.
+
 
 ==============================================================================
 8. API                                                        *project-nvim.api*
@@ -560,7 +605,7 @@ Make sure these flags are enabled to support `nvim-tree.lua`:
 ------------------------------------------------------------------------------
 8.3 `get_config()`                                     *project-nvim.get_config()*
 
-    If |project-nvim.setup()| has been called, it returns
+    If `setup()` (|project-nvim.setup()|) has been called, it returns
     a table containing the currently set options.
     Otherwise it will return `nil`.
 
