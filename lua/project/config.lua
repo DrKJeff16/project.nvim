@@ -8,6 +8,7 @@ local mod_exists = Util.mod_exists
 local pattern_exclude = Glob.pattern_exclude
 
 local copy = vim.deepcopy
+local in_tbl = vim.tbl_contains
 
 ---@class Project.Config
 ---@field setup_called? boolean
@@ -184,6 +185,17 @@ end
 ---@type table|Project.Config.Options
 Config.options = {}
 
+---@param self Project.Config
+function Config:verify_scope_chdir()
+    local VALID = { 'global', 'tab', 'win' }
+
+    if is_type('string', self.options.scope_chdir) and in_tbl(VALID, self.options.scope_chdir) then
+        return
+    end
+
+    self.scope_chdir = self.get_defaults().scope_chdir
+end
+
 ---Ensure that the `detection_methods` option is valid.
 ---This includes non-repeating values, only `'lsp'` and `'pattern'` strings,
 ---if any.
@@ -235,6 +247,7 @@ function Config.setup(options)
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
 
     Config:trim_methods()
+    Config:verify_scope_chdir()
 
     local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
     local Api = lazy.require('project.api') ---@module 'project.api'
