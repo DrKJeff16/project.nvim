@@ -1,5 +1,5 @@
 local Util = require('project.utils.util')
-local TelUtil = require('project.telescope.util')
+local TelUtil = require('telescope._extensions.projects.util')
 
 local reverse = Util.reverse
 local is_type = Util.is_type
