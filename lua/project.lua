@@ -1,4 +1,5 @@
 local lazy = require('project.lazy')
+
 local Config = lazy.require('project.config') ---@module 'project.config'
 local Api = lazy.require('project.api') ---@module 'project.api'
 
@@ -12,6 +13,8 @@ function Project.setup(options)
     Config.setup(options)
 end
 
+---Returns project root, as well as the method used.
+--- ---
 ---@return string|nil root
 ---@return string|nil method
 function Project.get_project_root()
@@ -24,14 +27,15 @@ function Project.delete_project(project)
     Api.delete_project(project)
 end
 
+---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|{ datapath: string, projectpath: string, historyfile: string }
-function Project.get_history_paths()
-    return Api.get_history_paths()
+function Project.get_history_paths(path)
+    return Api.get_history_paths(path)
 end
 
 ---@return string|nil
 function Project.get_last_project()
-    return Api.get_last_project()
+    return Api.last_project
 end
 
 ---@return string[] recent
@@ -45,7 +49,7 @@ end
 ---@return string|nil method
 ---@return string|nil last
 function Project.current_project()
-    local curr, method, last = Api.get_current_project()
+    local curr, method, last = Api.current_project, Api.current_method, Api.last_project
 
     return curr, method, last
 end
