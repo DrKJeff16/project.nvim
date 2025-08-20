@@ -136,7 +136,9 @@ end
 function Health.project_check()
     start('Current Project')
 
-    local curr, method, last = require('project').current_project()
+    local Api = require('project.api')
+
+    local curr, method, last = Api.current_project, Api.current_method, Api.last_project
     local msg = ''
 
     if curr == nil then
