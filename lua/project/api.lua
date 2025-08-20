@@ -5,7 +5,6 @@ local MODSTR = 'project.api'
 local lazy = require('project.lazy')
 
 local Config = lazy.require('project.config') ---@module 'project.config'
-local Glob = lazy.require('project.utils.globtopattern') ---@module 'project.utils.globtopattern'
 local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
 local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
 local History = lazy.require('project.utils.history') ---@module 'project.utils.history'
@@ -20,6 +19,9 @@ local is_windows = Util.is_windows
 local reverse = Util.reverse
 local dir_exists = Util.dir_exists
 
+local exists = Path.exists
+local is_excluded = Path.is_excluded
+
 local uv = vim.uv or vim.loop
 
 local in_tbl = vim.tbl_contains
@@ -32,49 +34,6 @@ local autocmd = vim.api.nvim_create_autocmd
 ---@class AutocmdTuple
 ---@field [1] string[]|string
 ---@field [2] vim.api.keyset.create_autocmd
-
----@param dir string
----@param identifier string
----@return boolean
-local function is(dir, identifier)
-    return dir:match('.*/(.*)') == identifier
-end
-
----@param path_str string
----@return string|'/'
-local function get_parent(path_str)
-    ---@type string
-    path_str = path_str:match('^(.*)/')
-
-    return (path_str ~= '') and path_str or '/'
-end
-
----@param dir string
----@param identifier string
----@return boolean
-local function sub(dir, identifier)
-    local path_str, current = get_parent(dir), ''
-
-    -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
-    while true do
-        if is(path_str, identifier) then
-            return true
-        end
-
-        current, path_str = path_str, get_parent(path_str)
-
-        if current == path_str then
-            return false
-        end
-    end
-end
-
----@param dir string
----@param identifier string
----@return boolean
-local function child(dir, identifier)
-    return is(get_parent(dir), identifier)
-end
 
 ---@class Project.API
 local Api = {}
@@ -120,7 +79,9 @@ function Api.find_lsp_root()
         end
 
         if in_tbl(filetypes, ft) and not in_tbl(Config.options.ignore_lsp, client.name) then
-            return client.config.root_dir, client.name
+            if Path.root_included(client.config.root_dir) ~= nil then
+                return client.config.root_dir, client.name
+            end
         end
 
         ::continue::
@@ -153,96 +114,7 @@ function Api.find_pattern_root()
         search_dir = search_dir:gsub('\\', '/')
     end
 
-    local last_dir_cache, curr_dir_cache = '', {}
-
-    ---@param file_dir string
-    local function get_files(file_dir)
-        last_dir_cache = file_dir
-        curr_dir_cache = {}
-
-        ---@type uv.uv_fs_t|nil
-        local dir = uv.fs_scandir(file_dir)
-        if dir == nil then
-            return
-        end
-
-        ---@type string|nil
-        local file
-
-        while true do
-            file = uv.fs_scandir_next(dir)
-            if file == nil then
-                return
-            end
-
-            table.insert(curr_dir_cache, file)
-        end
-    end
-
-    ---@param dir string
-    ---@param identifier string
-    local function has(dir, identifier)
-        if last_dir_cache ~= dir then
-            get_files(dir)
-        end
-
-        local pattern = Glob.globtopattern(identifier)
-
-        for _, file in next, curr_dir_cache do
-            if file:match(pattern) ~= nil then
-                return true
-            end
-        end
-
-        return false
-    end
-
-    ---@param dir string
-    ---@param pattern string
-    ---@return boolean
-    local function match(dir, pattern)
-        local switch = {
-            ['='] = is,
-            ['^'] = sub,
-            ['>'] = child,
-        }
-
-        local first_char = pattern:sub(1, 1)
-
-        if in_tbl(vim.tbl_keys(switch), first_char) then
-            return switch[first_char](dir, pattern:sub(2))
-        end
-
-        return has(dir, pattern)
-    end
-
-    -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
-    -- breadth-first search
-    while true do
-        for _, pattern in next, Config.options.patterns do
-            local exclude = false
-
-            if pattern:sub(1, 1) == '!' then
-                exclude, pattern = true, pattern:sub(2)
-            end
-
-            if match(search_dir, pattern) then
-                if not exclude then
-                    return search_dir, 'pattern ' .. pattern
-                end
-
-                break
-            end
-        end
-
-        local parent = get_parent(search_dir)
-
-        if parent == nil or parent == search_dir then
-            return nil
-        end
-
-        search_dir = parent
-    end
+    return Path.root_included(search_dir)
 end
 
 function Api.attach_to_lsp()
@@ -415,7 +287,7 @@ function Api.on_buf_enter(verbose, bufnr)
 
     local current_dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
 
-    if not Path.exists(current_dir) or Path.is_excluded(current_dir) then
+    if not exists(current_dir) or is_excluded(current_dir) then
         return
     end
 
