@@ -3,7 +3,6 @@ local lazy = require('project.lazy')
 local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
 
 local dir_exists = Util.dir_exists
-local is_type = Util.is_type
 
 local uv = vim.uv or vim.loop
 
