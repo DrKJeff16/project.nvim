@@ -30,6 +30,8 @@ local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
 local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
 local Error = lazy.require('project.utils.error') ---@module 'project.utils.error'
 
+local WARN = Error.WARN
+
 local uv = vim.uv or vim.loop
 
 local copy = vim.deepcopy
@@ -121,8 +123,7 @@ function History.delete_project(project)
         return
     end
 
-    local new_tbl = {}
-    local found = false
+    local new_tbl, found = {}, false
     local proj = is_type('string', project) and project or project.value
 
     for _, v in next, History.recent_projects do
@@ -134,7 +135,7 @@ function History.delete_project(project)
     end
 
     if found then
-        vim.notify(fmt('Deleting project `%s`', proj))
+        vim.notify(fmt('Deleting project `%s`', proj), WARN)
     end
 
     History.recent_projects = copy(new_tbl)
