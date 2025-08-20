@@ -427,19 +427,27 @@ function Api.init()
         --- `:ProjectRoot`
         {
             name = 'ProjectRoot',
-            cmd = function()
-                Api.on_buf_enter(true)
+            cmd = function(ctx)
+                local bang = ctx.bang ~= nil and ctx.bang or false
+
+                Api.on_buf_enter(bang)
             end,
-            opts = {},
+            opts = {
+                bang = true,
+            },
         },
 
         ---`:ProjectAdd`
         {
             name = 'ProjectAdd',
-            cmd = function()
-                Api.add_project_manually(true)
+            cmd = function(ctx)
+                local bang = ctx.bang ~= nil and ctx.bang or false
+
+                Api.add_project_manually(bang)
             end,
-            opts = {},
+            opts = {
+                bang = true,
+            },
         },
 
         ---`:ProjectConfig`
@@ -483,20 +491,29 @@ function Api.init()
         {
             name = 'ProjectDelete',
             cmd = function(ctx)
+                local bang = ctx.bang ~= nil and ctx.bang or false
+
                 for _, v in next, ctx.fargs do
                     local path = vim.fn.fnamemodify(v, ':p')
+                    local recent = Api.get_recent_projects()
 
                     ---HACK: Getting rid of trailing `/` in string
                     if path:sub(-1) == '/' then
                         path = path:sub(1, string.len(path) - 1)
                     end
 
-                    if dir_exists(path) and in_tbl(Api.get_recent_projects(), path) then
+                    if not (bang or in_tbl(recent, path)) then
+                        Error(fmt('(:ProjectDelete): Could not delete `%s`, aborting', path))
+                    end
+
+                    if in_tbl(recent, path) then
                         Api.delete_project(path)
                     end
                 end
             end,
             opts = {
+                desc = 'Delete the projects given as args, assuming they are valid',
+                bang = true,
                 nargs = '+',
 
                 ---@param Arg string
