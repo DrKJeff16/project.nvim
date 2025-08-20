@@ -34,25 +34,27 @@ function M.trace(msg)
     error(msg, M.TRACE)
 end
 
----@type table|Project.Utils.Error|fun(msg: string)
-local Error = setmetatable(M, {
-    __index = M,
+---@return table|Project.Utils.Error|fun(msg: string)
+function M.new()
+    return setmetatable({}, {
+        __index = M,
 
-    ---@param self Project.Utils.Error
-    ---@param k integer|string
-    ---@param v any
-    ---@diagnostic disable-next-line:unused-local
-    __newindex = function(self, k, v)
-        self.error('Error module is read-only!')
-    end,
+        ---@param self Project.Utils.Error
+        ---@param k integer|string
+        ---@param v any
+        ---@diagnostic disable-next-line:unused-local
+        __newindex = function(self, k, v)
+            self.error('Error module is read-only!')
+        end,
 
-    ---@param self Project.Utils.Error
-    ---@param msg string
-    __call = function(self, msg)
-        self.error(msg)
-    end,
-})
+        ---@param self Project.Utils.Error
+        ---@param msg string
+        __call = function(self, msg)
+            self.error(msg)
+        end,
+    })
+end
 
-return Error
+return M.new()
 
 --- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
