@@ -258,6 +258,15 @@ require('project').setup({
     'Pipfile',
   },
 
+  ---Sets whether to use Pattern Matching rules on the LSP.
+  ---
+  ---If `false`, the Pattern Matching will only apply to the `pattern` detection method.
+  ------
+  ---Default: `true`
+  ------
+  ---@type boolean
+  allow_patterns_for_lsp = true,
+
   ---Determines whether a project will be added if its project root is owned by a different user.
   ---
   ---If `false`, it won't add a project if its root is not owned by the
@@ -393,13 +402,14 @@ called for the plugin to start.**_
 
 <div align="center">
 
-_Starting from [`2d81e5d`](https://github.com/DrKJeff16/project.nvim/commit/2d81e5d66f7c88e4afa30687e61f8a5088195b41) **this now also works with the LSP aswell.**_
+_[`2d81e5d`](https://github.com/DrKJeff16/project.nvim/commit/2d81e5d66f7c88e4afa30687e61f8a5088195b41): **Now works with the LSP aswell.**_
 
 </div>
 
 ---
 
-`project.nvim` comes with a `vim-rooter`-inspired pattern matching expression engine for tighter project controls.
+`project.nvim` comes with a `vim-rooter`-inspired pattern matching expression engine
+to give you better handling of your projects.
 
 For your convenience here come some examples:
 

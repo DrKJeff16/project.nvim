@@ -56,6 +56,15 @@ local DEFAULTS = {
         'Pipfile',
     },
 
+    ---Sets whether to use Pattern Matching rules on the LSP.
+    ---
+    ---If `false`, the Pattern Matching will only apply to the `pattern` detection method.
+    ------
+    ---Default: `true`
+    ------
+    ---@type boolean
+    allow_patterns_for_lsp = true,
+
     ---Determines whether a project will be added if its project root is owned by a different user.
     ---
     ---If `false`, it won't add a project if its root is not owned by the

@@ -57,37 +57,57 @@ end
 ---
 ---Returns a tuple of two `string|nil` results.
 --- ---
----@return string|nil
----@return string|nil
+---@return string|nil dir
+---@return string|nil name
 function Api.find_lsp_root()
     local bufnr = curr_buf()
+    local allow_patterns = Config.options.allow_patterns_for_lsp
+
+    ---@type string|nil
+    local dir = nil
+
+    ---@type string|nil
+    local name = nil
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
     if vim.tbl_isempty(clients) then
-        return nil, nil
+        return dir, name
     end
 
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
 
     for _, client in next, clients do
+        if in_tbl(Config.options.ignore_lsp, client.name) then
+            goto continue
+        end
+
         ---@type table|string[]
-        ---@diagnostic disable-next-line:undefined-field
-        local filetypes = client.config.filetypes
+        local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
 
         if not is_type('table', filetypes) or vim.tbl_isempty(filetypes) then
             goto continue
         end
 
-        if in_tbl(filetypes, ft) and not in_tbl(Config.options.ignore_lsp, client.name) then
-            if Path.root_included(client.config.root_dir) ~= nil then
-                return client.config.root_dir, client.name
+        if in_tbl(filetypes, ft) then
+            dir, name = client.config.root_dir, client.name
+
+            --- If pattern matching for LSP is disabled
+            if not allow_patterns then
+                break
             end
+
+            --- If pattern matching for LSP is enabled, check patterns
+            if Path.root_included(client.config.root_dir) == nil then
+                dir, name = nil, nil
+            end
+
+            break
         end
 
         ::continue::
     end
 
-    return nil, nil
+    return dir, name
 end
 
 ---@param dir string

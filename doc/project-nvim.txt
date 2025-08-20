@@ -182,9 +182,23 @@ Table of Contents                                             *project-nvim.toc*
                                 |Project.Config.Options.detection_methods|
 
                                 See |project-nvim.pattern-matching| for more
-                                info on pattern matching
+                                info about pattern matching
 
                                 Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile' }` ~
+
+
+                                 *Project.Config.Options.allow_patterns_for_lsp*
+    * {allow_patterns_for_lsp}  (boolean)
+                                Sets whether to use Pattern Matching rules
+                                on the LSP.
+                                If `false`, the Pattern Matching will only
+                                apply to the `pattern` detection method (see
+                                |Project.Config.Options.detection_methods|)
+
+                                See |project-nvim.pattern-matching| for more
+                                info about pattern matching
+
+                                Default: `true` ~
 
 
                                  *Project.Config.Options.allow_different_owners*
@@ -309,7 +323,7 @@ Table of Contents                                             *project-nvim.toc*
                                 telescope picker instead of the `find_files`
                                 builtin.
                                 In case it is not available, it'll fall back
-                                to `find_files`
+                                to the `find_files` builtin
 
                                 Default: `false` ~
 
@@ -325,8 +339,8 @@ Table of Contents                                             *project-nvim.toc*
 ==============================================================================
 4. Pattern Matching                              *project-nvim.pattern-matching*
 
-    `project.nvim` comes with a pattern matching engine that uses
-    the same expressions as `vim-rooter`.
+    `project.nvim` comes with a `vim-rooter`-inspired pattern matching
+    expression engine to give you better handling of your projects.
 
     Examples ~
 
@@ -348,17 +362,17 @@ Table of Contents                                             *project-nvim.toc*
     patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
 <
 
-    - To specify the root has a certain directory as an ancestor (for
-      excluding directories), prefix it with `^`
+    - To specify the root has a certain directory as an ancestor
+      (for excluding directories), prefix it with `^`
 
 >lua
     ---Lua
     patterns = { '^fixtures' }
 <
 
-    - To specify the root has a certain directory as its direct ancestor / parent
-      (for putting working projects in a common directory),
-      prefix it with `>`
+    - To specify the root has a certain directory as its direct
+      ancestor / parent (for putting working projects in a
+      common directory), prefix it with `>`
 
 >lua
     ---Lua
@@ -367,13 +381,13 @@ Table of Contents                                             *project-nvim.toc*
 
     - To exclude a pattern, prefix it with `!`
 
+        NOTE: Make sure to put your pattern exclusions first, ~
+              and then the patterns you DO want included ~
+
 >lua
     ---Lua
     patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
 <
-
-    NOTE: Make sure to put your pattern exclusions first,
-    and then the patterns you do want included.
 
 ==============================================================================
 5. Nvim Tree                                            *project-nvim.nvim-tree*
