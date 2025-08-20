@@ -22,7 +22,9 @@ local change_working_directory = ProjActions.change_working_directory
 local Main = {}
 
 --- CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
-local default_opts = {}
+local default_opts = {
+    prompt_prefix = '󱎸  ',
+}
 
 ---@param opts table
 function Main.setup(opts)
