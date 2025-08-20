@@ -22,7 +22,7 @@ local change_working_directory = ProjActions.change_working_directory
 local Main = {}
 
 --- CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
-local default_opts = {
+Main.default_opts = {
     prompt_prefix = '󱎸  ',
 }
 
@@ -30,7 +30,7 @@ local default_opts = {
 function Main.setup(opts)
     opts = is_type('table', opts) and opts or {}
 
-    default_opts = vim.tbl_deep_extend('keep', opts, copy(default_opts))
+    Main.default_opts = vim.tbl_deep_extend('keep', opts, copy(Main.default_opts))
 end
 
 ---Main entrypoint for Telescope.
@@ -40,11 +40,11 @@ end
 ---@param opts? table
 function Main.projects(opts)
     opts = is_type('table', opts) and opts or {}
-    opts = vim.tbl_deep_extend('keep', copy(opts), default_opts)
+    opts = vim.tbl_deep_extend('keep', copy(opts), Main.default_opts)
 
     Pickers.new(opts, {
-        results_title = 'Select Your Project',
-        prompt_title = 'Projects',
+        prompt_title = 'Select Your Project',
+        results_title = 'Projects',
         finder = TelUtil.create_finder(),
         previewer = false,
         sorter = telescope_config.generic_sorter(opts),
@@ -53,9 +53,8 @@ function Main.projects(opts)
         ---@param map fun(mode: string, lhs: string, rhs: string|fun(), opts?: vim.api.keyset.keymap)
         attach_mappings = function(prompt_bufnr, map)
             ---@class PickerMaps
-            ---@field n table<string, string|fun()>
-            ---@field i table<string, string|fun()>
             local Keys = {
+                ---@type table<string, string|fun()>
                 n = {
                     b = browse_project_files,
                     d = delete_project,
@@ -65,6 +64,7 @@ function Main.projects(opts)
                     w = change_working_directory,
                 },
 
+                ---@type table<string, string|fun()>
                 i = {
                     ['<C-b>'] = browse_project_files,
                     ['<C-d>'] = delete_project,
