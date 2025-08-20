@@ -311,6 +311,13 @@ require('project').setup({
     ------
     ---@type boolean
     prefer_file_browser = false,
+
+    ---Make hidden files visible when using the `telescope` picker.
+    ------
+    ---Default: `false`
+    ------
+    ---@type boolean
+    show_hidden = false,
   },
 
   ---Table of lsp clients to ignore by name,
@@ -333,13 +340,6 @@ require('project').setup({
   ------
   ---@type string[]|table
   exclude_dirs = {},
-
-  ---Make hidden files visible when using the `telescope` picker.
-  ------
-  ---Default: `false`
-  ------
-  ---@type boolean
-  show_hidden = false,
 
   ---If `false`, you'll get a _notification_ every time
   ---`project.nvim` changes directory.

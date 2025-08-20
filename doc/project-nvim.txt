@@ -234,14 +234,6 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `{}` ~
 
 
-                                            *Project.Config.Options.show_hidden*
-    * {show_hidden}             (boolean)
-                                Make hidden files visible when using
-                                the `telescope` picker
-
-                                Default: `false` ~
-
-
                                            *Project.Config.Options.silent_chdir*
     * {silent_chdir}            (boolean)
                                 If `false`, you'll get notified every time
@@ -318,6 +310,14 @@ Table of Contents                                             *project-nvim.toc*
                                 builtin.
                                 In case it is not available, it'll fall back
                                 to `find_files`
+
+                                Default: `false` ~
+
+
+                                          *Project.Config.Telescope.show_hidden*
+    * {show_hidden}             (boolean)
+                                Make hidden files visible when using
+                                the `telescope` picker
 
                                 Default: `false` ~
 
