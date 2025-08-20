@@ -389,34 +389,53 @@ called for the plugin to start.**_
 
 ### Pattern Matching
 
-`project.nvim` comes with a pattern matching engine that uses the same expressions
-as `vim-rooter`, but for your convenience here come some examples:
+---
+
+<div align="center">
+
+_Starting from [`2d81e5d`](https://github.com/DrKJeff16/project.nvim/commit/2d81e5d66f7c88e4afa30687e61f8a5088195b41) **this now also works with the LSP aswell.**_
+
+</div>
+
+---
+
+`project.nvim` comes with a `vim-rooter`-inspired pattern matching expression engine for tighter project controls.
+
+For your convenience here come some examples:
 
 - To specify the root is a certain directory, prefix it with `=`:
   ```lua
   patterns = { '=src' }
   ```
+
 - To specify the root has a certain directory or file (which may be a glob), just
   add it to the pattern list:
   ```lua
   patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
   ```
+
 - To specify the root has a certain directory as an ancestor (useful for
   excluding directories), prefix it with `^`:
   ```lua
   patterns = { '^fixtures' }
   ```
+
 - To specify the root has a certain directory as its direct ancestor / parent
   (useful when you put working projects in a common directory), prefix it with `>`:
   ```lua
   patterns = { '>Latex' }
   ```
+
 - To exclude a pattern, prefix it with `!`:
   ```lua
   patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
   ```
 
-**NOTE**: Make sure to put your pattern exclusions first, and then the patterns you do want included.
+<div align="center">
+
+<b><ins>NOTE: Make sure to put your pattern exclusions first, and then the patterns you DO want included.</ins></b>
+
+</div>
 
 <div align="right">
 
