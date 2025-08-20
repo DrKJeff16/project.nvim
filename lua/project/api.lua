@@ -17,10 +17,10 @@ local WARN = Error.WARN
 local is_type = Util.is_type
 local is_windows = Util.is_windows
 local reverse = Util.reverse
-local dir_exists = Util.dir_exists
 
 local exists = Path.exists
 local is_excluded = Path.is_excluded
+local root_included = Path.root_included
 
 local uv = vim.uv or vim.loop
 
@@ -97,7 +97,7 @@ function Api.find_lsp_root()
             end
 
             --- If pattern matching for LSP is enabled, check patterns
-            if Path.root_included(client.config.root_dir) == nil then
+            if root_included(client.config.root_dir) == nil then
                 dir, name = nil, nil
             end
 
@@ -126,15 +126,18 @@ function Api.verify_owner(dir)
     return stat.uid == uv.getuid()
 end
 
----@return string|nil
----@return string|nil
+---@return string|nil dir
+---@return string|nil method
 function Api.find_pattern_root()
     local search_dir = vim.fn.expand('%:p:h', true)
+
     if is_windows() then
         search_dir = search_dir:gsub('\\', '/')
     end
 
-    return Path.root_included(search_dir)
+    local dir, method = root_included(search_dir)
+
+    return dir, method
 end
 
 function Api.attach_to_lsp()
@@ -160,7 +163,7 @@ function Api.set_pwd(dir, method)
         return false
     end
 
-    local silent = Config.options.silent_chdir
+    local verbose = not Config.options.silent_chdir
 
     ---@type string
     local msg = fmt('(%s.set_pwd):', MODSTR)
@@ -194,18 +197,18 @@ function Api.set_pwd(dir, method)
 
     if scope_chdir == 'global' then
         ok = pcall(vim.api.nvim_set_current_dir, dir)
-        msg = fmt('%s chdir to `%s`: ', msg, dir)
+        msg = fmt('%s chdir to `%s`:', msg, dir)
     elseif scope_chdir == 'tab' then
         ok = pcall(vim.cmd.tchdir, dir)
-        msg = fmt('%s tchdir to `%s`: ', msg, dir)
+        msg = fmt('%s tchdir to `%s`:', msg, dir)
     elseif scope_chdir == 'win' then
         ok = pcall(vim.cmd.lchdir, dir)
-        msg = fmt('%s lchdir to `%s`: ', msg, dir)
+        msg = fmt('%s lchdir to `%s`:', msg, dir)
     end
 
-    msg = msg .. (ok and 'SUCCESS' or 'FAILED')
+    msg = fmt('%s %s', msg, (ok and 'SUCCESS' or 'FAILED'))
 
-    if not silent then
+    if verbose then
         notify(fmt('(%s.set_pwd): Set CWD to %s using %s', MODSTR, dir, method), INFO)
 
         notify(msg, ok and INFO or WARN)
@@ -217,9 +220,9 @@ end
 ---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|{ datapath: string, projectpath: string, historyfile: string }
 function Api.get_history_paths(path)
-    local valid = { 'datapath', 'projectpath', 'historyfile' }
+    local VALID = { 'datapath', 'projectpath', 'historyfile' }
 
-    if not (path and in_tbl(valid, path)) then
+    if not (path and in_tbl(VALID, path)) then
         ---@type { datapath: string, projectpath: string, historyfile: string }
         return {
             datapath = Path.datapath,
@@ -231,22 +234,51 @@ function Api.get_history_paths(path)
     return Path[path]
 end
 
----Returns project root, as well as method
+---Returns project root, as well as the method used.
+--- ---
 ---@return string|nil
 ---@return string|nil
 function Api.get_project_root()
-    for _, detection_method in next, Config.options.detection_methods do
-        if detection_method == 'lsp' then
+    if vim.tbl_isempty(Config.options.detection_methods) then
+        return nil, nil
+    end
+
+    local VALID = { 'lsp', 'pattern' }
+
+    local SWITCH = {
+        lsp = function()
             local root, lsp_name = Api.find_lsp_root()
+
             if root ~= nil then
-                return root, fmt('"%s" lsp', lsp_name)
+                return true, root, fmt('"%s" lsp', lsp_name)
             end
-        elseif detection_method == 'pattern' then
+
+            return false, nil, nil
+        end,
+
+        pattern = function()
             local root, method = Api.find_pattern_root()
+
             if root ~= nil then
-                return root, method
+                return true, root, method
             end
+
+            return false, nil, nil
+        end,
+    }
+
+    for _, detection_method in next, Config.options.detection_methods do
+        if not in_tbl(VALID, detection_method) then
+            goto continue
         end
+
+        local success, root, lsp_method = SWITCH[detection_method]()
+
+        if success then
+            return root, lsp_method
+        end
+
+        ::continue::
     end
 
     return nil, nil
@@ -262,12 +294,15 @@ function Api.get_last_project()
     if #recent > 1 then
         recent = reverse(copy(recent))
         last = recent[2]
+    elseif #recent == 1 then
+        last = recent[1]
     end
 
     return last
 end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
+--- ---
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
@@ -280,7 +315,7 @@ end
 
 ---@param bufnr? integer
 ---@return boolean
-function Api.is_file(bufnr)
+function Api.buf_is_file(bufnr)
     bufnr = is_type('number', bufnr) and bufnr or curr_buf()
 
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
@@ -301,13 +336,13 @@ function Api.on_buf_enter(verbose, bufnr)
     verbose = is_type('boolean', verbose) and verbose or false
     bufnr = is_type('number', bufnr) and bufnr or curr_buf()
 
-    if not Api.is_file(bufnr) then
+    if not Api.buf_is_file(bufnr) then
         return
     end
 
     local current_dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
 
-    if not exists(current_dir) or is_excluded(current_dir) then
+    if not (exists(current_dir) and root_included(current_dir)) or is_excluded(current_dir) then
         return
     end
 
@@ -334,7 +369,7 @@ end
 function Api.add_project_manually(verbose)
     verbose = is_type('boolean', verbose) and verbose or false
 
-    local current_dir = vim.fn.expand('%:p:h')
+    local current_dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
 
     if verbose then
         notify(fmt('Attempting to process `%s`', current_dir), INFO)
