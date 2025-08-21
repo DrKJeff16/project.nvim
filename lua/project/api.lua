@@ -1,3 +1,8 @@
+---@class Project.HistoryPaths
+---@field datapath string
+---@field projectpath string
+---@field historyfile string
+
 local fmt = string.format
 
 local MODSTR = 'project.api'
@@ -27,6 +32,8 @@ local copy = vim.deepcopy
 local notify = vim.notify
 local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
+local buf_name = vim.api.nvim_buf_get_name
+local fnamemodify = vim.fn.fnamemodify
 
 ---@class AutocmdTuple
 ---@field [1] string[]|string
@@ -132,14 +139,14 @@ end
 ---@return string|nil dir
 ---@return string|nil method
 function Api.find_pattern_root()
-    local search_dir = vim.fn.expand('%:p:h', true)
+    local dir = fnamemodify(buf_name(curr_buf()), ':p:h')
+    local method = nil
 
     if is_windows() then
-        search_dir = search_dir:gsub('\\', '/')
+        dir = dir:gsub('\\', '/')
     end
 
-    local dir, method = root_included(search_dir)
-
+    dir, method = root_included(dir)
     return dir, method
 end
 
@@ -221,20 +228,23 @@ function Api.set_pwd(dir, method)
 end
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
----@return string|{ datapath: string, projectpath: string, historyfile: string }
+---@return string|Project.HistoryPaths res
 function Api.get_history_paths(path)
     local VALID = { 'datapath', 'projectpath', 'historyfile' }
 
-    if not (path and in_tbl(VALID, path)) then
-        ---@type { datapath: string, projectpath: string, historyfile: string }
-        return {
-            datapath = Path.datapath,
-            projectpath = Path.projectpath,
-            historyfile = Path.historyfile,
-        }
+    ---@type Project.HistoryPaths|string
+    local res = {
+        datapath = Path.datapath,
+        projectpath = Path.projectpath,
+        historyfile = Path.historyfile,
+    }
+
+    if is_type('string', path) and in_tbl(VALID, path) then
+        ---@type string
+        res = Path[path]
     end
 
-    return Path[path]
+    return res
 end
 
 ---Returns the project root, as well as the method used.
@@ -344,9 +354,9 @@ function Api.on_buf_enter(verbose, bufnr)
         return
     end
 
-    local current_dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
+    local dir = fnamemodify(buf_name(bufnr), ':p:h')
 
-    if not (exists(current_dir) and root_included(current_dir)) or is_excluded(current_dir) then
+    if not (exists(dir) and root_included(dir)) or is_excluded(dir) then
         return
     end
 
@@ -373,13 +383,13 @@ end
 function Api.add_project_manually(verbose)
     verbose = is_type('boolean', verbose) and verbose or false
 
-    local current_dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
+    local dir = fnamemodify(buf_name(curr_buf()), ':p:h')
 
     if verbose then
-        notify(fmt('Attempting to process `%s`', current_dir), INFO)
+        notify(fmt('Attempting to process `%s`', dir), INFO)
     end
 
-    Api.set_pwd(current_dir, 'manual')
+    Api.set_pwd(dir, 'manual')
 end
 
 function Api.init()
@@ -498,7 +508,7 @@ function Api.init()
                 local bang = ctx.bang ~= nil and ctx.bang or false
 
                 for _, v in next, ctx.fargs do
-                    local path = vim.fn.fnamemodify(v, ':p')
+                    local path = fnamemodify(v, ':p')
                     local recent = Api.get_recent_projects()
 
                     ---HACK: Getting rid of trailing `/` in string
