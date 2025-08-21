@@ -18,9 +18,9 @@ local Config = {}
 local DEFAULTS = {
     ---If `true` your root directory won't be changed automatically,
     ---so you have the option to manually do so using `:ProjectRoot` command.
-    ------
+    --- ---
     ---Default: `false`
-    ------
+    --- ---
     ---@type boolean
     manual_mode = false,
 
@@ -181,13 +181,13 @@ local DEFAULTS = {
 }
 
 ---Get the default options for configuring `project`.
--------
----@return Project.Config.Options
+--- ---
+---@return Project.Config.Options DEFAULTS
 function Config.get_defaults()
     return DEFAULTS
 end
 
----Default: `{}` (before calling `setup()`)
+---Default: `{}` (before calling `setup()`).
 ---
 ---@type table|Project.Config.Options
 Config.options = {}
