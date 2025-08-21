@@ -18,14 +18,16 @@ local in_tbl = vim.tbl_contains
 ---@class Project.Utils.Util
 local Util = {}
 
----Return whether nvim is running on Windows.
+---Checks whether nvim is running on Windows.
 --- ---
 ---@return boolean
 function Util.is_windows()
     return vim.fn.has('win32') == 1
 end
 
----Check whether `data` is of type `t` or not.
+---Checks whether `data` is of type `t` or not.
+---
+---If `data` is `nil`, the function will always return `false`.
 --- ---
 ---@param t Project.Utils.Util.Types Any return value the `type()` function would return
 ---@param data any The data to be type-checked
@@ -48,28 +50,41 @@ function Util.is_type(t, data)
     return data ~= nil and type(data) == t
 end
 
----Check if module `mod` is available.
+---Checks if module `mod` exists to be imported.
+--- ---
+---Example:
+---
+---```lua
+---if require('project.utils.util').mod_exists('foo') then
+---  require('foo')
+---end
+---```
+---
 --- ---
 ---@param mod string The `require()` argument to be checked
----@return boolean ok
+---@return boolean ok A boolean indicating whether the module exists or not
 function Util.mod_exists(mod)
     local is_type = Util.is_type
-    local ok, _ = false, nil
+    local ok = false
 
     if not is_type('string', mod) or mod == '' then
         return ok
     end
 
-    ok, _ = pcall(require, mod)
+    ok = pcall(require, mod)
 
     return ok
 end
 
 ---Get rid of all duplicates in input table.
 ---
----If table is empty, just returns it.
----@param T table|string[]
----@return table|string[] t
+---If table is empty, it'll just return it as-is.
+---
+---If the data passed to the function is not a table,
+---an error will be raised.
+--- ---
+---@param T table
+---@return table t
 function Util.dedup(T)
     if not Util.is_type('table', T) then
         error('(project.utils.util.dedup): Data is not a table!', ERROR)
@@ -150,9 +165,13 @@ function Util.format_per_type(t, data, sep, constraints)
     return msg
 end
 
----Reverses a table.
+---Reverses a given table.
 ---
----If table is empty, returns an empty table.
+---If the passed data is an empty table, it'll be returned as-is.
+---
+---If the data passed to the function is not a table,
+---an error will be raised.
+--- ---
 ---@param T table
 ---@return table
 function Util.reverse(T)
@@ -173,9 +192,18 @@ function Util.reverse(T)
     return T
 end
 
+---Checks whether a given path is a directory or not.
+---
+---If the data passed to the function is not a string,
+---an error will be raised.
+--- ---
 ---@param dir string
 ---@return boolean
 function Util.dir_exists(dir)
+    if not Util.is_type('string', dir) then
+        error('(project.utils.util.dir_exists): Argument is not a string', ERROR)
+    end
+
     local stat = uv.fs_stat(dir)
 
     return stat ~= nil and stat.type == 'directory'
