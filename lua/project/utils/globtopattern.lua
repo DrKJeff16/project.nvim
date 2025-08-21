@@ -1,7 +1,8 @@
----Credits for this module goes to: David Manura
+---Credits for this module goes to: David Manura:
 ---https://github.com/davidm/lua-glob-pattern
+--- ---
 ---@class Project.Utils.GlobPattern
-local Glob = { _TYPE = 'module', _NAME = 'globtopattern', _VERSION = '0.2.1.20120406' }
+local Glob = {}
 
 ---Some useful references:
 --- - apr_fnmatch in Apache APR.  For example,
@@ -10,11 +11,10 @@ local Glob = { _TYPE = 'module', _NAME = 'globtopattern', _VERSION = '0.2.1.2012
 ---@param g string
 ---@return string pattern
 function Glob.globtopattern(g)
-    local pattern = '^'
-    local i = 0 -- index in g
-    local c = '' -- char at index i in g.
+    local pattern, i, c = '^', 0, ''
 
     ---Unescape glob char.
+    --- ---
     ---@return boolean
     local function unescape()
         if c == '\\' then
@@ -29,14 +29,17 @@ function Glob.globtopattern(g)
     end
 
     ---Escape pattern char.
+    --- ---
     ---@param char string
     ---@return string
     local function escape(char)
         return char:match('^%w$') and c or '%' .. c
     end
 
-    -- TODO(DrKJeff16): Let's simplify this in the future
-    -- Convert tokens at end of charset.
+    --- TODO: Let's simplify this in the future
+
+    ---Convert tokens at end of charset.
+    --- ---
     ---@return boolean
     local function charset_end()
         while true do
@@ -86,6 +89,7 @@ function Glob.globtopattern(g)
     end
 
     ---Convert tokens in charset.
+    --- ---
     ---@return boolean
     local function charset()
         i = i + 1
@@ -145,16 +149,18 @@ function Glob.globtopattern(g)
 end
 
 ---@param pattern string
----@return string
+---@return string pattern
 function Glob.pattern_exclude(pattern)
-    local HOME_EXPAND = vim.fn.expand('~')
+    local HOME = vim.fn.expand('~')
     local pattern_len = string.len(pattern)
 
     if vim.startswith(pattern, '~/') then
-        pattern = string.format('%s/%s', HOME_EXPAND, pattern:sub(3, pattern_len))
+        pattern = string.format('%s/%s', HOME, pattern:sub(3, pattern_len))
     end
 
-    return Glob.globtopattern(pattern)
+    pattern = Glob.globtopattern(pattern)
+
+    return pattern
 end
 
 return Glob
