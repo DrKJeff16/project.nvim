@@ -10,8 +10,4 @@ Instead of using `require('project_nvim')` use `require('project')`.
     vim.log.levels.WARN
 )
 
-local lazy = require('project.lazy')
-
-local Project = lazy.require('project') ---@module 'project'
-
-return Project
+return require('project')

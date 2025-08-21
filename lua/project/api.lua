@@ -2,17 +2,14 @@ local fmt = string.format
 
 local MODSTR = 'project.api'
 
-local lazy = require('project.lazy')
+local Config = require('project.config')
+local Path = require('project.utils.path')
+local Util = require('project.utils.util')
+local History = require('project.utils.history')
 
-local Config = lazy.require('project.config') ---@module 'project.config'
-local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
-local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
-local History = lazy.require('project.utils.history') ---@module 'project.utils.history'
-local Error = lazy.require('project.utils.error') ---@module 'project.utils.error'
-
-local ERROR = Error.ERROR
-local INFO = Error.INFO
-local WARN = Error.WARN
+local ERROR = vim.log.levels.ERROR
+local INFO = vim.log.levels.INFO
+local WARN = vim.log.levels.WARN
 
 local is_type = Util.is_type
 local is_windows = Util.is_windows
@@ -110,6 +107,12 @@ function Api.find_lsp_root()
     return dir, name
 end
 
+---Check if given directory is owned by the user running Nvim.
+---
+---Unavailable/unreadable
+---
+---If running on Windows, this will return `true` regardless.
+--- ---
 ---@param dir string
 ---@return boolean
 function Api.verify_owner(dir)
@@ -119,11 +122,11 @@ function Api.verify_owner(dir)
 
     local stat = uv.fs_stat(dir)
 
-    if stat == nil then
-        error(fmt('(%s.verify_owner): Directory unreachable', MODSTR), ERROR)
+    if stat ~= nil then
+        return stat.uid == uv.getuid()
     end
 
-    return stat.uid == uv.getuid()
+    error(fmt("(%s.verify_owner): Directory can't be accessed!", MODSTR), ERROR)
 end
 
 ---@return string|nil dir
@@ -234,7 +237,7 @@ function Api.get_history_paths(path)
     return Path[path]
 end
 
----Returns project root, as well as the method used.
+---Returns the project root, as well as the method used.
 --- ---
 ---@return string|nil
 ---@return string|nil
@@ -290,11 +293,12 @@ function Api.get_last_project()
 
     ---@type string|nil
     local last = nil
+    local recent_len = #recent
 
-    if #recent > 1 then
+    if recent_len > 1 then
         recent = reverse(copy(recent))
         last = recent[2]
-    elseif #recent == 1 then
+    elseif recent_len == 1 then
         last = recent[1]
     end
 
@@ -379,7 +383,7 @@ function Api.add_project_manually(verbose)
 end
 
 function Api.init()
-    local group = augroup('project', { clear = true })
+    local group = augroup('project.nvim', { clear = true })
     local detection_methods = Config.options.detection_methods
 
     ---@type AutocmdTuple[]
@@ -503,7 +507,7 @@ function Api.init()
                     end
 
                     if not (bang or in_tbl(recent, path)) then
-                        Error(fmt('(:ProjectDelete): Could not delete `%s`, aborting', path))
+                        error(fmt('(:ProjectDelete): Could not delete `%s`, aborting', path), ERROR)
                     end
 
                     if in_tbl(recent, path) then

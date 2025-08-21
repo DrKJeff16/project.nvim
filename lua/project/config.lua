@@ -1,7 +1,5 @@
-local lazy = require('project.lazy')
-
-local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
-local Glob = lazy.require('project.utils.globtopattern') ---@module 'project.utils.globtopattern'
+local Util = require('project.utils.util')
+local Glob = require('project.utils.globtopattern')
 
 local is_type = Util.is_type
 local mod_exists = Util.mod_exists
@@ -258,8 +256,8 @@ function Config.setup(options)
     Config:trim_methods()
     Config:verify_scope_chdir()
 
-    local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
-    local Api = lazy.require('project.api') ---@module 'project.api'
+    local Path = require('project.utils.path')
+    local Api = require('project.api')
 
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
     vim.opt.autochdir = Config.options.enable_autochdir

@@ -9,9 +9,7 @@ local h_error = vim.health.error or vim.health.report_error
 
 local empty = vim.tbl_isempty
 
-local lazy = require('project.lazy')
-
-local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
+local Util = require('project.utils.util')
 
 local is_type = Util.is_type
 local dedup = Util.dedup
@@ -23,7 +21,7 @@ local Health = {}
 
 function Health.options_check()
     start('Config')
-    local Config = lazy.require('project.config') ---@module 'project.config'
+    local Config = require('project.config')
 
     local Options = Config.options
     table.sort(Options)
@@ -58,7 +56,7 @@ end
 function Health.history_check()
     start('History')
 
-    local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
+    local Path = require('project.utils.path')
 
     ---@class HistoryChecks
     ---@field name 'datapath'|'projectpath'|'historyfile'
@@ -108,7 +106,7 @@ end
 ---@return boolean
 function Health.setup_check()
     start('Setup')
-    local Config = lazy.require('project.config') ---@module 'project.config'
+    local Config = require('project.config')
 
     local setup_called = Config.setup_called or false
 
@@ -140,7 +138,7 @@ end
 function Health.project_check()
     start('Current Project')
 
-    local Api = lazy.require('project.api') ---@module 'project.api'
+    local Api = require('project.api')
 
     local curr, method, last = Api.current_project, Api.current_method, Api.last_project
     local msg = ''
@@ -171,7 +169,7 @@ function Health.project_check()
 
     start('Active Sessions')
 
-    local History = lazy.require('project.utils.history') ---@module 'project.utils.history'
+    local History = require('project.utils.history')
 
     local active = History.has_watch_setup
     local projects = History.session_projects
@@ -189,7 +187,7 @@ end
 
 function Health.telescope_check()
     start('Telescope')
-    local Config = lazy.require('project.config') ---@module 'project.config'
+    local Config = require('project.config')
 
     if not mod_exists('telescope') then
         h_warn('Telescope is not installed')
@@ -219,7 +217,8 @@ end
 
 function Health.recent_proj_check()
     start('Recent Projects')
-    local Api = lazy.require('project.api') ---@module 'project.api'
+    local Api = require('project.api')
+
     local recents = Api.get_recent_projects()
 
     if vim.tbl_isempty(recents) then

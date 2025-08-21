@@ -10,8 +10,7 @@
 local fmt = string.format
 local uv = vim.uv or vim.loop
 
-local lazy = require('project.lazy')
-local Error = lazy.require('project.utils.error') ---@module 'project.utils.error'
+local ERROR = vim.log.levels.ERROR
 
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
@@ -73,7 +72,7 @@ end
 ---@return table|string[] t
 function Util.dedup(T)
     if not Util.is_type('table', T) then
-        Error('(project.utils.util.dedup): Data is not a table!')
+        error('(project.utils.util.dedup): Data is not a table!', ERROR)
     end
 
     local t = {}
@@ -158,7 +157,7 @@ end
 ---@return table
 function Util.reverse(T)
     if not Util.is_type('table', T) then
-        Error('project.utils.util.reverse: Arg is not a table')
+        error('project.utils.util.reverse: Arg is not a table', ERROR)
     end
 
     if empty(T) then

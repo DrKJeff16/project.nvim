@@ -24,13 +24,11 @@ local fmt = string.format
 
 ---@alias ProjParam { value: string }
 
-local lazy = require('project.lazy')
+local Util = require('project.utils.util')
+local Path = require('project.utils.path')
 
-local Util = lazy.require('project.utils.util') ---@module 'project.utils.util'
-local Path = lazy.require('project.utils.path') ---@module 'project.utils.path'
-local Error = lazy.require('project.utils.error') ---@module 'project.utils.error'
-
-local WARN = Error.WARN
+local ERROR = vim.log.levels.ERROR
+local WARN = vim.log.levels.WARN
 
 local uv = vim.uv or vim.loop
 
@@ -241,7 +239,7 @@ function History.write_projects_to_history()
     local file = History.open_history(History.recent_projects == nil and 'a' or 'w')
 
     if file == nil then
-        Error('(project.utils.history.write_projects_to_history): File restricted')
+        error('(project.utils.history.write_projects_to_history): File restricted', ERROR)
     end
 
     local res = History.get_recent_projects()

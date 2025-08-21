@@ -1,7 +1,8 @@
-local lazy = require('project.lazy')
+local Config = require('project.config')
+local Api = require('project.api')
+local Util = require('project.utils.util')
 
-local Config = lazy.require('project.config') ---@module 'project.config'
-local Api = lazy.require('project.api') ---@module 'project.api'
+local is_type = Util.is_type
 
 ---The `project` module.
 --- ---
@@ -13,7 +14,7 @@ function Project.setup(options)
     Config.setup(options)
 end
 
----Returns project root, as well as the method used.
+---Returns the project root, as well as the method used.
 --- ---
 ---@return string|nil root
 ---@return string|nil method
@@ -33,9 +34,13 @@ function Project.get_history_paths(path)
     return Api.get_history_paths(path)
 end
 
----@return string|nil
-function Project.get_last_project()
-    return Api.last_project
+---@param refresh? boolean
+---@return string|nil last
+function Project.get_last_project(refresh)
+    refresh = is_type('boolean', refresh) and refresh or false
+    local last = refresh and Api.last_project or Api.get_last_project()
+
+    return last
 end
 
 ---@return string[] recent
@@ -45,11 +50,19 @@ function Project.get_recent_projects()
 end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
+--- ---
+---@param refresh? boolean
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
-function Project.current_project()
+function Project.current_project(refresh)
+    refresh = is_type('boolean', refresh) and refresh or false
+
     local curr, method, last = Api.current_project, Api.current_method, Api.last_project
+
+    if refresh then
+        curr, method, last = Api.get_current_project()
+    end
 
     return curr, method, last
 end
