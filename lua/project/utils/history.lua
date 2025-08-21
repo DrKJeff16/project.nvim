@@ -22,8 +22,6 @@ local fmt = string.format
 ---|"xw"
 ---|"xw+"
 
----@alias ProjParam { value: string }
-
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
 
@@ -44,11 +42,13 @@ local is_type = Util.is_type
 ---@field has_watch_setup? boolean
 local History = {}
 
--- projects from previous neovim sessions
+---Projects from previous neovim sessions.
+--- ---
 ---@type string[]|table|nil
 History.recent_projects = nil
 
--- projects from current neovim session
+---Projects from current neovim session.
+--- ---
 ---@type string[]|table
 History.session_projects = {}
 
@@ -139,12 +139,13 @@ function History.delete_project(project)
     History.recent_projects = copy(new_tbl)
 
     History.filter_recent_projects()
-    History.write_projects_to_history()
+    History.write_history()
 end
 
+---Splits data into table.
+--- ---
 ---@param history_data string
 function History.deserialize_history(history_data)
-    -- split data to table
     ---@type string[]
     local projects = {}
 
@@ -159,8 +160,9 @@ function History.deserialize_history(history_data)
     History.recent_projects = copy(projects)
 end
 
+---Only runs once.
+--- ---
 function History.setup_watch()
-    ---Only runs once
     if History.has_watch_setup then
         return
     end
@@ -176,13 +178,13 @@ function History.setup_watch()
         end
 
         History.recent_projects = nil
-        History.read_projects_from_history()
+        History.read_history()
     end)
 
     History.has_watch_setup = true
 end
 
-function History.read_projects_from_history()
+function History.read_history()
     History.open_history('r', function(_, fd)
         History.setup_watch()
 
@@ -232,14 +234,13 @@ end
 
 ---Write projects to history file.
 ---
----Unlike read projects, write projects is synchronous
----because it runs when Vim ends.
+---_Bear in mind: this function is synchronous._
 --- ---
-function History.write_projects_to_history()
+function History.write_history()
     local file = History.open_history(History.recent_projects == nil and 'a' or 'w')
 
     if file == nil then
-        error('(project.utils.history.write_projects_to_history): File restricted', ERROR)
+        error('(project.utils.history.write_history): File restricted', ERROR)
     end
 
     local res = History.get_recent_projects()

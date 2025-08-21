@@ -371,7 +371,7 @@ function Api.on_buf_enter(verbose, bufnr)
 
     Api.set_pwd(Api.current_project, Api.current_method)
 
-    History.write_projects_to_history()
+    History.write_history()
 end
 
 ---@param project string|Project.ActionEntry
@@ -403,7 +403,7 @@ function Api.init()
             {
                 pattern = '*',
                 group = group,
-                callback = History.write_projects_to_history,
+                callback = History.write_history,
             },
         },
     }
@@ -547,7 +547,7 @@ function Api.init()
         vim.api.nvim_create_user_command(cmnd.name, cmnd.cmd, cmnd.opts or {})
     end
 
-    History.read_projects_from_history()
+    History.read_history()
 end
 
 return Api
