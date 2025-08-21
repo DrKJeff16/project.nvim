@@ -85,7 +85,7 @@ end
 function Path.sub(dir, identifier)
     local path_str, current = Path.get_parent(dir), ''
 
-    -- FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
+    ---FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
     while true do
         if Path.is(path_str, identifier) then
             return true
@@ -146,8 +146,8 @@ function Path.root_included(dir)
     local Config = require('project.config')
     local search_dir = dir
 
-    --- Breadth-First search
-    while true do -- FIXME: This loop is dangerous, even if halting cond is supposedly known
+    ---Breadth-First search
+    while true do ---FIXME: This loop is dangerous, even if halting cond is supposedly known
         for _, pattern in next, Config.options.patterns do
             local excluded = false
 
