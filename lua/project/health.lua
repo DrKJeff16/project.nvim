@@ -1,5 +1,5 @@
-local uv = vim.uv or vim.loop
 local fmt = string.format
+local uv = vim.uv or vim.loop
 
 local start = vim.health.start or vim.health.report_start
 local ok = vim.health.ok or vim.health.report_ok
@@ -8,6 +8,7 @@ local h_warn = vim.health.warn or vim.health.report_warn
 local h_error = vim.health.error or vim.health.report_error
 
 local empty = vim.tbl_isempty
+local copy = vim.deepcopy
 
 local Util = require('project.utils.util')
 
@@ -15,6 +16,8 @@ local is_type = Util.is_type
 local dedup = Util.dedup
 local format_per_type = Util.format_per_type
 local mod_exists = Util.mod_exists
+local reverse = Util.reverse
+local is_windows = Util.is_windows
 
 ---@class Project.Health
 local Health = {}
@@ -113,7 +116,7 @@ function Health.setup_check()
     if setup_called then
         ok("`require('project').setup()` has been called")
 
-        if Util.is_windows() then
+        if is_windows() then
             h_warn(
                 fmt(
                     '%s\n\n\t%s',
@@ -175,7 +178,7 @@ function Health.project_check()
     local projects = History.session_projects
 
     if active and not empty(projects) then
-        projects = dedup(vim.deepcopy(projects))
+        projects = dedup(copy(projects))
 
         for k, v in next, projects do
             info(fmt('`[%s]`: `%s`', tostring(k), v))
@@ -232,15 +235,15 @@ function Health.recent_proj_check()
         return
     end
 
-    recents = Util.reverse(vim.deepcopy(recents))
+    recents = reverse(copy(recents))
 
     for i, project in next, recents do
         info(fmt('%s. `%s`', tostring(i), project))
     end
 end
 
--- This is called when running `:checkhealth project`
--- ---
+---This is called when running `:checkhealth project`.
+--- ---
 function Health.check()
     if not Health.setup_check() then
         return
