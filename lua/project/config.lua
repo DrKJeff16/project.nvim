@@ -1,3 +1,5 @@
+local fmt = string.format
+
 local Util = require('project.utils.util')
 local Glob = require('project.utils.globtopattern')
 
@@ -8,12 +10,14 @@ local pattern_exclude = Glob.pattern_exclude
 local copy = vim.deepcopy
 local in_tbl = vim.tbl_contains
 
+local WARN = vim.log.levels.WARN
+
 ---@class Project.Config
 ---@field setup_called? boolean
 local Config = {}
 
----Options defined after running `require('project').setup()`.
----
+---Options defined in `setup()`.
+--- ---
 ---@class Project.Config.Options
 local DEFAULTS = {
     ---If `true` your root directory won't be changed automatically,
@@ -30,9 +34,9 @@ local DEFAULTS = {
     ---can also delete or rearrange the detection methods.
     ---
     ---The detection methods get filtered and rid of duplicates during runtime.
-    ------
+    --- ---
     ---Default: `{ 'lsp' , 'pattern' }`
-    ------
+    --- ---
     ---@type ("lsp"|"pattern")[]
     detection_methods = { 'lsp', 'pattern' },
 
@@ -40,9 +44,9 @@ local DEFAULTS = {
     ---detection_methods.
     ---
     ---See `:h project.nvim-pattern-matching`
-    ------
+    --- ---
     ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile' }`
-    ------
+    --- ---
     ---@type string[]
     patterns = {
         '.git',
@@ -57,9 +61,9 @@ local DEFAULTS = {
     ---Sets whether to use Pattern Matching rules on the LSP.
     ---
     ---If `false`, the Pattern Matching will only apply to the `pattern` detection method.
-    ------
+    --- ---
     ---Default: `true`
-    ------
+    --- ---
     ---@type boolean
     allow_patterns_for_lsp = true,
 
@@ -67,23 +71,23 @@ local DEFAULTS = {
     ---
     ---If `false`, it won't add a project if its root is not owned by the
     ---current nvim `UID` **(UNIX only)**.
-    ------
+    --- ---
     ---Default: `true`
-    ------
+    --- ---
     ---@type boolean
     allow_different_owners = true,
 
     ---If enabled, set `vim.opt.autochdir` to `true`.
     ---
     ---This is disabled by default because the plugin implicitly disables `autochdir`.
-    ------
+    --- ---
     ---Default: `false`
-    ------
+    --- ---
     ---@type boolean
     enable_autochdir = false,
 
     ---Table of options used for the telescope picker.
-    ------
+    --- ---
     ---@class Project.Config.Options.Telescope
     telescope = {
         ---Determines whether the `telescope` picker should be called.
@@ -91,17 +95,17 @@ local DEFAULTS = {
         ---If telescope is not installed, this doesn't make a difference.
         ---
         ---Note that even if set to `false`, you can still load the extension manually.
-        ------
+        --- ---
         ---Default: `true`
-        ------
+        --- ---
         ---@type boolean
         enabled = true,
 
         ---Determines whether the newest projects come first in the
         ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
-        ------
+        --- ---
         ---Default: `'newest'`
-        ------
+        --- ---
         ---@type 'oldest'|'newest'
         sort = 'newest',
 
@@ -111,16 +115,16 @@ local DEFAULTS = {
         ---so that the Telescope picker uses it instead of the `find_files` builtin.
         ---
         ---In case it is not available, it'll fall back to `find_files`.
-        ------
+        --- ---
         ---Default: `false`
-        ------
+        --- ---
         ---@type boolean
         prefer_file_browser = false,
 
         ---Make hidden files visible when using the `telescope` picker.
-        ------
+        --- ---
         ---Default: `false`
-        ------
+        --- ---
         ---@type boolean
         show_hidden = false,
     },
@@ -130,9 +134,9 @@ local DEFAULTS = {
     ---
     ---If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
     ---for a list of servers.
-    ------
+    --- ---
     ---Default: `{}`
-    ------
+    --- ---
     ---@type string[]|table
     ignore_lsp = {},
 
@@ -140,9 +144,9 @@ local DEFAULTS = {
     ---e.g. `{ '~/.cargo/*', ... }`.
     ---
     ---See the `Pattern Matching` section in the `README.md` for more info.
-    ------
+    --- ---
     ---Default: `{}`
-    ------
+    --- ---
     ---@type string[]|table
     exclude_dirs = {},
 
@@ -151,9 +155,9 @@ local DEFAULTS = {
     ---
     ---This is useful for debugging, or for players that
     ---enjoy verbose operations.
-    ------
+    --- ---
     ---Default: `true`
-    ------
+    --- ---
     ---@type boolean
     silent_chdir = true,
 
@@ -163,9 +167,9 @@ local DEFAULTS = {
     --- - `'global'`: All your nvim `cwd` will sync to your current buffer's project
     --- - `'tab'`: _Per-tab_ `cwd` sync to the current buffer's project
     --- - `'win'`: _Per-window_ `cwd` sync to the current buffer's project
-    ------
+    --- ---
     ---Default: `'global'`
-    ------
+    --- ---
     ---@type 'global'|'tab'|'win'
     scope_chdir = 'global',
 
@@ -173,9 +177,9 @@ local DEFAULTS = {
     ---containing the project history in it.
     ---
     ---For more info, run `:lua vim.print(require('project').get_history_paths())`
-    ------
+    --- ---
     ---Default: `vim.fn.stdpath('data')`
-    ------
+    --- ---
     ---@type string
     datapath = vim.fn.stdpath('data'),
 }
@@ -188,29 +192,46 @@ function Config.get_defaults()
 end
 
 ---Default: `{}` (before calling `setup()`).
----
+--- ---
 ---@type table|Project.Config.Options
 Config.options = {}
 
----@param self Project.Config
-function Config:verify_scope_chdir()
+---Checks the `scope_chdir` option.
+---
+---If the option is not valid, a warning will be raised and
+---the value will revert back to the default.
+--- ---
+function Config.verify_scope_chdir()
     local VALID = { 'global', 'tab', 'win' }
 
-    if is_type('string', self.options.scope_chdir) and in_tbl(VALID, self.options.scope_chdir) then
+    if
+        is_type('string', Config.options.scope_chdir) and in_tbl(VALID, Config.options.scope_chdir)
+    then
         return
     end
 
-    self.scope_chdir = self.get_defaults().scope_chdir
+    vim.notify('`scope_chdir` option invalid. Reverting to default option.', WARN)
+    Config.scope_chdir = Config.get_defaults().scope_chdir
 end
 
----Ensure that the `detection_methods` option is valid.
----This includes non-repeating values, only `'lsp'` and `'pattern'` strings,
----if any.
+---Checks the `detection_methods` option.
+---
+---If the option is not a table, a warning will be raised and
+---the option will revert back to the default.
+---
+---If the option is an empty table, the function will stop.
+---
+---The option will be stripped from any duplicates and/or
+---invalid values.
 --- ---
----@param self Project.Config
-function Config:trim_methods()
-    if not is_type('table', self.options.detection_methods) then
-        self.options.detection_methods = self.get_defaults().detection_methods
+function Config.verify_methods()
+    if not is_type('table', Config.options.detection_methods) then
+        vim.notify('`detection_methods` option is not a table. Reverting to default option.', WARN)
+        Config.options.detection_methods = Config.get_defaults().detection_methods
+        return
+    end
+
+    if vim.tbl_isempty(Config.options.detection_methods) then
         return
     end
 
@@ -219,7 +240,7 @@ function Config:trim_methods()
     ---@type ('lsp'|'pattern')[]|table
     local methods = {}
 
-    for _, v in next, self.options.detection_methods do
+    for _, v in next, Config.options.detection_methods do
         if checker.lsp and checker.pattern then
             break
         end
@@ -228,11 +249,13 @@ function Config:trim_methods()
             goto continue
         end
 
+        --- If `'lsp'` is found and not duplicated
         if v == 'lsp' and not checker.lsp then
             table.insert(methods, v)
             checker.lsp = true
         end
 
+        --- If `'pattern'` is found and not duplicated
         if v == 'pattern' and not checker.pattern then
             table.insert(methods, v)
             checker.pattern = true
@@ -241,7 +264,7 @@ function Config:trim_methods()
         ::continue::
     end
 
-    self.options.detection_methods = copy(methods)
+    Config.options.detection_methods = copy(methods)
 end
 
 ---The function called when running `require('project').setup()`.
@@ -253,19 +276,16 @@ function Config.setup(options)
     Config.options = vim.tbl_deep_extend('force', Config.get_defaults(), options)
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
 
-    Config:trim_methods()
-    Config:verify_scope_chdir()
-
-    local Path = require('project.utils.path')
-    local Api = require('project.api')
+    Config.verify_methods()
+    Config.verify_scope_chdir()
 
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
     vim.opt.autochdir = Config.options.enable_autochdir
 
-    Path.init()
-    Api.init()
+    require('project.utils.path').init()
+    require('project.api').init()
 
-    ---Load `projects` Telescope picker if check is `true`.
+    ---Load `projects` Telescope picker if condition passes
     if Config.options.telescope.enabled and mod_exists('telescope') then
         require('telescope').load_extension('projects')
     end
