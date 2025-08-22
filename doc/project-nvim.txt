@@ -89,7 +89,7 @@ Table of Contents                                             *project-nvim.toc*
             'nvim-telescope/telescope.nvim',
           },
 
-	  ---@module 'project'
+          ---@module 'project'
           ---@type Project.Config.Options
           opts = {
             -- your configuration comes here
