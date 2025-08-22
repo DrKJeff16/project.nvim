@@ -1,6 +1,11 @@
 local fmt = string.format
 local uv = vim.uv or vim.loop
 
+---@class HistoryCheck
+---@field name string
+---@field type 'file'|'directory'
+---@field path string
+
 local start = vim.health.start or vim.health.report_start
 local ok = vim.health.ok or vim.health.report_ok
 local info = vim.health.info or vim.health.report_info
@@ -11,6 +16,10 @@ local empty = vim.tbl_isempty
 local copy = vim.deepcopy
 
 local Util = require('project.utils.util')
+local Path = require('project.utils.path')
+local History = require('project.utils.history')
+local Config = require('project.config')
+local Api = require('project.api')
 
 local is_type = Util.is_type
 local dedup = Util.dedup
@@ -22,9 +31,41 @@ local is_windows = Util.is_windows
 ---@class Project.Health
 local Health = {}
 
+---@return boolean setup_called
+function Health.setup_check()
+    start('Setup')
+
+    local setup_called = Config.setup_called or false
+
+    if not setup_called then
+        h_error('`setup()` has not been called!')
+        return setup_called
+    end
+
+    ok('`setup()` has been called!')
+
+    if vim.fn.has('nvim-0.11') == 1 then
+        ok('nvim version is at least `v0.11`')
+    else
+        h_warn('nvim version is lower than `v0.11`!')
+    end
+
+    if is_windows() then
+        h_warn([[
+        `DISCLAIMER`
+
+        You're running on Windows. Issues are more likely to occur,
+        bear that in mind.
+
+        Please report any issues to the maintainers.
+        ]])
+    end
+
+    return setup_called
+end
+
 function Health.options_check()
     start('Config')
-    local Config = require('project.config')
 
     local Options = Config.options
     table.sort(Options)
@@ -59,138 +100,82 @@ end
 function Health.history_check()
     start('History')
 
-    local Path = require('project.utils.path')
-
-    ---@class HistoryChecks
-    ---@field name 'datapath'|'projectpath'|'historyfile'
-    ---@field type 'file'|'directory'
-    ---@field value string
-
-    ---@type HistoryChecks[]
+    ---@type HistoryCheck[]
     local P = {
         {
             name = 'datapath',
             type = 'directory',
-            value = Path.datapath,
+            path = Path.datapath,
         },
         {
             name = 'projectpath',
             type = 'directory',
-            value = Path.projectpath,
+            path = Path.projectpath,
         },
         {
             name = 'historyfile',
             type = 'file',
-            value = Path.historyfile,
+            path = Path.historyfile,
         },
     }
 
     for _, v in next, P do
-        local fname, ftype, value = v.name, v.type, v.value
+        local fname, ftype, path = v.name, v.type, v.path
 
-        local stat = uv.fs_stat(value)
+        local stat = uv.fs_stat(path)
 
         if stat == nil then
-            h_error(fmt('%s: `%s` is missing or not readable!', fname, value))
+            h_error(fmt('%s: `%s` is missing or not readable!', fname, path))
             goto continue
         end
 
         if stat.type ~= ftype then
-            h_error(fmt('%s: `%s` is not of type `%s`!', fname, value, ftype))
+            h_error(fmt('%s: `%s` is not of type `%s`!', fname, path, ftype))
             goto continue
         end
 
-        ok(fmt('%s: `%s`', fname, value))
+        ok(fmt('%s: `%s`', fname, path))
 
         ::continue::
     end
 end
 
----@return boolean
-function Health.setup_check()
-    start('Setup')
-    local Config = require('project.config')
-
-    local setup_called = Config.setup_called or false
-
-    if setup_called then
-        ok("`require('project').setup()` has been called")
-
-        if is_windows() then
-            h_warn(
-                fmt(
-                    '%s\n\n\t%s',
-                    'Running on Windows. Issues might occur.',
-                    'Please report any issues to the maintainers'
-                )
-            )
-        end
-
-        if vim.fn.has('nvim-0.11') == 1 then
-            ok('nvim version is at least `v0.11`')
-        else
-            h_warn('nvim version is lower than `v0.11`!')
-        end
-    else
-        h_error("`require('project').setup()` has not been called!")
-    end
-
-    return setup_called
-end
-
 function Health.project_check()
     start('Current Project')
 
-    local Api = require('project.api')
-
     local curr, method, last = Api.current_project, Api.current_method, Api.last_project
-    local msg = ''
+    local msg
 
-    if curr == nil then
-        msg = 'Current project: **No current project**'
-    else
-        msg = fmt('Current project: `%s`', curr)
-    end
-
+    msg = fmt('Current project: `%s`', curr ~= nil and curr or 'No Current Project')
     info(msg)
 
-    if method == nil then
-        msg = 'Method used: **No method available**'
-    else
-        msg = fmt('Method used: `%s`', method)
-    end
-
+    msg = fmt('Method used: `%s`', method ~= nil and method or 'No method available')
     info(msg)
 
-    if last == nil then
-        msg = 'Last project: **No method available**'
-    else
-        msg = fmt('Last project: `%s`', last)
-    end
-
+    msg = fmt('Last project: `%s`', last ~= nil and last or 'No Last Project In History')
     info(msg)
 
     start('Active Sessions')
 
-    local History = require('project.utils.history')
-
     local active = History.has_watch_setup
     local projects = History.session_projects
 
-    if active and not empty(projects) then
-        projects = dedup(copy(projects))
-
-        for k, v in next, projects do
-            info(fmt('`[%s]`: `%s`', tostring(k), v))
-        end
-    else
+    if not active or empty(projects) then
         h_warn('No active session projects!')
+        return
+    end
+
+    projects = dedup(copy(projects))
+
+    ---@cast projects string[]
+    for k, v in next, projects do
+        info(fmt('[`%s`]: `%s`', tostring(k), v))
     end
 end
 
 function Health.telescope_check()
     start('Telescope')
-    local Config = require('project.config')
+    local Opts = Config.options
 
     if not mod_exists('telescope') then
         h_warn('Telescope is not installed')
@@ -204,33 +189,36 @@ function Health.telescope_check()
 
     ok('`projects` picker extension loaded')
 
-    local Opts = Config.options
-
     if not is_type('table', Opts.telescope) then
-        h_warn('`project` does not have telescope options set up')
+        h_warn('`projects` does not have telescope options set up')
         return
     end
 
-    if not vim.tbl_contains({ 'newest', 'oldest' }, Opts.telescope.sort) then
-        h_warn('Telescope setup option not configured correctly!')
+    local sort = Opts.telescope.sort
+
+    if not vim.tbl_contains({ 'newest', 'oldest' }, sort) then
+        h_warn('Telescope `sort` option not configured correctly!')
+        return
     end
 
-    ok(fmt("Sorting order: `'%s'`", Opts.telescope.sort))
+    ok(fmt("Sorting order: `'%s'`", sort))
 end
 
 function Health.recent_proj_check()
     start('Recent Projects')
-    local Api = require('project.api')
-
     local recents = Api.get_recent_projects()
 
     if vim.tbl_isempty(recents) then
         h_warn([[
-            **No projects found in history!**\n
-            _If this is your first time using this plugin,_\n
-            _or you just set a different `historypath` for your plugin,_\n
-            _then you can ignore this._\n\n
-            If this keeps appearing though, check your config and if needed create an issue.
+            `No projects found in history!`
+
+            If this is your first time using this plugin,
+            or you just set a different `historypath` for your plugin,
+            then you can ignore this.
+
+
+            If this keeps appearing, though, check your config
+            and submit an issue if pertinent.
                 ]])
         return
     end
@@ -238,7 +226,7 @@ function Health.recent_proj_check()
     recents = reverse(copy(recents))
 
     for i, project in next, recents do
-        info(fmt('%s. `%s`', tostring(i), project))
+        info(fmt('`%s`. `%s`', tostring(i), project))
     end
 end
 
@@ -249,7 +237,7 @@ function Health.check()
         return
     end
 
-    -- NOTE: Order matters below!
+    --- NOTE: Order matters below!
 
     Health.telescope_check()
     Health.project_check()
