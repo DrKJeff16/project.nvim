@@ -152,12 +152,12 @@ require('lazy').setup({
     -- Other plugins
     {
       'DrKJeff16/project.nvim',
-      -- WARN: IMPORTANT NOT TO LAZY-LOAD THIS PLUGIN
-      lazy = false,
-      dependencies = {
+      dependencies = { -- OPTIONAL
         'nvim-lua/plenary.nvim',
         'nvim-telescope/telescope.nvim',
-      }, -- OPTIONAL
+      },
+
+      ---@module 'project'
       ---@type Project.Config.Options
       opts = {
         -- your configuration comes here
@@ -244,7 +244,7 @@ require('project').setup({
   ---All the patterns used to detect root dir, when **'pattern'** is in
   ---detection_methods.
   ---
-  ---See `:h project.nvim-pattern-matching`
+  ---See `:h project-nvim.pattern-matching`
   ------
   ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile' }`
   ------
