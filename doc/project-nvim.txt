@@ -84,10 +84,12 @@ Table of Contents                                             *project-nvim.toc*
         -- Other plugins
         {
           'DrKJeff16/project.nvim',
-          dependencies = {
+          dependencies = { -- OPTIONAL
             'nvim-lua/plenary.nvim',
             'nvim-telescope/telescope.nvim',
-          }, -- OPTIONAL
+          },
+
+	  ---@module 'project'
           ---@type Project.Config.Options
           opts = {
             -- your configuration comes here
