@@ -550,4 +550,13 @@ function Api.init()
     History.read_history()
 end
 
-return Api
+---@type Project.API
+local M = setmetatable({}, {
+    __index = Api,
+
+    __newindex = function(_, _, _)
+        error('Project.API module is Read-Only!', ERROR)
+    end,
+})
+
+return M

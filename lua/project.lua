@@ -4,6 +4,8 @@ local Util = require('project.utils.util')
 
 local is_type = Util.is_type
 
+local ERROR = vim.log.levels.ERROR
+
 ---The `project` module.
 --- ---
 ---@class Project
@@ -72,4 +74,13 @@ function Project.get_config()
     return Config.setup_called and Config.options or nil
 end
 
-return Project
+---@type Project
+local M = setmetatable({}, {
+    __index = Project,
+
+    __newindex = function(_, _, _)
+        error('Project module is Read-Only!', ERROR)
+    end,
+})
+
+return M

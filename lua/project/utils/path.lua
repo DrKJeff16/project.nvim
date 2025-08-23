@@ -3,6 +3,7 @@ local Util = require('project.utils.util')
 local dir_exists = Util.dir_exists
 
 local uv = vim.uv or vim.loop
+local ERROR = vim.log.levels.ERROR
 
 ---@class Project.Utils.Path
 ---The directory where the project dir will be saved.
@@ -206,4 +207,13 @@ function Path.init()
     Path.historyfile = string.format('%s/project_history', Path.projectpath)
 end
 
-return Path
+---@type Project.Utils.Path
+local M = setmetatable({}, {
+    __index = Path,
+
+    __newindex = function(_, _, _)
+        error('Project.Utils.Path module is Read-Only!', ERROR)
+    end,
+})
+
+return M

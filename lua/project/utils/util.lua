@@ -220,4 +220,13 @@ function Util.normalise_path(path_to_normalise)
     return normalised_path
 end
 
-return Util
+---@type Project.Utils.Util
+local M = setmetatable({}, {
+    __index = Util,
+
+    __newindex = function(_, _, _)
+        error('Project.Utils.Util module is Read-Only!', ERROR)
+    end,
+})
+
+return M
