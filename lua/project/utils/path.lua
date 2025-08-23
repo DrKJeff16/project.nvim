@@ -111,17 +111,16 @@ end
 ---@return boolean
 function Path.match(dir, pattern)
     local SWITCH = {
-        { '=', Path.is },
-        { '^', Path.sub },
-        { '>', Path.child },
+        ['='] = Path.is,
+        ['^'] = Path.sub,
+        ['>'] = Path.child,
     }
 
     local first_char = pattern:sub(1, 1)
 
-    for _, case in next, SWITCH do
-        local char, func = case[1], case[2]
+    for char, case in next, SWITCH do
         if first_char == char then
-            return func(dir, pattern:sub(2))
+            return case(dir, pattern:sub(2))
         end
     end
 
@@ -144,7 +143,6 @@ end
 ---@return string|nil
 function Path.root_included(dir)
     local Config = require('project.config')
-    local search_dir = dir
 
     ---Breadth-First search
     while true do ---FIXME: This loop is dangerous, even if halting cond is supposedly known
@@ -155,22 +153,22 @@ function Path.root_included(dir)
                 excluded, pattern = true, pattern:sub(2)
             end
 
-            if Path.match(search_dir, pattern) then
+            if Path.match(dir, pattern) then
                 if not excluded then
-                    return search_dir, 'pattern ' .. pattern
+                    return dir, 'pattern ' .. pattern
                 end
 
                 break
             end
         end
 
-        local parent = Path.get_parent(search_dir)
+        local parent = Path.get_parent(dir)
 
-        if parent == nil or parent == search_dir then
+        if parent == nil or parent == dir then
             return nil
         end
 
-        search_dir = parent
+        dir = parent
     end
 end
 

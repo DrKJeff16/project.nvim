@@ -65,13 +65,12 @@ end
 ---@return boolean ok A boolean indicating whether the module exists or not
 function Util.mod_exists(mod)
     local is_type = Util.is_type
-    local ok = false
 
     if not is_type('string', mod) or mod == '' then
-        return ok
+        return false
     end
 
-    ok = pcall(require, mod)
+    local ok = pcall(require, mod)
 
     return ok
 end
