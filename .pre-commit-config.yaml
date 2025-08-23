@@ -9,6 +9,12 @@ repos:
     hooks:
       - id: remove-crlf
 
+  - repo: https://github.com/Calinou/pre-commit-luacheck
+    rev: v1.0.0
+    hooks:
+      - id: luacheck
+        verbose: true
+
   - repo: local
     hooks:
       - id: stylua
