@@ -136,18 +136,18 @@ function Api.verify_owner(dir)
     error(fmt("(%s.verify_owner): Directory can't be accessed!", MODSTR), ERROR)
 end
 
----@return string|nil dir
+---@return string|nil dir_res
 ---@return string|nil method
 function Api.find_pattern_root()
     local dir = fnamemodify(buf_name(curr_buf()), ':p:h')
-    local method = nil
 
     if is_windows() then
         dir = dir:gsub('\\', '/')
     end
 
-    dir, method = root_included(dir)
-    return dir, method
+    local dir_res, method = root_included(dir)
+
+    return dir_res, method
 end
 
 function Api.attach_to_lsp()

@@ -100,9 +100,8 @@ function Glob.globtopattern(g)
         elseif c == '^' or c == '!' then
             i = i + 1
             c = g:sub(i, i)
-            if c == ']' then
-            -- ignored
-            else
+
+            if c ~= ']' then
                 pattern = pattern .. '[^'
                 if not charset_end() then
                     return false

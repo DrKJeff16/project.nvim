@@ -1,5 +1,3 @@
-local fmt = string.format
-
 local Util = require('project.utils.util')
 local Glob = require('project.utils.globtopattern')
 

@@ -83,7 +83,8 @@ end
 ---@param identifier string
 ---@return boolean
 function Path.sub(dir, identifier)
-    local path_str, current = Path.get_parent(dir), ''
+    local path_str = Path.get_parent(dir)
+    local current
 
     ---FIXME: (DrKJeff16) This loop is dangerous, even if halting cond is supposedly known
     while true do
