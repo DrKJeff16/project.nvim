@@ -219,13 +219,15 @@ require('project').setup({
 <details>
 <summary><b><ins><code>setup()</code>comes with these defaults.</ins></b></summary>
 
+You can find these in [`config/defaults.lua`](./lua/project/config/defaults.lua).
+
 ```lua
 {
   ---If `true` your root directory won't be changed automatically,
   ---so you have the option to manually do so using `:ProjectRoot` command.
-  ------
+  --- ---
   ---Default: `false`
-  ------
+  --- ---
   ---@type boolean
   manual_mode = false,
 
@@ -235,9 +237,9 @@ require('project').setup({
   ---can also delete or rearrange the detection methods.
   ---
   ---The detection methods get filtered and rid of duplicates during runtime.
-  ------
+  --- ---
   ---Default: `{ 'lsp' , 'pattern' }`
-  ------
+  --- ---
   ---@type ("lsp"|"pattern")[]
   detection_methods = { 'lsp', 'pattern' },
 
@@ -245,9 +247,9 @@ require('project').setup({
   ---detection_methods.
   ---
   ---See `:h project-nvim.pattern-matching`
-  ------
+  --- ---
   ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile' }`
-  ------
+  --- ---
   ---@type string[]
   patterns = {
     '.git',
@@ -262,9 +264,9 @@ require('project').setup({
   ---Sets whether to use Pattern Matching rules on the LSP.
   ---
   ---If `false`, the Pattern Matching will only apply to the `pattern` detection method.
-  ------
+  --- ---
   ---Default: `true`
-  ------
+  --- ---
   ---@type boolean
   allow_patterns_for_lsp = true,
 
@@ -272,23 +274,23 @@ require('project').setup({
   ---
   ---If `false`, it won't add a project if its root is not owned by the
   ---current nvim `UID` **(UNIX only)**.
-  ------
+  --- ---
   ---Default: `true`
-  ------
+  --- ---
   ---@type boolean
   allow_different_owners = true,
 
   ---If enabled, set `vim.opt.autochdir` to `true`.
   ---
   ---This is disabled by default because the plugin implicitly disables `autochdir`.
-  ------
+  --- ---
   ---Default: `false`
-  ------
+  --- ---
   ---@type boolean
   enable_autochdir = false,
 
   ---Table of options used for the telescope picker.
-  ------
+  --- ---
   ---@class Project.Config.Options.Telescope
   telescope = {
     ---Determines whether the `telescope` picker should be called.
@@ -296,17 +298,17 @@ require('project').setup({
     ---If telescope is not installed, this doesn't make a difference.
     ---
     ---Note that even if set to `false`, you can still load the extension manually.
-    ------
+    --- ---
     ---Default: `true`
-    ------
+    --- ---
     ---@type boolean
     enabled = true,
 
     ---Determines whether the newest projects come first in the
     ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
-    ------
+    --- ---
     ---Default: `'newest'`
-    ------
+    --- ---
     ---@type 'oldest'|'newest'
     sort = 'newest',
 
@@ -316,16 +318,16 @@ require('project').setup({
     ---so that the Telescope picker uses it instead of the `find_files` builtin.
     ---
     ---In case it is not available, it'll fall back to `find_files`.
-    ------
+    --- ---
     ---Default: `false`
-    ------
+    --- ---
     ---@type boolean
     prefer_file_browser = false,
 
     ---Make hidden files visible when using the `telescope` picker.
-    ------
+    --- ---
     ---Default: `false`
-    ------
+    --- ---
     ---@type boolean
     show_hidden = false,
   },
@@ -335,9 +337,9 @@ require('project').setup({
   ---
   ---If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
   ---for a list of servers.
-  ------
+  --- ---
   ---Default: `{}`
-  ------
+  --- ---
   ---@type string[]|table
   ignore_lsp = {},
 
@@ -345,9 +347,9 @@ require('project').setup({
   ---e.g. `{ '~/.cargo/*', ... }`.
   ---
   ---See the `Pattern Matching` section in the `README.md` for more info.
-  ------
+  --- ---
   ---Default: `{}`
-  ------
+  --- ---
   ---@type string[]|table
   exclude_dirs = {},
 
@@ -356,9 +358,9 @@ require('project').setup({
   ---
   ---This is useful for debugging, or for players that
   ---enjoy verbose operations.
-  ------
+  --- ---
   ---Default: `true`
-  ------
+  --- ---
   ---@type boolean
   silent_chdir = true,
 
@@ -368,9 +370,9 @@ require('project').setup({
   --- - `'global'`: All your nvim `cwd` will sync to your current buffer's project
   --- - `'tab'`: _Per-tab_ `cwd` sync to the current buffer's project
   --- - `'win'`: _Per-window_ `cwd` sync to the current buffer's project
-  ------
+  --- ---
   ---Default: `'global'`
-  ------
+  --- ---
   ---@type 'global'|'tab'|'win'
   scope_chdir = 'global',
 
@@ -378,9 +380,9 @@ require('project').setup({
   ---containing the project history in it.
   ---
   ---For more info, run `:lua vim.print(require('project').get_history_paths())`
-  ------
+  --- ---
   ---Default: `vim.fn.stdpath('data')`
-  ------
+  --- ---
   ---@type string
   datapath = vim.fn.stdpath('data'),
 }
@@ -533,7 +535,7 @@ After that you can now call it from the command line:
 | r           | \<C-r\>     | `recent_project_files`     |
 | w           | \<C-w\>     | `change_working_directory` |
 
-_See more in [`lua/telescope/_extensions/projects/main.lua`](./lua/telescope/_extensions/projects/main.lua)_.
+_You can find the Actions in [`telescope/_extensions/projects/main.lua`](./lua/telescope/_extensions/projects/main.lua)_.
 
 <div align="right">
 

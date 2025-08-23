@@ -149,7 +149,9 @@ Table of Contents                                             *project-nvim.toc*
 ------------------------------------------------------------------------------
 3.1 `Project.Config.Options`                              *Project.Config.Options*
 
-  Fields ~
+    You can find the defaults in `project/config/defaults.lua`.
+
+    Fields ~
 
                                             *Project.Config.Options.manual_mode*
     * {manual_mode}             (boolean)
