@@ -92,7 +92,7 @@ function Api.find_lsp_root()
             goto continue
         end
 
-        if in_tbl(filetypes, ft) then
+        if in_tbl(filetypes, ft) and client.config.root_dir then
             dir, name = client.config.root_dir, client.name
 
             --- If pattern matching for LSP is disabled
