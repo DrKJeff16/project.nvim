@@ -11,9 +11,11 @@ body:
       label: Before we begin...
       description: "Make sure to read every checkbox and answer truthfully:"
       options:
+        - label: I am running on the latest version of `project.nvim`
+          required: true
         - label: I have checked for existing issues related to this one, whether open or closed
           required: true
-        - label: I have read the docs (`README.md`, etc.), and also the ones for `telescope.nvim`
+        - label: I have read the docs (`README.md`, `:h project-nvim`, etc.), and also the ones for `telescope.nvim`
           required: true
   - type: checkboxes
     attributes:
