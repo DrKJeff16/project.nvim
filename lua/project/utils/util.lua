@@ -10,10 +10,11 @@
 local fmt = string.format
 local uv = vim.uv or vim.loop
 
-local ERROR = vim.log.levels.ERROR
-
+local validate = vim.validate
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
+
+local ERROR = vim.log.levels.ERROR
 
 ---@class Project.Utils.Util
 local Util = {}
@@ -43,15 +44,21 @@ function Util.is_type(t, data)
         'userdata',
     }
 
-    if t == nil or not (type(t) == 'string' and in_tbl(TYPES, t)) then
-        return false
-    end
+    validate('t', t, function(v)
+        if v == nil or type(v) ~= 'string' then
+            return false
+        end
+
+        return in_tbl(TYPES, v)
+    end, false, "'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'")
+
+    validate('data', data, TYPES, true, 'any')
 
     return data ~= nil and type(data) == t
 end
 
 ---Checks if module `mod` exists to be imported.
---- ---
+---
 ---Example:
 ---
 ---```lua
@@ -64,6 +71,8 @@ end
 ---@param mod string The `require()` argument to be checked
 ---@return boolean ok A boolean indicating whether the module exists or not
 function Util.mod_exists(mod)
+    validate('mod', mod, 'string', false)
+
     local is_type = Util.is_type
 
     if not is_type('string', mod) or mod == '' then
@@ -85,9 +94,7 @@ end
 ---@param T table
 ---@return table t
 function Util.dedup(T)
-    if not Util.is_type('table', T) then
-        error('(project.utils.util.dedup): Data is not a table!', ERROR)
-    end
+    validate('T', T, 'table', false)
 
     local t = {}
 
@@ -172,11 +179,9 @@ end
 ---an error will be raised.
 --- ---
 ---@param T table
----@return table
+---@return table T
 function Util.reverse(T)
-    if not Util.is_type('table', T) then
-        error('project.utils.util.reverse: Arg is not a table', ERROR)
-    end
+    validate('T', T, 'table', false)
 
     if empty(T) then
         return T
@@ -199,19 +204,18 @@ end
 ---@param dir string
 ---@return boolean
 function Util.dir_exists(dir)
-    if not Util.is_type('string', dir) then
-        error('(project.utils.util.dir_exists): Argument is not a string', ERROR)
-    end
+    validate('dir', dir, 'string', false)
 
     local stat = uv.fs_stat(dir)
 
     return stat ~= nil and stat.type == 'directory'
 end
 
----@param path_to_normalise string
+---@param path string
 ---@return string normalised_path
-function Util.normalise_path(path_to_normalise)
-    local normalised_path = path_to_normalise:gsub('\\', '/'):gsub('//', '/')
+function Util.normalise_path(path)
+    validate('path', path, 'string', false)
+    local normalised_path = path:gsub('\\', '/'):gsub('//', '/')
 
     if Util.is_windows() then
         normalised_path = normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)
