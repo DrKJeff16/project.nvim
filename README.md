@@ -512,7 +512,7 @@ require('telescope').setup({
 After that you can now call it from the command line:
 
 ```vim
-" Vimscript
+" Vim command line
 :Telescope projects
 ```
 
@@ -535,7 +535,7 @@ After that you can now call it from the command line:
 | r           | \<C-r\>     | `recent_project_files`     |
 | w           | \<C-w\>     | `change_working_directory` |
 
-_You can find the Actions in [`telescope/_extensions/projects/main.lua`](./lua/telescope/_extensions/projects/main.lua)_.
+_You can find the Actions in [`telescope/_extensions/projects/actions.lua`](./lua/telescope/_extensions/projects/actions.lua)_.
 
 <div align="right">
 
@@ -558,9 +558,7 @@ subsequently `cd` to the current file's project directory
 The command does essentially the following:
 
 ```vim
-" vimscript
-
-" `:ProjectAdd` does the next line
+" Vim command line
 :lua require('project.api').add_project_manually()
 ```
 
@@ -581,9 +579,7 @@ set by the user.
 The command does essentially the following:
 
 ```vim
-" vimscript
-
-" `:ProjectRoot` does the next line
+" Vim command line
 :lua require('project.api').on_buf_enter()
 ```
 
@@ -616,9 +612,7 @@ using `vim.notify(inspect())`
 The command does essentially the following:
 
 ```vim
-" vimscript
-
-" `:ProjectConfig` does the next line
+" Vim command line
 :lua vim.notify(vim.inspect(require('project').get_config()))
 ```
 
@@ -639,13 +633,14 @@ The arguments can be relative, absolute or un-expanded (`~/path/to/project`). Th
 to parse the args.
 If there's a successful deletion, you'll recieve a notification through `vim.notify()`.
 
-_See [`:h :ProjectDelete`](https://github.com/DrKJeff16/project.nvim/blob/main/doc/project-nvim.txt#L557) for more info_.
+_See `:h :ProjectDelete` for more info_.
 
 - **Usage**
 
-  ```vim
-  :ProjectDelete /path/to/first [/path/to/second [...]]
-  ```
+```vim
+" Vim command line
+:ProjectDelete /path/to/first [/path/to/second [...]]
+```
 
 ---
 
@@ -799,6 +794,7 @@ If you're in a UNIX environment, make sure you have _**read, write and access pe
 You can get the value of `projectpath` by running the following in the cmdline:
 
 ```vim
+" Vim command line
 :lua vim.print(require('project').get_history_paths('projectpath'))
 ```
 
