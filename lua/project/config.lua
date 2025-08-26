@@ -7,9 +7,12 @@ local pattern_exclude = Glob.pattern_exclude
 
 local copy = vim.deepcopy
 local in_tbl = vim.tbl_contains
+local empty = vim.tbl_isempty
 
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
+
+local validate = vim.validate
 
 ---@class Project.Config
 ---@field setup_called? boolean
@@ -33,11 +36,11 @@ Config.options = {}
 ---the value will revert back to the default.
 --- ---
 function Config.verify_scope_chdir()
+    validate('scope_chdir', Config.options.scope_chdir, 'string', false, "'global'|'tab'|'win'")
+
     local VALID = { 'global', 'tab', 'win' }
 
-    if
-        is_type('string', Config.options.scope_chdir) and in_tbl(VALID, Config.options.scope_chdir)
-    then
+    if in_tbl(VALID, Config.options.scope_chdir) then
         return
     end
 
@@ -62,7 +65,9 @@ function Config.verify_methods()
         return
     end
 
-    if vim.tbl_isempty(Config.options.detection_methods) then
+    if empty(Config.options.detection_methods) and not vim.g.project_trigger_once then
+        vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
+        vim.g.project_trigger_once = true
         return
     end
 
@@ -84,15 +89,25 @@ function Config.verify_methods()
         if v == 'lsp' and not checker.lsp then
             table.insert(methods, v)
             checker.lsp = true
+
+            goto continue
         end
 
         --- If `'pattern'` is found and not duplicated
         if v == 'pattern' and not checker.pattern then
             table.insert(methods, v)
             checker.pattern = true
+
+            goto continue
         end
 
         ::continue::
+    end
+
+    if empty(methods) and not vim.g.project_trigger_once then
+        vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
+        vim.g.project_trigger_once = true
+        return
     end
 
     Config.options.detection_methods = methods
@@ -102,7 +117,9 @@ end
 --- ---
 ---@param options? Project.Config.Options
 function Config.setup(options)
-    options = is_type('table', options) and options or {}
+    validate('options', options, 'table', true, 'Project.Config.Options')
+
+    options = options or {}
 
     Config.options = vim.tbl_deep_extend('force', Config.get_defaults(), options)
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
