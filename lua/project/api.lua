@@ -524,11 +524,8 @@ function Api.init()
                 bang = true,
                 nargs = '+',
 
-                ---@param Arg string
-                ---@param Cmd string
-                ---@param Pos integer
                 ---@return string[]|table
-                complete = function(Arg, Cmd, Pos)
+                complete = function(_, _, _)
                     ---FIXME: Completions for User Commands are a pain to parse
 
                     return Api.get_recent_projects() or {}
