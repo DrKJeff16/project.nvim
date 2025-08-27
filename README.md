@@ -846,3 +846,5 @@ If you lack the required permissions for that directory, you can either:
 [Go To Top](#project-nvim)
 
 </div>
+
+<!--vim:ts=2:sts=2:sw=2:et:ai:si:sta:noci:nopi:-->
