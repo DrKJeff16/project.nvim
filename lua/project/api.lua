@@ -35,9 +35,8 @@ local autocmd = vim.api.nvim_create_autocmd
 local buf_name = vim.api.nvim_buf_get_name
 local fnamemodify = vim.fn.fnamemodify
 
----@class AutocmdTuple
----@field [1] string[]|string
----@field [2] vim.api.keyset.create_autocmd
+---@alias AutocmdTuple { [1]: string[]|string, [2]: vim.api.keyset.create_autocmd }
+---@alias ProjectCmd { name: string, cmd: fun(ctx?: vim.api.keyset.create_user_command.command_args), opts?: vim.api.keyset.user_command }
 
 ---@class Project.API
 local Api = {}
@@ -150,7 +149,7 @@ function Api.find_pattern_root()
     return dir_res, method
 end
 
-function Api.attach_to_lsp()
+function Api.gen_lsp_autocmd()
     local group = augroup('ProjectAttach', { clear = true })
     autocmd('LspAttach', {
         group = group,
@@ -422,7 +421,7 @@ function Api.init()
         })
 
         if in_tbl(detection_methods, 'lsp') then
-            Api.attach_to_lsp()
+            Api.gen_lsp_autocmd()
         end
     end
 
@@ -431,12 +430,7 @@ function Api.init()
         autocmd(events, au_tbl)
     end
 
-    ---@class ProjectCommandsList
-    ---@field name string
-    ---@field cmd fun(ctx?: vim.api.keyset.create_user_command.command_args)
-    ---@field opts? vim.api.keyset.user_command
-
-    ---@type ProjectCommandsList[]
+    ---@type ProjectCmd[]
     local commands = {
         --- `:ProjectRoot`
         {
@@ -537,7 +531,7 @@ function Api.init()
                 complete = function(Arg, Cmd, Pos)
                     ---FIXME: Completions for User Commands are a pain to parse
 
-                    return Api.get_recent_projects()
+                    return Api.get_recent_projects() or {}
                 end,
             },
         },

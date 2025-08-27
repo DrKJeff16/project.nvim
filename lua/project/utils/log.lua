@@ -24,7 +24,7 @@ local Log = {}
 ---@return fun(...: any): output: string?
 local function gen_log(lvl)
     return function(...)
-        if not require('project.utils.log').options.logging then
+        if not require('project.config').options.logging then
             return
         end
 
@@ -110,7 +110,7 @@ end
 ---@param lvl vim.log.levels
 ---@return string?
 function Log:write(data, lvl)
-    if not require('project.utils.log').options.logging then
+    if not require('project.config').options.logging then
         return
     end
 
@@ -162,7 +162,7 @@ Log.info = gen_log(INFO)
 Log.debug = gen_log(DEBUG)
 
 function Log.init()
-    local logging = require('project.utils.log').options.logging
+    local logging = require('project.config').options.logging
 
     if not logging or Log.logfile ~= nil then
         return
