@@ -1,9 +1,10 @@
+local fmt = string.format
+
 local Util = require('project.utils.util')
 
 local dir_exists = Util.dir_exists
 
 local uv = vim.uv or vim.loop
-local ERROR = vim.log.levels.ERROR
 
 ---@class Project.Utils.Path
 ---The directory where the project dir will be saved.
@@ -203,17 +204,10 @@ function Path.init()
     end
 
     Path.datapath = datapath
-    Path.projectpath = string.format('%s/project_nvim', Path.datapath)
-    Path.historyfile = string.format('%s/project_history', Path.projectpath)
+    Path.projectpath = fmt('%s/project_nvim', Path.datapath)
+    Path.historyfile = fmt('%s/project_history', Path.projectpath)
 end
 
----@type Project.Utils.Path
-local M = setmetatable({}, {
-    __index = Path,
+return Path
 
-    __newindex = function(_, _, _)
-        error('Project.Utils.Path module is Read-Only!', ERROR)
-    end,
-})
-
-return M
+---vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
