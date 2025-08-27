@@ -12,7 +12,8 @@ local DEFAULTS = {}
 DEFAULTS.logging = false
 
 ---If `true` your root directory won't be changed automatically,
----so you have the option to manually do so using `:ProjectRoot` command.
+---so you have the option to manually do so
+---using the `:ProjectRoot` command.
 --- ---
 ---Default: `false`
 --- ---

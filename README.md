@@ -39,9 +39,10 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 3. [Requirements](#requirements)
 4. [Installation](#installation)
 5. [Configuration](#configuration)
-    1. [Pattern Matching](#pattern-matching)
-    2. [Nvim Tree](#nvim-tree)
-    3. [Telescope](#telescope)
+    1. [Defaults](#defaults)
+    2. [Pattern Matching](#pattern-matching)
+    3. [Nvim Tree](#nvim-tree)
+    4. [Telescope](#telescope)
         1. [Telescope Mappings](#telescope-mappings)
 6. [Commands](#commands)
     1. [ProjectAdd](#projectadd)
@@ -50,10 +51,10 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
     4. [ProjectConfig](#projectconfig)
     5. [ProjectDelete](#projectdelete)
 7. [API](#api)
-  1. [`get_project_root()`](#get-project-root)
-  2. [`get_recent_projects()`](#get-recent-projects)
-  3. [`get_config()`](#get-config)
-  4. [`get_history_paths()`](#get-history-paths)
+    1. [`get_project_root()`](#get-project-root)
+    2. [`get_recent_projects()`](#get-recent-projects)
+    3. [`get_config()`](#get-config)
+    4. [`get_history_paths()`](#get-history-paths)
 8. [Utils](#utils)
 9. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
@@ -216,15 +217,34 @@ require('project').setup({
 })
 ```
 
+<div align="right">
+
+[Go To Top](#project-nvim)
+
+</div>
+
+---
+
+### Defaults
+
 <details>
 <summary><b><ins><code>setup()</code>comes with these defaults.</ins></b></summary>
 
-You can find these in [`config/defaults.lua`](./lua/project/config/defaults.lua).
+You can find these in [`project/config/defaults.lua`](./lua/project/config/defaults.lua).
 
 ```lua
 {
+  ---If `true`, it enables logging in `<project_datapath>/project.log`.
+  ---
+  ---WARNING: Experimental.
+  --- ---
+  ---Default: `false`
+  --- ---
+  logging = false,
+
   ---If `true` your root directory won't be changed automatically,
-  ---so you have the option to manually do so using `:ProjectRoot` command.
+  ---so you have the option to manually do so
+  ---using the `:ProjectRoot` command.
   --- ---
   ---Default: `false`
   --- ---
@@ -664,7 +684,7 @@ _See [_`api.lua`_](./lua/project/api.lua) for more info_.
 
 ## API
 
-The API can be found in [_'api.lua'_](./lua/project/api.lua).
+The API can be found in [_`api.lua`_](./lua/project/api.lua).
 
 <h3 id="get-project-root"><code>get_project_root()</code></h3>
 
