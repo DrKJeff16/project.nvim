@@ -3,11 +3,15 @@ local validate = vim.validate
 
 local uv = vim.uv or vim.loop
 
-local TRACE = vim.log.levels.TRACE -- `0`
-local DEBUG = vim.log.levels.DEBUG -- `1`
-local INFO = vim.log.levels.INFO -- `2`
-local WARN = vim.log.levels.WARN -- `3`
-local ERROR = vim.log.levels.ERROR -- `4`
+-- stylua: ignore start
+
+local TRACE = vim.log.levels.TRACE  -- `0`
+local DEBUG = vim.log.levels.DEBUG  -- `1`
+local INFO  = vim.log.levels.INFO   -- `2`
+local WARN  = vim.log.levels.WARN   -- `3`
+local ERROR = vim.log.levels.ERROR  -- `4`
+
+-- stylua: ignore end
 
 local LOG_PFX = '(project.nvim): '
 
@@ -18,6 +22,7 @@ local is_type = Util.is_type
 
 ---@class Project.Log
 ---@field logfile? string
+---@field log_loc? { bufnr: integer, win: integer, tab: integer }|nil
 local Log = {}
 
 ---@param lvl vim.log.levels
@@ -176,6 +181,55 @@ function Log.init()
     Log.logfile = Path.projectpath .. '/project.log'
     local fd = Log:open('a')
     uv.fs_write(fd, fmt('\n\n'))
+
+    vim.api.nvim_create_user_command(
+        'ProjectLog',
+        Log.open_win,
+        { desc = 'Opens the `project.nvim` log in a new tab' }
+    )
+end
+
+function Log.open_win()
+    local logging = require('project.config').options.logging
+
+    if not (Log.logfile and logging) then
+        return
+    end
+
+    if not Path.exists(Log.logfile) then
+        error('(project.utils.log.open_win): Bad logfile path!', ERROR)
+    end
+
+    if Log.log_loc ~= nil then
+        return
+    end
+
+    vim.cmd.tabedit(Log.logfile)
+
+    Log.log_loc = {
+        bufnr = vim.api.nvim_get_current_buf(),
+        win = vim.api.nvim_get_current_win(),
+        btab = vim.api.nvim_get_current_tabpage(),
+    }
+
+    local opts = { scope = 'local' }
+
+    vim.api.nvim_set_option_value('signcolumn', 'no', opts)
+    vim.api.nvim_set_option_value('number', false, opts)
+    vim.api.nvim_set_option_value('wrap', true, opts)
+    vim.api.nvim_set_option_value('filetype', '', opts)
+    vim.api.nvim_set_option_value('modifiable', false, opts)
+
+    vim.keymap.set('n', 'q', function()
+        local tab = vim.api.nvim_get_current_tabpage()
+        vim.cmd.bdelete({ bang = true })
+
+        if vim.api.nvim_get_current_tabpage() == tab then
+            vim.cmd.tabclose({ bang = true })
+        end
+
+        Log.log_loc = nil
+    end, { noremap = false, buffer = Log.log_loc.bufnr, silent = true })
 end
 
 ---@type Project.Log|fun(...: any)
