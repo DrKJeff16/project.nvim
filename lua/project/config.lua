@@ -132,9 +132,11 @@ function Config.setup(options)
 
     require('project.utils.path').init()
     require('project.api').init()
-
     local Log = require('project.utils.log')
-    Log.init()
+
+    if Config.options.logging then
+        Log.init()
+    end
 
     ---Load `projects` Telescope picker if condition passes
     if Config.options.telescope.enabled and mod_exists('telescope') then

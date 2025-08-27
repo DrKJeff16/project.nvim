@@ -24,6 +24,10 @@ local Log = {}
 ---@return fun(...: any): output: string?
 local function gen_log(lvl)
     return function(...)
+        if not require('project.utils.log').options.logging then
+            return
+        end
+
         local msg = LOG_PFX
 
         for i = 1, select('#', ...) do
@@ -31,9 +35,11 @@ local function gen_log(lvl)
 
             if sel == nil then
                 goto continue
-            elseif is_type('number', sel) or is_type('boolean') then
+            end
+
+            if is_type('number', sel) or is_type('boolean', sel) then
                 sel = tostring(sel)
-            else
+            elseif not is_type('string', sel) then
                 sel = vim.inspect(sel)
             end
 
@@ -104,6 +110,10 @@ end
 ---@param lvl vim.log.levels
 ---@return string?
 function Log:write(data, lvl)
+    if not require('project.utils.log').options.logging then
+        return
+    end
+
     local fd = self:open('a')
 
     if fd == nil then
@@ -152,7 +162,9 @@ Log.info = gen_log(INFO)
 Log.debug = gen_log(DEBUG)
 
 function Log.init()
-    if Log.logfile ~= nil then
+    local logging = require('project.utils.log').options.logging
+
+    if not logging or Log.logfile ~= nil then
         return
     end
 
@@ -176,10 +188,6 @@ local M = setmetatable({}, {
         validate('lvl', lvl, 'number', true, 'vim.log.levels')
 
         lvl = lvl ~= nil and math.floor(lvl) or INFO
-
-        if not Log.logfile then
-            Log.init()
-        end
 
         -- stylua: ignore start
         local select = {

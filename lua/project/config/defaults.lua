@@ -3,6 +3,14 @@
 ---@class Project.Config.Options
 local DEFAULTS = {}
 
+---If `true`, it enables logging in `<project_datapath>/project.log`.
+---
+---WARNING: Experimental.
+--- ---
+---Default: `false`
+--- ---
+DEFAULTS.logging = false
+
 ---If `true` your root directory won't be changed automatically,
 ---so you have the option to manually do so using `:ProjectRoot` command.
 --- ---
