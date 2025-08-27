@@ -1,4 +1,4 @@
-name: Lint Lua Code
+name: Selene Lint
 
 on: [push, pull_request]
 
@@ -19,10 +19,10 @@ jobs:
           # working-directory: '.'
 
           # Optional: File or directory to lint, relative to working-directory. Defaults to '.' (all files).
-          lint-path: 'lua/'
+          lint-path: '.'
 
           # Optional: Additional arguments for Selene CLI.
-          selene-args: '--display-style quiet'
+          # selene-args: '--display-style quiet'
 
           # Optional: Fail the action if Selene reports warnings. Defaults to 'false'.
           fail-on-warnings: 'false'
