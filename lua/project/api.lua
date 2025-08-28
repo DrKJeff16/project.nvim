@@ -344,6 +344,10 @@ function Api.on_buf_enter(verbose, bufnr)
     verbose = is_type('boolean', verbose) and verbose or false
     bufnr = is_type('number', bufnr) and bufnr or curr_buf()
 
+    if not Api.buf_is_file(bufnr) then
+        return
+    end
+
     local dir = fnamemodify(buf_name(bufnr), ':p:h')
 
     if not (exists(dir) and root_included(dir)) or is_excluded(dir) then
