@@ -128,17 +128,11 @@ function Health.history_check()
 
         if stat == nil then
             h_error(fmt('%s: `%s` is missing or not readable!', fname, path))
-            goto continue
-        end
-
-        if stat.type ~= ftype then
+        elseif stat.type ~= ftype then
             h_error(fmt('%s: `%s` is not of type `%s`!', fname, path, ftype))
-            goto continue
+        else
+            ok(fmt('%s: `%s`', fname, path))
         end
-
-        ok(fmt('%s: `%s`', fname, path))
-
-        ::continue::
     end
 end
 

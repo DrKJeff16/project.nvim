@@ -26,6 +26,7 @@ local root_included = Path.root_included
 
 local uv = vim.uv or vim.loop
 
+local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
 local curr_buf = vim.api.nvim_get_current_buf
 local copy = vim.deepcopy
@@ -73,41 +74,34 @@ function Api.find_lsp_root()
     local name = nil
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
-    if vim.tbl_isempty(clients) then
+    if empty(clients) then
         return dir, name
     end
 
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
 
     for _, client in next, clients do
-        if in_tbl(Config.options.ignore_lsp, client.name) then
-            goto continue
-        end
-
         ---@type table|string[]
         local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
+        local valid = is_type('table', filetypes) and not empty(filetypes)
 
-        if not is_type('table', filetypes) or vim.tbl_isempty(filetypes) then
-            goto continue
-        end
+        if not in_tbl(Config.options.ignore_lsp, client.name) and valid then
+            if in_tbl(filetypes, ft) and client.config.root_dir then
+                dir, name = client.config.root_dir, client.name
 
-        if in_tbl(filetypes, ft) and client.config.root_dir then
-            dir, name = client.config.root_dir, client.name
+                --- If pattern matching for LSP is disabled
+                if not allow_patterns then
+                    break
+                end
 
-            --- If pattern matching for LSP is disabled
-            if not allow_patterns then
+                --- If pattern matching for LSP is enabled, check patterns
+                if root_included(client.config.root_dir) == nil then
+                    dir, name = nil, nil
+                end
+
                 break
             end
-
-            --- If pattern matching for LSP is enabled, check patterns
-            if root_included(client.config.root_dir) == nil then
-                dir, name = nil, nil
-            end
-
-            break
         end
-
-        ::continue::
     end
 
     return dir, name
@@ -177,7 +171,7 @@ function Api.set_pwd(dir, method)
     ---@type string
     local msg = fmt('(%s.set_pwd):', MODSTR)
 
-    if vim.tbl_isempty(History.session_projects) then
+    if empty(History.session_projects) then
         History.session_projects = { dir }
     elseif not in_tbl(History.session_projects, dir) then
         table.insert(History.session_projects, dir)
@@ -280,17 +274,13 @@ function Api.get_project_root()
     }
 
     for _, detection_method in next, Config.options.detection_methods do
-        if not in_tbl(VALID, detection_method) then
-            goto continue
+        if in_tbl(VALID, detection_method) then
+            local success, root, lsp_method = SWITCH[detection_method]()
+
+            if success then
+                return root, lsp_method
+            end
         end
-
-        local success, root, lsp_method = SWITCH[detection_method]()
-
-        if success then
-            return root, lsp_method
-        end
-
-        ::continue::
     end
 
     return nil, nil

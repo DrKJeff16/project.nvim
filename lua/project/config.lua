@@ -81,27 +81,19 @@ function Config.verify_methods()
             break
         end
 
-        if not is_type('string', v) then
-            goto continue
+        if is_type('string', v) then
+            --- If `'lsp'` is found and not duplicated
+            if v == 'lsp' and not checker.lsp then
+                table.insert(methods, v)
+                checker.lsp = true
+            end
+
+            --- If `'pattern'` is found and not duplicated
+            if v == 'pattern' and not checker.pattern then
+                table.insert(methods, v)
+                checker.pattern = true
+            end
         end
-
-        --- If `'lsp'` is found and not duplicated
-        if v == 'lsp' and not checker.lsp then
-            table.insert(methods, v)
-            checker.lsp = true
-
-            goto continue
-        end
-
-        --- If `'pattern'` is found and not duplicated
-        if v == 'pattern' and not checker.pattern then
-            table.insert(methods, v)
-            checker.pattern = true
-
-            goto continue
-        end
-
-        ::continue::
     end
 
     if empty(methods) and not vim.g.project_trigger_once then

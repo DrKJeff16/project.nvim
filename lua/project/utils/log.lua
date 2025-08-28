@@ -38,19 +38,15 @@ local function gen_log(lvl)
         for i = 1, select('#', ...) do
             local sel = select(i, ...)
 
-            if sel == nil then
-                goto continue
+            if sel ~= nil then
+                if is_type('number', sel) or is_type('boolean', sel) then
+                    sel = tostring(sel)
+                elseif not is_type('string', sel) then
+                    sel = vim.inspect(sel)
+                end
+
+                msg = fmt('%s %s', msg, sel)
             end
-
-            if is_type('number', sel) or is_type('boolean', sel) then
-                sel = tostring(sel)
-            elseif not is_type('string', sel) then
-                sel = vim.inspect(sel)
-            end
-
-            msg = fmt('%s %s', msg, sel)
-
-            ::continue::
         end
 
         local output = Log:write(fmt('%s\n', msg), lvl)
