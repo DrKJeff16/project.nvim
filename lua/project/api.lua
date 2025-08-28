@@ -67,11 +67,8 @@ function Api.find_lsp_root()
     local bufnr = curr_buf()
     local allow_patterns = Config.options.allow_patterns_for_lsp
 
-    ---@type string|nil
-    local dir = nil
-
-    ---@type string|nil
-    local name = nil
+    ---@type string|nil, string|nil
+    local dir, name = nil, nil
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
     if empty(clients) then
@@ -190,6 +187,10 @@ function Api.set_pwd(dir, method)
         table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
     end
 
+    if vim.fn.getcwd(0, 0) == Api.current_project then
+        return false
+    end
+
     local scope_chdir = Config.options.scope_chdir
     local ok = true
 
@@ -212,9 +213,10 @@ function Api.set_pwd(dir, method)
     msg = fmt('%s %s', msg, (ok and 'SUCCESS' or 'FAILED'))
 
     if verbose then
-        notify(fmt('(%s.set_pwd): Set CWD to %s using %s', MODSTR, dir, method), INFO)
-
-        notify(msg, ok and INFO or WARN)
+        vim.schedule(function()
+            notify(fmt('(%s.set_pwd): Set CWD to %s using %s', MODSTR, dir, method), INFO)
+            notify(msg, ok and INFO or WARN)
+        end)
     end
 
     return true
@@ -342,10 +344,6 @@ function Api.on_buf_enter(verbose, bufnr)
     verbose = is_type('boolean', verbose) and verbose or false
     bufnr = is_type('number', bufnr) and bufnr or curr_buf()
 
-    if not Api.buf_is_file(bufnr) then
-        return
-    end
-
     local dir = fnamemodify(buf_name(bufnr), ':p:h')
 
     if not (exists(dir) and root_included(dir)) or is_excluded(dir) then
@@ -354,14 +352,14 @@ function Api.on_buf_enter(verbose, bufnr)
 
     Api.current_project, Api.current_method, Api.last_project = Api.get_current_project()
 
-    if verbose then
+    local changed = Api.set_pwd(Api.current_project, Api.current_method)
+
+    if verbose and changed then
         notify(
             fmt('Root: %s\nMethod: %s', Api.current_project or 'NONE', Api.current_method or 'NONE'),
             INFO
         )
     end
-
-    Api.set_pwd(Api.current_project, Api.current_method)
 
     History.write_history()
 end
