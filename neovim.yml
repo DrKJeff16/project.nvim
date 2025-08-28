@@ -1,8 +1,6 @@
 ---
 base: lua51
 name: neovim
-lua_versions:
-  - luajit
 
 globals:
   _:
