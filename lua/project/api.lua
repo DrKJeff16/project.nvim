@@ -289,6 +289,9 @@ end
 ---@return string|nil last
 function Api.get_last_project()
     local recent = Api.get_recent_projects()
+    if empty(recent) then
+        return nil
+    end
 
     ---@type string|nil
     local last = nil
