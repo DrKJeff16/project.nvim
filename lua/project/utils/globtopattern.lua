@@ -1,5 +1,3 @@
-local ERROR = vim.log.levels.ERROR
-
 ---Credits for this module goes to: David Manura:
 ---https://github.com/davidm/lua-glob-pattern
 --- ---
@@ -164,15 +162,6 @@ function Glob.pattern_exclude(pattern)
     return pattern
 end
 
----@type Project.Utils.Glob
-local M = setmetatable({}, {
-    __index = Glob,
-
-    __newindex = function(_, _, _)
-        error('Project.Utils.Glob module is Read-Only!', ERROR)
-    end,
-})
-
-return M
+return Glob
 
 ---vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:

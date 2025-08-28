@@ -534,15 +534,6 @@ function Api.init()
     History.read_history()
 end
 
----@type Project.API
-local M = setmetatable({}, {
-    __index = Api,
-
-    __newindex = function(_, _, _)
-        error('Project.API module is Read-Only!', ERROR)
-    end,
-})
-
-return M
+return Api
 
 ---vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:

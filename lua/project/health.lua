@@ -1,8 +1,6 @@
 local fmt = string.format
 local uv = vim.uv or vim.loop
 
-local ERROR = vim.log.levels.ERROR
-
 ---@class HistoryCheck
 ---@field name string
 ---@field type 'file'|'directory'
@@ -242,15 +240,6 @@ function Health.check()
     Health.recent_proj_check()
 end
 
----@type Project.Health
-local M = setmetatable({}, {
-    __index = Health,
-
-    __newindex = function(_, _, _)
-        error('Project.Health module is Read-Only!', ERROR)
-    end,
-})
-
-return M
+return Health
 
 ---vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:

@@ -1,4 +1,5 @@
 local fmt = string.format
+local validate = vim.validate
 
 local Util = require('project.utils.util')
 
@@ -145,6 +146,8 @@ end
 ---@return string|nil
 ---@return string|nil
 function Path.root_included(dir)
+    validate('dir', dir, 'string', false)
+
     local Config = require('project.config')
 
     ---Breadth-First search

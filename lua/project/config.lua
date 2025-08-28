@@ -10,7 +10,6 @@ local in_tbl = vim.tbl_contains
 local empty = vim.tbl_isempty
 
 local WARN = vim.log.levels.WARN
-local ERROR = vim.log.levels.ERROR
 
 local validate = vim.validate
 
@@ -140,15 +139,6 @@ function Config.setup(options)
     Log.debug('`Config.setup_called` set to `true`')
 end
 
----@type Project.Config
-local M = setmetatable({}, {
-    __index = Config,
-
-    __newindex = function(_, _, _)
-        error('Project.Config module is Read-Only!', ERROR)
-    end,
-})
-
-return M
+return Config
 
 ---vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:

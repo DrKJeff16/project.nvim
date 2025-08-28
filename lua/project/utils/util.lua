@@ -14,8 +14,6 @@ local validate = vim.validate
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
 
-local ERROR = vim.log.levels.ERROR
-
 ---@class Project.Utils.Util
 local Util = {}
 
@@ -224,15 +222,6 @@ function Util.normalise_path(path)
     return normalised_path
 end
 
----@type Project.Utils.Util
-local M = setmetatable({}, {
-    __index = Util,
-
-    __newindex = function(_, _, _)
-        error('Project.Utils.Util module is Read-Only!', ERROR)
-    end,
-})
-
-return M
+return Util
 
 ---vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
