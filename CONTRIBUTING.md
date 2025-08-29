@@ -83,7 +83,7 @@ Let's say you create a new submodule `lua/project_nvim/foo.lua`. If said module 
 with fields, the optimal way to document is to do it **in the same file**, and following this format:
 
 ```lua
--- A table that contains `foo`
+---A table that contains `foo`.
 ---@class Project.Foo
 local Foo = {}
 
