@@ -42,6 +42,7 @@ function Util.is_type(t, data)
         'userdata',
     }
 
+    validate('data', data, TYPES, true, 'any')
     validate('t', t, function(v)
         if v == nil or type(v) ~= 'string' then
             return false
@@ -49,8 +50,6 @@ function Util.is_type(t, data)
 
         return in_tbl(TYPES, v)
     end, false, "'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'")
-
-    validate('data', data, TYPES, true, 'any')
 
     return data ~= nil and type(data) == t
 end
@@ -67,19 +66,119 @@ end
 ---
 --- ---
 ---@param mod string The `require()` argument to be checked
----@return boolean ok A boolean indicating whether the module exists or not
+---@return boolean exists A boolean indicating whether the module exists or not
 function Util.mod_exists(mod)
     validate('mod', mod, 'string', false)
 
-    local is_type = Util.is_type
-
-    if not is_type('string', mod) or mod == '' then
+    if mod == '' then
         return false
     end
 
-    local ok = pcall(require, mod)
+    local exists = pcall(require, mod)
+    return exists
+end
 
-    return ok
+---Left strip a given leading `char` in a string, if any.
+--- ---
+---@param char string
+---@param str string
+---@return string new_str
+function Util.lstrip(char, str)
+    validate('char', char, function(v)
+        if v == nil or type(v) ~= 'string' then
+            return false
+        end
+
+        return v ~= ''
+    end, false, 'char')
+    validate('str', str, 'string', false)
+
+    if str == '' then
+        return str
+    end
+
+    local i, len, new_str = 1, str:len(), ''
+    local other = false
+
+    while i <= len + 1 do
+        if str:sub(i, i) ~= char and not other then
+            other = true
+        end
+
+        if other then
+            new_str = fmt('%s%s', new_str, str:sub(i, i))
+        end
+
+        i = i + 1
+    end
+
+    return new_str
+end
+
+---Right strip a given leading `char` in a string, if any.
+--- ---
+---@param char string
+---@param str string
+---@return string new_str
+function Util.rstrip(char, str)
+    validate('char', char, function(v)
+        if v == nil or type(v) ~= 'string' then
+            return false
+        end
+
+        return v ~= ''
+    end, false, 'char')
+    validate('str', str, 'string', false)
+
+    if str == '' then
+        return str
+    end
+
+    str = string.reverse(str)
+
+    local i, len, new_str = 1, str:len(), ''
+    local other = false
+
+    while i <= len + 1 do
+        if str:sub(i, i) ~= char and not other then
+            other = true
+        end
+
+        if other then
+            new_str = fmt('%s%s', new_str, str:sub(i, i))
+        end
+
+        i = i + 1
+    end
+
+    new_str = string.reverse(new_str)
+
+    return new_str
+end
+
+---Strip a given leading `char` in a string, if any, bidirectionally.
+--- ---
+---@param char string
+---@param str string
+---@return string new_str
+function Util.strip(char, str)
+    validate('char', char, function(v)
+        if v == nil or type(v) ~= 'string' then
+            return false
+        end
+
+        return v ~= ''
+    end, false, 'char')
+    validate('str', str, 'string', false)
+
+    if str == '' then
+        return str
+    end
+
+    local new_str = Util.lstrip(char, str)
+    new_str = Util.rstrip(char, new_str)
+
+    return new_str
 end
 
 ---Get rid of all duplicates in input table.
@@ -94,11 +193,11 @@ end
 function Util.dedup(T)
     validate('T', T, 'table', false)
 
-    local t = {}
-
     if empty(T) then
-        return t
+        return T
     end
+
+    local t = {}
 
     for _, v in next, T do
         if not in_tbl(t, v) then
@@ -109,17 +208,34 @@ function Util.dedup(T)
     return t
 end
 
----@param t 'number'|'string'|'boolean'|'table'
----@param data number|string|boolean|table
+---@param t 'number'|'string'|'boolean'|'table'|'function'
+---@param data nil|number|string|boolean|table|fun()
 ---@param sep? string
 ---@param constraints? string[]
 ---@return string
 ---@return boolean?
 function Util.format_per_type(t, data, sep, constraints)
+    validate('t', t, function(v)
+        if v == nil or type(v) ~= 'string' then
+            return false
+        end
+
+        return in_tbl({ 'number', 'string', 'boolean', 'table', 'function' }, v)
+    end, false, "'number'|'string'|'boolean'|'table'|'function'")
+    validate(
+        'data',
+        data,
+        { 'number', 'string', 'boolean', 'table', 'function' },
+        true,
+        'nil|number|string|boolean|table|fun()'
+    )
+    validate('sep', sep, 'string', true)
+    validate('constraints', constraints, 'table', true, 'string[]')
+
     local is_type = Util.is_type
 
-    sep = is_type('string', sep) and sep or ''
-    constraints = is_type('table', constraints) and constraints or nil
+    sep = sep or ''
+    constraints = constraints or nil
 
     if t == 'string' then
         local res = fmt('%s`"%s"`', sep, data)
@@ -127,7 +243,7 @@ function Util.format_per_type(t, data, sep, constraints)
             return res
         end
 
-        if is_type('table', constraints) and in_tbl(constraints, data) then
+        if constraints ~= nil and in_tbl(constraints, data) then
             return res
         end
 
@@ -136,6 +252,10 @@ function Util.format_per_type(t, data, sep, constraints)
 
     if t == 'number' or t == 'boolean' then
         return fmt('%s`%s`', sep, tostring(data))
+    end
+
+    if t == 'function' then
+        return fmt('%s`%s`', sep, t)
     end
 
     local msg = ''
@@ -148,7 +268,7 @@ function Util.format_per_type(t, data, sep, constraints)
         return fmt('%s%s `?`', sep, msg)
     end
 
-    if vim.tbl_isempty(data) then
+    if empty(data) then
         return fmt('%s%s `{}`', sep, msg)
     end
 
@@ -213,6 +333,7 @@ end
 ---@return string normalised_path
 function Util.normalise_path(path)
     validate('path', path, 'string', false)
+
     local normalised_path = path:gsub('\\', '/'):gsub('//', '/')
 
     if Util.is_windows() then
