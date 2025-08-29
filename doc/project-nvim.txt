@@ -517,7 +517,7 @@ Table of Contents                                             *project-nvim.toc*
     Useful for debugging.
 
 
-                                                                *:ProjectDelete*
+                                                 *ProjectDelete*  *:ProjectDelete*
 `:ProjectDelete[!] /path/to/first [/path/to/second [...]]`
 
 
