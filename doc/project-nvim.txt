@@ -148,8 +148,9 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 3.1 `Project.Config.Options`                              *Project.Config.Options*
+                                                    *project-nvim.setup-options*
 
-    You can find the defaults in `project/config/defaults.lua`.
+    These are the options passed to `setup()`.
 
     Fields ~
 
@@ -394,7 +395,7 @@ Table of Contents                                             *project-nvim.toc*
 ==============================================================================
 5. Nvim Tree                                            *project-nvim.nvim-tree*
 
-    Make sure these flags are enabled to support `nvim-tree.lua`:
+    Make sure these flags are enabled to support `nvim-tree`:
 
 >lua
         require('nvim-tree').setup({
@@ -472,7 +473,6 @@ Table of Contents                                             *project-nvim.toc*
         `r`             `<C-r>`         `recent_project_files()`
         `w`             `<C-w>`         `change_working_directory()`
 
-    All the actions can be found in `project/telescope/actions.lua`.
 
 ==============================================================================
 7. Commands                                              *project-nvim.commands*
@@ -500,8 +500,6 @@ Table of Contents                                             *project-nvim.toc*
         :lua require('project.api').add_project_manually()
 <
 
-    See `api.lua` for more info on `add_project_manually()`
-
 
                                                                   *:ProjectRoot*
 `:ProjectRoot`
@@ -522,8 +520,6 @@ Table of Contents                                             *project-nvim.toc*
         :lua require('project.api').on_buf_enter()
 <
 
-    See `api.lua` for more info on `on_buf_enter()`.
-
 
                                                                *:ProjectRecents*
 `:ProjectRecents`
@@ -532,8 +528,6 @@ Table of Contents                                             *project-nvim.toc*
 
     The `:ProjectRecents` command is a hook to print a formatted list
     of your recent projects using |vim.notify()|.
-
-    See `api.lua` for more info.
 
 
                                                                 *:ProjectConfig*
@@ -553,11 +547,9 @@ Table of Contents                                             *project-nvim.toc*
         :lua vim.notify(vim.inspect(require('project').get_config()))
 <
 
-    See `api.lua` for more info.
-
 
                                                                 *:ProjectDelete*
-`:ProjectDelete /path/to/first [/path/to/second [...]]`
+`:ProjectDelete[!] /path/to/first [/path/to/second [...]]`
 
     Descrpition ~
 
@@ -573,8 +565,6 @@ Table of Contents                                             *project-nvim.toc*
 
     It also features some barebones completion, but I'd like some help
     with how to do the completion parsing.
-
-    See `api.lua` for more info.
 
 
 ==============================================================================
