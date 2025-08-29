@@ -295,6 +295,8 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 3.2 `Project.Config.Telescope`                          *Project.Config.Telescope*
+                                                 *project-nvim.telescope-config*
+
 
     Fields ~
 
