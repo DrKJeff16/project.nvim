@@ -346,46 +346,43 @@ Table of Contents                                             *project-nvim.toc*
 
     Examples ~
 
-    For your convenience here come some examples:
-
-
-    - To specify the root is a certain directory, prefix it with `=`
+    To specify the root is a certain directory, prefix it with `=`
 
 >lua
-    ---Lua
-    patterns = { '=src' }
+        patterns = { '=src' }
 <
 
-    - To specify the root has a certain directory or file
+    To specify the root has a certain directory or file
       (which may be a glob), just add it to the pattern list
 
 >lua
-    ---Lua
-    patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
+        patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
 <
 
-    - To specify the root has a certain directory as an ancestor
+    To specify the root has a certain directory as an ancestor
       (for excluding directories), prefix it with `^`
 
 >lua
-    ---Lua
-    patterns = { '^fixtures' }
+        patterns = { '^fixtures' }
 <
 
-    - To specify the root has a certain directory as its direct
+    To specify the root has a certain directory as its direct
       ancestor / parent (for putting working projects in a
       common directory), prefix it with `>`
 
 >lua
-    ---Lua
-    patterns = { '>Latex' }
+        patterns = { '>Latex' }
 <
 
-    - To exclude a pattern, prefix it with `!`
+    To exclude a pattern, prefix it with `!`
 
 >lua
-    ---Lua
-    patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
+        patterns = {
+            '!.git/worktrees',
+            '!=extras',
+            '!^fixtures',
+            '!build/env.sh',
+        }
 <
 
             NOTE: Make sure to put your pattern exclusions first, ~
@@ -431,6 +428,9 @@ Table of Contents                                             *project-nvim.toc*
         require('telescope').load_extension('projects')
 <
 
+    from within the init process.
+
+
     Example ~
 
 >lua
@@ -456,14 +456,14 @@ Table of Contents                                             *project-nvim.toc*
     After that you can now call it from the command line:
 
 >vim
-        " Vimscript
         :Telescope projects
 <
 
 ------------------------------------------------------------------------------
 6.1 Telescope Mappings                         *project-nvim.telescope.mappings*
 
-    `project.nvim` comes with the following mappings for Telescope:
+    `project.nvim` comes with the following mappings for the
+    Telescope picker:
 
         Normal mode   Insert mode   Action                          ~
         `f`             `<C-f>`         `find_project_files()`
@@ -481,7 +481,7 @@ Table of Contents                                             *project-nvim.toc*
     Some of them might be incomplete and/or reworked in the future.
 
 
-                                                                   *:ProjectAdd*
+                                                       *ProjectAdd*  *:ProjectAdd*
 `:ProjectAdd`
 
     Description ~
@@ -491,80 +491,77 @@ Table of Contents                                             *project-nvim.toc*
     then subsequently `cd` to the current file's
     project directory.
 
-    The command does essentially the following:
+    The command does essentially the following in the command line:
 
 >vim
-        " vimscript
-
-        " `:ProjectAdd` does the next line
         :lua require('project.api').add_project_manually()
 <
 
-
-                                                                  *:ProjectRoot*
-`:ProjectRoot`
-
-    Descrpition ~
-
-    This command is a manual hook to set the current working directory
-    to the current file's root, attempting to use any of the
-    detection methods (|Project.Config.Options.detection_methods|)
-    set by the user.
-
-    The command does essentially the following:
-
->vim
-        " vimscript
-
-        " `:ProjectRoot` does the next line
-        :lua require('project.api').on_buf_enter()
-<
+    This is particularly useful if you've enabled {manual_mode}
+    it `setup()` (|project-nvim.setup-options|).
 
 
-                                                               *:ProjectRecents*
-`:ProjectRecents`
-
-    Descrpition ~
-
-    The `:ProjectRecents` command is a hook to print a formatted list
-    of your recent projects using |vim.notify()|.
-
-
-                                                                *:ProjectConfig*
+                                                 *ProjectConfig*  *:ProjectConfig*
 `:ProjectConfig`
 
-    Descrpition ~
 
     The `:ProjectConfig` command is a hook to display your current config
-    using `vim.notify(vim.inspect(...))`.
+    through |project-nvim.get_config()|.
 
-    The command does essentially the following:
+    The command does essentially the following in the command line:
 
 >vim
-        " vimscript
-
-        " `:ProjectConfig` does the next line
         :lua vim.notify(vim.inspect(require('project').get_config()))
 <
+
+    Useful for debugging.
 
 
                                                                 *:ProjectDelete*
 `:ProjectDelete[!] /path/to/first [/path/to/second [...]]`
 
-    Descrpition ~
 
     The `:ProjectDelete` command is one that needs at least one argument,
     and only accepts directories separated by a space.
-    The arguments have to be directories that exist in the result of
-    |project-nvim.get_recent_projects()|.
+    The arguments have to be directories that exist in the resulting
+    table returned by |project-nvim.get_recent_projects()|.
+    It also has barebones completion, though I'd like some help with
+    how to do the completion parsing down the line.
 
     The arguments can be relative, absolute or un-expanded (`~/...`).
-    The command will attempt to parse the args.
-    If there's a successful deletion, you'll receive a notification
-    through |vim.notify()|.
+    The command will attempt to parse the args. If the [!] is given
+    the command won't abort on invalid arguments.
+    If there's any successful deletion you'll receive a notification
+    through |vim.notify()| (invalid args with [!] are not
+    included).
 
-    It also features some barebones completion, but I'd like some help
-    with how to do the completion parsing.
+
+                                               *ProjectRecents*  *:ProjectRecents*
+`:ProjectRecents`
+
+
+    The `:ProjectRecents` command is a hook to print a formatted list
+    of your recent projects using |vim.notify()|.
+
+
+                                                     *ProjectRoot*  *:ProjectRoot*
+`:ProjectRoot`
+
+
+    The `:ProjectRoot` command is a manual hook to set the
+    current working directory to the current file's root,
+    attempting to use any of the detection methods
+    (|Project.Config.Options.detection_methods|)
+    set by the user.
+
+    The command does essentially the following in the command line:
+
+>vim
+        :lua require('project.api').on_buf_enter()
+<
+
+    This is particularly useful if you've enabled {manual_mode}
+    it `setup()` (|project-nvim.setup-options|).
 
 
 ==============================================================================
