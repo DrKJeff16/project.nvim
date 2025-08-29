@@ -326,19 +326,11 @@ end
 ---@return boolean
 function Api.buf_is_file(bufnr)
     validate('bufnr', bufnr, Util.int_validator, true, 'integer')
-
     bufnr = bufnr or curr_buf()
 
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
 
-    local whitelisted_buf_type = { '', 'acwrite' }
-    for _, buf_type in next, whitelisted_buf_type do
-        if bt == buf_type then
-            return true
-        end
-    end
-
-    return false
+    return in_tbl({ '', 'acwrite' }, bt)
 end
 
 ---@param verbose? boolean
