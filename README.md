@@ -22,6 +22,8 @@ https://github.com/user-attachments/assets/1808f20a-789a-41d3-8dbb-bf962c34cf5b
 
 </div>
 
+---
+
 ## Telescope Integration
 
 <div align="center">
@@ -32,10 +34,16 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 
 ---
 
+## Alternatives
+
+- [`telescope-project.nvim`](https://github.com/nvim-telescope/telescope-project.nvim)
+
+---
+
 ## Table of Contents
 
 1. [Features](#features)
-2. [Roadmap](#roadmap)
+2. [TODO](#todo)
 3. [Requirements](#requirements)
 4. [Installation](#installation)
 5. [Configuration](#configuration)
@@ -70,6 +78,7 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 - Asynchronous file IO so it will not slow down neovim when reading the history file on startup
 - Functional `checkhealth` hook `:checkhealth project`
 - Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
+- Logging capabilities **_(WIP, EXPERIMENTAL)_**
 - [Telescope Integration](#telescope) `:Telescope projects`
 - [`nvim-tree` Integration](#nvim-tree)
 
@@ -79,34 +88,16 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 
 </div>
 
-## Roadmap
+## TODO
 
-- [X] Fix deprecated `vim.lsp` calls (**_CRITICAL_**)
-- [X] Fix bug with history not working
-- [X] Fix history not being deleted consistently when using Telescope picker
-- [X] Fixed Pattern Matching not applying to LSP method, **added option to disable**
-- [X] `vim.health` integration, AKA `:checkhealth project`
-- [X] Let the user decide to include projects that they don't own ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/167))
-- [X] Add info for `:ProjectRoot` and `:ProjectAdd` commands ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/133))
-- [X] Create help documentation `:h project-nvim`
-- [X] Renamed `project.lua` to `api.lua`
-- [ ] Extend API
-  - [X] Rename `project.lua` to `api.lua`
-  - [X] Expose `project.api.get_project_root()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/112))
-  - [X] Add utility to display the current project `get_current_project()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/149))
-  - [X] Add more user commands
-  - [X] Implement `delete_project()` wrapper for the end-user to use (_not to be confused with `history.delete_project()`_)
-  - [ ] Add `enable()`, `disable()` and `toggle()`, or similar utilities
-- [X] Extend Telescope picker configuration
-  - [X] Fix `file_browser` mapping ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/107))
-  - [X] Add option to control picker sorting order ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/140))
-- [ ] Finish [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+Please refer to [`TODO.md`](./TODO.md) for more info.
 
 <div align="right">
 
 [Go To Top](#project-nvim)
 
 </div>
+
 
 ---
 
