@@ -165,6 +165,19 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `false` ~
 
 
+    * {disable_on}              (`{ ft: string[], bt: string[] }`)
+                                CREDITS TO @Zeioth! ~
+                                Determines in what filetypes/buftypes
+                                will the plugin not execute.
+
+                                It's a table with two fields:
+                                `ft` (|'filetype'|) and `bt` (|'buftype'|),
+                                each one being a string array table.
+
+                                The default value can be found in ~
+                                project.nvim's `README.md` ~
+
+
     * {manual_mode}             (boolean)
                                 If `true` your root directory
                                 won't be changed automatically,

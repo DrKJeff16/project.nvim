@@ -238,6 +238,39 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
   --- ---
   logging = false,
 
+  ---Determines in what filetypes/buftypes the plugin won't execute.
+  ---It's a table with two fields:
+  ---
+  --- - `ft` for filetypes to exclude
+  --- - `bt` for buftypes to exclude
+  ---
+  ---The default value for this one can be found in the project's `README.md`.
+  ---
+  --- ---
+  ---CREDITS TO @Zeioth !:
+  ---[`Zeioth/project.nvim`](https://github.com/Zeioth/project.nvim/commit/95f56b8454f3285b819340d7d769e67242d59b53)
+  --- ---
+  ---@type { ft: string[], bt: string[] }
+  disable_on = {
+    ft = {
+      '',
+      'TelescopePrompt',
+      'TelescopeResults',
+      'alpha',
+      'checkhealth',
+      'lazy',
+      'notify',
+      'packer',
+      'qf',
+    }, ---`filetype`
+
+    bt = {
+      'help',
+      'nofile',
+      'terminal',
+    }, ---`buftype`
+  },
+
   ---If `true` your root directory won't be changed automatically,
   ---so you have the option to manually do so
   ---using the `:ProjectRoot` command.
