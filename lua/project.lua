@@ -1,8 +1,7 @@
 local Config = require('project.config')
 local Api = require('project.api')
-local Util = require('project.utils.util')
 
-local is_type = Util.is_type
+local validate = vim.validate
 
 ---The `project` module.
 --- ---
@@ -11,7 +10,9 @@ local Project = {}
 
 ---@param options? Project.Config.Options
 function Project.setup(options)
-    Config.setup(options)
+    validate('options', options, 'table', true, 'Project.Config.Options')
+
+    Config.setup(options or {})
 end
 
 ---Returns the project root, as well as the method used.
@@ -25,21 +26,25 @@ end
 
 ---@param project string|Project.ActionEntry
 function Project.delete_project(project)
+    validate('project', project, { 'table', 'string' }, false, 'string|Project.ActionEntry')
+
     Api.delete_project(project)
 end
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|{ datapath: string, projectpath: string, historyfile: string }
 function Project.get_history_paths(path)
-    return Api.get_history_paths(path)
+    validate('path', path, 'string', true, "'datapath'|'projectpath'|'historyfile'")
+    return Api.get_history_paths(path or '')
 end
 
 ---@param refresh? boolean
 ---@return string? last
 function Project.get_last_project(refresh)
-    refresh = is_type('boolean', refresh) and refresh or false
-    local last = refresh and Api.last_project or Api.get_last_project()
+    validate('refresh', refresh, 'boolean', true)
+    refresh = refresh ~= nil and refresh or false
 
+    local last = refresh and Api.last_project or Api.get_last_project()
     return last
 end
 
@@ -52,11 +57,12 @@ end
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
 ---@param refresh? boolean
----@return string|nil curr
----@return string|nil method
----@return string|nil last
+---@return string? curr
+---@return string? method
+---@return string? last
 function Project.current_project(refresh)
-    refresh = is_type('boolean', refresh) and refresh or false
+    validate('refresh', refresh, 'boolean', true)
+    refresh = refresh ~= nil and refresh or false
 
     local curr, method, last = Api.current_project, Api.current_method, Api.last_project
 
