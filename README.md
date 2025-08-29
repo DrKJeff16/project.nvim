@@ -889,6 +889,7 @@ If you lack the required permissions for that directory, you can either:
 - [@steinbrueckri](https://github.com/steinbrueckri): Thank you for your support!
 - [@gmelodie](https://github.com/gmelodie): Thank you for your support!
 - [@pandar00](https://github.com/pandar00): **CONTRIBUTOR** (https://github.com/DrKJeff16/project.nvim/pull/4)
+- [@Zeioth](https://github.com/Zeioth): [Implemented the filetype/buftype exclusions in their fork](https://github.com/Zeioth/project.nvim/commit/95f56b8454f3285b819340d7d769e67242d59b53)
 
 <div align="right">
 
