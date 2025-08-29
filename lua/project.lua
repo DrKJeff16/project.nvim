@@ -16,8 +16,8 @@ end
 
 ---Returns the project root, as well as the method used.
 --- ---
----@return string|nil root
----@return string|nil method
+---@return string? root
+---@return string? method
 function Project.get_project_root()
     local root, method = Api.get_project_root()
     return root, method
@@ -35,7 +35,7 @@ function Project.get_history_paths(path)
 end
 
 ---@param refresh? boolean
----@return string|nil last
+---@return string? last
 function Project.get_last_project(refresh)
     refresh = is_type('boolean', refresh) and refresh or false
     local last = refresh and Api.last_project or Api.get_last_project()

@@ -289,16 +289,15 @@ function Api.get_project_root()
     end
 end
 
----@return string|nil last
+---@return string? last
 function Api.get_last_project()
     local recent = Api.get_recent_projects()
     if empty(recent) then
         return nil
     end
 
-    ---@type string|nil
-    local last = nil
-    local recent_len = #recent
+    ---@type string|nil, integer
+    local last, recent_len = nil, #recent
 
     if recent_len > 1 then
         recent = reverse(copy(recent))
