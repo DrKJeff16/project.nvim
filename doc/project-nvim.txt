@@ -20,9 +20,9 @@ Table of Contents                                             *project-nvim.toc*
 
 1. Features                                              |project-nvim.features|
 2. Installation                                           |project-nvim.install|
-    2.1 vim-plug                                 |project-nvim.install.vim-plug|
-    2.2 lazy.nvim                               |project-nvim.install.lazy-nvim|
-    2.3 pckr.nvim                               |project-nvim.install.pckr-nvim|
+    2.1 vim-plug                                 |project-nvim.install-vim-plug|
+    2.2 lazy.nvim                               |project-nvim.install-lazy-nvim|
+    2.3 pckr.nvim                               |project-nvim.install-pckr-nvim|
 3. project-nvim.setup                                       |project-nvim.setup|
     3.1. `Project.Config.Options`                         |Project.Config.Options|
     3.2. `Project.Config.Telescope`                     |Project.Config.Telescope|
@@ -57,7 +57,7 @@ Table of Contents                                             *project-nvim.toc*
 2. Installation                                           *project-nvim.install*
 
 ------------------------------------------------------------------------------
-2.1 vim-plug                                     *project-nvim.install.vim-plug*
+2.1 vim-plug                                     *project-nvim.install-vim-plug*
 
 >vim
     if has('nvim-0.11')
@@ -76,7 +76,7 @@ Table of Contents                                             *project-nvim.toc*
     endif
 <
 ------------------------------------------------------------------------------
-2.2 lazy.nvim                                   *project-nvim.install.lazy-nvim*
+2.2 lazy.nvim                                   *project-nvim.install-lazy-nvim*
 
 >lua
     require('lazy').setup({
@@ -103,7 +103,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ------------------------------------------------------------------------------
-2.3 pckr.nvim                                   *project-nvim.install.pckr-nvim*
+2.3 pckr.nvim                                   *project-nvim.install-pckr-nvim*
 
 >lua
     if vim.fn.has('nvim-0.11') == 1 then
