@@ -44,30 +44,29 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 
 1. [Features](#features)
 2. [TODO](#todo)
-3. [Requirements](#requirements)
-4. [Installation](#installation)
-5. [Configuration](#configuration)
+3. [Installation](#installation)
+4. [Configuration](#configuration)
     1. [Defaults](#defaults)
     2. [Pattern Matching](#pattern-matching)
     3. [Nvim Tree](#nvim-tree)
     4. [Telescope](#telescope)
         1. [Telescope Mappings](#telescope-mappings)
-6. [Commands](#commands)
+5. [Commands](#commands)
     1. [ProjectAdd](#projectadd)
     2. [ProjectRoot](#projectroot)
     3. [ProjectRecents](#projectrecents)
     4. [ProjectConfig](#projectconfig)
     5. [ProjectDelete](#projectdelete)
-7. [API](#api)
+6. [API](#api)
     1. [`get_project_root()`](#get-project-root)
     2. [`get_recent_projects()`](#get-recent-projects)
     3. [`get_config()`](#get-config)
     4. [`get_history_paths()`](#get-history-paths)
-8. [Utils](#utils)
-9. [Troubleshooting](#troubleshooting)
+7. [Utils](#utils)
+8. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
-10. [Contributing](#contributing)
-11. [Credits](#credits)
+9. [Contributing](#contributing)
+10. [Credits](#credits)
 
 ---
 
@@ -99,15 +98,21 @@ Please refer to [`TODO.md`](./TODO.md) for more info.
 </div>
 
 
+## Installation
+
 ---
 
-## Requirements
+<div align="center">
+
+**Requirements:**
 
 - Neovim >= 0.11.0
 - [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
 - [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(OPTIONAL)**
 
-## Installation
+</div>
+
+---
 
 Use any plugin manager of your choosing.
 
