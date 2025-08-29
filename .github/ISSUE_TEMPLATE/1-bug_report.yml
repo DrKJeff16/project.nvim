@@ -1,14 +1,14 @@
 name: Bug Report
 description: State if something is wrong
 title: "[BUG]: <TITLE>"
-labels: ["bug", "important"]
+labels: ["bug", "important", 'needs-triage']
 assignees:
   - DrKJeff16
 
 body:
   - type: checkboxes
     attributes:
-      label: Before we begin...
+      label: Issue Checks
       description: "Make sure to read every checkbox and answer truthfully:"
       options:
         - label: I am running on the latest version of `project.nvim`
@@ -23,6 +23,10 @@ body:
       description: "Check one or more types of concepts your issue relates to:"
       options:
         - label: The plugin is not detecting directories correctly
+          required: false
+        - label: The plugin is not changing directories
+          required: false
+        - label: Logging issues
           required: false
         - label: Another plugin interferes with `project.nvim`
           required: false
@@ -70,6 +74,18 @@ body:
       description: Describe clearly what were you expecting to occur
     validations:
       required: true
+  - type: textarea
+    attributes:
+      label: Output of `:checkhealth project`
+      description: |
+        If the plugin can be loaded, please run `:checkhealth project`
+        and paste the output below.
+
+        If there is any sensitive data please replace with `REDACTED`.
+      value: |
+        <PASTE HERE IF POSSIBLE>
+      validations:
+        required: false
   - type: textarea
     attributes:
       label: How did you setup the plugin?
