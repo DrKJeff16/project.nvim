@@ -26,6 +26,7 @@ local root_included = Path.root_included
 
 local uv = vim.uv or vim.loop
 
+local validate = vim.validate
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
 local curr_buf = vim.api.nvim_get_current_buf
@@ -42,14 +43,8 @@ local fnamemodify = vim.fn.fnamemodify
 ---@class Project.API
 local Api = {}
 
----@type string|nil
-Api.last_project = nil
-
----@type string|nil
-Api.current_project = nil
-
----@type string|nil
-Api.current_method = nil
+---@type string|nil, string|nil, string|nil
+Api.last_project, Api.current_project, Api.current_method = nil, nil, nil
 
 ---@return string[] recent
 function Api.get_recent_projects()
@@ -59,10 +54,11 @@ end
 
 ---Get the LSP client for current buffer.
 ---
----Returns a tuple of two `string|nil` results.
+---If successful, returns a tuple of two `string` results.
+---Otherwise, nothing is returned.
 --- ---
----@return string|nil dir
----@return string|nil name
+---@return string? dir
+---@return string? name
 function Api.find_lsp_root()
     local bufnr = curr_buf()
     local allow_patterns = Config.options.allow_patterns_for_lsp
@@ -106,9 +102,7 @@ end
 
 ---Check if given directory is owned by the user running Nvim.
 ---
----Unavailable/unreadable
----
----If running on Windows, this will return `true` regardless.
+---If running under Windows, this will return `true` regardless.
 --- ---
 ---@param dir string
 ---@return boolean
@@ -126,8 +120,8 @@ function Api.verify_owner(dir)
     error(fmt("(%s.verify_owner): Directory can't be accessed!", MODSTR), ERROR)
 end
 
----@return string|nil dir_res
----@return string|nil method
+---@return string? dir_res
+---@return string? method
 function Api.find_pattern_root()
     local dir = fnamemodify(buf_name(curr_buf()), ':p:h')
 
@@ -140,8 +134,14 @@ function Api.find_pattern_root()
     return dir_res, method
 end
 
-function Api.gen_lsp_autocmd()
-    local group = augroup('ProjectAttach', { clear = true })
+---Generates the autocommand for the `LspAttach` event.
+---
+---**_An `augroup` ID is mandatory!_**
+--- ---
+---@param group integer
+function Api.gen_lsp_autocmd(group)
+    validate('group', group, 'number', false, 'integer')
+
     autocmd('LspAttach', {
         group = group,
         callback = function(ev)
@@ -164,8 +164,6 @@ function Api.set_pwd(dir, method)
     end
 
     local verbose = not Config.options.silent_chdir
-
-    ---@type string
     local msg = fmt('(%s.set_pwd):', MODSTR)
 
     if empty(History.session_projects) then
@@ -187,7 +185,8 @@ function Api.set_pwd(dir, method)
         table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
     end
 
-    if vim.fn.getcwd(0, 0) == Api.current_project then
+    --- If CWD is same as current one
+    if in_tbl({ dir, Api.current_project }, vim.fn.getcwd(0, 0)) then
         return false
     end
 
@@ -416,7 +415,7 @@ function Api.init()
         })
 
         if in_tbl(detection_methods, 'lsp') then
-            Api.gen_lsp_autocmd()
+            Api.gen_lsp_autocmd(group)
         end
     end
 
