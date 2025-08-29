@@ -352,6 +352,13 @@ function Api.on_buf_enter(verbose, bufnr)
         return
     end
 
+    local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
+    local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
+
+    if in_tbl(Config.options.disable_on.ft, ft) or in_tbl(Config.options.disable_on.bt, bt) then
+        return
+    end
+
     Api.current_project, Api.current_method, Api.last_project = Api.get_current_project()
 
     local changed = Api.set_pwd(Api.current_project, Api.current_method)

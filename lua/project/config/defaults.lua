@@ -165,6 +165,39 @@ DEFAULTS.silent_chdir = true
 ---@type 'global'|'tab'|'win'
 DEFAULTS.scope_chdir = 'global'
 
+---Determines in what filetypes/buftypes the plugin won't execute.
+---It's a table with two fields:
+---
+--- - `ft` for filetypes to exclude
+--- - `bt` for buftypes to exclude
+---
+---The default value for this one can be found in the project's `README.md`.
+---
+--- ---
+---CREDITS TO @Zeioth !:
+---[`Zeioth/project.nvim`](https://github.com/Zeioth/project.nvim/commit/95f56b8454f3285b819340d7d769e67242d59b53)
+--- ---
+---@type { ft: string[], bt: string[] }
+DEFAULTS.disable_on = {
+    ft = {
+        '',
+        'TelescopePrompt',
+        'TelescopeResults',
+        'alpha',
+        'checkhealth',
+        'lazy',
+        'notify',
+        'packer',
+        'qf',
+    }, ---`filetype`
+
+    bt = {
+        'help',
+        'nofile',
+        'terminal',
+    }, ---`buftype`
+}
+
 ---The path where `project.nvim` will store the project history directory,
 ---containing the project history in it.
 ---
