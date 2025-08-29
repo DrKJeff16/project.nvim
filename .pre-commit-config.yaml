@@ -40,3 +40,4 @@ repos:
         name: Run make before commiting
         language: system
         entry: make
+        verbose: true
