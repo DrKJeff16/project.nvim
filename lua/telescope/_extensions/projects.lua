@@ -1,12 +1,9 @@
-local Util = require('project.utils.util')
-local mod_exists = Util.mod_exists
-
-if not mod_exists('telescope') then
+if not vim.g.project_setup then
     return
 end
 
-local Telescope = require('telescope')
 local Main = require('telescope._extensions.projects.main')
+local Telescope = require('telescope')
 
 local setup = Main.setup
 local projects = Main.projects
