@@ -1,3 +1,9 @@
+---For newcommers, in the original project this file was
+---`project.lua`.
+---
+---I decided to make this an API file instead to avoid any
+---confusions with naming, e.g. `require('project_nvim.project')`.
+
 ---@class Project.HistoryPaths
 ---@field datapath string
 ---@field projectpath string
