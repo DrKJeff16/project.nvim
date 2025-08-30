@@ -1,11 +1,13 @@
----Options defined in `setup()`.
+---The options available for in `require('project').setup()`.
 --- ---
 ---@class Project.Config.Options
 local DEFAULTS = {}
 
----If `true`, it enables logging in `<project_datapath>/project.log`.
+---**WARNING: Experimental. Still a WIP. Use at your own risk!**
+--- ---
 ---
----WARNING: Experimental.
+---If `true`, it enables logging in `$XDG_STATE_HOME/nvim/project_nvim/project.log`,
+---or the equivalent for Windows (`%APPDATA%/...`) / macOS (* shrug *).
 --- ---
 ---Default: `false`
 --- ---
@@ -20,22 +22,28 @@ DEFAULTS.logging = false
 ---@type boolean
 DEFAULTS.manual_mode = false
 
----Methods of detecting the root directory. `'lsp'` uses the native neovim
----LSP, while `'pattern'` uses vim-rooter like glob pattern matching. Here
----order matters: if one is not detected, the other is used as fallback. You
+---Methods of detecting the root directory.
+---
+--- - `'lsp'`: uses the native Neovim LSP
+---          (see [`vim.lsp`](lua://vim.lsp))
+--- - `'pattern'`: uses `vim-rooter`-like glob pattern matching
+---
+---**Order matters**: if one is not detected, the other is used as fallback. You
 ---can also delete or rearrange the detection methods.
 ---
----The detection methods get filtered and rid of duplicates during runtime.
+---Any values that aren't valid will be discarded on setup;
+---same thing with duplicates.
 --- ---
 ---Default: `{ 'lsp' , 'pattern' }`
 --- ---
 ---@type ("lsp"|"pattern")[]
 DEFAULTS.detection_methods = { 'lsp', 'pattern' }
 
----All the patterns used to detect root dir, when **'pattern'** is in
----detection_methods.
+---All the patterns used to detect the project's root directory.
 ---
----See `:h project.nvim-pattern-matching`
+---By default it only triggers when `'pattern'` is in `detection_methods`.
+---
+---See `:h project.nvim-pattern-matching`.
 --- ---
 ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile' }`
 --- ---
@@ -50,24 +58,29 @@ DEFAULTS.patterns = {
     'Pipfile',
 }
 
----Sets whether to use Pattern Matching rules on the LSP.
+---Sets whether to use Pattern Matching rules to the LSP client.
 ---
----If `false`, the Pattern Matching will only apply to the `pattern` detection method.
+---If `false` the Pattern Matching will only apply
+---to the `'pattern'` detection method.
+---
+---If `true` the `patters` setting will also filter
+---your LSP's `root_dir`, assuming there is one and `'lsp'`
+---is in `patterns`.
 --- ---
----Default: `true`
+---Default: `false`
 --- ---
 ---@type boolean
-DEFAULTS.allow_patterns_for_lsp = true
+DEFAULTS.allow_patterns_for_lsp = false
 
 ---Determines whether a project will be added if its project root is owned by a different user.
 ---
----If `false`, it won't add a project if its root is not owned by the
----current nvim `UID` **(UNIX only)**.
+---If `true`, it will add a project to the history even if its root
+---is not owned by the current nvim `UID` **(UNIX only)**.
 --- ---
----Default: `true`
+---Default: `false`
 --- ---
 ---@type boolean
-DEFAULTS.allow_different_owners = true
+DEFAULTS.allow_different_owners = false
 
 ---If enabled, set `vim.opt.autochdir` to `true`.
 ---

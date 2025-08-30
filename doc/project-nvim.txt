@@ -156,11 +156,13 @@ Table of Contents                                             *project-nvim.toc*
 
 
     * {logging}                 (boolean)
-                                If `true`, it enables logging
-                                in `<project_datapath>/project.log`.
-                                See {datapath} for more info
+                                WARNING: Experimental Still a WIP. ~
+                                         Use at your own risk! ~
 
-                                WARNING: Experimental ~
+                                If `true`, it enables logging into
+                                `<stdpath('state')>/project_nvim/project.log`
+
+                                See |stdpath()| for more info
 
                                 Default: `false` ~
 
@@ -189,15 +191,20 @@ Table of Contents                                             *project-nvim.toc*
 
     * {detection_methods}       (`table|('lsp'|'pattern')[]`)
                                 Methods of detecting the root directory.
-                                `'lsp'` uses the native neovim LSP.
-                                `'pattern'` uses vim-rooter like
-                                glob pattern matching.
+                                 - `'lsp'`: uses the native Neovim LSP
+                                          (see |vim.lsp|)
+                                 - `'pattern'`: uses `vim-rooter`-like
+                                              glob pattern matching
+                                              (see
+                                              |project-nvim.pattern-matching|)
 
                                 Order matters here! ~
-                                If one is not detected, fallback to next.
+                                If one is not detected, the other is used
+                                as fallback.
                                 You can also delete or rearrange them.
-                                The `detection methods` get filtered
-                                and rid of duplicates during runtime
+                                Any values that aren't valid will be
+                                discarded on setup; same thing
+                                with duplicates.
 
                                 Default: `{ 'lsp' , 'pattern' }` ~
 
@@ -207,28 +214,45 @@ Table of Contents                                             *project-nvim.toc*
                                 when `pattern` is in {detection_methods}.
 
                                 See |project-nvim.pattern-matching| for more
-                                info about pattern matching
+                                info on pattern matching.
 
-                                Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile' }` ~
+                                To see the default values, you have
+                                the `README.md` for this plugin, and
+                                as an alternative you can run
+                                this code snippet in your cmdline:
+
+>vim
+        :lua vim.print(require('project.config').get_defaults().patterns)
+<
+
+                                WARNING ~
+                                It is not a good idea to forcefully
+                                keep this empty!
 
 
     * {allow_patterns_for_lsp}  (boolean)
                                 Sets whether to use Pattern Matching rules
-                                on the LSP.
-                                If `false`, the Pattern Matching will only
-                                apply to the pattern detection method
+                                to the LSP client.
+
+                                If `false` the Pattern Matching will
+                                only apply to the `'pattern'` detection method.
+                                If `true` the {patters} setting will
+                                also filter your LSP's `root_dir`,
+                                assuming there is one and `'lsp'`
+                                is in {patterns}.
 
                                 See |project-nvim.pattern-matching| for more
-                                info about pattern matching
+                                info on pattern matching
 
-                                Default: `true` ~
+                                Default: `false` ~
 
 
     * {allow_different_owners}  (boolean)
                                 Determines whether a project will be
-                                added if its project root is owned by a
-                                different user.
-                                If `false`, it won't add a project if its root
+                                added if its project root is owned
+                                by a different user.
+                                If `true`, it will add the project
+                                to the history even if its root
                                 is not owned by the current nvim `UID`
                                 (UNIX only) ~
 
