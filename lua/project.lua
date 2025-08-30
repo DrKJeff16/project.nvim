@@ -3,7 +3,9 @@ local Api = require('project.api')
 
 local validate = vim.validate
 
----The `project` module.
+---The `project.nvim` module.
+---
+---A dynamic project manager for neovim.
 --- ---
 ---@class Project
 local Project = {}
@@ -75,7 +77,7 @@ end
 
 ---@return Project.Config.Options|nil
 function Project.get_config()
-    return Config.setup_called and Config.options or nil
+    return vim.g.project_setup == 1 and Config.options or nil
 end
 
 return Project

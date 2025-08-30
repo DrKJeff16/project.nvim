@@ -31,6 +31,7 @@ function Main.setup(opts)
     opts = is_type('table', opts) and opts or {}
 
     Main.default_opts = vim.tbl_deep_extend('keep', opts, copy(Main.default_opts))
+    vim.g.project_telescope_loaded = 1
 end
 
 ---Main entrypoint for Telescope.

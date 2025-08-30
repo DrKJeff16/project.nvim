@@ -35,7 +35,7 @@ local Health = {}
 function Health.setup_check()
     start('Setup')
 
-    local setup_called = Config.setup_called or false
+    local setup_called = vim.g.project_setup == 1
 
     if not setup_called then
         h_error('`setup()` has not been called!')

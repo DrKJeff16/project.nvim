@@ -138,6 +138,9 @@ end
 ---@param group integer
 function Api.gen_lsp_autocmd(group)
     validate('group', group, Util.int_validator, false, 'integer')
+    if vim.g.project_setup ~= 1 then
+        return
+    end
 
     autocmd('LspAttach', {
         group = group,

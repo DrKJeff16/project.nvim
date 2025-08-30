@@ -14,7 +14,6 @@ local WARN = vim.log.levels.WARN
 local validate = vim.validate
 
 ---@class Project.Config
----@field setup_called? boolean
 local Config = {}
 
 ---Get the default options for configuring `project`.
@@ -135,8 +134,8 @@ function Config.setup(options)
         Log.debug('Telescope Picker initialized from `setup()`')
     end
 
-    Config.setup_called = true
-    Log.debug('`Config.setup_called` set to `true`')
+    vim.g.project_setup = 1
+    Log.debug('`g:project_setup` set to `1`')
 end
 
 return Config
