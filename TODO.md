@@ -17,6 +17,8 @@
 - [X] Add info for `:ProjectRoot` and `:ProjectAdd` commands ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/133))
 - [X] Create help documentation `:h project-nvim`
 - [X] Rename `project.lua` to `api.lua`
+- [ ] Workspace Folders support (https://github.com/ahmedkhalf/project.nvim/pull/178)
+- [ ] Allow the users give their project an identifier (a name, number, a pizza, idk)
 - [ ] Implement attractive features from [`telescope-project.nvim`](https://github.com/nvim-telescope/telescope-project.nvim)
 - [ ] Finish [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 
