@@ -75,6 +75,7 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 - Automagically `cd` to the project root directory using `vim.lsp`
 - If no LSP is available then it'll try using pattern matching to `cd` to the project root directory instead
 - Asynchronous file IO so it will not slow down neovim when reading the history file on startup
+- **(NEW!)** Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook `:checkhealth project`
 - Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
 - Logging capabilities **_(WIP, EXPERIMENTAL)_**
@@ -119,7 +120,7 @@ Use any plugin manager of your choosing.
 Currently there are instructions for these:
 
 <details>
-<summary><b><a href="https://github.com/junegunn/vim-plug">vim-plug</a></b></summary>
+<summary><b><a href="https://github.com/junegunn/vim-plug" id="vim-plug">vim-plug</a></b></summary>
 
 ```vim
 if has('nvim-0.11')
@@ -141,7 +142,7 @@ endif
 </details>
 
 <details>
-<summary><b><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a></b></summary>
+<summary><b><a href="https://github.com/folke/lazy.nvim" id="lazy-nvim">lazy.nvim</a></b></summary>
 
 ```lua
 require('lazy').setup({
@@ -170,7 +171,7 @@ require('lazy').setup({
 </details>
 
 <details>
-<summary><b><a href="https://github.com/lewis6991/pckr.nvim">pckr.nvim</a></b></summary>
+<summary><b><a href="https://github.com/lewis6991/pckr.nvim" id="pckr-nvim">pckr.nvim</a></b></summary>
 
 ```lua
 if vim.fn.has('nvim-0.11') == 1 then
@@ -195,6 +196,10 @@ end
 
 </details>
 
+
+If you want to add instructions for your package manager please raise a **_BLANK ISSUE_**.
+
+
 <div align="right">
 
 [Go To Top](#project-nvim)
@@ -208,9 +213,7 @@ end
 To enable the plugin you may call `setup()`:
 
 ```lua
-require('project').setup({
-  -- Options
-})
+require('project').setup()
 ```
 
 <div align="right">
@@ -238,7 +241,7 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
   --- ---
   logging = false,
 
-  ---Determines in what filetypes/buftypes the plugin won't execute.
+  ---Determines in what filetypes/buftypes will the plugin be disabled in.
   ---It's a table with two fields:
   ---
   --- - `ft` for filetypes to exclude
@@ -259,6 +262,7 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
       'alpha',
       'checkhealth',
       'lazy',
+      'minimap', -- from `mini.map`
       'notify',
       'packer',
       'qf',
