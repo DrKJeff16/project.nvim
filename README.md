@@ -36,6 +36,8 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 
 ## Alternatives
 
+Show these much love!
+
 - [`telescope-project.nvim`](https://github.com/nvim-telescope/telescope-project.nvim)
 
 ---
