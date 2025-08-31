@@ -1,7 +1,3 @@
-if not vim.g.project_setup then
-    return
-end
-
 local Main = require('telescope._extensions.projects.main')
 local Telescope = require('telescope')
 

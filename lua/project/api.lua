@@ -196,7 +196,7 @@ function Api.set_pwd(dir, method)
 
     --- If directory is the same as current Project dir/CWD
     if in_tbl({ dir, Api.current_project or '' }, vim.fn.getcwd(0, 0)) then
-        return false
+        return true
     end
 
     local scope_chdir = Config.options.scope_chdir
@@ -357,6 +357,9 @@ function Api.on_buf_enter(verbose, bufnr)
     local dir = fnamemodify(buf_name(bufnr), ':p:h')
 
     if not (exists(dir) and root_included(dir)) or is_excluded(dir) then
+        if verbose then
+            notify('Directory is either excluded or does not exist!', WARN)
+        end
         return
     end
 
@@ -369,14 +372,7 @@ function Api.on_buf_enter(verbose, bufnr)
 
     Api.current_project, Api.current_method, Api.last_project = Api.get_current_project()
 
-    local changed = Api.set_pwd(Api.current_project, Api.current_method)
-
-    if verbose and changed then
-        notify(
-            fmt('Root: %s\nMethod: %s', Api.current_project or 'NONE', Api.current_method or 'NONE'),
-            INFO
-        )
-    end
+    Api.set_pwd(Api.current_project, Api.current_method)
 
     History.write_history()
 end
@@ -414,7 +410,9 @@ function Api.init()
             {
                 pattern = '*',
                 group = group,
-                callback = History.write_history,
+                callback = function()
+                    History.write_history()
+                end,
             },
         },
     }

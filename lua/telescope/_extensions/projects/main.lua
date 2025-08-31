@@ -1,9 +1,3 @@
-local Util = require('project.utils.util')
-
-local is_type = Util.is_type
-
-local copy = vim.deepcopy
-
 local Pickers = require('telescope.pickers')
 local Actions = require('telescope.actions')
 local telescope_config = require('telescope.config').values
@@ -28,9 +22,7 @@ Main.default_opts = {
 
 ---@param opts table
 function Main.setup(opts)
-    opts = is_type('table', opts) and opts or {}
-
-    Main.default_opts = vim.tbl_deep_extend('keep', opts, copy(Main.default_opts))
+    Main.default_opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
     vim.g.project_telescope_loaded = 1
 end
 
@@ -40,8 +32,7 @@ end
 --- ---
 ---@param opts? table
 function Main.projects(opts)
-    opts = is_type('table', opts) and opts or {}
-    opts = vim.tbl_deep_extend('keep', copy(opts), Main.default_opts)
+    opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
 
     Pickers.new(opts, {
         prompt_title = 'Select Your Project',
@@ -91,6 +82,9 @@ function Main.projects(opts)
     }):find()
 end
 
-return Main
+---@type TelescopeProjects.Main
+local M = setmetatable({}, { __index = Main })
+
+return M
 
 ---vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:

@@ -234,27 +234,20 @@ end
 
 ---Write projects to history file.
 ---
----_Bear in mind: this function is synchronous._
+---Bear in mind: **_this function is synchronous._**
 --- ---
 function History.write_history()
-    local file = History.open_history(History.recent_projects == nil and 'a' or 'w')
+    local fd = History.open_history(History.recent_projects ~= nil and 'w' or 'a')
 
-    if file == nil then
+    if fd == nil then
         error('(project.utils.history.write_history): File restricted', ERROR)
     end
 
     local res = History.get_recent_projects()
-
-    ---@type string[]
-    local tbl_out
     local len_res = #res
 
     -- Trim table to last 100 entries
-    if len_res > 100 then
-        tbl_out = vim.list_slice(res, len_res - 100, len_res)
-    else
-        tbl_out = copy(res)
-    end
+    local tbl_out = len_res > 100 and vim.list_slice(res, len_res - 100, len_res) or res
 
     -- Transform table to string
     local out = ''
@@ -262,9 +255,8 @@ function History.write_history()
         out = fmt('%s%s\n', out, v)
     end
 
-    -- Write string out to file and close
-    uv.fs_write(file, out, -1)
-    uv.fs_close(file)
+    uv.fs_write(fd, out, -1)
+    uv.fs_close(fd)
 end
 
 return History
