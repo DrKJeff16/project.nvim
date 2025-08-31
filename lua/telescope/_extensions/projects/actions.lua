@@ -1,4 +1,5 @@
 local Util = require('project.utils.util')
+local Log = require('project.utils.log')
 local TelUtil = require('telescope._extensions.projects.util')
 
 local reverse = Util.reverse
@@ -61,6 +62,7 @@ function M.change_working_directory(prompt_bufnr)
     Actions.close(prompt_bufnr)
 
     if selected_entry == nil or not is_type('string', selected_entry.value) then
+        Log.warn('Telescope entry not valid!')
         return
     end
 
