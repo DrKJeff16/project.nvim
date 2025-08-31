@@ -211,20 +211,19 @@ function Api.set_pwd(dir, method)
 
     if scope_chdir == 'global' then
         ok = pcall(vim.api.nvim_set_current_dir, dir)
-        msg = fmt('%s chdir to `%s`:', msg, dir)
+        msg = fmt('%s\nchdir: `%s`:', msg, dir)
     elseif scope_chdir == 'tab' then
         ok = pcall(vim.cmd.tchdir, dir)
-        msg = fmt('%s tchdir to `%s`:', msg, dir)
+        msg = fmt('%s\ntchdir: `%s`:', msg, dir)
     elseif scope_chdir == 'win' then
         ok = pcall(vim.cmd.lchdir, dir)
-        msg = fmt('%s lchdir to `%s`:', msg, dir)
+        msg = fmt('%s\nlchdir: `%s`:', msg, dir)
     end
 
-    msg = fmt('%s %s', msg, (ok and 'SUCCESS' or 'FAILED'))
+    msg = fmt('%s\nMethod: %s\nStatus: %s', msg, method, (ok and 'SUCCESS' or 'FAILED'))
 
     if verbose then
         vim.schedule(function()
-            notify(fmt('(%s.set_pwd): Set CWD to %s using %s', MODSTR, dir, method), INFO)
             notify(msg, (ok and INFO or WARN))
         end)
     end
