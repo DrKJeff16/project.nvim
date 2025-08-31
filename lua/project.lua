@@ -1,7 +1,7 @@
+local validate = vim.validate
+
 local Config = require('project.config')
 local Api = require('project.api')
-
-local validate = vim.validate
 
 ---The `project.nvim` module.
 ---
@@ -13,7 +13,6 @@ local Project = {}
 ---@param options? Project.Config.Options
 function Project.setup(options)
     validate('options', options, 'table', true, 'Project.Config.Options')
-
     Config.setup(options or {})
 end
 
@@ -29,7 +28,6 @@ end
 ---@param project string|Project.ActionEntry
 function Project.delete_project(project)
     validate('project', project, { 'table', 'string' }, false, 'string|Project.ActionEntry')
-
     Api.delete_project(project)
 end
 
