@@ -53,7 +53,7 @@ History.recent_projects = nil
 History.session_projects = {}
 
 ---@param mode OpenMode
----@param callback? fun(err: string|nil, fd: integer|nil)
+---@param callback? fun(err?: string, fd?: integer)
 ---@return integer|nil
 function History.open_history(mode, callback)
     local histfile, flag = Path.historyfile, tonumber('644', 8)

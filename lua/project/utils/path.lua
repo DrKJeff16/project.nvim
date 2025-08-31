@@ -76,10 +76,8 @@ end
 ---@param path_str string
 ---@return string|'/'
 function Path.get_parent(path_str)
-    ---@type string
     path_str = path_str:match('^(.*)/')
-
-    return (path_str ~= '') and path_str or '/'
+    return (path_str ~= '') and path_str or '/' ---@cast path_str  string
 end
 
 ---@param dir string
@@ -131,7 +129,7 @@ function Path.match(dir, pattern)
     return Path.has(dir, pattern)
 end
 
----@param callback? fun(err: string|nil, success: boolean|nil)
+---@param callback? fun(err?: string, success?: boolean)
 function Path.create_scaffolding(callback)
     local flag = tonumber('755', 8)
 
