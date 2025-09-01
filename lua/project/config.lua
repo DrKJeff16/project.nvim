@@ -118,7 +118,7 @@ function Config.setup(options)
     Config.verify_scope_chdir()
 
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
-    vim.opt.autochdir = Config.options.enable_autochdir
+    vim.o.autochdir = Config.options.enable_autochdir
 
     require('project.utils.path').init()
     require('project.api').init()

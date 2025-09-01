@@ -82,7 +82,7 @@ DEFAULTS.allow_patterns_for_lsp = false
 ---@type boolean
 DEFAULTS.allow_different_owners = false
 
----If enabled, set `vim.opt.autochdir` to `true`.
+---If enabled, set `vim.o.autochdir` to `true`.
 ---
 ---This is disabled by default because the plugin implicitly disables `autochdir`.
 --- ---
