@@ -10,6 +10,7 @@
 ---@field historyfile string
 
 local fmt = string.format
+local uv = vim.uv or vim.loop
 
 local MODSTR = 'project.api'
 local ERROR = vim.log.levels.ERROR
@@ -24,26 +25,27 @@ local History = require('project.utils.history')
 local is_type = Util.is_type
 local is_windows = Util.is_windows
 local reverse = Util.reverse
-
 local exists = Path.exists
 local is_excluded = Path.is_excluded
 local root_included = Path.root_included
 
-local uv = vim.uv or vim.loop
-
 local validate = vim.validate
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
-local curr_buf = vim.api.nvim_get_current_buf
 local copy = vim.deepcopy
 local notify = vim.notify
+local curr_buf = vim.api.nvim_get_current_buf
 local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
 local buf_name = vim.api.nvim_buf_get_name
 local fnamemodify = vim.fn.fnamemodify
 
 ---@alias AutocmdTuple { [1]: string[]|string, [2]: vim.api.keyset.create_autocmd }
----@alias ProjectCmd { name: string, cmd: fun(ctx?: vim.api.keyset.create_user_command.command_args), opts?: vim.api.keyset.user_command }
+
+---@class ProjectCmd
+---@field name string
+---@field cmd fun(ctx?: vim.api.keyset.create_user_command.command_args)
+---@field opts? vim.api.keyset.user_command
 
 ---@class Project.API
 ---@field last_project? string
@@ -370,7 +372,6 @@ function Api.on_buf_enter(verbose, bufnr)
     end
 
     Api.current_project, Api.current_method, Api.last_project = Api.get_current_project()
-
     Api.set_pwd(Api.current_project, Api.current_method)
 
     History.write_history()
