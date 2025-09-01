@@ -1,3 +1,5 @@
+local fmt = string.format
+
 local Util = require('project.utils.util')
 local Log = require('project.utils.log')
 local TelUtil = require('telescope._extensions.projects.util')
@@ -5,7 +7,6 @@ local TelUtil = require('telescope._extensions.projects.util')
 local reverse = Util.reverse
 local is_type = Util.is_type
 
-local fmt = string.format
 local copy = vim.deepcopy
 local fnamemodify = vim.fn.fnamemodify
 

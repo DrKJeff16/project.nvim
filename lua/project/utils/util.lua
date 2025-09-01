@@ -24,6 +24,61 @@ function Util.is_windows()
     return vim.fn.has('win32') == 1
 end
 
+---@param str string
+---@param use_dot? boolean
+---@param triggers? string[]
+---@return string new_str
+function Util.capitalize(str, use_dot, triggers)
+    validate('str', str, 'string', false)
+    validate('use_dot', use_dot, 'boolean', true)
+    validate('triggers', triggers, 'table', true, 'string[]')
+
+    if str == '' then
+        return str
+    end
+
+    use_dot = use_dot ~= nil and use_dot or false
+    triggers = triggers or { ' ', '' }
+
+    if not in_tbl(triggers, ' ') then
+        table.insert(triggers, ' ')
+    end
+    if not in_tbl(triggers, '') then
+        table.insert(triggers, '')
+    end
+
+    local strlen = str:len()
+    local prev_char, new_str, i = '', '', 1
+    local dot = true
+
+    while i <= strlen do
+        local char = str:sub(i, i)
+
+        if char == char:lower() and in_tbl(triggers, prev_char) then
+            char = dot and char:upper() or char:lower()
+
+            if dot then
+                dot = false
+            end
+        else
+            char = char:lower()
+        end
+
+        if use_dot and not dot then
+            dot = char == '.'
+        elseif not use_dot then
+            dot = true
+        end
+
+        new_str = fmt('%s%s', new_str, char)
+        prev_char = char
+
+        i = i + 1
+    end
+
+    return new_str
+end
+
 ---Checks whether `data` is of type `t` or not.
 ---
 ---If `data` is `nil`, the function will always return `false`.
