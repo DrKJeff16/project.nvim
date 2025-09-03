@@ -93,4 +93,4 @@ local M = setmetatable({}, { __index = Main })
 
 return M
 
----vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
+-- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:

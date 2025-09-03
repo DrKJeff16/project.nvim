@@ -53,3 +53,9 @@ doc/tags
 .luarc.jsonc
 luarc.json
 luarc.jsonc
+
+# Testing
+.repro/
+minimal_init.lua
+minimal.lua
+repro.lua
