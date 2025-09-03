@@ -1,14 +1,11 @@
 local fmt = string.format
 
+local History = require('project.utils.history')
+local Api = require('project.api')
+local Config = require('project.config')
 local Util = require('project.utils.util')
 local Log = require('project.utils.log')
 local TelUtil = require('telescope._extensions.projects.util')
-
-local reverse = Util.reverse
-local is_type = Util.is_type
-
-local copy = vim.deepcopy
-local fnamemodify = vim.fn.fnamemodify
 
 local Telescope = require('telescope')
 local Finders = require('telescope.finders')
@@ -16,11 +13,11 @@ local Actions = require('telescope.actions')
 local Builtin = require('telescope.builtin')
 local State = require('telescope.actions.state')
 
-local History = require('project.utils.history')
-local Api = require('project.api')
-local Config = require('project.config')
-
 local make_display = TelUtil.make_display
+local reverse = Util.reverse
+local is_type = Util.is_type
+local copy = vim.deepcopy
+local fnamemodify = vim.fn.fnamemodify
 
 ---@return table
 local function create_finder()
