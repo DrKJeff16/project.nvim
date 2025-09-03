@@ -3,6 +3,7 @@ local validate = vim.validate
 local Config = require('project.config')
 local Api = require('project.api')
 local Util = require('project.utils.util')
+local Log = require('project.utils.log')
 
 local vim_has = Util.vim_has
 
