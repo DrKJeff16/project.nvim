@@ -2,6 +2,7 @@ local validate = vim.validate
 
 local Config = require('project.config')
 local Api = require('project.api')
+local Log = require('project.utils.log')
 
 ---The `project.nvim` module.
 ---
@@ -13,7 +14,9 @@ local Project = {}
 ---@param options? Project.Config.Options
 function Project.setup(options)
     validate('options', options, 'table', true, 'Project.Config.Options')
+    Log.debug('Calling `setup()`...')
     Config.setup(options or {})
+    Log.info('Successful setup!!')
 end
 
 ---Returns the project root, as well as the method used.
