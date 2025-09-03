@@ -1,3 +1,11 @@
+local validate = vim.validate
+local in_tbl = vim.tbl_contains
+local empty = vim.tbl_isempty
+local WARN = vim.log.levels.WARN
+
+local Util = require('project.utils.util')
+local is_type = Util.is_type
+
 ---The options available for in `require('project').setup()`.
 --- ---
 ---@class Project.Config.Options
@@ -94,45 +102,48 @@ DEFAULTS.enable_autochdir = false
 ---Table of options used for the telescope picker.
 --- ---
 ---@class Project.Config.Options.Telescope
-DEFAULTS.telescope = {
-    ---Determines whether the `telescope` picker should be called.
-    ---
-    ---If telescope is not installed, this doesn't make a difference.
-    ---
-    ---Note that even if set to `false`, you can still load the extension manually.
-    --- ---
-    ---Default: `true`
-    --- ---
-    ---@type boolean
-    enabled = true,
+local telescope = {}
 
-    ---Determines whether the newest projects come first in the
-    ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
-    --- ---
-    ---Default: `'newest'`
-    --- ---
-    ---@type 'oldest'|'newest'
-    sort = 'newest',
+---Determines whether the `telescope` picker should be called.
+---
+---If telescope is not installed, this doesn't make a difference.
+---
+---Note that even if set to `false`, you can still load the extension manually.
+--- ---
+---Default: `true`
+--- ---
+---@type boolean
+telescope.enabled = true
 
-    ---If `true`, `telescope-file-browser.nvim` instead of builtins.
-    ---
-    ---If you have `telescope-file-browser.nvim` installed, you can enable this
-    ---so that the Telescope picker uses it instead of the `find_files` builtin.
-    ---
-    ---In case it is not available, it'll fall back to `find_files`.
-    --- ---
-    ---Default: `false`
-    --- ---
-    ---@type boolean
-    prefer_file_browser = false,
+---Determines whether the newest projects come first in the
+---telescope picker (`'newest'`), or the oldest (`'oldest'`).
+--- ---
+---Default: `'newest'`
+--- ---
+---@type 'oldest'|'newest'
+telescope.sort = 'newest'
 
-    ---Make hidden files visible when using the `telescope` picker.
-    --- ---
-    ---Default: `false`
-    --- ---
-    ---@type boolean
-    show_hidden = false,
-}
+---If `true`, `telescope-file-browser.nvim` instead of builtins.
+---
+---If you have `telescope-file-browser.nvim` installed, you can enable this
+---so that the Telescope picker uses it instead of the `find_files` builtin.
+---
+---In case it is not available, it'll fall back to `find_files`.
+--- ---
+---Default: `false`
+--- ---
+---@type boolean
+telescope.prefer_file_browser = false
+
+---Make hidden files visible when using the `telescope` picker.
+--- ---
+---Default: `false`
+--- ---
+---@type boolean
+telescope.show_hidden = false
+
+---@type Project.Config.Options.Telescope
+DEFAULTS.telescope = telescope
 
 ---Table of lsp clients to ignore by name,
 ---e.g. `{ 'efm', ... }`.
@@ -220,6 +231,91 @@ DEFAULTS.disable_on = {
 --- ---
 ---@type string
 DEFAULTS.datapath = vim.fn.stdpath('data')
+
+---Checks the `scope_chdir` option.
+---
+---If the option is not valid, a warning will be raised and
+---the value will revert back to the default.
+--- ---
+---@param self Project.Config.Options
+function DEFAULTS:verify_scope_chdir()
+    validate('scope_chdir', self.scope_chdir, 'string', false, "'global'|'tab'|'win'")
+
+    local VALID = { 'global', 'tab', 'win' }
+
+    if in_tbl(VALID, self.scope_chdir) then
+        return
+    end
+
+    vim.notify('`scope_chdir` option invalid. Reverting to default option.', WARN)
+    self.scope_chdir = DEFAULTS.scope_chdir
+end
+
+---Checks the `detection_methods` option.
+---
+---If the option is not a table, a warning will be raised and
+---the option will revert back to the default.
+---
+---If the option is an empty table, the function will stop.
+---
+---The option will be stripped from any duplicates and/or
+---invalid values.
+--- ---
+---@param self Project.Config.Options
+function DEFAULTS:verify_methods()
+    if not is_type('table', self.detection_methods) then
+        vim.notify('`detection_methods` option is not a table. Reverting to default option.', WARN)
+        self.detection_methods = DEFAULTS.detection_methods
+        return
+    end
+
+    if empty(self.detection_methods) and not vim.g.project_trigger_once then
+        vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
+        vim.g.project_trigger_once = true
+        return
+    end
+
+    local checker = { lsp = false, pattern = false }
+
+    ---@type ('lsp'|'pattern')[]|table
+    local methods = {}
+
+    for _, v in next, self.detection_methods do
+        if checker.lsp and checker.pattern then
+            break
+        end
+
+        if is_type('string', v) then
+            --- If `'lsp'` is found and not duplicated
+            if v == 'lsp' and not checker.lsp then
+                table.insert(methods, v)
+                checker.lsp = true
+            end
+
+            --- If `'pattern'` is found and not duplicated
+            if v == 'pattern' and not checker.pattern then
+                table.insert(methods, v)
+                checker.pattern = true
+            end
+        end
+    end
+
+    if empty(methods) and not vim.g.project_trigger_once then
+        vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
+        vim.g.project_trigger_once = true
+        return
+    end
+
+    self.detection_methods = methods
+end
+
+---@return Project.Config.Options
+function DEFAULTS.new()
+    ---@type Project.Config.Options
+    local self = setmetatable({}, { __index = DEFAULTS })
+
+    return self
+end
 
 return DEFAULTS
 
