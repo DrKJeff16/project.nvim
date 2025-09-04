@@ -194,7 +194,8 @@ end
 ---@param path string
 ---@return boolean
 function Path.exists(path)
-    return vim.fn.empty(vim.fn.glob(path)) == 0
+    --- CREDITS: @tomaskallup
+    return vim.fn.empty(vim.fn.glob(path:gsub('%[', '\\['))) == 0
 end
 
 function Path.init()
