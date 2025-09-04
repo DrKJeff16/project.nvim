@@ -440,6 +440,15 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
   --- ---
   ---@type string
   datapath = vim.fn.stdpath('data'),
+
+  ---The history size
+  ---
+  ---How many entries will be written to the history file. Set to `0` for no limit.
+  --- ---
+  ---Default: `100`
+  --- ---
+  ---@type integer
+  historysize = 100
 }
 ```
 

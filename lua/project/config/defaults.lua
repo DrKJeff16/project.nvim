@@ -232,6 +232,15 @@ DEFAULTS.disable_on = {
 ---@type string
 DEFAULTS.datapath = vim.fn.stdpath('data')
 
+---The history size
+---
+---How many entries will be written to the history file. Set to `0` for no limit.
+--- ---
+---Default: `100`
+--- ---
+---@type integer
+DEFAULTS.historysize = 100
+
 ---Checks the `scope_chdir` option.
 ---
 ---If the option is not valid, a warning will be raised and
