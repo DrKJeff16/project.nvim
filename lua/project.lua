@@ -34,7 +34,6 @@ end
 ---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|{ datapath: string, projectpath: string, historyfile: string }
 function Project.get_history_paths(path)
-    validate('path', path, 'string', true, "'datapath'|'projectpath'|'historyfile'")
     return Api.get_history_paths(path or '')
 end
 
