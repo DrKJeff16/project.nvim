@@ -4,12 +4,8 @@ permissions:
   contents: read
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types:
-      - opened
+  - push
+  - pull_request
 
 env:
   CLICOLOR: 1
