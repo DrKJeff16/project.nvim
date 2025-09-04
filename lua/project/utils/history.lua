@@ -250,7 +250,9 @@ function History.write_history()
 
     if History.history_size ~= nil and History.history_size > 0 then
         -- Trim table to last 100 entries
-        tbl_out = len_res > History.history_size and vim.list_slice(res, len_res - History.history_size, len_res) or res
+        tbl_out = len_res > History.history_size
+                and vim.list_slice(res, len_res - History.history_size, len_res)
+            or res
     end
 
     -- Transform table to string
