@@ -21,7 +21,8 @@ jobs:
       - name: panvimdoc
         uses: kdheepak/panvimdoc@main
         with:
-          vimdoc: project-nvim # Output vimdoc project name (required)
+          vimdoc: ${{ github.event.repository.name }}
+          # vimdoc: project-nvim # Output vimdoc project name (required)
           # The following are all optional
           pandoc: "README.md" # Input pandoc file
           version: "NVIM v0.11.0" # Vim version number
