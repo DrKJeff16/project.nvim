@@ -4,8 +4,6 @@ on:
   - discussion
   - issues
   - pull_request
-  - pull_request_review
-  - pull_request_target
 
 jobs:
   label:
