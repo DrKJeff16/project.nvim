@@ -40,6 +40,7 @@ local is_type = Util.is_type
 
 ---@class Project.Utils.History
 ---@field has_watch_setup? boolean
+---@field history_size? integer
 local History = {}
 
 ---Projects from previous neovim sessions.
@@ -245,9 +246,12 @@ function History.write_history()
 
     local res = History.get_recent_projects()
     local len_res = #res
+    local tbl_out = res
 
-    -- Trim table to last 100 entries
-    local tbl_out = len_res > 100 and vim.list_slice(res, len_res - 100, len_res) or res
+    if History.history_size ~= nil and History.history_size > 0 then
+        -- Trim table to last 100 entries
+        tbl_out = len_res > History.history_size and vim.list_slice(res, len_res - History.history_size, len_res) or res
+    end
 
     -- Transform table to string
     local out = ''
