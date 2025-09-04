@@ -25,7 +25,7 @@ jobs:
         id: checkout
         run: |
           mkdir -pv project.nvim
-          cp -rv lua doc README.md LICENSE project.nvim
+          cp -rv lua doc plugin README.md LICENSE project.nvim
           zip -r -9 project.nvim.zip project.nvim
           tar cvJf project.nvim.tar.xz project.nvim
           sha512sum project.nvim.zip > project.nvim.zip.sha512sum
