@@ -266,6 +266,16 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `false` ~
 
 
+    * {historysize}             (integer)
+                                The history size.
+                                This will indicate how many entries
+                                will be written to the history file.
+                                Set to `0` for no limit
+                                (by @acristoffers)
+
+                                Default: `100` ~
+
+
     * {telescope}               (|Project.Config.Telescope|)
                                 Table of options used for the telescope picker.
 

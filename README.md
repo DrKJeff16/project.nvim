@@ -344,6 +344,16 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
   ---@type boolean
   enable_autochdir = false,
 
+  ---The history size. (by @acristoffers)
+  ---
+  ---This will indicate how many entries will be written to the history file.
+  ---Set to `0` for no limit.
+  --- ---
+  ---Default: `100`
+  --- ---
+  ---@type integer
+  historysize = 100
+
   ---Table of options used for the telescope picker.
   --- ---
   ---@class Project.Config.Options.Telescope
@@ -440,15 +450,6 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
   --- ---
   ---@type string
   datapath = vim.fn.stdpath('data'),
-
-  ---The history size
-  ---
-  ---How many entries will be written to the history file. Set to `0` for no limit.
-  --- ---
-  ---Default: `100`
-  --- ---
-  ---@type integer
-  historysize = 100
 }
 ```
 
@@ -900,10 +901,11 @@ If you lack the required permissions for that directory, you can either:
 - [@jay-babu](https://github.com/jay-babu): Solved many issues in [their fork](https://github.com/jay-babu/project.nvim)
   much earlier
 - [@ldfwbebp](https://github.com/ldfwbebp): Integrated options for telescope picker
+- [@acristoffers](https://github.com/acristoffers) For PR #10
+- [@pandar00](https://github.com/pandar00): For PR #4
 - [@D7ry](https://github.com/D7ry): Made the original `get_current_project()` hook
 - [@steinbrueckri](https://github.com/steinbrueckri): Thank you for your support!
 - [@gmelodie](https://github.com/gmelodie): Thank you for your support!
-- [@pandar00](https://github.com/pandar00): **CONTRIBUTOR** (https://github.com/DrKJeff16/project.nvim/pull/4)
 - [@Zeioth](https://github.com/Zeioth): [Implemented the filetype/buftype exclusions in their fork](https://github.com/Zeioth/project.nvim/commit/95f56b8454f3285b819340d7d769e67242d59b53)
 
 <div align="right">
