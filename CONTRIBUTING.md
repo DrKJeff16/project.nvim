@@ -1,3 +1,5 @@
+<div align="center"
+
 # CONTRIBUTING
 
 ## Table of Contents
@@ -6,7 +8,10 @@
 2. [Recommendations](#recommendations)
     1. [StyLua](#stylua)
     2. [`pre-commit`](#pre-commit)
+    3. [`selene`](#selene)
 3. [Code Annotations](#code-annotations)
+
+</div>
 
 ---
 
@@ -15,11 +20,10 @@
 - **UNCREDITED CODE**. If pulling from somewhere else, _**paste the reference URL in a comment**_
 - **NO LUA ANNOTATIONS**. See [Code Annotations](#code-annotations)
 - **MERGE COMMITS**. Favour `git rebase` instead
-- **UNSIGNED COMMITS**. Read this guide[^2]
-  to sign your commits
+- **UNSIGNED COMMITS**. Read the guide[^2] on signing your commits
 - **UNTESTED CHANGES** _(if warranted)_. Make sure to test your changes before making a PR
-- **UNFORMATTED CODE**. See [StyLua](#stylua)
-- **NON-`LF` LINE ENDINGS**. Make sure to set the following through `git config`:
+- **UNFORMATTED CODE**. See the [StyLua](#stylua) section
+- **`CRLF` LINE ENDINGS**. Make sure to set your config in your CLI:
     ```sh
     # If you want to enforce this only in this repository
     git config --local core.autocrlf false
@@ -32,7 +36,7 @@
     And set this in your nvim config (recommended):
     ```lua
     -- init.lua, for instance
-    vim.opt.fileformat = 'unix'
+    vim.o.fileformat = 'unix'
     ```
     or
     ```vim
@@ -72,6 +76,21 @@ pre-commit install
 ```
 
 And now every time you run `git commit` the hooks contained in `.pre-commit-config.yaml` will run.
+
+### selene
+
+Here [`selene`](https://github.com/Kampfkarren/selene) is used for linting Lua code.
+The configuration is already set, but you can install it through `cargo`:
+
+```sh
+cargo install selene
+```
+
+It is recommended you use it to lint/check your code:
+
+```sh
+selene .
+```
 
 ---
 
@@ -131,9 +150,13 @@ return Foo
 **BEAR IN MIND ANY FIELD THAT'S NOT EXPLICITLY DEFINED SHOULD GO UNDER THE** `---@class` **ANNOTATION**.
 e.g. `Foo.things` above.
 
+**Undocumented code will be either asked for corrections or, if not willing to document, _rejected_.**
+
 </div>
 
 ---
+
+## Footnotes
 
 [^1]: https://luals.github.io/wiki/annotations/
 [^2]: https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
