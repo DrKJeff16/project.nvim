@@ -14,6 +14,7 @@ local h_error = vim.health.error or vim.health.report_error
 
 local empty = vim.tbl_isempty
 local copy = vim.deepcopy
+local in_tbl = vim.tbl_contains
 
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
@@ -68,31 +69,38 @@ function Health.options_check()
     start('Config')
 
     local Options = Config.options
-    table.sort(Options)
 
     if not is_type('table', Options) then
         h_error('The config table is missing!')
         return
     end
 
+    table.sort(Options)
+    local exceptions = {
+        'verify_methods',
+        'verify_scope_chdir',
+        'new',
+    }
+
     for k, v in next, Options do
         k = is_type('string', k) and k or ''
+        if not in_tbl(exceptions, k) then
+            ---@type table|string[]|nil
+            local constraints = nil
 
-        ---@type table|string[]|nil
-        local constraints = nil
+            if k == 'scope_chdir' then
+                constraints = { 'global', 'tab', 'win' }
+            end
 
-        if k == 'scope_chdir' then
-            constraints = { 'global', 'tab', 'win' }
-        end
+            local str, warning = format_per_type(type(v), v, nil, constraints)
 
-        local str, warning = format_per_type(type(v), v, nil, constraints)
+            str = fmt(' - %s: %s', k, str)
 
-        str = fmt(' - %s: %s', k, str)
-
-        if is_type('boolean', warning) and warning then
-            h_warn(str)
-        else
-            ok(str)
+            if is_type('boolean', warning) and warning then
+                h_warn(str)
+            else
+                ok(str)
+            end
         end
     end
 end
