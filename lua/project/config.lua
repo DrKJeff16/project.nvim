@@ -34,6 +34,7 @@ function Config.setup(options)
 
     Config.options:verify_methods()
     Config.options:verify_scope_chdir()
+    Config.options:verify_histsize()
 
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
     vim.o.autochdir = Config.options.enable_autochdir

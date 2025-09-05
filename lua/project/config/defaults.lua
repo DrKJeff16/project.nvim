@@ -232,14 +232,35 @@ DEFAULTS.disable_on = {
 ---@type string
 DEFAULTS.datapath = vim.fn.stdpath('data')
 
----The history size
+---The history size. (by `@acristoffers`)
 ---
----How many entries will be written to the history file. Set to `0` for no limit.
+---This will indicate how many entries will be
+---written to the history file.
+---Set to `0` for no limit.
 --- ---
 ---Default: `100`
 --- ---
 ---@type integer
 DEFAULTS.historysize = 100
+
+--------- UTILITIES ---------
+
+---Checks the `historysize` option.
+---
+---If the option is not valid, a warning will be raised and
+---the value will revert back to the default.
+--- ---
+---@param self Project.Config.Options
+function DEFAULTS:verify_histsize()
+    validate('historysize', self.historysize, 'number', false, 'integer')
+
+    if self.historysize >= 0 or self.historysize == math.floor(self.historysize) then
+        return
+    end
+
+    vim.notify('`historysize` option invalid. Reverting to default option.', WARN)
+    self.historysize = DEFAULTS.historysize
+end
 
 ---Checks the `scope_chdir` option.
 ---
@@ -321,11 +342,11 @@ end
 ---@return Project.Config.Options
 function DEFAULTS.new()
     ---@type Project.Config.Options
-    local self = setmetatable({}, { __index = DEFAULTS })
+    local self = setmetatable(DEFAULTS, { __index = DEFAULTS })
 
     return self
 end
 
-return DEFAULTS
+return DEFAULTS.new()
 
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
