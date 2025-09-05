@@ -396,8 +396,6 @@ function Api.init()
     local group = augroup('project.nvim', { clear = false })
     local detection_methods = Config.options.detection_methods
 
-    History.history_size = Config.options.historysize
-
     ---@type AutocmdTuple[]
     local autocmds = {
         {

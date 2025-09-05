@@ -40,7 +40,7 @@ local is_type = Util.is_type
 
 ---@class Project.Utils.History
 ---@field has_watch_setup? boolean
----@field history_size? integer
+---@field historysize? integer
 local History = {}
 
 ---Projects from previous neovim sessions.
@@ -238,20 +238,24 @@ end
 ---Bear in mind: **_this function is synchronous._**
 --- ---
 function History.write_history()
+    local Config = require('project.config')
+
     local fd = History.open_history(History.recent_projects ~= nil and 'w' or 'a')
 
     if fd == nil then
         error('(project.utils.history.write_history): File restricted', ERROR)
     end
 
+    History.historysize = Config.options.historysize or 100
+
     local res = History.get_recent_projects()
     local len_res = #res
     local tbl_out = res
 
-    if History.history_size ~= nil and History.history_size > 0 then
+    if History.historysize ~= nil and History.historysize > 0 then
         -- Trim table to last 100 entries
-        tbl_out = len_res > History.history_size
-                and vim.list_slice(res, len_res - History.history_size, len_res)
+        tbl_out = len_res > History.historysize
+                and vim.list_slice(res, len_res - History.historysize, len_res)
             or res
     end
 
