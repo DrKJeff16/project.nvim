@@ -14,7 +14,7 @@ I will be maintaining this plugin for the foreseeable future.
 
 ---
 
-## Checkhealth Support
+### Checkhealth Support
 
 <div align="center">
 
@@ -24,7 +24,7 @@ https://github.com/user-attachments/assets/1808f20a-789a-41d3-8dbb-bf962c34cf5b
 
 ---
 
-## Telescope Integration
+### Telescope Integration
 
 <div align="center">
 
@@ -34,7 +34,7 @@ https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 
 ---
 
-## Alternatives
+### Alternatives
 
 Show these much love!
 
