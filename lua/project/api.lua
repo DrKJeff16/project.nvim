@@ -39,13 +39,6 @@ local autocmd = vim.api.nvim_create_autocmd
 local buf_name = vim.api.nvim_buf_get_name
 local fnamemodify = vim.fn.fnamemodify
 
----@alias AutocmdTuple { [1]: string[]|string, [2]: vim.api.keyset.create_autocmd }
-
----@class ProjectCmd
----@field name string
----@field cmd fun(ctx?: vim.api.keyset.create_user_command.command_args)
----@field opts? vim.api.keyset.user_command
-
 ---@class Project.API
 ---@field last_project? string
 ---@field current_project? string
@@ -145,10 +138,6 @@ end
 ---@param group integer
 function Api.gen_lsp_autocmd(group)
     validate('group', group, Util.int_validator, false, 'integer')
-    if vim.g.project_setup ~= 1 then
-        return
-    end
-
     autocmd('LspAttach', {
         group = group,
         callback = function(ev)
@@ -396,41 +385,27 @@ function Api.init()
     local group = augroup('project.nvim', { clear = false })
     local detection_methods = Config.options.detection_methods
 
-    ---@type AutocmdTuple[]
-    local autocmds = {
-        {
-            'VimLeavePre',
-            {
-                pattern = '*',
-                group = group,
-                callback = function()
-                    History.write_history()
-                end,
-            },
-        },
-    }
+    vim.api.nvim_create_autocmd('VimLeavePre', {
+        pattern = '*',
+        group = group,
+        callback = function()
+            History.write_history()
+        end,
+    })
 
     if not Config.options.manual_mode then
-        table.insert(autocmds, {
-            { 'BufEnter', 'WinEnter', 'BufWinEnter' },
-            {
-                pattern = '*',
-                group = group,
-                nested = true,
-                callback = function(ev)
-                    Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
-                end,
-            },
+        vim.api.nvim_create_autocmd({ 'BufEnter', 'WinEnter', 'BufWinEnter' }, {
+            pattern = '*',
+            group = group,
+            nested = true,
+            callback = function(ev)
+                Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
+            end,
         })
 
         if in_tbl(detection_methods, 'lsp') then
             Api.gen_lsp_autocmd(group)
         end
-    end
-
-    for _, value in next, autocmds do
-        local events, au_tbl = value[1], value[2]
-        autocmd(events, au_tbl)
     end
 
     History.read_history()
