@@ -281,6 +281,13 @@ function DEFAULTS:verify_scope_chdir()
     self.scope_chdir = DEFAULTS.scope_chdir
 end
 
+function DEFAULTS:verify_datapath()
+    if not Util.dir_exists(self.datapath) then
+        vim.notify('Invalid `datapath`, reverting to default.', WARN)
+        self.datapath = DEFAULTS.datapath
+    end
+end
+
 ---Checks the `detection_methods` option.
 ---
 ---If the option is not a table, a warning will be raised and
