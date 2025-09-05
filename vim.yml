@@ -1,6 +1,6 @@
 ---
 base: lua51
-name: neovim
+name: vim
 
 globals:
   _:
