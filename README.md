@@ -901,9 +901,9 @@ If you lack the required permissions for that directory, you can either:
 - [@jay-babu](https://github.com/jay-babu): Solved many issues in [their fork](https://github.com/jay-babu/project.nvim)
   much earlier
 - [@ldfwbebp](https://github.com/ldfwbebp): Integrated options for telescope picker
-- [@pandar00](https://github.com/pandar00): For PR #4
-- [@acristoffers](https://github.com/acristoffers): For PR #10
-- [@tomaskallup](https://github.com/tomaskallup): For code improvements #11
+- [@pandar00](https://github.com/pandar00): For PR [#4](https://github.com/DrKJeff16/project.nvim/pull/4)
+- [@acristoffers](https://github.com/acristoffers): For PR [#10](https://github.com/DrKJeff16/project.nvim/pull/10)
+- [@tomaskallup](https://github.com/tomaskallup): For code improvements [#11](https://github.com/DrKJeff16/project.nvim/issues/11)
 - [@D7ry](https://github.com/D7ry): Made the original `get_current_project()` hook
 - [@steinbrueckri](https://github.com/steinbrueckri): Thank you for your support!
 - [@gmelodie](https://github.com/gmelodie): Thank you for your support!
