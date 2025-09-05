@@ -206,9 +206,7 @@ function Util.rstrip(char, str)
         i = i + 1
     end
 
-    new_str = string.reverse(new_str)
-
-    return new_str
+    return new_str:reverse()
 end
 
 ---Strip a given leading `char` in a string, if any, bidirectionally.
@@ -244,7 +242,7 @@ end
 ---an error will be raised.
 --- ---
 ---@param T table
----@return table t
+---@return table NT
 function Util.dedup(T)
     validate('T', T, 'table', false)
 
@@ -252,15 +250,15 @@ function Util.dedup(T)
         return T
     end
 
-    local t = {}
+    local NT = {}
 
     for _, v in next, T do
-        if not in_tbl(t, v) then
-            table.insert(t, v)
+        if not in_tbl(NT, v) then
+            table.insert(NT, v)
         end
     end
 
-    return t
+    return NT
 end
 
 ---@param t 'number'|'string'|'boolean'|'table'|'function'
