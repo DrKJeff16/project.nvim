@@ -1,10 +1,7 @@
 local fmt = string.format
 local uv = vim.uv or vim.loop
 
----@class HistoryCheck
----@field name string
----@field type 'file'|'directory'
----@field path string
+---@alias HistoryCheck { name: string, type: ('file'|'directory'), path: string }
 
 local start = vim.health.start or vim.health.report_start
 local ok = vim.health.ok or vim.health.report_ok
