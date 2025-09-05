@@ -79,11 +79,11 @@ function Health.options_check()
     local exceptions = {
         'verify_methods',
         'verify_scope_chdir',
+        'verify_datapath',
         'new',
     }
 
     for k, v in next, Options do
-        k = is_type('string', k) and k or ''
         if not in_tbl(exceptions, k) then
             ---@type table|string[]|nil
             local constraints = nil

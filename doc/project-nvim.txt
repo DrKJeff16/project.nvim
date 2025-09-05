@@ -325,6 +325,20 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `'global'` ~
 
 
+    * {before_attach}           (`nil|fun()`)
+                                Hook to run before attaching to a new project.
+                                If `nil`, it won't run
+
+                                Default: `nil` ~
+
+
+    * {on_attach}               (`nil|fun()`)
+                                Hook to run after attaching to a new project.
+                                If `nil`, it won't run
+
+                                Default: `nil` ~
+
+
     * {datapath}                (string)
                                 The path where `project/project_history`
                                 will be stored in.

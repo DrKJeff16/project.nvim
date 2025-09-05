@@ -163,6 +163,10 @@ function Api.set_pwd(dir, method)
         return false
     end
 
+    if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
+        Config.options.before_attach()
+    end
+
     local verbose = not Config.options.silent_chdir
 
     if empty(History.session_projects) then
@@ -216,6 +220,10 @@ function Api.set_pwd(dir, method)
         vim.schedule(function()
             notify(msg, (ok and INFO or WARN))
         end)
+    end
+
+    if Config.options.on_attach ~= nil and vim.is_callable(Config.options.on_attach) then
+        Config.options.on_attach()
     end
 
     return true

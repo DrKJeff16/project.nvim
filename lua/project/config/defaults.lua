@@ -64,7 +64,26 @@ DEFAULTS.patterns = {
     '.bzr',
     '.svn',
     'Pipfile',
+    'pyproject.toml',
 }
+
+---Hook to run before attaching to a new project.
+---
+---If `nil`, it won't run.
+--- ---
+---Default: `nil`
+--- ---
+---@type nil|fun(...: any)
+DEFAULTS.before_attach = nil
+
+---Hook to run after attaching to a new project.
+---
+---If `nil`, it won't run.
+--- ---
+---Default: `nil`
+--- ---
+---@type nil|fun(...: any)
+DEFAULTS.on_attach = nil
 
 ---Sets whether to use Pattern Matching rules to the LSP client.
 ---

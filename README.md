@@ -441,6 +441,24 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
   ---@type 'global'|'tab'|'win'
   scope_chdir = 'global',
 
+  ---Hook to run before attaching to a new project.
+  ---
+  ---If `nil`, it won't run.
+  --- ---
+  ---Default: `nil`
+  --- ---
+  ---@type nil|fun()
+  before_attach = nil,
+
+  ---Hook to run after attaching to a new project.
+  ---
+  ---If `nil`, it won't run.
+  --- ---
+  ---Default: `nil`
+  --- ---
+  ---@type nil|fun()
+  on_attach = nil,
+
   ---The path where `project.nvim` will store the project history directory,
   ---containing the project history in it.
   ---
