@@ -12,6 +12,7 @@ vim.api.nvim_create_user_command('ProjectRoot', function(ctx)
     Api.on_buf_enter(bang)
 end, {
     bang = true,
+    desc = 'Sets the current project root to the current CWD',
 })
 
 vim.api.nvim_create_user_command('ProjectAdd', function(ctx)
@@ -21,6 +22,7 @@ vim.api.nvim_create_user_command('ProjectAdd', function(ctx)
     Api.add_project_manually(bang)
 end, {
     bang = true,
+    desc = 'Adds the current CWD project to the Project History',
 })
 
 ---`:ProjectConfig`
@@ -29,7 +31,9 @@ vim.api.nvim_create_user_command('ProjectConfig', function()
     local inspect = vim.inspect
 
     vim.notify(inspect(cfg))
-end, {})
+end, {
+    desc = 'Prints out the current configuratiion for `project.nvim`',
+})
 
 vim.api.nvim_create_user_command('ProjectRecents', function()
     local Api = require('project.api')
@@ -52,7 +56,9 @@ vim.api.nvim_create_user_command('ProjectRecents', function()
     end
 
     vim.notify(msg, INFO)
-end, {})
+end, {
+    desc = 'Prints out the recent `project.nvim` projects',
+})
 
 vim.api.nvim_create_user_command('ProjectDelete', function(ctx)
     local bang = ctx.bang ~= nil and ctx.bang or false
@@ -78,7 +84,7 @@ vim.api.nvim_create_user_command('ProjectDelete', function(ctx)
         end
     end
 end, {
-    desc = 'Delete the projects given as args, assuming they are valid',
+    desc = 'Deletes the projects given as args, assuming they are valid',
     bang = true,
     nargs = '+',
 
