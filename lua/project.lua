@@ -17,6 +17,8 @@ function Project.setup(options)
 end
 
 ---Returns the project root, as well as the method used.
+---
+---If no project root is found, nothing will be returned.
 --- ---
 ---@return string? root
 ---@return string? method
@@ -25,11 +27,7 @@ function Project.get_project_root()
     return root, method
 end
 
----@param project string|Project.ActionEntry
-function Project.delete_project(project)
-    validate('project', project, { 'table', 'string' }, false, 'string|Project.ActionEntry')
-    Api.delete_project(project)
-end
+Project.delete_project = Api.delete_project
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|{ datapath: string, projectpath: string, historyfile: string }

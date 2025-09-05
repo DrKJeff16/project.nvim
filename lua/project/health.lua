@@ -146,15 +146,9 @@ function Health.project_check()
     start('Current Project')
 
     local curr, method, last = Api.current_project, Api.current_method, Api.last_project
-    local msg
-
-    msg = fmt('Current project: `%s`', curr ~= nil and curr or 'No Current Project')
-    info(msg)
-
-    msg = fmt('Method used: `%s`', method ~= nil and method or 'No method available')
-    info(msg)
-
-    msg = fmt('Last project: `%s`', last ~= nil and last or 'No Last Project In History')
+    local msg = fmt('Current project: `%s`\n', curr ~= nil and curr or 'No Current Project')
+    msg = fmt('%sMethod used: `%s`\n', msg, (method ~= nil and method or 'No method available'))
+    msg = fmt('%sLast project: `%s`\n', msg, (last ~= nil and last or 'No Last Project In History'))
     info(msg)
 
     start('Active Sessions')

@@ -32,7 +32,6 @@ local root_included = Path.root_included
 local validate = vim.validate
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
-local copy = vim.deepcopy
 local notify = vim.notify
 local curr_buf = vim.api.nvim_get_current_buf
 local augroup = vim.api.nvim_create_augroup
@@ -302,21 +301,13 @@ end
 ---@return string? last
 function Api.get_last_project()
     local recent = Api.get_recent_projects()
-    if empty(recent) then
+    if empty(recent) or #recent == 1 then
         return nil
     end
 
-    ---@type string|nil, integer
-    local last, recent_len = nil, #recent
+    recent = reverse(recent)
 
-    if recent_len > 1 then
-        recent = reverse(copy(recent))
-        last = recent[2]
-    elseif recent_len == 1 then
-        last = recent[1]
-    end
-
-    return last
+    return recent[1]
 end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
@@ -371,12 +362,15 @@ function Api.on_buf_enter(verbose, bufnr)
         return
     end
 
-    Api.current_project, Api.current_method, Api.last_project = Api.get_current_project()
+    Api.current_project, Api.current_method = Api.get_current_project()
     Api.set_pwd(Api.current_project, Api.current_method)
+    Api.last_project = Api.get_last_project()
 
     History.write_history()
 end
 
+---Deletes a project string, or a Telescope Entry type.
+--- ---
 ---@param project string|Project.ActionEntry
 function Api.delete_project(project)
     validate('project', project, { 'string', 'table' }, false, 'string|Project.ActionEntry')
@@ -387,7 +381,6 @@ end
 ---@param verbose? boolean
 function Api.add_project_manually(verbose)
     validate('verbose', verbose, 'boolean', true)
-
     verbose = verbose ~= nil and verbose or false
 
     local dir = fnamemodify(buf_name(curr_buf()), ':p:h')
