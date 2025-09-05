@@ -1,5 +1,0 @@
-# Apply override to all files in the directory
-*.md        linguist-detectable text eol=lf
-*.lua       text eol=lf
-*.yaml      text eol=lf
-*.yml       text eol=lf
