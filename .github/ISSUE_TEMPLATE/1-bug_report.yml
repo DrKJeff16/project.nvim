@@ -17,6 +17,7 @@ body:
           required: true
         - label: I have read the docs (`README.md`, `:h project-nvim`, etc.), and also the ones for `telescope.nvim`
           required: true
+
   - type: checkboxes
     attributes:
       label: What is the problem you encountered relate to?
@@ -40,52 +41,50 @@ body:
           required: false
         - label: Other
           required: false
+
   - type: input
     attributes:
       label: "What neovim version are you using? (`nvim -v`)"
       placeholder: "v0.12.0-dev-839+ga08d6a8ac1"
     validations:
       required: true
+
   - type: input
     attributes:
       label: "Operating system and, if possible, what version?"
       placeholder: Linux 6.15.6-arch1-1
     validations:
       required: true
+
   - type: textarea
     attributes:
       label: Describe the bug
       description: Write down what happened, as detailed as you can. Avoid irrelevant info
     validations:
       required: true
+
   - type: textarea
     attributes:
       label: Steps To Reproduce
       description: Steps to reproduce the behavior
-      placeholder: |
-        1.
-        2.
-        3.
     validations:
       required: true
+
   - type: textarea
     attributes:
       label: Expected Behavior
       description: Describe clearly what were you expecting to occur
     validations:
       required: true
+
   - type: textarea
     attributes:
       label: Output of `:checkhealth project`
-      description: |
-        If the plugin can be loaded, please run `:checkhealth project`
-        and paste the output below.
+      description: If you can run `project.nvim`, run `:checkhealth project` and paste the output.
+      placeholder: "<PASTE HERE IF POSSIBLE>"
+    validations:
+      required: false
 
-        If there is any sensitive data please replace with `REDACTED`.
-      value: |
-        <PASTE HERE IF POSSIBLE>
-      validations:
-        required: false
   - type: textarea
     attributes:
       label: How did you setup the plugin?
@@ -105,6 +104,7 @@ body:
       render: lua
     validations:
       required: false
+
   - type: textarea
     attributes:
       label: Additional Info and/or Screenshots
