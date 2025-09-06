@@ -426,11 +426,12 @@ end
 --- ---
 function Api.run_fzf_lua()
     local fzf_lua = require('fzf-lua')
+
     fzf_lua.fzf_exec(function(cb)
         local results = Api.get_recent_projects()
         results = reverse(results)
-        for _, e in ipairs(results) do
-            cb(e)
+        for _, entry in ipairs(results) do
+            cb(entry)
         end
         cb()
     end, {
