@@ -75,10 +75,10 @@ Show these much love!
 
 ## Features
 
-- Automagically `cd` to the project root directory using `vim.lsp`
-- If no LSP is available then it'll try using pattern matching to `cd` to the project root directory instead
+- Automagically `cd` to the project root directory using `vim.lsp` or pattern matching
 - Asynchronous file IO so it will not slow down neovim when reading the history file on startup
-- **(NEW!)** Users can control whether to run this or not by filetype/buftype
+- Users can control whether to run this or not by filetype/buftype
+- **(NEW!)** Fzf-Lua integration (credits to [@deathmaz](https://github.com/deathmaz))
 - Functional `checkhealth` hook `:checkhealth project`
 - Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
 - Logging capabilities **_(WIP, EXPERIMENTAL)_**
@@ -633,6 +633,14 @@ _You can find the Actions in [`telescope/_extensions/projects/actions.lua`](./lu
 
 These are the user commands you can call from the cmdline:
 
+### ProjectFzf
+
+> This command is only enabled if you have `fzf-lua` installed
+
+The `:ProjectFzf` command is a dynamicly enabled User Command that runs
+`project.nvim` through `fzf-lua`.
+For now it just executes [`require('project.api').run_fzf_lua()`](./lua/project/api.lua).
+
 ### ProjectAdd
 
 The `:ProjectAdd` command is a manual hook to add to session projects, then
@@ -919,6 +927,7 @@ If you lack the required permissions for that directory, you can either:
 - [@ahmedkhalf](https://github.com/ahmedkhalf): The author of the plugin this is based from
 - [@jay-babu](https://github.com/jay-babu): Solved many issues in [their fork](https://github.com/jay-babu/project.nvim)
   much earlier
+- [@deathmaz](https://github.com/deathmaz): Fzf-Lua integration
 - [@ldfwbebp](https://github.com/ldfwbebp): Integrated options for telescope picker
 - [@pandar00](https://github.com/pandar00): For PR [#4](https://github.com/DrKJeff16/project.nvim/pull/4)
 - [@acristoffers](https://github.com/acristoffers): For PR [#10](https://github.com/DrKJeff16/project.nvim/pull/10)
