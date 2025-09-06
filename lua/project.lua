@@ -2,6 +2,9 @@ local validate = vim.validate
 
 local Config = require('project.config')
 local Api = require('project.api')
+local Util = require('project.utils.util')
+
+local vim_has = Util.vim_has
 
 ---The `project.nvim` module.
 ---
@@ -12,7 +15,11 @@ local Project = {}
 
 ---@param options? Project.Config.Options
 function Project.setup(options)
-    validate('options', options, 'table', true, 'Project.Config.Options')
+    if vim_has('nvim-0.11') then
+        validate('options', options, 'table', true, 'Project.Config.Options')
+    else
+        validate({ options = { options, { 'table', 'nil' } } })
+    end
     Config.setup(options or {})
 end
 
@@ -38,7 +45,12 @@ end
 ---@param refresh? boolean
 ---@return string? last
 function Project.get_last_project(refresh)
-    validate('refresh', refresh, 'boolean', true)
+    if vim_has('nvim-0.11') then
+        validate('refresh', refresh, 'boolean', true)
+    else
+        validate({ refresh = { refresh, { 'boolean', 'nil' } } })
+    end
+
     refresh = refresh ~= nil and refresh or false
 
     local last = refresh and Api.last_project or Api.get_last_project()
@@ -58,7 +70,11 @@ end
 ---@return string? method
 ---@return string? last
 function Project.current_project(refresh)
-    validate('refresh', refresh, 'boolean', true)
+    if vim_has('nvim-0.11') then
+        validate('refresh', refresh, 'boolean', true)
+    else
+        validate({ refresh = { refresh, { 'boolean', 'nil' } } })
+    end
     refresh = refresh ~= nil and refresh or false
 
     local curr, method, last = Api.current_project, Api.current_method, Api.last_project

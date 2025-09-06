@@ -17,6 +17,10 @@ local in_tbl = vim.tbl_contains
 ---@class Project.Utils.Util
 local Util = {}
 
+function Util.vim_has(feature)
+    return vim.fn.has(feature) == 1
+end
+
 ---Checks whether nvim is running on Windows.
 --- ---
 ---@return boolean
