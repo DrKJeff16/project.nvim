@@ -12,25 +12,17 @@ I will be maintaining this plugin for the foreseeable future.
 
 </div>
 
----
-
 ### Checkhealth Support
 
-<div align="center">
-
-https://github.com/user-attachments/assets/1808f20a-789a-41d3-8dbb-bf962c34cf5b
-
-</div>
-
----
+https://github.com/user-attachments/assets/436f5cbe-7549-4b8a-b962-4fce3d2a2fc3
 
 ### Telescope Integration
 
-<div align="center">
-
 https://github.com/user-attachments/assets/e0f804ad-adf5-4ca7-8c9a-086cdd8cf83b
 
-</div>
+### Fzf-Lua Integration
+
+https://github.com/user-attachments/assets/1516ff2e-29d9-4e0d-b592-bf2f79ab8158
 
 ---
 
