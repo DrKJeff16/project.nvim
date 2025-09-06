@@ -17,13 +17,14 @@ local uv = vim.uv or vim.loop
 ---The project history file.
 --- ---
 ---@field historyfile? string
+---@field last_dir_cache? string
+---@field curr_dir_cache? string[]
 local Path = {}
-
-Path.last_dir_cache = ''
-Path.curr_dir_cache = {}
 
 ---@param file_dir string
 function Path.get_files(file_dir)
+    validate('file_dir', file_dir, 'string', false)
+
     Path.last_dir_cache = file_dir
     Path.curr_dir_cache = {}
 
@@ -77,6 +78,7 @@ end
 ---@return string|'/'
 function Path.get_parent(path_str)
     path_str = path_str:match('^(.*)/')
+    vim.notify(fmt('Parent: %s', path_str or '/'))
     return (path_str ~= '') and path_str or '/' ---@cast path_str  string
 end
 
@@ -93,7 +95,8 @@ function Path.sub(dir, identifier)
             return true
         end
 
-        current, path_str = path_str, Path.get_parent(path_str)
+        current = path_str
+        path_str = Path.get_parent(path_str)
 
         if current == path_str then
             return false
