@@ -304,7 +304,7 @@ function Api.get_last_project()
 
     recent = reverse(recent)
 
-    return recent[1]
+    return recent[2]
 end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
