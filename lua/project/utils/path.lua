@@ -78,6 +78,7 @@ end
 ---@return string|'/'
 function Path.get_parent(path_str)
     path_str = path_str:match('^(.*)/')
+    vim.notify(fmt('Parent: %s', path_str or '/'))
     return (path_str ~= '') and path_str or '/' ---@cast path_str  string
 end
 
