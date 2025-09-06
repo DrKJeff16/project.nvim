@@ -419,6 +419,36 @@ function Api.init()
     History.read_history()
 end
 
+---This runs assuming you have FZF-Lua installed!
+---
+---CREDITS: @deathmaz
+---https://github.com/ahmedkhalf/project.nvim/issues/71#issuecomment-1212993659
+--- ---
+function Api.run_fzf_lua()
+    local fzf_lua = require('fzf-lua')
+    fzf_lua.fzf_exec(function(cb)
+        local results = Api.get_recent_projects()
+        for _, e in ipairs(results) do
+            cb(e)
+        end
+        cb()
+    end, {
+        actions = {
+            ['default'] = {
+                function(selected)
+                    fzf_lua.files({ cwd = selected[1] })
+                end,
+            },
+            ['ctrl-d'] = {
+                function(selected)
+                    Api.delete_project({ value = selected[1] })
+                end,
+                fzf_lua.actions.resume,
+            },
+        },
+    })
+end
+
 return Api
 
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:

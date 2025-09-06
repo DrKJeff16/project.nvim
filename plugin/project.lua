@@ -96,3 +96,9 @@ end, {
         return Api.get_recent_projects() or {}
     end,
 })
+
+if require('project.utils.util').mod_exists('fzf-lua') then
+    vim.api.nvim_create_user_command('ProjectFzf', require('project').run_fzf_lua, {
+        desc = 'Run project.nvim through Fzf-Lua (assuming you have it enabled)',
+    })
+end

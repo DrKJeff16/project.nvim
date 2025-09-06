@@ -75,6 +75,8 @@ function Project.get_config()
     return vim.g.project_setup == 1 and Config.options or nil
 end
 
+Project.run_fzf_lua = Api.run_fzf_lua
+
 return Project
 
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
