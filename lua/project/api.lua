@@ -75,18 +75,16 @@ function Api.find_lsp_root()
     for _, client in next, clients do
         ---@type table|string[]
         local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
-        local ignore_lsp = Config.options.ignore_lsp
         local valid = is_type('table', filetypes) and not empty(filetypes)
 
-        if not in_tbl(ignore_lsp, client.name) and valid then
+        if not in_tbl(Config.options.ignore_lsp, client.name) and valid then
             if in_tbl(filetypes, ft) and client.config.root_dir then
                 dir, name = client.config.root_dir, client.name
 
                 --- If pattern matching for LSP is enabled, check patterns
                 if allow_patterns then
-                    dir = root_included(dir)
-                    if dir == nil then
-                        return
+                    if root_included(client.config.root_dir) == nil then
+                        dir, name = nil, nil
                     end
                 end
 
@@ -123,7 +121,7 @@ end
 ---@return string? dir_res
 ---@return string? method
 function Api.find_pattern_root()
-    local dir = vim.fn.expand('%:p:h')
+    local dir = fnamemodify(buf_name(curr_buf()), ':p:h')
 
     if is_windows() then
         dir = dir:gsub('\\', '/')
@@ -133,12 +131,27 @@ function Api.find_pattern_root()
     return dir_res, method
 end
 
----@param dir string
----@param method string
+---Generates the autocommand for the `LspAttach` event.
+---
+---**_An `augroup` ID is mandatory!_**
+--- ---
+---@param group integer
+function Api.gen_lsp_autocmd(group)
+    validate('group', group, Util.int_validator, false, 'integer')
+    autocmd('LspAttach', {
+        group = group,
+        callback = function(ev)
+            Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
+        end,
+    })
+end
+
+---@param dir? string
+---@param method? string
 ---@return boolean
 function Api.set_pwd(dir, method)
-    validate('dir', dir, 'string', false)
-    validate('method', method, 'string', false)
+    validate('dir', dir, 'string', true)
+    validate('method', method, 'string', true)
 
     if dir == nil or method == nil then
         notify(fmt('(%s.set_pwd): `dir` and/or `method` are `nil`!', MODSTR), WARN)
@@ -150,11 +163,11 @@ function Api.set_pwd(dir, method)
         return false
     end
 
-    local verbose = not Config.options.silent_chdir
-
     if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
         Config.options.before_attach()
     end
+
+    local verbose = not Config.options.silent_chdir
 
     if empty(History.session_projects) then
         History.session_projects = { dir }
@@ -176,7 +189,7 @@ function Api.set_pwd(dir, method)
     end
 
     --- If directory is the same as current Project dir/CWD
-    if in_tbl({ dir }, vim.fn.getcwd(0, 0)) then
+    if in_tbl({ dir, Api.current_project or '' }, vim.fn.getcwd(0, 0)) then
         return true
     end
 
@@ -188,25 +201,24 @@ function Api.set_pwd(dir, method)
         return false
     end
 
-    Api.current_project = dir
-    Api.current_method = method
+    local ok = false
 
     if scope_chdir == 'global' then
-        vim.api.nvim_set_current_dir(dir)
+        ok = pcall(vim.api.nvim_set_current_dir, dir)
         msg = fmt('%s\nchdir: `%s`:', msg, dir)
     elseif scope_chdir == 'tab' then
-        vim.cmd.tchdir(dir)
+        ok = pcall(vim.cmd.tchdir, dir)
         msg = fmt('%s\ntchdir: `%s`:', msg, dir)
     elseif scope_chdir == 'win' then
-        vim.cmd.lchdir(dir)
+        ok = pcall(vim.cmd.lchdir, dir)
         msg = fmt('%s\nlchdir: `%s`:', msg, dir)
     end
 
-    msg = fmt('%s\nMethod: %s', msg, method)
+    msg = fmt('%s\nMethod: %s\nStatus: %s', msg, method, (ok and 'SUCCESS' or 'FAILED'))
 
     if verbose then
         vim.schedule(function()
-            notify(msg, INFO)
+            notify(msg, (ok and INFO or WARN))
         end)
     end
 
@@ -248,6 +260,8 @@ function Api.get_project_root()
         return
     end
 
+    local VALID = { 'lsp', 'pattern' }
+
     local SWITCH = {
         lsp = function()
             local root, lsp_name = Api.find_lsp_root()
@@ -271,11 +285,10 @@ function Api.get_project_root()
     }
 
     for _, detection_method in next, Config.options.detection_methods do
-        if detection_method == 'lsp' or detection_method == 'pattern' then
+        if in_tbl(VALID, detection_method) then
             local success, root, lsp_method = SWITCH[detection_method]()
 
             if success then
-                vim.notify(fmt('Detection method `%s`', detection_method))
                 return root, lsp_method
             end
         end
@@ -291,7 +304,7 @@ function Api.get_last_project()
 
     recent = reverse(recent)
 
-    return recent[2]
+    return recent[1]
 end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
@@ -317,13 +330,11 @@ function Api.buf_is_file(bufnr)
     return in_tbl({ '', 'acwrite' }, bt)
 end
 
----@param method string
 ---@param verbose? boolean
 ---@param bufnr? integer
-function Api.on_buf_enter(method, verbose, bufnr)
-    validate('method', method, 'string', false)
+function Api.on_buf_enter(verbose, bufnr)
     validate('verbose', verbose, 'boolean', true)
-    validate('bufnr', bufnr, 'number', true, 'integer')
+    validate('bufnr', bufnr, Util.int_validator, true, 'integer')
 
     verbose = verbose ~= nil and verbose or false
     bufnr = bufnr or curr_buf()
@@ -332,9 +343,9 @@ function Api.on_buf_enter(method, verbose, bufnr)
         return
     end
 
-    local dir = vim.fn.expand('%:p:h')
+    local dir = fnamemodify(buf_name(bufnr), ':p:h')
 
-    if not exists(dir) or is_excluded(dir) then
+    if not (exists(dir) and root_included(dir)) or is_excluded(dir) then
         if verbose then
             notify('Directory is either excluded or does not exist!', WARN)
         end
@@ -348,9 +359,8 @@ function Api.on_buf_enter(method, verbose, bufnr)
         return
     end
 
-    dir, method = root_included(dir)
-    Api.set_pwd(dir, method)
-
+    Api.current_project, Api.current_method = Api.get_current_project()
+    Api.set_pwd(Api.current_project, Api.current_method)
     Api.last_project = Api.get_last_project()
 
     History.write_history()
@@ -383,7 +393,7 @@ function Api.init()
     local group = augroup('project.nvim', { clear = false })
     local detection_methods = Config.options.detection_methods
 
-    autocmd('VimLeavePre', {
+    vim.api.nvim_create_autocmd('VimLeavePre', {
         pattern = '*',
         group = group,
         callback = function()
@@ -392,24 +402,17 @@ function Api.init()
     })
 
     if not Config.options.manual_mode then
-        if in_tbl(detection_methods, 'lsp') then
-            autocmd('LspAttach', {
-                group = group,
-                callback = function(ev)
-                    Api.on_buf_enter('lsp', not Config.options.silent_chdir, ev.buf)
-                end,
-            })
-        end
+        vim.api.nvim_create_autocmd({ 'BufEnter', 'WinEnter', 'BufWinEnter' }, {
+            pattern = '*',
+            group = group,
+            nested = true,
+            callback = function(ev)
+                Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
+            end,
+        })
 
-        if in_tbl(detection_methods, 'pattern') then
-            vim.api.nvim_create_autocmd({ 'BufWinEnter' }, {
-                pattern = '*',
-                group = group,
-                nested = true,
-                callback = function(ev)
-                    Api.on_buf_enter('pattern', not Config.options.silent_chdir, ev.buf)
-                end,
-            })
+        if in_tbl(detection_methods, 'lsp') then
+            Api.gen_lsp_autocmd(group)
         end
     end
 
