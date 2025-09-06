@@ -191,12 +191,7 @@ function Path.is_excluded(dir)
     return false
 end
 
----@param path string
----@return boolean
-function Path.exists(path)
-    --- CREDITS: @tomaskallup
-    return vim.fn.empty(vim.fn.glob(path:gsub('%[', '\\['))) == 0
-end
+Path.exists = Util.dir_exists
 
 function Path.init()
     local datapath = require('project.config').options.datapath

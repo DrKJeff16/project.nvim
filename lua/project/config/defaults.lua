@@ -65,6 +65,8 @@ DEFAULTS.patterns = {
     '.svn',
     'Pipfile',
     'pyproject.toml',
+    '.pre-commit-config.yaml',
+    '.pre-commit-config.yml',
 }
 
 ---Hook to run before attaching to a new project.
