@@ -523,6 +523,15 @@ Table of Contents                                             *project-nvim.toc*
     Some of them might be incomplete and/or reworked in the future.
 
 
+`:ProjectFzf`
+
+    This command is only enabled if you have `fzf-lua` installed ~
+
+    The `:ProjectFzf` command is a dynamicly enabled User Command that runs
+    `project.nvim` through `fzf-lua`.
+    For now it just executes `require('project').run_fzf_lua()`
+
+
                                                        *ProjectAdd*  *:ProjectAdd*
 `:ProjectAdd`
 
@@ -618,7 +627,14 @@ Table of Contents                                             *project-nvim.toc*
     to benefit from.
 
 ------------------------------------------------------------------------------
-8.1 `get_project_root()`                         *project-nvim.get_project_root()*
+8.2 `run_fzf_lua()`                                   *project-nvim.run_fzf_lua()*
+
+    `run_fzf_lua()` is an API utility to run this project using
+    `fzf-lua`. See |:ProjectFzf| for more info.
+
+
+------------------------------------------------------------------------------
+8.2 `get_project_root()`                         *project-nvim.get_project_root()*
 
     An internal method for the API to determine
     both the project root and the method/LSP used

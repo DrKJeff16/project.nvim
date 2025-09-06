@@ -55,6 +55,7 @@ Show these much love!
     4. [Telescope](#telescope)
         1. [Telescope Mappings](#telescope-mappings)
 5. [Commands](#commands)
+    1. [ProjectFzf](#projectfzf)
     1. [ProjectAdd](#projectadd)
     2. [ProjectRoot](#projectroot)
     3. [ProjectRecents](#projectrecents)
@@ -111,7 +112,9 @@ Please refer to [`TODO.md`](./TODO.md) for more info.
 **Requirements:**
 
 - Neovim >= 0.11.0
+- [`fzf-lua`](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
 - [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
+  - [`plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
 - [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(OPTIONAL)**
 
 </div>
@@ -639,7 +642,7 @@ These are the user commands you can call from the cmdline:
 
 The `:ProjectFzf` command is a dynamicly enabled User Command that runs
 `project.nvim` through `fzf-lua`.
-For now it just executes [`require('project.api').run_fzf_lua()`](./lua/project/api.lua).
+For now it just executes [`require('project').run_fzf_lua()`](#run-fzf-lua).
 
 ### ProjectAdd
 
@@ -758,6 +761,11 @@ _See [_`api.lua`_](./lua/project/api.lua) for more info_.
 
 The API can be found in [_`api.lua`_](./lua/project/api.lua).
 
+<h3 id="run-fzf-lua"><code>run_fzf_lua()</code></h3>
+
+`run_fzf_lua()` is an API utility to run this project using
+`fzf-lua`. See [`:ProjectFzf`](#projectfzf) for more info.
+
 <h3 id="get-project-root"><code>get_project_root()</code></h3>
 
 `get_project_root()` is an [API](./lua/project/api.lua) utility for finding out
@@ -767,12 +775,6 @@ about the current project's root, if any:
 ---@type fun(): (string|nil,string?)
 local root, lsp_or_method = require('project').get_project_root()
 ```
-
-<div align="right">
-
-[Go To Top](#project-nvim)
-
-</div>
 
 <h3 id="get-recent-projects"><code>get_recent_projects()</code></h3>
 
@@ -791,12 +793,6 @@ vim.print(recent_projects)
 
 Where `get_recent_projects()` returns either an empty table `{}` or a string array `{ '/path/to/project1', ... }`
 
-<div align="right">
-
-[Go To Top](#project-nvim)
-
-</div>
-
 <h3 id="get-config"><code>get_config()</code></h3>
 
 **If** `setup()` **has been called**, it returns a table containing the currently set options.
@@ -811,12 +807,6 @@ vim.notify(vim.inspect(config))
 -- Using `vim.print()`
 vim.print(config)
 ```
-
-<div align="right">
-
-[Go To Top](#project-nvim)
-
-</div>
 
 <h3 id="get-history-paths"><code>get_history_paths()</code></h3>
 
