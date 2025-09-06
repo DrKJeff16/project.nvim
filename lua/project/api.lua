@@ -275,7 +275,6 @@ function Api.get_project_root()
             local success, root, lsp_method = SWITCH[detection_method]()
 
             if success then
-                vim.notify(fmt('Detection method `%s`', detection_method))
                 return root, lsp_method
             end
         end
