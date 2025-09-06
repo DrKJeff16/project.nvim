@@ -1,6 +1,9 @@
 # Vim Helptags
 doc/tags
 
+# Local issue template
+ISSUE.md
+
 # Patching
 /patches/
 /.patches/
