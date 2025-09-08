@@ -97,8 +97,20 @@ end, {
     end,
 })
 
+---Add `Fzf-Lua` command ONLY if it is installed
 if require('project.utils.util').mod_exists('fzf-lua') then
     vim.api.nvim_create_user_command('ProjectFzf', require('project').run_fzf_lua, {
-        desc = 'Run project.nvim through Fzf-Lua (assuming you have it enabled)',
+        desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
     })
+end
+
+---Add `Telescope` shortcut ONLY if it is installed
+if require('project.utils.util').mod_exists('telescope') then
+    vim.api.nvim_create_user_command(
+        'ProjectTelescope',
+        require('telescope._extensions.projects').projects,
+        {
+            desc = 'Telescope shortcut for project.nvim picker',
+        }
+    )
 end
