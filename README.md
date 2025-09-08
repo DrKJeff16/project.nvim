@@ -101,8 +101,6 @@ Please refer to [`TODO.md`](./TODO.md) for more info.
 
 ---
 
-<div align="center">
-
 **Requirements:**
 
 - Neovim >= 0.11.0
@@ -110,8 +108,6 @@ Please refer to [`TODO.md`](./TODO.md) for more info.
 - [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
   - [`plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
 - [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(OPTIONAL)**
-
-</div>
 
 ---
 
