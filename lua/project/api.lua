@@ -380,7 +380,7 @@ function Api.add_project_manually(verbose)
     validate('verbose', verbose, 'boolean', true)
     verbose = verbose ~= nil and verbose or false
 
-    local dir = fnamemodify(buf_name(curr_buf()), ':p:h')
+    local dir = vim.fn.fnamemodify(buf_name(curr_buf()), ':p:h')
 
     if verbose then
         notify(fmt('Attempting to process `%s`', dir), INFO)

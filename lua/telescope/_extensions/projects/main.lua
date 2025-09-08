@@ -58,6 +58,10 @@ end
 --- ---
 ---@param opts? table
 function Main.projects(opts)
+    if vim.g.project_telescope_loaded ~= 1 then
+        error('project.nvim: Telescope picker not loaded!')
+    end
+
     opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
 
     local scope_chdir = require('project.config').options.scope_chdir

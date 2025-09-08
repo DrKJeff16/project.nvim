@@ -5,6 +5,8 @@ local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 
+local Util = require('project.utils.util')
+
 vim.api.nvim_create_user_command('ProjectRoot', function(ctx)
     local bang = ctx.bang ~= nil and ctx.bang or false
     local Api = require('project.api')
@@ -30,7 +32,7 @@ vim.api.nvim_create_user_command('ProjectConfig', function()
     local cfg = require('project').get_config()
     local inspect = vim.inspect
 
-    vim.notify(inspect(cfg))
+    vim.notify(inspect(cfg), INFO)
 end, {
     desc = 'Prints out the current configuratiion for `project.nvim`',
 })
@@ -98,19 +100,19 @@ end, {
 })
 
 ---Add `Fzf-Lua` command ONLY if it is installed
-if require('project.utils.util').mod_exists('fzf-lua') then
-    vim.api.nvim_create_user_command('ProjectFzf', require('project').run_fzf_lua, {
+if Util.mod_exists('fzf-lua') then
+    vim.api.nvim_create_user_command('ProjectFzf', function()
+        require('project').run_fzf_lua()
+    end, {
         desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
     })
 end
 
----Add `Telescope` shortcut ONLY if it is installed
-if require('project.utils.util').mod_exists('telescope') then
-    vim.api.nvim_create_user_command(
-        'ProjectTelescope',
-        require('telescope._extensions.projects').projects,
-        {
-            desc = 'Telescope shortcut for project.nvim picker',
-        }
-    )
+---Add `Telescope` shortcut ONLY if it is installed and loaded
+if Util.mod_exists('telescope') then
+    vim.api.nvim_create_user_command('ProjectTelescope', function()
+        require('telescope._extensions.projects').projects()
+    end, {
+        desc = 'Telescope shortcut for project.nvim picker',
+    })
 end
