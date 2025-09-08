@@ -31,11 +31,13 @@ Table of Contents                                             *project-nvim.toc*
 6. Telescope                                            |project-nvim.telescope|
     6.1. Telescope Mappings                        |project-nvim.telescope.maps|
 7. Commands                                              |project-nvim.commands|
-    7.1. `:ProjectAdd`                                               |:ProjectAdd|
-    7.2. `:ProjectRoot`                                             |:ProjectRoot|
-    7.3. `:ProjectConfig`                                         |:ProjectConfig|
-    7.4. `:ProjectRecents`                                       |:ProjectRecents|
-    7.5. `:ProjectDelete`                                         |:ProjectDelete|
+    7.1. `:ProjectFzf`                                               |:ProjectFzf|
+    7.2. `:ProjectTelescope`                                   |:ProjectTelescope|
+    7.3. `:ProjectAdd`                                               |:ProjectAdd|
+    7.4. `:ProjectRoot`                                             |:ProjectRoot|
+    7.5. `:ProjectConfig`                                         |:ProjectConfig|
+    7.6. `:ProjectRecents`                                       |:ProjectRecents|
+    7.7. `:ProjectDelete`                                         |:ProjectDelete|
 8. API                                                        |project-nvim.api|
     8.1. `get_project_root()`                    |project-nvim.get_project_root()|
     8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
@@ -520,16 +522,35 @@ Table of Contents                                             *project-nvim.toc*
 7. Commands                                              *project-nvim.commands*
 
     There are a bunch of user commands you can call from the cmdline.
-    Some of them might be incomplete and/or reworked in the future.
+
+    NOTE: Some of these might be incomplete and/or reworked in the future. ~
 
 
+                                                       *ProjectFzf*  *:ProjectFzf*
 `:ProjectFzf`
 
-    This command is only enabled if you have `fzf-lua` installed ~
+                            This command is only enabled ~
+                            if you have `fzf-lua` installed ~
 
-    The `:ProjectFzf` command is a dynamicly enabled User Command that runs
-    `project.nvim` through `fzf-lua`.
-    For now it just executes `require('project').run_fzf_lua()`
+                            The `:ProjectFzf` command is a
+                            dynamicly enabled User Command that runs
+                            `project.nvim` through `fzf-lua`.
+                            For now it just executes
+                            `require('project').run_fzf_lua()`
+
+
+                                           *ProjectTelescope*  *:ProjectTelescope*
+`:ProjectTelescope`
+
+                            This command is only enabled if you have ~
+                            both `telescope.nvim` and have loaded ~
+                            the `projects` picker ~
+                            (see |project-nvim.telescope|) ~
+
+                            The `:ProjectTelescope` command is a
+                            dynamicly enabled User Command
+                            that runs the Telescope `projects` picker.
+                            A shortcut, really
 
 
                                                        *ProjectAdd*  *:ProjectAdd*

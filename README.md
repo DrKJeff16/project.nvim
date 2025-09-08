@@ -48,11 +48,12 @@ Show these much love!
         1. [Telescope Mappings](#telescope-mappings)
 5. [Commands](#commands)
     1. [ProjectFzf](#projectfzf)
-    1. [ProjectAdd](#projectadd)
-    2. [ProjectRoot](#projectroot)
-    3. [ProjectRecents](#projectrecents)
-    4. [ProjectConfig](#projectconfig)
-    5. [ProjectDelete](#projectdelete)
+    2. [ProjectTelescope](#projecttelescope)
+    3. [ProjectAdd](#projectadd)
+    4. [ProjectRoot](#projectroot)
+    5. [ProjectRecents](#projectrecents)
+    6. [ProjectConfig](#projectconfig)
+    7. [ProjectDelete](#projectdelete)
 6. [API](#api)
     1. [`run_fzf_lua()`](#run-fzf-lua)
     2. [`get_project_root()`](#get-project-root)
@@ -631,11 +632,18 @@ These are the user commands you can call from the cmdline:
 
 ### ProjectFzf
 
-> This command is only enabled if you have `fzf-lua` installed
+> This command is only enabled if you have installed `fzf-lua`
 
 The `:ProjectFzf` command is a dynamicly enabled User Command that runs
 `project.nvim` through `fzf-lua`.
 For now it just executes [`require('project').run_fzf_lua()`](#run-fzf-lua).
+
+### ProjectTelescope
+
+> This command is only enabled if you have `telescope.nvim` (and you loaded it)
+
+The `:ProjectTelescope` command is a dynamicly enabled User Command that runs
+the Telescope `projects` picker. A shortcut, really.
 
 ### ProjectAdd
 
