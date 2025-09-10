@@ -20,6 +20,7 @@ local Config = require('project.config')
 local Path = require('project.utils.path')
 local Util = require('project.utils.util')
 local History = require('project.utils.history')
+local Log = require('project.utils.log')
 
 local is_type = Util.is_type
 local is_windows = Util.is_windows
@@ -81,6 +82,8 @@ Api.delete_project = History.delete_project
 ---@return string? name
 function Api.find_lsp_root()
     local allow_patterns = Config.options.allow_patterns_for_lsp
+    Log.debug(fmt('(%s.find_lsp_root): Current buffer is %s', MODSTR, bufnr))
+    Log.debug(fmt('(%s.find_lsp_root): Allowing patterns: %s', MODSTR, tostring(allow_patterns)))
 
     local bufnr = curr_buf()
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
