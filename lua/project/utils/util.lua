@@ -387,6 +387,19 @@ function Util.dir_exists(dir)
 end
 
 ---@param path string
+---@return boolean
+function Util.path_exists(path)
+    validate('path', path, 'string', false)
+
+    if Util.dir_exists(path) then
+        return true
+    end
+
+    --- CREDITS: @tomaskallup
+    return vim.fn.empty(vim.fn.glob(path:gsub('%[', '\\['))) == 0
+end
+
+---@param path string
 ---@return string normalised_path
 function Util.normalise_path(path)
     validate('path', path, 'string', false)

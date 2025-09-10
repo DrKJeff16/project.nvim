@@ -187,7 +187,7 @@ function Path.is_excluded(dir)
     return false
 end
 
-Path.exists = require('project.utils.util').dir_exists
+Path.exists = require('project.utils.util').path_exists
 
 function Path.init()
     local datapath = require('project.config').options.datapath
