@@ -15,11 +15,6 @@ local ERROR = vim.log.levels.ERROR  -- `4`
 
 local LOG_PFX = '(project.nvim): '
 
-local Path = require('project.utils.path')
-local Util = require('project.utils.util')
-
-local is_type = Util.is_type
-
 ---@class Project.Log
 ---@field logfile? string
 ---@field log_loc? { bufnr: integer, win: integer, tab: integer }|nil
@@ -33,6 +28,7 @@ local function gen_log(lvl)
             return
         end
 
+        local is_type = require('project.utils.util').is_type
         local msg = LOG_PFX
 
         for i = 1, select('#', ...) do
@@ -96,7 +92,7 @@ function Log.setup_watch()
         return
     end
 
-    event:start(Path.projectpath, {}, function(err, _, events)
+    event:start(require('project.utils.path').projectpath, {}, function(err, _, events)
         if not (err == nil and events.change) then
             return
         end
@@ -147,11 +143,11 @@ function Log:open(mode, callback)
     local logfile, flag = self.logfile, tonumber('644', 8)
 
     if callback == nil then -- async
-        Path.create_scaffolding()
+        require('project.utils.path').create_scaffolding()
         return uv.fs_open(logfile, mode, flag)
     end
 
-    Path.create_scaffolding(function(_, _)
+    require('project.utils.path').create_scaffolding(function(_, _)
         uv.fs_open(logfile, mode, flag, callback)
     end)
 end
@@ -169,12 +165,12 @@ function Log.init()
         return
     end
 
-    if not Path.projectpath then
+    if not require('project.utils.path').projectpath then
         vim.notify('Project Path directory not set!', WARN)
         return
     end
 
-    Log.logfile = Path.projectpath .. '/project.log'
+    Log.logfile = require('project.utils.path').projectpath .. '/project.log'
     local fd = Log:open('a')
     uv.fs_write(fd, fmt('\n\n'))
 
@@ -192,7 +188,7 @@ function Log.open_win()
         return
     end
 
-    if not Path.exists(Log.logfile) then
+    if not require('project.utils.path').exists(Log.logfile) then
         error('(project.utils.log.open_win): Bad logfile path!', ERROR)
     end
 
