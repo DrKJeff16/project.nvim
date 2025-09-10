@@ -1,10 +1,6 @@
 local fmt = string.format
 local validate = vim.validate
 
-local Util = require('project.utils.util')
-
-local dir_exists = Util.dir_exists
-
 local uv = vim.uv or vim.loop
 
 ---@class Project.Utils.Path
@@ -191,12 +187,12 @@ function Path.is_excluded(dir)
     return false
 end
 
-Path.exists = Util.dir_exists
+Path.exists = require('project.utils.util').dir_exists
 
 function Path.init()
     local datapath = require('project.config').options.datapath
 
-    if not dir_exists(datapath) then
+    if not Path.exists(datapath) then
         datapath = vim.fn.stdpath('data')
     end
 
