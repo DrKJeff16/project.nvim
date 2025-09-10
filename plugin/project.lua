@@ -85,10 +85,17 @@ end, {
     bang = true,
     nargs = '+',
 
-    ---@return string[]|table
-    complete = function(_, _, _)
-        ---TODO: Structure completions for `:ProjectDelete`
-        return Api.get_recent_projects() or {}
+    ---CREDITS: @kuator
+    ---@param line string
+    ---@return string[]
+    complete = function(_, line)
+        local recent = Api.get_recent_projects()
+        local input = vim.split(line, '%s+')
+        local prefix = input[#input]
+
+        return vim.tbl_filter(function(cmd)
+            return vim.startswith(cmd, prefix)
+        end, recent)
     end,
 })
 
