@@ -6,22 +6,20 @@ local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 
 local Util = require('project.utils.util')
+local Api = require('project.api')
+local reverse = Util.reverse
 
 vim.api.nvim_create_user_command('ProjectRoot', function(ctx)
-    local bang = ctx.bang ~= nil and ctx.bang or false
-    local Api = require('project.api')
-
-    Api.on_buf_enter(bang)
+    local verbose = ctx.bang ~= nil and ctx.bang or false
+    Api.on_buf_enter(verbose)
 end, {
     bang = true,
     desc = 'Sets the current project root to the current CWD',
 })
 
 vim.api.nvim_create_user_command('ProjectAdd', function(ctx)
-    local bang = ctx.bang ~= nil and ctx.bang or false
-    local Api = require('project.api')
-
-    Api.add_project_manually(bang)
+    local verbose = ctx.bang ~= nil and ctx.bang or false
+    Api.add_project_manually(verbose)
 end, {
     bang = true,
     desc = 'Adds the current CWD project to the Project History',
@@ -38,8 +36,6 @@ end, {
 })
 
 vim.api.nvim_create_user_command('ProjectRecents', function()
-    local Api = require('project.api')
-    local reverse = require('project.utils.util').reverse
     local recent_proj = Api.get_recent_projects()
 
     if recent_proj == nil or vim.tbl_isempty(recent_proj) then
@@ -66,7 +62,6 @@ vim.api.nvim_create_user_command('ProjectDelete', function(ctx)
     local bang = ctx.bang ~= nil and ctx.bang or false
 
     for _, v in next, ctx.fargs do
-        local Api = require('project.api')
         local path = vim.fn.fnamemodify(v, ':p')
         local recent = Api.get_recent_projects()
 
@@ -93,8 +88,6 @@ end, {
     ---@return string[]|table
     complete = function(_, _, _)
         ---TODO: Structure completions for `:ProjectDelete`
-        local Api = require('project.api')
-
         return Api.get_recent_projects() or {}
     end,
 })
