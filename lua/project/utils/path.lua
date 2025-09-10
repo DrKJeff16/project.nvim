@@ -140,7 +140,11 @@ end
 ---@return string|nil
 ---@return string|nil
 function Path.root_included(dir)
-    validate('dir', dir, 'string', false)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('dir', dir, 'string', false)
+    else
+        validate({ dir = { dir, 'string' } })
+    end
 
     local Config = require('project.config')
 
