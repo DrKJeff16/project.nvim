@@ -598,9 +598,7 @@ Table of Contents                                             *project-nvim.toc*
                             The arguments have to be directories that exist
                             in the table returned by
                             |project-nvim.get_recent_projects()|.
-                            It also has barebones completion,
-                            though I'd like some help with how to do
-                            the completion parsing down the line.
+                            It also supports project completion
 
                             The arguments can be relative, absolute
                             or un-expanded (`~/...`).

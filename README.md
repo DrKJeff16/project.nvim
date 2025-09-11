@@ -734,16 +734,6 @@ _See `:h :ProjectDelete` for more info_.
 :ProjectDelete /path/to/first [/path/to/second [...]]
 ```
 
----
-
-<div align="center">
-
-_**It also features some barebones completion, but I'd like some help with how to do the completion parsing.**_
-
-</div>
-
----
-
 _See [_`api.lua`_](./lua/project/api.lua) for more info_.
 
 <div align="right">
