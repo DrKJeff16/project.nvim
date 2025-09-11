@@ -6,12 +6,11 @@ local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 
 local Util = require('project.utils.util')
-local Api = require('project.api')
 local reverse = Util.reverse
 
 vim.api.nvim_create_user_command('ProjectRoot', function(ctx)
     local verbose = ctx.bang ~= nil and ctx.bang or false
-    Api.on_buf_enter(verbose)
+    require('project.api').on_buf_enter(verbose)
 end, {
     bang = true,
     desc = 'Sets the current project root to the current CWD',
@@ -19,7 +18,7 @@ end, {
 
 vim.api.nvim_create_user_command('ProjectAdd', function(ctx)
     local verbose = ctx.bang ~= nil and ctx.bang or false
-    Api.add_project_manually(verbose)
+    require('project.api').add_project_manually(verbose)
 end, {
     bang = true,
     desc = 'Adds the current CWD project to the Project History',
@@ -28,15 +27,14 @@ end, {
 ---`:ProjectConfig`
 vim.api.nvim_create_user_command('ProjectConfig', function()
     local cfg = require('project').get_config()
-    local inspect = vim.inspect
 
-    vim.notify(inspect(cfg), INFO)
+    vim.notify(vim.inspect(cfg), INFO)
 end, {
     desc = 'Prints out the current configuratiion for `project.nvim`',
 })
 
 vim.api.nvim_create_user_command('ProjectRecents', function()
-    local recent_proj = Api.get_recent_projects()
+    local recent_proj = require('project.api').get_recent_projects()
 
     if recent_proj == nil or vim.tbl_isempty(recent_proj) then
         vim.notify('{}', WARN)
@@ -63,11 +61,11 @@ vim.api.nvim_create_user_command('ProjectDelete', function(ctx)
 
     for _, v in next, ctx.fargs do
         local path = vim.fn.fnamemodify(v, ':p')
-        local recent = Api.get_recent_projects()
+        local recent = require('project.api').get_recent_projects()
 
         ---HACK: Getting rid of trailing `/` in string
         if path:sub(-1) == '/' then
-            path = path:sub(1, string.len(path) - 1)
+            path = path:sub(1, path:len() - 1)
         end
 
         ---If `:ProjectDelete` isn't called with bang `!`, abort on
@@ -77,7 +75,7 @@ vim.api.nvim_create_user_command('ProjectDelete', function(ctx)
         end
 
         if vim.tbl_contains(recent, path) then
-            Api.delete_project(path)
+            require('project.api').delete_project(path)
         end
     end
 end, {
@@ -89,7 +87,7 @@ end, {
     ---@param line string
     ---@return string[]
     complete = function(_, line)
-        local recent = Api.get_recent_projects()
+        local recent = require('project.api').get_recent_projects()
         local input = vim.split(line, '%s+')
         local prefix = input[#input]
 
