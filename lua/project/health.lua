@@ -74,10 +74,11 @@ function Health.options_check()
 
     table.sort(Options)
     local exceptions = {
+        'new',
+        'verify_datapath',
+        'verify_histsize',
         'verify_methods',
         'verify_scope_chdir',
-        'verify_datapath',
-        'new',
     }
 
     for k, v in next, Options do
@@ -189,7 +190,7 @@ function Health.telescope_check()
 
     local sort = Opts.telescope.sort
 
-    if not vim.tbl_contains({ 'newest', 'oldest' }, sort) then
+    if not in_tbl({ 'newest', 'oldest' }, sort) then
         h_warn('Telescope `sort` option not configured correctly!')
         return
     end
@@ -201,7 +202,7 @@ function Health.recent_proj_check()
     start('Recent Projects')
     local recents = Api.get_recent_projects()
 
-    if vim.tbl_isempty(recents) then
+    if empty(recents) then
         h_warn([[
             `No projects found in history!`
 
@@ -219,7 +220,7 @@ function Health.recent_proj_check()
     recents = reverse(copy(recents))
 
     for i, project in next, recents do
-        info(fmt('`%s`. `%s`', tostring(i), project))
+        info(fmt('`%s`. `%s`', i, project))
     end
 end
 
