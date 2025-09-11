@@ -4,6 +4,14 @@
 ---@class Project.Utils.Glob
 local Glob = {}
 
+---Escape pattern char.
+--- ---
+---@param char string
+---@return string
+local function escape(char, c)
+    return char:match('^%w$') and c or ('%' .. c)
+end
+
 ---Some useful references:
 --- - apr_fnmatch in Apache APR.  For example,
 ---   http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html
@@ -26,14 +34,6 @@ function Glob.globtopattern(g)
             end
         end
         return true
-    end
-
-    ---Escape pattern char.
-    --- ---
-    ---@param char string
-    ---@return string
-    local function escape(char)
-        return char:match('^%w$') and c or '%' .. c
     end
 
     --- TODO: Let's simplify this in the future
@@ -66,19 +66,19 @@ function Glob.globtopattern(g)
                         pattern = '[^]'
                         return false
                     elseif c == ']' then
-                        pattern = pattern .. escape(c1) .. '%-]'
+                        pattern = pattern .. escape(c1, c) .. '%-]'
                         break
                     else
                         if not unescape() then
                             break
                         end
-                        pattern = pattern .. escape(c1) .. '-' .. escape(c)
+                        pattern = pattern .. escape(c1, c) .. '-' .. escape(c, c)
                     end
                 elseif c == ']' then
-                    pattern = pattern .. escape(c1) .. ']'
+                    pattern = pattern .. escape(c1, c) .. ']'
                     break
                 else
-                    pattern = pattern .. escape(c1)
+                    pattern = pattern .. escape(c1, c)
                     i = i - 1 -- put back
                 end
             end
@@ -138,9 +138,9 @@ function Glob.globtopattern(g)
                 pattern = pattern .. '\\$'
                 break
             end
-            pattern = pattern .. escape(c)
+            pattern = pattern .. escape(c, c)
         else
-            pattern = pattern .. escape(c)
+            pattern = pattern .. escape(c, c)
         end
     end
 
