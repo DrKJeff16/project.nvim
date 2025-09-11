@@ -1,3 +1,7 @@
+if not require('project.utils.util').mod_exists('telescope') then
+    error('project.nvim: Telescope is not installed!')
+end
+
 local fmt = string.format
 
 local Pickers = require('telescope.pickers')
