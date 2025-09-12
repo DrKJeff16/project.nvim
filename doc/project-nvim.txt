@@ -278,6 +278,14 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `100` ~
 
 
+    * {show_hidden}             (boolean)
+                                Make hidden files visible when using
+                                the `telescope` picker (or others for that
+                                matter)
+
+                                Default: `false` ~
+
+
     * {telescope}               (|Project.Config.Telescope|)
                                 Table of options used for the telescope picker.
 
@@ -389,13 +397,6 @@ Table of Contents                                             *project-nvim.toc*
                                 builtin.
                                 In case it is not available, it'll fall back
                                 to the `find_files` builtin
-
-                                Default: `false` ~
-
-
-    * {show_hidden}             (boolean)
-                                Make hidden files visible when using
-                                the `telescope` picker
 
                                 Default: `false` ~
 

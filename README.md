@@ -99,10 +99,7 @@ Please refer to [`TODO.md`](./TODO.md) for more info.
 
 </div>
 
-
 ## Installation
-
----
 
 **Requirements:**
 
@@ -214,14 +211,6 @@ To enable the plugin you may call `setup()`:
 ```lua
 require('project').setup()
 ```
-
-<div align="right">
-
-[Go To Top](#project-nvim)
-
-</div>
-
----
 
 ### Defaults
 
@@ -385,14 +374,14 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
         --- ---
         ---@type boolean
         prefer_file_browser = false,
-
-        ---Make hidden files visible when using the `telescope` picker.
-        --- ---
-        ---Default: `false`
-        --- ---
-        ---@type boolean
-        show_hidden = false,
     },
+
+    ---Make hidden files visible when using the any picker.
+    --- ---
+    ---Default: `false`
+    --- ---
+    ---@type boolean
+    show_hidden = false,
 
     ---Table of lsp clients to ignore by name,
     ---e.g. `{ 'efm', ... }`.
@@ -402,7 +391,7 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
     --- ---
     ---Default: `{}`
     --- ---
-    ---@type string[]|table
+    ---@type string[]
     ignore_lsp = {},
 
     ---Don't calculate root dir on specific directories,
@@ -412,7 +401,7 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
     --- ---
     ---Default: `{}`
     --- ---
-    ---@type string[]|table
+    ---@type string[]
     exclude_dirs = {},
 
     ---If `false`, you'll get a _notification_ every time
@@ -478,16 +467,6 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
 
 ### Pattern Matching
 
----
-
-<div align="center">
-
-_[`2d81e5d`](https://github.com/DrKJeff16/project.nvim/commit/2d81e5d66f7c88e4afa30687e61f8a5088195b41): **Now works with the LSP aswell.**_
-
-</div>
-
----
-
 `project.nvim` comes with a `vim-rooter`-inspired pattern matching expression engine
 to give you better handling of your projects.
 
@@ -521,11 +500,12 @@ For your convenience here come some examples:
   patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
   ```
 
-<div align="center">
 
-<b><ins>NOTE: Make sure to put your pattern exclusions first, and then the patterns you DO want included.</ins></b>
+**NOTE:**
 
-</div>
+- Make sure to put your pattern exclusions first, and then the patterns you DO want included.
+- If you have `allow_patterns_for_lsp` enabled, it will also work somewhat for your LSP clients.
+
 
 <div align="right">
 
@@ -595,12 +575,6 @@ After that you can now call it from the command line:
 " Vim command line
 :Telescope projects
 ```
-
-<div align="right">
-
-[Go To Top](#project-nvim)
-
-</div>
 
 #### Telescope Mappings
 
