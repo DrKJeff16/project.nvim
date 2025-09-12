@@ -4,6 +4,7 @@
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
 that allows users to manage, access and selectively include in a history.
+
 This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
 I will be maintaining this plugin for the foreseeable future.
 
