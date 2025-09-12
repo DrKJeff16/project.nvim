@@ -50,7 +50,7 @@ Main.default_opts = {
     prompt_prefix = '󱎸  ',
 }
 
----@param opts table
+---@param opts? table
 function Main.setup(opts)
     Main.default_opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
     vim.g.project_telescope_loaded = 1

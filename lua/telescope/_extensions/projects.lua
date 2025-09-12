@@ -8,7 +8,7 @@ local Telescope = require('telescope')
 ---@class TelescopeProjects
 ---@field exports { projects: fun(opts?: table) }
 ---@field projects fun(opts?: table)
----@field setup fun(opts: table)
+---@field setup fun(opts?: table)
 
 ---@type TelescopeProjects
 local M = Telescope.register_extension({
