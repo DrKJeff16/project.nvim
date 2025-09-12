@@ -33,9 +33,17 @@ end
 ---@param triggers? string[]
 ---@return string new_str
 function Util.capitalize(str, use_dot, triggers)
-    validate('str', str, 'string', false)
-    validate('use_dot', use_dot, 'boolean', true)
-    validate('triggers', triggers, 'table', true, 'string[]')
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('str', str, 'string', false)
+        validate('use_dot', use_dot, 'boolean', true)
+        validate('triggers', triggers, 'table', true, 'string[]')
+    else
+        validate({
+            str = { str, 'string' },
+            use_dot = { use_dot, { 'boolean', 'nil' } },
+            triggers = { triggers, { 'table', 'nil' } },
+        })
+    end
 
     if str == '' then
         return str
@@ -101,14 +109,30 @@ function Util.is_type(t, data)
         'userdata',
     }
 
-    validate('data', data, TYPES, true, 'any')
-    validate('t', t, function(v)
-        if v == nil or type(v) ~= 'string' then
-            return false
-        end
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('data', data, TYPES, true, 'any')
+        validate('t', t, function(v)
+            if v == nil or type(v) ~= 'string' then
+                return false
+            end
 
-        return in_tbl(TYPES, v)
-    end, false, "'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'")
+            return in_tbl(TYPES, v)
+        end, false, "'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'")
+    else
+        validate({
+            data = { data, TYPES },
+            t = {
+                t,
+                function(v)
+                    if v == nil or type(v) ~= 'string' then
+                        return false
+                    end
+
+                    return in_tbl(TYPES, v)
+                end,
+            },
+        })
+    end
 
     return data ~= nil and type(data) == t
 end
@@ -127,7 +151,11 @@ end
 ---@param mod string The `require()` argument to be checked
 ---@return boolean exists A boolean indicating whether the module exists or not
 function Util.mod_exists(mod)
-    validate('mod', mod, 'string', false)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('mod', mod, 'string', false)
+    else
+        validate({ mod = { mod, 'string' } })
+    end
 
     if mod == '' then
         return false
@@ -143,14 +171,15 @@ end
 ---@param str string
 ---@return string new_str
 function Util.lstrip(char, str)
-    validate('char', char, function(v)
-        if v == nil or type(v) ~= 'string' then
-            return false
-        end
-
-        return v ~= ''
-    end, false, 'char')
-    validate('str', str, 'string', false)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('char', char, 'string', false)
+        validate('str', str, 'string', false)
+    else
+        validate({
+            char = { char, 'string' },
+            str = { str, 'string' },
+        })
+    end
 
     if str == '' then
         return str
@@ -180,14 +209,15 @@ end
 ---@param str string
 ---@return string new_str
 function Util.rstrip(char, str)
-    validate('char', char, function(v)
-        if v == nil or type(v) ~= 'string' then
-            return false
-        end
-
-        return v ~= ''
-    end, false, 'char')
-    validate('str', str, 'string', false)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('char', char, 'string', false)
+        validate('str', str, 'string', false)
+    else
+        validate({
+            char = { char, 'string' },
+            str = { str, 'string' },
+        })
+    end
 
     if str == '' then
         return str
@@ -219,14 +249,15 @@ end
 ---@param str string
 ---@return string new_str
 function Util.strip(char, str)
-    validate('char', char, function(v)
-        if v == nil or type(v) ~= 'string' then
-            return false
-        end
-
-        return v ~= ''
-    end, false, 'char')
-    validate('str', str, 'string', false)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('char', char, 'string', false)
+        validate('str', str, 'string', false)
+    else
+        validate({
+            char = { char, 'string' },
+            str = { str, 'string' },
+        })
+    end
 
     if str == '' then
         return str
@@ -248,7 +279,11 @@ end
 ---@param T table
 ---@return table NT
 function Util.dedup(T)
-    validate('T', T, 'table', false)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('T', T, 'table', false)
+    else
+        validate({ T = { T, 'table' } })
+    end
 
     if empty(T) then
         return T
@@ -272,22 +307,43 @@ end
 ---@return string
 ---@return boolean?
 function Util.format_per_type(t, data, sep, constraints)
-    validate('t', t, function(v)
-        if v == nil or type(v) ~= 'string' then
-            return false
-        end
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('t', t, function(v)
+            if v == nil or type(v) ~= 'string' then
+                return false
+            end
 
-        return in_tbl({ 'number', 'string', 'boolean', 'table', 'function' }, v)
-    end, false, "'number'|'string'|'boolean'|'table'|'function'")
-    validate(
-        'data',
-        data,
-        { 'number', 'string', 'boolean', 'table', 'function' },
-        true,
-        'nil|number|string|boolean|table|fun()'
-    )
-    validate('sep', sep, 'string', true)
-    validate('constraints', constraints, 'table', true, 'string[]')
+            return in_tbl({ 'number', 'string', 'boolean', 'table', 'function' }, v)
+        end, false, "'number'|'string'|'boolean'|'table'|'function'")
+        validate(
+            'data',
+            data,
+            { 'number', 'string', 'boolean', 'table', 'function' },
+            true,
+            'nil|number|string|boolean|table|fun()'
+        )
+        validate('sep', sep, 'string', true)
+        validate('constraints', constraints, 'table', true, 'string[]')
+    else
+        validate({
+            t = {
+                t,
+                function(v)
+                    if v == nil or type(v) ~= 'string' then
+                        return false
+                    end
+
+                    return in_tbl({ 'number', 'string', 'boolean', 'table', 'function' }, v)
+                end,
+            },
+            data = {
+                data,
+                { 'number', 'string', 'boolean', 'table', 'function', 'nil' },
+            },
+            sep = { sep, { 'string', 'nil' } },
+            constraints = { constraints, { 'table', 'nil' } },
+        })
+    end
 
     local is_type = Util.is_type
 
@@ -356,7 +412,11 @@ end
 ---@param T table
 ---@return table T
 function Util.reverse(T)
-    validate('T', T, 'table', false)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('T', T, 'table', false)
+    else
+        validate({ T = { T, 'table' } })
+    end
 
     if empty(T) then
         return T
@@ -379,7 +439,11 @@ end
 ---@param dir string
 ---@return boolean
 function Util.dir_exists(dir)
-    validate('dir', dir, 'string', false)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('dir', dir, 'string', false)
+    else
+        validate({ dir = { dir, 'string' } })
+    end
 
     local stat = uv.fs_stat(dir)
 
@@ -389,7 +453,11 @@ end
 ---@param path string
 ---@return boolean
 function Util.path_exists(path)
-    validate('path', path, 'string', false)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('path', path, 'string', false)
+    else
+        validate({ path = { path, 'string' } })
+    end
 
     if Util.dir_exists(path) then
         return true
@@ -402,7 +470,11 @@ end
 ---@param path string
 ---@return string normalised_path
 function Util.normalise_path(path)
-    validate('path', path, 'string', false)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('path', path, 'string', false)
+    else
+        validate({ path = { path, 'string' } })
+    end
 
     local normalised_path = path:gsub('\\', '/'):gsub('//', '/')
 

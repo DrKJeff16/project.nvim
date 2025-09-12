@@ -15,7 +15,7 @@ local Project = {}
 
 ---@param options? Project.Config.Options
 function Project.setup(options)
-    if vim_has('nvim-0.11') then
+    if vim_has('nvim-0.11') == 1 then
         validate('options', options, 'table', true, 'Project.Config.Options')
     else
         validate({ options = { options, { 'table', 'nil' } } })
@@ -45,7 +45,7 @@ end
 ---@param refresh? boolean
 ---@return string? last
 function Project.get_last_project(refresh)
-    if vim_has('nvim-0.11') then
+    if vim_has('nvim-0.11') == 1 then
         validate('refresh', refresh, 'boolean', true)
     else
         validate({ refresh = { refresh, { 'boolean', 'nil' } } })
@@ -70,7 +70,7 @@ end
 ---@return string? method
 ---@return string? last
 function Project.current_project(refresh)
-    if vim_has('nvim-0.11') then
+    if vim_has('nvim-0.11') == 1 then
         validate('refresh', refresh, 'boolean', true)
     else
         validate({ refresh = { refresh, { 'boolean', 'nil' } } })

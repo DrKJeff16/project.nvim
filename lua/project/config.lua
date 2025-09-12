@@ -25,7 +25,11 @@ Config.options = Config.get_defaults().new()
 --- ---
 ---@param options? Project.Config.Options
 function Config.setup(options)
-    validate('options', options, 'table', true, 'Project.Config.Options')
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('options', options, 'table', true, 'Project.Config.Options')
+    else
+        validate({ options = { options, { 'table', 'nil' } } })
+    end
 
     options = options or {}
 
