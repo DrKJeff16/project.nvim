@@ -156,15 +156,15 @@ telescope.sort = 'newest'
 ---@type boolean
 telescope.prefer_file_browser = false
 
----Make hidden files visible when using the `telescope` picker.
+---@type Project.Config.Options.Telescope
+DEFAULTS.telescope = telescope
+
+---Make hidden files visible when using any picker.
 --- ---
 ---Default: `false`
 --- ---
 ---@type boolean
-telescope.show_hidden = false
-
----@type Project.Config.Options.Telescope
-DEFAULTS.telescope = telescope
+DEFAULTS.show_hidden = false
 
 ---Table of lsp clients to ignore by name,
 ---e.g. `{ 'efm', ... }`.

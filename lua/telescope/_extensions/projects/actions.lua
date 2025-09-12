@@ -75,7 +75,7 @@ end
 
 ---@param prompt_bufnr integer
 function M.find_project_files(prompt_bufnr)
-    local hidden = Config.options.telescope.show_hidden
+    local hidden = Config.options.show_hidden
     local prefer_file_browser = Config.options.telescope.prefer_file_browser
 
     local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
@@ -105,7 +105,7 @@ end
 
 ---@param prompt_bufnr integer
 function M.browse_project_files(prompt_bufnr)
-    local hidden = Config.options.telescope.show_hidden
+    local hidden = Config.options.show_hidden
     local prefer_file_browser = Config.options.telescope.prefer_file_browser
 
     local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
@@ -144,14 +144,14 @@ function M.search_in_project_files(prompt_bufnr)
 
     Builtin.live_grep({
         cwd = project_path,
-        hidden = Config.options.telescope.show_hidden,
+        hidden = Config.options.show_hidden,
         mode = 'insert',
     })
 end
 
 ---@param prompt_bufnr integer
 function M.recent_project_files(prompt_bufnr)
-    local hidden = Config.options.telescope.show_hidden
+    local hidden = Config.options.show_hidden
 
     local _, cd_successful = M.change_working_directory(prompt_bufnr)
 
