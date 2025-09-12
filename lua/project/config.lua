@@ -19,7 +19,7 @@ end
 ---Default: `{}` (before calling `setup()`).
 --- ---
 ---@type Project.Config.Options
-Config.options = Config.get_defaults().new()
+Config.options = {}
 
 ---The function called when running `require('project').setup()`.
 --- ---
@@ -33,7 +33,7 @@ function Config.setup(options)
 
     options = options or {}
 
-    Config.options = vim.tbl_deep_extend('force', Config.get_defaults(), options)
+    Config.options = Config.get_defaults().new(options)
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
 
     Config.options:verify_methods()

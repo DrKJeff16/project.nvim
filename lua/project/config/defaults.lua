@@ -367,14 +367,23 @@ function DEFAULTS:verify_methods()
     self.detection_methods = methods
 end
 
+---@param opts? Project.Config.Options
 ---@return Project.Config.Options
-function DEFAULTS.new()
+function DEFAULTS.new(opts)
+    if vim.fn.has('nvim-0.11') == 1 then
+        vim.validate('opts', opts, 'table', true, 'Project.Config.Options')
+    else
+        vim.validate({ opts = { opts, { 'table', 'nil' } } })
+    end
+
+    opts = opts or {}
+
     ---@type Project.Config.Options
-    local self = setmetatable(DEFAULTS, { __index = DEFAULTS })
+    local self = setmetatable(opts, { __index = DEFAULTS })
 
     return self
 end
 
-return DEFAULTS.new()
+return DEFAULTS
 
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
