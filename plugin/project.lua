@@ -5,9 +5,6 @@ local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 
-local Util = require('project.utils.util')
-local reverse = Util.reverse
-
 vim.api.nvim_create_user_command('ProjectRoot', function(ctx)
     local verbose = ctx.bang ~= nil and ctx.bang or false
     require('project.api').on_buf_enter(verbose)
@@ -35,9 +32,11 @@ end, {
 
 vim.api.nvim_create_user_command('ProjectRecents', function()
     local recent_proj = require('project.api').get_recent_projects()
+    local reverse = require('project.utils.util').reverse
 
     if recent_proj == nil or vim.tbl_isempty(recent_proj) then
         vim.notify('{}', WARN)
+        return
     end
 
     ---@type string[]
@@ -98,7 +97,7 @@ end, {
 })
 
 ---Add `Fzf-Lua` command ONLY if it is installed
-if Util.mod_exists('fzf-lua') then
+if require('project.utils.util').mod_exists('fzf-lua') then
     vim.api.nvim_create_user_command('ProjectFzf', function()
         require('project').run_fzf_lua()
     end, {
@@ -107,7 +106,7 @@ if Util.mod_exists('fzf-lua') then
 end
 
 ---Add `Telescope` shortcut ONLY if it is installed and loaded
-if Util.mod_exists('telescope') then
+if require('project.utils.util').mod_exists('telescope') then
     vim.api.nvim_create_user_command('ProjectTelescope', function()
         require('telescope._extensions.projects').projects()
     end, {
