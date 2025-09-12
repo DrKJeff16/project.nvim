@@ -20,6 +20,12 @@ Path.curr_dir_cache = {}
 
 ---@param file_dir string
 function Path.get_files(file_dir)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('file_dir', file_dir, 'string', false)
+    else
+        validate({ file_dir = { file_dir, 'string' } })
+    end
+
     Path.last_dir_cache = file_dir
     Path.curr_dir_cache = {}
 
@@ -45,6 +51,16 @@ end
 ---@param dir string
 ---@param identifier string
 function Path.has(dir, identifier)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('dir', dir, 'string', false)
+        validate('identifier', identifier, 'string', false)
+    else
+        validate({
+            dir = { dir, 'string' },
+            identifier = { identifier, 'string' },
+        })
+    end
+
     local globtopattern = require('project.utils.globtopattern').globtopattern
 
     if Path.last_dir_cache ~= dir then
@@ -66,12 +82,28 @@ end
 ---@param identifier string
 ---@return boolean
 function Path.is(dir, identifier)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('dir', dir, 'string', false)
+        validate('identifier', identifier, 'string', false)
+    else
+        validate({
+            dir = { dir, 'string' },
+            identifier = { identifier, 'string' },
+        })
+    end
+
     return dir:match('.*/(.*)') == identifier
 end
 
 ---@param path_str string
 ---@return string|'/'
 function Path.get_parent(path_str)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('path_str', path_str, 'string', false)
+    else
+        validate({ path_str = { path_str, 'string' } })
+    end
+
     path_str = path_str:match('^(.*)/')
     return (path_str ~= '') and path_str or '/' ---@cast path_str  string
 end
@@ -80,6 +112,16 @@ end
 ---@param identifier string
 ---@return boolean
 function Path.sub(dir, identifier)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('dir', dir, 'string', false)
+        validate('identifier', identifier, 'string', false)
+    else
+        validate({
+            dir = { dir, 'string' },
+            identifier = { identifier, 'string' },
+        })
+    end
+
     local path_str = Path.get_parent(dir)
     local current
 
@@ -101,6 +143,16 @@ end
 ---@param identifier string
 ---@return boolean
 function Path.child(dir, identifier)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('dir', dir, 'string', false)
+        validate('identifier', identifier, 'string', false)
+    else
+        validate({
+            dir = { dir, 'string' },
+            identifier = { identifier, 'string' },
+        })
+    end
+
     return Path.is(Path.get_parent(dir), identifier)
 end
 
@@ -108,6 +160,16 @@ end
 ---@param pattern string
 ---@return boolean
 function Path.match(dir, pattern)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('dir', dir, 'string', false)
+        validate('pattern', pattern, 'string', false)
+    else
+        validate({
+            dir = { dir, 'string' },
+            pattern = { pattern, 'string' },
+        })
+    end
+
     local SWITCH = {
         ['='] = Path.is,
         ['^'] = Path.sub,
@@ -179,6 +241,12 @@ end
 ---@param dir string
 ---@return boolean
 function Path.is_excluded(dir)
+    if vim.fn.has('nvim-0.11') == 1 then
+        validate('dir', dir, 'string', false)
+    else
+        validate({ dir = { dir, 'string' } })
+    end
+
     local exclude_dirs = require('project.config').options.exclude_dirs
 
     for _, excluded in next, exclude_dirs do
