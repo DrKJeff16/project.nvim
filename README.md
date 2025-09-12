@@ -3,7 +3,8 @@
 # project.nvim
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
-that allows users to manage, access and selectively include in a history.
+that automatically sets the user's `pwd` in a project root, and
+allows users to manage, access and selectively include in a history.
 
 This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
 I will be maintaining this plugin for the foreseeable future.
@@ -70,7 +71,7 @@ Show these much love!
 
 ## Features
 
-- Automagically `cd` to the project root directory using `vim.lsp` or pattern matching
+- Automatically `cd` to the project root directory using `vim.lsp` or pattern matching
 - Asynchronous file IO so it will not slow down neovim when reading the history file on startup
 - Users can control whether to run this or not by filetype/buftype
 - **(NEW!)** Fzf-Lua integration (credits to [@deathmaz](https://github.com/deathmaz))
