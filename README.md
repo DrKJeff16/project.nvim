@@ -759,7 +759,7 @@ The API can be found in [_`api.lua`_](./lua/project/api.lua).
 about the current project's root, if any:
 
 ```lua
----@type fun(): (string|nil,string?)
+---@type string?, string?
 local root, lsp_or_method = require('project').get_project_root()
 ```
 
