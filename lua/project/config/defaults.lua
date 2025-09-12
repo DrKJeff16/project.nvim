@@ -381,6 +381,8 @@ function DEFAULTS.new(opts)
     ---@type Project.Config.Options
     local self = setmetatable(opts, { __index = DEFAULTS })
 
+    self = vim.tbl_deep_extend('keep', self, DEFAULTS)
+
     return self
 end
 
