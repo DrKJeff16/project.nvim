@@ -33,6 +33,8 @@ Show these much love!
 
 - [`telescope-project.nvim`](https://github.com/nvim-telescope/telescope-project.nvim)
 - [`snacks.nvim`](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md#projects)
+- [`neovim-project`](https://github.com/coffebar/neovim-project)
+- [`project-fzf.nvim`](https://github.com/jakobwesthoff/project-fzf.nvim) (**BASED OFF `project.nvim`**)
 
 ---
 
