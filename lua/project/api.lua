@@ -438,7 +438,11 @@ function Api.run_fzf_lua()
         actions = {
             ['default'] = {
                 function(selected)
-                    fzf_lua.files({ cwd = selected[1] })
+                    fzf_lua.files({
+                        cwd = selected[1],
+                        silent = Config.options.silent_chdir,
+                        hidden = Config.options.show_hidden,
+                    })
                 end,
             },
             ['ctrl-d'] = {
