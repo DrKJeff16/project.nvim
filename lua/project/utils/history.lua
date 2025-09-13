@@ -228,9 +228,7 @@ function History.get_recent_projects()
         end
     end
 
-    recents = dedup(copy(recents))
-
-    return recents
+    return dedup(recents)
 end
 
 ---Write projects to history file.
