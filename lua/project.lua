@@ -3,6 +3,7 @@ local validate = vim.validate
 local Config = require('project.config')
 local Api = require('project.api')
 local Util = require('project.utils.util')
+local Log = require('project.utils.log')
 
 local vim_has = Util.vim_has
 
@@ -20,7 +21,10 @@ function Project.setup(options)
     else
         validate({ options = { options, { 'table', 'nil' } } })
     end
+
+    Log.debug('Calling `setup()`...')
     Config.setup(options or {})
+    Log.info('Successful setup!!')
 end
 
 ---Returns the project root, as well as the method used.

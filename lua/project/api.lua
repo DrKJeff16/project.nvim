@@ -21,6 +21,7 @@ local Config = require('project.config')
 local Path = require('project.utils.path')
 local Util = require('project.utils.util')
 local History = require('project.utils.history')
+local Log = require('project.utils.log')
 
 local is_type = Util.is_type
 local is_windows = Util.is_windows
@@ -61,6 +62,8 @@ end
 function Api.find_lsp_root()
     local bufnr = curr_buf()
     local allow_patterns = Config.options.allow_patterns_for_lsp
+    Log.debug(fmt('(%s.find_lsp_root): Current buffer is %s', MODSTR, bufnr))
+    Log.debug(fmt('(%s.find_lsp_root): Allowing patterns: %s', MODSTR, tostring(allow_patterns)))
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
     if empty(clients) then
