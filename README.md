@@ -5,7 +5,7 @@
 [Wiki](https://github.com/DrKJeff16/project.nvim/wiki) | [Contributing](./CONTRIBUTING.md) | [Roadmap/TODO](./TODO.md) | [Discussions](https://github.com/DrKJeff16/project.nvim/discussions)
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
-that automatically sets the user's `pwd` in a project root, and
+that automatically sets the user's `cwd` in a project root, and
 allows users to manage, access and selectively include in a history.
 
 </div>
