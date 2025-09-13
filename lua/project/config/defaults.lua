@@ -72,7 +72,7 @@ DEFAULTS.patterns = {
 ---Hook to run before attaching to a new project.
 ---
 ---It recieves `target_dir` and, optionally,
----the `method` used to change directories.
+---the `method` used to change directory.
 ---
 ---If `nil`, it won't run.
 --- ---
@@ -84,7 +84,7 @@ DEFAULTS.before_attach = nil
 ---Hook to run after attaching to a new project.
 ---
 ---It recieves `dir` and, optionally,
----the `method` used to change directories.
+---the `method` used to change directory.
 ---
 ---If `nil`, it won't run.
 --- ---

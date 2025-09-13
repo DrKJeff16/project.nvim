@@ -422,20 +422,26 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
 
     ---Hook to run before attaching to a new project.
     ---
-    ---If `nil`, it won't run.
-    --- ---
-    ---Default: `nil`
-    --- ---
-    ---@type nil|fun()
-    before_attach = nil,
-
-    ---Hook to run after attaching to a new project.
+    ---It recieves `target_dir` and, optionally,
+    ---the `method` used to change directory.
     ---
     ---If `nil`, it won't run.
     --- ---
     ---Default: `nil`
     --- ---
-    ---@type nil|fun()
+    ---@type nil|fun(target_dir: string, method?: string)
+    before_attach = nil,
+
+    ---Hook to run after attaching to a new project.
+    ---
+    ---It recieves `dir` and, optionally,
+    ---the `method` used to change directory.
+    ---
+    ---If `nil`, it won't run.
+    --- ---
+    ---Default: `nil`
+    --- ---
+    ---@type nil|fun(dir: string, method?: string)
     on_attach = nil,
 
     ---The path where `project.nvim` will store the project history directory,
