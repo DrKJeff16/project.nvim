@@ -164,7 +164,7 @@ function Api.set_pwd(dir, method)
     end
 
     if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
-        Config.options.before_attach()
+        Config.options.before_attach(dir, method)
     end
 
     local verbose = not Config.options.silent_chdir
@@ -222,8 +222,8 @@ function Api.set_pwd(dir, method)
         end)
     end
 
-    if Config.options.on_attach ~= nil and vim.is_callable(Config.options.on_attach) then
-        Config.options.on_attach()
+    if Config.options.on_attach and vim.is_callable(Config.options.on_attach) then
+        Config.options.on_attach(dir, method)
     end
 
     return true
@@ -402,7 +402,7 @@ function Api.init()
     })
 
     if not Config.options.manual_mode then
-        vim.api.nvim_create_autocmd({ 'BufEnter', 'WinEnter', 'BufWinEnter' }, {
+        vim.api.nvim_create_autocmd('BufEnter', {
             pattern = '*',
             group = group,
             nested = true,

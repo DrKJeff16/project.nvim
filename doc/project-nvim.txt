@@ -335,15 +335,19 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `'global'` ~
 
 
-    * {before_attach}           (`nil|fun()`)
+    * {before_attach}           (`nil|fun(target_dir, method?)`)
                                 Hook to run before attaching to a new project.
+                                It recieves `target_dir` and, optionally,
+                                the `method` used to change directory.
                                 If `nil`, it won't run
 
                                 Default: `nil` ~
 
 
-    * {on_attach}               (`nil|fun()`)
+    * {on_attach}               (`nil|fun(dir, method?)`)
                                 Hook to run after attaching to a new project.
+                                It recieves `dir` and, optionally,
+                                the `method` used to change directory.
                                 If `nil`, it won't run
 
                                 Default: `nil` ~
