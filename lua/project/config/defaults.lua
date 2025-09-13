@@ -74,6 +74,8 @@ DEFAULTS.patterns = {
 ---It recieves `target_dir` and, optionally,
 ---the `method` used to change directory.
 ---
+---CREDITS: @danilevy1212
+---
 ---If `nil`, it won't run.
 --- ---
 ---Default: `nil`
@@ -85,6 +87,8 @@ DEFAULTS.before_attach = nil
 ---
 ---It recieves `dir` and, optionally,
 ---the `method` used to change directory.
+---
+---CREDITS: @danilevy1212
 ---
 ---If `nil`, it won't run.
 --- ---
