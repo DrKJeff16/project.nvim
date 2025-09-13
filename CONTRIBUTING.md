@@ -1,5 +1,3 @@
-<div align="center"
-
 # CONTRIBUTING
 
 ## Table of Contents
@@ -10,8 +8,6 @@
     2. [`pre-commit`](#pre-commit)
     3. [`selene`](#selene)
 3. [Code Annotations](#code-annotations)
-
-</div>
 
 ---
 
