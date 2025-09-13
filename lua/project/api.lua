@@ -402,7 +402,7 @@ function Api.init()
     })
 
     if not Config.options.manual_mode then
-        vim.api.nvim_create_autocmd({ 'BufEnter', 'WinEnter', 'BufWinEnter' }, {
+        vim.api.nvim_create_autocmd('BufEnter', {
             pattern = '*',
             group = group,
             nested = true,
