@@ -1,17 +1,22 @@
 <div align="center">
 
-# project.nvim
+# project.nvim [![Mentioned in Awesome Neovim](https://awesome.re/mentioned-badge.svg)](https://github.com/rockerBOO/awesome-neovim)
+
+[Wiki](https://github.com/DrKJeff16/project.nvim/wiki) | [Contributing](./CONTRIBUTING.md) | [Roadmap/TODO](./TODO.md) | [Discussions](https://github.com/DrKJeff16/project.nvim/discussions)
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
 that automatically sets the user's `pwd` in a project root, and
 allows users to manage, access and selectively include in a history.
 
-This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
-I will be maintaining this plugin for the foreseeable future.
-
-**_Looking for other maintainers in case I'm unable to keep this repo up to date!_**
-
 </div>
+
+> [!NOTE]
+> This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
+> I will be maintaining this plugin for the foreseeable future.
+
+> [!IMPORTANT]
+> **_Looking for other maintainers in case I'm unable to keep this repo up to date!_**
+
 
 ### Checkhealth Support
 
@@ -38,39 +43,6 @@ Show these much love!
 
 ---
 
-## Table of Contents
-
-1. [Features](#features)
-2. [TODO](#todo)
-3. [Installation](#installation)
-4. [Configuration](#configuration)
-    1. [Defaults](#defaults)
-    2. [Pattern Matching](#pattern-matching)
-    3. [Nvim Tree](#nvim-tree)
-    4. [Telescope](#telescope)
-        1. [Telescope Mappings](#telescope-mappings)
-5. [Commands](#commands)
-    1. [ProjectFzf](#projectfzf)
-    2. [ProjectTelescope](#projecttelescope)
-    3. [ProjectAdd](#projectadd)
-    4. [ProjectRoot](#projectroot)
-    5. [ProjectRecents](#projectrecents)
-    6. [ProjectConfig](#projectconfig)
-    7. [ProjectDelete](#projectdelete)
-6. [API](#api)
-    1. [`run_fzf_lua()`](#run-fzf-lua)
-    2. [`get_project_root()`](#get-project-root)
-    2. [`get_recent_projects()`](#get-recent-projects)
-    3. [`get_config()`](#get-config)
-    4. [`get_history_paths()`](#get-history-paths)
-7. [Utils](#utils)
-8. [Troubleshooting](#troubleshooting)
-    1. [History File Not Created](#history-file-not-created)
-9. [Contributing](#contributing)
-10. [Credits](#credits)
-
----
-
 ## Features
 
 - Automatically `cd` to the project root directory using `vim.lsp` or pattern matching
@@ -83,40 +55,56 @@ Show these much love!
 - [Telescope Integration](#telescope) `:Telescope projects`
 - [`nvim-tree` Integration](#nvim-tree)
 
-<div align="right">
+---
 
-[Go To Top](#project-nvim)
+## Table of Contents
 
-</div>
+1. [Installation](#installation)
+2. [Configuration](#configuration)
+    1. [Defaults](#defaults)
+    2. [Pattern Matching](#pattern-matching)
+    3. [Nvim Tree](#nvim-tree)
+    4. [Telescope](#telescope)
+        1. [Telescope Mappings](#telescope-mappings)
+3. [Commands](#commands)
+    1. [ProjectFzf](#projectfzf)
+    2. [ProjectTelescope](#projecttelescope)
+    3. [ProjectAdd](#projectadd)
+    4. [ProjectRoot](#projectroot)
+    5. [ProjectRecents](#projectrecents)
+    6. [ProjectConfig](#projectconfig)
+    7. [ProjectDelete](#projectdelete)
+4. [API](#api)
+    1. [`run_fzf_lua()`](#run-fzf-lua)
+    2. [`get_project_root()`](#get-project-root)
+    2. [`get_recent_projects()`](#get-recent-projects)
+    3. [`get_config()`](#get-config)
+    4. [`get_history_paths()`](#get-history-paths)
+5. [Utils](#utils)
+6. [Troubleshooting](#troubleshooting)
+    1. [History File Not Created](#history-file-not-created)
+7. [Credits](#credits)
 
-## TODO
-
-Please refer to [`TODO.md`](./TODO.md) for more info.
-
-<div align="right">
-
-[Go To Top](#project-nvim)
-
-</div>
+---
 
 ## Installation
 
-**Requirements:**
+> [!IMPORTANT]
+>
+> **Requirements:**
+> - Neovim >= 0.11.0
+> - [`fzf-lua`](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
+> - [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
+>   - [`plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
+> - [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(OPTIONAL)**
 
-- Neovim >= 0.11.0
-- [`fzf-lua`](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
-- [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
-  - [`plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
-- [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(OPTIONAL)**
-
----
 
 Use any plugin manager of your choosing.
 
 Currently there are instructions for these:
 
 <details>
-<summary><b><a href="https://github.com/junegunn/vim-plug" id="vim-plug">vim-plug</a></b></summary>
+<summary><b><code>vim-plug</code></b></summary>
 
 ```vim
 if has('nvim-0.11')
@@ -138,7 +126,7 @@ endif
 </details>
 
 <details>
-<summary><b><a href="https://github.com/folke/lazy.nvim" id="lazy-nvim">lazy.nvim</a></b></summary>
+<summary><b><code>lazy.nvim</code></b></summary>
 
 ```lua
 require('lazy').setup({
@@ -167,7 +155,7 @@ require('lazy').setup({
 </details>
 
 <details>
-<summary><b><a href="https://github.com/lewis6991/pckr.nvim" id="pckr-nvim">pckr.nvim</a></b></summary>
+<summary><b><code>pckr.nvim</code></b></summary>
 
 ```lua
 if vim.fn.has('nvim-0.11') == 1 then
@@ -193,12 +181,13 @@ end
 </details>
 
 
-If you want to add instructions for your package manager please raise a **_BLANK ISSUE_**.
+> [!TIP]
+> If you want to add instructions for your package manager please raise a **_BLANK ISSUE_**.
 
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -215,7 +204,7 @@ require('project').setup()
 ### Defaults
 
 <details>
-<summary><b><ins><code>setup()</code>comes with these defaults.</ins></b></summary>
+<summary><b><code>setup()</code><ins>comes with these defaults.</ins></b></summary>
 
 You can find these in [`project/config/defaults.lua`](./lua/project/config/defaults.lua).
 
@@ -461,7 +450,7 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -501,15 +490,14 @@ For your convenience here come some examples:
   ```
 
 
-**NOTE:**
-
-- Make sure to put your pattern exclusions first, and then the patterns you DO want included.
-- If you have `allow_patterns_for_lsp` enabled, it will also work somewhat for your LSP clients.
+> [!IMPORTANT]
+> - Make sure to put your pattern exclusions first, and then the patterns you DO want included.
+> - If you have `allow_patterns_for_lsp` enabled, it will also work somewhat for your LSP clients.
 
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -530,7 +518,7 @@ require('nvim-tree').setup({
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -545,36 +533,35 @@ require('telescope').setup(...)
 require('telescope').load_extension('projects')
 ```
 
-Also you can configure the picker when calling `require('telescope').setup()`
-(**CREDITS**: [@ldfwbebp](https://github.com/ldfwbebp) https://github.com/ahmedkhalf/project.nvim/pull/160).
-
-For example:
-
-```lua
-require('telescope').setup({
-  --- ...
-  extensions = {
-    projects = {
-      layout_strategy = "horizontal",
-      layout_config = {
-        anchor = "N",
-        height = 0.25,
-        width = 0.6,
-        prompt_position = "bottom",
-      },
-
-      prompt_prefix = "󱎸  ",
-    },
-  },
-})
-```
-
 After that you can now call it from the command line:
 
 ```vim
 " Vim command line
 :Telescope projects
 ```
+
+> [!TIP]
+> You can also configure the picker when calling `require('telescope').setup()`
+> **CREDITS**: [@ldfwbebp](https://github.com/ldfwbebp): https://github.com/ahmedkhalf/project.nvim/pull/160
+>
+> ```lua
+> require('telescope').setup({
+>   --- ...
+>   extensions = {
+>     projects = {
+>       layout_strategy = "horizontal",
+>       layout_config = {
+>         anchor = "N",
+>         height = 0.25,
+>         width = 0.6,
+>         prompt_position = "bottom",
+>       },
+>
+>       prompt_prefix = "󱎸  ",
+>     },
+>   },
+> })
+> ```
 
 #### Telescope Mappings
 
@@ -589,11 +576,13 @@ After that you can now call it from the command line:
 | r           | \<C-r\>     | `recent_project_files`     |
 | w           | \<C-w\>     | `change_working_directory` |
 
-_You can find the Actions in [`telescope/_extensions/projects/actions.lua`](./lua/telescope/_extensions/projects/actions.lua)_.
+
+> [!TIP]
+> _You can find the Actions in [`telescope/_extensions/projects/actions.lua`](./lua/telescope/_extensions/projects/actions.lua)_.
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -605,6 +594,7 @@ These are the user commands you can call from the cmdline:
 
 ### ProjectFzf
 
+> [!IMPORTANT]
 > This command is only enabled if you have installed `fzf-lua`
 
 The `:ProjectFzf` command is a dynamicly enabled User Command that runs
@@ -613,6 +603,7 @@ For now it just executes [`require('project').run_fzf_lua()`](#run-fzf-lua).
 
 ### ProjectTelescope
 
+> [!IMPORTANT]
 > This command is only enabled if you have `telescope.nvim` (and you loaded it)
 
 The `:ProjectTelescope` command is a dynamicly enabled User Command that runs
@@ -631,11 +622,12 @@ The command does essentially the following:
 :lua require('project.api').add_project_manually()
 ```
 
-_See [`api.lua`](./lua/project/api.lua) for more info on `add_project_manually()`_.
+> [!INFO]
+> _See [`api.lua`](./lua/project/api.lua) for more info on `add_project_manually()`_.
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -652,11 +644,12 @@ The command does essentially the following:
 :lua require('project.api').on_buf_enter()
 ```
 
-_See [_`api.lua`_](./lua/project/api.lua) for more info on `on_buf_enter()`_.
+> [!INFO]
+> _See [_`api.lua`_](./lua/project/api.lua) for more info on `on_buf_enter()`_.
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -665,11 +658,12 @@ _See [_`api.lua`_](./lua/project/api.lua) for more info on `on_buf_enter()`_.
 The `:ProjectRecents` command is a hook to print a formatted list of your
 recent projects using `vim.notify()`.
 
-_See [`api.lua`](./lua/project/api.lua) for more info_.
+> [!INFO]
+> _See [`api.lua`](./lua/project/api.lua) for more info_.
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -685,11 +679,12 @@ The command does essentially the following:
 :lua vim.notify(vim.inspect(require('project').get_config()))
 ```
 
-_See [`api.lua`](./lua/project/api.lua) for more info_.
+> [!INFO]
+> _See [`api.lua`](./lua/project/api.lua) for more info_.
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -702,20 +697,21 @@ The arguments can be relative, absolute or un-expanded (`~/path/to/project`). Th
 to parse the args.
 If there's a successful deletion, you'll recieve a notification through `vim.notify()`.
 
-_See `:h :ProjectDelete` for more info_.
+> [!NOTE]
+> **USAGE**
+>
+> ```vim
+> " Vim command line
+> :ProjectDelete /path/to/first [/path/to/second [...]]
+> ```
 
-- **Usage**
-
-```vim
-" Vim command line
-:ProjectDelete /path/to/first [/path/to/second [...]]
-```
-
-_See [_`api.lua`_](./lua/project/api.lua) for more info_.
+> [!TIP]
+> - _See `:h :ProjectDelete` for more info_.
+> - _See [_`api.lua`_](./lua/project/api.lua) for more info_.
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -801,7 +797,7 @@ vim.print(get_history_paths('historyfile'))
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -809,10 +805,11 @@ vim.print(get_history_paths('historyfile'))
 
 ## Utils
 
-A set of utilities that get repeated across the board.
+> [!NOTE]
+> _These utilities are in part inspired by my own utilities found in [**`Jnvim`**](https://github.com/DrKJeff16/Jnvim),_
+> _my own Nvim configuration; particularly the **(WIP)** [**`User API`**](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)_.
 
-> _These utilities are in part inspired by my own utilities found in **[`Jnvim`](https://github.com/DrKJeff16/Jnvim)**, my own Nvim configuration;**,
-> particularly the **[`User API`](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)**_.
+A set of utilities that get repeated across the board.
 
 You can import them the follow way:
 
@@ -824,7 +821,7 @@ _See [`util.lua`](./lua/project/utils/util.lua) for further reference_.
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -837,15 +834,17 @@ _See [`util.lua`](./lua/project/utils/util.lua) for further reference_.
 If you're in a UNIX environment, make sure you have _**read, write and access permissions**_
 (`rwx`) for the `projectpath` directory.
 
-You can get the value of `projectpath` by running the following in the cmdline:
+> [!IMPORTANT]
+> The **default** value is `vim.fn.stdpath('data')/project_nvim`.
+> See `:h stdpath()` for more info.
 
-```vim
-" Vim command line
-:lua vim.print(require('project').get_history_paths('projectpath'))
-```
-
-The **default** value is `vim.fn.stdpath('data')/project_nvim`.
-See `:h stdpath()` for more info.
+> [!TIP]
+> You can get the value of `projectpath` by running the following in the cmdline:
+>
+> ```vim
+> " Vim command line
+> :lua vim.print(require('project').get_history_paths('projectpath'))
+> ```
 
 If you lack the required permissions for that directory, you can either:
 
@@ -854,23 +853,7 @@ If you lack the required permissions for that directory, you can either:
 
 <div align="right">
 
-[Go To Top](#project-nvim)
-
-</div>
-
----
-
-## Contributing
-
-<div align="center">
-
-**Please refer to [`CONTRIBUTING.md`](./CONTRIBUTING.md)**
-
-</div>
-
-<div align="right">
-
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
@@ -893,7 +876,7 @@ If you lack the required permissions for that directory, you can either:
 
 <div align="right">
 
-[Go To Top](#project-nvim)
+[Go To Top](#projectnvim-)
 
 </div>
 
