@@ -14,12 +14,12 @@
 ## What I Will Not Accept
 
 - **UNCREDITED CODE**. If pulling from somewhere else, _**paste the reference URL in a comment**_
-- **NO LUA ANNOTATIONS**. See [Code Annotations](#code-annotations)
+- **MISSING LUA ANNOTATIONS**. See [Code Annotations](#code-annotations)
 - **MERGE COMMITS**. Favour `git rebase` instead
-- **UNSIGNED COMMITS**. Read the guide[^2] on signing your commits
+- **UNSIGNED COMMITS**. Read the guide on signing your commits[^2]
 - **UNTESTED CHANGES** _(if warranted)_. Make sure to test your changes before making a PR
 - **UNFORMATTED CODE**. See the [StyLua](#stylua) section
-- **`CRLF` LINE ENDINGS**. Make sure to set your config in your CLI:
+- **NON-UNIX LINE ENDINGS**. Make sure to set your config in your CLI:
     ```sh
     # If you want to enforce this only in this repository
     git config --local core.autocrlf false
@@ -46,26 +46,34 @@
 
 ### StyLua
 
-**This one's a requirement**. You can install it through your package manager or by following
-[these instructions](https://github.com/JohnnyMorganz/StyLua#installation).
-
-To run it, you must be in the root of the repository and simply run the following command:
-
-```sh
-stylua .
-```
+> [!IMPORTANT]
+> **This one's a requirement.**
 
 This will format any Lua file that needs it.
 
-> **NOTE**: I will not accept any changes to `.stylua.toml`.
+You can install StyLua through your package manager or by following
+[these instructions](https://github.com/JohnnyMorganz/StyLua#installation).
+
+> [!TIP]
+> To run it, you must be **in the root of the repository**.
+> Simply run the following command:
+>
+> ```sh
+> stylua .
+> ```
+
+> [!WARNING]
+> **I will NOT accept any changes to** `.stylua.toml`.
 
 ### `pre-commit`
 
 Preferably use `pre-commit` to run the hooks contained in [`.pre-commit-config.yaml`](./.pre-commit-config.yaml).
 
 To install it, follow [these instructions](https://pre-commit.com/#install) in the `pre-commit` website.
+After that, run the following command in your terminal:
 
-After that, run the following command in your terminal (make sure to be in the root of the repository):
+> [!IMPORTANT]
+> Make sure to be in the root of the repository.
 
 ```sh
 pre-commit install
@@ -73,26 +81,47 @@ pre-commit install
 
 And now every time you run `git commit` the hooks contained in `.pre-commit-config.yaml` will run.
 
+> [!TIP]
+> It is recommended for you to update the hooks if required to:
+>
+> ```sh
+> pre-commit autoupdate
+> ```
+>
+> You must then commit the changes to `.pre-commit-config.yaml`.
+
 ### selene
 
-Here [`selene`](https://github.com/Kampfkarren/selene) is used for linting Lua code.
-The configuration is already set, but you can install it through `cargo`:
+[`selene`](https://github.com/Kampfkarren/selene) is used for linting Lua code.
+
+The configuration is already set, you only need to install it through `cargo`:
 
 ```sh
 cargo install selene
 ```
 
-It is recommended you use it to lint/check your code:
+or your package manager of preference.
 
-```sh
-selene .
-```
+> [!TIP]
+> To use it, just run it **from the root of the repository**:
+>
+> ```sh
+> selene .
+> ```
+
+> [!WARNING]
+> I will not accept any changes to `selene.toml` or `vim.yml`.
 
 ---
 
 ## Code Annotations
 
-Please refer to LuaLS' code annotations to understand the syntax.[^1]
+> [!WARNING]
+> **Undocumented code will be either asked for corrections or,
+> if not willing to document, _rejected_.**
+
+> [!IMPORTANT]
+> Please refer to LuaLS' code annotations to understand the syntax.[^1]
 
 Let's say you create a new submodule `lua/project_nvim/foo.lua`. If said module returns a table
 with fields, the optimal way to document is to do it **in the same file**, and following this format:
@@ -141,14 +170,10 @@ end
 return Foo
 ```
 
-<div align="center">
-
-**BEAR IN MIND ANY FIELD THAT'S NOT EXPLICITLY DEFINED SHOULD GO UNDER THE** `---@class` **ANNOTATION**.
-e.g. `Foo.things` above.
-
-**Undocumented code will be either asked for corrections or, if not willing to document, _rejected_.**
-
-</div>
+> [!IMPORTANT]
+> **BEAR IN MIND THAT ANY FIELD THAT'S NOT EXPLICITLY DEFINED
+> SHOULD GO UNDER THE** `---@class` **ANNOTATION**.
+> e.g. `Foo.things` from above.
 
 ---
 
