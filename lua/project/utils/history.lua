@@ -116,9 +116,16 @@ function History.filter_recent_projects()
     History.recent_projects = copy(new_recent)
 end
 
----@param project Project.ActionEntry|string
+---Deletes a project string, or a Telescope Entry type.
+--- ---
+---@param project string|Project.ActionEntry
 function History.delete_project(project)
-    if History.recent_projects == nil then
+    if vim.fn.has('nvim-0.11') == 1 then
+        vim.validate('project', project, { 'string', 'table' }, false, 'string|Project.ActionEntry')
+    else
+        vim.validate({ project = { project, { 'string', 'table' } } })
+    end
+    if not History.recent_projects then
         return
     end
 

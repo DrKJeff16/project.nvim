@@ -367,14 +367,7 @@ function Api.on_buf_enter(verbose, bufnr)
     History.write_history()
 end
 
----Deletes a project string, or a Telescope Entry type.
---- ---
----@param project string|Project.ActionEntry
-function Api.delete_project(project)
-    validate('project', project, { 'string', 'table' }, false, 'string|Project.ActionEntry')
-
-    History.delete_project(project)
-end
+Api.delete_project = History.delete_project
 
 ---@param verbose? boolean
 function Api.add_project_manually(verbose)
