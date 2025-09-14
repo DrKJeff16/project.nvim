@@ -36,14 +36,15 @@ https://github.com/user-attachments/assets/1516ff2e-29d9-4e0d-b592-bf2f79ab8158
 
 Show these much love!
 
-- [`telescope-project.nvim`](https://github.com/nvim-telescope/telescope-project.nvim)
-- [`snacks.nvim`](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md#projects)
-- [`neovim-project`](https://github.com/coffebar/neovim-project)
+- [`nvim-telescope/telescope-project.nvim`](https://github.com/nvim-telescope/telescope-project.nvim)
+- [`folke/snacks.nvim`](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md#projects)
+- [`coffebar/neovim-project`](https://github.com/coffebar/neovim-project)
+- [`LintaoAmons/cd-project.nvim`](https://github.com/LintaoAmons/cd-project.nvim)
 
 > [!CAUTION]
-> At the time of writing this, the following works with the original `project.nvim`.
+> At the time of writing this, the following **ONLY** works with the original `project.nvim`.
 >
-> - [`project-fzf.nvim`](https://github.com/jakobwesthoff/project-fzf.nvim) (**BASED OFF `project.nvim`**)
+> - [`jakobwesthoff/project-fzf.nvim`](https://github.com/jakobwesthoff/project-fzf.nvim) (**BASED OFF `project.nvim`**)
 
 ---
 
@@ -79,11 +80,11 @@ Show these much love!
     6. [ProjectConfig](#projectconfig)
     7. [ProjectDelete](#projectdelete)
 4. [API](#api)
-    1. [`run_fzf_lua()`](#run-fzf-lua)
-    2. [`get_project_root()`](#get-project-root)
-    2. [`get_recent_projects()`](#get-recent-projects)
-    3. [`get_config()`](#get-config)
-    4. [`get_history_paths()`](#get-history-paths)
+    1. [`run_fzf_lua()`](#run_fzf_lua)
+    2. [`get_project_root()`](#get_project_root)
+    2. [`get_recent_projects()`](#get_recent_projects)
+    3. [`get_config()`](#get_config)
+    4. [`get_history_paths()`](#get_history_paths)
 5. [Utils](#utils)
 6. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
@@ -184,6 +185,23 @@ end
 
 </details>
 
+<details>
+<summary><b><code>paq-nvim</code></b></summary>
+
+```lua
+local paq = require('paq')
+
+paq({
+  'savq/paq-nvim',
+
+  'nvim-lua/plenary.nvim', -- OPTIONAL
+  'nvim-telescope/telescope.nvim', -- OPTIONAL
+
+  'DrKJeff16/project.nvim',
+})
+```
+
+</details>
 
 > [!TIP]
 > If you want to add instructions for your package manager please raise a **_BLANK ISSUE_**.
@@ -462,6 +480,8 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
 
 </div>
 
+---
+
 ### Pattern Matching
 
 `project.nvim` comes with a `vim-rooter`-inspired pattern matching expression engine
@@ -600,7 +620,7 @@ After that you can now call it from the command line:
 
 These are the user commands you can call from the cmdline:
 
-### ProjectFzf
+### `:ProjectFzf`
 
 > [!IMPORTANT]
 > This command is only enabled if you have installed `fzf-lua`
@@ -609,7 +629,7 @@ The `:ProjectFzf` command is a dynamicly enabled User Command that runs
 `project.nvim` through `fzf-lua`.
 For now it just executes [`require('project').run_fzf_lua()`](#run-fzf-lua).
 
-### ProjectTelescope
+### `:ProjectTelescope`
 
 > [!IMPORTANT]
 > This command is only enabled if you have `telescope.nvim` (and you loaded it)
@@ -617,7 +637,7 @@ For now it just executes [`require('project').run_fzf_lua()`](#run-fzf-lua).
 The `:ProjectTelescope` command is a dynamicly enabled User Command that runs
 the Telescope `projects` picker. A shortcut, really.
 
-### ProjectAdd
+### `:ProjectAdd`
 
 The `:ProjectAdd` command is a manual hook to add to session projects, then
 subsequently `cd` to the current file's project directory
@@ -633,13 +653,7 @@ The command does essentially the following:
 > [!INFO]
 > _See [`api.lua`](./lua/project/api.lua) for more info on `add_project_manually()`_.
 
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-
-### ProjectRoot
+### `:ProjectRoot`
 
 The `:ProjectRoot` command is a manual hook to set the working directory to the current
 file's root, attempting to use any of the `setup()` detection methods
@@ -655,13 +669,7 @@ The command does essentially the following:
 > [!INFO]
 > _See [_`api.lua`_](./lua/project/api.lua) for more info on `on_buf_enter()`_.
 
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-
-### ProjectRecents
+### `:ProjectRecents`
 
 The `:ProjectRecents` command is a hook to print a formatted list of your
 recent projects using `vim.notify()`.
@@ -669,13 +677,7 @@ recent projects using `vim.notify()`.
 > [!INFO]
 > _See [`api.lua`](./lua/project/api.lua) for more info_.
 
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-
-### ProjectConfig
+### `:ProjectConfig`
 
 The `:ProjectConfig` command is a hook to display your current config
 using `vim.notify(inspect())`
@@ -690,13 +692,7 @@ The command does essentially the following:
 > [!INFO]
 > _See [`api.lua`](./lua/project/api.lua) for more info_.
 
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-
-### ProjectDelete
+### `:ProjectDelete`
 
 The `:ProjectDelete` command is one that needs at least one argument, and only accepts directories separated
 by a space. The arguments have to be directories that exist in the result of `get_recent_projects()`.
@@ -729,12 +725,12 @@ If there's a successful deletion, you'll recieve a notification through `vim.not
 
 The API can be found in [_`api.lua`_](./lua/project/api.lua).
 
-<h3 id="run-fzf-lua"><code>run_fzf_lua()</code></h3>
+### `run_fzf_lua()`
 
 `run_fzf_lua()` is an API utility to run this project using
 `fzf-lua`. See [`:ProjectFzf`](#projectfzf) for more info.
 
-<h3 id="get-project-root"><code>get_project_root()</code></h3>
+### `get_project_root()`
 
 `get_project_root()` is an [API](./lua/project/api.lua) utility for finding out
 about the current project's root, if any:
@@ -744,7 +740,7 @@ about the current project's root, if any:
 local root, lsp_or_method = require('project').get_project_root()
 ```
 
-<h3 id="get-recent-projects"><code>get_recent_projects()</code></h3>
+### `get_recent_projects()`
 
 You can get a list of recent projects by running the code below:
 
@@ -761,7 +757,7 @@ vim.print(recent_projects)
 
 Where `get_recent_projects()` returns either an empty table `{}` or a string array `{ '/path/to/project1', ... }`
 
-<h3 id="get-config"><code>get_config()</code></h3>
+### `get_config()`
 
 **If** `setup()` **has been called**, it returns a table containing the currently set options.
 Otherwise it will return `nil`.
@@ -776,7 +772,7 @@ vim.notify(vim.inspect(config))
 vim.print(config)
 ```
 
-<h3 id="get-history-paths"><code>get_history_paths()</code></h3>
+### `get_history_paths()`
 
 If no valid args are passed to this function, it will return the following dictionary:
 
