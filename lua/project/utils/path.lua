@@ -187,15 +187,8 @@ function Path.match(dir, pattern)
     return Path.has(dir, pattern)
 end
 
----@param callback? fun(err?: string, success?: boolean)
-function Path.create_scaffolding(callback)
-    local flag = tonumber('755', 8)
-
-    if callback ~= nil then
-        uv.fs_mkdir(Path.projectpath, flag, callback)
-    else
-        uv.fs_mkdir(Path.projectpath, flag)
-    end
+function Path.create_scaffolding()
+    uv.fs_mkdir(Path.projectpath, tonumber('755', 8))
 end
 
 ---@param dir string
