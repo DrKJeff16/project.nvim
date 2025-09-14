@@ -335,22 +335,20 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `'global'` ~
 
 
-    * {before_attach}           (`nil|fun(target_dir, method?)`)
+    * {before_attach}           (`fun(target_dir?, method?)`)
                                 Hook to run before attaching to a new project.
-                                It recieves `target_dir` and, optionally,
-                                the `method` used to change directory.
-                                If `nil`, it won't run
+                                It optionally recieves `target_dir` and
+                                the `method` used to change directory
 
-                                Default: `nil` ~
+                                Default: empty function ~
 
 
-    * {on_attach}               (`nil|fun(dir, method?)`)
+    * {on_attach}               (`fun(dir?, method?)`)
                                 Hook to run after attaching to a new project.
-                                It recieves `dir` and, optionally,
-                                the `method` used to change directory.
-                                If `nil`, it won't run
+                                It optionally recieves `dir` and
+                                the `method` used to change directory
 
-                                Default: `nil` ~
+                                Default: empty function ~
 
 
     * {datapath}                (string)
@@ -359,10 +357,8 @@ Table of Contents                                             *project-nvim.toc*
 
                                 For more info, you can run the following code
                                 in your command line:
-
 >vim
-    " Vimscript
-    :lua vim.print(require('project').get_history_paths())
+                                :lua vim.print(require('project').get_history_paths())
 <
 
                                 Default: `vim.fn.stdpath('data')` ~

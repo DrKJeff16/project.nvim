@@ -75,13 +75,12 @@ DEFAULTS.patterns = {
 ---the `method` used to change directory.
 ---
 ---CREDITS: @danilevy1212
----
----If `nil`, it won't run.
 --- ---
----Default: `nil`
+---Default: `function(target_dir, method) end`
 --- ---
----@type nil|fun(target_dir: string, method?: string)
-DEFAULTS.before_attach = nil
+---@param target_dir? string
+---@param method? string
+DEFAULTS.before_attach = function(target_dir, method) end
 
 ---Hook to run after attaching to a new project.
 ---
@@ -89,13 +88,12 @@ DEFAULTS.before_attach = nil
 ---the `method` used to change directory.
 ---
 ---CREDITS: @danilevy1212
----
----If `nil`, it won't run.
 --- ---
----Default: `nil`
+---Default: `function(dir, method) end`
 --- ---
----@type nil|fun(dir: string, method?: string)
-DEFAULTS.on_attach = nil
+---@param dir? string
+---@param method? string
+DEFAULTS.on_attach = function(dir, method) end
 
 ---Sets whether to use Pattern Matching rules to the LSP client.
 ---

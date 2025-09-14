@@ -32,6 +32,7 @@ local root_included = Path.root_included
 local validate = vim.validate
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
+local in_list = vim.list_contains
 local notify = vim.notify
 local curr_buf = vim.api.nvim_get_current_buf
 local augroup = vim.api.nvim_create_augroup
@@ -171,7 +172,7 @@ function Api.set_pwd(dir, method)
 
     if empty(History.session_projects) then
         History.session_projects = { dir }
-    elseif not in_tbl(History.session_projects, dir) then
+    elseif not in_list(History.session_projects, dir) then
         table.insert(History.session_projects, dir)
     elseif #History.session_projects > 1 then
         ---@type integer
@@ -196,7 +197,7 @@ function Api.set_pwd(dir, method)
     local scope_chdir = Config.options.scope_chdir
     local msg = fmt('(%s.set_pwd):', MODSTR)
 
-    if not in_tbl({ 'global', 'tab', 'win' }, scope_chdir) then
+    if not in_list({ 'global', 'tab', 'win' }, scope_chdir) then
         notify(fmt('%s INVALID value for `scope_chdir`', msg), WARN)
         return false
     end
