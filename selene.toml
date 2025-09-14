@@ -1,4 +1,4 @@
-std = "vim"
+std = "vim" # Points to the `vim.yml` file
 
 [lints]
 mixed_table = "allow"
