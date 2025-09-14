@@ -51,7 +51,7 @@ Show these much love!
 ## Features
 
 - Automatically `cd` to the project root directory using `vim.lsp` or pattern matching
-- Asynchronous file IO so it will not slow down neovim when reading the history file on startup
+- ~Asynchronous file IO so it will not slow down neovim when reading the history file on startup~
 - Users can control whether to run this or not by filetype/buftype
 - **(NEW!)** Fzf-Lua integration (credits to [@deathmaz](https://github.com/deathmaz))
 - Functional `checkhealth` hook `:checkhealth project`
