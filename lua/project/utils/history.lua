@@ -54,12 +54,16 @@ History.recent_projects = nil
 History.session_projects = {}
 
 ---@param mode OpenMode
----@return integer|nil
+---@return (integer|nil)? fd
 function History.open_history(mode)
     local histfile = Path.historyfile
 
     Path.create_scaffolding()
-    return uv.fs_open(histfile, mode, tonumber('644', 8))
+    local dir_stat = vim.uv.fs_stat(Path.projectpath)
+
+    if dir_stat then
+        return uv.fs_open(histfile, mode, tonumber('644', 8))
+    end
 end
 
 ---@param tbl string[]
@@ -198,7 +202,6 @@ function History.read_history()
         return
     end
     local data = uv.fs_read(fd, stat.size, -1)
-    uv.fs_close(fd)
 
     History.deserialize_history(data)
 end

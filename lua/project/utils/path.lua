@@ -1,6 +1,5 @@
 local fmt = string.format
 local validate = vim.validate
-
 local uv = vim.uv or vim.loop
 
 ---@class Project.Utils.Path
