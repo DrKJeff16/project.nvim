@@ -58,7 +58,7 @@ History.session_projects = {}
 function History.open_history(mode)
     local histfile = Path.historyfile
 
-    Path.create_scaffolding()
+    Path.create_projectpath()
     local dir_stat = vim.uv.fs_stat(Path.projectpath)
 
     if dir_stat then

@@ -15,6 +15,8 @@ local ERROR = vim.log.levels.ERROR  -- `4`
 
 local LOG_PFX = '(project.nvim): '
 
+local Path = require('project.utils.path')
+
 ---@class Project.Log
 ---@field logfile? string
 ---@field log_loc? { bufnr: integer, win: integer, tab: integer }|nil
@@ -52,23 +54,20 @@ local function gen_log(lvl)
 end
 
 function Log.read_log()
-    Log:open('r', function(_, fd)
-        Log.setup_watch()
+    Log.setup_watch()
+    local fd = Log:open('r')
 
-        if fd == nil then
-            return
-        end
+    if not fd then
+        return
+    end
 
-        uv.fs_fstat(fd, function(_, stat)
-            if stat == nil then
-                return
-            end
+    local stat = uv.fs_fstat(fd)
+    if not stat then
+        return
+    end
 
-            uv.fs_read(fd, stat.size, -1, function(_, _)
-                uv.fs_close(fd, function(_, _) end)
-            end)
-        end)
-    end)
+    local data = uv.fs_read(fd, stat.size, -1)
+    return data
 end
 
 function Log.clear_log()
@@ -137,19 +136,14 @@ end
 
 ---@param self Project.Log
 ---@param mode OpenMode
----@param callback? fun(err: string|nil, fd: integer|nil)
 ---@return integer|nil
-function Log:open(mode, callback)
-    local logfile, flag = self.logfile, tonumber('644', 8)
+function Log:open(mode)
+    Path.create_projectpath()
+    local dir_stat = uv.fs_stat(Path.projectpath)
 
-    if callback == nil then -- async
-        require('project.utils.path').create_scaffolding()
-        return uv.fs_open(logfile, mode, flag)
+    if dir_stat and dir_stat.type == 'directory' then
+        return uv.fs_open(self.logfile, mode, tonumber('644', 8))
     end
-
-    require('project.utils.path').create_scaffolding(function(_, _)
-        uv.fs_open(logfile, mode, flag, callback)
-    end)
 end
 
 Log.trace = gen_log(TRACE)
@@ -172,7 +166,7 @@ function Log.init()
 
     Log.logfile = require('project.utils.path').projectpath .. '/project.log'
     local fd = Log:open('a')
-    uv.fs_write(fd, fmt('\n\n'))
+    uv.fs_write(fd, fmt('\n\n'), -1)
 
     vim.api.nvim_create_user_command(
         'ProjectLog',

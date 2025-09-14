@@ -186,7 +186,7 @@ function Path.match(dir, pattern)
     return Path.has(dir, pattern)
 end
 
-function Path.create_scaffolding()
+function Path.create_projectpath()
     uv.fs_mkdir(Path.projectpath, tonumber('755', 8))
 end
 
