@@ -6,17 +6,28 @@
 
 ---
 
+## Table of Contents
+
+1. [Important](#important)
+2. [Logging](#logging)
+3. [API](#api)
+4. [Telescope](#telescope)
+
+---
+
 ## Important
 
-- [X] Fix deprecated `vim.lsp` calls (**_CRITICAL_**)
-- [X] Fix bug with history not working
-- [X] Fix history not being deleted consistently when using Telescope picker
-- [X] Fix Pattern Matching not applying to LSP method, **added option to disable**
-- [X] `vim.health` integration, AKA `:checkhealth project`
-- [X] Let the user decide to include projects that they don't own ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/167))
-- [X] Add info for `:ProjectRoot` and `:ProjectAdd` commands ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/133))
-- [X] Create help documentation `:h project-nvim`
-- [X] Rename `project.lua` to `api.lua`
+- [x] Fix deprecated `vim.lsp` calls (**_CRITICAL_**)
+- [x] Fix bug with history not working
+- [x] Fix history not being deleted consistently when using Telescope picker
+- [x] Fix Pattern Matching not applying to LSP method, **added option to disable**
+- [x] `vim.health` integration, AKA `:checkhealth project`
+- [x] Let the user decide to include projects that they don't own ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/167))
+- [x] Add info for `:ProjectRoot` and `:ProjectAdd` commands ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/133))
+- [x] Create help documentation `:h project-nvim`
+- [x] Rename `project.lua` to `api.lua`
+- [x] `fzf-lua` implementation
+- [ ] Drop the async IO component ([#17](https://github.com/DrKJeff16/project.nvim/pull/17))
 - [ ] Workspace Folders support (https://github.com/ahmedkhalf/project.nvim/pull/178)
 - [ ] Allow the users give their project an identifier (a name, number, a pizza, idk)
 - [ ] Implement attractive features from [`telescope-project.nvim`](https://github.com/nvim-telescope/telescope-project.nvim)
@@ -26,8 +37,8 @@
 
 ## Logging
 
-- [X] Create basic utilities
-- [X] Add logging toggle to `setup()`
+- [x] Create basic utilities
+- [x] Add logging toggle to `setup()`
 - [ ] Implement logging utilities across codebase
 - [ ] Link logging with checkhealth
 - [ ] Create command with interface for end-user
@@ -37,17 +48,17 @@
 
 ## API
 
-- [X] Rename `project.lua` to `api.lua`
-- [X] Expose `project.api.get_project_root()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/112))
-- [X] Add utility to display the current project `get_current_project()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/149))
-- [X] Add more user commands
-- [X] Implement `delete_project()` API wrapper for the end-user to use
-- [X] New user command `:ProjectDelete`
-- [ ] Simplify `set_pwd()` to avoid repeated calls (#7)
+- [x] Rename `project.lua` to `api.lua`
+- [x] Expose `project.api.get_project_root()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/112))
+- [x] Add utility to display the current project `get_current_project()` ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/149))
+- [x] Add more user commands
+- [x] Implement `delete_project()` API wrapper for the end-user to use
+- [x] New user command `:ProjectDelete`
+- [x] ~Simplify `set_pwd()` to avoid repeated calls (#7)~ Fixed autocommands to avoid repeat calls
 
 ---
 
 ## Telescope
 
-- [X] Fix `file_browser` mapping ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/107))
-- [X] Add option to control picker sorting order ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/140))
+- [x] Fix `file_browser` mapping ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/107))
+- [x] Add option to control picker sorting order ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/140))
