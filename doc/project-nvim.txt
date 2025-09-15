@@ -39,7 +39,8 @@ Table of Contents                                             *project-nvim.toc*
     7.6. `:ProjectRecents`                                       |:ProjectRecents|
     7.7. `:ProjectDelete`                                         |:ProjectDelete|
 8. API                                                        |project-nvim.api|
-    8.1. `get_project_root()`                    |project-nvim.get_project_root()|
+    8.1. `run_fzf_lua()`                              |project-nvim.run_fzf_lua()|
+    8.2. `get_project_root()`                    |project-nvim.get_project_root()|
     8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
     8.3. `get_config()`                                |project-nvim.get_config()|
     8.4. `get_history_paths()`                  |project-nvim.get_history_paths()|
@@ -656,7 +657,7 @@ Table of Contents                                             *project-nvim.toc*
     to benefit from.
 
 ------------------------------------------------------------------------------
-8.2 `run_fzf_lua()`                                   *project-nvim.run_fzf_lua()*
+8.1 `run_fzf_lua()`                                   *project-nvim.run_fzf_lua()*
 
     `run_fzf_lua()` is an API utility to run this project using
     `fzf-lua`. See |:ProjectFzf| for more info.
