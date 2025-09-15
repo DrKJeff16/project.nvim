@@ -152,17 +152,26 @@ telescope.enabled = true
 ---@type 'oldest'|'newest'
 telescope.sort = 'newest'
 
----If `true`, `telescope-file-browser.nvim` instead of builtins.
----
 ---If you have `telescope-file-browser.nvim` installed, you can enable this
 ---so that the Telescope picker uses it instead of the `find_files` builtin.
 ---
+---If `true`, use `telescope-file-browser.nvim` instead of builtins.
 ---In case it is not available, it'll fall back to `find_files`.
 --- ---
 ---Default: `false`
 --- ---
 ---@type boolean
 telescope.prefer_file_browser = false
+
+---Set this to `true` if you don't want the file picker to appear
+---after you've selected a project.
+---
+---CREDITS: [UNKNOWN](https://github.com/ahmedkhalf/project.nvim/issues/157#issuecomment-2226419783)
+--- ---
+---Default: `false`
+--- ---
+---@type boolean
+telescope.disable_file_picker = false
 
 ---@type Project.Config.Options.Telescope
 DEFAULTS.telescope = telescope

@@ -401,6 +401,15 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `false` ~
 
 
+    * {disable_file_picker}     (boolean)
+                                Set this to `true` if you don't want
+                                the file picker to appear
+                                after you've selected a project.
+                                CREDITS: UNKNOWN ~
+
+                                Default: `false` ~
+
+
 ==============================================================================
 4. Pattern Matching                              *project-nvim.pattern-matching*
 

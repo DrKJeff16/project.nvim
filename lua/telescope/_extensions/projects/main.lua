@@ -6,7 +6,9 @@ local fmt = string.format
 
 local Pickers = require('telescope.pickers')
 local Actions = require('telescope.actions')
+local State = require('telescope.actions.state')
 local telescope_config = require('telescope.config').values
+local action_set = require('telescope.actions.set')
 
 local ProjActions = require('telescope._extensions.projects.actions')
 local TelUtil = require('telescope._extensions.projects.util')
@@ -50,6 +52,28 @@ Main.default_opts = {
     prompt_prefix = '󱎸  ',
 }
 
+---@param prompt_bufnr integer
+---@param map fun(mode: string, lhs: string, rhs: string|fun())
+---@return boolean
+local function normal_attach(prompt_bufnr, map)
+    for mode, group in next, Keys do
+        for lhs, rhs in next, group do
+            map(mode, lhs, rhs)
+        end
+    end
+
+    Actions.select_default:replace(function() --- `on_project_selected`
+        if require('project.config').options.telescope.disable_file_picker then
+            local entry = State.get_selected_entry()
+            require('project.api').set_pwd(entry.value, 'telescope')
+            return action_set.select(prompt_bufnr, 'default')
+        end
+        find_project_files(prompt_bufnr)
+    end)
+
+    return true
+end
+
 ---@param opts? table
 function Main.setup(opts)
     Main.default_opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
@@ -67,8 +91,8 @@ function Main.projects(opts)
     end
 
     opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
-
-    local scope_chdir = require('project.config').options.scope_chdir
+    local Options = require('project.config').options
+    local scope_chdir = Options.scope_chdir
     local scope = scope_chdir == 'win' and 'window' or scope_chdir
 
     Pickers.new(opts, {
@@ -78,21 +102,7 @@ function Main.projects(opts)
         previewer = false,
         sorter = telescope_config.generic_sorter(opts),
 
-        ---@param prompt_bufnr integer
-        ---@param map fun(mode: string, lhs: string, rhs: string|fun())
-        attach_mappings = function(prompt_bufnr, map)
-            for mode, group in next, Keys do
-                for lhs, rhs in next, group do
-                    map(mode, lhs, rhs)
-                end
-            end
-
-            Actions.select_default:replace(function() --- `on_project_selected`
-                find_project_files(prompt_bufnr)
-            end)
-
-            return true
-        end,
+        attach_mappings = normal_attach,
     }):find()
 end
 

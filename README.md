@@ -385,6 +385,16 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
         --- ---
         ---@type boolean
         prefer_file_browser = false,
+
+        ---Set this to `true` if you don't want the file picker to appear
+        ---after you've selected a project.
+        ---
+        ---CREDITS: [UNKNOWN](https://github.com/ahmedkhalf/project.nvim/issues/157#issuecomment-2226419783)
+        --- ---
+        ---Default: `false`
+        --- ---
+        ---@type boolean
+        disable_file_picker = false,
     },
 
     ---Make hidden files visible when using the any picker.
