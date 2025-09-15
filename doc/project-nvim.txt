@@ -280,8 +280,8 @@ Table of Contents                                             *project-nvim.toc*
 
     * {show_hidden}             (boolean)
                                 Make hidden files visible when using
-                                the `telescope` picker (or others for that
-                                matter)
+                                any picker (including `fzf-lua` and
+                                `telescope`)
 
                                 Default: `false` ~
 
@@ -402,10 +402,10 @@ Table of Contents                                             *project-nvim.toc*
 
 
     * {disable_file_picker}     (boolean)
+                                CREDITS: UNKNOWN ~
                                 Set this to `true` if you don't want
                                 the file picker to appear
                                 after you've selected a project.
-                                CREDITS: UNKNOWN ~
 
                                 Default: `false` ~
 

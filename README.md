@@ -397,7 +397,7 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
         disable_file_picker = false,
     },
 
-    ---Make hidden files visible when using the any picker.
+    ---Make hidden files visible when using any picker.
     --- ---
     ---Default: `false`
     --- ---
