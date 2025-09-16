@@ -4,9 +4,9 @@
 
 [Wiki](https://github.com/DrKJeff16/project.nvim/wiki) | [Contributing](./CONTRIBUTING.md) | [Roadmap/TODO](./TODO.md) | [Discussions](https://github.com/DrKJeff16/project.nvim/discussions)
 
-`project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
-that automatically sets the user's `cwd` in the project root, and also
-allows users to manage, access and selectively include their projects in a history.
+`project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that,
+under configurable conditions, automatically sets the user's `cwd` to the current project root
+and also allows users to manage, access and selectively include their projects in a history.
 
 </div>
 
@@ -52,7 +52,7 @@ Show these much love!
 ## Features
 
 - Automatically `cd` to the project root directory using `vim.lsp` or pattern matching
-- ~Asynchronous file IO so it will not slow down neovim when reading the history file on startup~
+- ~Asynchronous file IO so it will not slow down Neovim when reading the history file on startup~
 - Users can control whether to run this or not by filetype/buftype
 - **(NEW!)** Fzf-Lua integration (credits to [@deathmaz](https://github.com/deathmaz))
 - Functional `checkhealth` hook `:checkhealth project`
@@ -290,7 +290,7 @@ require('project').setup()
     ---@type boolean
     manual_mode = false,
 
-    ---Methods of detecting the root directory. `'lsp'` uses the native neovim
+    ---Methods of detecting the root directory. `'lsp'` uses the native Neovim
     ---LSP, while `'pattern'` uses vim-rooter like glob pattern matching. Here
     ---order matters: if one is not detected, the other is used as fallback. You
     ---can also delete or rearrange the detection methods.
