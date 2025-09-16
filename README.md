@@ -117,6 +117,7 @@ if has('nvim-0.11')
 
   " OPTIONAL
   Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-lua/plenary.nvim'
+  Plug 'ibhagwan/fzf-lua'
 
   lua << EOF
   require('project').setup({
@@ -142,6 +143,7 @@ require('lazy').setup({
       dependencies = { -- OPTIONAL
         'nvim-lua/plenary.nvim',
         'nvim-telescope/telescope.nvim',
+        'ibhagwan/fzf-lua',
       },
 
       ---@module 'project'
@@ -170,6 +172,7 @@ if vim.fn.has('nvim-0.11') == 1 then
       requires = {
         'nvim-lua/plenary.nvim',
         'nvim-telescope/telescope.nvim',
+        'ibhagwan/fzf-lua',
       }, -- OPTIONAL
       config = function()
         require('project').setup({
@@ -196,6 +199,7 @@ paq({
 
   'nvim-lua/plenary.nvim', -- OPTIONAL
   'nvim-telescope/telescope.nvim', -- OPTIONAL
+  'ibhagwan/fzf-lua', -- OPTIONAL
 
   'DrKJeff16/project.nvim',
 })
@@ -204,7 +208,8 @@ paq({
 </details>
 
 > [!TIP]
-> If you want to add instructions for your package manager please raise a **_BLANK ISSUE_**.
+> If you want to add instructions for your plugin manager of preference
+> please raise a **_BLANK ISSUE_**.
 
 
 <div align="right">
@@ -228,7 +233,8 @@ require('project').setup()
 <details>
 <summary><b><code>setup()</code><ins>comes with these defaults.</ins></b></summary>
 
-You can find these in [`project/config/defaults.lua`](./lua/project/config/defaults.lua).
+> [!NOTE]
+> You can find these in [`project/config/defaults.lua`](./lua/project/config/defaults.lua).
 
 ```lua
 {
@@ -457,6 +463,8 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
     --- ---
     ---Default: `function(target_dir, method) end`
     --- ---
+    ---@param target_dir? string
+    ---@param method? string
     before_attach = function(target_dir, method) end,
 
     ---Hook to run after attaching to a new project.
@@ -468,6 +476,8 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
     --- ---
     ---Default: `function(dir, method) end`
     --- ---
+    ---@param dir? string
+    ---@param method? string
     on_attach = function(dir, method) end,
 
     ---The path where `project.nvim` will store the project history directory,
@@ -607,12 +617,12 @@ After that you can now call it from the command line:
 
 | Normal mode | Insert mode | Action                     |
 | ----------- | ----------- | -------------------------- |
-| f           | \<C-f\>     | `find_project_files`       |
-| b           | \<C-b\>     | `browse_project_files`     |
-| d           | \<C-d\>     | `delete_project`           |
-| s           | \<C-s\>     | `search_in_project_files`  |
-| r           | \<C-r\>     | `recent_project_files`     |
-| w           | \<C-w\>     | `change_working_directory` |
+| `f`           |   `<C-f>`     |   `find_project_files`       |
+| `b`           |   `<C-b>`     |   `browse_project_files`     |
+| `d`           |   `<C-d>`     |   `delete_project`           |
+| `s`           |   `<C-s>`     |   `search_in_project_files`  |
+| `r`           |   `<C-r>`     |   `recent_project_files`     |
+| `w`           |   `<C-w>`     |   `change_working_directory` |
 
 
 > [!TIP]
