@@ -48,7 +48,7 @@ function M.create_finder()
                 display = M.make_display,
                 name = name,
                 value = entry,
-                ordinal = name .. ' ' .. entry,
+                ordinal = ('%s %s'):format(name, entry),
             }
         end,
     })

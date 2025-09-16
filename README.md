@@ -5,18 +5,19 @@
 [Wiki](https://github.com/DrKJeff16/project.nvim/wiki) | [Contributing](./CONTRIBUTING.md) | [Roadmap/TODO](./TODO.md) | [Discussions](https://github.com/DrKJeff16/project.nvim/discussions)
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua
-that automatically sets the user's `cwd` in a project root, and
-allows users to manage, access and selectively include in a history.
+that automatically sets the user's `cwd` in the project root, and also
+allows users to manage, access and selectively include their projects in a history.
 
 </div>
 
 > [!NOTE]
-> This is forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
-> I will be maintaining this plugin for the foreseeable future.
+> This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
+> Ever since I've decided to extend it and address issues.
+>
+> _**I will be maintaining this plugin for the foreseeable future!**_
 
 > [!IMPORTANT]
-> **_Looking for other maintainers in case I'm unable to keep this repo up to date!_**
-
+> **_I'm looking for other maintainers in case I'm unable to keep this repo up to date!_**
 
 ### Checkhealth Support
 
@@ -230,11 +231,11 @@ require('project').setup()
 
 ### Defaults
 
-<details>
-<summary><b><code>setup()</code><ins>comes with these defaults.</ins></b></summary>
-
 > [!NOTE]
 > You can find these in [`project/config/defaults.lua`](./lua/project/config/defaults.lua).
+
+<details>
+<summary><b><code>setup()</code><ins>comes with these defaults.</ins></b></summary>
 
 ```lua
 {
