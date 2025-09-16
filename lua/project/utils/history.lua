@@ -54,19 +54,16 @@ History.recent_projects = nil
 History.session_projects = {}
 
 ---@param mode OpenMode
----@param callback? fun(err?: string, fd?: integer)
----@return integer|nil
-function History.open_history(mode, callback)
-    local histfile, flag = Path.historyfile, tonumber('644', 8)
+---@return (integer|nil)? fd
+function History.open_history(mode)
+    local histfile = Path.historyfile
 
-    if callback == nil then -- async
-        Path.create_scaffolding()
-        return uv.fs_open(histfile, mode, flag)
+    Path.create_projectpath()
+    local dir_stat = vim.uv.fs_stat(Path.projectpath)
+
+    if dir_stat then
+        return uv.fs_open(histfile, mode, tonumber('644', 8))
     end
-
-    Path.create_scaffolding(function(_, _)
-        uv.fs_open(histfile, mode, flag, callback)
-    end)
 end
 
 ---@param tbl string[]
@@ -193,24 +190,20 @@ function History.setup_watch()
 end
 
 function History.read_history()
-    History.open_history('r', function(_, fd)
-        History.setup_watch()
+    local fd = History.open_history('r')
+    History.setup_watch()
 
-        if fd == nil then
-            return
-        end
+    if fd == nil then
+        return
+    end
 
-        uv.fs_fstat(fd, function(_, stat)
-            if stat == nil then
-                return
-            end
+    local stat = uv.fs_fstat(fd)
+    if not stat then
+        return
+    end
+    local data = uv.fs_read(fd, stat.size, -1)
 
-            uv.fs_read(fd, stat.size, -1, function(_, data)
-                uv.fs_close(fd, function(_, _) end)
-                History.deserialize_history(data)
-            end)
-        end)
-    end)
+    History.deserialize_history(data)
 end
 
 ---@return string[] recents
