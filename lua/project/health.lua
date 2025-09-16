@@ -12,6 +12,7 @@ local h_error = vim.health.error or vim.health.report_error
 local empty = vim.tbl_isempty
 local copy = vim.deepcopy
 local in_tbl = vim.tbl_contains
+local in_list = vim.list_contains
 
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
@@ -162,7 +163,7 @@ function Health.project_check()
     projects = dedup(copy(projects))
 
     ---@cast projects string[]
-    for k, v in next, projects do
+    for k, v in ipairs(projects) do
         info(fmt('[`%s`]: `%s`', tostring(k), v))
     end
 end
@@ -172,12 +173,17 @@ function Health.telescope_check()
     local Opts = Config.options
 
     if not mod_exists('telescope') then
-        h_warn('Telescope is not installed')
+        h_warn(
+            fmt(
+                '`telescope.nvim` is not installed.\n%s',
+                "This doesn't represent an issue necessarily"
+            )
+        )
         return
     end
 
-    if not mod_exists('telescope._extensions.projects') then
-        h_warn('`projects` Telescope picker is missing!\nHave you set it up?')
+    if not require('telescope').extensions.projects then
+        h_warn('`projects` Telescope picker is missing!\nHave you loaded it?')
         return
     end
 
@@ -190,12 +196,33 @@ function Health.telescope_check()
 
     local sort = Opts.telescope.sort
 
-    if not in_tbl({ 'newest', 'oldest' }, sort) then
+    if not in_list({ 'newest', 'oldest' }, sort) then
         h_warn('Telescope `sort` option not configured correctly!')
         return
     end
 
     ok(fmt("Sorting order: `'%s'`", sort))
+end
+
+function Health.fzf_lua_check()
+    start('Fzf-Lua')
+    local Opts = Config.options
+
+    if not mod_exists('telescope') then
+        h_warn(
+            fmt('`fzf-lua` is not installed. \n%s', "This doesn't represent an issue necessarily")
+        )
+        return
+    end
+
+    ok('`fzf-lua` is installed!')
+
+    if not (vim.cmd.ProjectFzf and vim.is_callable(vim.cmd.ProjectFzf)) then
+        h_warn('`:ProjectFzf` user command is not loaded!')
+        return
+    end
+
+    ok('`:ProjectFzf` user command loaded!')
 end
 
 function Health.recent_proj_check()
@@ -234,6 +261,7 @@ function Health.check()
     --- NOTE: Order matters below!
 
     Health.telescope_check()
+    Health.fzf_lua_check()
     Health.project_check()
     Health.history_check()
     Health.options_check()
