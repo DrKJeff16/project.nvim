@@ -10,12 +10,6 @@ repos:
       - id: remove-crlf
       - id: forbid-crlf  # Forbid files containing CRLF end-lines to be committed
 
-  - repo: https://github.com/Calinou/pre-commit-luacheck
-    rev: v1.0.0
-    hooks:
-      - id: luacheck
-        verbose: true
-
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.7
     hooks:
