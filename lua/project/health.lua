@@ -11,7 +11,6 @@ local h_error = vim.health.error or vim.health.report_error
 
 local empty = vim.tbl_isempty
 local copy = vim.deepcopy
-local in_tbl = vim.tbl_contains
 local in_list = vim.list_contains
 
 local Util = require('project.utils.util')
@@ -76,14 +75,15 @@ function Health.options_check()
     table.sort(Options)
     local exceptions = {
         'new',
+        'telescope',
         'verify_datapath',
         'verify_histsize',
         'verify_methods',
         'verify_scope_chdir',
     }
 
-    for k, v in next, Options do
-        if not in_tbl(exceptions, k) then
+    for k, v in pairs(Options) do
+        if not in_list(exceptions, k) then
             ---@type table|string[]|nil
             local constraints = nil
 
@@ -93,7 +93,7 @@ function Health.options_check()
 
             local str, warning = format_per_type(type(v), v, nil, constraints)
 
-            str = fmt(' - %s: %s', k, str)
+            str = (' - %s: %s'):format(k, str)
 
             if is_type('boolean', warning) and warning then
                 h_warn(str)
@@ -126,18 +126,19 @@ function Health.history_check()
         },
     }
 
-    for _, v in next, P do
-        local fname, ftype, path = v.name, v.type, v.path
+    for _, v in ipairs(P) do
+        local stat = uv.fs_stat(v.path)
 
-        local stat = uv.fs_stat(path)
-
-        if stat == nil then
-            h_error(fmt('%s: `%s` is missing or not readable!', fname, path))
-        elseif stat.type ~= ftype then
-            h_error(fmt('%s: `%s` is not of type `%s`!', fname, path, ftype))
-        else
-            ok(fmt('%s: `%s`', fname, path))
+        if not stat then
+            h_error(fmt('%s: `%s` is missing or not readable!', v.name, v.path))
+            return
         end
+        if stat.type ~= v.type then
+            h_error(fmt('%s: `%s` is not of type `%s`!', v.name, v.path, v.type))
+            return
+        end
+
+        ok(('%s: `%s`'):format(v.name, v.path))
     end
 end
 
@@ -170,12 +171,12 @@ end
 
 function Health.telescope_check()
     start('Telescope')
-    local Opts = Config.options
+    local Opts = copy(Config.options)
 
     if not mod_exists('telescope') then
         h_warn(
             fmt(
-                '`telescope.nvim` is not installed.\n%s',
+                '`telescope.nvim` is not installed.\n%s\n',
                 "This doesn't represent an issue necessarily"
             )
         )
@@ -187,26 +188,30 @@ function Health.telescope_check()
         return
     end
 
-    ok('`projects` picker extension loaded')
+    ok('`projects` picker extension loaded\n')
 
     if not is_type('table', Opts.telescope) then
         h_warn('`projects` does not have telescope options set up')
         return
     end
 
-    local sort = Opts.telescope.sort
+    info('Config Options:\n')
 
-    if not in_list({ 'newest', 'oldest' }, sort) then
-        h_warn('Telescope `sort` option not configured correctly!')
-        return
+    for k, v in pairs(Opts.telescope) do
+        local str, warning = format_per_type(type(v), v)
+
+        str = ('`%s`: %s'):format(k, str)
+
+        if is_type('boolean', warning) and warning then
+            h_warn(str)
+        else
+            ok(str)
+        end
     end
-
-    ok(fmt("Sorting order: `'%s'`", sort))
 end
 
 function Health.fzf_lua_check()
     start('Fzf-Lua')
-    local Opts = Config.options
 
     if not mod_exists('telescope') then
         h_warn(
