@@ -487,6 +487,10 @@ Table of Contents                                             *project-nvim.toc*
         -- ... and so on
 <
 
+    NOTE ~
+    Not 100% certain whether the `reveal_force_cwd` flag is necessary,
+    but better safe than sorry!
+
 
 ==============================================================================
 6. Telescope                                            *project-nvim.telescope*

@@ -585,6 +585,10 @@ vim.keymap.set('n', '<YOUR-FLOAT-MAP>', ':Neotree filesystem float reveal_force_
 -- ... and so on
 ```
 
+> [!NOTE]
+> Not 100% certain whether the `reveal_force_cwd` flag is necessary,
+> but better safe than sorry!
+
 <div align="right">
 
 [Go To Top](#projectnvim-)
