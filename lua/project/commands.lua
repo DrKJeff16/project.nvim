@@ -35,11 +35,15 @@ end
 
 ---@param ctx vim.api.keyset.create_user_command.command_args
 function M.ProjectDelete(ctx)
-    local bang = ctx.bang ~= nil and ctx.bang or false
+    local force = ctx.bang ~= nil and ctx.bang or false
+    local recent = require('project.api').get_recent_projects()
+
+    if recent == nil then
+        return
+    end
 
     for _, v in next, ctx.fargs do
         local path = vim.fn.fnamemodify(v, ':p')
-        local recent = require('project.api').get_recent_projects()
 
         ---HACK: Getting rid of trailing `/` in string
         if path:sub(-1) == '/' then
@@ -48,7 +52,7 @@ function M.ProjectDelete(ctx)
 
         ---If `:ProjectDelete` isn't called with bang `!`, abort on
         ---anything that isn't in recent projects
-        if not (bang or vim.tbl_contains(recent, path) or path ~= '') then
+        if not (force or vim.list_contains(recent, path) or path ~= '') then
             error(('(:ProjectDelete): Could not delete `%s`, aborting'):format(path), ERROR)
         end
 
