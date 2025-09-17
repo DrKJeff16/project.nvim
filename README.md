@@ -60,6 +60,7 @@ Show these much love!
 - Logging capabilities **_(WIP, EXPERIMENTAL)_**
 - [Telescope Integration](#telescope) `:Telescope projects`
 - [`nvim-tree` Integration](#nvim-tree)
+- [`neo-tree` Integration](#neo-tree)
 
 ---
 
@@ -70,7 +71,8 @@ Show these much love!
     1. [Defaults](#defaults)
     2. [Pattern Matching](#pattern-matching)
     3. [Nvim Tree](#nvim-tree)
-    4. [Telescope](#telescope)
+    4. [Neo Tree](#neo-tree)
+    5. [Telescope](#telescope)
         1. [Telescope Mappings](#telescope-mappings)
 3. [Commands](#commands)
     1. [ProjectFzf](#projectfzf)
@@ -103,6 +105,7 @@ Show these much love!
 > - [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
 >   - [`plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
 > - [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(OPTIONAL)**
+> - [`neo-tree.nvim`](https://github.com/nvim-neo-tree/neo-tree.nvim) **(OPTIONAL)**
 
 
 Use any plugin manager of your choosing.
@@ -563,6 +566,23 @@ require('nvim-tree').setup({
     update_root = true,
   },
 })
+```
+
+<div align="right">
+
+[Go To Top](#projectnvim-)
+
+</div>
+
+### Neo Tree
+
+You can use `:Neotree filesystem ...` when changing a project:
+
+```lua
+vim.keymap.set('n', '<YOUR-TOGGLE-MAP>', ':Neotree filesystem toggle reveal_force_cwd<CR>', opts)
+vim.keymap.set('n', '<YOUR-SHOW-MAP>', ':Neotree filesystem show reveal_force_cwd<CR>', opts)
+vim.keymap.set('n', '<YOUR-FLOAT-MAP>', ':Neotree filesystem float reveal_force_cwd<CR>', opts)
+-- ... and so on
 ```
 
 <div align="right">
