@@ -1,4 +1,3 @@
-local fmt = string.format
 local validate = vim.validate
 local uv = vim.uv or vim.loop
 
@@ -30,16 +29,13 @@ function Path.get_files(file_dir)
 
     ---@type uv.uv_fs_t|nil
     local dir = uv.fs_scandir(file_dir)
-    if dir == nil then
+    if not dir then
         return
     end
 
-    ---@type string|nil
-    local file
-
     while true do
-        file = uv.fs_scandir_next(dir)
-        if file == nil then
+        local file = uv.fs_scandir_next(dir)
+        if not file then
             return
         end
 
@@ -261,8 +257,8 @@ function Path.init()
     end
 
     Path.datapath = datapath
-    Path.projectpath = fmt('%s/project_nvim', Path.datapath)
-    Path.historyfile = fmt('%s/project_history', Path.projectpath)
+    Path.projectpath = ('%s/project_nvim'):format(Path.datapath)
+    Path.historyfile = ('%s/project_history'):format(Path.projectpath)
 end
 
 return Path

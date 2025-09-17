@@ -1,4 +1,3 @@
-local fmt = string.format
 local validate = vim.validate
 
 local uv = vim.uv or vim.loop
@@ -43,11 +42,11 @@ local function gen_log(lvl)
                     sel = vim.inspect(sel)
                 end
 
-                msg = fmt('%s %s', msg, sel)
+                msg = ('%s %s'):format(msg, sel)
             end
         end
 
-        local output = Log:write(fmt('%s\n', msg), lvl)
+        local output = Log:write(('%s\n'):format(msg), lvl)
 
         return output
     end
@@ -126,7 +125,7 @@ function Log:write(data, lvl)
     }
     -- stylua: ignore end
 
-    local msg = fmt('%s %s  ==>  %s', os.date(), tostring(os.clock()), PFX[lvl] .. data)
+    local msg = ('%s %s  ==>  %s'):format(os.date(), tostring(os.clock()), PFX[lvl] .. data)
 
     uv.fs_write(fd, msg)
     uv.fs_close(fd)
@@ -166,7 +165,7 @@ function Log.init()
 
     Log.logfile = require('project.utils.path').projectpath .. '/project.log'
     local fd = Log:open('a')
-    uv.fs_write(fd, fmt('\n\n'), -1)
+    uv.fs_write(fd, string.char(10) .. string.char(10), -1)
 
     vim.api.nvim_create_user_command(
         'ProjectLog',

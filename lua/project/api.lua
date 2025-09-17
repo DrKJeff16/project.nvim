@@ -24,6 +24,7 @@ local History = require('project.utils.history')
 local is_type = Util.is_type
 local is_windows = Util.is_windows
 local reverse = Util.reverse
+local vim_has = Util.vim_has
 local exists = Path.exists
 local is_excluded = Path.is_excluded
 local root_included = Path.root_included
@@ -60,6 +61,8 @@ local fnamemodify = vim.fn.fnamemodify
 --     return result
 -- end
 
+---The `project.nvim` API module.
+--- ---
 ---@class Project.API
 ---@field last_project? string
 ---@field current_project? string
@@ -67,6 +70,7 @@ local fnamemodify = vim.fn.fnamemodify
 local Api = {}
 
 Api.get_recent_projects = History.get_recent_projects
+Api.delete_project = History.delete_project
 
 ---Get the LSP client for current buffer.
 ---
@@ -120,7 +124,7 @@ end
 ---@param dir string
 ---@return boolean
 function Api.verify_owner(dir)
-    if vim.fn.has('nvim-0.11') then
+    if vim_has('nvim-0.11') then
         validate('dir', dir, 'string', false)
     else
         validate({ dir = { dir, 'string' } })
@@ -157,8 +161,8 @@ end
 --- ---
 ---@param group integer
 function Api.gen_lsp_autocmd(group)
-    if vim.fn.has('nvim-0.11') then
-        validate('group', group, Util.int_validator, false, 'integer')
+    if vim_has('nvim-0.11') then
+        validate('group', group, 'number', false, 'integer')
     else
         validate({ group = { group, 'number' } })
     end
@@ -174,7 +178,7 @@ end
 ---@param method? string
 ---@return boolean
 function Api.set_pwd(dir, method)
-    if vim.fn.has('nvim-0.11') then
+    if vim_has('nvim-0.11') then
         validate('dir', dir, 'string', true)
         validate('method', method, 'string', true)
     else
@@ -265,7 +269,7 @@ end
 ---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|Project.HistoryPaths res
 function Api.get_history_paths(path)
-    if vim.fn.has('nvim-0.11') then
+    if vim_has('nvim-0.11') then
         validate('path', path, 'string', true, "'datapath'|'projectpath'|'historyfile'")
     else
         validate({ path = { path, { 'string', 'nil' } } })
@@ -361,8 +365,8 @@ end
 ---@param bufnr? integer
 ---@return boolean
 function Api.buf_is_file(bufnr)
-    if vim.fn.has('nvim-0.11') then
-        validate('bufnr', bufnr, Util.int_validator, true, 'integer')
+    if vim_has('nvim-0.11') then
+        validate('bufnr', bufnr, 'number', true, 'integer')
     else
         validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
@@ -376,9 +380,9 @@ end
 ---@param verbose? boolean
 ---@param bufnr? integer
 function Api.on_buf_enter(verbose, bufnr)
-    if vim.fn.has('nvim-0.11') then
+    if vim_has('nvim-0.11') then
         validate('verbose', verbose, 'boolean', true)
-        validate('bufnr', bufnr, Util.int_validator, true, 'integer')
+        validate('bufnr', bufnr, 'number', true, 'integer')
     else
         validate({
             verbose = { verbose, { 'boolean', 'nil' } },
@@ -415,11 +419,9 @@ function Api.on_buf_enter(verbose, bufnr)
     History.write_history()
 end
 
-Api.delete_project = History.delete_project
-
 ---@param verbose? boolean
 function Api.add_project_manually(verbose)
-    if vim.fn.has('nvim-0.11') then
+    if vim_has('nvim-0.11') then
         validate('verbose', verbose, 'boolean', true)
     else
         validate({ verbose = { verbose, { 'boolean', 'nil' } } })

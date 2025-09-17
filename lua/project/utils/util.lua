@@ -485,20 +485,6 @@ function Util.normalise_path(path)
     return normalised_path
 end
 
----@param v any
----@return boolean
-function Util.int_validator(v)
-    if not v then
-        return false
-    end
-
-    if type(v) ~= 'number' then
-        return false
-    end
-
-    return (math.floor(v) == v or math.ceil(v) == v)
-end
-
 return Util
 
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
