@@ -10,31 +10,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Lint Lua code with Selene
-        uses: YoloWingPixie/selene-lua-linter-action@v1
+        uses: AlejandroSuero/selene-linter-action@v1.0.0
         with:
-          # Required: Path to your Selene configuration file (e.g., selene.toml or .selene.toml)
-          config-path: selene.toml
-
-          # Optional: Directory to run Selene in. Defaults to repository root.
-          # working-directory: '.'
-
-          # Optional: File or directory to lint, relative to working-directory. Defaults to '.' (all files).
-          lint-path: '.'
-
-          # Optional: Additional arguments for Selene CLI.
-          # selene-args: '--display-style quiet'
-
-          # Optional: Fail the action if Selene reports warnings. Defaults to 'false'.
-          fail-on-warnings: 'false'
-
-          # Optional: Report Selene findings as GitHub annotations. Defaults to 'true'.
-          report-as-annotations: 'true'
-
-          # Optional: Selene version to use. Defaults to 'latest'.
-          selene-version: 'latest'
-
-          # Optional: Selene repository. Defaults to 'Kampfkarren/selene'.
-          selene-repo: 'Kampfkarren/selene'
-
-          # Optional: Selene variant ('selene' or 'selene-light'). Defaults to 'selene'.
-          selene-variant: 'selene'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --display-style=quiet .
