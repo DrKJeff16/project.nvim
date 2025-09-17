@@ -289,6 +289,8 @@ function Api.get_history_paths(path)
 end
 
 ---Returns the project root, as well as the method used.
+---
+---If no project root is found, nothing will be returned.
 --- ---
 ---@return string? root
 ---@return string? method

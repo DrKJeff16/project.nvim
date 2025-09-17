@@ -13,34 +13,12 @@ local vim_has = Util.vim_has
 ---@class Project
 local Project = {}
 
----@param options? Project.Config.Options
-function Project.setup(options)
-    if vim_has('nvim-0.11') then
-        validate('options', options, 'table', true, 'Project.Config.Options')
-    else
-        validate({ options = { options, { 'table', 'nil' } } })
-    end
-    Config.setup(options or {})
-end
-
----Returns the project root, as well as the method used.
----
----If no project root is found, nothing will be returned.
---- ---
----@return string? root
----@return string? method
-function Project.get_project_root()
-    local root, method = Api.get_project_root()
-    return root, method
-end
-
+Project.setup = Config.setup
+Project.get_recent_projects = Api.get_recent_projects
+Project.get_project_root = Api.get_project_root
 Project.delete_project = Api.delete_project
-
----@param path? 'datapath'|'projectpath'|'historyfile'
----@return string|{ datapath: string, projectpath: string, historyfile: string }
-function Project.get_history_paths(path)
-    return Api.get_history_paths(path or '')
-end
+Project.get_history_paths = Api.get_history_paths
+Project.run_fzf_lua = Api.run_fzf_lua
 
 ---@param refresh? boolean
 ---@return string? last
@@ -55,12 +33,6 @@ function Project.get_last_project(refresh)
 
     local last = refresh and Api.last_project or Api.get_last_project()
     return last
-end
-
----@return string[] recent
-function Project.get_recent_projects()
-    local recent = Api.get_recent_projects()
-    return recent
 end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
@@ -90,8 +62,6 @@ end
 function Project.get_config()
     return vim.g.project_setup == 1 and Config.options or nil
 end
-
-Project.run_fzf_lua = Api.run_fzf_lua
 
 return Project
 
