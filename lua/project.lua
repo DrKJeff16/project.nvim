@@ -15,7 +15,7 @@ local Project = {}
 
 ---@param options? Project.Config.Options
 function Project.setup(options)
-    if vim_has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         validate('options', options, 'table', true, 'Project.Config.Options')
     else
         validate({ options = { options, { 'table', 'nil' } } })
