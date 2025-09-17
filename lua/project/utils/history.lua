@@ -1,5 +1,3 @@
-local fmt = string.format
-
 ---@alias OpenMode
 ---|integer
 ---|string
@@ -31,12 +29,11 @@ local WARN = vim.log.levels.WARN
 local uv = vim.uv or vim.loop
 
 local copy = vim.deepcopy
-local in_tbl = vim.tbl_contains
+local in_list = vim.list_contains
 
 local dir_exists = Util.dir_exists
 local normalise_path = Util.normalise_path
 local dedup = Util.dedup
-local is_type = Util.is_type
 
 ---@class Project.Utils.History
 ---@field has_watch_setup? boolean
@@ -45,12 +42,12 @@ local History = {}
 
 ---Projects from previous neovim sessions.
 --- ---
----@type string[]|table|nil
+---@type string[]|nil
 History.recent_projects = nil
 
 ---Projects from current neovim session.
 --- ---
----@type string[]|table
+---@type string[]
 History.session_projects = {}
 
 ---@param mode OpenMode
@@ -59,7 +56,7 @@ function History.open_history(mode)
     local histfile = Path.historyfile
 
     Path.create_projectpath()
-    local dir_stat = vim.uv.fs_stat(Path.projectpath)
+    local dir_stat = uv.fs_stat(Path.projectpath)
 
     if dir_stat then
         return uv.fs_open(histfile, mode, tonumber('644', 8))
@@ -81,7 +78,7 @@ local function delete_duplicates(tbl)
         end
     end
 
-    ---@type table|string[]
+    ---@type string[]
     local res = {}
 
     for _, v in next, tbl do
@@ -93,21 +90,22 @@ local function delete_duplicates(tbl)
         end
     end
 
-    res = dedup(copy(res))
-
-    return res
+    return dedup(res)
 end
 
 function History.filter_recent_projects()
+    if History.recent_projects == nil then
+        return
+    end
+
+    ---@type string[]
     local recent = dedup(History.recent_projects)
 
-    ---@type string[]|table
+    ---@type string[]
     local new_recent = {}
 
-    for _, v in next, recent do
-        if v ~= nil then
-            table.insert(new_recent, v)
-        end
+    for _, v in ipairs(recent) do
+        table.insert(new_recent, v)
     end
 
     History.recent_projects = copy(new_recent)
@@ -122,15 +120,17 @@ function History.delete_project(project)
     else
         vim.validate({ project = { project, { 'string', 'table' } } })
     end
-    if not History.recent_projects then
+
+    if History.recent_projects == nil then
         return
     end
 
+    ---@type string[], boolean
     local new_tbl, found = {}, false
-    local proj = is_type('string', project) and project or project.value
+    local proj = type(project) == 'string' and project or project.value
 
-    for _, v in next, History.recent_projects do
-        if v ~= proj and not in_tbl(new_tbl, v) then
+    for _, v in ipairs(History.recent_projects) do
+        if v ~= proj and not in_list(new_tbl, v) then
             table.insert(new_tbl, v)
         elseif v == proj then
             found = true
@@ -138,7 +138,7 @@ function History.delete_project(project)
     end
 
     if found then
-        vim.notify(fmt('Deleting project `%s`', proj), WARN)
+        vim.notify(('Deleting project `%s`'):format(proj), WARN)
     end
 
     History.recent_projects = copy(new_tbl)
@@ -173,7 +173,7 @@ function History.setup_watch()
     end
 
     local event = uv.new_fs_event()
-    if event == nil then
+    if not event then
         return
     end
 
@@ -211,7 +211,7 @@ function History.get_recent_projects()
     ---@type string[]
     local tbl = {}
 
-    if History.recent_projects ~= nil then
+    if History.recent_projects then
         vim.list_extend(tbl, History.recent_projects)
         vim.list_extend(tbl, History.session_projects)
     else
@@ -222,7 +222,7 @@ function History.get_recent_projects()
 
     ---@type string[]
     local recents = {}
-    for _, dir in next, tbl do
+    for _, dir in ipairs(tbl) do
         if dir_exists(dir) then
             table.insert(recents, dir)
         end
@@ -240,7 +240,7 @@ function History.write_history()
 
     local fd = History.open_history(History.recent_projects ~= nil and 'w' or 'a')
 
-    if fd == nil then
+    if not fd then
         error('(project.utils.history.write_history): File restricted', ERROR)
     end
 
@@ -259,8 +259,8 @@ function History.write_history()
 
     -- Transform table to string
     local out = ''
-    for _, v in next, tbl_out do
-        out = fmt('%s%s\n', out, v)
+    for _, v in ipairs(tbl_out) do
+        out = ('%s%s\n'):format(out, v)
     end
 
     uv.fs_write(fd, out, -1)

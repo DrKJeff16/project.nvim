@@ -9,7 +9,6 @@
 ---@field projectpath string
 ---@field historyfile string
 
-local fmt = string.format
 local uv = vim.uv or vim.loop
 
 local MODSTR = 'project.api'
@@ -31,7 +30,6 @@ local root_included = Path.root_included
 
 local validate = vim.validate
 local empty = vim.tbl_isempty
-local in_tbl = vim.tbl_contains
 local in_list = vim.list_contains
 local notify = vim.notify
 local curr_buf = vim.api.nvim_get_current_buf
@@ -40,17 +38,35 @@ local autocmd = vim.api.nvim_create_autocmd
 local buf_name = vim.api.nvim_buf_get_name
 local fnamemodify = vim.fn.fnamemodify
 
+-- ---@param client vim.lsp.Client
+-- ---@param name string
+-- ---@return string
+-- local function lsp_get_buf_root(client, name)
+--     -- LSP clients can have multiple workspace folders
+--     if not client.workspace_folders then
+--         return client.config.root_dir
+--     end
+--
+--     local result = client.config.root_dir
+--
+--     for _, workspace_folder in ipairs(client.workspace_folders) do
+--         local folder_name = vim.uri_to_fname(workspace_folder.uri)
+--         if folder_name and vim.startswith(name, folder_name) then
+--             result = folder_name
+--             break
+--         end
+--     end
+--
+--     return result
+-- end
+
 ---@class Project.API
 ---@field last_project? string
 ---@field current_project? string
 ---@field current_method? string
 local Api = {}
 
----@return string[] recent
-function Api.get_recent_projects()
-    local recent = History.get_recent_projects()
-    return recent
-end
+Api.get_recent_projects = History.get_recent_projects
 
 ---Get the LSP client for current buffer.
 ---
@@ -60,8 +76,10 @@ end
 ---@return string? dir
 ---@return string? name
 function Api.find_lsp_root()
-    local bufnr = curr_buf()
     local allow_patterns = Config.options.allow_patterns_for_lsp
+
+    local bufnr = curr_buf()
+    local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
     if empty(clients) then
@@ -71,15 +89,13 @@ function Api.find_lsp_root()
     ---@type string|nil, string|nil
     local dir, name = nil, nil
 
-    local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
-
-    for _, client in next, clients do
-        ---@type table|string[]
+    for _, client in ipairs(clients) do
+        ---@type string[]
         local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
         local valid = is_type('table', filetypes) and not empty(filetypes)
 
-        if not in_tbl(Config.options.ignore_lsp, client.name) and valid then
-            if in_tbl(filetypes, ft) and client.config.root_dir then
+        if not in_list(Config.options.ignore_lsp, client.name) and valid then
+            if in_list(filetypes, ft) and client.config.root_dir then
                 dir, name = client.config.root_dir, client.name
 
                 --- If pattern matching for LSP is enabled, check patterns
@@ -104,16 +120,19 @@ end
 ---@param dir string
 ---@return boolean
 function Api.verify_owner(dir)
-    vim.validate('dir', dir, 'string', false)
+    if vim.fn.has('nvim-0.11') then
+        validate('dir', dir, 'string', false)
+    else
+        validate({ dir = { dir, 'string' } })
+    end
 
     if is_windows() then
         return true
     end
 
     local stat = uv.fs_stat(dir)
-
-    if stat == nil then
-        error(fmt("(%s.verify_owner): Directory can't be accessed!", MODSTR), ERROR)
+    if not stat then
+        error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
     end
 
     return stat.uid == uv.getuid()
@@ -138,7 +157,11 @@ end
 --- ---
 ---@param group integer
 function Api.gen_lsp_autocmd(group)
-    validate('group', group, Util.int_validator, false, 'integer')
+    if vim.fn.has('nvim-0.11') then
+        validate('group', group, Util.int_validator, false, 'integer')
+    else
+        validate({ group = { group, 'number' } })
+    end
     autocmd('LspAttach', {
         group = group,
         callback = function(ev)
@@ -151,17 +174,26 @@ end
 ---@param method? string
 ---@return boolean
 function Api.set_pwd(dir, method)
-    validate('dir', dir, 'string', true)
-    validate('method', method, 'string', true)
+    if vim.fn.has('nvim-0.11') then
+        validate('dir', dir, 'string', true)
+        validate('method', method, 'string', true)
+    else
+        validate({
+            dir = { dir, { 'string', 'nil' } },
+            method = { method, { 'string', 'nil' } },
+        })
+    end
 
     if dir == nil or method == nil then
-        notify(fmt('(%s.set_pwd): `dir` and/or `method` are `nil`!', MODSTR), WARN)
+        notify(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR), WARN)
         return false
     end
 
-    if not (Config.options.allow_different_owners or Api.verify_owner(dir)) then
-        notify(fmt('(%s.set_pwd): Project root is owned by a different user', MODSTR), WARN)
-        return false
+    if not Config.options.allow_different_owners then
+        if not Api.verify_owner(dir) then
+            notify(('(%s.set_pwd): Project root is owned by a different user'):format(MODSTR), WARN)
+            return false
+        end
     end
 
     if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
@@ -190,15 +222,15 @@ function Api.set_pwd(dir, method)
     end
 
     --- If directory is the same as current Project dir/CWD
-    if in_tbl({ dir, Api.current_project or '' }, vim.fn.getcwd(0, 0)) then
+    if in_list({ dir, Api.current_project or '' }, vim.fn.getcwd(0, 0)) then
         return true
     end
 
     local scope_chdir = Config.options.scope_chdir
-    local msg = fmt('(%s.set_pwd):', MODSTR)
+    local msg = ('(%s.set_pwd):'):format(MODSTR)
 
     if not in_list({ 'global', 'tab', 'win' }, scope_chdir) then
-        notify(fmt('%s INVALID value for `scope_chdir`', msg), WARN)
+        notify(('%s INVALID value for `scope_chdir`'):format(msg), WARN)
         return false
     end
 
@@ -206,16 +238,16 @@ function Api.set_pwd(dir, method)
 
     if scope_chdir == 'global' then
         ok = pcall(vim.api.nvim_set_current_dir, dir)
-        msg = fmt('%s\nchdir: `%s`:', msg, dir)
+        msg = ('%s\nchdir: `%s`:'):format(msg, dir)
     elseif scope_chdir == 'tab' then
         ok = pcall(vim.cmd.tchdir, dir)
-        msg = fmt('%s\ntchdir: `%s`:', msg, dir)
+        msg = ('%s\ntchdir: `%s`:'):format(msg, dir)
     elseif scope_chdir == 'win' then
         ok = pcall(vim.cmd.lchdir, dir)
-        msg = fmt('%s\nlchdir: `%s`:', msg, dir)
+        msg = ('%s\nlchdir: `%s`:'):format(msg, dir)
     end
 
-    msg = fmt('%s\nMethod: %s\nStatus: %s', msg, method, (ok and 'SUCCESS' or 'FAILED'))
+    msg = ('%s\nMethod: %s\nStatus: %s'):format(msg, method, (ok and 'SUCCESS' or 'FAILED'))
 
     if verbose then
         vim.schedule(function()
@@ -233,7 +265,11 @@ end
 ---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|Project.HistoryPaths res
 function Api.get_history_paths(path)
-    validate('path', path, 'string', true, "'datapath'|'projectpath'|'historyfile'")
+    if vim.fn.has('nvim-0.11') then
+        validate('path', path, 'string', true, "'datapath'|'projectpath'|'historyfile'")
+    else
+        validate({ path = { path, { 'string', 'nil' } } })
+    end
 
     local VALID = { 'datapath', 'projectpath', 'historyfile' }
 
@@ -244,7 +280,7 @@ function Api.get_history_paths(path)
         historyfile = Path.historyfile,
     }
 
-    if path ~= nil and in_tbl(VALID, path) then
+    if path and in_list(VALID, path) then
         ---@type string
         res = Path[path]
     end
@@ -268,7 +304,7 @@ function Api.get_project_root()
             local root, lsp_name = Api.find_lsp_root()
 
             if root ~= nil then
-                return true, root, fmt('"%s" lsp', lsp_name)
+                return true, root, ('"%s" lsp'):format(lsp_name)
             end
 
             return false, nil, nil
@@ -285,8 +321,8 @@ function Api.get_project_root()
         end,
     }
 
-    for _, detection_method in next, Config.options.detection_methods do
-        if in_tbl(VALID, detection_method) then
+    for _, detection_method in ipairs(Config.options.detection_methods) do
+        if in_list(VALID, detection_method) then
             local success, root, lsp_method = SWITCH[detection_method]()
 
             if success then
@@ -323,20 +359,30 @@ end
 ---@param bufnr? integer
 ---@return boolean
 function Api.buf_is_file(bufnr)
-    validate('bufnr', bufnr, Util.int_validator, true, 'integer')
+    if vim.fn.has('nvim-0.11') then
+        validate('bufnr', bufnr, Util.int_validator, true, 'integer')
+    else
+        validate({ bufnr = { bufnr, { 'number', 'nil' } } })
+    end
     bufnr = bufnr or curr_buf()
 
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
 
-    return in_tbl({ '', 'acwrite' }, bt)
+    return in_list({ '', 'acwrite' }, bt)
 end
 
 ---@param verbose? boolean
 ---@param bufnr? integer
 function Api.on_buf_enter(verbose, bufnr)
-    validate('verbose', verbose, 'boolean', true)
-    validate('bufnr', bufnr, Util.int_validator, true, 'integer')
-
+    if vim.fn.has('nvim-0.11') then
+        validate('verbose', verbose, 'boolean', true)
+        validate('bufnr', bufnr, Util.int_validator, true, 'integer')
+    else
+        validate({
+            verbose = { verbose, { 'boolean', 'nil' } },
+            bufnr = { bufnr, { 'number', 'nil' } },
+        })
+    end
     verbose = verbose ~= nil and verbose or false
     bufnr = bufnr or curr_buf()
 
@@ -356,7 +402,7 @@ function Api.on_buf_enter(verbose, bufnr)
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
 
-    if in_tbl(Config.options.disable_on.ft, ft) or in_tbl(Config.options.disable_on.bt, bt) then
+    if in_list(Config.options.disable_on.ft, ft) or in_list(Config.options.disable_on.bt, bt) then
         return
     end
 
@@ -371,13 +417,17 @@ Api.delete_project = History.delete_project
 
 ---@param verbose? boolean
 function Api.add_project_manually(verbose)
-    validate('verbose', verbose, 'boolean', true)
+    if vim.fn.has('nvim-0.11') then
+        validate('verbose', verbose, 'boolean', true)
+    else
+        validate({ verbose = { verbose, { 'boolean', 'nil' } } })
+    end
     verbose = verbose ~= nil and verbose or false
 
     local dir = vim.fn.fnamemodify(buf_name(curr_buf()), ':p:h')
 
     if verbose then
-        notify(fmt('Attempting to process `%s`', dir), INFO)
+        notify(('Attempting to process `%s`'):format(dir), INFO)
     end
 
     Api.set_pwd(dir, 'manual')
@@ -387,7 +437,7 @@ function Api.init()
     local group = augroup('project.nvim', { clear = false })
     local detection_methods = Config.options.detection_methods
 
-    vim.api.nvim_create_autocmd('VimLeavePre', {
+    autocmd('VimLeavePre', {
         pattern = '*',
         group = group,
         callback = function()
@@ -396,7 +446,7 @@ function Api.init()
     })
 
     if not Config.options.manual_mode then
-        vim.api.nvim_create_autocmd('BufEnter', {
+        autocmd('BufEnter', {
             pattern = '*',
             group = group,
             nested = true,
@@ -405,7 +455,7 @@ function Api.init()
             end,
         })
 
-        if in_tbl(detection_methods, 'lsp') then
+        if in_list(detection_methods, 'lsp') then
             Api.gen_lsp_autocmd(group)
         end
     end
