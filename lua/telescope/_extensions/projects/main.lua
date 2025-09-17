@@ -21,9 +21,8 @@ local recent_project_files = ProjActions.recent_project_files
 local search_in_project_files = ProjActions.search_in_project_files
 local change_working_directory = ProjActions.change_working_directory
 
----@class PickerMaps
+---@type table<'n'|'i'|'v'|'t'|'x'|'o', table<string, string|fun()>>
 local Keys = {
-    ---@type table<string, string|fun()>
     n = {
         b = browse_project_files,
         d = delete_project,
@@ -33,7 +32,6 @@ local Keys = {
         w = change_working_directory,
     },
 
-    ---@type table<string, string|fun()>
     i = {
         ['<C-b>'] = browse_project_files,
         ['<C-d>'] = delete_project,
