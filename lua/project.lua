@@ -19,21 +19,7 @@ Project.get_project_root = Api.get_project_root
 Project.delete_project = Api.delete_project
 Project.get_history_paths = Api.get_history_paths
 Project.run_fzf_lua = Api.run_fzf_lua
-
----@param refresh? boolean
----@return string? last
-function Project.get_last_project(refresh)
-    if vim_has('nvim-0.11') then
-        validate('refresh', refresh, 'boolean', true)
-    else
-        validate({ refresh = { refresh, { 'boolean', 'nil' } } })
-    end
-
-    refresh = refresh ~= nil and refresh or false
-
-    local last = refresh and Api.last_project or Api.get_last_project()
-    return last
-end
+Project.get_last_project = Api.get_last_project
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
