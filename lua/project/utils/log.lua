@@ -15,6 +15,9 @@ local ERROR = vim.log.levels.ERROR  -- `4`
 local LOG_PFX = '(project.nvim): '
 
 local Path = require('project.utils.path')
+local Util = require('project.utils.util')
+
+local vim_has = Util.vim_has
 
 ---@class Project.Log
 ---@field logfile? string
@@ -111,7 +114,7 @@ function Log:write(data, lvl)
 
     local fd = self:open('a')
 
-    if fd == nil then
+    if not fd then
         return
     end
 
@@ -135,7 +138,7 @@ end
 
 ---@param self Project.Log
 ---@param mode OpenMode
----@return integer|nil
+---@return (integer|nil)?
 function Log:open(mode)
     Path.create_projectpath()
     local dir_stat = uv.fs_stat(Path.projectpath)
@@ -197,13 +200,19 @@ function Log.open_win()
         btab = vim.api.nvim_get_current_tabpage(),
     }
 
-    local opts = { scope = 'local' }
+    ---@type vim.api.keyset.option
+    local win_opts = { win = Log.log_loc.win }
 
-    vim.api.nvim_set_option_value('signcolumn', 'no', opts)
-    vim.api.nvim_set_option_value('number', false, opts)
-    vim.api.nvim_set_option_value('wrap', true, opts)
-    vim.api.nvim_set_option_value('filetype', '', opts)
-    vim.api.nvim_set_option_value('modifiable', false, opts)
+    vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
+    vim.api.nvim_set_option_value('number', false, win_opts)
+    vim.api.nvim_set_option_value('wrap', true, win_opts)
+    vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
+
+    ---@type vim.api.keyset.option
+    local buf_opts = { buf = Log.log_loc.bufnr }
+
+    vim.api.nvim_set_option_value('filetype', 'log', buf_opts)
+    vim.api.nvim_set_option_value('modifiable', false, buf_opts)
 
     vim.keymap.set('n', 'q', function()
         local tab = vim.api.nvim_get_current_tabpage()
@@ -217,16 +226,19 @@ function Log.open_win()
     end, { noremap = false, buffer = Log.log_loc.bufnr, silent = true })
 end
 
----@type Project.Log|fun(...: any)
+---@type Project.Log|fun(lvl: vim.log.levels, ...: any)
 local M = setmetatable({}, {
     __index = Log,
 
-    ---@param lvl? vim.log.levels
+    ---@param lvl vim.log.levels
     ---@param ... any
     __call = function(_, lvl, ...)
-        validate('lvl', lvl, 'number', true, 'vim.log.levels')
+        if vim_has('nvim-0.11') then
+            validate('lvl', lvl, 'number', false, 'vim.log.levels')
+        else
+            validate({ lvl = { lvl, 'number' } })
+        end
 
-        lvl = lvl ~= nil and math.floor(lvl) or INFO
 
         -- stylua: ignore start
         local select = {

@@ -34,6 +34,7 @@ local in_list = vim.list_contains
 local dir_exists = Util.dir_exists
 local normalise_path = Util.normalise_path
 local dedup = Util.dedup
+local vim_has = Util.vim_has
 
 ---@class Project.Utils.History
 ---@field has_watch_setup? boolean
@@ -53,6 +54,11 @@ History.session_projects = {}
 ---@param mode OpenMode
 ---@return (integer|nil)? fd
 function History.open_history(mode)
+    if vim_has('nvim-0.11') then
+        vim.validate('mode', mode, 'string', false, 'OpenMode')
+    else
+        vim.validate({ mode = { mode, 'string' } })
+    end
     local histfile = Path.historyfile
 
     Path.create_projectpath()
@@ -66,6 +72,12 @@ end
 ---@param tbl string[]
 ---@return string[] res
 local function delete_duplicates(tbl)
+    if vim_has('nvim-0.11') then
+        vim.validate('tbl', tbl, 'table', false, 'string[]')
+    else
+        vim.validate({ tbl = { tbl, 'table' } })
+    end
+
     ---@type table<string, integer|nil>
     local cache_dict = {}
 
@@ -115,7 +127,7 @@ end
 --- ---
 ---@param project string|Project.ActionEntry
 function History.delete_project(project)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         vim.validate('project', project, { 'string', 'table' }, false, 'string|Project.ActionEntry')
     else
         vim.validate({ project = { project, { 'string', 'table' } } })
@@ -151,6 +163,12 @@ end
 --- ---
 ---@param history_data string
 function History.deserialize_history(history_data)
+    if vim_has('nvim-0.11') then
+        vim.validate('history_data', history_data, 'string', false)
+    else
+        vim.validate({ history_data = { history_data, 'string' } })
+    end
+
     ---@type string[]
     local projects = {}
 
