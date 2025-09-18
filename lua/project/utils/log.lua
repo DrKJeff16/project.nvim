@@ -1,5 +1,3 @@
-local validate = vim.validate
-
 local uv = vim.uv or vim.loop
 
 -- stylua: ignore start
@@ -14,8 +12,6 @@ local ERROR = vim.log.levels.ERROR  -- `4`
 
 local LOG_PFX = '(project.nvim): '
 
-local Path = require('project.utils.path')
-
 ---@class Project.Log
 ---@field logfile? string
 ---@field log_loc? { bufnr: integer, win: integer, tab: integer }|nil
@@ -24,9 +20,10 @@ local Log = {}
 ---@param lvl vim.log.levels
 ---@return fun(...: any): output: string?
 local function gen_log(lvl)
-    local Util = require('project.utils.util')
-    local is_type = Util.is_type
+    local is_type = require('project.utils.util').is_type
 
+    ---@param ... any
+    ---@return string? output
     return function(...)
         if not require('project.config').options.logging then
             return
@@ -71,12 +68,11 @@ function Log.read_log()
 end
 
 function Log.clear_log()
-    local fd = Log:open('w')
+    local success = uv.fs_unlink(Log.logfile)
 
-    uv.fs_write(fd, '\n')
-    uv.fs_close(fd)
-
-    vim.notify('(project.nvim): Log cleared successfully', INFO)
+    if success then
+        vim.notify('(project.nvim): Log cleared successfully', INFO)
+    end
 end
 
 ---Only runs once.
@@ -91,6 +87,7 @@ function Log.setup_watch()
         return
     end
 
+    local Path = require('project.utils.path')
     event:start(Path.projectpath, {}, function(err, _, events)
         if not (err == nil and events.change) then
             return
@@ -138,6 +135,8 @@ end
 ---@param mode OpenMode
 ---@return (integer|nil)?
 function Log:open(mode)
+    local Path = require('project.utils.path')
+
     Path.create_projectpath()
     local dir_stat = uv.fs_stat(Path.projectpath)
 
@@ -155,6 +154,7 @@ Log.debug = gen_log(DEBUG)
 
 function Log.init()
     local logging = require('project.config').options.logging
+    local Path = require('project.utils.path')
 
     if not logging or Log.logfile ~= nil then
         return
@@ -167,7 +167,12 @@ function Log.init()
 
     Log.logfile = Path.projectpath .. '/project.log'
     local fd = Log:open('a')
-    uv.fs_write(fd, ('='):rep(70) .. '\n', -1)
+    local stat = uv.fs_fstat(fd)
+    if not stat then
+        error('Log stat is nil!', ERROR)
+    end
+
+    uv.fs_write(fd, (stat.size >= 1 and '\n' or '') .. ('='):rep(70) .. '\n', -1)
 
     vim.api.nvim_create_user_command('ProjectLog', function(ctx)
         local close = ctx.bang ~= nil and ctx.bang or false
@@ -194,6 +199,7 @@ end
 
 function Log.open_win()
     local logging = require('project.config').options.logging
+    local Path = require('project.utils.path')
 
     if not (Log.logfile and logging) then
         return
@@ -226,6 +232,7 @@ function Log.open_win()
     ---@type vim.api.keyset.option
     local buf_opts = { buf = Log.log_loc.bufnr }
     vim.api.nvim_set_option_value('filetype', 'log', buf_opts)
+    vim.api.nvim_set_option_value('buftype', 'nowrite', buf_opts)
     vim.api.nvim_set_option_value('modifiable', false, buf_opts)
 
     vim.keymap.set('n', 'q', Log.close_win, {
@@ -246,42 +253,6 @@ function Log.close_win()
     Log.log_loc = nil
 end
 
----@type Project.Log|fun(lvl: vim.log.levels, ...: any)
-local M = setmetatable({}, {
-    __index = Log,
-
-    ---@param lvl vim.log.levels
-    ---@param ... any
-    __call = function(_, lvl, ...)
-        local Util = require('project.utils.util')
-        local vim_has = Util.vim_has
-
-        if vim_has('nvim-0.11') then
-            validate('lvl', lvl, 'number', false, 'vim.log.levels')
-        else
-            validate({ lvl = { lvl, 'number' } })
-        end
-
-
-        -- stylua: ignore start
-        local select = {
-            [TRACE] = Log.trace,
-            [DEBUG] = Log.debug,
-            [INFO]  = Log.info,
-            [WARN]  = Log.warn,
-            [ERROR] = Log.error,
-        }
-        -- stylua: ignore end
-
-        if lvl < TRACE or lvl > ERROR then
-            lvl = INFO
-        end
-
-        local log = select[lvl]
-        log(...)
-    end,
-})
-
-return M
+return Log
 
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
