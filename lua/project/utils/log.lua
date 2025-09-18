@@ -15,9 +15,6 @@ local ERROR = vim.log.levels.ERROR  -- `4`
 local LOG_PFX = '(project.nvim): '
 
 local Path = require('project.utils.path')
-local Util = require('project.utils.util')
-
-local vim_has = Util.vim_has
 
 ---@class Project.Log
 ---@field logfile? string
@@ -27,12 +24,14 @@ local Log = {}
 ---@param lvl vim.log.levels
 ---@return fun(...: any): output: string?
 local function gen_log(lvl)
+    local Util = require('project.utils.util')
+    local is_type = Util.is_type
+
     return function(...)
         if not require('project.config').options.logging then
             return
         end
 
-        local is_type = require('project.utils.util').is_type
         local msg = LOG_PFX
 
         for i = 1, select('#', ...) do
@@ -49,12 +48,11 @@ local function gen_log(lvl)
             end
         end
 
-        local output = Log:write(('%s\n'):format(msg), lvl)
-
-        return output
+        return Log:write(('%s\n'):format(msg), lvl)
     end
 end
 
+---@return string|nil data
 function Log.read_log()
     Log.setup_watch()
     local fd = Log:open('r')
@@ -93,7 +91,7 @@ function Log.setup_watch()
         return
     end
 
-    event:start(require('project.utils.path').projectpath, {}, function(err, _, events)
+    event:start(Path.projectpath, {}, function(err, _, events)
         if not (err == nil and events.change) then
             return
         end
@@ -144,7 +142,8 @@ function Log:open(mode)
     local dir_stat = uv.fs_stat(Path.projectpath)
 
     if dir_stat and dir_stat.type == 'directory' then
-        return uv.fs_open(self.logfile, mode, tonumber('644', 8))
+        local fd = uv.fs_open(self.logfile, mode, tonumber('644', 8))
+        return fd
     end
 end
 
@@ -161,20 +160,36 @@ function Log.init()
         return
     end
 
-    if not require('project.utils.path').projectpath then
+    if not Path.projectpath then
         vim.notify('Project Path directory not set!', WARN)
         return
     end
 
-    Log.logfile = require('project.utils.path').projectpath .. '/project.log'
+    Log.logfile = Path.projectpath .. '/project.log'
     local fd = Log:open('a')
-    uv.fs_write(fd, string.char(10) .. string.char(10), -1)
+    uv.fs_write(fd, ('='):rep(70) .. '\n', -1)
 
-    vim.api.nvim_create_user_command(
-        'ProjectLog',
-        Log.open_win,
-        { desc = 'Opens the `project.nvim` log in a new tab' }
-    )
+    vim.api.nvim_create_user_command('ProjectLog', function(ctx)
+        local close = ctx.bang ~= nil and ctx.bang or false
+        if close then
+            Log.close_win()
+            return
+        end
+
+        Log.open_win()
+    end, {
+        desc = 'Opens the `project.nvim` log in a new tab',
+        bang = true,
+    })
+    vim.api.nvim_create_user_command('ProjectLogClear', function()
+        if Log.log_loc then
+            Log.close_win()
+        end
+
+        Log.clear_log()
+    end, {
+        desc = 'Clears the `project.nvim` log',
+    })
 end
 
 function Log.open_win()
@@ -184,7 +199,7 @@ function Log.open_win()
         return
     end
 
-    if not require('project.utils.path').exists(Log.logfile) then
+    if not Path.exists(Log.logfile) then
         error('(project.utils.log.open_win): Bad logfile path!', ERROR)
     end
 
@@ -202,28 +217,33 @@ function Log.open_win()
 
     ---@type vim.api.keyset.option
     local win_opts = { win = Log.log_loc.win }
-
     vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
+    vim.api.nvim_set_option_value('list', false, win_opts)
     vim.api.nvim_set_option_value('number', false, win_opts)
-    vim.api.nvim_set_option_value('wrap', true, win_opts)
+    vim.api.nvim_set_option_value('wrap', false, win_opts)
     vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
 
     ---@type vim.api.keyset.option
     local buf_opts = { buf = Log.log_loc.bufnr }
-
     vim.api.nvim_set_option_value('filetype', 'log', buf_opts)
     vim.api.nvim_set_option_value('modifiable', false, buf_opts)
 
-    vim.keymap.set('n', 'q', function()
-        local tab = vim.api.nvim_get_current_tabpage()
-        vim.cmd.bdelete({ bang = true })
+    vim.keymap.set('n', 'q', Log.close_win, {
+        noremap = true,
+        buffer = Log.log_loc.bufnr,
+        silent = true,
+    })
+end
 
-        if vim.api.nvim_get_current_tabpage() == tab then
-            vim.cmd.tabclose({ bang = true })
-        end
+function Log.close_win()
+    if not Log.log_loc then
+        return
+    end
 
-        Log.log_loc = nil
-    end, { noremap = false, buffer = Log.log_loc.bufnr, silent = true })
+    vim.api.nvim_buf_delete(Log.log_loc.bufnr, { force = true })
+    vim.cmd.tabclose(Log.log_loc.tab)
+
+    Log.log_loc = nil
 end
 
 ---@type Project.Log|fun(lvl: vim.log.levels, ...: any)
@@ -233,6 +253,9 @@ local M = setmetatable({}, {
     ---@param lvl vim.log.levels
     ---@param ... any
     __call = function(_, lvl, ...)
+        local Util = require('project.utils.util')
+        local vim_has = Util.vim_has
+
         if vim_has('nvim-0.11') then
             validate('lvl', lvl, 'number', false, 'vim.log.levels')
         else
