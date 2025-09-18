@@ -75,13 +75,14 @@ Show these much love!
     5. [Telescope](#telescope)
         1. [Telescope Mappings](#telescope-mappings)
 3. [Commands](#commands)
-    1. [ProjectFzf](#projectfzf)
-    2. [ProjectTelescope](#projecttelescope)
-    3. [ProjectAdd](#projectadd)
-    4. [ProjectRoot](#projectroot)
-    5. [ProjectRecents](#projectrecents)
-    6. [ProjectConfig](#projectconfig)
-    7. [ProjectDelete](#projectdelete)
+    1. [`:ProjectFzf`](#projectfzf)
+    2. [`:ProjectTelescope`](#projecttelescope)
+    3. [`:ProjectAdd`](#projectadd)
+    4. [`:ProjectRoot`](#projectroot)
+    5. [`:ProjectRecents`](#projectrecents)
+    6. [`:ProjectConfig`](#projectconfig)
+    7. [`:ProjectDelete`](#projectdelete)
+    8. [`:ProjectSession`](#projectsession)
 4. [API](#api)
     1. [`run_fzf_lua()`](#run_fzf_lua)
     2. [`get_project_root()`](#get_project_root)
@@ -758,6 +759,11 @@ If there's a successful deletion, you'll recieve a notification through `vim.not
 > [!TIP]
 > - _See `:h :ProjectDelete` for more info_.
 > - _See [_`api.lua`_](./lua/project/api.lua) for more info_.
+
+### `:ProjectSession`
+
+The `:ProjectSession` command prints out the current session projects, in numerical order,
+found in `History.session_projects`.
 
 <div align="right">
 

@@ -38,6 +38,7 @@ Table of Contents                                             *project-nvim.toc*
     7.5. `:ProjectConfig`                                         |:ProjectConfig|
     7.6. `:ProjectRecents`                                       |:ProjectRecents|
     7.7. `:ProjectDelete`                                         |:ProjectDelete|
+    7.8. `:ProjectSession`                                       |:ProjectSession|
 8. API                                                        |project-nvim.api|
     8.1. `run_fzf_lua()`                              |project-nvim.run_fzf_lua()|
     8.2. `get_project_root()`                    |project-nvim.get_project_root()|
@@ -590,12 +591,13 @@ Table of Contents                                             *project-nvim.toc*
 
 
                                                        *ProjectAdd*  *:ProjectAdd*
-`:ProjectAdd`
+`:ProjectAdd[!]`
 
                             The `:ProjectAdd` command is a manual hook to add
                             the current root to the session directories table,
                             then subsequently `cd` to the current file's
                             project directory.
+                            Adding a [!] will make this command verbose.
 
                             The command does essentially the following
                             in the command line:
@@ -656,7 +658,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
                                                      *ProjectRoot*  *:ProjectRoot*
-`:ProjectRoot`
+`:ProjectRoot[!]`
 
                             The `:ProjectRoot` command is a manual hook
                             to set the current working directory
@@ -664,6 +666,7 @@ Table of Contents                                             *project-nvim.toc*
                             any of the detection methods
                             set by the user
                             (|Project.Config.Options.detection_methods|).
+                            Adding a [!] will make this command verbose.
 
                             The command does essentially the following
                             in the command line:
@@ -673,6 +676,15 @@ Table of Contents                                             *project-nvim.toc*
                             This is particularly useful if you enabled
                             {manual_mode} in `setup()`
                             (see |project-nvim.setup-options|).
+
+
+                                               *ProjectSession*  *:ProjectSession*
+`:ProjectSession`
+
+                            The `:ProjectSession` command prints out
+                            the current session projects,
+                            in numerical order,
+                            found in `History.session_projects`
 
 
 ==============================================================================
