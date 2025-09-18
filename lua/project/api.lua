@@ -37,7 +37,6 @@ local curr_buf = vim.api.nvim_get_current_buf
 local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
 local buf_name = vim.api.nvim_buf_get_name
-local fnamemodify = vim.fn.fnamemodify
 
 -- ---@param client vim.lsp.Client
 -- ---@param name string
@@ -145,14 +144,13 @@ end
 ---@return string? dir_res
 ---@return string? method
 function Api.find_pattern_root()
-    local dir = fnamemodify(buf_name(curr_buf()), ':p:h')
+    local dir = vim.fn.fnamemodify(buf_name(curr_buf()), ':p:h')
 
     if is_windows() then
         dir = dir:gsub('\\', '/')
     end
 
-    local dir_res, method = root_included(dir)
-    return dir_res, method
+    return root_included(dir)
 end
 
 ---Generates the autocommand for the `LspAttach` event.
@@ -396,7 +394,7 @@ function Api.on_buf_enter(verbose, bufnr)
         return
     end
 
-    local dir = fnamemodify(buf_name(bufnr), ':p:h')
+    local dir = vim.fn.fnamemodify(buf_name(bufnr), ':p:h')
 
     if not (exists(dir) and root_included(dir)) or is_excluded(dir) then
         if verbose then
