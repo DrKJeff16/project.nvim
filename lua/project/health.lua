@@ -1,4 +1,3 @@
-local fmt = string.format
 local uv = vim.uv or vim.loop
 
 ---@alias HistoryCheck { name: string, type: ('file'|'directory'), path: string }
@@ -130,11 +129,11 @@ function Health.history_check()
         local stat = uv.fs_stat(v.path)
 
         if not stat then
-            h_error(fmt('%s: `%s` is missing or not readable!', v.name, v.path))
+            h_error(('%s: `%s` is missing or not readable!'):format(v.name, v.path))
             return
         end
         if stat.type ~= v.type then
-            h_error(fmt('%s: `%s` is not of type `%s`!', v.name, v.path, v.type))
+            h_error(('%s: `%s` is not of type `%s`!'):format(v.name, v.path, v.type))
             return
         end
 
@@ -146,9 +145,12 @@ function Health.project_check()
     start('Current Project')
 
     local curr, method, last = Api.current_project, Api.current_method, Api.last_project
-    local msg = fmt('Current project: `%s`\n', curr ~= nil and curr or 'No Current Project')
-    msg = fmt('%sMethod used: `%s`\n', msg, (method ~= nil and method or 'No method available'))
-    msg = fmt('%sLast project: `%s`\n', msg, (last ~= nil and last or 'No Last Project In History'))
+    local msg = ('Current project: `%s`\n'):format(curr ~= nil and curr or 'No Current Project')
+    msg = ('%sMethod used: `%s`\n'):format(msg, (method ~= nil and method or 'No method available'))
+    msg = ('%sLast project: `%s`\n'):format(
+        msg,
+        (last ~= nil and last or 'No Last Project In History')
+    )
     info(msg)
 
     start('Active Sessions')
@@ -165,7 +167,7 @@ function Health.project_check()
 
     ---@cast projects string[]
     for k, v in ipairs(projects) do
-        info(fmt('[`%s`]: `%s`', tostring(k), v))
+        info(('[`%s`]: `%s`'):format(k, v))
     end
 end
 
@@ -175,8 +177,7 @@ function Health.telescope_check()
 
     if not mod_exists('telescope') then
         h_warn(
-            fmt(
-                '`telescope.nvim` is not installed.\n%s\n',
+            ('`telescope.nvim` is not installed.\n%s\n'):format(
                 "This doesn't represent an issue necessarily"
             )
         )
@@ -215,7 +216,9 @@ function Health.fzf_lua_check()
 
     if not mod_exists('telescope') then
         h_warn(
-            fmt('`fzf-lua` is not installed. \n%s', "This doesn't represent an issue necessarily")
+            ('`fzf-lua` is not installed. \n%s'):format(
+                "This doesn't represent an issue necessarily"
+            )
         )
         return
     end
@@ -251,8 +254,8 @@ function Health.recent_proj_check()
 
     recents = reverse(copy(recents))
 
-    for i, project in next, recents do
-        info(fmt('`%s`. `%s`', i, project))
+    for i, project in ipairs(recents) do
+        info(('`%s`. `%s`'):format(i, project))
     end
 end
 
