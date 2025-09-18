@@ -6,12 +6,14 @@ vim.api.nvim_create_user_command('ProjectAdd', Commands.ProjectAdd, {
     desc = 'Adds the current CWD project to the Project History',
 })
 
-vim.api.nvim_create_user_command('ProjectDelete', Commands.ProjectDelete, {
+vim.api.nvim_create_user_command('ProjectDelete', function(ctx)
+    Commands.ProjectDelete(ctx)
+end, {
     desc = 'Deletes the projects given as args, assuming they are valid',
     bang = true,
     nargs = '+',
 
-    complete = Commands.completions.ProjectDelete,
+    complete = Commands.ProjectDelete.complete,
 })
 
 ---`:ProjectConfig`
@@ -26,6 +28,10 @@ vim.api.nvim_create_user_command('ProjectRecents', Commands.ProjectRecents, {
 vim.api.nvim_create_user_command('ProjectRoot', Commands.ProjectRoot, {
     bang = true,
     desc = 'Sets the current project root to the current CWD',
+})
+
+vim.api.nvim_create_user_command('ProjectSession', Commands.ProjectSession, {
+    desc = 'Prints out the current `project.nvim` projects session',
 })
 
 ---Add `Fzf-Lua` command ONLY if it is installed
