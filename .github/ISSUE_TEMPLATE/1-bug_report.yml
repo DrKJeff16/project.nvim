@@ -58,6 +58,26 @@ body:
 
   - type: textarea
     attributes:
+      label: "Output Of `:ProjectConfig`"
+      descriptios: |
+        In case the bug does not impair this user command, it is highly encouraged
+        for you to paste the output in this issue.
+
+        Read [this Wiki entry](https://github.com/DrKJeff16/project.nvim/wiki/Tips-And-Tricks#redirecting-output-of-user-commands) if you need help.
+      placeholder: "<PASTE HERE IF POSSIBLE>"
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Output of `:checkhealth project`
+      description: If you can run `:checkhealth project`, please paste the output below.
+      placeholder: "<PASTE HERE IF POSSIBLE>"
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
       label: Describe the bug
       description: Write down what happened, as detailed as you can. Avoid irrelevant info
     validations:
@@ -76,14 +96,6 @@ body:
       description: Describe clearly what were you expecting to occur
     validations:
       required: true
-
-  - type: textarea
-    attributes:
-      label: Output of `:checkhealth project`
-      description: If you can run `project.nvim`, run `:checkhealth project` and paste the output.
-      placeholder: "<PASTE HERE IF POSSIBLE>"
-    validations:
-      required: false
 
   - type: textarea
     attributes:
