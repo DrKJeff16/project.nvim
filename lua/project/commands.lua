@@ -7,10 +7,9 @@ local vim_has = require('project.utils.util').vim_has
 ---@class ProjectCommand
 ---@field complete? fun(arg?: string, line?: string, pos?: integer)
 ---@field desc string
----@field bang? boolean
 local Command = {}
 
----@param func fun(_, ctx?: vim.api.keyset.create_user_command.command_args)
+---@param func fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@param desc string
 ---@param completor? fun(arg?: string, line?: string, pos?: integer): string[]
 ---@return ProjectCommand|fun(ctx?: vim.api.keyset.create_user_command.command_args)
@@ -21,7 +20,7 @@ function Command.new(func, desc, completor)
             func,
             'function',
             false,
-            'fun(_, ctx?: vim.api.keyset.create_user_command.command_args)'
+            'fun(ctx?: vim.api.keyset.create_user_command.command_args)'
         )
         vim.validate('desc', desc, 'string', false)
         vim.validate(
@@ -39,9 +38,19 @@ function Command.new(func, desc, completor)
         })
     end
 
+    ---@type ProjectCommand|fun(ctx?: vim.api.keyset.create_user_command.command_args)
     local self = setmetatable({}, {
         __index = Command,
-        __call = func,
+
+        ---@param ctx? vim.api.keyset.create_user_command.command_args
+        __call = function(_, ctx)
+            if ctx then
+                func(ctx)
+                return
+            end
+
+            func()
+        end,
     })
 
     self.desc = desc
@@ -56,13 +65,13 @@ end
 ---@class Project.Commands
 local M = {}
 
-M.ProjectAdd = Command.new(function(_, ctx)
+M.ProjectAdd = Command.new(function(ctx)
     local quiet = ctx.bang ~= nil and ctx.bang or false
     require('project.api').add_project_manually(not quiet)
 end, 'Adds the current CWD project to the Project History')
 
 M.ProjectDelete = Command.new(
-    function(_, ctx)
+    function(ctx)
         local force = ctx.bang ~= nil and ctx.bang or false
         local recent = require('project.api').get_recent_projects()
 
@@ -70,7 +79,7 @@ M.ProjectDelete = Command.new(
             return
         end
 
-        for _, v in next, ctx.fargs do
+        for _, v in ipairs(ctx.fargs) do
             local path = vim.fn.fnamemodify(v, ':p')
 
             ---HACK: Getting rid of trailing `/` in string
@@ -101,16 +110,16 @@ M.ProjectDelete = Command.new(
     end
 )
 
-M.ProjectConfig = Command.new(function(_)
+M.ProjectConfig = Command.new(function()
     local cfg = require('project').get_config()
     vim.notify(vim.inspect(cfg), INFO)
 end, 'Prints out the current configuratiion for `project.nvim`')
 
-M.ProjectFzf = Command.new(function(_)
+M.ProjectFzf = Command.new(function()
     require('project').run_fzf_lua()
 end, 'Run project.nvim through Fzf-Lua (assuming you have it installed)')
 
-M.ProjectRecents = Command.new(function(_)
+M.ProjectRecents = Command.new(function()
     local recent_proj = require('project.api').get_recent_projects()
     local reverse = require('project.utils.util').reverse
 
@@ -132,12 +141,12 @@ M.ProjectRecents = Command.new(function(_)
 end, 'Prints out the recent `project.nvim` projects')
 
 ---@param ctx vim.api.keyset.create_user_command.command_args
-M.ProjectRoot = Command.new(function(_, ctx)
+M.ProjectRoot = Command.new(function(ctx)
     local verbose = ctx.bang ~= nil and ctx.bang or false
     require('project.api').on_buf_enter(verbose)
 end, 'Sets the current project root to the current CWD')
 
-M.ProjectSession = Command.new(function(_)
+M.ProjectSession = Command.new(function()
     local session = require('project.utils.history').session_projects
     if vim.tbl_isempty(session) then
         vim.notify('No sessions available!', vim.log.levels.WARN)
@@ -153,7 +162,7 @@ M.ProjectSession = Command.new(function(_)
     vim.notify(msg, vim.log.levels.INFO)
 end, 'Prints out the current `project.nvim` projects session')
 
-M.ProjectTelescope = Command.new(function(_)
+M.ProjectTelescope = Command.new(function()
     require('telescope._extensions.projects').projects()
 end, 'Telescope shortcut for project.nvim picker')
 
