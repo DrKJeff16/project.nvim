@@ -5,13 +5,13 @@ vim.api.nvim_create_user_command('ProjectAdd', function(ctx)
     Commands.ProjectAdd(ctx)
 end, {
     bang = true,
-    desc = 'Adds the current CWD project to the Project History',
+    desc = Commands.ProjectAdd.desc,
 })
 
 vim.api.nvim_create_user_command('ProjectDelete', function(ctx)
     Commands.ProjectDelete(ctx)
 end, {
-    desc = 'Deletes the projects given as args, assuming they are valid',
+    desc = Commands.ProjectDelete.desc,
     bang = true,
     nargs = '+',
 
@@ -22,26 +22,26 @@ end, {
 vim.api.nvim_create_user_command('ProjectConfig', function()
     Commands.ProjectConfig()
 end, {
-    desc = 'Prints out the current configuratiion for `project.nvim`',
+    desc = Commands.ProjectConfig.desc,
 })
 
 vim.api.nvim_create_user_command('ProjectRecents', function()
     Commands.ProjectRecents()
 end, {
-    desc = 'Prints out the recent `project.nvim` projects',
+    desc = Commands.ProjectRecents.desc,
 })
 
 vim.api.nvim_create_user_command('ProjectRoot', function(ctx)
     Commands.ProjectRoot(ctx)
 end, {
     bang = true,
-    desc = 'Sets the current project root to the current CWD',
+    desc = Commands.ProjectRoot.desc,
 })
 
 vim.api.nvim_create_user_command('ProjectSession', function()
     Commands.ProjectSession()
 end, {
-    desc = 'Prints out the current `project.nvim` projects session',
+    desc = Commands.ProjectSession.desc,
 })
 
 ---Add `Fzf-Lua` command ONLY if it is installed
@@ -49,7 +49,7 @@ if mod_exists('fzf-lua') and not mod_exists('project-fzf') then
     vim.api.nvim_create_user_command('ProjectFzf', function()
         Commands.ProjectFzf()
     end, {
-        desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
+        desc = Commands.ProjectFzf.desc,
     })
 end
 
@@ -58,7 +58,7 @@ if mod_exists('telescope') then
     vim.api.nvim_create_user_command('ProjectTelescope', function()
         Commands.ProjectTelescope()
     end, {
-        desc = 'Telescope shortcut for project.nvim picker',
+        desc = Commands.ProjectTelescope.desc,
     })
 end
 

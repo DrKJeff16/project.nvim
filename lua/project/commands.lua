@@ -6,12 +6,15 @@ local vim_has = require('project.utils.util').vim_has
 
 ---@class ProjectCommand
 ---@field complete? fun(arg?: string, line?: string, pos?: integer)
+---@field desc string
+---@field bang? boolean
 local Command = {}
 
 ---@param func fun(_, ctx?: vim.api.keyset.create_user_command.command_args)
+---@param desc string
 ---@param completor? fun(arg?: string, line?: string, pos?: integer): string[]
 ---@return ProjectCommand|fun(ctx?: vim.api.keyset.create_user_command.command_args)
-function Command.new(func, completor)
+function Command.new(func, desc, completor)
     if vim_has('nvim-0.11') then
         vim.validate(
             'func',
@@ -20,6 +23,7 @@ function Command.new(func, completor)
             false,
             'fun(_, ctx?: vim.api.keyset.create_user_command.command_args)'
         )
+        vim.validate('desc', desc, 'string', false)
         vim.validate(
             'completor',
             completor,
@@ -30,6 +34,7 @@ function Command.new(func, completor)
     else
         vim.validate({
             func = { func, 'function' },
+            desc = { desc, 'string' },
             completor = { completor, { 'function', 'nil' } },
         })
     end
@@ -38,6 +43,8 @@ function Command.new(func, completor)
         __index = Command,
         __call = func,
     })
+
+    self.desc = desc
 
     if completor and vim.is_callable(completor) then
         self.complete = completor
@@ -52,52 +59,56 @@ local M = {}
 M.ProjectAdd = Command.new(function(_, ctx)
     local quiet = ctx.bang ~= nil and ctx.bang or false
     require('project.api').add_project_manually(not quiet)
-end)
+end, 'Adds the current CWD project to the Project History')
 
-M.ProjectDelete = Command.new(function(_, ctx)
-    local force = ctx.bang ~= nil and ctx.bang or false
-    local recent = require('project.api').get_recent_projects()
+M.ProjectDelete = Command.new(
+    function(_, ctx)
+        local force = ctx.bang ~= nil and ctx.bang or false
+        local recent = require('project.api').get_recent_projects()
 
-    if recent == nil then
-        return
+        if recent == nil then
+            return
+        end
+
+        for _, v in next, ctx.fargs do
+            local path = vim.fn.fnamemodify(v, ':p')
+
+            ---HACK: Getting rid of trailing `/` in string
+            if path:sub(-1) == '/' then
+                path = path:sub(1, path:len() - 1)
+            end
+
+            ---If `:ProjectDelete` isn't called with bang `!`, abort on
+            ---anything that isn't in recent projects
+            if not (force or vim.list_contains(recent, path) or path ~= '') then
+                error(('(:ProjectDelete): Could not delete `%s`, aborting'):format(path), ERROR)
+            end
+
+            if vim.list_contains(recent, path) then
+                require('project.api').delete_project(path)
+            end
+        end
+    end,
+    'Deletes the projects given as args, assuming they are valid',
+    function(_, line)
+        local recent = require('project.api').get_recent_projects()
+        local input = vim.split(line, '%s+')
+        local prefix = input[#input]
+
+        return vim.tbl_filter(function(cmd) ---@param cmd string
+            return vim.startswith(cmd, prefix)
+        end, recent)
     end
-
-    for _, v in next, ctx.fargs do
-        local path = vim.fn.fnamemodify(v, ':p')
-
-        ---HACK: Getting rid of trailing `/` in string
-        if path:sub(-1) == '/' then
-            path = path:sub(1, path:len() - 1)
-        end
-
-        ---If `:ProjectDelete` isn't called with bang `!`, abort on
-        ---anything that isn't in recent projects
-        if not (force or vim.list_contains(recent, path) or path ~= '') then
-            error(('(:ProjectDelete): Could not delete `%s`, aborting'):format(path), ERROR)
-        end
-
-        if vim.list_contains(recent, path) then
-            require('project.api').delete_project(path)
-        end
-    end
-end, function(_, line)
-    local recent = require('project.api').get_recent_projects()
-    local input = vim.split(line, '%s+')
-    local prefix = input[#input]
-
-    return vim.tbl_filter(function(cmd) ---@param cmd string
-        return vim.startswith(cmd, prefix)
-    end, recent)
-end)
+)
 
 M.ProjectConfig = Command.new(function(_)
     local cfg = require('project').get_config()
     vim.notify(vim.inspect(cfg), INFO)
-end)
+end, 'Prints out the current configuratiion for `project.nvim`')
 
 M.ProjectFzf = Command.new(function(_)
     require('project').run_fzf_lua()
-end)
+end, 'Run project.nvim through Fzf-Lua (assuming you have it installed)')
 
 M.ProjectRecents = Command.new(function(_)
     local recent_proj = require('project.api').get_recent_projects()
@@ -118,13 +129,13 @@ M.ProjectRecents = Command.new(function(_)
     end
 
     vim.notify(msg, INFO)
-end)
+end, 'Prints out the recent `project.nvim` projects')
 
 ---@param ctx vim.api.keyset.create_user_command.command_args
 M.ProjectRoot = Command.new(function(_, ctx)
     local verbose = ctx.bang ~= nil and ctx.bang or false
     require('project.api').on_buf_enter(verbose)
-end)
+end, 'Sets the current project root to the current CWD')
 
 M.ProjectSession = Command.new(function(_)
     local session = require('project.utils.history').session_projects
@@ -140,11 +151,11 @@ M.ProjectSession = Command.new(function(_)
         msg = msg .. (len ~= i and '%s. %s\n' or '%s. %s'):format(i, proj)
     end
     vim.notify(msg, vim.log.levels.INFO)
-end)
+end, 'Prints out the current `project.nvim` projects session')
 
 M.ProjectTelescope = Command.new(function(_)
     require('telescope._extensions.projects').projects()
-end)
+end, 'Telescope shortcut for project.nvim picker')
 
 return M
 
