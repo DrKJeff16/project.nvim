@@ -1,8 +1,9 @@
 local Log = require('project.utils.log')
+local MODSTR = 'telescope._extensions.projects'
 
 if not require('project.utils.util').mod_exists('telescope') then
-    Log.error('project.nvim: Telescope is not installed!')
-    error('project.nvim: Telescope is not installed!')
+    Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
+    error(('(%s): Telescope is not installed!'):format(MODSTR))
 end
 
 local Main = require('telescope._extensions.projects.main')
@@ -18,8 +19,7 @@ local M = Telescope.register_extension({
     projects = Main.projects,
 })
 
-Log.info('Registering `projects` Telescope picker successfully.')
-
+Log.debug(('(%s): Registering `projects` picker successfully!'):format(MODSTR))
 return M
 
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
