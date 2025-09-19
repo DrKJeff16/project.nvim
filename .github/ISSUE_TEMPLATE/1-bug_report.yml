@@ -59,7 +59,7 @@ body:
   - type: textarea
     attributes:
       label: "Output Of `:ProjectConfig`"
-      descriptios: |
+      description: |
         In case the bug does not impair this user command, it is highly encouraged
         for you to paste the output in this issue.
 
