@@ -372,10 +372,10 @@ require('project').setup()
         ---
         ---Note that even if set to `false`, you can still load the extension manually.
         --- ---
-        ---Default: `true`
+        ---Default: `false`
         --- ---
         ---@type boolean
-        enabled = true,
+        enabled = false,
 
         ---Determines whether the newest projects come first in the
         ---telescope picker (`'newest'`), or the oldest (`'oldest'`).

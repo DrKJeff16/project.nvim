@@ -144,10 +144,10 @@ local telescope = {}
 ---
 ---Note that even if set to `false`, you can still load the extension manually.
 --- ---
----Default: `true`
+---Default: `false`
 --- ---
 ---@type boolean
-telescope.enabled = true
+telescope.enabled = false
 
 ---Determines whether the newest projects come first in the
 ---telescope picker (`'newest'`), or the oldest (`'oldest'`).

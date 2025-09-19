@@ -373,7 +373,7 @@ Table of Contents                                             *project-nvim.toc*
                                 Note that even if set to `false`,
                                 you can still load the extension manually
 
-                                Default: `true` ~
+                                Default: `false` ~
 
 
     * {sort}                    (`'newest'|'oldest'`)
