@@ -1,3 +1,5 @@
+local MODSTR = 'project.config'
+
 local Util = require('project.utils.util')
 local Glob = require('project.utils.globtopattern')
 
@@ -55,11 +57,11 @@ function Config.setup(options)
     ---Load `projects` Telescope picker if condition passes
     if Config.options.telescope.enabled and mod_exists('telescope') then
         require('telescope').load_extension('projects')
-        Log.debug('Telescope Picker initialized from `setup()`')
+        Log.info(('(%s.setup): Telescope Picker initialized.'):format(MODSTR))
     end
 
     vim.g.project_setup = 1
-    Log.debug('`g:project_setup` set to `1`')
+    Log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
 end
 
 return Config

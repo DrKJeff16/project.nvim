@@ -9,9 +9,9 @@
 ---@field projectpath string
 ---@field historyfile string
 
-local uv = vim.uv or vim.loop
-
 local MODSTR = 'project.api'
+
+local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
@@ -185,30 +185,43 @@ function Api.set_pwd(dir, method)
             method = { method, { 'string', 'nil' } },
         })
     end
+    local Log = require('project.utils.log')
 
     if dir == nil or method == nil then
-        notify(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR), WARN)
+        Log.error(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR))
+        notify(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR), ERROR)
         return false
     end
 
     if not Config.options.allow_different_owners then
         if not Api.verify_owner(dir) then
-            notify(('(%s.set_pwd): Project root is owned by a different user'):format(MODSTR), WARN)
+            Log.error(('(%s.set_pwd): Project root is owned by a different user'):format(MODSTR))
+            notify(
+                ('(%s.set_pwd): Project root is owned by a different user'):format(MODSTR),
+                ERROR
+            )
             return false
         end
     end
 
-    if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
-        Config.options.before_attach(dir, method)
-    end
-
     local verbose = not Config.options.silent_chdir
+    local modified = false
 
     if empty(History.session_projects) then
         History.session_projects = { dir }
+        modified = true
     elseif not in_list(History.session_projects, dir) then
         table.insert(History.session_projects, dir)
-    elseif #History.session_projects > 1 then
+        modified = true
+    end
+
+    --- If directory is the same as current Project dir/CWD
+    if in_list({ dir, Api.current_project or '' }, vim.fn.getcwd(0, 0)) then
+        Log.info(('(%s.set_pwd): Current directory is selected project.'):format(MODSTR))
+        return true
+    end
+
+    if not modified and #History.session_projects > 1 then
         ---@type integer
         local old_pos
 
@@ -223,16 +236,18 @@ function Api.set_pwd(dir, method)
         table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
     end
 
-    --- If directory is the same as current Project dir/CWD
-    if in_list({ dir, Api.current_project or '' }, vim.fn.getcwd(0, 0)) then
-        return true
+    if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
+        Log.debug(('(%s.set_pwd): Running `before_attach` hook.'):format(MODSTR))
+        Config.options.before_attach(dir, method)
+        Log.debug(('(%s.set_pwd): Ran `before_attach` hook successfully.'):format(MODSTR))
     end
 
     local scope_chdir = Config.options.scope_chdir
     local msg = ('(%s.set_pwd):'):format(MODSTR)
 
     if not in_list({ 'global', 'tab', 'win' }, scope_chdir) then
-        notify(('%s INVALID value for `scope_chdir`'):format(msg), WARN)
+        Log.error(('%s INVALID value for `scope_chdir`'):format(msg))
+        notify(('%s INVALID value for `scope_chdir`'):format(msg), ERROR)
         return false
     end
 
@@ -251,17 +266,25 @@ function Api.set_pwd(dir, method)
 
     msg = ('%s\nMethod: %s\nStatus: %s'):format(msg, method, (ok and 'SUCCESS' or 'FAILED'))
 
+    if ok then
+        Log.info(msg)
+
+        if Config.options.on_attach and vim.is_callable(Config.options.on_attach) then
+            Log.debug(('(%s.set_pwd): Running `on_attach` hook.'):format(MODSTR))
+            Config.options.on_attach(dir, method)
+            Log.debug(('(%s.set_pwd): Ran `on_attach` hook successfully.'):format(MODSTR))
+        end
+    else
+        Log.error(msg)
+    end
+
     if verbose then
         vim.schedule(function()
-            notify(msg, (ok and INFO or WARN))
+            notify(msg, (ok and INFO or ERROR))
         end)
     end
 
-    if Config.options.on_attach and vim.is_callable(Config.options.on_attach) then
-        Config.options.on_attach(dir, method)
-    end
-
-    return true
+    return ok
 end
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
