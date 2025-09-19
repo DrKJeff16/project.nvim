@@ -6,17 +6,25 @@ local vim_has = require('project.utils.util').vim_has
 
 ---@class Project.Commands.Spec
 ---@field name string
----@field func fun(ctx?: vim.api.keyset.create_user_command.command_args)
+---@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@field desc string
----@field completor? fun(arg?: string, line?: string, pos?: integer): string[]
+---@field complete? fun(arg?: string, line?: string, pos?: integer): string[]
 
----@class Project.Commands
+---@alias Project.CMD
+---|{ name: string, desc: string, complete?: fun(arg?: string, line?: string, pos?: integer): string[] }
+---|fun(ctx?: vim.api.keyset.create_user_command.command_args)
+
+---@class Project.CMDS
 ---@field new fun(self: Project.Commands, spec: Project.Commands.Spec)
 
----@type Project.Commands|table<string, Project.Commands.Spec>
+---@alias Project.Commands
+---|Project.CMDS
+---|table<string, Project.CMD>
+
+---@type Project.Commands
 local Command = {}
 
----@param self Project.Commands|table<string, Project.Commands.Spec>
+---@param self Project.Commands
 ---@param spec Project.Commands.Spec
 function Command:new(spec)
     if vim_has('nvim-0.11') then
@@ -25,33 +33,33 @@ function Command:new(spec)
         vim.validate({ spec = { spec, 'table' } })
     end
 
-    local func = spec.func
+    local callback = spec.callback
 
+    ---@type Project.CMD
     local T = { name = spec.name, desc = spec.desc }
 
-    if spec.completor and vim.is_callable(spec.completor) then
-        T.complete = spec.completor
+    if spec.complete and vim.is_callable(spec.complete) then
+        T.complete = spec.complete
     end
 
-    ---@type table<string, Project.Commands.Spec>|fun(ctx?: vim.api.keyset.create_user_command.command_args)
     self[spec.name] = setmetatable(T, {
         __index = Command,
 
         ---@param ctx? vim.api.keyset.create_user_command.command_args
         __call = function(_, ctx)
             if ctx then
-                func(ctx)
+                callback(ctx)
                 return
             end
 
-            func()
+            callback()
         end,
     })
 end
 
 Command:new({
     name = 'ProjectAdd',
-    func = function(ctx)
+    callback = function(ctx)
         local quiet = ctx.bang ~= nil and ctx.bang or false
         require('project.api').add_project_manually(not quiet)
     end,
@@ -60,7 +68,7 @@ Command:new({
 
 Command:new({
     name = 'ProjectDelete',
-    func = function(ctx)
+    callback = function(ctx)
         local force = ctx.bang ~= nil and ctx.bang or false
         local recent = require('project.api').get_recent_projects()
 
@@ -88,7 +96,9 @@ Command:new({
         end
     end,
     desc = 'Deletes the projects given as args, assuming they are valid',
-    completor = function(_, line)
+
+    ---@param line string
+    complete = function(_, line)
         local recent = require('project.api').get_recent_projects()
         local input = vim.split(line, '%s+')
         local prefix = input[#input]
@@ -101,7 +111,7 @@ Command:new({
 
 Command:new({
     name = 'ProjectConfig',
-    func = function()
+    callback = function()
         local cfg = require('project').get_config()
         vim.notify(vim.inspect(cfg), INFO)
     end,
@@ -110,7 +120,7 @@ Command:new({
 
 Command:new({
     name = 'ProjectFzf',
-    func = function()
+    callback = function()
         require('project').run_fzf_lua()
     end,
     desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
@@ -118,7 +128,7 @@ Command:new({
 
 Command:new({
     name = 'ProjectRecents',
-    func = function()
+    callback = function()
         local recent_proj = require('project.api').get_recent_projects()
         local reverse = require('project.utils.util').reverse
 
@@ -143,7 +153,7 @@ Command:new({
 
 Command:new({
     name = 'ProjectRoot',
-    func = function(ctx)
+    callback = function(ctx)
         local verbose = ctx.bang ~= nil and ctx.bang or false
         require('project.api').on_buf_enter(verbose)
     end,
@@ -152,7 +162,7 @@ Command:new({
 
 Command:new({
     name = 'ProjectSession',
-    func = function()
+    callback = function()
         local session = require('project.utils.history').session_projects
         if vim.tbl_isempty(session) then
             vim.notify('No sessions available!', vim.log.levels.WARN)
@@ -172,7 +182,7 @@ Command:new({
 
 Command:new({
     name = 'ProjectTelescope',
-    func = function()
+    callback = function()
         require('telescope._extensions.projects').projects()
     end,
     desc = 'Telescope shortcut for project.nvim picker',
