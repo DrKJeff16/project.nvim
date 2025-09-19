@@ -328,7 +328,7 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `'global'` ~
 
 
-    * {before_attach}           (`fun(target_dir?, method?)`)
+    * {before_attach}           (`fun(target_dir?: string, method?: string)`)
                                 Hook to run before attaching to a new project.
                                 It optionally recieves `target_dir` and
                                 the `method` used to change directory
@@ -336,10 +336,11 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: empty function ~
 
 
-    * {on_attach}               (`fun(dir?, method?)`)
+    * {on_attach}               (`fun(dir?: string, method?: string)`)
                                 Hook to run after attaching to a new project.
                                 It optionally recieves `dir` and
-                                the `method` used to change directory
+                                the `method` used to change directory.
+                                Only runs on successful chdir! ~
 
                                 Default: empty function ~
 
@@ -366,10 +367,9 @@ Table of Contents                                             *project-nvim.toc*
 
     * {enabled}                 (boolean)
                                 Determines whether the `telescope` picker
-                                should be called.
+                                should be called from `setup()`.
                                 If `telescope` is not installed, then
-                                this won't make a difference
-
+                                this won't make a difference.
                                 Note that even if set to `false`,
                                 you can still load the extension manually
 
@@ -379,7 +379,9 @@ Table of Contents                                             *project-nvim.toc*
     * {sort}                    (`'newest'|'oldest'`)
                                 Determines whether the newest projects come
                                 first in the telescope picker (`'newest'`)
-                                or the oldest (`'oldest'`)
+                                or the oldest (`'oldest'`).
+                                Invalid values will trigger this value
+                                to revert to default
 
                                 Default: `'newest'` ~
 
@@ -398,7 +400,7 @@ Table of Contents                                             *project-nvim.toc*
                                 CREDITS: UNKNOWN ~
                                 Set this to `true` if you don't want
                                 the file picker to appear
-                                after you've selected a project.
+                                after you've selected a project
 
                                 Default: `false` ~
 

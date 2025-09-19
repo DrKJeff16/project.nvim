@@ -5,6 +5,7 @@ local WARN = vim.log.levels.WARN
 
 local Util = require('project.utils.util')
 local is_type = Util.is_type
+local dir_exists = Util.dir_exists
 
 ---The options available for in `require('project').setup()`.
 --- ---
@@ -80,9 +81,11 @@ DEFAULTS.patterns = {
 --- ---
 ---@param target_dir? string
 ---@param method? string
+---@diagnostic disable-next-line:unused-local
 DEFAULTS.before_attach = function(target_dir, method) end
 
 ---Hook to run after attaching to a new project.
+---**_This only runs if the directory changes successfully._**
 ---
 ---It recieves `dir` and, optionally,
 ---the `method` used to change directory.
@@ -93,6 +96,7 @@ DEFAULTS.before_attach = function(target_dir, method) end
 --- ---
 ---@param dir? string
 ---@param method? string
+---@diagnostic disable-next-line:unused-local
 DEFAULTS.on_attach = function(dir, method) end
 
 ---Sets whether to use Pattern Matching rules to the LSP client.
@@ -133,7 +137,8 @@ DEFAULTS.enable_autochdir = false
 ---@class Project.Config.Options.Telescope
 local telescope = {}
 
----Determines whether the `telescope` picker should be called.
+---Determines whether the `telescope` picker should be called
+---from the `setup()` function.
 ---
 ---If telescope is not installed, this doesn't make a difference.
 ---
@@ -230,14 +235,13 @@ DEFAULTS.scope_chdir = 'global'
 ---Determines in what filetypes/buftypes the plugin won't execute.
 ---It's a table with two fields:
 ---
---- - `ft` for filetypes to exclude
---- - `bt` for buftypes to exclude
+--- - `ft`: A string array of filetypes to exclude
+--- - `bt`: A string array of buftypes to exclude
 ---
----The default value for this one can be found in the project's `README.md`.
----
---- ---
----CREDITS TO @Zeioth !:
+---CREDITS TO [@Zeioth](https://github.com/Zeioth)!:
 ---[`Zeioth/project.nvim`](https://github.com/Zeioth/project.nvim/commit/95f56b8454f3285b819340d7d769e67242d59b53)
+--- ---
+---The default value for this one can be found in the project's `README.md`.
 --- ---
 ---@type { ft: string[], bt: string[] }
 DEFAULTS.disable_on = {
@@ -320,7 +324,7 @@ function DEFAULTS:verify_scope_chdir()
 end
 
 function DEFAULTS:verify_datapath()
-    if not Util.dir_exists(self.datapath) then
+    if not dir_exists(self.datapath) then
         vim.notify('Invalid `datapath`, reverting to default.', WARN)
         self.datapath = DEFAULTS.datapath
     end
