@@ -1,4 +1,4 @@
-local validate = vim.validate
+local MODSTR = 'project'
 
 local Config = require('project.config')
 local Api = require('project.api')
@@ -29,24 +29,33 @@ Project.get_last_project = Api.get_last_project
 ---@return string? last
 function Project.current_project(refresh)
     if vim_has('nvim-0.11') then
-        validate('refresh', refresh, 'boolean', true)
+        vim.validate('refresh', refresh, 'boolean', true)
     else
-        validate({ refresh = { refresh, { 'boolean', 'nil' } } })
+        vim.validate({ refresh = { refresh, { 'boolean', 'nil' } } })
     end
     refresh = refresh ~= nil and refresh or false
 
-    local curr, method, last = Api.current_project, Api.current_method, Api.last_project
+    local Log = require('project.utils.log')
 
     if refresh then
-        curr, method, last = Api.get_current_project()
+        Log.info(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
+        return Api.get_current_project()
     end
 
-    return curr, method, last
+    Log.info(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
+    return Api.current_project, Api.current_method, Api.last_project
 end
 
----@return Project.Config.Options|nil
+---@return Project.Config.Options?
 function Project.get_config()
-    return vim.g.project_setup == 1 and Config.options or nil
+    local Log = require('project.utils.log')
+
+    if vim.g.project_setup == 1 then
+        Log.info(('(%s.get_config): Project is set up. Returning setup options.'):format(MODSTR))
+        return Config.options
+    end
+
+    Log.error(('(%s.get_config): Project is not set up'):format(MODSTR))
 end
 
 return Project

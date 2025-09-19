@@ -1,15 +1,18 @@
-if not require('project.utils.util').mod_exists('telescope') then
-    error('project.nvim: Telescope is not installed!')
-end
+local MODSTR = 'telescope._extensions.projects.actions'
+local Log = require('project.utils.log')
 
-local fmt = string.format
+if not require('project.utils.util').mod_exists('telescope') then
+    Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
+    error(('(%s): Telescope is not installed!'):format(MODSTR))
+end
 
 local History = require('project.utils.history')
 local Api = require('project.api')
 local Config = require('project.config')
 local Util = require('project.utils.util')
-local Log = require('project.utils.log')
-local TelUtil = require('telescope._extensions.projects.util')
+local make_display = require('telescope._extensions.projects.util').make_display
+local reverse = Util.reverse
+local is_type = Util.is_type
 
 local Telescope = require('telescope')
 local Finders = require('telescope.finders')
@@ -17,17 +20,18 @@ local Actions = require('telescope.actions')
 local Builtin = require('telescope.builtin')
 local State = require('telescope.actions.state')
 
-local make_display = TelUtil.make_display
-local reverse = Util.reverse
-local is_type = Util.is_type
 local copy = vim.deepcopy
-local fnamemodify = vim.fn.fnamemodify
 
 ---@return table
 local function create_finder()
     local results = History.get_recent_projects()
 
     if Config.options.telescope.sort == 'newest' then
+        Log.debug(
+            ('(%s.create_finder): Sorting order to `newest`. Reversing project list.'):format(
+                MODSTR
+            )
+        )
         results = reverse(copy(results))
     end
 
@@ -36,14 +40,17 @@ local function create_finder()
 
         ---@param value string
         entry_maker = function(value)
-            local name = fmt('%s/%s', fnamemodify(value, ':h:t'), fnamemodify(value, ':t'))
+            local name = ('%s/%s'):format(
+                vim.fn.fnamemodify(value, ':h:t'),
+                vim.fn.fnamemodify(value, ':t')
+            )
 
             ---@class Project.ActionEntry
             local action_entry = {
                 display = make_display,
                 name = name,
                 value = value,
-                ordinal = fmt('%s %s', name, value),
+                ordinal = ('%s %s'):format(name, value),
             }
 
             return action_entry
@@ -55,20 +62,38 @@ end
 local M = {}
 
 ---@param prompt_bufnr integer
----@return string|nil
+---@return string?
 ---@return boolean?
 function M.change_working_directory(prompt_bufnr)
     ---@type Project.ActionEntry
     local selected_entry = State.get_selected_entry()
 
+    Log.debug(('(%s.change_working_directory): Closing prompt `%s`.'):format(MODSTR, prompt_bufnr))
     Actions.close(prompt_bufnr)
+    Log.debug(
+        ('(%s.change_working_directory): Closed prompt `%s` successfully.'):format(
+            MODSTR,
+            prompt_bufnr
+        )
+    )
 
-    if selected_entry == nil or not is_type('string', selected_entry.value) then
-        Log.warn('Telescope entry not valid!')
+    if not (selected_entry and is_type('string', selected_entry.value)) then
+        Log.error(('(%s.change_working_directory): Invalid entry!'):format(MODSTR))
         return
     end
 
     local cd_successful = Api.set_pwd(selected_entry.value, 'telescope')
+    if cd_successful then
+        Log.info(
+            ('(%s.change_working_directory): suffessfully changed working directory.'):format(
+                MODSTR
+            )
+        )
+    else
+        Log.error(
+            ('(%s.change_working_directory): failed to change working directory!'):format(MODSTR)
+        )
+    end
 
     return selected_entry.value, cd_successful
 end
@@ -172,15 +197,21 @@ function M.delete_project(prompt_bufnr)
     local active_entry = State.get_selected_entry()
 
     if active_entry == nil or not is_type('string', active_entry.value) then
+        Log.debug(('(%s.delete_project): Closing prompt `%s`.'):format(MODSTR, prompt_bufnr))
         Actions.close(prompt_bufnr)
+        Log.debug(
+            ('(%s.delete_project): Closed prompt `%s` successfully.'):format(MODSTR, prompt_bufnr)
+        )
+
         return
     end
 
     local value = active_entry.value
-    local choice = vim.fn.confirm(fmt("Delete '%s' from project list?", value), '&Yes\n&No', 2)
+    local choice = vim.fn.confirm(("Delete '%s' from project list?"):format(value), '&Yes\n&No', 2)
 
     ---If choice is not `YES`
     if choice ~= 1 then
+        Log.info('(%s.delete_project): Aborting project deletion.')
         return
     end
 
@@ -188,9 +219,13 @@ function M.delete_project(prompt_bufnr)
 
     local finder = create_finder()
 
+    Log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
     State.get_current_picker(prompt_bufnr):refresh(finder, {
         reset_prompt = true,
     })
+    Log.debug(
+        ('(%s.delete_project): Refreshing prompt `%s` successfully.'):format(MODSTR, prompt_bufnr)
+    )
 end
 
 return M

@@ -1,4 +1,7 @@
+local Log = require('project.utils.log')
+
 if not require('project.utils.util').mod_exists('telescope') then
+    Log.error('project.nvim: Telescope is not installed!')
     error('project.nvim: Telescope is not installed!')
 end
 
@@ -14,6 +17,8 @@ local M = Telescope.register_extension({
     exports = { projects = Main.projects },
     projects = Main.projects,
 })
+
+Log.info('Registering `projects` Telescope picker successfully.')
 
 return M
 
