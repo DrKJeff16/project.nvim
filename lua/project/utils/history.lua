@@ -78,10 +78,10 @@ local function delete_duplicates(tbl)
         vim.validate({ tbl = { tbl, 'table' } })
     end
 
-    ---@type table<string, integer|nil>
+    ---@type table<string, integer>
     local cache_dict = {}
 
-    for _, v in next, tbl do
+    for _, v in ipairs(tbl) do
         local normalised_path = normalise_path(v)
         if cache_dict[normalised_path] == nil then
             cache_dict[normalised_path] = 1
@@ -93,7 +93,7 @@ local function delete_duplicates(tbl)
     ---@type string[]
     local res = {}
 
-    for _, v in next, tbl do
+    for _, v in ipairs(tbl) do
         local normalised_path = normalise_path(v)
         if cache_dict[normalised_path] == 1 then
             table.insert(res, normalised_path)

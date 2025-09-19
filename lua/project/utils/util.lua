@@ -33,7 +33,7 @@ end
 ---@param triggers? string[]
 ---@return string new_str
 function Util.capitalize(str, use_dot, triggers)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('str', str, 'string', false)
         validate('use_dot', use_dot, 'boolean', true)
         validate('triggers', triggers, 'table', true, 'string[]')
@@ -109,7 +109,7 @@ function Util.is_type(t, data)
         'userdata',
     }
 
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('data', data, TYPES, true, 'any')
         validate('t', t, function(v)
             if v == nil or type(v) ~= 'string' then
@@ -151,7 +151,7 @@ end
 ---@param mod string The `require()` argument to be checked
 ---@return boolean exists A boolean indicating whether the module exists or not
 function Util.mod_exists(mod)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('mod', mod, 'string', false)
     else
         validate({ mod = { mod, 'string' } })
@@ -171,7 +171,7 @@ end
 ---@param str string
 ---@return string new_str
 function Util.lstrip(char, str)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('char', char, 'string', false)
         validate('str', str, 'string', false)
     else
@@ -209,7 +209,7 @@ end
 ---@param str string
 ---@return string new_str
 function Util.rstrip(char, str)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('char', char, 'string', false)
         validate('str', str, 'string', false)
     else
@@ -249,7 +249,7 @@ end
 ---@param str string
 ---@return string new_str
 function Util.strip(char, str)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('char', char, 'string', false)
         validate('str', str, 'string', false)
     else
@@ -279,7 +279,7 @@ end
 ---@param T table
 ---@return table NT
 function Util.dedup(T)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('T', T, 'table', false)
     else
         validate({ T = { T, 'table' } })
@@ -307,7 +307,7 @@ end
 ---@return string
 ---@return boolean?
 function Util.format_per_type(t, data, sep, constraints)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('t', t, function(v)
             if v == nil or type(v) ~= 'string' then
                 return false
@@ -412,7 +412,7 @@ end
 ---@param T table
 ---@return table T
 function Util.reverse(T)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('T', T, 'table', false)
     else
         validate({ T = { T, 'table' } })
@@ -439,7 +439,7 @@ end
 ---@param dir string
 ---@return boolean
 function Util.dir_exists(dir)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('dir', dir, 'string', false)
     else
         validate({ dir = { dir, 'string' } })
@@ -453,7 +453,7 @@ end
 ---@param path string
 ---@return boolean
 function Util.path_exists(path)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('path', path, 'string', false)
     else
         validate({ path = { path, 'string' } })
@@ -470,7 +470,7 @@ end
 ---@param path string
 ---@return string normalised_path
 function Util.normalise_path(path)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if Util.vim_has('nvim-0.11') then
         validate('path', path, 'string', false)
     else
         validate({ path = { path, 'string' } })

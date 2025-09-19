@@ -1,6 +1,8 @@
 local validate = vim.validate
 local uv = vim.uv or vim.loop
 
+local vim_has = require('project.utils.util').vim_has
+
 ---@class Project.Utils.Path
 ---The directory where the project dir will be saved.
 --- ---
@@ -14,11 +16,13 @@ local uv = vim.uv or vim.loop
 local Path = {}
 
 Path.last_dir_cache = ''
+
+---@type string[]
 Path.curr_dir_cache = {}
 
 ---@param file_dir string
 function Path.get_files(file_dir)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         validate('file_dir', file_dir, 'string', false)
     else
         validate({ file_dir = { file_dir, 'string' } })
@@ -46,7 +50,7 @@ end
 ---@param dir string
 ---@param identifier string
 function Path.has(dir, identifier)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         validate('dir', dir, 'string', false)
         validate('identifier', identifier, 'string', false)
     else
@@ -64,7 +68,7 @@ function Path.has(dir, identifier)
 
     local pattern = globtopattern(identifier)
 
-    for _, file in next, Path.curr_dir_cache do
+    for _, file in ipairs(Path.curr_dir_cache) do
         if file:match(pattern) ~= nil then
             return true
         end
@@ -77,7 +81,7 @@ end
 ---@param identifier string
 ---@return boolean
 function Path.is(dir, identifier)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         validate('dir', dir, 'string', false)
         validate('identifier', identifier, 'string', false)
     else
@@ -93,7 +97,7 @@ end
 ---@param path_str string
 ---@return string|'/'
 function Path.get_parent(path_str)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         validate('path_str', path_str, 'string', false)
     else
         validate({ path_str = { path_str, 'string' } })
@@ -107,7 +111,7 @@ end
 ---@param identifier string
 ---@return boolean
 function Path.sub(dir, identifier)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         validate('dir', dir, 'string', false)
         validate('identifier', identifier, 'string', false)
     else
@@ -138,7 +142,7 @@ end
 ---@param identifier string
 ---@return boolean
 function Path.child(dir, identifier)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         validate('dir', dir, 'string', false)
         validate('identifier', identifier, 'string', false)
     else
@@ -155,7 +159,7 @@ end
 ---@param pattern string
 ---@return boolean
 function Path.match(dir, pattern)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         validate('dir', dir, 'string', false)
         validate('pattern', pattern, 'string', false)
     else
@@ -173,7 +177,7 @@ function Path.match(dir, pattern)
 
     local first_char = pattern:sub(1, 1)
 
-    for char, case in next, SWITCH do
+    for char, case in pairs(SWITCH) do
         if first_char == char then
             return case(dir, pattern:sub(2))
         end
@@ -190,7 +194,7 @@ end
 ---@return string|nil
 ---@return string|nil
 function Path.root_included(dir)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         validate('dir', dir, 'string', false)
     else
         validate({ dir = { dir, 'string' } })
@@ -200,7 +204,7 @@ function Path.root_included(dir)
 
     ---Breadth-First search
     while true do ---FIXME: This loop is dangerous, even if halting cond is supposedly known
-        for _, pattern in next, Config.options.patterns do
+        for _, pattern in ipairs(Config.options.patterns) do
             local excluded = false
 
             if pattern:sub(1, 1) == '!' then
@@ -229,7 +233,7 @@ end
 ---@param dir string
 ---@return boolean
 function Path.is_excluded(dir)
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         validate('dir', dir, 'string', false)
     else
         validate({ dir = { dir, 'string' } })
@@ -237,7 +241,7 @@ function Path.is_excluded(dir)
 
     local exclude_dirs = require('project.config').options.exclude_dirs
 
-    for _, excluded in next, exclude_dirs do
+    for _, excluded in ipairs(exclude_dirs) do
         ---FIXME: This needs revision
         if dir:match(excluded) ~= nil then
             return true

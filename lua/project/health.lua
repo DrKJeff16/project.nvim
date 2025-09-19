@@ -24,6 +24,7 @@ local format_per_type = Util.format_per_type
 local mod_exists = Util.mod_exists
 local reverse = Util.reverse
 local is_windows = Util.is_windows
+local vim_has = Util.vim_has
 
 ---@class Project.Health
 local Health = {}
@@ -41,7 +42,7 @@ function Health.setup_check()
 
     ok('`setup()` has been called!')
 
-    if vim.fn.has('nvim-0.11') == 1 then
+    if vim_has('nvim-0.11') then
         ok('nvim version is at least `v0.11`')
     else
         h_warn('nvim version is lower than `v0.11`!')
