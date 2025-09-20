@@ -1,72 +1,85 @@
+local MODSTR = 'project.commands'
+
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 
 local vim_has = require('project.utils.util').vim_has
 
----@class Project.Commands.Spec
+---@alias CompletorFun fun(arg?: string, line?: string, pos?: integer): string[]
+
+---@class Project.Commands.Spec: vim.api.keyset.user_command
 ---@field name string
 ---@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@field desc string
----@field complete? fun(arg?: string, line?: string, pos?: integer): string[]
+---@field complete? CompletorFun
+---@field bang? boolean
 
 ---@alias Project.CMD
----|{ name: string, desc: string, complete?: fun(arg?: string, line?: string, pos?: integer): string[] }
+---|vim.api.keyset.user_command
+---|{ name: string, desc: string, complete?: CompletorFun }
 ---|fun(ctx?: vim.api.keyset.create_user_command.command_args)
 
----@class Project.CMDS
----@field new fun(self: Project.Commands, spec: Project.Commands.Spec)
-
 ---@alias Project.Commands
----|Project.CMDS
 ---|table<string, Project.CMD>
+---|{ new: fun(spec: Project.Commands.Spec) }
 
 ---@type Project.Commands
 local Command = {}
 
----@param self Project.Commands
 ---@param spec Project.Commands.Spec
-function Command:new(spec)
+function Command.new(spec)
     if vim_has('nvim-0.11') then
         vim.validate('spec', spec, 'table', false, 'Project.Commands.Spec')
     else
         vim.validate({ spec = { spec, 'table' } })
     end
 
-    local callback = spec.callback
+    if vim.tbl_isempty(spec) then
+        error(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
+    end
 
     ---@type Project.CMD
-    local T = { name = spec.name, desc = spec.desc }
+    local T = {
+        name = spec.name,
+        desc = spec.desc,
+        bang = spec.bang ~= nil and spec.bang or false,
+    }
+
+    if spec.nargs ~= nil then
+        T.nargs = spec.nargs
+    end
 
     if spec.complete and vim.is_callable(spec.complete) then
         T.complete = spec.complete
     end
 
-    self[spec.name] = setmetatable(T, {
+    Command[spec.name] = setmetatable(T, {
         __index = Command,
 
         ---@param ctx? vim.api.keyset.create_user_command.command_args
         __call = function(_, ctx)
             if ctx then
-                callback(ctx)
+                spec.callback(ctx)
                 return
             end
 
-            callback()
+            spec.callback()
         end,
     })
 end
 
-Command:new({
+Command.new({
     name = 'ProjectAdd',
     callback = function(ctx)
         local quiet = ctx.bang ~= nil and ctx.bang or false
         require('project.api').add_project_manually(not quiet)
     end,
     desc = 'Adds the current CWD project to the Project History',
+    bang = true,
 })
 
-Command:new({
+Command.new({
     name = 'ProjectDelete',
     callback = function(ctx)
         local force = ctx.bang ~= nil and ctx.bang or false
@@ -96,6 +109,8 @@ Command:new({
         end
     end,
     desc = 'Deletes the projects given as args, assuming they are valid',
+    nargs = '+',
+    bang = true,
 
     ---@param line string
     complete = function(_, line)
@@ -109,7 +124,7 @@ Command:new({
     end,
 })
 
-Command:new({
+Command.new({
     name = 'ProjectConfig',
     callback = function()
         local cfg = require('project').get_config()
@@ -118,7 +133,7 @@ Command:new({
     desc = 'Prints out the current configuratiion for `project.nvim`',
 })
 
-Command:new({
+Command.new({
     name = 'ProjectFzf',
     callback = function()
         require('project').run_fzf_lua()
@@ -126,7 +141,7 @@ Command:new({
     desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
 })
 
-Command:new({
+Command.new({
     name = 'ProjectRecents',
     callback = function()
         local recent_proj = require('project.api').get_recent_projects()
@@ -151,21 +166,22 @@ Command:new({
     desc = 'Prints out the recent `project.nvim` projects',
 })
 
-Command:new({
+Command.new({
     name = 'ProjectRoot',
     callback = function(ctx)
         local verbose = ctx.bang ~= nil and ctx.bang or false
         require('project.api').on_buf_enter(verbose)
     end,
     desc = 'Sets the current project root to the current CWD',
+    bang = true,
 })
 
-Command:new({
+Command.new({
     name = 'ProjectSession',
     callback = function()
         local session = require('project.utils.history').session_projects
         if vim.tbl_isempty(session) then
-            vim.notify('No sessions available!', vim.log.levels.WARN)
+            vim.notify('No sessions available!', ERROR)
             return
         end
 
@@ -175,12 +191,13 @@ Command:new({
         for i, proj in ipairs(session) do
             msg = msg .. (len ~= i and '%s. %s\n' or '%s. %s'):format(i, proj)
         end
-        vim.notify(msg, vim.log.levels.INFO)
+
+        vim.notify(msg, INFO)
     end,
     desc = 'Prints out the current `project.nvim` projects session',
 })
 
-Command:new({
+Command.new({
     name = 'ProjectTelescope',
     callback = function()
         require('telescope._extensions.projects').projects()
