@@ -6,25 +6,22 @@ local INFO = vim.log.levels.INFO
 
 local vim_has = require('project.utils.util').vim_has
 
----@alias CompletorFun fun(arg?: string, line?: string, pos?: integer): string[]
+---@alias CompletorFun fun(a?: string, l?: string, p?: integer): string[]
 
 ---@class Project.Commands.Spec: vim.api.keyset.user_command
 ---@field name string
 ---@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@field desc string
----@field complete? CompletorFun
----@field bang? boolean
+---@field complete? string|CompletorFun
 
 ---@alias Project.CMD
----|vim.api.keyset.user_command
----|{ name: string, desc: string, complete?: CompletorFun }
+---|{ name: string, desc: string, bang?: boolean, complete?: string|CompletorFun, nargs?: any }
 ---|fun(ctx?: vim.api.keyset.create_user_command.command_args)
 
----@alias Project.Commands
----|table<string, Project.CMD>
----|{ new: fun(spec: Project.Commands.Spec) }
+---@class Project.Commands
+---@field new fun(spec: Project.Commands.Spec)
 
----@type Project.Commands
+---@type Project.Commands|table<string, Project.CMD>
 local Command = {}
 
 ---@param spec Project.Commands.Spec
