@@ -494,6 +494,15 @@ end
 ---https://github.com/ahmedkhalf/project.nvim/issues/71#issuecomment-1212993659
 --- ---
 function Api.run_fzf_lua()
+    if not Config.options.fzf_lua.enabled then
+        vim.notify(
+            '(`project.nvim`): `fzf-lua` integration is disabled!\n\n'
+                .. 'Make sure to enable it when running `setup()`!',
+            WARN
+        )
+        return
+    end
+
     local fzf_lua = require('fzf-lua')
 
     fzf_lua.fzf_exec(function(cb)
