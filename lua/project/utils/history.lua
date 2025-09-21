@@ -62,11 +62,21 @@ function History.open_history(mode)
         vim.validate({ mode = { mode, 'string' } })
     end
     Path.create_projectpath()
+    local Log = require('project.utils.log')
+
     local dir_stat = uv.fs_stat(Path.projectpath)
-    local histfile = Path.historyfile
-    if dir_stat then
-        return uv.fs_open(histfile, mode, tonumber('644', 8))
+    if not dir_stat then
+        Log.error(
+            ('(%s.open_history): Unable to open the directory for the history file!'):format(MODSTR)
+        )
+        error(
+            ('(%s.open_history): Unable to open the directory for the history file!'):format(MODSTR),
+            ERROR
+        )
     end
+
+    local fd = uv.fs_open(Path.historyfile, mode, tonumber('644', 8))
+    return fd
 end
 
 ---@param tbl string[]
