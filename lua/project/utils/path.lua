@@ -196,8 +196,8 @@ function Path.create_projectpath()
 end
 
 ---@param dir string
----@return string?
----@return string?
+---@return string|nil
+---@return string|nil
 function Path.root_included(dir)
     if vim_has('nvim-0.11') then
         vim.validate('dir', dir, 'string', false)

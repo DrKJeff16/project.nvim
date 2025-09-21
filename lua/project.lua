@@ -24,9 +24,9 @@ Project.get_last_project = Api.get_last_project
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
 ---@param refresh? boolean
----@return string? curr
----@return string? method
----@return string? last
+---@return string|nil curr
+---@return string|nil method
+---@return string|nil last
 function Project.current_project(refresh)
     if vim_has('nvim-0.11') then
         vim.validate('refresh', refresh, 'boolean', true)
@@ -46,7 +46,7 @@ function Project.current_project(refresh)
     return Api.current_project, Api.current_method, Api.last_project
 end
 
----@return Project.Config.Options?
+---@return Project.Config.Options|nil
 function Project.get_config()
     local Log = require('project.utils.log')
 

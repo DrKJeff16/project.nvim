@@ -54,7 +54,7 @@ History.recent_projects = nil
 History.session_projects = {}
 
 ---@param mode OpenMode
----@return (integer|nil)? fd
+---@return integer|nil fd
 function History.open_history(mode)
     if vim_has('nvim-0.11') then
         vim.validate('mode', mode, 'string', false, 'OpenMode')

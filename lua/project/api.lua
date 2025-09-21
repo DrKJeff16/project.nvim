@@ -76,8 +76,8 @@ Api.delete_project = History.delete_project
 ---If successful, returns a tuple of two `string` results.
 ---Otherwise, nothing is returned.
 --- ---
----@return string? dir
----@return string? name
+---@return string|nil dir
+---@return string|nil name
 function Api.find_lsp_root()
     local allow_patterns = Config.options.allow_patterns_for_lsp
 
@@ -141,8 +141,8 @@ function Api.verify_owner(dir)
     return stat.uid == uv.getuid()
 end
 
----@return string? dir_res
----@return string? method
+---@return string|nil dir_res
+---@return string|nil method
 function Api.find_pattern_root()
     local dir = vim.fn.fnamemodify(buf_name(curr_buf()), ':p:h')
 
@@ -317,8 +317,8 @@ end
 ---
 ---If no project root is found, nothing will be returned.
 --- ---
----@return string? root
----@return string? method
+---@return string|nil root
+---@return string|nil method
 function Api.get_project_root()
     if empty(Config.options.detection_methods) then
         return
@@ -359,7 +359,7 @@ function Api.get_project_root()
     end
 end
 
----@return string? last
+---@return string|nil last
 function Api.get_last_project()
     local recent = Api.get_recent_projects()
     if empty(recent) or #recent == 1 then
@@ -373,9 +373,9 @@ end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
----@return string? curr
----@return string? method
----@return string? last
+---@return string|nil curr
+---@return string|nil method
+---@return string|nil last
 function Api.get_current_project()
     local curr, method = Api.get_project_root()
     local last = Api.get_last_project()

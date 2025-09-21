@@ -62,8 +62,8 @@ end
 local M = {}
 
 ---@param prompt_bufnr integer
----@return string?
----@return boolean?
+---@return string|nil
+---@return boolean|nil
 function M.change_working_directory(prompt_bufnr)
     ---@type Project.ActionEntry
     local selected_entry = State.get_selected_entry()

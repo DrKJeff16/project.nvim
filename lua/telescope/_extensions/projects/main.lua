@@ -2,8 +2,6 @@ if not require('project.utils.util').mod_exists('telescope') then
     error('project.nvim: Telescope is not installed!')
 end
 
-local fmt = string.format
-
 local Pickers = require('telescope.pickers')
 local Actions = require('telescope.actions')
 local State = require('telescope.actions.state')
@@ -94,7 +92,7 @@ function Main.projects(opts)
     local scope = scope_chdir == 'win' and 'window' or scope_chdir
 
     Pickers.new(opts, {
-        prompt_title = fmt('Select Your Project (%s)', Util.capitalize(scope)),
+        prompt_title = ('Select Your Project (%s)'):format(Util.capitalize(scope)),
         results_title = 'Projects',
         finder = TelUtil.create_finder(),
         previewer = false,

@@ -17,12 +17,12 @@ local ERROR = vim.log.levels.ERROR  -- `4`
 local Log = {}
 
 ---@param lvl vim.log.levels
----@return fun(...: any): output: string?
+---@return fun(...: any): output: string|nil
 local function gen_log(lvl)
     local is_type = require('project.utils.util').is_type
 
     ---@param ... any
-    ---@return string? output
+    ---@return string|nil output
     return function(...)
         if not require('project.config').options.logging then
             return
@@ -101,7 +101,7 @@ end
 
 ---@param data string
 ---@param lvl vim.log.levels
----@return string?
+---@return string|nil
 function Log:write(data, lvl)
     if not require('project.config').options.logging or vim.g.project_log_cleared == 1 then
         return
@@ -133,7 +133,7 @@ end
 
 ---@param self Project.Log
 ---@param mode OpenMode
----@return (integer|nil)?
+---@return integer|nil
 function Log:open(mode)
     local Path = require('project.utils.path')
 

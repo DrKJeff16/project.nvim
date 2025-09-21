@@ -7,7 +7,6 @@
 ---|'thread'
 ---|'userdata'
 
-local fmt = string.format
 local uv = vim.uv or vim.loop
 
 local validate = vim.validate
@@ -82,7 +81,7 @@ function Util.capitalize(str, use_dot, triggers)
             dot = true
         end
 
-        new_str = fmt('%s%s', new_str, char)
+        new_str = ('%s%s'):format(new_str, char)
         prev_char = char
 
         i = i + 1
@@ -194,7 +193,7 @@ function Util.lstrip(char, str)
         end
 
         if other then
-            new_str = fmt('%s%s', new_str, str:sub(i, i))
+            new_str = ('%s%s'):format(new_str, str:sub(i, i))
         end
 
         i = i + 1
@@ -234,7 +233,7 @@ function Util.rstrip(char, str)
         end
 
         if other then
-            new_str = fmt('%s%s', new_str, str:sub(i, i))
+            new_str = ('%s%s'):format(new_str, str:sub(i, i))
         end
 
         i = i + 1
@@ -305,7 +304,7 @@ end
 ---@param sep? string
 ---@param constraints? string[]
 ---@return string
----@return boolean?
+---@return boolean|nil
 function Util.format_per_type(t, data, sep, constraints)
     if Util.vim_has('nvim-0.11') then
         validate('t', t, function(v)
@@ -351,7 +350,7 @@ function Util.format_per_type(t, data, sep, constraints)
     constraints = constraints or nil
 
     if t == 'string' then
-        local res = fmt('%s`"%s"`', sep, data)
+        local res = ('%s`"%s"`'):format(sep, data)
         if not is_type('table', constraints) then
             return res
         end
@@ -364,38 +363,38 @@ function Util.format_per_type(t, data, sep, constraints)
     end
 
     if t == 'number' or t == 'boolean' then
-        return fmt('%s`%s`', sep, tostring(data))
+        return ('%s`%s`'):format(sep, tostring(data))
     end
 
     if t == 'function' then
-        return fmt('%s`%s`', sep, t)
+        return ('%s`%s`'):format(sep, t)
     end
 
     local msg = ''
 
     if t == 'nil' then
-        return fmt('%s%s `nil`', sep, msg)
+        return ('%s%s `nil`'):format(sep, msg)
     end
 
     if t ~= 'table' then
-        return fmt('%s%s `?`', sep, msg)
+        return ('%s%s `?`'):format(sep, msg)
     end
 
     if empty(data) then
-        return fmt('%s%s `{}`', sep, msg)
+        return ('%s%s `{}`'):format(sep, msg)
     end
 
-    sep = fmt('%s ', sep)
+    sep = ('%s '):format(sep)
 
     ---@cast data table
     for k, v in next, data do
-        k = is_type('number', k) and fmt('[%s]', tostring(k)) or k
-        msg = fmt('%s\n%s%s: ', msg, sep, k)
+        k = is_type('number', k) and ('[%s]'):format(tostring(k)) or k
+        msg = ('%s\n%s%s: '):format(msg, sep, k)
 
         if not is_type('string', v) then
-            msg = fmt('%s%s', msg, Util.format_per_type(type(v), v, sep))
+            msg = ('%s%s'):format(msg, Util.format_per_type(type(v), v, sep))
         else
-            msg = fmt('%s`"%s"`', msg, v)
+            msg = ('%s`"%s"`'):format(msg, v)
         end
     end
 

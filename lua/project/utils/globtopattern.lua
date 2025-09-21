@@ -154,7 +154,7 @@ function Glob.pattern_exclude(pattern)
     local pattern_len = pattern:len()
 
     if vim.startswith(pattern, '~/') then
-        pattern = string.format('%s/%s', HOME, pattern:sub(3, pattern_len))
+        pattern = ('%s/%s'):format(HOME, pattern:sub(3, pattern_len))
     end
 
     return Glob.globtopattern(pattern)
