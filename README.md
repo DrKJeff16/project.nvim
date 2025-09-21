@@ -76,12 +76,14 @@ Show these much love!
 3. [Commands](#commands)
     1. [`:ProjectFzf`](#projectfzf)
     2. [`:ProjectTelescope`](#projecttelescope)
-    3. [`:ProjectAdd`](#projectadd)
-    4. [`:ProjectRoot`](#projectroot)
-    5. [`:ProjectRecents`](#projectrecents)
-    6. [`:ProjectConfig`](#projectconfig)
-    7. [`:ProjectDelete`](#projectdelete)
-    8. [`:ProjectSession`](#projectsession)
+    3. [`:ProjectLog`](#projectlog)
+    4. [`:ProjectLogClear`](#projectlogclear)
+    5. [`:ProjectAdd`](#projectadd)
+    6. [`:ProjectRoot`](#projectroot)
+    7. [`:ProjectRecents`](#projectrecents)
+    8. [`:ProjectConfig`](#projectconfig)
+    9. [`:ProjectDelete`](#projectdelete)
+    10. [`:ProjectSession`](#projectsession)
 4. [API](#api)
     1. [`run_fzf_lua()`](#run_fzf_lua)
     2. [`get_project_root()`](#get_project_root)
@@ -683,6 +685,36 @@ For now it just executes [`require('project').run_fzf_lua()`](#run-fzf-lua).
 
 The `:ProjectTelescope` command is a dynamicly enabled User Command that runs
 the Telescope `projects` picker. A shortcut, really.
+
+### `:ProjectLog`
+
+> [!IMPORTANT]
+> This command will not be available unless you set `logging = true`
+> in your `setup()`.
+
+The `:ProjectLog` command opens the `project.nvim` log file in a new tab,
+which can be exited by pressing `q` in Normal Mode.
+
+If a `[!]` is supplied at the end of the command (i.e. `:ProjectLog!`), then it'll close
+any instance of a previously opened log file, if found. Otherwise nothing will happen
+
+### `:ProjectLogClear`
+
+> [!IMPORTANT]
+> This command will not be available unless you set `logging = true`
+> in your `setup()`.
+
+The `:ProjectLogClear` command will delete all the contents of your log file,
+assuming there is one.
+
+If this is called from a logfile tab, then it will attempt to close it.
+
+> [!NOTE]
+> Once this command is called no more logs will be written for your current
+> Neovim session. You will have to restart.
+>
+> You could set `vim.g.project_log_cleared` to a value different to `1`,
+> **BUT THIS SOLUTION IS NOT TESTED FULLY. EXPECT WEIRD BEHAVIOUR IF YOU DO THIS!**
 
 ### `:ProjectAdd`
 
