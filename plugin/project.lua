@@ -1,4 +1,5 @@
 local Commands = require('project.commands')
+local mod_exists = require('project.utils.util').mod_exists
 
 ---`:ProjectAdd`
 vim.api.nvim_create_user_command('ProjectAdd', function(ctx)

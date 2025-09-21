@@ -253,6 +253,20 @@ require('project').setup()
     ---@type boolean
     logging = false,
 
+    ---Table of options used for `fzf-lua` integration
+    --- ---
+    ---@class Project.Config.FzfLua
+    fzf_lua = {
+        ---Determines whether the `fzf-lua` integration is enabled.
+        ---
+        ---If `fzf-lua` is not installed, this won't make a difference.
+        --- ---
+        ---Default: `false`
+        --- ---
+        ---@type boolean
+        enabled = false,
+    },
+
     ---Determines in what filetypes/buftypes the plugin won't execute.
     ---It's a table with two fields:
     ---
