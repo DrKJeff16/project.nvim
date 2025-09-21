@@ -20,6 +20,8 @@
 ---|"xw"
 ---|"xw+"
 
+local MODSTR = 'project.utils.history'
+
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
 
@@ -59,11 +61,9 @@ function History.open_history(mode)
     else
         vim.validate({ mode = { mode, 'string' } })
     end
-    local histfile = Path.historyfile
-
     Path.create_projectpath()
     local dir_stat = uv.fs_stat(Path.projectpath)
-
+    local histfile = Path.historyfile
     if dir_stat then
         return uv.fs_open(histfile, mode, tonumber('644', 8))
     end
@@ -120,7 +120,7 @@ function History.filter_recent_projects()
         table.insert(new_recent, v)
     end
 
-    History.recent_projects = copy(new_recent)
+    History.recent_projects = new_recent
 end
 
 ---Deletes a project string, or a Telescope Entry type.
@@ -133,7 +133,10 @@ function History.delete_project(project)
         vim.validate({ project = { project, { 'string', 'table' } } })
     end
 
+    local Log = require('project.utils.log')
+
     if History.recent_projects == nil then
+        Log.error('(%s.delete_project): `recent_projects` is nil! Aborting.')
         return
     end
 
@@ -149,11 +152,12 @@ function History.delete_project(project)
         end
     end
 
+    Log.warn(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj))
     if found then
-        vim.notify(('Deleting project `%s`'):format(proj), WARN)
+        vim.notify(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj), WARN)
     end
 
-    History.recent_projects = copy(new_tbl)
+    History.recent_projects = new_tbl
 
     History.filter_recent_projects()
     History.write_history()
@@ -171,16 +175,13 @@ function History.deserialize_history(history_data)
 
     ---@type string[]
     local projects = {}
-
     for s in history_data:gmatch('[^\r\n]+') do
         if not Path.is_excluded(s) and dir_exists(s) then
             table.insert(projects, s)
         end
     end
 
-    projects = delete_duplicates(copy(projects))
-
-    History.recent_projects = copy(projects)
+    History.recent_projects = delete_duplicates(projects)
 end
 
 ---Only runs once.
@@ -209,11 +210,11 @@ end
 
 function History.read_history()
     local fd = History.open_history('r')
-    History.setup_watch()
-
-    if fd == nil then
+    if not fd then
         return
     end
+
+    History.setup_watch()
 
     local stat = uv.fs_fstat(fd)
     if not stat then
@@ -255,18 +256,19 @@ end
 --- ---
 function History.write_history()
     local Config = require('project.config')
+    local Log = require('project.utils.log')
 
     local fd = History.open_history(History.recent_projects ~= nil and 'w' or 'a')
-
     if not fd then
-        error('(project.utils.history.write_history): File restricted', ERROR)
+        Log.error(('(%s.write_history): File restricted!'):format(MODSTR))
+        error(('(%s.write_history): File restricted!'):format(MODSTR), ERROR)
     end
 
     History.historysize = Config.options.historysize or 100
 
     local res = History.get_recent_projects()
     local len_res = #res
-    local tbl_out = res
+    local tbl_out = copy(res)
 
     if History.historysize ~= nil and History.historysize > 0 then
         -- Trim table to last 100 entries
@@ -281,8 +283,10 @@ function History.write_history()
         out = ('%s%s\n'):format(out, v)
     end
 
+    Log.debug(('(%s.write_history): Writing to file...'):format(MODSTR))
     uv.fs_write(fd, out, -1)
     uv.fs_close(fd)
+    Log.debug(('(%s.write_history): File descriptor closed!'):format(MODSTR))
 end
 
 return History
