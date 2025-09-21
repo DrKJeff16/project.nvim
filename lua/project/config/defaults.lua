@@ -71,11 +71,12 @@ local DEFAULTS = {
         enabled = false,
     },
 
-    ---If `true`, it enables logging in the same directory your
-    ---history file is in.
+    ---If `true`, it enables logging in the same directory in which your
+    ---history file is stored.
     --- ---
     ---Default: `false`
     --- ---
+    ---@type boolean
     logging = false,
 
     ---If `true` your root directory won't be changed automatically,

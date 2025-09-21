@@ -245,13 +245,27 @@ require('project').setup()
 
 ```lua
 {
-    ---If `true`, it enables logging in `<project_datapath>/project.log`.
-    ---
-    ---WARNING: Experimental.
+    ---If `true`, it enables logging in the same directory in which your
+    ---history file is stored.
     --- ---
     ---Default: `false`
     --- ---
+    ---@type boolean
     logging = false,
+
+    ---Table of options used for `fzf-lua` integration
+    --- ---
+    ---@class Project.Config.FzfLua
+    fzf_lua = {
+        ---Determines whether the `fzf-lua` integration is enabled.
+        ---
+        ---If `fzf-lua` is not installed, this won't make a difference.
+        --- ---
+        ---Default: `false`
+        --- ---
+        ---@type boolean
+        enabled = false,
+    },
 
     ---Determines in what filetypes/buftypes the plugin won't execute.
     ---It's a table with two fields:
@@ -365,7 +379,7 @@ require('project').setup()
 
     ---Table of options used for the telescope picker.
     --- ---
-    ---@class Project.Config.Options.Telescope
+    ---@class Project.Config.Telescope
     telescope = {
         ---Determines whether the `telescope` picker should be called
         ---from the `setup()` function.
@@ -387,11 +401,10 @@ require('project').setup()
         ---@type 'oldest'|'newest'
         sort = 'newest',
 
-        ---If `true`, `telescope-file-browser.nvim` instead of builtins.
-        ---
         ---If you have `telescope-file-browser.nvim` installed, you can enable this
         ---so that the Telescope picker uses it instead of the `find_files` builtin.
         ---
+        ---If `true`, use `telescope-file-browser.nvim` instead of builtins.
         ---In case it is not available, it'll fall back to `find_files`.
         --- ---
         ---Default: `false`
@@ -830,7 +843,7 @@ local root, lsp_or_method = require('project').get_project_root()
 You can get a list of recent projects by running the code below:
 
 ```lua
----@type string[]|table
+---@type string[]
 local recent_projects = require('project').get_recent_projects()
 
 -- Using `vim.notify()`
