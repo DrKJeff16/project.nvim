@@ -57,20 +57,6 @@ local DEFAULTS = {
         disable_file_picker = false,
     },
 
-    ---Table of options used for `fzf-lua` integration
-    --- ---
-    ---@class Project.Config.FzfLua
-    fzf_lua = {
-        ---Determines whether the `fzf-lua` integration is enabled.
-        ---
-        ---If `fzf-lua` is not installed, this won't make a difference.
-        --- ---
-        ---Default: `false`
-        --- ---
-        ---@type boolean
-        enabled = false,
-    },
-
     ---If `true`, it enables logging in the same directory in which your
     ---history file is stored.
     --- ---
