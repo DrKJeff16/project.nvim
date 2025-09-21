@@ -252,12 +252,11 @@ function Commands.create_user_commands()
     })
 
     if require('project.config').options.fzf_lua.enabled then
-        Commands.new({
-            name = 'ProjectFzf',
-            callback = function()
-                require('project').run_fzf_lua()
-            end,
-            desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
+        ---`:ProjectFzf`
+        vim.api.nvim_create_user_command('ProjectFzf', function()
+            Commands.ProjectFzf()
+        end, {
+            desc = Commands.ProjectFzf.desc,
         })
     end
 
