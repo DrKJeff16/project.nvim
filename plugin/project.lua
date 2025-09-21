@@ -48,24 +48,24 @@ end, {
     desc = Commands.ProjectSession.desc,
 })
 
----Add `Fzf-Lua` command ONLY if it is installed
-if mod_exists('fzf-lua') and not mod_exists('project-fzf') then
-    ---`:ProjectFzf`
-    vim.api.nvim_create_user_command('ProjectFzf', function()
+---`:ProjectFzf`
+vim.api.nvim_create_user_command('ProjectFzf', function()
+    if mod_exists('fzf-lua') and not mod_exists('project-fzf') then
+        ---Run `Fzf-Lua` command ONLY if it is installed
         Commands.ProjectFzf()
-    end, {
-        desc = Commands.ProjectFzf.desc,
-    })
-end
+    end
+end, {
+    desc = Commands.ProjectFzf.desc,
+})
 
----Add `Telescope` shortcut ONLY if it is installed and loaded
-if mod_exists('telescope') then
-    ---`:ProjectTelescope`
-    vim.api.nvim_create_user_command('ProjectTelescope', function()
+---`:ProjectTelescope`
+vim.api.nvim_create_user_command('ProjectTelescope', function()
+    ---Run `Telescope` shortcut ONLY if it is installed and loaded
+    if mod_exists('telescope') then
         Commands.ProjectTelescope()
-    end, {
-        desc = Commands.ProjectTelescope.desc,
-    })
-end
+    end
+end, {
+    desc = Commands.ProjectTelescope.desc,
+})
 
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:

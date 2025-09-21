@@ -672,7 +672,7 @@ These are the user commands you can call from the cmdline:
 ### `:ProjectFzf`
 
 > [!IMPORTANT]
-> This command is only enabled if you have installed `fzf-lua`
+> **This command works ONLY if you have `fzf-lua` installed and loaded**
 
 The `:ProjectFzf` command is a dynamicly enabled User Command that runs
 `project.nvim` through `fzf-lua`.
@@ -681,10 +681,11 @@ For now it just executes [`require('project').run_fzf_lua()`](#run-fzf-lua).
 ### `:ProjectTelescope`
 
 > [!IMPORTANT]
-> This command is only enabled if you have `telescope.nvim` (and you loaded it)
+> **This command works ONLY if you have `telescope.nvim` installed and loaded**
 
 The `:ProjectTelescope` command is a dynamicly enabled User Command that runs
-the Telescope `projects` picker. A shortcut, really.
+the Telescope `projects` picker.
+A shortcut, to be honest.
 
 ### `:ProjectLog`
 

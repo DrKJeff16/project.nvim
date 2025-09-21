@@ -567,8 +567,8 @@ Table of Contents                                             *project-nvim.toc*
                                                        *ProjectFzf*  *:ProjectFzf*
 `:ProjectFzf`
 
-                            This command is only enabled ~
-                            if you have `fzf-lua` installed ~
+                            This command works ONLY if you have ~
+                            `fzf-lua` installed and loaded ~
 
                             The `:ProjectFzf` command is a
                             dynamicly enabled User Command that runs
@@ -581,15 +581,13 @@ Table of Contents                                             *project-nvim.toc*
                                            *ProjectTelescope*  *:ProjectTelescope*
 `:ProjectTelescope`
 
-                            This command is only enabled if you have ~
-                            both `telescope.nvim` and have loaded ~
-                            the `projects` picker ~
-                            (see |project-nvim.telescope|) ~
+                            This command works ONLY if you have ~
+                            `telescope.nvim` installed and loaded ~
 
                             The `:ProjectTelescope` command is a
                             dynamicly enabled User Command
                             that runs the Telescope `projects` picker.
-                            A shortcut, really
+                            A shortcut, to be honest
 
 
                                                        *ProjectAdd*  *:ProjectAdd*
