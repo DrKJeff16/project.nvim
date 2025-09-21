@@ -54,6 +54,8 @@ function Config.setup(options)
         Log.init()
     end
 
+    require('project.commands').create_user_commands()
+
     ---Load `projects` Telescope picker if condition passes
     if Config.options.telescope.enabled and mod_exists('telescope') then
         require('telescope').load_extension('projects')

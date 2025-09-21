@@ -2,9 +2,7 @@ local MODSTR = 'project'
 
 local Config = require('project.config')
 local Api = require('project.api')
-local Util = require('project.utils.util')
-
-local vim_has = Util.vim_has
+local vim_has = require('project.utils.util').vim_has
 
 ---The `project.nvim` module.
 ---

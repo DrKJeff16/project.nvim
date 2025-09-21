@@ -20,12 +20,13 @@ local vim_has = require('project.utils.util').vim_has
 
 ---@class Project.Commands
 ---@field new fun(spec: Project.Commands.Spec)
+---@field create_user_commands fun()
 
 ---@type Project.Commands|table<string, Project.CMD>
-local Command = {}
+local Commands = {}
 
 ---@param spec Project.Commands.Spec
-function Command.new(spec)
+function Commands.new(spec)
     if vim_has('nvim-0.11') then
         vim.validate('spec', spec, 'table', false, 'Project.Commands.Spec')
     else
@@ -51,8 +52,8 @@ function Command.new(spec)
         T.complete = spec.complete
     end
 
-    Command[spec.name] = setmetatable(T, {
-        __index = Command,
+    Commands[spec.name] = setmetatable(T, {
+        __index = Commands,
 
         ---@param ctx? vim.api.keyset.create_user_command.command_args
         __call = function(_, ctx)
@@ -66,7 +67,7 @@ function Command.new(spec)
     })
 end
 
-Command.new({
+Commands.new({
     name = 'ProjectAdd',
     callback = function(ctx)
         local quiet = ctx.bang ~= nil and ctx.bang or false
@@ -76,7 +77,7 @@ Command.new({
     bang = true,
 })
 
-Command.new({
+Commands.new({
     name = 'ProjectDelete',
     callback = function(ctx)
         local force = ctx.bang ~= nil and ctx.bang or false
@@ -121,7 +122,7 @@ Command.new({
     end,
 })
 
-Command.new({
+Commands.new({
     name = 'ProjectConfig',
     callback = function()
         local cfg = require('project').get_config()
@@ -130,7 +131,7 @@ Command.new({
     desc = 'Prints out the current configuratiion for `project.nvim`',
 })
 
-Command.new({
+Commands.new({
     name = 'ProjectFzf',
     callback = function()
         require('project').run_fzf_lua()
@@ -138,7 +139,7 @@ Command.new({
     desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
 })
 
-Command.new({
+Commands.new({
     name = 'ProjectRecents',
     callback = function()
         local recent_proj = require('project.api').get_recent_projects()
@@ -163,7 +164,7 @@ Command.new({
     desc = 'Prints out the recent `project.nvim` projects',
 })
 
-Command.new({
+Commands.new({
     name = 'ProjectRoot',
     callback = function(ctx)
         local verbose = ctx.bang ~= nil and ctx.bang or false
@@ -173,7 +174,7 @@ Command.new({
     bang = true,
 })
 
-Command.new({
+Commands.new({
     name = 'ProjectSession',
     callback = function()
         local session = require('project.utils.history').session_projects
@@ -194,7 +195,7 @@ Command.new({
     desc = 'Prints out the current `project.nvim` projects session',
 })
 
-Command.new({
+Commands.new({
     name = 'ProjectTelescope',
     callback = function()
         require('telescope._extensions.projects').projects()
@@ -202,6 +203,72 @@ Command.new({
     desc = 'Telescope shortcut for project.nvim picker',
 })
 
-return Command
+function Commands.create_user_commands()
+    ---`:ProjectAdd`
+    vim.api.nvim_create_user_command('ProjectAdd', function(ctx)
+        Commands.ProjectAdd(ctx)
+    end, {
+        bang = Commands.ProjectAdd.bang,
+        desc = Commands.ProjectAdd.desc,
+    })
+
+    ---`:ProjectConfig`
+    vim.api.nvim_create_user_command('ProjectConfig', function()
+        Commands.ProjectConfig()
+    end, {
+        desc = Commands.ProjectConfig.desc,
+    })
+
+    ---`:ProjectDelete`
+    vim.api.nvim_create_user_command('ProjectDelete', function(ctx)
+        Commands.ProjectDelete(ctx)
+    end, {
+        desc = Commands.ProjectDelete.desc,
+        bang = Commands.ProjectDelete.bang,
+        nargs = Commands.ProjectDelete.nargs,
+        complete = Commands.ProjectDelete.complete,
+    })
+
+    ---`:ProjectRecents`
+    vim.api.nvim_create_user_command('ProjectRecents', function()
+        Commands.ProjectRecents()
+    end, {
+        desc = Commands.ProjectRecents.desc,
+    })
+
+    ---`:ProjectRoot`
+    vim.api.nvim_create_user_command('ProjectRoot', function(ctx)
+        Commands.ProjectRoot(ctx)
+    end, {
+        bang = Commands.ProjectRoot.bang,
+        desc = Commands.ProjectRoot.desc,
+    })
+
+    ---`:ProjectSession`
+    vim.api.nvim_create_user_command('ProjectSession', function()
+        Commands.ProjectSession()
+    end, {
+        desc = Commands.ProjectSession.desc,
+    })
+
+    if require('project.config').options.fzf_lua.enabled then
+        Commands.new({
+            name = 'ProjectFzf',
+            callback = function()
+                require('project').run_fzf_lua()
+            end,
+            desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
+        })
+    end
+
+    ---`:ProjectTelescope`
+    vim.api.nvim_create_user_command('ProjectTelescope', function()
+        Commands.ProjectTelescope()
+    end, {
+        desc = Commands.ProjectTelescope.desc,
+    })
+end
+
+return Commands
 
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:noci:nopi:
