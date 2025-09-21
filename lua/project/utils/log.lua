@@ -1,4 +1,5 @@
 local uv = vim.uv or vim.loop
+local MODSTR = 'project.utils.log'
 
 -- stylua: ignore start
 
@@ -9,8 +10,6 @@ local WARN  = vim.log.levels.WARN   -- `3`
 local ERROR = vim.log.levels.ERROR  -- `4`
 
 -- stylua: ignore end
-
-local LOG_PFX = '(project.nvim): '
 
 ---@class Project.Log
 ---@field logfile? string
@@ -29,7 +28,7 @@ local function gen_log(lvl)
             return
         end
 
-        local msg = LOG_PFX
+        local msg = ''
 
         for i = 1, select('#', ...) do
             local sel = select(i, ...)
@@ -72,6 +71,7 @@ function Log.clear_log()
 
     if success then
         vim.notify('(project.nvim): Log cleared successfully', INFO)
+        vim.g.project_log_cleared = 1
     end
 end
 
@@ -83,7 +83,7 @@ function Log.setup_watch()
     end
 
     local event = uv.new_fs_event()
-    if event == nil then
+    if not event then
         return
     end
 
@@ -103,7 +103,7 @@ end
 ---@param lvl vim.log.levels
 ---@return string?
 function Log:write(data, lvl)
-    if not require('project.config').options.logging then
+    if not require('project.config').options.logging or vim.g.project_log_cleared == 1 then
         return
     end
 
@@ -115,15 +115,15 @@ function Log:write(data, lvl)
 
     -- stylua: ignore start
     local PFX = {
-        [TRACE] = '[TRACE] ',
-        [DEBUG] = '[DEBUG] ',
-        [INFO]  = '[INFO] ',
-        [WARN]  = '[WARN] ',
-        [ERROR] = '[ERROR] ',
+        [TRACE] = '[TRACE]  ',
+        [DEBUG] = '[DEBUG]  ',
+        [INFO]  = '[INFO]   ',
+        [WARN]  = '[WARN]   ',
+        [ERROR] = '[ERROR]  ',
     }
     -- stylua: ignore end
 
-    local msg = ('%s %s  ==>  %s'):format(os.date(), tostring(os.clock()), PFX[lvl] .. data)
+    local msg = os.date('- %H:%M:%S  ==>  ' .. PFX[lvl] .. data)
 
     uv.fs_write(fd, msg)
     uv.fs_close(fd)
@@ -172,7 +172,12 @@ function Log.init()
         error('Log stat is nil!', ERROR)
     end
 
-    uv.fs_write(fd, (stat.size >= 1 and '\n' or '') .. ('='):rep(70) .. '\n', -1)
+    local head = ('='):rep(45)
+    uv.fs_write(
+        fd,
+        (stat.size >= 1 and '\n' or '')
+            .. os.date(head .. '  %x  (Started: %H:%M:%S)  ' .. head .. '\n')
+    )
 
     vim.api.nvim_create_user_command('ProjectLog', function(ctx)
         local close = ctx.bang ~= nil and ctx.bang or false
@@ -205,8 +210,16 @@ function Log.open_win()
         return
     end
 
+    if vim.g.project_log_cleared == 1 then
+        vim.notify(
+            ('(%s.open_win): Log has already been cleared. Try restarting.'):format(MODSTR),
+            WARN
+        )
+        return
+    end
+
     if not Path.exists(Log.logfile) then
-        error('(project.utils.log.open_win): Bad logfile path!', ERROR)
+        error(('(%s.open_win): Bad logfile path!'):format(MODSTR), ERROR)
     end
 
     if Log.log_loc ~= nil then
