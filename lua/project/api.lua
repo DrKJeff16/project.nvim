@@ -76,12 +76,13 @@ Api.delete_project = History.delete_project
 ---If successful, returns a tuple of two `string` results.
 ---Otherwise, nothing is returned.
 --- ---
+---@param bufnr? integer
 ---@return string|nil dir
 ---@return string|nil name
-function Api.find_lsp_root()
+function Api.find_lsp_root(bufnr)
     local allow_patterns = Config.options.allow_patterns_for_lsp
 
-    local bufnr = curr_buf()
+    bufnr = bufnr or curr_buf()
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
@@ -141,10 +142,12 @@ function Api.verify_owner(dir)
     return stat.uid == uv.getuid()
 end
 
+---@param bufnr? integer
 ---@return string|nil dir_res
 ---@return string|nil method
-function Api.find_pattern_root()
-    local dir = vim.fn.fnamemodify(buf_name(curr_buf()), ':p:h')
+function Api.find_pattern_root(bufnr)
+    bufnr = bufnr or curr_buf()
+    local dir = vim.fn.fnamemodify(buf_name(bufnr), ':p:h')
 
     if is_windows() then
         dir = dir:gsub('\\', '/')
@@ -317,9 +320,10 @@ end
 ---
 ---If no project root is found, nothing will be returned.
 --- ---
+---@param bufnr? integer
 ---@return string|nil root
 ---@return string|nil method
-function Api.get_project_root()
+function Api.get_project_root(bufnr)
     if empty(Config.options.detection_methods) then
         return
     end
@@ -328,7 +332,7 @@ function Api.get_project_root()
 
     local SWITCH = {
         lsp = function()
-            local root, lsp_name = Api.find_lsp_root()
+            local root, lsp_name = Api.find_lsp_root(bufnr)
 
             if root ~= nil then
                 return true, root, ('"%s" lsp'):format(lsp_name)
@@ -338,7 +342,7 @@ function Api.get_project_root()
         end,
 
         pattern = function()
-            local root, method = Api.find_pattern_root()
+            local root, method = Api.find_pattern_root(bufnr)
 
             if root ~= nil then
                 return true, root, method
@@ -373,11 +377,12 @@ end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
+---@param bufnr? integer
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
-function Api.get_current_project()
-    local curr, method = Api.get_project_root()
+function Api.get_current_project(bufnr)
+    local curr, method = Api.get_project_root(bufnr)
     local last = Api.get_last_project()
 
     return curr, method, last
@@ -433,7 +438,7 @@ function Api.on_buf_enter(verbose, bufnr)
         return
     end
 
-    Api.current_project, Api.current_method = Api.get_current_project()
+    Api.current_project, Api.current_method = Api.get_current_project(bufnr)
     Api.set_pwd(Api.current_project, Api.current_method)
     Api.last_project = Api.get_last_project()
 
