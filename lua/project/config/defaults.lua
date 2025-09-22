@@ -1,3 +1,5 @@
+local MODSTR = 'project.config.defaults'
+
 local validate = vim.validate
 local in_tbl = vim.tbl_contains
 local empty = vim.tbl_isempty
@@ -10,6 +12,7 @@ local dir_exists = Util.dir_exists
 ---The options available for in `require('project').setup()`.
 --- ---
 ---@class Project.Config.Options
+---@field logging? boolean
 local DEFAULTS = {
     ---Table of options used for the telescope picker.
     --- ---
@@ -71,13 +74,17 @@ local DEFAULTS = {
         enabled = false,
     },
 
-    ---If `true`, it enables logging in the same directory in which your
-    ---history file is stored.
+    ---Options for logging utility.
     --- ---
-    ---Default: `false`
-    --- ---
-    ---@type boolean
-    logging = false,
+    ---@class Project.Config.Logging
+    log = {
+        ---If `true`, it enables logging in the same directory in which your
+        ---history file is stored.
+        --- ---
+        ---Default: `false`
+        --- ---
+        enabled = false,
+    },
 
     ---If `true` your root directory won't be changed automatically,
     ---so you have the option to manually do so
@@ -395,6 +402,34 @@ function DEFAULTS:verify_methods()
     end
 
     self.detection_methods = methods
+end
+
+---@param self Project.Config.Options
+function DEFAULTS:verify_logging()
+    if self.log == nil or type(self.log) ~= 'table' then
+        self.log = vim.deepcopy(DEFAULTS.log)
+    end
+
+    if self.logging ~= nil and type(self.logging) == 'boolean' then
+        self.log.enabled = self.logging
+        self.logging = nil
+        vim.notify(
+            ('(%s:verify_logging): `options.logging` has migrated to `options.log.enabled`!'):format(
+                MODSTR
+            ),
+            WARN
+        )
+    end
+end
+
+---@param self Project.Config.Options
+function DEFAULTS:verify()
+    self:verify_datapath()
+    self:verify_histsize()
+    self:verify_methods()
+    self:verify_scope_chdir()
+
+    self:verify_logging()
 end
 
 ---@param opts? Project.Config.Options

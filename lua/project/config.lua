@@ -38,10 +38,7 @@ function Config.setup(options)
     Config.options = Config.get_defaults().new(options)
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
 
-    Config.options:verify_methods()
-    Config.options:verify_scope_chdir()
-    Config.options:verify_histsize()
-    Config.options:verify_datapath()
+    Config.options:verify()
 
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
     vim.o.autochdir = Config.options.enable_autochdir
@@ -50,7 +47,7 @@ function Config.setup(options)
     require('project.api').init()
     local Log = require('project.utils.log')
 
-    if Config.options.logging then
+    if Config.options.log.enabled then
         Log.init()
     end
 

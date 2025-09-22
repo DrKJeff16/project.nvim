@@ -24,7 +24,7 @@ local function gen_log(lvl)
     ---@param ... any
     ---@return string|nil output
     return function(...)
-        if not require('project.config').options.logging then
+        if not require('project.config').options.log.enabled then
             return
         end
 
@@ -103,7 +103,7 @@ end
 ---@param lvl vim.log.levels
 ---@return string|nil
 function Log:write(data, lvl)
-    if not require('project.config').options.logging or vim.g.project_log_cleared == 1 then
+    if not require('project.config').options.log.enabled or vim.g.project_log_cleared == 1 then
         return
     end
 
@@ -153,10 +153,10 @@ Log.info = gen_log(INFO)
 Log.debug = gen_log(DEBUG)
 
 function Log.init()
-    local logging = require('project.config').options.logging
+    local enabled = require('project.config').options.log.enabled
     local Path = require('project.utils.path')
 
-    if not logging or Log.logfile ~= nil then
+    if not enabled or Log.logfile ~= nil then
         return
     end
 
@@ -203,10 +203,10 @@ function Log.init()
 end
 
 function Log.open_win()
-    local logging = require('project.config').options.logging
+    local enabled = require('project.config').options.log.enabled
     local Path = require('project.utils.path')
 
-    if not (Log.logfile and logging) then
+    if not (Log.logfile and enabled) then
         return
     end
 
