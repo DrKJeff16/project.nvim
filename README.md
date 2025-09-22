@@ -247,13 +247,17 @@ require('project').setup()
 
 ```lua
 {
-    ---If `true`, it enables logging in the same directory in which your
-    ---history file is stored.
+    ---Options for logging utility.
     --- ---
-    ---Default: `false`
-    --- ---
-    ---@type boolean
-    logging = false,
+    ---@class Project.Config.Logging
+    log = {
+        ---If `true`, it enables logging in the same directory in which your
+        ---history file is stored.
+        --- ---
+        ---Default: `false`
+        --- ---
+        enabled = false,
+    },
 
     ---Table of options used for `fzf-lua` integration
     --- ---

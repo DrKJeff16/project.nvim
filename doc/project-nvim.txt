@@ -26,6 +26,7 @@ Table of Contents                                             *project-nvim.toc*
     2.1. `Project.Config.Options`                         |Project.Config.Options|
     2.2. `Project.Config.Telescope`                     |Project.Config.Telescope|
     2.3. `Project.Config.FzfLua`                           |Project.Config.FzfLua|
+    2.4. `Project.Config.Logging`                         |Project.Config.Logging|
 3. Pattern Matching                              |project-nvim.pattern-matching|
 4. Nvim Tree                                            |project-nvim.nvim-tree|
 5. Neo Tree                                              |project-nvim.neo-tree|
@@ -410,6 +411,18 @@ Table of Contents                                             *project-nvim.toc*
                                 integration is enabled.
                                 If `fzf-lua` is not installed
                                 this won't make a difference.
+
+                                Default: `false` ~
+
+
+------------------------------------------------------------------------------
+2.4 `Project.Config.Logging`                              *Project.Config.Logging*
+                                                   *project-nvim.logging-config*
+
+    * {enabled}                 (boolean)
+                                If `true`, it enables logging
+                                in the same directory in which your
+                                history file is stored.
 
                                 Default: `false` ~
 
