@@ -215,23 +215,22 @@ end
 function Health.fzf_lua_check()
     start('Fzf-Lua')
 
-    if not mod_exists('telescope') then
+    if not Config.options.fzf_lua.enabled then
         h_warn(
-            ('`fzf-lua` is not installed. \n%s'):format(
+            ('`fzf-lua` integration is disabled.\n%s'):format(
                 "This doesn't represent an issue necessarily"
             )
         )
         return
     end
 
-    ok('`fzf-lua` is installed!')
+    ok('`fzf-lua` integration enabled!')
 
     if not (vim.cmd.ProjectFzf and vim.is_callable(vim.cmd.ProjectFzf)) then
         h_warn('`:ProjectFzf` user command is not loaded!')
-        return
+    else
+        ok('`:ProjectFzf` user command loaded!')
     end
-
-    ok('`:ProjectFzf` user command loaded!')
 end
 
 function Health.recent_proj_check()
