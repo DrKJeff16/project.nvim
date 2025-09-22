@@ -68,9 +68,6 @@ local buf_name = vim.api.nvim_buf_get_name
 ---@field current_method? string
 local Api = {}
 
-Api.get_recent_projects = History.get_recent_projects
-Api.delete_project = History.delete_project
-
 ---Get the LSP client for current buffer.
 ---
 ---If successful, returns a tuple of two `string` results.
@@ -365,7 +362,7 @@ end
 
 ---@return string|nil last
 function Api.get_last_project()
-    local recent = Api.get_recent_projects()
+    local recent = History.get_recent_projects()
     if empty(recent) or #recent == 1 then
         return nil
     end
@@ -507,7 +504,7 @@ function Api.run_fzf_lua()
     local fzf_lua = require('fzf-lua')
 
     fzf_lua.fzf_exec(function(cb)
-        local results = Api.get_recent_projects()
+        local results = History.get_recent_projects()
         results = reverse(results)
         for _, entry in ipairs(results) do
             cb(entry)
@@ -526,7 +523,7 @@ function Api.run_fzf_lua()
             },
             ['ctrl-d'] = {
                 function(selected)
-                    Api.delete_project({ value = selected[1] })
+                    History.delete_project({ value = selected[1] })
                 end,
                 fzf_lua.actions.resume,
             },

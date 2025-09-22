@@ -12,9 +12,9 @@ local vim_has = require('project.utils.util').vim_has
 local Project = {}
 
 Project.setup = Config.setup
-Project.get_recent_projects = Api.get_recent_projects
+Project.get_recent_projects = require('project.utils.history').get_recent_projects
 Project.get_project_root = Api.get_project_root
-Project.delete_project = Api.delete_project
+Project.delete_project = require('project.utils.history').delete_project
 Project.get_history_paths = Api.get_history_paths
 Project.run_fzf_lua = Api.run_fzf_lua
 Project.get_last_project = Api.get_last_project

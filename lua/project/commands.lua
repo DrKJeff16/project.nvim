@@ -88,7 +88,7 @@ Commands.new({
     name = 'ProjectDelete',
     callback = function(ctx)
         local force = ctx.bang ~= nil and ctx.bang or false
-        local recent = require('project.api').get_recent_projects()
+        local recent = require('project.utils.history').get_recent_projects()
 
         if recent == nil then
             return
@@ -109,7 +109,7 @@ Commands.new({
             end
 
             if vim.list_contains(recent, path) then
-                require('project.api').delete_project(path)
+                require('project.utils.history').delete_project(path)
             end
         end
     end,
@@ -119,7 +119,7 @@ Commands.new({
 
     ---@param line string
     complete = function(_, line)
-        local recent = require('project.api').get_recent_projects()
+        local recent = require('project.utils.history').get_recent_projects()
         local input = vim.split(line, '%s+')
         local prefix = input[#input]
 
@@ -149,20 +149,20 @@ Commands.new({
 Commands.new({
     name = 'ProjectRecents',
     callback = function()
-        local recent_proj = require('project.api').get_recent_projects()
+        local recent = require('project.utils.history').get_recent_projects()
         local reverse = require('project.utils.util').reverse
 
-        if recent_proj == nil or vim.tbl_isempty(recent_proj) then
+        if recent == nil or vim.tbl_isempty(recent) then
             vim.notify('{}', WARN)
             return
         end
 
         ---@type string[]
-        recent_proj = reverse(vim.deepcopy(recent_proj))
+        recent = reverse(vim.deepcopy(recent))
 
-        local len, msg = #recent_proj, ''
+        local len, msg = #recent, ''
 
-        for k, v in ipairs(recent_proj) do
+        for k, v in ipairs(recent) do
             msg = ('%s %s. %s'):format(msg, k, v) .. (k < len and ('%s\n'):format(msg) or '')
         end
 

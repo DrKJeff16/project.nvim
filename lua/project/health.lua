@@ -235,7 +235,7 @@ end
 
 function Health.recent_proj_check()
     start('Recent Projects')
-    local recents = Api.get_recent_projects()
+    local recents = History.get_recent_projects()
 
     if empty(recents) then
         h_warn([[
