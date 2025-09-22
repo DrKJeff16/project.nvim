@@ -981,6 +981,7 @@ If you lack the required permissions for that directory, you can either:
 - [@danilevy1212](https://github.com/danilevy1212): For their extensive help in PRs:
     - [#15](https://github.com/DrKJeff16/project.nvim/pull/15)
     - [#17](https://github.com/DrKJeff16/project.nvim/pull/17)
+- [@xbot](https://github.com/xbot): For PR [#19](https://github.com/DrKJeff16/project.nvim/pull/19)
 - [@steinbrueckri](https://github.com/steinbrueckri): Thank you for your support!
 - [@gmelodie](https://github.com/gmelodie): Thank you for your support!
 
