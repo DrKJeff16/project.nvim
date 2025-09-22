@@ -9,6 +9,8 @@ end
 local Main = require('telescope._extensions.projects.main')
 local Telescope = require('telescope')
 
+Log.debug(('(%s): Registering `projects` picker...'):format(MODSTR))
+
 ---@class TelescopeProjects
 ---@field exports { projects: fun(opts?: table) }
 ---@field projects fun(opts?: table)
