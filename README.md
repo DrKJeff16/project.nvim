@@ -709,7 +709,7 @@ A shortcut, to be honest.
 ### `:ProjectLog`
 
 > [!IMPORTANT]
-> This command will not be available unless you set `logging = true`
+> This command will not be available unless you set `log.enabled = true`
 > in your `setup()`.
 
 The `:ProjectLog` command opens the `project.nvim` log file in a new tab,
@@ -721,7 +721,7 @@ any instance of a previously opened log file, if found. Otherwise nothing will h
 ### `:ProjectLogClear`
 
 > [!IMPORTANT]
-> This command will not be available unless you set `logging = true`
+> This command will not be available unless you set `log.enabled = true`
 > in your `setup()`.
 
 The `:ProjectLogClear` command will delete all the contents of your log file,

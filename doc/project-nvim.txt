@@ -146,12 +146,11 @@ Table of Contents                                             *project-nvim.toc*
 2.1 `Project.Config.Options`                              *Project.Config.Options*
                                                     *project-nvim.setup-options*
 
-    * {logging}                 (boolean)
-                                If `true`, it enables logging
-                                in the same directory in which
-                                history file is stored.
+    * {log}                     (|Project.Options.Logging|)
+                                Options for logging.
 
-                                Default: `false` ~
+                                Default: |Project.Options.Logging| ~
+
 
 
     * {disable_on}              (`{ ft: string[], bt: string[] }`)
@@ -636,7 +635,7 @@ Table of Contents                                             *project-nvim.toc*
 `:ProjectLog[!]`
                             IMPORTANT ~
                             This command will not be available unless ~
-                            you set `logging = true` in your `setup()` ~
+                            you set `log.enabled = true` in your `setup()` ~
 
                             The `:ProjectLog` command opens
                             the `project.nvim` log file in a new tab,
@@ -651,7 +650,7 @@ Table of Contents                                             *project-nvim.toc*
 `:ProjectLogClear`
                             IMPORTANT ~
                             This command will not be available unless ~
-                            you set `logging = true` in your `setup()` ~
+                            you set `log.enabled = true` in your `setup()` ~
 
                             The `:ProjectLogClear` command will delete
                             all the contents of your log file,
