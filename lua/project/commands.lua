@@ -53,7 +53,14 @@ function Commands.new(spec)
     end
 
     Commands[spec.name] = setmetatable(T, {
-        __index = Commands,
+        ---@param k string
+        __index = function(_, k)
+            return spec[k]
+        end,
+
+        __tostring = function()
+            return spec.desc
+        end,
 
         ---@param ctx? vim.api.keyset.create_user_command.command_args
         __call = function(_, ctx)
