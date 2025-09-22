@@ -494,6 +494,11 @@ end
 ---https://github.com/ahmedkhalf/project.nvim/issues/71#issuecomment-1212993659
 --- ---
 function Api.run_fzf_lua()
+    if not Util.mod_exists('fzf-lua') then
+        vim.notify('`fzf-lua` is not installed!', ERROR)
+        return
+    end
+
     local fzf_lua = require('fzf-lua')
 
     fzf_lua.fzf_exec(function(cb)
