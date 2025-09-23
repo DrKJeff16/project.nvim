@@ -2,9 +2,9 @@
 
 # project.nvim [![Mentioned in Awesome Neovim](https://awesome.re/mentioned-badge.svg)](https://github.com/rockerBOO/awesome-neovim)
 
-================ [Breaking Changes](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes) ================
+**========================  [_Breaking Changes_](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes)  ========================**
 
-[Announcements](https://github.com/DrKJeff16/project.nvim/discussions/1) | [Discussions](https://github.com/DrKJeff16/project.nvim/discussions) | [Wiki](https://github.com/DrKJeff16/project.nvim/wiki) | [Credits](./CREDITS.md) | [Contributing](./CONTRIBUTING.md) | [Roadmap](./TODO.md)
+_[Announcements](https://github.com/DrKJeff16/project.nvim/discussions/1) | [Discussions](https://github.com/DrKJeff16/project.nvim/discussions) | [Wiki](https://github.com/DrKJeff16/project.nvim/wiki) | [Credits](./CREDITS.md) | [Contributing](./CONTRIBUTING.md) | [Roadmap](./TODO.md)_
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that,
 under configurable conditions, automatically sets the user's `cwd` to the current project root
