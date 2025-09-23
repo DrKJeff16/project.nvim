@@ -87,8 +87,7 @@ Show these much love!
     9. [`:ProjectDelete`](#projectdelete)
     10. [`:ProjectSession`](#projectsession)
 4. [API](#api)
-    1. [`run_fzf_lua()`](#run_fzf_lua)
-    2. [`get_project_root()`](#get_project_root)
+    1. [`get_project_root()`](#get_project_root)
     2. [`get_recent_projects()`](#get_recent_projects)
     3. [`get_config()`](#get_config)
     4. [`get_history_paths()`](#get_history_paths)
@@ -828,11 +827,6 @@ found in `History.session_projects`.
 ## API
 
 The API can be found in [_`api.lua`_](./lua/project/api.lua).
-
-### `run_fzf_lua()`
-
-`run_fzf_lua()` is an API utility to run this project using
-`fzf-lua`. See [`:ProjectFzf`](#projectfzf) for more info.
 
 ### `get_project_root()`
 
