@@ -152,8 +152,8 @@ require('lazy').setup({
         'nvim-telescope/telescope.nvim',
         'ibhagwan/fzf-lua',
       },
-
       ---@module 'project'
+
       ---@type Project.Config.Options
       opts = {
         -- your configuration comes here
@@ -176,11 +176,11 @@ if vim.fn.has('nvim-0.11') == 1 then
   require('pckr').add({
     {
       'DrKJeff16/project.nvim',
-      requires = {
+      requires = { -- OPTIONAL
         'nvim-lua/plenary.nvim',
         'nvim-telescope/telescope.nvim',
         'ibhagwan/fzf-lua',
-      }, -- OPTIONAL
+      },
       config = function()
         require('project').setup({
           -- your configuration comes here
@@ -204,11 +204,10 @@ local paq = require('paq')
 paq({
   'savq/paq-nvim',
 
+  'DrKJeff16/project.nvim',
   'nvim-lua/plenary.nvim', -- OPTIONAL
   'nvim-telescope/telescope.nvim', -- OPTIONAL
   'ibhagwan/fzf-lua', -- OPTIONAL
-
-  'DrKJeff16/project.nvim',
 })
 ```
 
@@ -239,6 +238,19 @@ require('project').setup()
 
 > [!NOTE]
 > You can find these in [`project/config/defaults.lua`](./lua/project/config/defaults.lua).
+
+> [!NOTE]
+> The `Project.Telescope.ActionNames` type is an alias for:
+>
+> ```lua
+> ---@alias Project.Telescope.ActionNames
+> ---|'browse_project_files'
+> ---|'change_working_directory'
+> ---|'delete_project'
+> ---|'find_project_files'
+> ---|'recent_project_files'
+> ---|'search_in_project_files'
+> ```
 
 <details>
 <summary><b><code>setup()</code><ins>comes with these defaults.</ins></b></summary>
@@ -425,6 +437,33 @@ require('project').setup()
         --- ---
         ---@type boolean
         disable_file_picker = false,
+
+        ---Table of mappings for the Telescope picker.
+        ---
+        ---Only supports Normal and Insert modes.
+        --- ---
+        ---Default: check the README
+        --- ---
+        ---@type table<'n'|'i', table<string, Project.Telescope.ActionNames>>
+        mappings = {
+            n = {
+                b = 'browse_project_files',
+                d = 'delete_project',
+                f = 'find_project_files',
+                r = 'recent_project_files',
+                s = 'search_in_project_files',
+                w = 'change_working_directory',
+            },
+
+            i = {
+                ['<C-b>'] = 'browse_project_files',
+                ['<C-d>'] = 'delete_project',
+                ['<C-f>'] = 'find_project_files',
+                ['<C-r>'] = 'recent_project_files',
+                ['<C-s>'] = 'search_in_project_files',
+                ['<C-w>'] = 'change_working_directory',
+            },
+        },
     },
 
     ---Make hidden files visible when using any picker.

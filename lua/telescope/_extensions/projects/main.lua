@@ -2,43 +2,19 @@ if not require('project.utils.util').mod_exists('telescope') then
     error('project.nvim: Telescope is not installed!')
 end
 
+local copy = vim.deepcopy
+local in_list = vim.list_contains
+local empty = vim.tbl_isempty
+
 local Pickers = require('telescope.pickers')
 local Actions = require('telescope.actions')
 local State = require('telescope.actions.state')
 local telescope_config = require('telescope.config').values
-local action_set = require('telescope.actions.set')
 
-local ProjActions = require('telescope._extensions.projects.actions')
+local _Actions = require('telescope._extensions.projects.actions')
 local TelUtil = require('telescope._extensions.projects.util')
+
 local Util = require('project.utils.util')
-
-local browse_project_files = ProjActions.browse_project_files
-local delete_project = ProjActions.delete_project
-local find_project_files = ProjActions.find_project_files
-local recent_project_files = ProjActions.recent_project_files
-local search_in_project_files = ProjActions.search_in_project_files
-local change_working_directory = ProjActions.change_working_directory
-
----@type table<'n'|'i'|'v'|'t'|'x'|'o', table<string, string|fun()>>
-local Keys = {
-    n = {
-        b = browse_project_files,
-        d = delete_project,
-        f = find_project_files,
-        r = recent_project_files,
-        s = search_in_project_files,
-        w = change_working_directory,
-    },
-
-    i = {
-        ['<C-b>'] = browse_project_files,
-        ['<C-d>'] = delete_project,
-        ['<C-f>'] = find_project_files,
-        ['<C-r>'] = recent_project_files,
-        ['<C-s>'] = search_in_project_files,
-        ['<C-w>'] = change_working_directory,
-    },
-}
 
 ---@class TelescopeProjects.Main
 local Main = {}
@@ -48,23 +24,47 @@ Main.default_opts = {
     prompt_prefix = '󱎸  ',
 }
 
+local valid_acts = {
+    'browse_project_files',
+    'change_working_directory',
+    'delete_project',
+    'find_project_files',
+    'recent_project_files',
+    'search_in_project_files',
+}
+
 ---@param prompt_bufnr integer
----@param map fun(mode: string, lhs: string, rhs: string|fun())
+---@param map fun(mode: string, lhs: string, rhs: string|function)
 ---@return boolean
 local function normal_attach(prompt_bufnr, map)
-    for mode, group in next, Keys do
-        for lhs, rhs in next, group do
-            map(mode, lhs, rhs)
+    local is_type = require('project.utils.util').is_type
+    local Keys = require('project.config').options.telescope.mappings or {}
+
+    if not is_type('table', Keys) or empty(Keys) then
+        Keys = copy(require('project.config.defaults').telescope.mappings)
+    end
+
+    for mode, group in pairs(Keys) do
+        if in_list({ 'n', 'i' }, mode) and is_type('table', group) and not empty(group) then
+            for lhs, act in pairs(group) do
+                ---@type function|false
+                local rhs = (_Actions[act] and in_list(valid_acts, act)) and _Actions[act] or false
+
+                if rhs and vim.is_callable(rhs) and is_type('string', lhs) then
+                    map(mode, lhs, rhs)
+                end
+            end
         end
     end
 
-    Actions.select_default:replace(function() --- `on_project_selected`
+    Actions.select_default:replace(function()
         if require('project.config').options.telescope.disable_file_picker then
             local entry = State.get_selected_entry()
             require('project.api').set_pwd(entry.value, 'telescope')
-            return action_set.select(prompt_bufnr, 'default')
+            return require('telescope.actions.set').select(prompt_bufnr, 'default')
         end
-        find_project_files(prompt_bufnr)
+
+        _Actions.find_project_files(prompt_bufnr)
     end)
 
     return true

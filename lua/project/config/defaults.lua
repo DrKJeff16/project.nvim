@@ -1,13 +1,17 @@
 local MODSTR = 'project.config.defaults'
 
+---@alias Project.Telescope.ActionNames
+---|'browse_project_files'
+---|'change_working_directory'
+---|'delete_project'
+---|'find_project_files'
+---|'recent_project_files'
+---|'search_in_project_files'
+
 local validate = vim.validate
 local in_tbl = vim.tbl_contains
 local empty = vim.tbl_isempty
 local WARN = vim.log.levels.WARN
-
-local Util = require('project.utils.util')
-local is_type = Util.is_type
-local dir_exists = Util.dir_exists
 
 ---The options available for in `require('project').setup()`.
 --- ---
@@ -58,6 +62,33 @@ local DEFAULTS = {
         --- ---
         ---@type boolean
         disable_file_picker = false,
+
+        ---Table of mappings for the Telescope picker.
+        ---
+        ---Only supports Normal and Insert modes.
+        --- ---
+        ---Default: check the README
+        --- ---
+        ---@type table<'n'|'i', table<string, Project.Telescope.ActionNames>>
+        mappings = {
+            n = {
+                b = 'browse_project_files',
+                d = 'delete_project',
+                f = 'find_project_files',
+                r = 'recent_project_files',
+                s = 'search_in_project_files',
+                w = 'change_working_directory',
+            },
+
+            i = {
+                ['<C-b>'] = 'browse_project_files',
+                ['<C-d>'] = 'delete_project',
+                ['<C-f>'] = 'find_project_files',
+                ['<C-r>'] = 'recent_project_files',
+                ['<C-s>'] = 'search_in_project_files',
+                ['<C-w>'] = 'change_working_directory',
+            },
+        },
     },
 
     ---Table of options used for `fzf-lua` integration
@@ -340,7 +371,7 @@ function DEFAULTS:verify_scope_chdir()
 end
 
 function DEFAULTS:verify_datapath()
-    if not dir_exists(self.datapath) then
+    if not require('project.utils.util').dir_exists(self.datapath) then
         vim.notify('Invalid `datapath`, reverting to default.', WARN)
         self.datapath = DEFAULTS.datapath
     end
@@ -358,6 +389,8 @@ end
 --- ---
 ---@param self Project.Config.Options
 function DEFAULTS:verify_methods()
+    local is_type = require('project.utils.util').is_type
+
     if not is_type('table', self.detection_methods) then
         vim.notify('`detection_methods` option is not a table. Reverting to default option.', WARN)
         self.detection_methods = DEFAULTS.detection_methods
@@ -428,24 +461,21 @@ function DEFAULTS:verify()
     self:verify_histsize()
     self:verify_methods()
     self:verify_scope_chdir()
-
     self:verify_logging()
 end
 
 ---@param opts? Project.Config.Options
 ---@return Project.Config.Options
 function DEFAULTS.new(opts)
-    if vim.fn.has('nvim-0.11') == 1 then
-        vim.validate('opts', opts, 'table', true, 'Project.Config.Options')
+    if require('project.utils.util').vim_has('nvim-0.11') then
+        validate('opts', opts, 'table', true, 'Project.Config.Options')
     else
-        vim.validate({ opts = { opts, { 'table', 'nil' } } })
+        validate({ opts = { opts, { 'table', 'nil' } } })
     end
-
     opts = opts or {}
 
     ---@type Project.Config.Options
     local self = setmetatable(opts, { __index = DEFAULTS })
-
     self = vim.tbl_deep_extend('keep', self, DEFAULTS)
 
     return self
