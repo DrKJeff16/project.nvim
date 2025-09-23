@@ -34,17 +34,6 @@ function M.exec(cb)
     cb()
 end
 
----@type fzf-lua.config.Actions
-M.actions = {
-    default = {
-        M.default,
-    },
-    ['ctrl-d'] = {
-        M.delete_project,
-        require('fzf-lua').actions.resume,
-    },
-}
-
 ---This runs assuming you have FZF-Lua installed!
 ---
 ---CREDITS: @deathmaz
@@ -56,7 +45,17 @@ function M.run_fzf_lua()
         return
     end
 
-    require('fzf-lua').fzf_exec(M.exec, { actions = M.actions })
+    require('fzf-lua').fzf_exec(M.exec, {
+        actions = {
+            default = {
+                M.default,
+            },
+            ['ctrl-d'] = {
+                M.delete_project,
+                require('fzf-lua').actions.resume,
+            },
+        },
+    })
 end
 
 return M
