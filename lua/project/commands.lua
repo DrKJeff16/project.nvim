@@ -7,14 +7,16 @@ local vim_has = require('project.utils.util').vim_has
 
 ---@alias CompletorFun fun(a?: string, l?: string, p?: integer): string[]
 
----@class Project.Commands.Spec: vim.api.keyset.user_command
+---@class Project.Commands.Spec
 ---@field name string
 ---@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@field desc string
 ---@field complete? string|CompletorFun
+---@field bang? boolean
+---@field nargs? string|integer
 
 ---@alias Project.CMD
----|{ name: string, desc: string, bang?: boolean, complete?: string|CompletorFun, nargs?: any }
+---|{ name: string, desc: string, bang: boolean, complete?: string|CompletorFun, nargs?: any }
 ---|fun(ctx?: vim.api.keyset.create_user_command.command_args)
 
 ---@class Project.Commands
@@ -36,7 +38,31 @@ function Commands.new(spec)
         error(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
     end
 
-    ---@type Project.CMD
+    if vim_has('nvim-0.11') then
+        vim.validate('name', spec.name, 'string', false)
+        vim.validate('callback', spec.callback, 'function', false)
+        vim.validate('desc', spec.desc, 'string', false)
+        vim.validate('bang', spec.bang, 'boolean', true, 'boolean?')
+        vim.validate('nargs', spec.nargs, { 'string', 'number' }, true, '(string|integer)?')
+        vim.validate(
+            'complete',
+            spec.complete,
+            { 'function', 'string' },
+            true,
+            '(string|CompletorFun)?'
+        )
+    else
+        vim.validate({
+            name = { spec.name, 'string' },
+            callback = { spec.callback, 'function' },
+            desc = { spec.desc, 'string' },
+            bang = { spec.bang, { 'string', 'nil' } },
+            nargs = { spec.nargs, { 'string', 'number', 'nil' } },
+            complete = { spec.complete, { 'string', 'function', 'nil' } },
+        })
+    end
+
+    ---@type { name: string, desc: string, bang: boolean, complete?: string|CompletorFun, nargs?: string|integer }
     local T = {
         name = spec.name,
         desc = spec.desc,
@@ -51,14 +77,14 @@ function Commands.new(spec)
         T.complete = spec.complete
     end
 
-    Commands[spec.name] = setmetatable(T, {
+    Commands[spec.name] = setmetatable({}, {
         ---@param k string
         __index = function(_, k)
-            return spec[k]
+            return T[k]
         end,
 
         __tostring = function()
-            return spec.desc
+            return T.desc
         end,
 
         ---@param ctx? vim.api.keyset.create_user_command.command_args
@@ -204,7 +230,9 @@ Commands.new({
 Commands.new({
     name = 'ProjectTelescope',
     callback = function()
-        require('telescope._extensions.projects').projects()
+        if vim.g.project_telescope_loaded == 1 then
+            require('telescope._extensions.projects').projects()
+        end
     end,
     desc = 'Telescope shortcut for project.nvim picker',
 })
