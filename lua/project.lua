@@ -1,7 +1,5 @@
 local MODSTR = 'project'
 
-local Config = require('project.config')
-local Api = require('project.api')
 local vim_has = require('project.utils.util').vim_has
 
 ---The `project.nvim` module.
@@ -11,13 +9,13 @@ local vim_has = require('project.utils.util').vim_has
 ---@class Project
 local Project = {}
 
-Project.setup = Config.setup
+Project.setup = require('project.config').setup
 Project.get_recent_projects = require('project.utils.history').get_recent_projects
-Project.get_project_root = Api.get_project_root
+Project.get_project_root = require('project.api').get_project_root
 Project.delete_project = require('project.utils.history').delete_project
-Project.get_history_paths = Api.get_history_paths
-Project.run_fzf_lua = Api.run_fzf_lua
-Project.get_last_project = Api.get_last_project
+Project.get_history_paths = require('project.api').get_history_paths
+Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
+Project.get_last_project = require('project.api').get_last_project
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
@@ -33,6 +31,7 @@ function Project.current_project(refresh)
     end
     refresh = refresh ~= nil and refresh or false
 
+    local Api = require('project.api')
     local Log = require('project.utils.log')
 
     if refresh then
@@ -47,6 +46,7 @@ end
 ---@return Project.Config.Options|nil
 function Project.get_config()
     local Log = require('project.utils.log')
+    local Config = require('project.config')
 
     if vim.g.project_setup == 1 then
         Log.info(('(%s.get_config): Project is set up. Returning setup options.'):format(MODSTR))

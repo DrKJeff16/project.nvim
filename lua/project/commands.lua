@@ -1,5 +1,4 @@
 local MODSTR = 'project.commands'
-
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
@@ -141,7 +140,7 @@ Commands.new({
 Commands.new({
     name = 'ProjectFzf',
     callback = function()
-        require('project').run_fzf_lua()
+        require('project.extensions.fzf-lua').run_fzf_lua()
     end,
     desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
 })
