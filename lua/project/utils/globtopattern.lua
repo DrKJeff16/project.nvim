@@ -1,5 +1,6 @@
----Credits for this module goes to: David Manura:
----https://github.com/davidm/lua-glob-pattern
+local in_list = vim.list_contains
+
+---Credits for this module goes to [David Manura](https://github.com/davidm/lua-glob-pattern).
 --- ---
 ---@class Project.Utils.Glob
 local Glob = {}
@@ -8,7 +9,7 @@ local Glob = {}
 --- ---
 ---@param char string
 ---@return string
-local function escape(char, c)
+function Glob.escape(char, c)
     return char:match('^%w$') and c or ('%' .. c)
 end
 
@@ -16,19 +17,22 @@ end
 --- - apr_fnmatch in Apache APR.  For example,
 ---   http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html
 ---   which cites POSIX 1003.2-1992, section B.6.
----@param g string
+--- ---
+---@param glob string
 ---@return string pattern
-function Glob.globtopattern(g)
-    local pattern, i, c = '^', 0, ''
+function Glob.globtopattern(glob)
+    local pattern = '^'
+    local i = 0
+    local char = ''
 
     ---Unescape glob char.
     --- ---
     ---@return boolean
     local function unescape()
-        if c == '\\' then
+        if char == '\\' then
             i = i + 1
-            c = g:sub(i, i)
-            if c == '' then
+            char = glob:sub(i, i)
+            if char == '' then
                 pattern = '[^]'
                 return false
             end
@@ -43,47 +47,51 @@ function Glob.globtopattern(g)
     ---@return boolean
     local function charset_end()
         while true do
-            if c == '' then
+            if char == '' then
                 pattern = '[^]'
                 return false
-            elseif c == ']' then
-                pattern = pattern .. ']'
+            elseif char == ']' then
+                pattern = ('%s]'):format(pattern)
                 break
             else
                 if not unescape() then
                     break
                 end
-                local c1 = c
+                local c1 = char
                 i = i + 1
-                c = g:sub(i, i)
-                if c == '' then
+                char = glob:sub(i, i)
+                if char == '' then
                     pattern = '[^]'
                     return false
-                elseif c == '-' then
+                elseif char == '-' then
                     i = i + 1
-                    c = g:sub(i, i)
-                    if c == '' then
+                    char = glob:sub(i, i)
+                    if char == '' then
                         pattern = '[^]'
                         return false
-                    elseif c == ']' then
-                        pattern = pattern .. escape(c1, c) .. '%-]'
+                    elseif char == ']' then
+                        pattern = ('%s%s'):format(pattern, Glob.escape(c1, char)) .. '%-]'
                         break
                     else
                         if not unescape() then
                             break
                         end
-                        pattern = pattern .. escape(c1, c) .. '-' .. escape(c, c)
+                        pattern = ('%s%s-%s'):format(
+                            pattern,
+                            Glob.escape(c1, char),
+                            Glob.escape(char, char)
+                        )
                     end
-                elseif c == ']' then
-                    pattern = pattern .. escape(c1, c) .. ']'
+                elseif char == ']' then
+                    pattern = ('%s%s]'):format(pattern, Glob.escape(c1, char))
                     break
                 else
-                    pattern = pattern .. escape(c1, c)
+                    pattern = ('%s%s'):format(pattern, Glob.escape(c1, char))
                     i = i - 1 -- put back
                 end
             end
             i = i + 1
-            c = g:sub(i, i)
+            char = glob:sub(i, i)
         end
         return true
     end
@@ -93,22 +101,22 @@ function Glob.globtopattern(g)
     ---@return boolean
     local function charset()
         i = i + 1
-        c = g:sub(i, i)
-        if c == '' or c == ']' then
+        char = glob:sub(i, i)
+        if in_list({ '', ']' }, char) then
             pattern = '[^]'
             return false
-        elseif c == '^' or c == '!' then
+        elseif in_list({ '^', '!' }, char) then
             i = i + 1
-            c = g:sub(i, i)
+            char = glob:sub(i, i)
 
-            if c ~= ']' then
-                pattern = pattern .. '[^'
+            if char ~= ']' then
+                pattern = ('%s[^'):format(pattern)
                 if not charset_end() then
                     return false
                 end
             end
         else
-            pattern = pattern .. '['
+            pattern = ('%s['):format(pattern)
             if not charset_end() then
                 return false
             end
@@ -119,28 +127,28 @@ function Glob.globtopattern(g)
     ---Convert tokens.
     while true do
         i = i + 1
-        c = g:sub(i, i)
-        if c == '' then
-            pattern = pattern .. '$'
+        char = glob:sub(i, i)
+        if char == '' then
+            pattern = ('%s$'):format(pattern)
             break
-        elseif c == '?' then
-            pattern = pattern .. '.'
-        elseif c == '*' then
-            pattern = pattern .. '.*'
-        elseif c == '[' then
+        elseif char == '?' then
+            pattern = ('%s.'):format(pattern)
+        elseif char == '*' then
+            pattern = ('%s.*'):format(pattern)
+        elseif char == '[' then
             if not charset() then
                 break
             end
-        elseif c == '\\' then
+        elseif char == '\\' then
             i = i + 1
-            c = g:sub(i, i)
-            if c == '' then
-                pattern = pattern .. '\\$'
+            char = glob:sub(i, i)
+            if char == '' then
+                pattern = ('%s\\$'):format(pattern)
                 break
             end
-            pattern = pattern .. escape(c, c)
+            pattern = ('%s%s'):format(pattern, Glob.escape(char, char))
         else
-            pattern = pattern .. escape(c, c)
+            pattern = ('%s%s'):format(pattern, Glob.escape(char, char))
         end
     end
 
