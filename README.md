@@ -2,9 +2,9 @@
 
 # project.nvim [![Mentioned in Awesome Neovim](https://awesome.re/mentioned-badge.svg)](https://github.com/rockerBOO/awesome-neovim)
 
-**========================  [_Breaking Changes_](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes)  ========================**
+**========================  [Breaking Changes](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes)  ========================**
 
-_[Announcements](https://github.com/DrKJeff16/project.nvim/discussions/1) | [Discussions](https://github.com/DrKJeff16/project.nvim/discussions) | [Wiki](https://github.com/DrKJeff16/project.nvim/wiki) | [Credits](./CREDITS.md) | [Contributing](./CONTRIBUTING.md) | [Roadmap](./TODO.md)_
+[**Announcements**](https://github.com/DrKJeff16/project.nvim/discussions/1) | [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions) | [**Wiki**](https://github.com/DrKJeff16/project.nvim/wiki) | [**Credits**](./CREDITS.md) | [**Contributing**](./CONTRIBUTING.md) | [**Roadmap**](./TODO.md)
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that,
 under configurable conditions, automatically sets the user's `cwd` to the current project root
@@ -68,6 +68,10 @@ Show these much love!
 ## Table of Contents
 
 1. [Installation](#installation)
+    1. [`vim-plug`](#vim-plug)
+    2. [`lazy.nvim`](#lazynvim)
+    3. [`pckr.nvim`](#pckrnvim)
+    4. [`paq-nvim`](#paq-nvim)
 2. [Configuration](#configuration)
     1. [Defaults](#defaults)
     2. [Pattern Matching](#pattern-matching)
@@ -111,13 +115,13 @@ Show these much love!
 > - [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(OPTIONAL)**
 > - [`neo-tree.nvim`](https://github.com/nvim-neo-tree/neo-tree.nvim) **(OPTIONAL)**
 
+Use any plugin manager of your choosing. There currently instructions for the following.
 
-Use any plugin manager of your choosing.
+> [!TIP]
+> If you want to add instructions for your plugin manager of preference
+> please raise a [**_BLANK ISSUE_**](https://github.com/DrKJeff16/project.nvim/issues/new?template=BLANK_ISSUE).
 
-Currently there are instructions for these:
-
-<details>
-<summary><ins><code>vim-plug</code></ins></summary>
+### `vim-plug`
 
 ```vim
 if has('nvim-0.11')
@@ -137,10 +141,7 @@ if has('nvim-0.11')
 endif
 ```
 
-</details>
-
-<details>
-<summary><ins><code>lazy.nvim</code></ins></summary>
+### `lazy.nvim`
 
 ```lua
 require('lazy').setup({
@@ -167,10 +168,7 @@ require('lazy').setup({
 })
 ```
 
-</details>
-
-<details>
-<summary><ins><code>pckr.nvim</code></ins></summary>
+### `pckr.nvim`
 
 ```lua
 if vim.fn.has('nvim-0.11') == 1 then
@@ -194,10 +192,7 @@ if vim.fn.has('nvim-0.11') == 1 then
 end
 ```
 
-</details>
-
-<details>
-<summary><ins><code>paq-nvim</code></ins></summary>
+### `paq-nvim`
 
 ```lua
 local paq = require('paq')
@@ -211,13 +206,6 @@ paq({
   'ibhagwan/fzf-lua', -- OPTIONAL
 })
 ```
-
-</details>
-
-> [!TIP]
-> If you want to add instructions for your plugin manager of preference
-> please raise a **_BLANK ISSUE_**.
-
 
 <div align="right">
 
@@ -260,19 +248,20 @@ require('project').setup()
 {
     ---Options for logging utility.
     --- ---
-    ---@class Project.Config.Logging
+    ---@type Project.Config.Logging
     log = {
         ---If `true`, it enables logging in the same directory in which your
         ---history file is stored.
         --- ---
         ---Default: `false`
         --- ---
+        ---@type boolean
         enabled = false,
     },
 
     ---Table of options used for `fzf-lua` integration
     --- ---
-    ---@class Project.Config.FzfLua
+    ---@type Project.Config.FzfLua
     fzf_lua = {
         ---Determines whether the `fzf-lua` integration is enabled.
         ---
@@ -396,7 +385,7 @@ require('project').setup()
 
     ---Table of options used for the telescope picker.
     --- ---
-    ---@class Project.Config.Telescope
+    ---@type Project.Config.Telescope
     telescope = {
         ---Determines whether the `telescope` picker should be called
         ---from the `setup()` function.
