@@ -77,9 +77,15 @@ local Api = {}
 ---@return string|nil dir
 ---@return string|nil name
 function Api.find_lsp_root(bufnr)
-    local allow_patterns = Config.options.allow_patterns_for_lsp
-
+    if vim_has('nvim-0.11') then
+        validate('bufnr', bufnr, 'number', true, 'integer?')
+    else
+        validate({ bufnr = { bufnr, { 'number', 'nil' } } })
+    end
     bufnr = bufnr or curr_buf()
+
+    local allow_patterns = Config.options.allow_patterns_for_lsp
+    local ignore_lsp = Config.options.ignore_lsp
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
@@ -95,13 +101,13 @@ function Api.find_lsp_root(bufnr)
         local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
         local valid = is_type('table', filetypes) and not empty(filetypes)
 
-        if not in_list(Config.options.ignore_lsp, client.name) and valid then
+        if not in_list(ignore_lsp, client.name) and valid then
             if in_list(filetypes, ft) and client.config.root_dir then
                 dir, name = client.config.root_dir, client.name
 
                 --- If pattern matching for LSP is enabled, check patterns
                 if allow_patterns then
-                    if root_included(client.config.root_dir) == nil then
+                    if root_included(dir) == nil then
                         dir, name = nil, nil
                     end
                 end
@@ -126,13 +132,16 @@ function Api.verify_owner(dir)
     else
         validate({ dir = { dir, 'string' } })
     end
+    local Log = require('project.utils.log')
 
     if is_windows() then
+        Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
         return true
     end
 
     local stat = uv.fs_stat(dir)
     if not stat then
+        Log.error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR))
         error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
     end
 
@@ -143,9 +152,14 @@ end
 ---@return string|nil dir_res
 ---@return string|nil method
 function Api.find_pattern_root(bufnr)
+    if vim_has('nvim-0.11') then
+        validate('bufnr', bufnr, 'number', true, 'integer?')
+    else
+        validate({ bufnr = { bufnr, { 'number', 'nil' } } })
+    end
     bufnr = bufnr or curr_buf()
-    local dir = vim.fn.fnamemodify(buf_name(bufnr), ':p:h')
 
+    local dir = vim.fn.fnamemodify(buf_name(bufnr), ':p:h')
     if is_windows() then
         dir = dir:gsub('\\', '/')
     end
@@ -321,12 +335,18 @@ end
 ---@return string|nil root
 ---@return string|nil method
 function Api.get_project_root(bufnr)
+    if vim_has('nvim-0.11') then
+        validate('bufnr', bufnr, 'number', true, 'integer?')
+    else
+        validate({ bufnr = { bufnr, { 'number', 'nil' } } })
+    end
+    bufnr = bufnr or curr_buf()
+
     if empty(Config.options.detection_methods) then
         return
     end
 
     local VALID = { 'lsp', 'pattern' }
-
     local SWITCH = {
         lsp = function()
             local root, lsp_name = Api.find_lsp_root(bufnr)
@@ -351,8 +371,9 @@ function Api.get_project_root(bufnr)
 
     for _, detection_method in ipairs(Config.options.detection_methods) do
         if in_list(VALID, detection_method) then
-            local success, root, lsp_method = SWITCH[detection_method]()
+            local func = SWITCH[detection_method]
 
+            local success, root, lsp_method = func()
             if success then
                 return root, lsp_method
             end
@@ -379,6 +400,13 @@ end
 ---@return string|nil method
 ---@return string|nil last
 function Api.get_current_project(bufnr)
+    if vim_has('nvim-0.11') then
+        validate('bufnr', bufnr, 'number', true, 'integer?')
+    else
+        validate({ bufnr = { bufnr, { 'number', 'nil' } } })
+    end
+    bufnr = bufnr or curr_buf()
+
     local curr, method = Api.get_project_root(bufnr)
     local last = Api.get_last_project()
 
@@ -389,7 +417,7 @@ end
 ---@return boolean
 function Api.buf_is_file(bufnr)
     if vim_has('nvim-0.11') then
-        validate('bufnr', bufnr, 'number', true, 'integer')
+        validate('bufnr', bufnr, 'number', true, 'integer?')
     else
         validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
