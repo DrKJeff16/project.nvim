@@ -107,6 +107,7 @@ Show these much love!
 > - [`fzf-lua`](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
 > - [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
 >   - [`plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
+>   - [`telescope-file-browser.nvim`](https://github.com/nvim-telescope/telescope-file-browser.nvim) **(OPTIONAL, to replace the builtin `find_files`)**
 > - [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua) **(OPTIONAL)**
 > - [`neo-tree.nvim`](https://github.com/nvim-neo-tree/neo-tree.nvim) **(OPTIONAL)**
 
@@ -116,7 +117,7 @@ Use any plugin manager of your choosing.
 Currently there are instructions for these:
 
 <details>
-<summary><b><code>vim-plug</code></b></summary>
+<summary><ins><code>vim-plug</code></ins></summary>
 
 ```vim
 if has('nvim-0.11')
@@ -139,7 +140,7 @@ endif
 </details>
 
 <details>
-<summary><b><code>lazy.nvim</code></b></summary>
+<summary><ins><code>lazy.nvim</code></ins></summary>
 
 ```lua
 require('lazy').setup({
@@ -169,7 +170,7 @@ require('lazy').setup({
 </details>
 
 <details>
-<summary><b><code>pckr.nvim</code></b></summary>
+<summary><ins><code>pckr.nvim</code></ins></summary>
 
 ```lua
 if vim.fn.has('nvim-0.11') == 1 then
@@ -196,7 +197,7 @@ end
 </details>
 
 <details>
-<summary><b><code>paq-nvim</code></b></summary>
+<summary><ins><code>paq-nvim</code></ins></summary>
 
 ```lua
 local paq = require('paq')
