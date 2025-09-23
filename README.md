@@ -4,7 +4,7 @@
 
 ================ [Breaking Changes](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes) ================
 
-[Announcements](https://github.com/DrKJeff16/project.nvim/discussions/1) | [Discussions](https://github.com/DrKJeff16/project.nvim/discussions) | [Wiki](https://github.com/DrKJeff16/project.nvim/wiki) | [Contributing](./CONTRIBUTING.md) | [Roadmap](./TODO.md)
+[Announcements](https://github.com/DrKJeff16/project.nvim/discussions/1) | [Discussions](https://github.com/DrKJeff16/project.nvim/discussions) | [Wiki](https://github.com/DrKJeff16/project.nvim/wiki) | [Credits](./CREDITS.md) | [Contributing](./CONTRIBUTING.md) | [Roadmap](./TODO.md)
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that,
 under configurable conditions, automatically sets the user's `cwd` to the current project root
@@ -55,11 +55,11 @@ Show these much love!
 
 - Automatically sets the `cwd` to the project root directory using either `vim.lsp` or pattern matching
 - Users can control whether to run this or not by filetype/buftype
-- Fzf-Lua integration (credits to [@deathmaz](https://github.com/deathmaz))
 - Functional `checkhealth` hook `:checkhealth project`
 - Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
 - Logging capabilities **_(WIP, EXPERIMENTAL)_**
 - [Telescope Integration](#telescope) `:Telescope projects`
+- `Fzf-Lua` Integration
 - [`nvim-tree` Integration](#nvim-tree)
 - [`neo-tree` Integration](#neo-tree)
 
@@ -94,8 +94,7 @@ Show these much love!
 5. [Utils](#utils)
 6. [Troubleshooting](#troubleshooting)
     1. [History File Not Created](#history-file-not-created)
-7. [Credits](#credits)
-8. [License](#license)
+7. [License](#license)
 
 ---
 
@@ -952,32 +951,6 @@ If you lack the required permissions for that directory, you can either:
 
 - Delete that directory **(RECOMMENDED)**
 - Run `chmod 755 <project/path>` **(NOT SURE IF THIS WILL FIX IT)**
-
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-
----
-
-## Credits
-
-- [@ahmedkhalf](https://github.com/ahmedkhalf): The author of the original `project.nvim`
-- [@jay-babu](https://github.com/jay-babu): Solved many issues way earlier in [their fork](https://github.com/jay-babu/project.nvim)
-- [@Zeioth](https://github.com/Zeioth): Implemented the filetype/buftype exclusions [in their fork](https://github.com/Zeioth/project.nvim/commit/95f56b8454f3285b819340d7d769e67242d59b53)
-- [@ldfwbebp](https://github.com/ldfwbebp): Integrated options for telescope picker
-- [@D7ry](https://github.com/D7ry): Made the original `get_current_project()` hook from which I took inspiration
-- [@deathmaz](https://github.com/deathmaz): Fzf-Lua integration
-- [@pandar00](https://github.com/pandar00): For PR [#4](https://github.com/DrKJeff16/project.nvim/pull/4)
-- [@acristoffers](https://github.com/acristoffers): For PR [#10](https://github.com/DrKJeff16/project.nvim/pull/10)
-- [@tomaskallup](https://github.com/tomaskallup): For code improvements [#11](https://github.com/DrKJeff16/project.nvim/issues/11)
-- [@danilevy1212](https://github.com/danilevy1212): For their extensive help in PRs:
-    - [#15](https://github.com/DrKJeff16/project.nvim/pull/15)
-    - [#17](https://github.com/DrKJeff16/project.nvim/pull/17)
-- [@xbot](https://github.com/xbot): For PR [#19](https://github.com/DrKJeff16/project.nvim/pull/19)
-- [@steinbrueckri](https://github.com/steinbrueckri): Thank you for your support!
-- [@gmelodie](https://github.com/gmelodie): Thank you for your support!
 
 <div align="right">
 
