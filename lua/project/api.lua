@@ -215,21 +215,13 @@ function Api.set_pwd(dir, method)
         end
     end
 
-    local verbose = not Config.options.silent_chdir
     local modified = false
-
     if empty(History.session_projects) then
         History.session_projects = { dir }
         modified = true
     elseif not in_list(History.session_projects, dir) then
         table.insert(History.session_projects, dir)
         modified = true
-    end
-
-    --- If directory is the same as current Project dir/CWD
-    if in_list({ dir, Api.current_project or '' }, vim.fn.getcwd(0, 0)) then
-        Log.info(('(%s.set_pwd): Current directory is selected project.'):format(MODSTR))
-        return true
     end
 
     if not modified and #History.session_projects > 1 then
@@ -247,6 +239,12 @@ function Api.set_pwd(dir, method)
         table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
     end
 
+    --- If directory is the same as current Project dir/CWD
+    if in_list({ dir, Api.current_project or '' }, vim.fn.getcwd(0, 0)) then
+        Log.info(('(%s.set_pwd): Current directory is selected project.'):format(MODSTR))
+        return true
+    end
+
     if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
         Log.debug(('(%s.set_pwd): Running `before_attach` hook.'):format(MODSTR))
         Config.options.before_attach(dir, method)
@@ -255,7 +253,6 @@ function Api.set_pwd(dir, method)
 
     local scope_chdir = Config.options.scope_chdir
     local msg = ('(%s.set_pwd):'):format(MODSTR)
-
     if not in_list({ 'global', 'tab', 'win' }, scope_chdir) then
         Log.error(('%s INVALID value for `scope_chdir`'):format(msg))
         notify(('%s INVALID value for `scope_chdir`'):format(msg), ERROR)
@@ -263,7 +260,6 @@ function Api.set_pwd(dir, method)
     end
 
     local ok = false
-
     if scope_chdir == 'global' then
         ok = pcall(vim.api.nvim_set_current_dir, dir)
         msg = ('%s\nchdir: `%s`:'):format(msg, dir)
@@ -276,10 +272,8 @@ function Api.set_pwd(dir, method)
     end
 
     msg = ('%s\nMethod: %s\nStatus: %s'):format(msg, method, (ok and 'SUCCESS' or 'FAILED'))
-
     if ok then
         Log.info(msg)
-
         if Config.options.on_attach and vim.is_callable(Config.options.on_attach) then
             Log.debug(('(%s.set_pwd): Running `on_attach` hook.'):format(MODSTR))
             Config.options.on_attach(dir, method)
@@ -289,6 +283,7 @@ function Api.set_pwd(dir, method)
         Log.error(msg)
     end
 
+    local verbose = not Config.options.silent_chdir
     if verbose then
         vim.schedule(function()
             notify(msg, (ok and INFO or ERROR))
@@ -301,8 +296,6 @@ end
 ---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|Project.API.HistoryPaths res
 function Api.get_history_paths(path)
-    local VALID = { 'datapath', 'projectpath', 'historyfile' }
-
     ---@type Project.API.HistoryPaths|string
     local res = {
         datapath = Path.datapath,
@@ -310,7 +303,7 @@ function Api.get_history_paths(path)
         historyfile = Path.historyfile,
     }
 
-    if path and in_list(VALID, path) then
+    if path and in_list(vim.tbl_keys(res), path) then
         ---@type string
         res = Path[path]
     end
@@ -337,7 +330,6 @@ function Api.get_project_root(bufnr)
         return
     end
 
-    local VALID = { 'lsp', 'pattern' }
     local SWITCH = {
         lsp = function()
             local root, lsp_name = Api.find_lsp_root(bufnr)
@@ -346,7 +338,7 @@ function Api.get_project_root(bufnr)
                 return true, root, ('"%s" lsp'):format(lsp_name)
             end
 
-            return false, nil, nil
+            return false
         end,
 
         pattern = function()
@@ -356,14 +348,13 @@ function Api.get_project_root(bufnr)
                 return true, root, method
             end
 
-            return false, nil, nil
+            return false
         end,
     }
 
     for _, detection_method in ipairs(Config.options.detection_methods) do
-        if in_list(VALID, detection_method) then
+        if in_list(vim.tbl_keys(SWITCH), detection_method) then
             local func = SWITCH[detection_method]
-
             local success, root, lsp_method = func()
             if success then
                 return root, lsp_method
@@ -465,8 +456,12 @@ function Api.prompt_project()
     vim.ui.input({
         prompt = 'Input a valid path to the project:',
         completion = 'dir',
-        default = 'NONE',
+        default = Api.get_project_root(curr_buf()),
     }, function(input)
+        if not input or input == '' then
+            return
+        end
+
         local path = vim.fn.fnamemodify(input, ':p')
         if not (exists(path) and exists(vim.fn.fnamemodify(path, ':p:h'))) then
             error('Invalid path!', ERROR)
@@ -479,7 +474,16 @@ function Api.prompt_project()
             end
         end
 
-        Api.set_pwd(path, 'prompt')
+        if Api.current_project == path then
+            vim.notify('Already added that directory!', WARN)
+            return
+        end
+
+        local success = Api.set_pwd(path, 'prompt')
+
+        if not success then
+            vim.notify('Failed to add directory to project history!', ERROR)
+        end
     end)
 end
 
