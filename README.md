@@ -257,6 +257,13 @@ require('project').setup()
         --- ---
         ---@type boolean
         enabled = false,
+
+        ---The maximum logfile size (in megabytes).
+        --- ---
+        ---Default: `1.0`
+        --- ---
+        ---@type number
+        max_size = 1.0,
     },
 
     ---Table of options used for `fzf-lua` integration

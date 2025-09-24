@@ -449,6 +449,12 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `false` ~
 
 
+    * {max_size}                (number)
+                                The maximum logfile size (in megabytes).
+
+                                Default: `1.0` ~
+
+
 ==============================================================================
 3. Pattern Matching                              *project-nvim.pattern-matching*
 

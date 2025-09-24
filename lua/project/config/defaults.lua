@@ -115,6 +115,13 @@ local DEFAULTS = {
         ---Default: `false`
         --- ---
         enabled = false,
+
+        ---The maximum logfile size (in megabytes).
+        --- ---
+        ---Default: `1.0`
+        --- ---
+        ---@type number
+        max_size = 1.0,
     },
 
     ---If `true` your root directory won't be changed automatically,
