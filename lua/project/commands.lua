@@ -1,6 +1,5 @@
 local MODSTR = 'project.commands'
 local ERROR = vim.log.levels.ERROR
-local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 
 local vim_has = require('project.utils.util').vim_has
@@ -172,31 +171,6 @@ Commands.new({
 })
 
 Commands.new({
-    name = 'ProjectRecents',
-    callback = function()
-        local recent = require('project.utils.history').get_recent_projects()
-        local reverse = require('project.utils.util').reverse
-
-        if recent == nil or vim.tbl_isempty(recent) then
-            vim.notify('{}', WARN)
-            return
-        end
-
-        ---@type string[]
-        recent = reverse(vim.deepcopy(recent))
-
-        local len, msg = #recent, ''
-
-        for k, v in ipairs(recent) do
-            msg = ('%s %s. %s'):format(msg, k, v) .. (k < len and ('%s\n'):format(msg) or '')
-        end
-
-        vim.notify(msg, INFO)
-    end,
-    desc = 'Prints out the recent `project.nvim` projects',
-})
-
-Commands.new({
     name = 'ProjectRoot',
     callback = function(ctx)
         local verbose = ctx.bang ~= nil and ctx.bang or false
@@ -261,13 +235,6 @@ function Commands.create_user_commands()
         bang = Commands.ProjectDelete.bang,
         nargs = Commands.ProjectDelete.nargs,
         complete = Commands.ProjectDelete.complete,
-    })
-
-    ---`:ProjectRecents`
-    vim.api.nvim_create_user_command('ProjectRecents', function()
-        Commands.ProjectRecents()
-    end, {
-        desc = Commands.ProjectRecents.desc,
     })
 
     ---`:ProjectRoot`

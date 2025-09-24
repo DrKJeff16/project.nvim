@@ -115,24 +115,6 @@ local function delete_duplicates(tbl)
     return dedup(res)
 end
 
-function History.filter_recent_projects()
-    if History.recent_projects == nil then
-        return
-    end
-
-    ---@type string[]
-    local recent = dedup(History.recent_projects)
-
-    ---@type string[]
-    local new_recent = {}
-
-    for _, v in ipairs(recent) do
-        table.insert(new_recent, v)
-    end
-
-    History.recent_projects = new_recent
-end
-
 ---Deletes a project string, or a Telescope Entry type.
 --- ---
 ---@param project string|Project.ActionEntry
@@ -168,8 +150,6 @@ function History.delete_project(project)
     end
 
     History.recent_projects = new_tbl
-
-    History.filter_recent_projects()
     History.write_history()
 end
 
