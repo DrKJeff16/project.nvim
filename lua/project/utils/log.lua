@@ -231,7 +231,7 @@ function Log.open_win()
     Log.log_loc = {
         bufnr = vim.api.nvim_get_current_buf(),
         win = vim.api.nvim_get_current_win(),
-        btab = vim.api.nvim_get_current_tabpage(),
+        tab = vim.api.nvim_get_current_tabpage(),
     }
 
     ---@type vim.api.keyset.option
@@ -260,6 +260,7 @@ function Log.close_win()
         return
     end
 
+    vim.keymap.del('n', 'q', { buffer = Log.log_loc.bufnr })
     vim.api.nvim_buf_delete(Log.log_loc.bufnr, { force = true })
     pcall(vim.cmd.tabclose, Log.log_loc.tab)
 
