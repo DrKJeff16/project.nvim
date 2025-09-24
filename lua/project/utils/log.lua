@@ -50,15 +50,18 @@ end
 
 ---@return string|nil data
 function Log.read_log()
-    Log.setup_watch()
-    local fd = Log.open('r')
-
-    if not fd then
+    if not Log.logfile then
         return
     end
 
-    local stat = uv.fs_fstat(fd)
+    local stat = uv.fs_stat(Log.logfile)
     if not stat then
+        return
+    end
+
+    local fd = Log.open('r')
+    Log.setup_watch()
+    if not fd then
         return
     end
 
@@ -123,8 +126,9 @@ function Log.write(data, lvl)
     }
     -- stylua: ignore end
 
+    ---A formatted string (`24:59:59` time).
     local msg = os.date(('%s  ==>  %s%s'):format('%H:%M:%S', PFX[lvl], data))
-    uv.fs_write(fd, msg)
+    uv.fs_write(fd, msg, -1)
     uv.fs_close(fd)
 
     return msg
@@ -219,37 +223,42 @@ function Log.open_win()
         error(('(%s.open_win): Bad logfile path!'):format(MODSTR), ERROR)
     end
 
+    -- Log window appears to be open
     if Log.log_loc ~= nil then
         return
     end
 
     vim.cmd.tabedit(Log.logfile)
+    local set_log_loc = vim.schedule_wrap(function()
+        Log.log_loc = {
+            bufnr = vim.api.nvim_get_current_buf(),
+            win = vim.api.nvim_get_current_win(),
+            tab = vim.api.nvim_get_current_tabpage(),
+        }
 
-    Log.log_loc = {
-        bufnr = vim.api.nvim_get_current_buf(),
-        win = vim.api.nvim_get_current_win(),
-        tab = vim.api.nvim_get_current_tabpage(),
-    }
+        ---@type vim.api.keyset.option
+        local win_opts = { win = Log.log_loc.win }
+        vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
+        vim.api.nvim_set_option_value('list', false, win_opts)
+        vim.api.nvim_set_option_value('number', false, win_opts)
+        vim.api.nvim_set_option_value('wrap', false, win_opts)
+        vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
 
-    ---@type vim.api.keyset.option
-    local win_opts = { win = Log.log_loc.win }
-    vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
-    vim.api.nvim_set_option_value('list', false, win_opts)
-    vim.api.nvim_set_option_value('number', false, win_opts)
-    vim.api.nvim_set_option_value('wrap', false, win_opts)
-    vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
+        ---@type vim.api.keyset.option
+        local buf_opts = { buf = Log.log_loc.bufnr }
+        vim.api.nvim_set_option_value('filetype', 'log', buf_opts)
+        vim.api.nvim_set_option_value('fileencoding', 'utf-8', buf_opts)
+        vim.api.nvim_set_option_value('buftype', 'nowrite', buf_opts)
+        vim.api.nvim_set_option_value('modifiable', false, buf_opts)
 
-    ---@type vim.api.keyset.option
-    local buf_opts = { buf = Log.log_loc.bufnr }
-    vim.api.nvim_set_option_value('filetype', 'log', buf_opts)
-    vim.api.nvim_set_option_value('buftype', 'nowrite', buf_opts)
-    vim.api.nvim_set_option_value('modifiable', false, buf_opts)
+        vim.keymap.set('n', 'q', Log.close_win, {
+            buffer = Log.log_loc.bufnr,
+            noremap = true,
+            silent = true,
+        })
+    end)
 
-    vim.keymap.set('n', 'q', Log.close_win, {
-        noremap = true,
-        buffer = Log.log_loc.bufnr,
-        silent = true,
-    })
+    set_log_loc()
 end
 
 function Log.close_win()
@@ -257,9 +266,8 @@ function Log.close_win()
         return
     end
 
-    vim.keymap.del('n', 'q', { buffer = Log.log_loc.bufnr })
-    vim.api.nvim_buf_delete(Log.log_loc.bufnr, { force = true })
-    pcall(vim.cmd.tabclose, Log.log_loc.tab)
+    vim.api.nvim_buf_delete(Log.log_loc.bufnr, {})
+    pcall(vim.cmd.tabclose)
 
     Log.log_loc = nil
 end
