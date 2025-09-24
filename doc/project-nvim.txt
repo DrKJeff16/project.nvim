@@ -39,9 +39,8 @@ Table of Contents                                             *project-nvim.toc*
     7.3. `:ProjectAdd`                                               |:ProjectAdd|
     7.4. `:ProjectRoot`                                             |:ProjectRoot|
     7.5. `:ProjectConfig`                                         |:ProjectConfig|
-    7.6. `:ProjectRecents`                                       |:ProjectRecents|
-    7.7. `:ProjectDelete`                                         |:ProjectDelete|
-    7.8. `:ProjectSession`                                       |:ProjectSession|
+    7.6. `:ProjectDelete`                                         |:ProjectDelete|
+    7.7. `:ProjectSession`                                       |:ProjectSession|
 8. API                                                        |project-nvim.api|
     8.1. `get_project_root()`                    |project-nvim.get_project_root()|
     8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
@@ -733,14 +732,6 @@ Table of Contents                                             *project-nvim.toc*
                             you'll receive a notification through
                             |vim.notify()| (invalid args with [!] are not
                             included).
-
-
-                                               *ProjectRecents*  *:ProjectRecents*
-`:ProjectRecents`
-
-                            The `:ProjectRecents` command is a hook
-                            to print a formatted list of your
-                            recent projects using |vim.notify()|.
 
 
                                                      *ProjectRoot*  *:ProjectRoot*

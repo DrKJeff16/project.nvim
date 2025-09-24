@@ -86,10 +86,9 @@ Show these much love!
     4. [`:ProjectLogClear`](#projectlogclear)
     5. [`:ProjectAdd`](#projectadd)
     6. [`:ProjectRoot`](#projectroot)
-    7. [`:ProjectRecents`](#projectrecents)
-    8. [`:ProjectConfig`](#projectconfig)
-    9. [`:ProjectDelete`](#projectdelete)
-    10. [`:ProjectSession`](#projectsession)
+    7. [`:ProjectConfig`](#projectconfig)
+    8. [`:ProjectDelete`](#projectdelete)
+    9. [`:ProjectSession`](#projectsession)
 4. [API](#api)
     1. [`get_project_root()`](#get_project_root)
     2. [`get_recent_projects()`](#get_recent_projects)
@@ -801,14 +800,6 @@ The command does essentially the following:
 
 > [!INFO]
 > _See [_`api.lua`_](./lua/project/api.lua) for more info on `on_buf_enter()`_.
-
-### `:ProjectRecents`
-
-The `:ProjectRecents` command is a hook to print a formatted list of your
-recent projects using `vim.notify()`.
-
-> [!INFO]
-> _See [`api.lua`](./lua/project/api.lua) for more info_.
 
 ### `:ProjectConfig`
 
