@@ -32,12 +32,12 @@ function Config.setup(options)
     else
         validate({ options = { options, { 'table', 'nil' } } })
     end
-
     options = options or {}
 
     Config.options = Config.get_defaults().new(options)
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
 
+    --- Verify config integrity
     Config.options:verify()
 
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
@@ -45,8 +45,8 @@ function Config.setup(options)
 
     require('project.utils.path').init()
     require('project.api').init()
-    local Log = require('project.utils.log')
 
+    local Log = require('project.utils.log')
     if Config.options.log.enabled then
         Log.init()
     end
