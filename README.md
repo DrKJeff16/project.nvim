@@ -57,7 +57,7 @@ Show these much love!
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook `:checkhealth project`
 - Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
-- Logging capabilities **_(WIP, EXPERIMENTAL)_**
+- Logging capabilities `:ProjectLog`
 - [Telescope Integration](#telescope) `:Telescope projects`
 - `Fzf-Lua` Integration
 - [`nvim-tree` Integration](#nvim-tree)
