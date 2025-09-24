@@ -389,8 +389,7 @@ function Api.get_last_project()
     end
 
     recent = reverse(recent)
-
-    return recent[2]
+    return #History.session_projects <= 1 and recent[2] or recent[1]
 end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
