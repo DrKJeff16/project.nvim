@@ -21,17 +21,14 @@
 ---|"xw+"
 
 local MODSTR = 'project.utils.history'
+local ERROR = vim.log.levels.ERROR
+local WARN = vim.log.levels.WARN
+local uv = vim.uv or vim.loop
+local copy = vim.deepcopy
+local in_list = vim.list_contains
 
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
-
-local ERROR = vim.log.levels.ERROR
-local WARN = vim.log.levels.WARN
-
-local uv = vim.uv or vim.loop
-
-local copy = vim.deepcopy
-local in_list = vim.list_contains
 
 local dir_exists = Util.dir_exists
 local normalise_path = Util.normalise_path
