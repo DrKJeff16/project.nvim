@@ -4,10 +4,7 @@
 ---I decided to make this an API file instead to avoid any
 ---confusions with naming, e.g. `require('project_nvim.project')`.
 
----@class Project.HistoryPaths
----@field datapath string
----@field projectpath string
----@field historyfile string
+---@alias Project.API.HistoryPaths { datapath: string, projectpath: string, historyfile: string }
 
 local MODSTR = 'project.api'
 
@@ -302,17 +299,11 @@ function Api.set_pwd(dir, method)
 end
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
----@return string|Project.HistoryPaths res
+---@return string|Project.API.HistoryPaths res
 function Api.get_history_paths(path)
-    if vim_has('nvim-0.11') then
-        validate('path', path, 'string', true, "'datapath'|'projectpath'|'historyfile'")
-    else
-        validate({ path = { path, { 'string', 'nil' } } })
-    end
-
     local VALID = { 'datapath', 'projectpath', 'historyfile' }
 
-    ---@type Project.HistoryPaths|string
+    ---@type Project.API.HistoryPaths|string
     local res = {
         datapath = Path.datapath,
         projectpath = Path.projectpath,
@@ -388,6 +379,7 @@ function Api.get_last_project()
         return nil
     end
 
+    ---@type string[]
     recent = reverse(recent)
     return #History.session_projects <= 1 and recent[2] or recent[1]
 end
@@ -431,8 +423,8 @@ end
 ---@param bufnr? integer
 function Api.on_buf_enter(verbose, bufnr)
     if vim_has('nvim-0.11') then
-        validate('verbose', verbose, 'boolean', true)
-        validate('bufnr', bufnr, 'number', true, 'integer')
+        validate('verbose', verbose, 'boolean', true, 'boolean?')
+        validate('bufnr', bufnr, 'number', true, 'integer?')
     else
         validate({
             verbose = { verbose, { 'boolean', 'nil' } },
