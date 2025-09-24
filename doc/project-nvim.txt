@@ -9,8 +9,8 @@
     "bookmark" and/or discard them, depending on
     your needs.
 
-    This is forked from `ahmedkhalf/project.nvim`:
-    https://github.com/ahmedkhalf/project.nvim
+    This was originally forked from `ahmedkhalf/project.nvim`.
+    Ever since I've decided to extend it and address issues.
 
                 This plugin will be maintained and extended          ~
                         for the foreseeable future.              ~
