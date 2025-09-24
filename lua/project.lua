@@ -17,6 +17,7 @@ Project.delete_project = require('project.utils.history').delete_project
 Project.get_history_paths = require('project.api').get_history_paths
 Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
 Project.get_last_project = require('project.api').get_last_project
+Project.prompt_project = require('project.api').prompt_project
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---

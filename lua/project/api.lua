@@ -461,6 +461,28 @@ function Api.on_buf_enter(verbose, bufnr)
     History.write_history()
 end
 
+function Api.prompt_project()
+    vim.ui.input({
+        prompt = 'Input a valid path to the project:',
+        completion = 'dir',
+        default = 'NONE',
+    }, function(input)
+        local path = vim.fn.fnamemodify(input, ':p')
+        if not (exists(path) and exists(vim.fn.fnamemodify(path, ':p:h'))) then
+            error('Invalid path!', ERROR)
+        end
+
+        if not Util.dir_exists(path) then
+            path = vim.fn.fnamemodify(path, ':p:h')
+            if not Util.dir_exists(path) then
+                error('Path is not a directory, and parent could not be retrieved!', ERROR)
+            end
+        end
+
+        Api.set_pwd(path, 'prompt')
+    end)
+end
+
 ---@param verbose? boolean
 function Api.add_project_manually(verbose)
     if vim_has('nvim-0.11') then
@@ -471,7 +493,6 @@ function Api.add_project_manually(verbose)
     verbose = verbose ~= nil and verbose or false
 
     local dir = vim.fn.fnamemodify(buf_name(curr_buf()), ':p:h')
-
     if verbose then
         notify(('Attempting to process `%s`'):format(dir), INFO)
     end
