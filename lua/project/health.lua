@@ -1,13 +1,9 @@
 local uv = vim.uv or vim.loop
-
----@alias HistoryCheck { name: string, type: ('file'|'directory'), path: string }
-
 local start = vim.health.start or vim.health.report_start
 local ok = vim.health.ok or vim.health.report_ok
 local info = vim.health.info or vim.health.report_info
 local h_warn = vim.health.warn or vim.health.report_warn
 local h_error = vim.health.error or vim.health.report_error
-
 local empty = vim.tbl_isempty
 local copy = vim.deepcopy
 local in_list = vim.list_contains
@@ -107,7 +103,7 @@ end
 function Health.history_check()
     start('History')
 
-    ---@type HistoryCheck[]
+    ---@type { name: string, type: ('file'|'directory'), path: string }[]
     local P = {
         {
             name = 'datapath',
@@ -148,7 +144,7 @@ function Health.project_check()
     local curr, method, last = Api.current_project, Api.current_method, Api.last_project
     local msg = ('Current project: `%s`\n'):format(curr ~= nil and curr or 'No Current Project')
     msg = ('%sMethod used: `%s`\n'):format(msg, (method ~= nil and method or 'No method available'))
-    msg = ('%sLast project: `%s`\n'):format(
+    msg = ('%sLast project: `%s`'):format(
         msg,
         (last ~= nil and last or 'No Last Project In History')
     )
@@ -178,7 +174,7 @@ function Health.telescope_check()
 
     if not mod_exists('telescope') then
         h_warn(
-            ('`telescope.nvim` is not installed.\n%s\n'):format(
+            ('`telescope.nvim` is not installed.\n%s'):format(
                 "This doesn't represent an issue necessarily"
             )
         )
@@ -190,18 +186,17 @@ function Health.telescope_check()
         return
     end
 
-    ok('`projects` picker extension loaded\n')
+    ok('`projects` picker extension loaded')
 
     if not is_type('table', Opts.telescope) then
         h_warn('`projects` does not have telescope options set up')
         return
     end
 
-    info('Config Options:\n')
+    start('Telescope Config')
 
     for k, v in pairs(Opts.telescope) do
         local str, warning = format_per_type(type(v), v)
-
         str = ('`%s`: %s'):format(k, str)
 
         if is_type('boolean', warning) and warning then
@@ -268,10 +263,10 @@ function Health.check()
 
     --- NOTE: Order matters below!
 
-    Health.telescope_check()
-    Health.fzf_lua_check()
     Health.project_check()
     Health.history_check()
+    Health.telescope_check()
+    Health.fzf_lua_check()
     Health.options_check()
     Health.recent_proj_check()
 end
