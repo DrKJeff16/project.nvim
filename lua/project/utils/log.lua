@@ -44,14 +44,14 @@ local function gen_log(lvl)
             end
         end
 
-        return Log:write(('%s\n'):format(msg), lvl)
+        return Log.write(('%s\n'):format(msg), lvl)
     end
 end
 
 ---@return string|nil data
 function Log.read_log()
     Log.setup_watch()
-    local fd = Log:open('r')
+    local fd = Log.open('r')
 
     if not fd then
         return
@@ -102,12 +102,12 @@ end
 ---@param data string
 ---@param lvl vim.log.levels
 ---@return string|nil
-function Log:write(data, lvl)
+function Log.write(data, lvl)
     if not require('project.config').options.log.enabled or vim.g.project_log_cleared == 1 then
         return
     end
 
-    local fd = self:open('a')
+    local fd = Log.open('a')
 
     if not fd then
         return
@@ -123,27 +123,26 @@ function Log:write(data, lvl)
     }
     -- stylua: ignore end
 
-    local msg = os.date('- %H:%M:%S  ==>  ' .. PFX[lvl] .. data)
-
+    local msg = os.date(('%s  ==>  %s%s'):format('%H:%M:%S', PFX[lvl], data))
     uv.fs_write(fd, msg)
     uv.fs_close(fd)
 
     return msg
 end
 
----@param self Project.Log
 ---@param mode OpenMode
 ---@return integer|nil
-function Log:open(mode)
+function Log.open(mode)
     local Path = require('project.utils.path')
 
     Path.create_projectpath()
     local dir_stat = uv.fs_stat(Path.projectpath)
-
-    if dir_stat and dir_stat.type == 'directory' then
-        local fd = uv.fs_open(self.logfile, mode, tonumber('644', 8))
-        return fd
+    if not dir_stat or dir_stat.type ~= 'directory' then
+        error(('(%s.open): Projectpath stat is not valid!'):format(MODSTR), ERROR)
     end
+
+    local fd = uv.fs_open(Log.logfile, mode, tonumber('644', 8))
+    return fd
 end
 
 Log.trace = gen_log(TRACE)
@@ -154,29 +153,28 @@ Log.debug = gen_log(DEBUG)
 
 function Log.init()
     local enabled = require('project.config').options.log.enabled
-    local Path = require('project.utils.path')
-
-    if not enabled or Log.logfile ~= nil then
+    if not enabled then
         return
     end
 
+    local Path = require('project.utils.path')
     if not Path.projectpath then
-        vim.notify('Project Path directory not set!', WARN)
+        vim.notify(('(%s.init): Project Path directory not set!'):format(MODSTR), ERROR)
         return
     end
 
     Log.logfile = Path.projectpath .. '/project.log'
-    local fd = Log:open('a')
+    local fd = Log.open('a')
     local stat = uv.fs_fstat(fd)
     if not stat then
-        error('Log stat is nil!', ERROR)
+        error(('(%s.init): Log stat is nil!'):format(MODSTR), ERROR)
     end
 
     local head = ('='):rep(45)
     uv.fs_write(
         fd,
         (stat.size >= 1 and '\n' or '')
-            .. os.date(head .. '  %x  (Started: %H:%M:%S)  ' .. head .. '\n')
+            .. os.date(('%s    %s    %s\n'):format(head, '%x  (Started: %H:%M:%S)', head))
     )
 
     vim.api.nvim_create_user_command('ProjectLog', function(ctx)
@@ -204,8 +202,6 @@ end
 
 function Log.open_win()
     local enabled = require('project.config').options.log.enabled
-    local Path = require('project.utils.path')
-
     if not (Log.logfile and enabled) then
         return
     end
@@ -218,6 +214,7 @@ function Log.open_win()
         return
     end
 
+    local Path = require('project.utils.path')
     if not Path.exists(Log.logfile) then
         error(('(%s.open_win): Bad logfile path!'):format(MODSTR), ERROR)
     end
