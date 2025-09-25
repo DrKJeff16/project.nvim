@@ -21,6 +21,30 @@ local Popup = {}
 ---@class Project.Popup.Select
 Popup.select = {}
 
+---@param opts Project.Popup.SelectSpec
+---@return { choices: table<string, ProjectCmdFun>, choices_list: string[] }|ProjectCmdFun
+function Popup.select:new(opts)
+    ---@type { choices: table<string, ProjectCmdFun>, choices_list: string[] }|ProjectCmdFun
+    local T = setmetatable({}, {
+        __index = Popup.select,
+
+        ---@param ctx? vim.api.keyset.create_user_command.command_args
+        __call = function(_, ctx)
+            if ctx then
+                opts.callback(ctx)
+                return
+            end
+
+            opts.callback()
+        end,
+    })
+
+    T.choices = opts.choices
+    T.choices_list = opts.choices_list
+
+    return T
+end
+
 ---@param input string?
 function Popup.prompt_project(input)
     local Api = require('project.api')
@@ -46,30 +70,6 @@ function Popup.prompt_project(input)
 
     Api.set_pwd(input, 'prompt')
     History.write_history()
-end
-
----@param opts Project.Popup.SelectSpec
----@return { choices: table<string, ProjectCmdFun>, choices_list: string[] }|ProjectCmdFun
-function Popup.select:new(opts)
-    ---@type { choices: table<string, ProjectCmdFun>, choices_list: string[] }|ProjectCmdFun
-    local T = setmetatable({}, {
-        __index = Popup.select,
-
-        ---@param ctx? vim.api.keyset.create_user_command.command_args
-        __call = function(_, ctx)
-            if ctx then
-                opts.callback(ctx)
-                return
-            end
-
-            opts.callback()
-        end,
-    })
-
-    T.choices = opts.choices
-    T.choices_list = opts.choices_list
-
-    return T
 end
 
 Popup.open_menu = Popup.select:new({
