@@ -5,11 +5,12 @@
 ---@class Project.Popup.SelectSpec: Project.Popup.Spec
 ---@field callback ProjectCmdFun
 
--- local MODSTR = 'project.popup'
+local MODSTR = 'project.popup'
 
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local in_list = vim.list_contains
+local empty = vim.tbl_isempty
 
 local Util = require('project.utils.util')
 local History = require('project.utils.history')
@@ -30,6 +31,20 @@ Popup.select = {}
 function Popup.select:new(opts)
     if vim_has('nvim-0.11') then
         vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
+    else
+        vim.validate({
+            opts = { opts, 'table' },
+            choices = { opts.choices, 'function' },
+            choices_list = { opts.choices_list, 'function' },
+            callback = { opts.callback, 'function' },
+        })
+    end
+
+    if empty(opts) then
+        error(('(%s.select:new): Empty args for constructor!'):format(MODSTR), ERROR)
+    end
+
+    if vim_has('nvim-0.11') then
         vim.validate('choices', opts.choices, 'function', false, 'fun(): table<string, function>')
         vim.validate('choices_list', opts.choices_list, 'function', false, 'fun(): string[]')
         vim.validate(
@@ -41,18 +56,21 @@ function Popup.select:new(opts)
         )
     else
         vim.validate({
-            opts = { opts, 'table' },
             choices = { opts.choices, 'function' },
             choices_list = { opts.choices_list, 'function' },
             callback = { opts.callback, 'function' },
         })
     end
+
     ---@type Project.Popup.Select|Project.Popup.Spec|ProjectCmdFun
     local T = setmetatable({
         choices = opts.choices,
         choices_list = opts.choices_list,
     }, {
-        __index = Popup.select,
+        ---@param k string
+        __index = function(t, k)
+            return rawget(t, k)
+        end,
 
         ---@param ctx? vim.api.keyset.create_user_command.command_args
         __call = function(_, ctx)
@@ -166,7 +184,7 @@ Popup.open_menu = Popup.select:new({
                 require('project.commands').ProjectNew()
             end,
             ['Delete A Project'] = function()
-                require('project.commands').ProjectDelete()
+                Popup.delete_menu()
             end,
             ['Show Config'] = function()
                 require('project.commands').ProjectConfig()

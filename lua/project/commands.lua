@@ -4,6 +4,7 @@ local MODSTR = 'project.commands'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local validate = vim.validate
+local in_list = vim.list_contains
 
 local vim_has = require('project.utils.util').vim_has
 
@@ -135,24 +136,21 @@ M.new({
             return
         end
 
-        local force = ctx.bang ~= nil and ctx.bang or false
         local recent = require('project.utils.history').get_recent_projects()
-
-        if recent == nil then
+        if not recent then
             return
         end
 
+        local force = ctx.bang ~= nil and ctx.bang or false
         for _, v in ipairs(ctx.fargs) do
             local path = vim.fn.fnamemodify(v, ':p')
-
-            ---HACK: Getting rid of trailing `/` in string
-            if path:sub(-1) == '/' then
+            if path:sub(-1) == '/' then ---HACK: Getting rid of trailing `/` in string
                 path = path:sub(1, path:len() - 1)
             end
 
             ---If `:ProjectDelete` isn't called with bang `!`, abort on
             ---anything that isn't in recent projects
-            if not (force or vim.list_contains(recent, path) or path ~= '') then
+            if not (force or in_list(recent, path) or path ~= '') then
                 error(('(:ProjectDelete): Could not delete `%s`, aborting'):format(path), ERROR)
             end
 
@@ -226,7 +224,6 @@ M.new({
 
         local len = #session
         local msg = ''
-
         for i, proj in ipairs(session) do
             msg = msg .. (len ~= i and '%s. %s\n' or '%s. %s'):format(i, proj)
         end
