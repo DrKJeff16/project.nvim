@@ -1,6 +1,8 @@
----@class Project.Popup.SelectSpec
+---@class Project.Popup.Spec
 ---@field choices fun(): table<string, function>
 ---@field choices_list fun(): string[]
+
+---@class Project.Popup.SelectSpec: Project.Popup.Spec
 ---@field callback ProjectCmdFun
 
 -- local MODSTR = 'project.popup'
@@ -15,6 +17,7 @@ local Path = require('project.utils.path')
 local Config = require('project.config')
 local exists = Path.exists
 local get_recent_projects = History.get_recent_projects
+local vim_has = Util.vim_has
 
 ---@class Project.Popup
 local Popup = {}
@@ -23,9 +26,28 @@ local Popup = {}
 Popup.select = {}
 
 ---@param opts Project.Popup.SelectSpec
----@return { choices: (fun(): table<string, ProjectCmdFun>), choices_list: (fun(): string[]) }|ProjectCmdFun
+---@return Project.Popup.Select|Project.Popup.Spec|ProjectCmdFun
 function Popup.select:new(opts)
-    ---@type { choices: (fun(): table<string, ProjectCmdFun>), choices_list: (fun(): string[]) }|ProjectCmdFun
+    if vim_has('nvim-0.11') then
+        vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
+        vim.validate('choices', opts.choices, 'function', false, 'fun(): table<string, function>')
+        vim.validate('choices_list', opts.choices_list, 'function', false, 'fun(): string[]')
+        vim.validate(
+            'callback',
+            opts.callback,
+            'function',
+            false,
+            'fun(ctx?: vim.api.keyset.create_user_command.command_args)'
+        )
+    else
+        vim.validate({
+            opts = { opts, 'table' },
+            choices = { opts.choices, 'function' },
+            choices_list = { opts.choices_list, 'function' },
+            callback = { opts.callback, 'function' },
+        })
+    end
+    ---@type Project.Popup.Select|Project.Popup.Spec|ProjectCmdFun
     local T = setmetatable({
         choices = opts.choices,
         choices_list = opts.choices_list,
@@ -34,21 +56,25 @@ function Popup.select:new(opts)
 
         ---@param ctx? vim.api.keyset.create_user_command.command_args
         __call = function(_, ctx)
-            if ctx then
-                opts.callback(ctx)
+            if not ctx then
+                opts.callback()
                 return
             end
 
-            opts.callback()
+            opts.callback(ctx)
         end,
     })
 
     return T
 end
 
----@param input string?
+---@param input string|nil
 function Popup.prompt_project(input)
-    local Api = require('project.api')
+    if vim_has('nvim-0.11') then
+        vim.validate('input', input, 'string', true, 'string|nil')
+    else
+        vim.validate({ input = { input, { 'string', 'nil' } } })
+    end
     if not input or input == '' then
         return
     end
@@ -64,7 +90,8 @@ function Popup.prompt_project(input)
         end
     end
 
-    local recent = require('project.utils.history').get_recent_projects()
+    local Api = require('project.api')
+    local recent = History.get_recent_projects()
     if Api.current_project == input or in_list(recent, input) then
         vim.notify('Already added that directory!', WARN)
         return
