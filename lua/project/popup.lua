@@ -133,13 +133,8 @@ Popup.open_menu = Popup.select:new({
     choices = (function()
         ---@type table<string, ProjectCmdFun>
         local res = {
-            ['New Project'] = function(ctx)
-                if vim.tbl_isempty(ctx.fargs) then
-                    require('project.commands').ProjectNew()
-                    return
-                end
-
-                require('project.commands').ProjectNew(ctx)
+            ['New Project'] = function()
+                require('project.commands').ProjectNew()
             end,
             ['Delete A Project'] = function()
                 require('project.commands').ProjectDelete()

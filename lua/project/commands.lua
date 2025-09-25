@@ -197,11 +197,9 @@ M.new({
 M.new({
     name = 'ProjectNew',
     callback = function()
-        local Api = require('project.api')
         vim.ui.input({
             prompt = 'Input a valid path to the project:',
             completion = 'dir',
-            default = Api.get_project_root(),
         }, require('project.popup').prompt_project)
     end,
     desc = 'Run the experimental UI for project.nvim',
