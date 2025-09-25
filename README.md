@@ -818,24 +818,29 @@ The command does essentially the following:
 
 ### `:ProjectDelete`
 
-The `:ProjectDelete` command is one that needs at least one argument, and only accepts directories separated
-by a space. The arguments have to be directories that exist in the result of `get_recent_projects()`.
+The `:ProjectDelete` command is a utility to delete your projects.
 
-The arguments can be relative, absolute or un-expanded (`~/path/to/project`). The command will attempt
-to parse the args.
-If there's a successful deletion, you'll recieve a notification through `vim.notify()`.
+If no arguments are given, a popup with a list of your current projects will be opened.
+
+If one or more arguments are passed, it will expect directories separated
+by a space. The arguments have to be directories that are returned by `get_recent_projects()`.
+The arguments can be relative, absolute or un-expanded (`~/path/to/project`).
+The command will attemptto parse the args and, unless a `!` is passed to the command
+(`:ProjectDelete!`). In that case, invalid args will be ignored.
+
+If there's a successful deletion, you'll recieve a notification denoting success.
 
 > [!NOTE]
 > **USAGE**
 >
 > ```vim
 > " Vim command line
-> :ProjectDelete /path/to/first [/path/to/second [...]]
+> :ProjectDelete[!] [/path/to/first [/path/to/second [...]]]
 > ```
 
 > [!TIP]
 > - _See `:h :ProjectDelete` for more info_.
-> - _See [_`api.lua`_](./lua/project/api.lua) for more info_.
+> - _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
 
 ### `:ProjectSession`
 

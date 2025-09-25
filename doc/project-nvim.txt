@@ -713,25 +713,26 @@ Table of Contents                                             *project-nvim.toc*
 
 
                                                  *ProjectDelete*  *:ProjectDelete*
-`:ProjectDelete[!] /path/to/first [/path/to/second [...]]`
+`:ProjectDelete[!] [/path/to/first [/path/to/second [...]]]`
 
-                            The `:ProjectDelete` command is one that needs
-                            at least one argument, and only accepts
-                            directories separated by a space.
-                            The arguments have to be directories that exist
-                            in the table returned by
-                            |project-nvim.get_recent_projects()|.
-                            It also supports project completion
-
-                            The arguments can be relative, absolute
-                            or un-expanded (`~/...`).
-                            The command will attempt to parse the args.
-                            If the [!] is given the command won't abort
-                            on invalid arguments.
-                            If there's any successful deletion
-                            you'll receive a notification through
-                            |vim.notify()| (invalid args with [!] are not
-                            included).
+                            The `:ProjectDelete` command is a utility
+                            to delete your projects.
+                            If no arguments are given
+                            a popup with a list of your current projects
+                            will be opened.
+                            If one or more arguments are passed
+                            it will expect directories separated by a space.
+                            The arguments have to be directories that are
+                            returned by `get_recent_projects()`
+                            (see |project-nvim.get_recent_projects()|).
+                            The arguments can be relative,
+                            absolute or un-expanded (`~/path/to/project`).
+                            The command will attemptto parse the args and,
+                            unless a `!` is passed to the command
+                            (`:ProjectDelete!`). In that case
+                            invalid args will be ignored.
+                            If there's a successful deletion
+                            you'll recieve a notification denoting success.
 
 
                                                      *ProjectRoot*  *:ProjectRoot*

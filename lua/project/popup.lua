@@ -14,6 +14,7 @@ local History = require('project.utils.history')
 local Path = require('project.utils.path')
 local Config = require('project.config')
 local exists = Path.exists
+local get_recent_projects = History.get_recent_projects
 
 ---@class Project.Popup
 local Popup = {}
@@ -71,6 +72,41 @@ function Popup.prompt_project(input)
     Api.set_pwd(input, 'prompt')
     History.write_history()
 end
+
+Popup.delete_menu = Popup.select:new({
+    callback = function()
+        vim.ui.select(Popup.delete_menu.choices_list, {
+            prompt = 'Select a project to delete:',
+        }, function(item, _)
+            if not in_list(Popup.delete_menu.choices_list, item) then
+                error('Bad selection!', ERROR)
+            end
+
+            local op = Popup.delete_menu.choices[item]
+            if not (op and vim.is_callable(op)) then
+                error('Bad selection!', ERROR)
+            end
+
+            op()
+        end)
+    end,
+    choices_list = (function()
+        local recents = get_recent_projects()
+        return Util.reverse(recents)
+    end)(),
+    choices = (function()
+        ---@type table<string, fun()>
+        local T = {}
+
+        for _, proj in ipairs(get_recent_projects()) do
+            T[proj] = function()
+                History.delete_project(proj)
+            end
+        end
+
+        return T
+    end)(),
+})
 
 Popup.open_menu = Popup.select:new({
     callback = function(ctx)

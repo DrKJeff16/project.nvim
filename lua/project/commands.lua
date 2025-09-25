@@ -130,6 +130,11 @@ M.new({
 M.new({
     name = 'ProjectDelete',
     callback = function(ctx)
+        if vim.tbl_isempty(ctx.fargs) then
+            require('project.popup').delete_menu()
+            return
+        end
+
         local force = ctx.bang ~= nil and ctx.bang or false
         local recent = require('project.utils.history').get_recent_projects()
 
@@ -156,8 +161,8 @@ M.new({
             end
         end
     end,
-    desc = 'Deletes the projects given as args, assuming they are valid',
-    nargs = '+',
+    desc = 'Deletes the projects given as args, assuming they are valid. No args open a popup',
+    nargs = '*',
     bang = true,
 
     ---@param line string
