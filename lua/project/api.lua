@@ -486,10 +486,12 @@ function Api.add_project_manually(verbose)
         validate({ verbose = { verbose, { 'boolean', 'nil' } } })
     end
     verbose = verbose ~= nil and verbose or false
+    local Log = require('project.utils.log')
 
     local dir = vim.fn.fnamemodify(buf_name(curr_buf()), ':p:h')
+    Log.debug(('(%s.add_project_manually): Attempting to process `%s`'):format(MODSTR, dir), INFO)
     if verbose then
-        notify(('Attempting to process `%s`'):format(dir), INFO)
+        notify(('(%s.add_project_manually): Attempting to process `%s`'):format(MODSTR, dir), INFO)
     end
 
     Api.set_pwd(dir, 'manual')

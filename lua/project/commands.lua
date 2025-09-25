@@ -1,6 +1,7 @@
 local MODSTR = 'project.commands'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
+local validate = vim.validate
 
 local vim_has = require('project.utils.util').vim_has
 
@@ -23,14 +24,14 @@ local vim_has = require('project.utils.util').vim_has
 ---@field create_user_commands fun()
 
 ---@type Project.Commands|table<string, Project.CMD>
-local Commands = {}
+local M = {}
 
 ---@param spec Project.Commands.Spec
-function Commands.new(spec)
+function M.new(spec)
     if vim_has('nvim-0.11') then
-        vim.validate('spec', spec, 'table', false, 'Project.Commands.Spec')
+        validate('spec', spec, 'table', false, 'Project.Commands.Spec')
     else
-        vim.validate({ spec = { spec, 'table' } })
+        validate({ spec = { spec, 'table' } })
     end
 
     if vim.tbl_isempty(spec) then
@@ -38,12 +39,12 @@ function Commands.new(spec)
     end
 
     if vim_has('nvim-0.11') then
-        vim.validate('name', spec.name, 'string', false)
-        vim.validate('callback', spec.callback, 'function', false)
-        vim.validate('desc', spec.desc, 'string', false)
-        vim.validate('bang', spec.bang, 'boolean', true, 'boolean?')
-        vim.validate('nargs', spec.nargs, { 'string', 'number' }, true, '(string|integer)?')
-        vim.validate(
+        validate('name', spec.name, 'string', false)
+        validate('callback', spec.callback, 'function', false)
+        validate('desc', spec.desc, 'string', false)
+        validate('bang', spec.bang, 'boolean', true, 'boolean?')
+        validate('nargs', spec.nargs, { 'string', 'number' }, true, '(string|integer)?')
+        validate(
             'complete',
             spec.complete,
             { 'function', 'string' },
@@ -51,7 +52,7 @@ function Commands.new(spec)
             '(string|CompletorFun)?'
         )
     else
-        vim.validate({
+        validate({
             name = { spec.name, 'string' },
             callback = { spec.callback, 'function' },
             desc = { spec.desc, 'string' },
@@ -59,6 +60,12 @@ function Commands.new(spec)
             nargs = { spec.nargs, { 'string', 'number', 'nil' } },
             complete = { spec.complete, { 'string', 'function', 'nil' } },
         })
+    end
+    if spec.name == '' then
+        error(('(%.new): No user command name provided!'):format(MODSTR))
+    end
+    if spec.desc == '' then
+        error(('(%.new): No user command description provided!'):format(MODSTR))
     end
 
     ---@type { name: string, desc: string, bang: boolean, complete?: string|CompletorFun, nargs?: string|integer }
@@ -76,7 +83,7 @@ function Commands.new(spec)
         T.complete = spec.complete
     end
 
-    Commands[spec.name] = setmetatable({}, {
+    M[spec.name] = setmetatable({}, {
         ---@param k string
         __index = function(_, k)
             return T[k]
@@ -98,7 +105,7 @@ function Commands.new(spec)
     })
 end
 
-Commands.new({
+M.new({
     name = 'ProjectAdd',
     callback = function(ctx)
         local quiet = ctx.bang ~= nil and ctx.bang or false
@@ -108,7 +115,7 @@ Commands.new({
     bang = true,
 })
 
-Commands.new({
+M.new({
     name = 'ProjectDelete',
     callback = function(ctx)
         local force = ctx.bang ~= nil and ctx.bang or false
@@ -153,7 +160,7 @@ Commands.new({
     end,
 })
 
-Commands.new({
+M.new({
     name = 'ProjectConfig',
     callback = function()
         local cfg = require('project').get_config()
@@ -162,7 +169,7 @@ Commands.new({
     desc = 'Prints out the current configuratiion for `project.nvim`',
 })
 
-Commands.new({
+M.new({
     name = 'ProjectFzf',
     callback = function()
         require('project.extensions.fzf-lua').run_fzf_lua()
@@ -170,7 +177,7 @@ Commands.new({
     desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
 })
 
-Commands.new({
+M.new({
     name = 'ProjectNew',
     callback = function()
         local Api = require('project.api')
@@ -183,7 +190,7 @@ Commands.new({
     desc = 'Run the experimental UI for project.nvim',
 })
 
-Commands.new({
+M.new({
     name = 'ProjectRoot',
     callback = function(ctx)
         local verbose = ctx.bang ~= nil and ctx.bang or false
@@ -193,7 +200,7 @@ Commands.new({
     bang = true,
 })
 
-Commands.new({
+M.new({
     name = 'ProjectSession',
     callback = function()
         local session = require('project.utils.history').session_projects
@@ -214,7 +221,7 @@ Commands.new({
     desc = 'Prints out the current `project.nvim` projects session',
 })
 
-Commands.new({
+M.new({
     name = 'ProjectTelescope',
     callback = function()
         if vim.g.project_telescope_loaded == 1 then
@@ -224,71 +231,71 @@ Commands.new({
     desc = 'Telescope shortcut for project.nvim picker',
 })
 
-function Commands.create_user_commands()
+function M.create_user_commands()
     ---`:ProjectAdd`
-    vim.api.nvim_create_user_command('ProjectAdd', function(ctx)
-        Commands.ProjectAdd(ctx)
+    vim.api.nvim_create_user_command(M.ProjectAdd.name, function(ctx)
+        M.ProjectAdd(ctx)
     end, {
-        bang = Commands.ProjectAdd.bang,
-        desc = Commands.ProjectAdd.desc,
+        bang = M.ProjectAdd.bang,
+        desc = M.ProjectAdd.desc,
     })
 
     ---`:ProjectConfig`
-    vim.api.nvim_create_user_command('ProjectConfig', function()
-        Commands.ProjectConfig()
+    vim.api.nvim_create_user_command(M.ProjectConfig.name, function()
+        M.ProjectConfig()
     end, {
-        desc = Commands.ProjectConfig.desc,
+        desc = M.ProjectConfig.desc,
     })
 
     ---`:ProjectDelete`
-    vim.api.nvim_create_user_command('ProjectDelete', function(ctx)
-        Commands.ProjectDelete(ctx)
+    vim.api.nvim_create_user_command(M.ProjectDelete.name, function(ctx)
+        M.ProjectDelete(ctx)
     end, {
-        desc = Commands.ProjectDelete.desc,
-        bang = Commands.ProjectDelete.bang,
-        nargs = Commands.ProjectDelete.nargs,
-        complete = Commands.ProjectDelete.complete,
+        desc = M.ProjectDelete.desc,
+        bang = M.ProjectDelete.bang,
+        nargs = M.ProjectDelete.nargs,
+        complete = M.ProjectDelete.complete,
     })
 
     ---`:ProjectNew`
-    vim.api.nvim_create_user_command('ProjectNew', function()
-        Commands.ProjectNew()
+    vim.api.nvim_create_user_command(M.ProjectNew.name, function()
+        M.ProjectNew()
     end, {
-        desc = Commands.ProjectNew.desc,
+        desc = M.ProjectNew.desc,
     })
 
     ---`:ProjectRoot`
-    vim.api.nvim_create_user_command('ProjectRoot', function(ctx)
-        Commands.ProjectRoot(ctx)
+    vim.api.nvim_create_user_command(M.ProjectRoot.name, function(ctx)
+        M.ProjectRoot(ctx)
     end, {
-        bang = Commands.ProjectRoot.bang,
-        desc = Commands.ProjectRoot.desc,
+        bang = M.ProjectRoot.bang,
+        desc = M.ProjectRoot.desc,
     })
 
     ---`:ProjectSession`
-    vim.api.nvim_create_user_command('ProjectSession', function()
-        Commands.ProjectSession()
+    vim.api.nvim_create_user_command(M.ProjectSession.name, function()
+        M.ProjectSession()
     end, {
-        desc = Commands.ProjectSession.desc,
+        desc = M.ProjectSession.desc,
     })
 
     if require('project.config').options.fzf_lua.enabled then
         ---`:ProjectFzf`
-        vim.api.nvim_create_user_command('ProjectFzf', function()
-            Commands.ProjectFzf()
+        vim.api.nvim_create_user_command(M.ProjectFzf.name, function()
+            M.ProjectFzf()
         end, {
-            desc = Commands.ProjectFzf.desc,
+            desc = M.ProjectFzf.desc,
         })
     end
 
     ---`:ProjectTelescope`
-    vim.api.nvim_create_user_command('ProjectTelescope', function()
-        Commands.ProjectTelescope()
+    vim.api.nvim_create_user_command(M.ProjectTelescope.name, function()
+        M.ProjectTelescope()
     end, {
-        desc = Commands.ProjectTelescope.desc,
+        desc = M.ProjectTelescope.desc,
     })
 end
 
-return Commands
+return M
 
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:
