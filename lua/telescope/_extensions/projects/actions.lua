@@ -22,42 +22,6 @@ local State = require('telescope.actions.state')
 
 local copy = vim.deepcopy
 
----@return table
-local function create_finder()
-    local results = History.get_recent_projects()
-
-    if Config.options.telescope.sort == 'newest' then
-        Log.debug(
-            ('(%s.create_finder): Sorting order to `newest`. Reversing project list.'):format(
-                MODSTR
-            )
-        )
-        results = reverse(copy(results))
-    end
-
-    return Finders.new_table({
-        results = results,
-
-        ---@param value string
-        entry_maker = function(value)
-            local name = ('%s/%s'):format(
-                vim.fn.fnamemodify(value, ':h:t'),
-                vim.fn.fnamemodify(value, ':t')
-            )
-
-            ---@class Project.ActionEntry
-            local action_entry = {
-                display = make_display,
-                name = name,
-                value = value,
-                ordinal = ('%s %s'):format(name, value),
-            }
-
-            return action_entry
-        end,
-    })
-end
-
 ---@class Project.Telescope.Actions
 local M = {}
 
@@ -197,32 +161,69 @@ function M.delete_project(prompt_bufnr)
     local active_entry = State.get_selected_entry()
 
     if active_entry == nil or not is_type('string', active_entry.value) then
-        Log.debug(('(%s.delete_project): Closing prompt `%s`.'):format(MODSTR, prompt_bufnr))
         Actions.close(prompt_bufnr)
-        Log.debug(
-            ('(%s.delete_project): Closed prompt `%s` successfully.'):format(MODSTR, prompt_bufnr)
+        Log.error(
+            ('(%s.delete_project): Closed prompt `%s` due to entry not being available!'):format(
+                MODSTR,
+                prompt_bufnr
+            )
         )
 
         return
     end
 
-    local value = active_entry.value
-    local choice = vim.fn.confirm(("Delete '%s' from project list?"):format(value), '&Yes\n&No', 2)
-
+    local choice = vim.fn.confirm(
+        ("Delete '%s' from project list?"):format(active_entry.value),
+        '&Yes\n&No',
+        2
+    )
     ---If choice is not `YES`
     if choice ~= 1 then
         Log.info('(%s.delete_project): Aborting project deletion.')
         return
     end
 
-    History.delete_project(active_entry)
-
-    local finder = create_finder()
+    History.delete_project(active_entry.value)
 
     Log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
-    State.get_current_picker(prompt_bufnr):refresh(finder, {
-        reset_prompt = true,
-    })
+    State.get_current_picker(prompt_bufnr):refresh(
+        (function()
+            local results = History.get_recent_projects()
+            if Config.options.telescope.sort == 'newest' then
+                Log.debug(
+                    ('(%s.create_finder): Sorting order to `newest`. Reversing project list.'):format(
+                        MODSTR
+                    )
+                )
+                results = reverse(copy(results))
+            end
+
+            return Finders.new_table({
+                results = results,
+
+                ---@param value string
+                entry_maker = function(value)
+                    local name = ('%s/%s'):format(
+                        vim.fn.fnamemodify(value, ':h:t'),
+                        vim.fn.fnamemodify(value, ':t')
+                    )
+
+                    ---@class Project.ActionEntry
+                    local action_entry = {
+                        display = make_display,
+                        name = name,
+                        value = value,
+                        ordinal = ('%s %s'):format(name, value),
+                    }
+
+                    return action_entry
+                end,
+            })
+        end)(),
+        {
+            reset_prompt = true,
+        }
+    )
     Log.debug(
         ('(%s.delete_project): Refreshing prompt `%s` successfully.'):format(MODSTR, prompt_bufnr)
     )

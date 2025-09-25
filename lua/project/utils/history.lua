@@ -25,7 +25,6 @@ local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local uv = vim.uv or vim.loop
 local copy = vim.deepcopy
-local in_list = vim.list_contains
 
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
@@ -123,9 +122,9 @@ function History.delete_project(project)
     end
 
     local Log = require('project.utils.log')
-
     if History.recent_projects == nil then
-        Log.error('(%s.delete_project): `recent_projects` is nil! Aborting.')
+        Log.error(('(%s.delete_project): `recent_projects` is nil! Aborting.'):format(MODSTR))
+        vim.notify(('(%s.delete_project): `recent_projects` is nil! Aborting.'):format(MODSTR))
         return
     end
 
@@ -134,20 +133,30 @@ function History.delete_project(project)
     local proj = type(project) == 'string' and project or project.value
 
     for _, v in ipairs(History.recent_projects) do
-        if v ~= proj and not in_list(new_tbl, v) then
+        if v ~= proj then
             table.insert(new_tbl, v)
-        elseif v == proj then
+        else
             found = true
         end
     end
+    History.recent_projects = copy(new_tbl)
 
-    Log.warn(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj))
-    if found then
-        vim.notify(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj), WARN)
+    new_tbl = {}
+    for _, v in ipairs(History.session_projects) do
+        if v ~= proj then
+            table.insert(new_tbl, v)
+        else
+            found = true
+        end
     end
+    History.session_projects = copy(new_tbl)
 
-    History.recent_projects = new_tbl
-    History.write_history()
+    if found then
+        Log.warn(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj))
+        vim.notify(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj), WARN)
+
+        History.write_history(true)
+    end
 end
 
 ---Splits data into table.
@@ -208,6 +217,7 @@ function History.read_history()
         return
     end
     local data = uv.fs_read(fd, stat.size, -1)
+    uv.fs_close(fd)
 
     History.deserialize_history(data)
 end
@@ -241,7 +251,15 @@ end
 ---
 ---Bear in mind: **_this function is synchronous._**
 --- ---
-function History.write_history()
+---@param close? boolean
+function History.write_history(close)
+    if vim_has('nvim-0.11') then
+        vim.validate('close', close, 'boolean', true, 'boolean?')
+    else
+        vim.validate({ close = { close, { 'boolean', 'nil' } } })
+    end
+    close = close ~= nil and close or false
+
     local Config = require('project.config')
     local Log = require('project.utils.log')
 
@@ -272,8 +290,11 @@ function History.write_history()
 
     Log.debug(('(%s.write_history): Writing to file...'):format(MODSTR))
     uv.fs_write(fd, out, -1)
-    uv.fs_close(fd)
-    Log.debug(('(%s.write_history): File descriptor closed!'):format(MODSTR))
+
+    if close then
+        uv.fs_close(fd)
+        Log.debug(('(%s.write_history): File descriptor closed!'):format(MODSTR))
+    end
 end
 
 return History

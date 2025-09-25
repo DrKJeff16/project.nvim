@@ -452,39 +452,30 @@ function Api.on_buf_enter(verbose, bufnr)
     History.write_history()
 end
 
-function Api.prompt_project()
-    vim.ui.input({
-        prompt = 'Input a valid path to the project:',
-        completion = 'dir',
-        default = Api.get_project_root(curr_buf()),
-    }, function(input)
-        if not input or input == '' then
-            return
-        end
+---@param input string?
+function Api.prompt_project(input)
+    if not input or input == '' then
+        return
+    end
 
-        local path = vim.fn.fnamemodify(input, ':p')
-        if not (exists(path) and exists(vim.fn.fnamemodify(path, ':p:h'))) then
-            error('Invalid path!', ERROR)
-        end
+    if not (exists(input) and exists(vim.fn.fnamemodify(input, ':p:h'))) then
+        error('Invalid path!', ERROR)
+    end
 
-        if not Util.dir_exists(path) then
-            path = vim.fn.fnamemodify(path, ':p:h')
-            if not Util.dir_exists(path) then
-                error('Path is not a directory, and parent could not be retrieved!', ERROR)
-            end
+    if not Util.dir_exists(input) then
+        input = vim.fn.fnamemodify(input, ':p:h')
+        if not Util.dir_exists(input) then
+            error('Path is not a directory, and parent could not be retrieved!', ERROR)
         end
+    end
 
-        if Api.current_project == path then
-            vim.notify('Already added that directory!', WARN)
-            return
-        end
+    if Api.current_project == input or in_list(History.get_recent_projects(), input) then
+        vim.notify('Already added that directory!', WARN)
+        return
+    end
 
-        local success = Api.set_pwd(path, 'prompt')
-
-        if not success then
-            vim.notify('Failed to add directory to project history!', ERROR)
-        end
-    end)
+    Api.set_pwd(input, 'prompt')
+    History.write_history()
 end
 
 ---@param verbose? boolean
@@ -512,7 +503,7 @@ function Api.init()
         pattern = '*',
         group = group,
         callback = function()
-            History.write_history()
+            History.write_history(true)
         end,
     })
 

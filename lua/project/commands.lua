@@ -171,6 +171,19 @@ Commands.new({
 })
 
 Commands.new({
+    name = 'ProjectNew',
+    callback = function()
+        local Api = require('project.api')
+        vim.ui.input({
+            prompt = 'Input a valid path to the project:',
+            completion = 'dir',
+            default = Api.get_project_root(),
+        }, Api.prompt_project)
+    end,
+    desc = 'Run the experimental UI for project.nvim',
+})
+
+Commands.new({
     name = 'ProjectRoot',
     callback = function(ctx)
         local verbose = ctx.bang ~= nil and ctx.bang or false
@@ -235,6 +248,13 @@ function Commands.create_user_commands()
         bang = Commands.ProjectDelete.bang,
         nargs = Commands.ProjectDelete.nargs,
         complete = Commands.ProjectDelete.complete,
+    })
+
+    ---`:ProjectNew`
+    vim.api.nvim_create_user_command('ProjectNew', function()
+        Commands.ProjectNew()
+    end, {
+        desc = Commands.ProjectNew.desc,
     })
 
     ---`:ProjectRoot`
