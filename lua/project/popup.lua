@@ -123,7 +123,16 @@ Popup.delete_menu = Popup.select:new({
     callback = function()
         vim.ui.select(Popup.delete_menu.choices_list(), {
             prompt = 'Select a project to delete:',
-        }, function(item, _)
+            format_item = function(item)
+                local session = History.session_projects
+
+                if in_list(session, item) then
+                    return '* ' .. item
+                end
+
+                return item
+            end,
+        }, function(item)
             if not in_list(Popup.delete_menu.choices_list(), item) then
                 error('Bad selection!', ERROR)
             end
@@ -197,16 +206,18 @@ Popup.open_menu = Popup.select:new({
             end,
             ['Exit'] = function() end,
         }
-        if vim.g.telescope_loaded == 1 then
+        if vim.g.project_telescope_loaded == 1 then
             res['Open Telescope Picker'] = function()
                 require('telescope._extensions.projects').projects()
             end
         end
+
         if Config.options.fzf_lua.enabled then
             res['Open Fzf-Lua Picker'] = function()
                 require('project.extensions.fzf-lua').run_fzf_lua()
             end
         end
+
         if Config.options.log.enabled then
             res['Open Log'] = function()
                 require('project.utils.log').open_win()
@@ -223,11 +234,9 @@ Popup.open_menu = Popup.select:new({
         local res_list = {
             'New Project',
             'Delete A Project',
-            'Show Config',
-            'Run Checkhealth',
         }
 
-        if vim.g.telescope_loaded == 1 then
+        if vim.g.project_telescope_loaded == 1 then
             table.insert(res_list, 'Open Telescope Picker')
         end
         if Config.options.fzf_lua.enabled then
@@ -237,6 +246,8 @@ Popup.open_menu = Popup.select:new({
             table.insert(res_list, 'Open Log')
             table.insert(res_list, 'Clear Log')
         end
+        table.insert(res_list, 'Show Config')
+        table.insert(res_list, 'Run Checkhealth')
         table.insert(res_list, 'Open Help Docs')
         table.insert(res_list, 'Exit')
 
