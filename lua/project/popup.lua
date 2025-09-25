@@ -1,6 +1,6 @@
 ---@class Project.Popup.SelectSpec
----@field choices table<string, function>
----@field choices_list string[]
+---@field choices fun(): table<string, function>
+---@field choices_list fun(): string[]
 ---@field callback ProjectCmdFun
 
 -- local MODSTR = 'project.popup'
@@ -23,10 +23,13 @@ local Popup = {}
 Popup.select = {}
 
 ---@param opts Project.Popup.SelectSpec
----@return { choices: table<string, ProjectCmdFun>, choices_list: string[] }|ProjectCmdFun
+---@return { choices: (fun(): table<string, ProjectCmdFun>), choices_list: (fun(): string[]) }|ProjectCmdFun
 function Popup.select:new(opts)
-    ---@type { choices: table<string, ProjectCmdFun>, choices_list: string[] }|ProjectCmdFun
-    local T = setmetatable({}, {
+    ---@type { choices: (fun(): table<string, ProjectCmdFun>), choices_list: (fun(): string[]) }|ProjectCmdFun
+    local T = setmetatable({
+        choices = opts.choices,
+        choices_list = opts.choices_list,
+    }, {
         __index = Popup.select,
 
         ---@param ctx? vim.api.keyset.create_user_command.command_args
@@ -39,9 +42,6 @@ function Popup.select:new(opts)
             opts.callback()
         end,
     })
-
-    T.choices = opts.choices
-    T.choices_list = opts.choices_list
 
     return T
 end
@@ -64,7 +64,8 @@ function Popup.prompt_project(input)
         end
     end
 
-    if Api.current_project == input or in_list(History.get_recent_projects(), input) then
+    local recent = require('project.utils.history').get_recent_projects()
+    if Api.current_project == input or in_list(recent, input) then
         vim.notify('Already added that directory!', WARN)
         return
     end
@@ -75,14 +76,15 @@ end
 
 Popup.delete_menu = Popup.select:new({
     callback = function()
-        vim.ui.select(Popup.delete_menu.choices_list, {
+        vim.ui.select(Popup.delete_menu.choices_list(), {
             prompt = 'Select a project to delete:',
         }, function(item, _)
-            if not in_list(Popup.delete_menu.choices_list, item) then
+            if not in_list(Popup.delete_menu.choices_list(), item) then
                 error('Bad selection!', ERROR)
             end
 
-            local op = Popup.delete_menu.choices[item]
+            local choices = Popup.delete_menu.choices()
+            local op = choices[item]
             if not (op and vim.is_callable(op)) then
                 error('Bad selection!', ERROR)
             end
@@ -90,11 +92,14 @@ Popup.delete_menu = Popup.select:new({
             op()
         end)
     end,
-    choices_list = (function()
-        local recents = get_recent_projects()
-        return Util.reverse(recents)
-    end)(),
-    choices = (function()
+    choices_list = function()
+        ---@type string[]
+        local recents = Util.reverse(get_recent_projects())
+
+        table.insert(recents, 'Exit')
+        return recents
+    end,
+    choices = function()
         ---@type table<string, fun()>
         local T = {}
 
@@ -104,33 +109,30 @@ Popup.delete_menu = Popup.select:new({
             end
         end
 
+        T['Exit'] = function() end
         return T
-    end)(),
+    end,
 })
 
 Popup.open_menu = Popup.select:new({
-    callback = function(ctx)
-        vim.ui.select(Popup.open_menu.choices_list, {
+    callback = function()
+        vim.ui.select(Popup.open_menu.choices_list(), {
             prompt = 'Select an operation:',
         }, function(item, _)
-            if not in_list(Popup.open_menu.choices_list, item) then
+            if not in_list(Popup.open_menu.choices_list(), item) then
                 error('Bad selection!', ERROR)
             end
 
-            local op = Popup.open_menu.choices[item]
+            local choices = Popup.open_menu.choices()
+            local op = choices[item]
             if not (op and vim.is_callable(op)) then
                 error('Bad selection!', ERROR)
-            end
-
-            if ctx then
-                op(ctx)
-                return
             end
 
             op()
         end)
     end,
-    choices = (function()
+    choices = function()
         ---@type table<string, ProjectCmdFun>
         local res = {
             ['New Project'] = function()
@@ -170,8 +172,8 @@ Popup.open_menu = Popup.select:new({
         end
 
         return res
-    end)(),
-    choices_list = (function()
+    end,
+    choices_list = function()
         ---@type string[]
         local res_list = {
             'New Project',
@@ -194,7 +196,7 @@ Popup.open_menu = Popup.select:new({
         table.insert(res_list, 'Exit')
 
         return res_list
-    end)(),
+    end,
 })
 
 return Popup
