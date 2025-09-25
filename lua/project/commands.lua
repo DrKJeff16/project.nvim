@@ -1,3 +1,5 @@
+---@alias ProjectCmdFun fun(ctx?: vim.api.keyset.create_user_command.command_args)
+
 local MODSTR = 'project.commands'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
@@ -106,6 +108,16 @@ function M.new(spec)
 end
 
 M.new({
+    name = 'Project',
+    callback = function(ctx)
+        require('project.popup').open_menu(ctx.fargs)
+    end,
+    desc = 'Run the main project.nvim UI',
+    nargs = '*',
+    bang = true,
+})
+
+M.new({
     name = 'ProjectAdd',
     callback = function(ctx)
         local quiet = ctx.bang ~= nil and ctx.bang or false
@@ -185,7 +197,7 @@ M.new({
             prompt = 'Input a valid path to the project:',
             completion = 'dir',
             default = Api.get_project_root(),
-        }, Api.prompt_project)
+        }, require('project.popup').prompt_project)
     end,
     desc = 'Run the experimental UI for project.nvim',
 })
@@ -232,6 +244,14 @@ M.new({
 })
 
 function M.create_user_commands()
+    vim.api.nvim_create_user_command(M.Project.name, function(ctx)
+        M.Project(ctx)
+    end, {
+        desc = M.Project.desc,
+        nargs = M.Project.nargs,
+        bang = M.Project.bang,
+    })
+
     ---`:ProjectAdd`
     vim.api.nvim_create_user_command(M.ProjectAdd.name, function(ctx)
         M.ProjectAdd(ctx)
