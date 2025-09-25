@@ -130,7 +130,7 @@ M.new({
 M.new({
     name = 'ProjectDelete',
     callback = function(ctx)
-        if vim.tbl_isempty(ctx.fargs) then
+        if not ctx or vim.tbl_isempty(ctx.fargs) then
             require('project.popup').delete_menu()
             return
         end

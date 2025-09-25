@@ -141,7 +141,9 @@ Popup.open_menu = Popup.select:new({
 
                 require('project.commands').ProjectNew(ctx)
             end,
-            ['Delete Project'] = function() end,
+            ['Delete A Project'] = function()
+                require('project.commands').ProjectDelete()
+            end,
             ['Show Config'] = function()
                 require('project.commands').ProjectConfig()
             end,
@@ -178,7 +180,7 @@ Popup.open_menu = Popup.select:new({
         ---@type string[]
         local res_list = {
             'New Project',
-            'Delete Project',
+            'Delete A Project',
             'Show Config',
             'Run Checkhealth',
         }
