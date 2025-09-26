@@ -40,9 +40,9 @@
 
 - [x] Create basic utilities
 - [x] Add logging toggle to `setup()`
-- [ ] Implement logging utilities across codebase
+- [X] Implement logging utilities across codebase
+- [X] Create command with interface for end-user
 - [ ] Link logging with checkhealth
-- [ ] Create command with interface for end-user
 - [ ] Document logging
 
 ---
