@@ -72,7 +72,7 @@ Show these much love!
 - Logging capabilities `:ProjectLog`, `:ProjectLogClear`
 - `vim.ui` menu support
 - [Telescope Integration](#telescope) `:Telescope projects`
-- `Fzf-Lua` Integration
+- [`Fzf-Lua` Integration](#ProjectFzf)
 - [`nvim-tree` Integration](#nvim-tree)
 - [`neo-tree` Integration](#neo-tree)
 
@@ -741,7 +741,10 @@ These are the user commands you can call from the cmdline:
 
 The `:ProjectFzf` command is a dynamicly enabled User Command that runs
 `project.nvim` through `fzf-lua`.
-For now it just executes [`require('project').run_fzf_lua()`](#run-fzf-lua).
+For now it just executes `require('project').run_fzf_lua()`.
+
+> [!TIP]
+> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
 
 ### `:ProjectTelescope`
 
@@ -751,6 +754,9 @@ For now it just executes [`require('project').run_fzf_lua()`](#run-fzf-lua).
 The `:ProjectTelescope` command is a dynamicly enabled User Command that runs
 the Telescope `projects` picker.
 A shortcut, to be honest.
+
+> [!TIP]
+> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
 
 ### `:ProjectLog`
 
@@ -763,6 +769,9 @@ which can be exited by pressing `q` in Normal Mode.
 
 If a `[!]` is supplied at the end of the command (i.e. `:ProjectLog!`), then it'll close
 any instance of a previously opened log file, if found. Otherwise nothing will happen
+
+> [!TIP]
+> _See [_`log.lua`_](./lua/project/utils/log.lua) for more info_.
 
 ### `:ProjectLogClear`
 
@@ -782,6 +791,9 @@ If this is called from a logfile tab, then it will attempt to close it.
 > You could set `vim.g.project_log_cleared` to a value different to `1`,
 > **BUT THIS SOLUTION IS NOT TESTED FULLY. EXPECT WEIRD BEHAVIOUR IF YOU DO THIS!**
 
+> [!TIP]
+> _See [_`log.lua`_](./lua/project/utils/log.lua) for more info_.
+
 ### `:ProjectAdd`
 
 The `:ProjectAdd` command is a manual hook that opens a prompt to input any
@@ -790,10 +802,10 @@ directory through a UI prompt, to be saved to your project history.
 If your prompt is valid, your `cwd` will be switched to said directory.
 Adding a [!] will set the prompt to your cwd.
 
-> [!TIP]
+> [!NOTE]
 > This is particularly useful if you've enabled `manual_mode` in `setup()`.
 
-> [!NOTE]
+> [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
 
 ### `:ProjectRoot`
@@ -809,8 +821,8 @@ The command does essentially the following:
 :lua require('project.api').on_buf_enter()
 ```
 
-> [!INFO]
-> _See [_`api.lua`_](./lua/project/api.lua) for more info on `on_buf_enter()`_.
+> [!TIP]
+> _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
 
 ### `:ProjectConfig`
 
@@ -824,8 +836,8 @@ The command does essentially the following:
 :lua vim.notify(vim.inspect(require('project').get_config()))
 ```
 
-> [!INFO]
-> _See [`api.lua`](./lua/project/api.lua) for more info_.
+> [!TIP]
+> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
 
 ### `:ProjectDelete`
 
@@ -857,6 +869,9 @@ If there's a successful deletion, you'll recieve a notification denoting success
 
 The `:ProjectSession` command prints out the current session projects, in numerical order,
 found in `History.session_projects`.
+
+> [!TIP]
+> - _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
 
 <div align="right">
 
