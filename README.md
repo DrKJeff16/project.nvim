@@ -772,19 +772,17 @@ If this is called from a logfile tab, then it will attempt to close it.
 
 ### `:ProjectAdd`
 
-The `:ProjectAdd` command is a manual hook to add to session projects, then
-subsequently `cd` to the current file's project directory
-(provided) it actually could.
+The `:ProjectAdd` command is a manual hook that opens a prompt to input any
+directory through a UI prompt, to be saved to your project history.
 
-The command does essentially the following:
+If your prompt is valid, your `cwd` will be switched to said directory.
+Adding a [!] will set the prompt to your cwd.
 
-```vim
-" Vim command line
-:lua require('project.api').add_project_manually()
-```
+> [!TIP]
+> This is particularly useful if you've enabled `manual_mode` in `setup()`.
 
-> [!INFO]
-> _See [`api.lua`](./lua/project/api.lua) for more info on `add_project_manually()`_.
+> [!NOTE]
+> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
 
 ### `:ProjectRoot`
 

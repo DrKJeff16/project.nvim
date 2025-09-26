@@ -641,21 +641,17 @@ Table of Contents                                             *project-nvim.toc*
                                                        *ProjectAdd*  *:ProjectAdd*
 `:ProjectAdd[!]`
 
-                            The `:ProjectAdd` command is a manual hook to add
-                            the current root to the session directories table,
-                            then subsequently `cd` to the current file's
-                            project directory.
-                            Adding a [!] will make this command verbose.
-
-                            The command does essentially the following
-                            in the command line:
->vim
-                            :lua require('project.api').add_project_manually()
-<
-
+                            The `:ProjectAdd` command is a manual hook
+                            that opens a prompt to input any directory
+                            through a UI prompt, to be saved
+                            to your project history.
+                            If your prompt is valid your `cwd`
+                            will be switched to said directory.
+                            Adding a [!] will set the prompt to your cwd.
                             This is particularly useful if you've
-                            enabled {manual_mode} in `setup()`
-                            (see |project-nvim.setup-options|).
+                            enabled {manual_mode} in `setup()`.
+
+                            See |project-nvim.setup-options|
 
 
                                                        *ProjectLog*  *:ProjectLog*
