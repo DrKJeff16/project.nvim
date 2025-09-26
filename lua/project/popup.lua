@@ -44,13 +44,7 @@ function Popup.select:new(opts)
     if vim_has('nvim-0.11') then
         vim.validate('choices', opts.choices, 'function', false, 'fun(): table<string, function>')
         vim.validate('choices_list', opts.choices_list, 'function', false, 'fun(): string[]')
-        vim.validate(
-            'callback',
-            opts.callback,
-            'function',
-            false,
-            'fun(ctx?: vim.api.keyset.create_user_command.command_args)'
-        )
+        vim.validate('callback', opts.callback, 'function', false)
     else
         vim.validate({
             choices = { opts.choices, 'function' },
@@ -64,6 +58,7 @@ function Popup.select:new(opts)
         choices = opts.choices,
         choices_list = opts.choices_list,
     }, {
+        ---@param t Project.Popup.Select|Project.Popup.SelectChoices|ProjectCmdFun
         ---@param k string
         __index = function(t, k)
             return rawget(t, k)

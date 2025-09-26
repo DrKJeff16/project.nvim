@@ -1,5 +1,4 @@
 local MODSTR = 'project.config'
-
 local Util = require('project.utils.util')
 local Glob = require('project.utils.globtopattern')
 local mod_exists = Util.mod_exists
@@ -51,7 +50,6 @@ function Config.setup(options)
 
     vim.g.project_setup = 1
     Log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
-
     require('project.commands').create_user_commands()
 end
 

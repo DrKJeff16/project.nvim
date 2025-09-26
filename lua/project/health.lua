@@ -89,9 +89,7 @@ end
 
 function Health.history_check()
     start('History')
-
-    ---@type { name: string, type: ('file'|'directory'), path: string }[]
-    local P = {
+    local P = { ---@type { name: string, type: ('file'|'directory'), path: string }[]
         {
             name = 'datapath',
             type = 'directory',
@@ -140,9 +138,9 @@ function Health.project_check()
         h_warn('No active session projects!')
         return
     end
-    projects = dedup(copy(projects))
 
-    ---@cast projects string[]
+    ---@type string[]
+    projects = dedup(copy(projects))
     for k, v in ipairs(projects) do
         info(('[`%s`]: `%s`'):format(k, v))
     end
@@ -152,11 +150,11 @@ function Health.telescope_check()
     start('Telescope')
     local Opts = copy(Config.options)
     if not mod_exists('telescope') then
-        h_warn(
-            ('`telescope.nvim` is not installed.\n%s'):format(
-                "This doesn't represent an issue necessarily"
-            )
-        )
+        h_warn([[
+        `telescope.nvim` is not installed.
+
+        This doesn't represent an issue necessarily
+        ]])
         return
     end
     if not require('telescope').extensions.projects then
@@ -185,11 +183,11 @@ end
 function Health.fzf_lua_check()
     start('Fzf-Lua')
     if not Config.options.fzf_lua.enabled then
-        h_warn(
-            ('`fzf-lua` integration is disabled.\n%s'):format(
-                "This doesn't represent an issue necessarily"
-            )
-        )
+        h_warn([[
+        `fzf-lua` integration is disabled.
+
+        This doesn't represent an issue necessarily
+        ]])
         return
     end
 
@@ -212,14 +210,12 @@ function Health.recent_proj_check()
             or you just set a different `historypath` for your plugin,
             then you can ignore this.
 
-
             If this keeps appearing, though, check your config
             and submit an issue if pertinent.
                 ]])
         return
     end
-    recents = reverse(copy(recents))
-    for i, project in ipairs(recents) do
+    for i, project in ipairs(reverse(copy(recents))) do
         info(('`%s`. `%s`'):format(i, project))
     end
 end
