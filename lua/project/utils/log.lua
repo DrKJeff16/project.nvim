@@ -168,12 +168,16 @@ function Log.init()
     end
 
     Log.logfile = Path.projectpath .. '/project.log'
-    local stat = uv.fs_stat(Log.logfile)
-    if not stat then
-        error(('(%s.init): Log stat is nil!'):format(MODSTR), ERROR)
-    end
 
     local fd
+    local stat = uv.fs_stat(Log.logfile)
+    if stat == nil then
+        fd = Log.open('w')
+        uv.fs_close(fd)
+
+        stat = uv.fs_stat(Log.logfile)
+    end
+
     local max_size = require('project.config').options.log.max_size
     if (stat.size / 1024) / 1024 >= max_size then
         fd = Log.open('w')
