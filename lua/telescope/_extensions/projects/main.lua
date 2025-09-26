@@ -1,7 +1,6 @@
 if not require('project.utils.util').mod_exists('telescope') then
     error('project.nvim: Telescope is not installed!')
 end
-
 local copy = vim.deepcopy
 local in_list = vim.list_contains
 local empty = vim.tbl_isempty
@@ -13,7 +12,6 @@ local telescope_config = require('telescope.config').values
 
 local _Actions = require('telescope._extensions.projects.actions')
 local TelUtil = require('telescope._extensions.projects.util')
-
 local Util = require('project.utils.util')
 
 ---@class TelescopeProjects.Main
@@ -40,7 +38,6 @@ local valid_acts = {
 local function normal_attach(prompt_bufnr, map)
     local is_type = require('project.utils.util').is_type
     local Keys = require('project.config').options.telescope.mappings or {}
-
     if not is_type('table', Keys) or empty(Keys) then
         Keys = copy(require('project.config.defaults').telescope.mappings)
     end
@@ -55,14 +52,12 @@ local function normal_attach(prompt_bufnr, map)
             for lhs, act in pairs(group) do
                 ---@type function|false
                 local rhs = (_Actions[act] and in_list(valid_acts, act)) and _Actions[act] or false
-
                 if rhs and vim.is_callable(rhs) and is_type('string', lhs) then
                     map(mode, lhs, rhs)
                 end
             end
         end
     end
-
     Actions.select_default:replace(function()
         if require('project.config').options.telescope.disable_file_picker then
             local entry = State.get_selected_entry()
@@ -91,26 +86,21 @@ function Main.projects(opts)
     if vim.g.project_telescope_loaded ~= 1 then
         error('project.nvim: Telescope picker not loaded!')
     end
-
     opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
     local Options = require('project.config').options
     local scope_chdir = Options.scope_chdir
     local scope = scope_chdir == 'win' and 'window' or scope_chdir
-
     Pickers.new(opts, {
         prompt_title = ('Select Your Project (%s)'):format(Util.capitalize(scope)),
         results_title = 'Projects',
         finder = TelUtil.create_finder(),
         previewer = false,
         sorter = telescope_config.generic_sorter(opts),
-
         attach_mappings = normal_attach,
     }):find()
 end
 
 ---@type TelescopeProjects.Main
 local M = setmetatable({}, { __index = Main })
-
 return M
-
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

@@ -6,12 +6,18 @@
 
 ---@alias Project.API.HistoryPaths { datapath: string, projectpath: string, historyfile: string }
 
-local MODSTR = 'project.api'
-
 local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
+local validate = vim.validate
+local empty = vim.tbl_isempty
+local in_list = vim.list_contains
+local notify = vim.notify
+local curr_buf = vim.api.nvim_get_current_buf
+local augroup = vim.api.nvim_create_augroup
+local autocmd = vim.api.nvim_create_autocmd
+local buf_name = vim.api.nvim_buf_get_name
 
 local Config = require('project.config')
 local Path = require('project.utils.path')
@@ -26,36 +32,7 @@ local exists = Path.exists
 local is_excluded = Path.is_excluded
 local root_included = Path.root_included
 
-local validate = vim.validate
-local empty = vim.tbl_isempty
-local in_list = vim.list_contains
-local notify = vim.notify
-local curr_buf = vim.api.nvim_get_current_buf
-local augroup = vim.api.nvim_create_augroup
-local autocmd = vim.api.nvim_create_autocmd
-local buf_name = vim.api.nvim_buf_get_name
-
--- ---@param client vim.lsp.Client
--- ---@param name string
--- ---@return string
--- local function lsp_get_buf_root(client, name)
---     -- LSP clients can have multiple workspace folders
---     if not client.workspace_folders then
---         return client.config.root_dir
---     end
---
---     local result = client.config.root_dir
---
---     for _, workspace_folder in ipairs(client.workspace_folders) do
---         local folder_name = vim.uri_to_fname(workspace_folder.uri)
---         if folder_name and vim.startswith(name, folder_name) then
---             result = folder_name
---             break
---         end
---     end
---
---     return result
--- end
+local MODSTR = 'project.api'
 
 ---The `project.nvim` API module.
 --- ---
@@ -84,7 +61,6 @@ function Api.find_lsp_root(bufnr)
     local allow_patterns = Config.options.allow_patterns_for_lsp
     local ignore_lsp = Config.options.ignore_lsp
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
-
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
     if empty(clients) then
         return
@@ -92,28 +68,22 @@ function Api.find_lsp_root(bufnr)
 
     ---@type string|nil, string|nil
     local dir, name = nil, nil
-
     for _, client in ipairs(clients) do
         ---@type string[]
         local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
         local valid = is_type('table', filetypes) and not empty(filetypes)
-
         if not in_list(ignore_lsp, client.name) and valid then
             if in_list(filetypes, ft) and client.config.root_dir then
                 dir, name = client.config.root_dir, client.name
-
-                --- If pattern matching for LSP is enabled, check patterns
-                if allow_patterns then
+                if allow_patterns then -- If pattern matching for LSP is enabled, check patterns
                     if root_included(dir) == nil then
                         dir, name = nil, nil
                     end
                 end
-
                 break
             end
         end
     end
-
     return dir, name
 end
 
@@ -130,7 +100,6 @@ function Api.verify_owner(dir)
         validate({ dir = { dir, 'string' } })
     end
     local Log = require('project.utils.log')
-
     if is_windows() then
         Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
         return true
@@ -141,7 +110,6 @@ function Api.verify_owner(dir)
         Log.error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR))
         error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
     end
-
     return stat.uid == uv.getuid()
 end
 
@@ -160,7 +128,6 @@ function Api.find_pattern_root(bufnr)
     if is_windows() then
         dir = dir:gsub('\\', '/')
     end
-
     return root_included(dir)
 end
 
@@ -188,8 +155,8 @@ end
 ---@return boolean
 function Api.set_pwd(dir, method)
     if vim_has('nvim-0.11') then
-        validate('dir', dir, 'string', true)
-        validate('method', method, 'string', true)
+        validate('dir', dir, 'string', true, 'string?')
+        validate('method', method, 'string', true, 'string?')
     else
         validate({
             dir = { dir, { 'string', 'nil' } },
@@ -197,13 +164,11 @@ function Api.set_pwd(dir, method)
         })
     end
     local Log = require('project.utils.log')
-
     if dir == nil or method == nil then
         Log.error(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR))
         notify(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR), ERROR)
         return false
     end
-
     if not Config.options.allow_different_owners then
         if not Api.verify_owner(dir) then
             Log.error(('(%s.set_pwd): Project root is owned by a different user'):format(MODSTR))
@@ -223,18 +188,15 @@ function Api.set_pwd(dir, method)
         table.insert(History.session_projects, dir)
         modified = true
     end
-
     if not modified and #History.session_projects > 1 then
         ---@type integer
         local old_pos
-
         for k, v in next, History.session_projects do
             if v == dir then
                 old_pos = k
                 break
             end
         end
-
         table.remove(History.session_projects, old_pos)
         table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
     end
@@ -244,7 +206,6 @@ function Api.set_pwd(dir, method)
         Log.info(('(%s.set_pwd): Current directory is selected project.'):format(MODSTR))
         return true
     end
-
     if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
         Log.debug(('(%s.set_pwd): Running `before_attach` hook.'):format(MODSTR))
         Config.options.before_attach(dir, method)
@@ -270,7 +231,6 @@ function Api.set_pwd(dir, method)
         ok = pcall(vim.cmd.lchdir, dir)
         msg = ('%s\nlchdir: `%s`:'):format(msg, dir)
     end
-
     msg = ('%s\nMethod: %s\nStatus: %s'):format(msg, method, (ok and 'SUCCESS' or 'FAILED'))
     if ok then
         Log.info(msg)
@@ -289,7 +249,6 @@ function Api.set_pwd(dir, method)
             notify(msg, (ok and INFO or ERROR))
         end)
     end
-
     return ok
 end
 
@@ -302,12 +261,10 @@ function Api.get_history_paths(path)
         projectpath = Path.projectpath,
         historyfile = Path.historyfile,
     }
-
     if path and in_list(vim.tbl_keys(res), path) then
         ---@type string
         res = Path[path]
     end
-
     return res
 end
 
@@ -329,7 +286,6 @@ function Api.get_project_root(bufnr)
     if empty(Config.options.detection_methods) then
         return
     end
-
     local SWITCH = {
         lsp = function()
             local root, lsp_name = Api.find_lsp_root(bufnr)
@@ -351,7 +307,6 @@ function Api.get_project_root(bufnr)
             return false
         end,
     }
-
     for _, detection_method in ipairs(Config.options.detection_methods) do
         if in_list(vim.tbl_keys(SWITCH), detection_method) then
             local func = SWITCH[detection_method]
@@ -391,7 +346,6 @@ function Api.get_current_project(bufnr)
 
     local curr, method = Api.get_project_root(bufnr)
     local last = Api.get_last_project()
-
     return curr, method, last
 end
 
@@ -406,7 +360,6 @@ function Api.buf_is_file(bufnr)
     bufnr = bufnr or curr_buf()
 
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
-
     return in_list({ '', 'acwrite' }, bt)
 end
 
@@ -430,7 +383,6 @@ function Api.on_buf_enter(verbose, bufnr)
     end
 
     local dir = vim.fn.fnamemodify(buf_name(bufnr), ':p:h')
-
     if not (exists(dir) and root_included(dir)) or is_excluded(dir) then
         if verbose then
             notify('Directory is either excluded or does not exist!', WARN)
@@ -440,7 +392,6 @@ function Api.on_buf_enter(verbose, bufnr)
 
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
-
     if in_list(Config.options.disable_on.ft, ft) or in_list(Config.options.disable_on.bt, bt) then
         return
     end
@@ -448,14 +399,12 @@ function Api.on_buf_enter(verbose, bufnr)
     Api.current_project, Api.current_method = Api.get_current_project(bufnr)
     Api.set_pwd(Api.current_project, Api.current_method)
     Api.last_project = Api.get_last_project()
-
     History.write_history()
 end
 
 function Api.init()
     local group = augroup('project.nvim', { clear = false })
     local detection_methods = Config.options.detection_methods
-
     autocmd('VimLeavePre', {
         pattern = '*',
         group = group,
@@ -463,7 +412,6 @@ function Api.init()
             History.write_history(true)
         end,
     })
-
     if not Config.options.manual_mode then
         autocmd('BufEnter', {
             pattern = '*',
@@ -478,10 +426,8 @@ function Api.init()
             Api.gen_lsp_autocmd(group)
         end
     end
-
     History.read_history()
 end
 
 return Api
-
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

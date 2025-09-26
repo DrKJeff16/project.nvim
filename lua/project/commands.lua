@@ -1,15 +1,8 @@
 ---@alias ProjectCmdFun fun(ctx?: vim.api.keyset.create_user_command.command_args)
-
-local MODSTR = 'project.commands'
-local ERROR = vim.log.levels.ERROR
-local INFO = vim.log.levels.INFO
-local validate = vim.validate
-local in_list = vim.list_contains
-local curr_buf = vim.api.nvim_get_current_buf
-
-local vim_has = require('project.utils.util').vim_has
-
 ---@alias CompletorFun fun(a?: string, l?: string, p?: integer): string[]
+---@alias Project.CMD
+---|{ name: string, desc: string, bang: boolean, complete?: string|CompletorFun, nargs?: any }
+---|fun(ctx?: vim.api.keyset.create_user_command.command_args)
 
 ---@class Project.Commands.Spec
 ---@field name string
@@ -19,13 +12,17 @@ local vim_has = require('project.utils.util').vim_has
 ---@field bang? boolean
 ---@field nargs? string|integer
 
----@alias Project.CMD
----|{ name: string, desc: string, bang: boolean, complete?: string|CompletorFun, nargs?: any }
----|fun(ctx?: vim.api.keyset.create_user_command.command_args)
-
 ---@class Project.Commands
 ---@field new fun(spec: Project.Commands.Spec)
 ---@field create_user_commands fun()
+
+local MODSTR = 'project.commands'
+local ERROR = vim.log.levels.ERROR
+local INFO = vim.log.levels.INFO
+local validate = vim.validate
+local in_list = vim.list_contains
+local curr_buf = vim.api.nvim_get_current_buf
+local vim_has = require('project.utils.util').vim_has
 
 ---@type Project.Commands|table<string, Project.CMD>
 local M = {}
@@ -41,7 +38,6 @@ function M.new(spec)
     if vim.tbl_isempty(spec) then
         error(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
     end
-
     if vim_has('nvim-0.11') then
         validate('name', spec.name, 'string', false)
         validate('callback', spec.callback, 'function', false)
@@ -78,21 +74,17 @@ function M.new(spec)
         desc = spec.desc,
         bang = spec.bang ~= nil and spec.bang or false,
     }
-
     if spec.nargs ~= nil then
         T.nargs = spec.nargs
     end
-
     if spec.complete and vim.is_callable(spec.complete) then
         T.complete = spec.complete
     end
-
     M[spec.name] = setmetatable({}, {
         ---@param k string
         __index = function(_, k)
             return T[k]
         end,
-
         __tostring = function()
             return T.desc
         end,
@@ -103,7 +95,6 @@ function M.new(spec)
                 spec.callback(ctx)
                 return
             end
-
             spec.callback()
         end,
     })
@@ -138,13 +129,9 @@ M.new({
             if path:sub(-1) == '/' then ---HACK: Getting rid of trailing `/` in string
                 path = path:sub(1, path:len() - 1)
             end
-
-            ---If `:ProjectDelete` isn't called with bang `!`, abort on
-            ---anything that isn't in recent projects
             if not (force or in_list(recent, path) or path ~= '') then
                 error(('(:ProjectDelete): Could not delete `%s`, aborting'):format(path), ERROR)
             end
-
             if vim.list_contains(recent, path) then
                 require('project.utils.history').delete_project(path)
             end
@@ -159,7 +146,6 @@ M.new({
         local recent = require('project.utils.history').get_recent_projects()
         local input = vim.split(line, '%s+')
         local prefix = input[#input]
-
         return vim.tbl_filter(function(cmd) ---@param cmd string
             return vim.startswith(cmd, prefix)
         end, recent)
@@ -191,7 +177,6 @@ M.new({
             prompt = 'Input a valid path to the project:',
             completion = 'dir',
         }
-
         if ctx and ctx.bang ~= nil then
             if ctx.bang then
                 opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
@@ -228,7 +213,6 @@ M.new({
         for i, proj in ipairs(session) do
             msg = msg .. (len ~= i and '%s. %s\n' or '%s. %s'):format(i, proj)
         end
-
         vim.notify(msg, INFO)
     end,
     desc = 'Prints out the current `project.nvim` projects session',
@@ -252,23 +236,17 @@ function M.create_user_commands()
         nargs = M.Project.nargs,
         bang = M.Project.bang,
     })
-
-    ---`:ProjectAdd`
     vim.api.nvim_create_user_command(M.ProjectAdd.name, function(ctx)
         M.ProjectAdd(ctx)
     end, {
         bang = M.ProjectAdd.bang,
         desc = M.ProjectAdd.desc,
     })
-
-    ---`:ProjectConfig`
     vim.api.nvim_create_user_command(M.ProjectConfig.name, function()
         M.ProjectConfig()
     end, {
         desc = M.ProjectConfig.desc,
     })
-
-    ---`:ProjectDelete`
     vim.api.nvim_create_user_command(M.ProjectDelete.name, function(ctx)
         M.ProjectDelete(ctx)
     end, {
@@ -277,39 +255,30 @@ function M.create_user_commands()
         nargs = M.ProjectDelete.nargs,
         complete = M.ProjectDelete.complete,
     })
-
-    ---`:ProjectRoot`
     vim.api.nvim_create_user_command(M.ProjectRoot.name, function(ctx)
         M.ProjectRoot(ctx)
     end, {
         bang = M.ProjectRoot.bang,
         desc = M.ProjectRoot.desc,
     })
-
-    ---`:ProjectSession`
     vim.api.nvim_create_user_command(M.ProjectSession.name, function()
         M.ProjectSession()
     end, {
         desc = M.ProjectSession.desc,
     })
-
+    vim.api.nvim_create_user_command(M.ProjectTelescope.name, function()
+        M.ProjectTelescope()
+    end, {
+        desc = M.ProjectTelescope.desc,
+    })
     if require('project.config').options.fzf_lua.enabled then
-        ---`:ProjectFzf`
         vim.api.nvim_create_user_command(M.ProjectFzf.name, function()
             M.ProjectFzf()
         end, {
             desc = M.ProjectFzf.desc,
         })
     end
-
-    ---`:ProjectTelescope`
-    vim.api.nvim_create_user_command(M.ProjectTelescope.name, function()
-        M.ProjectTelescope()
-    end, {
-        desc = M.ProjectTelescope.desc,
-    })
 end
 
 return M
-
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

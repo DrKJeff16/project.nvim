@@ -1,5 +1,3 @@
-local MODSTR = 'project.config.defaults'
-
 ---@alias Project.Telescope.ActionNames
 ---|'browse_project_files'
 ---|'change_working_directory'
@@ -9,10 +7,12 @@ local MODSTR = 'project.config.defaults'
 ---|'recent_project_files'
 ---|'search_in_project_files'
 
-local validate = vim.validate
 local in_tbl = vim.tbl_contains
 local empty = vim.tbl_isempty
 local WARN = vim.log.levels.WARN
+local MODSTR = 'project.config.defaults'
+
+local vim_has = require('project.utils.util').vim_has
 
 ---The options available for in `require('project').setup()`.
 --- ---
@@ -34,7 +34,6 @@ local DEFAULTS = {
         --- ---
         ---@type boolean
         enabled = false,
-
         ---Determines whether the newest projects come first in the
         ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
         --- ---
@@ -42,7 +41,6 @@ local DEFAULTS = {
         --- ---
         ---@type 'oldest'|'newest'
         sort = 'newest',
-
         ---If you have `telescope-file-browser.nvim` installed, you can enable this
         ---so that the Telescope picker uses it instead of the `find_files` builtin.
         ---
@@ -53,7 +51,6 @@ local DEFAULTS = {
         --- ---
         ---@type boolean
         prefer_file_browser = false,
-
         ---Set this to `true` if you don't want the file picker to appear
         ---after you've selected a project.
         ---
@@ -63,7 +60,6 @@ local DEFAULTS = {
         --- ---
         ---@type boolean
         disable_file_picker = false,
-
         ---Table of mappings for the Telescope picker.
         ---
         ---Only supports Normal and Insert modes.
@@ -80,7 +76,6 @@ local DEFAULTS = {
                 s = 'search_in_project_files',
                 w = 'change_working_directory',
             },
-
             i = {
                 ['<C-b>'] = 'browse_project_files',
                 ['<C-d>'] = 'delete_project',
@@ -91,7 +86,6 @@ local DEFAULTS = {
             },
         },
     },
-
     ---Table of options used for `fzf-lua` integration
     --- ---
     ---@class Project.Config.FzfLua
@@ -105,7 +99,6 @@ local DEFAULTS = {
         ---@type boolean
         enabled = false,
     },
-
     ---Options for logging utility.
     --- ---
     ---@class Project.Config.Logging
@@ -124,7 +117,6 @@ local DEFAULTS = {
         ---@type number
         max_size = 1.0,
     },
-
     ---If `true` your root directory won't be changed automatically,
     ---so you have the option to manually do so
     ---using the `:ProjectRoot` command.
@@ -133,7 +125,6 @@ local DEFAULTS = {
     --- ---
     ---@type boolean
     manual_mode = false,
-
     ---Methods of detecting the root directory.
     ---
     --- - `'lsp'`: uses the native Neovim LSP
@@ -150,7 +141,6 @@ local DEFAULTS = {
     --- ---
     ---@type ("lsp"|"pattern")[]
     detection_methods = { 'lsp', 'pattern' },
-
     ---All the patterns used to detect the project's root directory.
     ---
     ---By default it only triggers when `'pattern'` is in `detection_methods`.
@@ -172,7 +162,6 @@ local DEFAULTS = {
         '.pre-commit-config.yaml',
         '.pre-commit-config.yml',
     },
-
     ---Hook to run before attaching to a new project.
     ---
     ---It recieves `target_dir` and, optionally,
@@ -186,7 +175,6 @@ local DEFAULTS = {
     ---@param method? string
     ---@diagnostic disable-next-line:unused-local
     before_attach = function(target_dir, method) end,
-
     ---Hook to run after attaching to a new project.
     ---**_This only runs if the directory changes successfully._**
     ---
@@ -201,21 +189,18 @@ local DEFAULTS = {
     ---@param method? string
     ---@diagnostic disable-next-line:unused-local
     on_attach = function(dir, method) end,
-
     ---Sets whether to use Pattern Matching rules to the LSP client.
     ---
     ---If `false` the Pattern Matching will only apply
     ---to the `'pattern'` detection method.
     ---
     ---If `true` the `patters` setting will also filter
-    ---your LSP's `root_dir`, assuming there is one and `'lsp'`
-    ---is in `patterns`.
+    ---your LSP's `root_dir`, assuming there is one and `'lsp'` is in `patterns`.
     --- ---
     ---Default: `false`
     --- ---
     ---@type boolean
     allow_patterns_for_lsp = false,
-
     ---Determines whether a project will be added if its project root is owned by a different user.
     ---
     ---If `true`, it will add a project to the history even if its root
@@ -225,7 +210,6 @@ local DEFAULTS = {
     --- ---
     ---@type boolean
     allow_different_owners = false,
-
     ---If enabled, set `vim.o.autochdir` to `true`.
     ---
     ---This is disabled by default because the plugin implicitly disables `autochdir`.
@@ -234,14 +218,12 @@ local DEFAULTS = {
     --- ---
     ---@type boolean
     enable_autochdir = false,
-
     ---Make hidden files visible when using any picker.
     --- ---
     ---Default: `false`
     --- ---
     ---@type boolean
     show_hidden = false,
-
     ---Table of lsp clients to ignore by name,
     ---e.g. `{ 'efm', ... }`.
     ---
@@ -252,7 +234,6 @@ local DEFAULTS = {
     --- ---
     ---@type string[]
     ignore_lsp = {},
-
     ---Don't calculate root dir on specific directories,
     ---e.g. `{ '~/.cargo/*', ... }`.
     ---
@@ -262,7 +243,6 @@ local DEFAULTS = {
     --- ---
     ---@type string[]
     exclude_dirs = {},
-
     ---If `false`, you'll get a _notification_ every time
     ---`project.nvim` changes directory.
     ---
@@ -273,7 +253,6 @@ local DEFAULTS = {
     --- ---
     ---@type boolean
     silent_chdir = true,
-
     ---Determines the scope for changing the directory.
     ---
     ---Valid options are:
@@ -285,7 +264,6 @@ local DEFAULTS = {
     --- ---
     ---@type 'global'|'tab'|'win'
     scope_chdir = 'global',
-
     ---Determines in what filetypes/buftypes the plugin won't execute.
     ---It's a table with two fields:
     ---
@@ -317,7 +295,6 @@ local DEFAULTS = {
             'terminal',
         }, ---`buftype`
     },
-
     ---The path where `project.nvim` will store the project history directory,
     ---containing the project history in it.
     ---
@@ -327,7 +304,6 @@ local DEFAULTS = {
     --- ---
     ---@type string
     datapath = vim.fn.stdpath('data'),
-
     ---The history size. (by `@acristoffers`)
     ---
     ---This will indicate how many entries will be
@@ -340,8 +316,6 @@ local DEFAULTS = {
     historysize = 100,
 }
 
---------- UTILITIES ---------
-
 ---Checks the `historysize` option.
 ---
 ---If the option is not valid, a warning will be raised and
@@ -349,12 +323,14 @@ local DEFAULTS = {
 --- ---
 ---@param self Project.Config.Options
 function DEFAULTS:verify_histsize()
-    validate('historysize', self.historysize, 'number', false, 'integer')
-
+    if vim_has('nvim-0.11') then
+        vim.validate('historysize', self.historysize, 'number', false, 'integer')
+    else
+        vim.validate({ historysize = { self.historysize, 'number' } })
+    end
     if self.historysize >= 0 or self.historysize == math.floor(self.historysize) then
         return
     end
-
     vim.notify('`historysize` option invalid. Reverting to default option.', WARN)
     self.historysize = DEFAULTS.historysize
 end
@@ -366,10 +342,13 @@ end
 --- ---
 ---@param self Project.Config.Options
 function DEFAULTS:verify_scope_chdir()
-    validate('scope_chdir', self.scope_chdir, 'string', false, "'global'|'tab'|'win'")
+    if vim_has('nvim-0.11') then
+        vim.validate('scope_chdir', self.scope_chdir, 'string', false, "'global'|'tab'|'win'")
+    else
+        vim.validate({ scope_chdir = { self.scope_chdir, 'string' } })
+    end
 
     local VALID = { 'global', 'tab', 'win' }
-
     if in_tbl(VALID, self.scope_chdir) then
         return
     end
@@ -398,50 +377,40 @@ end
 ---@param self Project.Config.Options
 function DEFAULTS:verify_methods()
     local is_type = require('project.utils.util').is_type
-
     if not is_type('table', self.detection_methods) then
         vim.notify('`detection_methods` option is not a table. Reverting to default option.', WARN)
         self.detection_methods = DEFAULTS.detection_methods
         return
     end
-
     if empty(self.detection_methods) and not vim.g.project_trigger_once then
         vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
         vim.g.project_trigger_once = true
         return
     end
 
-    local checker = { lsp = false, pattern = false }
-
     ---@type ('lsp'|'pattern')[]|table
     local methods = {}
-
+    local checker = { lsp = false, pattern = false }
     for _, v in next, self.detection_methods do
         if checker.lsp and checker.pattern then
             break
         end
-
         if is_type('string', v) then
-            --- If `'lsp'` is found and not duplicated
             if v == 'lsp' and not checker.lsp then
                 table.insert(methods, v)
                 checker.lsp = true
             end
-
-            --- If `'pattern'` is found and not duplicated
             if v == 'pattern' and not checker.pattern then
                 table.insert(methods, v)
                 checker.pattern = true
             end
         end
     end
-
     if empty(methods) and not vim.g.project_trigger_once then
         vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
         vim.g.project_trigger_once = true
         return
     end
-
     self.detection_methods = methods
 end
 
@@ -450,7 +419,6 @@ function DEFAULTS:verify_logging()
     if self.log == nil or type(self.log) ~= 'table' then
         self.log = vim.deepcopy(DEFAULTS.log)
     end
-
     if self.logging ~= nil and type(self.logging) == 'boolean' then
         self.log.enabled = self.logging
         self.logging = nil
@@ -476,19 +444,16 @@ end
 ---@return Project.Config.Options
 function DEFAULTS.new(opts)
     if require('project.utils.util').vim_has('nvim-0.11') then
-        validate('opts', opts, 'table', true, 'Project.Config.Options')
+        vim.validate('opts', opts, 'table', true, 'Project.Config.Options')
     else
-        validate({ opts = { opts, { 'table', 'nil' } } })
+        vim.validate({ opts = { opts, { 'table', 'nil' } } })
     end
     opts = opts or {}
 
-    ---@type Project.Config.Options
-    local self = setmetatable(opts, { __index = DEFAULTS })
+    local self = setmetatable(opts, { __index = DEFAULTS }) ---@type Project.Config.Options
     self = vim.tbl_deep_extend('keep', self, DEFAULTS)
-
     return self
 end
 
 return DEFAULTS
-
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

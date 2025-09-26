@@ -1,6 +1,5 @@
 local MODSTR = 'telescope._extensions.projects.util'
 local Log = require('project.utils.log')
-
 if not require('project.utils.util').mod_exists('telescope') then
     Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
     error(('(%s): Telescope is not installed!'):format(MODSTR), vim.log.levels.ERROR)
@@ -18,9 +17,9 @@ local M = {}
 
 ---@param entry { name: string, value: string, display: fun(...: any), index: integer, ordinal: string }
 function M.make_display(entry)
-    Log.info(('(%s.make_display): Entry value: %s'):format(MODSTR, vim.inspect(entry)))
-
-    Log.debug(('(%s.make_display): Creating display.'):format(MODSTR))
+    Log.debug(
+        ('(%s.make_display): Creating display. Entry values: %s'):format(MODSTR, vim.inspect(entry))
+    )
     local displayer = Entry_display.create({
         separator = ' ',
         items = {
@@ -28,18 +27,14 @@ function M.make_display(entry)
             { remaining = true },
         },
     })
-
-    Log.debug(('(%s.make_display): Successfully created display.'):format(MODSTR))
     return displayer({ entry.name, { entry.value, 'Comment' } })
 end
 
 ---@return table
 function M.create_finder()
     local sort = Config.options.telescope.sort or 'newest'
-
-    Log.info(('(%s.create_finder): Sorting by `%s`.'):format(MODSTR, sort))
     local results = History.get_recent_projects()
-
+    Log.info(('(%s.create_finder): Sorting by `%s`.'):format(MODSTR, sort))
     if sort == 'newest' then
         results = reverse(results)
     end
@@ -63,5 +58,4 @@ function M.create_finder()
 end
 
 return M
-
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

@@ -1,6 +1,5 @@
 local MODSTR = 'telescope._extensions.projects.actions'
 local Log = require('project.utils.log')
-
 if not require('project.utils.util').mod_exists('telescope') then
     Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
     error(('(%s): Telescope is not installed!'):format(MODSTR))
@@ -28,10 +27,10 @@ local M = {}
 
 M.help_mappings = Generate.which_key({
     only_show_curret_mode = true,
-    name_width = 30, -- typically leads to smaller floats
-    max_height = 0.6, -- increase potential maximum height
-    separator = ' | ', -- change sep between mode, keybind, and name
-    close_with_action = false, -- do not close float on action
+    name_width = 30,
+    max_height = 0.6,
+    separator = ' | ',
+    close_with_action = false,
 })
 
 ---@param prompt_bufnr integer
@@ -40,7 +39,6 @@ M.help_mappings = Generate.which_key({
 function M.change_working_directory(prompt_bufnr)
     ---@type Project.ActionEntry
     local selected_entry = State.get_selected_entry()
-
     Actions.close(prompt_bufnr)
     Log.debug(
         ('(%s.change_working_directory): Closed prompt `%s` successfully.'):format(
@@ -66,7 +64,6 @@ function M.change_working_directory(prompt_bufnr)
             ('(%s.change_working_directory): failed to change working directory!'):format(MODSTR)
         )
     end
-
     return selected_entry.value, cd_successful
 end
 
@@ -74,7 +71,6 @@ end
 function M.find_project_files(prompt_bufnr)
     local hidden = Config.options.show_hidden
     local prefer_file_browser = Config.options.telescope.prefer_file_browser
-
     local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
 
     ---FIXME: Need to check this case
@@ -90,13 +86,11 @@ function M.find_project_files(prompt_bufnr)
         hide_parent_dir = true,
         mode = 'insert',
     }
-
     if prefer_file_browser and Telescope.extensions.file_browser then
         ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
         Telescope.extensions.file_browser.file_browser(opts)
         return
     end
-
     Builtin.find_files(opts)
 end
 
@@ -104,7 +98,6 @@ end
 function M.browse_project_files(prompt_bufnr)
     local hidden = Config.options.show_hidden
     local prefer_file_browser = Config.options.telescope.prefer_file_browser
-
     local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
 
     ---FIXME: Need to check this case
@@ -120,13 +113,11 @@ function M.browse_project_files(prompt_bufnr)
         hide_parent_dir = true,
         mode = 'insert',
     }
-
     if prefer_file_browser and Telescope.extensions.file_browser then
         ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
         Telescope.extensions.file_browser.file_browser(opts)
         return
     end
-
     Builtin.find_files(opts)
 end
 
@@ -138,7 +129,6 @@ function M.search_in_project_files(prompt_bufnr)
     if not cd_successful then
         return
     end
-
     Builtin.live_grep({
         cwd = project_path,
         hidden = Config.options.show_hidden,
@@ -149,14 +139,12 @@ end
 ---@param prompt_bufnr integer
 function M.recent_project_files(prompt_bufnr)
     local hidden = Config.options.show_hidden
-
     local _, cd_successful = M.change_working_directory(prompt_bufnr)
 
     ---FIXME: Need to check this case
     if not cd_successful then
         return
     end
-
     Builtin.oldfiles({
         cwd_only = true,
         hidden = hidden,
@@ -167,7 +155,6 @@ end
 function M.delete_project(prompt_bufnr)
     ---@type Project.ActionEntry
     local active_entry = State.get_selected_entry()
-
     if active_entry == nil or not is_type('string', active_entry.value) then
         Actions.close(prompt_bufnr)
         Log.error(('(%s.delete_project): Entry not available!'):format(MODSTR, prompt_bufnr))
@@ -179,14 +166,11 @@ function M.delete_project(prompt_bufnr)
         '&Yes\n&No',
         2
     )
-    ---If choice is not `YES`
     if choice ~= 1 then
         Log.info('(%s.delete_project): Aborting project deletion.')
         return
     end
-
     History.delete_project(active_entry.value)
-
     Log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
     State.get_current_picker(prompt_bufnr):refresh(
         (function()
@@ -199,7 +183,6 @@ function M.delete_project(prompt_bufnr)
                 )
                 results = reverse(copy(results))
             end
-
             return Finders.new_table({
                 results = results,
 
@@ -222,12 +205,9 @@ function M.delete_project(prompt_bufnr)
                 end,
             })
         end)(),
-        {
-            reset_prompt = true,
-        }
+        { reset_prompt = true }
     )
 end
 
 return M
-
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

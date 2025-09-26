@@ -6,7 +6,6 @@
 ---@field callback ProjectCmdFun
 
 local MODSTR = 'project.popup'
-
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local in_list = vim.list_contains
@@ -39,11 +38,9 @@ function Popup.select:new(opts)
             callback = { opts.callback, 'function' },
         })
     end
-
     if empty(opts) then
         error(('(%s.select:new): Empty args for constructor!'):format(MODSTR), ERROR)
     end
-
     if vim_has('nvim-0.11') then
         vim.validate('choices', opts.choices, 'function', false, 'fun(): table<string, function>')
         vim.validate('choices_list', opts.choices_list, 'function', false, 'fun(): string[]')
@@ -71,18 +68,15 @@ function Popup.select:new(opts)
         __index = function(t, k)
             return rawget(t, k)
         end,
-
         ---@param ctx? vim.api.keyset.create_user_command.command_args
         __call = function(_, ctx)
             if not ctx then
                 opts.callback()
                 return
             end
-
             opts.callback(ctx)
         end,
     })
-
     return T
 end
 
@@ -96,11 +90,9 @@ function Popup.prompt_project(input)
     if not input or input == '' then
         return
     end
-
     if not (exists(input) and exists(vim.fn.fnamemodify(input, ':p:h'))) then
         error('Invalid path!', ERROR)
     end
-
     if not Util.dir_exists(input) then
         input = vim.fn.fnamemodify(input, ':p:h')
         if not Util.dir_exists(input) then
@@ -114,7 +106,6 @@ function Popup.prompt_project(input)
         vim.notify('Already added that directory!', WARN)
         return
     end
-
     Api.set_pwd(input, 'prompt')
     History.write_history()
 end
@@ -125,11 +116,9 @@ Popup.delete_menu = Popup.select:new({
             prompt = 'Select a project to delete:',
             format_item = function(item)
                 local session = History.session_projects
-
                 if in_list(session, item) then
                     return '* ' .. item
                 end
-
                 return item
             end,
         }, function(item)
@@ -149,20 +138,17 @@ Popup.delete_menu = Popup.select:new({
     choices_list = function()
         ---@type string[]
         local recents = Util.reverse(get_recent_projects())
-
         table.insert(recents, 'Exit')
         return recents
     end,
     choices = function()
         ---@type table<string, fun()>
         local T = {}
-
         for _, proj in ipairs(get_recent_projects()) do
             T[proj] = function()
                 History.delete_project(proj)
             end
         end
-
         T['Exit'] = function() end
         return T
     end,
@@ -176,7 +162,6 @@ Popup.open_menu = Popup.select:new({
             if not in_list(Popup.open_menu.choices_list(), item) then
                 error('Bad selection!', ERROR)
             end
-
             local choices = Popup.open_menu.choices()
             local op = choices[item]
             if not (op and vim.is_callable(op)) then
@@ -211,13 +196,11 @@ Popup.open_menu = Popup.select:new({
                 require('telescope._extensions.projects').projects()
             end
         end
-
         if Config.options.fzf_lua.enabled then
             res['Open Fzf-Lua Picker'] = function()
                 require('project.extensions.fzf-lua').run_fzf_lua()
             end
         end
-
         if Config.options.log.enabled then
             res['Open Log'] = function()
                 require('project.utils.log').open_win()
@@ -226,7 +209,6 @@ Popup.open_menu = Popup.select:new({
                 require('project.utils.log').clear_log()
             end
         end
-
         return res
     end,
     choices_list = function()
@@ -235,7 +217,6 @@ Popup.open_menu = Popup.select:new({
             'New Project',
             'Delete A Project',
         }
-
         if vim.g.project_telescope_loaded == 1 then
             table.insert(res_list, 'Open Telescope Picker')
         end
@@ -250,11 +231,9 @@ Popup.open_menu = Popup.select:new({
         table.insert(res_list, 'Run Checkhealth')
         table.insert(res_list, 'Open Help Docs')
         table.insert(res_list, 'Exit')
-
         return res_list
     end,
 })
 
 return Popup
-
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:
