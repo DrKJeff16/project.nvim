@@ -5,6 +5,7 @@ local MODSTR = 'project.config.defaults'
 ---|'change_working_directory'
 ---|'delete_project'
 ---|'find_project_files'
+---|'help_mappings'
 ---|'recent_project_files'
 ---|'search_in_project_files'
 

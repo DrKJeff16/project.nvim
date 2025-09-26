@@ -17,6 +17,7 @@ local is_type = Util.is_type
 local Telescope = require('telescope')
 local Finders = require('telescope.finders')
 local Actions = require('telescope.actions')
+local Generate = require('telescope.actions.generate')
 local Builtin = require('telescope.builtin')
 local State = require('telescope.actions.state')
 
@@ -25,6 +26,14 @@ local copy = vim.deepcopy
 ---@class Project.Telescope.Actions
 local M = {}
 
+M.help_mappings = Generate.which_key({
+    only_show_curret_mode = true,
+    name_width = 30, -- typically leads to smaller floats
+    max_height = 0.6, -- increase potential maximum height
+    separator = ' | ', -- change sep between mode, keybind, and name
+    close_with_action = false, -- do not close float on action
+})
+
 ---@param prompt_bufnr integer
 ---@return string|nil
 ---@return boolean|nil
@@ -32,7 +41,6 @@ function M.change_working_directory(prompt_bufnr)
     ---@type Project.ActionEntry
     local selected_entry = State.get_selected_entry()
 
-    Log.debug(('(%s.change_working_directory): Closing prompt `%s`.'):format(MODSTR, prompt_bufnr))
     Actions.close(prompt_bufnr)
     Log.debug(
         ('(%s.change_working_directory): Closed prompt `%s` successfully.'):format(
@@ -162,13 +170,7 @@ function M.delete_project(prompt_bufnr)
 
     if active_entry == nil or not is_type('string', active_entry.value) then
         Actions.close(prompt_bufnr)
-        Log.error(
-            ('(%s.delete_project): Closed prompt `%s` due to entry not being available!'):format(
-                MODSTR,
-                prompt_bufnr
-            )
-        )
-
+        Log.error(('(%s.delete_project): Entry not available!'):format(MODSTR, prompt_bufnr))
         return
     end
 
@@ -223,9 +225,6 @@ function M.delete_project(prompt_bufnr)
         {
             reset_prompt = true,
         }
-    )
-    Log.debug(
-        ('(%s.delete_project): Refreshing prompt `%s` successfully.'):format(MODSTR, prompt_bufnr)
     )
 end
 

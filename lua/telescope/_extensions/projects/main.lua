@@ -29,6 +29,7 @@ local valid_acts = {
     'change_working_directory',
     'delete_project',
     'find_project_files',
+    'help_mappings',
     'recent_project_files',
     'search_in_project_files',
 }
@@ -46,6 +47,11 @@ local function normal_attach(prompt_bufnr, map)
 
     for mode, group in pairs(Keys) do
         if in_list({ 'n', 'i' }, mode) and is_type('table', group) and not empty(group) then
+            if mode == 'n' then
+                group['?'] = 'help_mappings'
+            else
+                group['<C-?>'] = 'help_mappings'
+            end
             for lhs, act in pairs(group) do
                 ---@type function|false
                 local rhs = (_Actions[act] and in_list(valid_acts, act)) and _Actions[act] or false
