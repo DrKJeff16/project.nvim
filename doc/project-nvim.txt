@@ -36,6 +36,8 @@ Table of Contents                                             *project-nvim.toc*
     6.1. Telescope Mappings                        |project-nvim.telescope.maps|
 7. Commands                                              |project-nvim.commands|
     7.1. `:Project`                                                     |:Project|
+    7.2. `:ProjectLog`                                               |:ProjectLog|
+    7.3. `:ProjectLogClear`                                     |:ProjectLogClear|
     7.2. `:ProjectFzf`                                               |:ProjectFzf|
     7.3. `:ProjectTelescope`                                   |:ProjectTelescope|
     7.4. `:ProjectAdd`                                               |:ProjectAdd|
@@ -621,7 +623,42 @@ Table of Contents                                             *project-nvim.toc*
                             pointing to all the useful operations
                             this plugin can provide.
                             This one is subject to change,
-                            just as |vim.ui|is
+                            just as |vim.ui| is
+
+
+                                                                   *:ProjectLog*
+`:ProjectLog`
+                            This command will not be available ~
+                            unless you set `log.enabled = true` ~
+                            in your `setup()` ~
+
+                            The `:ProjectLog` command opens the `project.nvim`
+                            log file in a new tab, which can be exited
+                            by pressing `q` in Normal Mode.
+                            If [!] is supplied at the end of the command
+                            (i.e. `:ProjectLog!`), then it'll close
+                            any instance of a previously opened log file,
+                            if found
+
+
+                                                              *:ProjectLogClear*
+`:ProjectLogClear`
+                            This command will not be available ~
+                            unless you set `log.enabled = true` ~
+                            in your `setup()` ~
+
+                            The `:ProjectLogClear` command will delete
+                            all the contents of your log file
+                            (assuming there is one).
+                            If this is called from a logfile tab
+                            then it will attempt to close it.
+                            Once this command is called no more logs
+                            will be written for your current
+                            Neovim session, so you will have to restart.
+                            You could set `vim.g.project_log_cleared`
+                            to a value different to `1`,
+                            BUT THIS SOLUTION IS NOT TESTED FULLY. ~
+                            EXPECT WEIRD BEHAVIOUR IF YOU DO THIS! ~
 
 
                                                        *ProjectFzf*  *:ProjectFzf*
