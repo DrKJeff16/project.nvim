@@ -5,6 +5,7 @@ local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local validate = vim.validate
 local in_list = vim.list_contains
+local curr_buf = vim.api.nvim_get_current_buf
 
 local vim_has = require('project.utils.util').vim_has
 
@@ -119,16 +120,6 @@ M.new({
 })
 
 M.new({
-    name = 'ProjectAdd',
-    callback = function(ctx)
-        local quiet = ctx.bang ~= nil and ctx.bang or false
-        require('project.api').add_project_manually(not quiet)
-    end,
-    desc = 'Adds the current CWD project to the Project History',
-    bang = true,
-})
-
-M.new({
     name = 'ProjectDelete',
     callback = function(ctx)
         if not ctx or vim.tbl_isempty(ctx.fargs) then
@@ -193,14 +184,24 @@ M.new({
 })
 
 M.new({
-    name = 'ProjectNew',
-    callback = function()
-        vim.ui.input({
+    name = 'ProjectAdd',
+    callback = function(ctx)
+        ---@type vim.ui.input.Opts
+        local opts = {
             prompt = 'Input a valid path to the project:',
             completion = 'dir',
-        }, require('project.popup').prompt_project)
+        }
+
+        if ctx and ctx.bang ~= nil then
+            if ctx.bang then
+                opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
+            end
+        end
+
+        vim.ui.input(opts, require('project.popup').prompt_project)
     end,
-    desc = 'Run the experimental UI for project.nvim',
+    desc = 'Prompt to add the current directory to the project history',
+    bang = true,
 })
 
 M.new({
@@ -275,13 +276,6 @@ function M.create_user_commands()
         bang = M.ProjectDelete.bang,
         nargs = M.ProjectDelete.nargs,
         complete = M.ProjectDelete.complete,
-    })
-
-    ---`:ProjectNew`
-    vim.api.nvim_create_user_command(M.ProjectNew.name, function()
-        M.ProjectNew()
-    end, {
-        desc = M.ProjectNew.desc,
     })
 
     ---`:ProjectRoot`

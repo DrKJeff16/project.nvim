@@ -1,8 +1,8 @@
----@class Project.Popup.Spec
+---@class Project.Popup.SelectChoices
 ---@field choices fun(): table<string, function>
 ---@field choices_list fun(): string[]
 
----@class Project.Popup.SelectSpec: Project.Popup.Spec
+---@class Project.Popup.SelectSpec: Project.Popup.SelectChoices
 ---@field callback ProjectCmdFun
 
 local MODSTR = 'project.popup'
@@ -27,7 +27,7 @@ local Popup = {}
 Popup.select = {}
 
 ---@param opts Project.Popup.SelectSpec
----@return Project.Popup.Select|Project.Popup.Spec|ProjectCmdFun
+---@return Project.Popup.Select|Project.Popup.SelectChoices|ProjectCmdFun
 function Popup.select:new(opts)
     if vim_has('nvim-0.11') then
         vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
@@ -62,7 +62,7 @@ function Popup.select:new(opts)
         })
     end
 
-    ---@type Project.Popup.Select|Project.Popup.Spec|ProjectCmdFun
+    ---@type Project.Popup.Select|Project.Popup.SelectChoices|ProjectCmdFun
     local T = setmetatable({
         choices = opts.choices,
         choices_list = opts.choices_list,
@@ -190,7 +190,7 @@ Popup.open_menu = Popup.select:new({
         ---@type table<string, ProjectCmdFun>
         local res = {
             ['New Project'] = function()
-                require('project.commands').ProjectNew()
+                require('project.commands').ProjectAdd()
             end,
             ['Delete A Project'] = function()
                 Popup.delete_menu()

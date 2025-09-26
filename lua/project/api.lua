@@ -452,25 +452,6 @@ function Api.on_buf_enter(verbose, bufnr)
     History.write_history()
 end
 
----@param verbose? boolean
-function Api.add_project_manually(verbose)
-    if vim_has('nvim-0.11') then
-        validate('verbose', verbose, 'boolean', true)
-    else
-        validate({ verbose = { verbose, { 'boolean', 'nil' } } })
-    end
-    verbose = verbose ~= nil and verbose or false
-    local Log = require('project.utils.log')
-
-    local dir = vim.fn.fnamemodify(buf_name(curr_buf()), ':p:h')
-    Log.debug(('(%s.add_project_manually): Attempting to process `%s`'):format(MODSTR, dir), INFO)
-    if verbose then
-        notify(('(%s.add_project_manually): Attempting to process `%s`'):format(MODSTR, dir), INFO)
-    end
-
-    Api.set_pwd(dir, 'manual')
-end
-
 function Api.init()
     local group = augroup('project.nvim', { clear = false })
     local detection_methods = Config.options.detection_methods
