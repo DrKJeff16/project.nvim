@@ -35,13 +35,14 @@ Table of Contents                                             *project-nvim.toc*
 6. Telescope                                            |project-nvim.telescope|
     6.1. Telescope Mappings                        |project-nvim.telescope.maps|
 7. Commands                                              |project-nvim.commands|
-    7.1. `:ProjectFzf`                                               |:ProjectFzf|
-    7.2. `:ProjectTelescope`                                   |:ProjectTelescope|
-    7.3. `:ProjectAdd`                                               |:ProjectAdd|
-    7.4. `:ProjectRoot`                                             |:ProjectRoot|
-    7.5. `:ProjectConfig`                                         |:ProjectConfig|
-    7.6. `:ProjectDelete`                                         |:ProjectDelete|
-    7.7. `:ProjectSession`                                       |:ProjectSession|
+    7.1. `:Project`                                                     |:Project|
+    7.2. `:ProjectFzf`                                               |:ProjectFzf|
+    7.3. `:ProjectTelescope`                                   |:ProjectTelescope|
+    7.4. `:ProjectAdd`                                               |:ProjectAdd|
+    7.5. `:ProjectRoot`                                             |:ProjectRoot|
+    7.6. `:ProjectConfig`                                         |:ProjectConfig|
+    7.7. `:ProjectDelete`                                         |:ProjectDelete|
+    7.8. `:ProjectSession`                                       |:ProjectSession|
 8. API                                                        |project-nvim.api|
     8.1. `get_project_root()`                    |project-nvim.get_project_root()|
     8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
@@ -612,6 +613,15 @@ Table of Contents                                             *project-nvim.toc*
     There are a bunch of user commands you can call from the cmdline.
 
     NOTE: Some of these might be incomplete and/or reworked in the future. ~
+
+
+                                                                      *:Project*
+`:Project`
+                            The `:Project` command will open a UI window
+                            pointing to all the useful operations
+                            this plugin can provide.
+                            This one is subject to change,
+                            just as |vim.ui|is
 
 
                                                        *ProjectFzf*  *:ProjectFzf*

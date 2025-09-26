@@ -95,15 +95,16 @@ Show these much love!
     5. [Telescope](#telescope)
         1. [Telescope Mappings](#telescope-mappings)
 3. [Commands](#commands)
-    1. [`:ProjectFzf`](#projectfzf)
-    2. [`:ProjectTelescope`](#projecttelescope)
-    3. [`:ProjectLog`](#projectlog)
-    4. [`:ProjectLogClear`](#projectlogclear)
-    5. [`:ProjectAdd`](#projectadd)
-    6. [`:ProjectRoot`](#projectroot)
-    7. [`:ProjectConfig`](#projectconfig)
-    8. [`:ProjectDelete`](#projectdelete)
-    9. [`:ProjectSession`](#projectsession)
+    1. [`:Project`](#project)
+    2. [`:ProjectFzf`](#projectfzf)
+    3. [`:ProjectTelescope`](#projecttelescope)
+    4. [`:ProjectLog`](#projectlog)
+    5. [`:ProjectLogClear`](#projectlogclear)
+    6. [`:ProjectAdd`](#projectadd)
+    7. [`:ProjectRoot`](#projectroot)
+    8. [`:ProjectConfig`](#projectconfig)
+    9. [`:ProjectDelete`](#projectdelete)
+    10. [`:ProjectSession`](#projectsession)
 4. [API](#api)
     1. [`get_project_root()`](#get_project_root)
     2. [`get_recent_projects()`](#get_recent_projects)
@@ -735,6 +736,11 @@ After that you can now call it from the command line:
 ## Commands
 
 These are the user commands you can call from the cmdline:
+
+### `:Project`
+
+The `:Project` command will open a UI window pointing to all the useful operations
+this plugin can provide. This one is subject to change, just as `vim.ui` is.
 
 ### `:ProjectFzf`
 
