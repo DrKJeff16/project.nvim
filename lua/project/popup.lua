@@ -122,7 +122,7 @@ Popup.delete_menu = Popup.select:new({
                 return item
             end,
         }, function(item)
-            if not in_list(Popup.delete_menu.choices_list(), item) then
+            if not (item and in_list(Popup.delete_menu.choices_list(), item)) then
                 error('Bad selection!', ERROR)
             end
 
@@ -159,6 +159,9 @@ Popup.open_menu = Popup.select:new({
         vim.ui.select(Popup.open_menu.choices_list(), {
             prompt = 'Select an operation:',
         }, function(item, _)
+            if not item then
+                return
+            end
             if not in_list(Popup.open_menu.choices_list(), item) then
                 error('Bad selection!', ERROR)
             end
