@@ -1,13 +1,14 @@
 ==============================================================================
 *project-nvim*                  A dynamic project management solution for neovim
 
-    `project.nvim` is a `Neovim` plugin written
-    in Lua that provides a dynamic project
-    management solution.
+    `project.nvim` is a Neovim plugin written in Lua that,
+    under configurable conditions, automatically sets
+    the user's `cwd` to the current project root
+    and also allows users to manage, access and selectively include
+    their projects in a history.
 
     This plugin allows you to navigate through projects,
-    "bookmark" and/or discard them, depending on
-    your needs.
+    "bookmark" and/or discard them, according to your needs.
 
     This was originally forked from `ahmedkhalf/project.nvim`.
     Ever since I've decided to extend it and address issues.

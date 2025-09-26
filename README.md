@@ -10,6 +10,9 @@
 under configurable conditions, automatically sets the user's `cwd` to the current project root
 and also allows users to manage, access and selectively include their projects in a history.
 
+This plugin allows you to navigate through projects, _"bookmark"_ and/or discard them,
+according to your needs.
+
 </div>
 
 > [!NOTE]
