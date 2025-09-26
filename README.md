@@ -24,17 +24,26 @@ according to your needs.
 > [!IMPORTANT]
 > **_I'm looking for other maintainers in case I'm unable to keep this repo up to date!_**
 
-### Checkhealth Support
+<details>
+<summary><b><ins>Checkhealth Support Example</ins></b></summary>
 
 https://github.com/user-attachments/assets/436f5cbe-7549-4b8a-b962-4fce3d2a2fc3
 
-### Telescope Integration
+</details>
+<br />
+<details>
+<summary><b><ins>Telescope Integration Example</ins></b></summary>
 
 https://github.com/user-attachments/assets/376cbca0-a746-4992-8223-8475fcd99fc9
 
-### Fzf-Lua Integration
+</details>
+<br />
+<details>
+<summary><b><ins>Fzf-Lua Integration Example</ins></b></summary>
 
 https://github.com/user-attachments/assets/1516ff2e-29d9-4e0d-b592-bf2f79ab8158
+
+</details>
 
 ---
 
