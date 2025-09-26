@@ -4,6 +4,7 @@ if not require('project.utils.util').mod_exists('telescope') then
     Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
     error(('(%s): Telescope is not installed!'):format(MODSTR))
 end
+
 local Main = require('telescope._extensions.projects.main')
 local Telescope = require('telescope')
 
@@ -16,7 +17,7 @@ local M = Telescope.register_extension({
     exports = { projects = Main.projects },
     projects = Main.projects,
 })
+
 Log.debug(('(%s): Registered `projects` picker successfully!'):format(MODSTR))
 return M
-
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

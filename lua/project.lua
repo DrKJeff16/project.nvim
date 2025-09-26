@@ -3,8 +3,6 @@ local ERROR = vim.log.levels.ERROR
 local vim_has = require('project.utils.util').vim_has
 
 ---The `project.nvim` module.
----
----A dynamic project manager for neovim.
 --- ---
 ---@class Project
 local Project = {}

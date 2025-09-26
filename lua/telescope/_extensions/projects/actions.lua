@@ -40,13 +40,7 @@ function M.change_working_directory(prompt_bufnr)
     ---@type Project.ActionEntry
     local selected_entry = State.get_selected_entry()
     Actions.close(prompt_bufnr)
-    Log.debug(
-        ('(%s.change_working_directory): Closed prompt `%s` successfully.'):format(
-            MODSTR,
-            prompt_bufnr
-        )
-    )
-
+    Log.debug(('(%s.change_working_directory): Closed prompt `%s`.'):format(MODSTR, prompt_bufnr))
     if not (selected_entry and is_type('string', selected_entry.value)) then
         Log.error(('(%s.change_working_directory): Invalid entry!'):format(MODSTR))
         return
@@ -54,15 +48,9 @@ function M.change_working_directory(prompt_bufnr)
 
     local cd_successful = Api.set_pwd(selected_entry.value, 'telescope')
     if cd_successful then
-        Log.info(
-            ('(%s.change_working_directory): suffessfully changed working directory.'):format(
-                MODSTR
-            )
-        )
+        Log.info(('(%s.change_working_directory): Successfully changed directory.'):format(MODSTR))
     else
-        Log.error(
-            ('(%s.change_working_directory): failed to change working directory!'):format(MODSTR)
-        )
+        Log.error(('(%s.change_working_directory): Failed to change directory!'):format(MODSTR))
     end
     return selected_entry.value, cd_successful
 end
@@ -72,8 +60,6 @@ function M.find_project_files(prompt_bufnr)
     local hidden = Config.options.show_hidden
     local prefer_file_browser = Config.options.telescope.prefer_file_browser
     local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
-
-    ---FIXME: Need to check this case
     if not cd_successful then
         return
     end
@@ -99,8 +85,6 @@ function M.browse_project_files(prompt_bufnr)
     local hidden = Config.options.show_hidden
     local prefer_file_browser = Config.options.telescope.prefer_file_browser
     local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
-
-    ---FIXME: Need to check this case
     if not cd_successful then
         return
     end
@@ -124,11 +108,10 @@ end
 ---@param prompt_bufnr integer
 function M.search_in_project_files(prompt_bufnr)
     local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
-
-    ---FIXME: Need to check this case
     if not cd_successful then
         return
     end
+
     Builtin.live_grep({
         cwd = project_path,
         hidden = Config.options.show_hidden,
@@ -140,22 +123,17 @@ end
 function M.recent_project_files(prompt_bufnr)
     local hidden = Config.options.show_hidden
     local _, cd_successful = M.change_working_directory(prompt_bufnr)
-
-    ---FIXME: Need to check this case
     if not cd_successful then
         return
     end
-    Builtin.oldfiles({
-        cwd_only = true,
-        hidden = hidden,
-    })
+    Builtin.oldfiles({ cwd_only = true, hidden = hidden })
 end
 
 ---@param prompt_bufnr integer
 function M.delete_project(prompt_bufnr)
     ---@type Project.ActionEntry
     local active_entry = State.get_selected_entry()
-    if active_entry == nil or not is_type('string', active_entry.value) then
+    if not (active_entry and is_type('string', active_entry.value)) then
         Actions.close(prompt_bufnr)
         Log.error(('(%s.delete_project): Entry not available!'):format(MODSTR, prompt_bufnr))
         return
@@ -176,11 +154,7 @@ function M.delete_project(prompt_bufnr)
         (function()
             local results = History.get_recent_projects()
             if Config.options.telescope.sort == 'newest' then
-                Log.debug(
-                    ('(%s.create_finder): Sorting order to `newest`. Reversing project list.'):format(
-                        MODSTR
-                    )
-                )
+                Log.debug(('(%s.create_finder): Sorting order to `newest`.'):format(MODSTR))
                 results = reverse(copy(results))
             end
             return Finders.new_table({
@@ -200,7 +174,6 @@ function M.delete_project(prompt_bufnr)
                         value = value,
                         ordinal = ('%s %s'):format(name, value),
                     }
-
                     return action_entry
                 end,
             })

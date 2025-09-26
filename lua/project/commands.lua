@@ -1,71 +1,37 @@
 ---@alias ProjectCmdFun fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@alias CompletorFun fun(a?: string, l?: string, p?: integer): string[]
 ---@alias Project.CMD
----|{ name: string, desc: string, bang: boolean, complete?: string|CompletorFun, nargs?: any }
----|fun(ctx?: vim.api.keyset.create_user_command.command_args)
+---|{ desc: string, name: string, bang: boolean, complete?: string|CompletorFun, nargs?: string|integer }
+---|ProjectCmdFun
 
 ---@class Project.Commands.Spec
----@field name string
 ---@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
+---@field name string
 ---@field desc string
 ---@field complete? string|CompletorFun
 ---@field bang? boolean
 ---@field nargs? string|integer
 
----@class Project.Commands
----@field new fun(spec: Project.Commands.Spec)
----@field create_user_commands fun()
-
 local MODSTR = 'project.commands'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
-local validate = vim.validate
 local in_list = vim.list_contains
 local curr_buf = vim.api.nvim_get_current_buf
 local vim_has = require('project.utils.util').vim_has
 
----@type Project.Commands|table<string, Project.CMD>
+---@type { create_user_commands: (fun()), new: fun(spec: Project.Commands.Spec) }|table<string, Project.CMD>
 local M = {}
 
 ---@param spec Project.Commands.Spec
 function M.new(spec)
     if vim_has('nvim-0.11') then
-        validate('spec', spec, 'table', false, 'Project.Commands.Spec')
+        vim.validate('spec', spec, 'table', false, 'Project.Commands.Spec')
     else
-        validate({ spec = { spec, 'table' } })
+        vim.validate({ spec = { spec, 'table' } })
     end
 
     if vim.tbl_isempty(spec) then
         error(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
-    end
-    if vim_has('nvim-0.11') then
-        validate('name', spec.name, 'string', false)
-        validate('callback', spec.callback, 'function', false)
-        validate('desc', spec.desc, 'string', false)
-        validate('bang', spec.bang, 'boolean', true, 'boolean?')
-        validate('nargs', spec.nargs, { 'string', 'number' }, true, '(string|integer)?')
-        validate(
-            'complete',
-            spec.complete,
-            { 'function', 'string' },
-            true,
-            '(string|CompletorFun)?'
-        )
-    else
-        validate({
-            name = { spec.name, 'string' },
-            callback = { spec.callback, 'function' },
-            desc = { spec.desc, 'string' },
-            bang = { spec.bang, { 'string', 'nil' } },
-            nargs = { spec.nargs, { 'string', 'number', 'nil' } },
-            complete = { spec.complete, { 'string', 'function', 'nil' } },
-        })
-    end
-    if spec.name == '' then
-        error(('(%.new): No user command name provided!'):format(MODSTR))
-    end
-    if spec.desc == '' then
-        error(('(%.new): No user command description provided!'):format(MODSTR))
     end
 
     ---@type { name: string, desc: string, bang: boolean, complete?: string|CompletorFun, nargs?: string|integer }

@@ -4,8 +4,7 @@
 ---I decided to make this an API file instead to avoid any
 ---confusions with naming, e.g. `require('project_nvim.project')`.
 
----@alias Project.API.HistoryPaths { datapath: string, projectpath: string, historyfile: string }
-
+local MODSTR = 'project.api'
 local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
@@ -23,7 +22,6 @@ local Config = require('project.config')
 local Path = require('project.utils.path')
 local Util = require('project.utils.util')
 local History = require('project.utils.history')
-
 local is_type = Util.is_type
 local is_windows = Util.is_windows
 local reverse = Util.reverse
@@ -31,8 +29,6 @@ local vim_has = Util.vim_has
 local exists = Path.exists
 local is_excluded = Path.is_excluded
 local root_included = Path.root_included
-
-local MODSTR = 'project.api'
 
 ---The `project.nvim` API module.
 --- ---
@@ -253,9 +249,9 @@ function Api.set_pwd(dir, method)
 end
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
----@return string|Project.API.HistoryPaths res
+---@return string|{ datapath: string, projectpath: string, historyfile: string } res
 function Api.get_history_paths(path)
-    ---@type Project.API.HistoryPaths|string
+    ---@type { datapath: string, projectpath: string, historyfile: string }|string
     local res = {
         datapath = Path.datapath,
         projectpath = Path.projectpath,
