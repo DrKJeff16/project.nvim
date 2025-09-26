@@ -14,9 +14,7 @@ function Glob.escape(char, c)
 end
 
 ---Some useful references:
---- - apr_fnmatch in Apache APR.  For example,
----   http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html
----   which cites POSIX 1003.2-1992, section B.6.
+--- - [`apr_fnmatch`](http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html)
 --- ---
 ---@param glob string
 ---@return string pattern
@@ -25,9 +23,6 @@ function Glob.globtopattern(glob)
     local i = 0
     local char = ''
 
-    ---Unescape glob char.
-    --- ---
-    ---@return boolean
     local function unescape()
         if char == '\\' then
             i = i + 1
@@ -39,8 +34,6 @@ function Glob.globtopattern(glob)
         end
         return true
     end
-
-    --- TODO: Let's simplify this in the future
 
     ---Convert tokens at end of charset.
     --- ---
@@ -108,7 +101,6 @@ function Glob.globtopattern(glob)
         elseif in_list({ '^', '!' }, char) then
             i = i + 1
             char = glob:sub(i, i)
-
             if char ~= ']' then
                 pattern = ('%s[^'):format(pattern)
                 if not charset_end() then
@@ -124,7 +116,6 @@ function Glob.globtopattern(glob)
         return true
     end
 
-    ---Convert tokens.
     while true do
         i = i + 1
         char = glob:sub(i, i)
@@ -151,7 +142,6 @@ function Glob.globtopattern(glob)
             pattern = ('%s%s'):format(pattern, Glob.escape(char, char))
         end
     end
-
     return pattern
 end
 
@@ -160,14 +150,11 @@ end
 function Glob.pattern_exclude(pattern)
     local HOME = vim.fn.expand('~')
     local pattern_len = pattern:len()
-
     if vim.startswith(pattern, '~/') then
         pattern = ('%s/%s'):format(HOME, pattern:sub(3, pattern_len))
     end
-
     return Glob.globtopattern(pattern)
 end
 
 return Glob
-
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:
