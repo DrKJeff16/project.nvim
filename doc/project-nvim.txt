@@ -458,6 +458,12 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `1.0` ~
 
 
+    * {logpath}                 (string)
+                                Path in which the log file will be saved.
+
+                                Default: `vim.fn.stdpath('state')` ~
+
+
 ==============================================================================
 3. Pattern Matching                              *project-nvim.pattern-matching*
 

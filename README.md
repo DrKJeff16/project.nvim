@@ -279,6 +279,13 @@ require('project').setup()
         --- ---
         ---@type number
         max_size = 1.0,
+
+        ---Path in which the log file will be saved.
+        --- ---
+        ---Default: `vim.fn.stdpath('state')`
+        --- ---
+        ---@type string
+        logpath = vim.fn.stdpath('state'),
     },
 
     ---Table of options used for `fzf-lua` integration
