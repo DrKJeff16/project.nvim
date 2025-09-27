@@ -1,5 +1,9 @@
+local MODSTR = 'telescope._extensions.projects.main'
+local Log = require('project.utils.log')
+local ERROR = vim.log.levels.ERROR
 if not require('project.utils.util').mod_exists('telescope') then
-    error('project.nvim: Telescope is not installed!')
+    Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
+    error(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
 end
 local copy = vim.deepcopy
 local in_list = vim.list_contains
@@ -73,6 +77,7 @@ end
 function Main.setup(opts)
     Main.default_opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
     vim.g.project_telescope_loaded = 1
+    Log.info(('(%s.setup): `projects` picker setup successful!'):format(MODSTR))
 end
 
 ---Main entrypoint for Telescope.
@@ -82,7 +87,8 @@ end
 ---@param opts? table
 function Main.projects(opts)
     if vim.g.project_telescope_loaded ~= 1 then
-        error('project.nvim: Telescope picker not loaded!')
+        Log.error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
+        error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR), ERROR)
     end
     opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
 
