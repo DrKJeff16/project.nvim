@@ -109,13 +109,18 @@ local DEFAULTS = {
         ---Default: `false`
         --- ---
         enabled = false,
-
         ---The maximum logfile size (in megabytes).
         --- ---
         ---Default: `1.0`
         --- ---
         ---@type number
         max_size = 1.0,
+        ---Path in which the log file will be saved.
+        --- ---
+        ---Default: `vim.fn.stdpath('state')`
+        --- ---
+        ---@type string
+        logpath = vim.fn.stdpath('state'),
     },
     ---If `true` your root directory won't be changed automatically,
     ---so you have the option to manually do so

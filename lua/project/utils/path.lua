@@ -164,12 +164,19 @@ function Path.match(dir, pattern)
     return Path.has(dir, pattern)
 end
 
-function Path.create_projectpath()
-    if not Path.exists(Path.projectpath) then
-        require('project.utils.log').debug(
-            ('(%s.create_projectpath): Creating directory `%s`.'):format(MODSTR, Path.projectpath)
-        )
-        uv.fs_mkdir(Path.projectpath, tonumber('755', 8))
+---@param path? string
+function Path.create_path(path)
+    if vim_has('nvim-0.11') then
+        vim.validate('path', path, 'string', true)
+    else
+        vim.validate({ path = { path, { 'string', 'nil' } } })
+    end
+    path = path or Path.projectpath
+
+    if not Path.exists(path) then
+        local Log = require('project.utils.log')
+        Log.debug(('(%s.create_path): Creating directory `%s`.'):format(MODSTR, path))
+        uv.fs_mkdir(path, tonumber('755', 8))
     end
 end
 

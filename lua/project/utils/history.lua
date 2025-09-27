@@ -56,7 +56,7 @@ function History.open_history(mode)
     else
         vim.validate({ mode = { mode, 'string' } })
     end
-    Path.create_projectpath()
+    Path.create_path()
     local Log = require('project.utils.log')
     local dir_stat = uv.fs_stat(Path.projectpath)
     if not dir_stat then

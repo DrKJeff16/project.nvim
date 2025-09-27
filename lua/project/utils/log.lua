@@ -2,13 +2,11 @@ local uv = vim.uv or vim.loop
 local MODSTR = 'project.utils.log'
 
 -- stylua: ignore start
-
 local TRACE = vim.log.levels.TRACE  -- `0`
 local DEBUG = vim.log.levels.DEBUG  -- `1`
 local INFO  = vim.log.levels.INFO   -- `2`
 local WARN  = vim.log.levels.WARN   -- `3`
 local ERROR = vim.log.levels.ERROR  -- `4`
-
 -- stylua: ignore end
 
 ---@class Project.Log
@@ -19,46 +17,44 @@ local Log = {}
 ---@param lvl vim.log.levels
 ---@return fun(...: any): output: string|nil
 local function gen_log(lvl)
-    local is_type = require('project.utils.util').is_type
-
     ---@param ... any
     ---@return string|nil output
     return function(...)
         if not require('project.config').options.log.enabled then
             return
         end
-
+        local is_type = require('project.utils.util').is_type
         local msg = ''
-
         for i = 1, select('#', ...) do
             local sel = select(i, ...)
-
             if sel ~= nil then
                 if is_type('number', sel) or is_type('boolean', sel) then
                     sel = tostring(sel)
                 elseif not is_type('string', sel) then
                     sel = vim.inspect(sel)
                 end
-
                 msg = ('%s %s'):format(msg, sel)
             end
         end
-
         return Log.write(('%s\n'):format(msg), lvl)
     end
 end
+
+Log.trace = gen_log(TRACE)
+Log.warn = gen_log(WARN)
+Log.error = gen_log(ERROR)
+Log.info = gen_log(INFO)
+Log.debug = gen_log(DEBUG)
 
 ---@return string|nil data
 function Log.read_log()
     if not Log.logfile then
         return
     end
-
     local stat = uv.fs_stat(Log.logfile)
     if not stat then
         return
     end
-
     local fd = Log.open('r')
     Log.setup_watch()
     if not fd then
@@ -71,7 +67,6 @@ end
 
 function Log.clear_log()
     local success = uv.fs_unlink(Log.logfile)
-
     if success then
         vim.notify('(project.nvim): Log cleared successfully', INFO)
         vim.g.project_log_cleared = 1
@@ -84,21 +79,17 @@ function Log.setup_watch()
     if Log.has_watch_setup then
         return
     end
-
     local event = uv.new_fs_event()
     if not event then
         return
     end
-
-    local Path = require('project.utils.path')
-    event:start(Path.projectpath, {}, function(err, _, events)
+    event:start(Log.logpath, {}, function(err, _, events)
         if not (err == nil and events.change) then
             return
         end
 
         Log.read_log()
     end)
-
     Log.has_watch_setup = true
 end
 
@@ -109,9 +100,7 @@ function Log.write(data, lvl)
     if not require('project.config').options.log.enabled or vim.g.project_log_cleared == 1 then
         return
     end
-
     local fd = Log.open('a')
-
     if not fd then
         return
     end
@@ -126,11 +115,9 @@ function Log.write(data, lvl)
     }
     -- stylua: ignore end
 
-    ---A formatted string (`24:59:59` time).
     local msg = os.date(('%s  ==>  %s%s'):format('%H:%M:%S', PFX[lvl], data))
     uv.fs_write(fd, msg, -1)
     uv.fs_close(fd)
-
     return msg
 end
 
@@ -138,9 +125,8 @@ end
 ---@return integer|nil
 function Log.open(mode)
     local Path = require('project.utils.path')
-
-    Path.create_projectpath()
-    local dir_stat = uv.fs_stat(Path.projectpath)
+    Path.create_path(Log.logpath)
+    local dir_stat = uv.fs_stat(Log.logpath)
     if not dir_stat or dir_stat.type ~= 'directory' then
         error(('(%s.open): Projectpath stat is not valid!'):format(MODSTR), ERROR)
     end
@@ -149,42 +135,28 @@ function Log.open(mode)
     return fd
 end
 
-Log.trace = gen_log(TRACE)
-Log.warn = gen_log(WARN)
-Log.error = gen_log(ERROR)
-Log.info = gen_log(INFO)
-Log.debug = gen_log(DEBUG)
-
 function Log.init()
-    local enabled = require('project.config').options.log.enabled
-    if not enabled then
+    local log_cfg = require('project.config').options.log
+    if not log_cfg.enabled then
         return
     end
-
-    local Path = require('project.utils.path')
-    if not Path.projectpath then
-        vim.notify(('(%s.init): Project Path directory not set!'):format(MODSTR), ERROR)
-        return
-    end
-
-    Log.logfile = Path.projectpath .. '/project.log'
+    Log.logpath = log_cfg.logpath
+    Log.logfile = Log.logpath .. '/project.log'
+    require('project.utils.path').create_path(Log.logpath)
 
     local fd
     local stat = uv.fs_stat(Log.logfile)
-    if stat == nil then
+    if not stat then
         fd = Log.open('w')
         uv.fs_close(fd)
-
-        stat = uv.fs_stat(Log.logfile)
+        fd = nil
     end
-
-    local max_size = require('project.config').options.log.max_size
+    stat = uv.fs_stat(Log.logfile) ---@type uv.fs_stat.result
+    local max_size = log_cfg.max_size
     if (stat.size / 1024) / 1024 >= max_size then
         fd = Log.open('w')
-
         uv.fs_ftruncate(fd, 0)
         uv.fs_close(fd)
-
         fd = nil
     end
 
@@ -193,29 +165,42 @@ function Log.init()
     uv.fs_write(
         fd,
         (stat.size >= 1 and '\n' or '')
-            .. os.date(('%s    %s    %s\n'):format(head, '%x  (Started: %H:%M:%S)', head))
+            .. os.date(('%s    %s    %s\n'):format(head, '%x  (%H:%M:%S)', head))
     )
-
-    vim.api.nvim_create_user_command('ProjectLog', function(ctx)
-        local close = ctx.bang ~= nil and ctx.bang or false
-        if close then
-            Log.close_win()
-            return
-        end
-
-        Log.open_win()
-    end, {
+    local Commands = require('project.commands')
+    Commands.new({
+        name = 'ProjectLog',
+        callback = function(ctx)
+            local close = ctx.bang ~= nil and ctx.bang or false
+            if close then
+                Log.close_win()
+                return
+            end
+            Log.open_win()
+        end,
         desc = 'Opens the `project.nvim` log in a new tab',
         bang = true,
     })
-    vim.api.nvim_create_user_command('ProjectLogClear', function()
-        if Log.log_loc then
-            Log.close_win()
-        end
-
-        Log.clear_log()
-    end, {
+    Commands.new({
+        name = 'ProjectLogClear',
+        callback = function()
+            if Log.log_loc then
+                Log.close_win()
+            end
+            Log.clear_log()
+        end,
         desc = 'Clears the `project.nvim` log',
+    })
+    vim.api.nvim_create_user_command(Commands.ProjectLog.name, function(ctx)
+        Commands.ProjectLog(ctx)
+    end, {
+        desc = Commands.ProjectLog.desc,
+        bang = Commands.ProjectLog.bang,
+    })
+    vim.api.nvim_create_user_command(Commands.ProjectLogClear.name, function()
+        Commands.ProjectLogClear()
+    end, {
+        desc = Commands.ProjectLogClear.desc,
     })
 end
 
