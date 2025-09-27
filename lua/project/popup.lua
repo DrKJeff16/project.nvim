@@ -27,7 +27,7 @@ Popup.select = {}
 
 ---@param opts Project.Popup.SelectSpec
 ---@return Project.Popup.Select|Project.Popup.SelectChoices|ProjectCmdFun
-function Popup.select:new(opts)
+function Popup.select.new(opts)
     if vim_has('nvim-0.11') then
         vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
     else
@@ -39,7 +39,7 @@ function Popup.select:new(opts)
         })
     end
     if empty(opts) then
-        error(('(%s.select:new): Empty args for constructor!'):format(MODSTR), ERROR)
+        error(('(%s.select.new): Empty args for constructor!'):format(MODSTR), ERROR)
     end
     if vim_has('nvim-0.11') then
         vim.validate('choices', opts.choices, 'function', false, 'fun(): table<string, function>')
@@ -105,7 +105,7 @@ function Popup.prompt_project(input)
     History.write_history()
 end
 
-Popup.delete_menu = Popup.select:new({
+Popup.delete_menu = Popup.select.new({
     callback = function()
         vim.ui.select(Popup.delete_menu.choices_list(), {
             prompt = 'Select a project to delete:',
@@ -149,11 +149,11 @@ Popup.delete_menu = Popup.select:new({
     end,
 })
 
-Popup.open_menu = Popup.select:new({
+Popup.open_menu = Popup.select.new({
     callback = function()
         vim.ui.select(Popup.open_menu.choices_list(), {
             prompt = 'Select an operation:',
-        }, function(item, _)
+        }, function(item)
             if not item then
                 return
             end
