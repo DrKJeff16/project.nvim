@@ -169,38 +169,31 @@ function Log.init()
     )
     local Commands = require('project.commands')
     Commands.new({
-        name = 'ProjectLog',
-        callback = function(ctx)
-            local close = ctx.bang ~= nil and ctx.bang or false
-            if close then
-                Log.close_win()
-                return
-            end
-            Log.open_win()
-        end,
-        desc = 'Opens the `project.nvim` log in a new tab',
-        bang = true,
-    })
-    Commands.new({
-        name = 'ProjectLogClear',
-        callback = function()
-            if Log.log_loc then
-                Log.close_win()
-            end
-            Log.clear_log()
-        end,
-        desc = 'Clears the `project.nvim` log',
-    })
-    vim.api.nvim_create_user_command(Commands.ProjectLog.name, function(ctx)
-        Commands.ProjectLog(ctx)
-    end, {
-        desc = Commands.ProjectLog.desc,
-        bang = Commands.ProjectLog.bang,
-    })
-    vim.api.nvim_create_user_command(Commands.ProjectLogClear.name, function()
-        Commands.ProjectLogClear()
-    end, {
-        desc = Commands.ProjectLogClear.desc,
+        {
+            name = 'ProjectLog',
+            with_ctx = true,
+            callback = function(ctx)
+                local close = ctx.bang ~= nil and ctx.bang or false
+                if close then
+                    Log.close_win()
+                    return
+                end
+                Log.open_win()
+            end,
+            desc = 'Opens the `project.nvim` log in a new tab',
+            bang = true,
+        },
+        {
+            name = 'ProjectLogClear',
+            with_ctx = false,
+            callback = function()
+                if Log.log_loc then
+                    Log.close_win()
+                end
+                Log.clear_log()
+            end,
+            desc = 'Clears the `project.nvim` log',
+        },
     })
 end
 
