@@ -9,13 +9,13 @@ local Project = {}
 
 Project.setup = require('project.config').setup
 Project.get_recent_projects = require('project.utils.history').get_recent_projects
-Project.get_project_root = require('project.api').get_project_root
 Project.delete_project = require('project.utils.history').delete_project
+Project.get_project_root = require('project.api').get_project_root
 Project.get_history_paths = require('project.api').get_history_paths
-Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
 Project.get_last_project = require('project.api').get_last_project
 Project.open_menu = require('project.popup').open_menu
 Project.delete_menu = require('project.popup').delete_menu
+Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
