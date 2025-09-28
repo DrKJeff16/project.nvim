@@ -1,17 +1,16 @@
-local uv = vim.uv or vim.loop
-local MODSTR = 'project.utils.log'
-
 -- stylua: ignore start
-local TRACE = vim.log.levels.TRACE  -- `0`
-local DEBUG = vim.log.levels.DEBUG  -- `1`
-local INFO  = vim.log.levels.INFO   -- `2`
-local WARN  = vim.log.levels.WARN   -- `3`
-local ERROR = vim.log.levels.ERROR  -- `4`
+local uv     =  vim.uv or vim.loop
+local MODSTR = 'project.utils.log'
+local TRACE  =  vim.log.levels.TRACE  -- `0`
+local DEBUG  =  vim.log.levels.DEBUG  -- `1`
+local INFO   =  vim.log.levels.INFO   -- `2`
+local WARN   =  vim.log.levels.WARN   -- `3`
+local ERROR  =  vim.log.levels.ERROR  -- `4`
 -- stylua: ignore end
 
 ---@class Project.Log
 ---@field logfile? string
----@field log_loc? { bufnr: integer, win: integer, tab: integer }|nil
+---@field log_loc? { bufnr: integer, win: integer }|nil
 local Log = {}
 
 ---@param lvl vim.log.levels
@@ -124,8 +123,7 @@ end
 ---@param mode OpenMode
 ---@return integer|nil
 function Log.open(mode)
-    local Path = require('project.utils.path')
-    Path.create_path(Log.logpath)
+    require('project.utils.path').create_path(Log.logpath)
     local dir_stat = uv.fs_stat(Log.logpath)
     if not dir_stat or dir_stat.type ~= 'directory' then
         error(('(%s.open): Projectpath stat is not valid!'):format(MODSTR), ERROR)
@@ -203,20 +201,14 @@ function Log.open_win()
         return
     end
     if vim.g.project_log_cleared == 1 then
-        vim.notify(
-            ('(%s.open_win): Log has already been cleared. Try restarting.'):format(MODSTR),
-            WARN
-        )
+        vim.notify(('(%s.open_win): Log has been cleared. Try restarting.'):format(MODSTR), WARN)
         return
     end
-
-    local Path = require('project.utils.path')
-    if not Path.exists(Log.logfile) then
+    if not require('project.utils.path').exists(Log.logfile) then
         error(('(%s.open_win): Bad logfile path!'):format(MODSTR), ERROR)
     end
 
-    -- Log window appears to be open
-    if Log.log_loc ~= nil then
+    if Log.log_loc ~= nil then -- Log window appears to be open
         return
     end
 
@@ -225,7 +217,6 @@ function Log.open_win()
         Log.log_loc = {
             bufnr = vim.api.nvim_get_current_buf(),
             win = vim.api.nvim_get_current_win(),
-            tab = vim.api.nvim_get_current_tabpage(),
         }
 
         ---@type vim.api.keyset.option

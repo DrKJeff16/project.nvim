@@ -12,7 +12,9 @@ local empty = vim.tbl_isempty
 local WARN = vim.log.levels.WARN
 local MODSTR = 'project.config.defaults'
 
-local vim_has = require('project.utils.util').vim_has
+local Util = require('project.utils.util')
+local vim_has = Util.vim_has
+local is_type = Util.is_type
 
 ---The options available for in `require('project').setup()`.
 --- ---
@@ -384,7 +386,6 @@ end
 --- ---
 ---@param self Project.Config.Options
 function DEFAULTS:verify_methods()
-    local is_type = require('project.utils.util').is_type
     if not is_type('table', self.detection_methods) then
         vim.notify('`detection_methods` option is not a table. Reverting to default option.', WARN)
         self.detection_methods = DEFAULTS.detection_methods
@@ -436,6 +437,15 @@ function DEFAULTS:verify_logging()
             ),
             WARN
         )
+    end
+
+    local logpath = self.log.logpath
+    if not (is_type('string', logpath) and require('project.utils.path').exists(logpath)) then
+        self.log.logpath = DEFAULTS.log.logpath
+    end
+    local max_size = self.log.max_size
+    if not (is_type('number', max_size) and max_size > 0) then
+        self.log.max_size = DEFAULTS.log.max_size
     end
 end
 
