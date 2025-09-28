@@ -204,7 +204,7 @@ function Path.root_included(dir)
             end
         end
         local parent = Path.get_parent(dir)
-        if parent == nil or parent == dir then
+        if not parent or parent == dir then
             return
         end
         dir = parent

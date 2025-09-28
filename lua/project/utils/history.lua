@@ -278,6 +278,9 @@ function History.open_win()
             bufnr = vim.api.nvim_get_current_buf(),
             win = vim.api.nvim_get_current_win(),
         }
+
+        vim.api.nvim_buf_set_name(History.hist_loc.bufnr, 'Project History')
+
         local win_opts = { win = History.hist_loc.win } ---@type vim.api.keyset.option
         vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
         vim.api.nvim_set_option_value('list', false, win_opts)

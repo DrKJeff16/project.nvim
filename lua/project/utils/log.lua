@@ -219,6 +219,8 @@ function Log.open_win()
             win = vim.api.nvim_get_current_win(),
         }
 
+        vim.api.nvim_buf_set_name(Log.log_loc.bufnr, 'Project Log')
+
         ---@type vim.api.keyset.option
         local win_opts = { win = Log.log_loc.win }
         vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
