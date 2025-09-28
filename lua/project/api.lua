@@ -9,13 +9,10 @@ local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
-local empty = vim.tbl_isempty
 local in_list = vim.list_contains
-local notify = vim.notify
 local curr_buf = vim.api.nvim_get_current_buf
 local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
-local buf_name = vim.api.nvim_buf_get_name
 
 local Config = require('project.config')
 local Path = require('project.utils.path')
@@ -57,7 +54,7 @@ function Api.find_lsp_root(bufnr)
     local ignore_lsp = Config.options.ignore_lsp
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
-    if empty(clients) then
+    if vim.tbl_isempty(clients) then
         return
     end
 
@@ -66,13 +63,13 @@ function Api.find_lsp_root(bufnr)
     for _, client in ipairs(clients) do
         ---@type string[]
         local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
-        local valid = is_type('table', filetypes) and not empty(filetypes)
+        local valid = is_type('table', filetypes) and not vim.tbl_isempty(filetypes)
         if not in_list(ignore_lsp, client.name) and valid then
             if in_list(filetypes, ft) and client.config.root_dir then
                 dir, name = client.config.root_dir, client.name
                 if allow_patterns then -- If pattern matching for LSP is enabled, check patterns
                     if root_included(dir) == nil then
-                        dir, name = nil, nil
+                        return
                     end
                 end
                 break
@@ -119,7 +116,7 @@ function Api.find_pattern_root(bufnr)
     end
     bufnr = bufnr or curr_buf()
 
-    local dir = vim.fn.fnamemodify(buf_name(bufnr), ':p:h')
+    local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
     if is_windows() then
         dir = dir:gsub('\\', '/')
     end
@@ -161,13 +158,13 @@ function Api.set_pwd(dir, method)
     local Log = require('project.utils.log')
     if dir == nil or method == nil then
         Log.error(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR))
-        notify(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR), ERROR)
+        vim.notify(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR), ERROR)
         return false
     end
     if not Config.options.allow_different_owners then
         if not Api.verify_owner(dir) then
             Log.error(('(%s.set_pwd): Project root is owned by a different user'):format(MODSTR))
-            notify(
+            vim.notify(
                 ('(%s.set_pwd): Project root is owned by a different user'):format(MODSTR),
                 ERROR
             )
@@ -176,7 +173,7 @@ function Api.set_pwd(dir, method)
     end
 
     local modified = false
-    if empty(History.session_projects) then
+    if vim.tbl_isempty(History.session_projects) then
         History.session_projects = { dir }
         modified = true
     elseif not in_list(History.session_projects, dir) then
@@ -211,7 +208,7 @@ function Api.set_pwd(dir, method)
     local msg = ('(%s.set_pwd):'):format(MODSTR)
     if not in_list({ 'global', 'tab', 'win' }, scope_chdir) then
         Log.error(('%s INVALID value for `scope_chdir`'):format(msg))
-        notify(('%s INVALID value for `scope_chdir`'):format(msg), ERROR)
+        vim.notify(('%s INVALID value for `scope_chdir`'):format(msg), ERROR)
         return false
     end
 
@@ -241,7 +238,7 @@ function Api.set_pwd(dir, method)
     local verbose = not Config.options.silent_chdir
     if verbose then
         vim.schedule(function()
-            notify(msg, (ok and INFO or ERROR))
+            vim.notify(msg, (ok and INFO or ERROR))
         end)
     end
     return ok
@@ -278,7 +275,7 @@ function Api.get_project_root(bufnr)
     end
     bufnr = bufnr or curr_buf()
 
-    if empty(Config.options.detection_methods) then
+    if vim.tbl_isempty(Config.options.detection_methods) then
         return
     end
     local SWITCH = {
@@ -316,7 +313,7 @@ end
 ---@return string|nil last
 function Api.get_last_project()
     local recent = History.get_recent_projects()
-    if empty(recent) or #recent == 1 then
+    if vim.tbl_isempty(recent) or #recent == 1 then
         return nil
     end
 
@@ -376,10 +373,10 @@ function Api.on_buf_enter(verbose, bufnr)
         return
     end
 
-    local dir = vim.fn.fnamemodify(buf_name(bufnr), ':p:h')
+    local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
     if not (exists(dir) and root_included(dir)) or is_excluded(dir) then
         if verbose then
-            notify('Directory is either excluded or does not exist!', WARN)
+            vim.notify('Directory is either excluded or does not exist!', WARN)
         end
         return
     end
