@@ -5,10 +5,10 @@
 ---confusions with naming, e.g. `require('project_nvim.project')`.
 
 local MODSTR = 'project.api'
-local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
+local uv = vim.uv or vim.loop
 local in_list = vim.list_contains
 local current_buf = vim.api.nvim_get_current_buf
 
@@ -41,33 +41,29 @@ function Api.find_lsp_root(bufnr)
     end
     bufnr = bufnr or current_buf()
 
-    local allow_patterns = Config.options.allow_patterns_for_lsp
-    local ignore_lsp = Config.options.ignore_lsp
-    local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
     if vim.tbl_isempty(clients) then
         return
     end
 
-    ---@type string|nil, string|nil
-    local dir, name = nil, nil
+    local ignore_lsp = Config.options.ignore_lsp
+    local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
     for _, client in ipairs(clients) do
         ---@type string[]
         local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
         local valid = Util.is_type('table', filetypes) and not vim.tbl_isempty(filetypes)
-        if not in_list(ignore_lsp, client.name) and valid then
-            if in_list(filetypes, ft) and client.config.root_dir then
-                dir, name = client.config.root_dir, client.name
-                if allow_patterns then -- If pattern matching for LSP is enabled, check patterns
+        if valid and in_list(filetypes, ft) and not in_list(ignore_lsp, client.name) then
+            if client.config.root_dir then
+                local dir, name = client.config.root_dir, client.name
+                if Config.options.allow_patterns_for_lsp then
                     if Path.root_included(dir) == nil then
                         return
                     end
                 end
-                break
+                return dir, name
             end
         end
     end
-    return dir, name
 end
 
 ---Check if given directory is owned by the user running Nvim.
@@ -108,9 +104,7 @@ function Api.find_pattern_root(bufnr)
     bufnr = bufnr or current_buf()
 
     local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
-    if Util.is_windows() then
-        dir = dir:gsub('\\', '/')
-    end
+    dir = Util.is_windows() and dir:gsub('\\', '/') or dir
     return Path.root_included(dir)
 end
 
@@ -125,12 +119,17 @@ function Api.gen_lsp_autocmd(group)
     else
         vim.validate({ group = { group, 'number' } })
     end
+    if vim.g.project_lspattach == 1 then
+        return
+    end
+
     vim.api.nvim_create_autocmd('LspAttach', {
         group = group,
         callback = function(ev)
             Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
         end,
     })
+    vim.g.project_lspattach = 1
 end
 
 ---@param dir? string
@@ -147,18 +146,21 @@ function Api.set_pwd(dir, method)
         })
     end
     local Log = require('project.utils.log')
-    if dir == nil or method == nil then
-        Log.error(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR))
-        vim.notify(('(%s.set_pwd): `dir` and/or `method` are `nil`!'):format(MODSTR), ERROR)
+    if not dir then
+        Log.error(('(%s.set_pwd): `dir` is `nil`!'):format(MODSTR))
+        vim.notify(('(%s.set_pwd): `dir` is `nil`!'):format(MODSTR), ERROR)
         return false
     end
+    if not method then
+        Log.error(('(%s.set_pwd): `method` is `nil`!'):format(MODSTR))
+        vim.notify(('(%s.set_pwd): `method` is `nil`!'):format(MODSTR), ERROR)
+        return false
+    end
+
     if not Config.options.allow_different_owners then
         if not Api.verify_owner(dir) then
-            Log.error(('(%s.set_pwd): Project root is owned by a different user'):format(MODSTR))
-            vim.notify(
-                ('(%s.set_pwd): Project root is owned by a different user'):format(MODSTR),
-                ERROR
-            )
+            Log.error(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))
+            vim.notify(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR), ERROR)
             return false
         end
     end
@@ -184,8 +186,7 @@ function Api.set_pwd(dir, method)
         table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
     end
 
-    --- If directory is the same as current Project dir/CWD
-    if in_list({ dir, Api.current_project or '' }, vim.fn.getcwd(0, 0)) then
+    if dir == vim.fn.getcwd(0, 0) then
         Log.info(('(%s.set_pwd): Current directory is selected project.'):format(MODSTR))
         return true
     end
@@ -199,8 +200,7 @@ function Api.set_pwd(dir, method)
     local msg = ('(%s.set_pwd):'):format(MODSTR)
     if not in_list({ 'global', 'tab', 'win' }, scope_chdir) then
         Log.error(('%s INVALID value for `scope_chdir`'):format(msg))
-        vim.notify(('%s INVALID value for `scope_chdir`'):format(msg), ERROR)
-        return false
+        error(('%s INVALID value for `scope_chdir`'):format(msg), ERROR)
     end
 
     local ok = false
@@ -377,10 +377,15 @@ function Api.on_buf_enter(verbose, bufnr)
     if in_list(Config.options.disable_on.ft, ft) or in_list(Config.options.disable_on.bt, bt) then
         return
     end
+
     Api.current_project, Api.current_method = Api.get_current_project(bufnr)
+    local write = Api.current_project ~= vim.fn.getcwd(0, 0)
     Api.set_pwd(Api.current_project, Api.current_method)
+
     Api.last_project = Api.get_last_project()
-    History.write_history()
+    if write then
+        History.write_history()
+    end
 end
 
 function Api.init()
@@ -394,14 +399,17 @@ function Api.init()
         end,
     })
     if not Config.options.manual_mode then
-        vim.api.nvim_create_autocmd('BufEnter', {
-            pattern = '*',
-            group = group,
-            nested = true,
-            callback = function(ev)
-                Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
-            end,
-        })
+        if in_list(detection_methods, 'pattern') then
+            vim.api.nvim_create_autocmd('BufEnter', {
+                pattern = '*',
+                group = group,
+                nested = true,
+                callback = function(ev)
+                    Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
+                end,
+            })
+        end
+
         if in_list(detection_methods, 'lsp') then
             Api.gen_lsp_autocmd(group)
         end
