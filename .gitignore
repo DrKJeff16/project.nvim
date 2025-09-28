@@ -57,6 +57,9 @@ ISSUE.md
 luarc.json
 luarc.jsonc
 
+# LuaCov
+luacov*
+
 # Testing
 .repro/
 minimal_init.lua
