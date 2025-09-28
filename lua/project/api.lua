@@ -10,21 +10,12 @@ local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
 local in_list = vim.list_contains
-local curr_buf = vim.api.nvim_get_current_buf
-local augroup = vim.api.nvim_create_augroup
-local autocmd = vim.api.nvim_create_autocmd
+local current_buf = vim.api.nvim_get_current_buf
 
 local Config = require('project.config')
 local Path = require('project.utils.path')
 local Util = require('project.utils.util')
 local History = require('project.utils.history')
-local is_type = Util.is_type
-local is_windows = Util.is_windows
-local reverse = Util.reverse
-local vim_has = Util.vim_has
-local exists = Path.exists
-local is_excluded = Path.is_excluded
-local root_included = Path.root_included
 
 ---The `project.nvim` API module.
 --- ---
@@ -43,12 +34,12 @@ local Api = {}
 ---@return string|nil dir
 ---@return string|nil name
 function Api.find_lsp_root(bufnr)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer?')
     else
         vim.validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
-    bufnr = bufnr or curr_buf()
+    bufnr = bufnr or current_buf()
 
     local allow_patterns = Config.options.allow_patterns_for_lsp
     local ignore_lsp = Config.options.ignore_lsp
@@ -63,12 +54,12 @@ function Api.find_lsp_root(bufnr)
     for _, client in ipairs(clients) do
         ---@type string[]
         local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
-        local valid = is_type('table', filetypes) and not vim.tbl_isempty(filetypes)
+        local valid = Util.is_type('table', filetypes) and not vim.tbl_isempty(filetypes)
         if not in_list(ignore_lsp, client.name) and valid then
             if in_list(filetypes, ft) and client.config.root_dir then
                 dir, name = client.config.root_dir, client.name
                 if allow_patterns then -- If pattern matching for LSP is enabled, check patterns
-                    if root_included(dir) == nil then
+                    if Path.root_included(dir) == nil then
                         return
                     end
                 end
@@ -86,13 +77,13 @@ end
 ---@param dir string
 ---@return boolean
 function Api.verify_owner(dir)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('dir', dir, 'string', false)
     else
         vim.validate({ dir = { dir, 'string' } })
     end
     local Log = require('project.utils.log')
-    if is_windows() then
+    if Util.is_windows() then
         Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
         return true
     end
@@ -109,18 +100,18 @@ end
 ---@return string|nil dir_res
 ---@return string|nil method
 function Api.find_pattern_root(bufnr)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer?')
     else
         vim.validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
-    bufnr = bufnr or curr_buf()
+    bufnr = bufnr or current_buf()
 
     local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
-    if is_windows() then
+    if Util.is_windows() then
         dir = dir:gsub('\\', '/')
     end
-    return root_included(dir)
+    return Path.root_included(dir)
 end
 
 ---Generates the autocommand for the `LspAttach` event.
@@ -129,12 +120,12 @@ end
 --- ---
 ---@param group integer
 function Api.gen_lsp_autocmd(group)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('group', group, 'number', false, 'integer')
     else
         vim.validate({ group = { group, 'number' } })
     end
-    autocmd('LspAttach', {
+    vim.api.nvim_create_autocmd('LspAttach', {
         group = group,
         callback = function(ev)
             Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
@@ -146,7 +137,7 @@ end
 ---@param method? string
 ---@return boolean
 function Api.set_pwd(dir, method)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('dir', dir, 'string', true, 'string?')
         vim.validate('method', method, 'string', true, 'string?')
     else
@@ -268,12 +259,12 @@ end
 ---@return string|nil root
 ---@return string|nil method
 function Api.get_project_root(bufnr)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer?')
     else
         vim.validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
-    bufnr = bufnr or curr_buf()
+    bufnr = bufnr or current_buf()
 
     if vim.tbl_isempty(Config.options.detection_methods) then
         return
@@ -318,7 +309,7 @@ function Api.get_last_project()
     end
 
     ---@type string[]
-    recent = reverse(recent)
+    recent = Util.reverse(recent)
     return #History.session_projects <= 1 and recent[2] or recent[1]
 end
 
@@ -329,12 +320,12 @@ end
 ---@return string|nil method
 ---@return string|nil last
 function Api.get_current_project(bufnr)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer?')
     else
         vim.validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
-    bufnr = bufnr or curr_buf()
+    bufnr = bufnr or current_buf()
 
     local curr, method = Api.get_project_root(bufnr)
     local last = Api.get_last_project()
@@ -344,12 +335,12 @@ end
 ---@param bufnr? integer
 ---@return boolean
 function Api.buf_is_file(bufnr)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer?')
     else
         vim.validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
-    bufnr = bufnr or curr_buf()
+    bufnr = bufnr or current_buf()
 
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
     return in_list({ '', 'acwrite' }, bt)
@@ -358,7 +349,7 @@ end
 ---@param verbose? boolean
 ---@param bufnr? integer
 function Api.on_buf_enter(verbose, bufnr)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('verbose', verbose, 'boolean', true, 'boolean?')
         vim.validate('bufnr', bufnr, 'number', true, 'integer?')
     else
@@ -368,13 +359,13 @@ function Api.on_buf_enter(verbose, bufnr)
         })
     end
     verbose = verbose ~= nil and verbose or false
-    bufnr = bufnr or curr_buf()
+    bufnr = bufnr or current_buf()
     if not Api.buf_is_file(bufnr) then
         return
     end
 
     local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
-    if not (exists(dir) and root_included(dir)) or is_excluded(dir) then
+    if not (Path.exists(dir) and Path.root_included(dir)) or Path.is_excluded(dir) then
         if verbose then
             vim.notify('Directory is either excluded or does not exist!', WARN)
         end
@@ -393,9 +384,9 @@ function Api.on_buf_enter(verbose, bufnr)
 end
 
 function Api.init()
-    local group = augroup('project.nvim', { clear = false })
+    local group = vim.api.nvim_create_augroup('project.nvim', { clear = false })
     local detection_methods = Config.options.detection_methods
-    autocmd('VimLeavePre', {
+    vim.api.nvim_create_autocmd('VimLeavePre', {
         pattern = '*',
         group = group,
         callback = function()
@@ -403,7 +394,7 @@ function Api.init()
         end,
     })
     if not Config.options.manual_mode then
-        autocmd('BufEnter', {
+        vim.api.nvim_create_autocmd('BufEnter', {
             pattern = '*',
             group = group,
             nested = true,

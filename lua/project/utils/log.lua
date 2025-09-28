@@ -202,7 +202,6 @@ function Log.open_win()
     if not (Log.logfile and enabled) then
         return
     end
-
     if vim.g.project_log_cleared == 1 then
         vim.notify(
             ('(%s.open_win): Log has already been cleared. Try restarting.'):format(MODSTR),
