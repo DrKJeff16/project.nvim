@@ -18,7 +18,7 @@ according to your needs.
 </div>
 
 > [!NOTE]
-> This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
+> This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim/pull/158).
 > Ever since I've decided to extend it and address issues.
 >
 > _**I will be maintaining this plugin for the foreseeable future!**_
