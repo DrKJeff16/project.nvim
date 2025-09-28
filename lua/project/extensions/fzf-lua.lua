@@ -17,7 +17,6 @@ end
 
 ---@param selected string[]
 function M.delete_project(selected)
-    vim.print(selected)
     require('project.utils.history').delete_project(selected[1])
 end
 
