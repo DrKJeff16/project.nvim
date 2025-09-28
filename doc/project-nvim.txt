@@ -101,7 +101,6 @@ Table of Contents                                             *project-nvim.toc*
       },
     })
 <
-
 ------------------------------------------------------------------------------
 1.3 pckr.nvim                                        *project-nvim.install-pckr*
 >lua
@@ -125,8 +124,6 @@ Table of Contents                                             *project-nvim.toc*
       })
     end
 <
-
-
 ------------------------------------------------------------------------------
 1.4 paq-nvim                                          *project-nvim.install-paq*
 >lua
@@ -141,7 +138,6 @@ Table of Contents                                             *project-nvim.toc*
       'ibhagwan/fzf-lua', -- OPTIONAL
     })
 <
-
 ==============================================================================
 2. project-nvim.setup                                       *project-nvim.setup*
 
