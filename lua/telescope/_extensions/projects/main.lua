@@ -1,13 +1,12 @@
 local MODSTR = 'telescope._extensions.projects.main'
 local Log = require('project.utils.log')
+local Util = require('project.utils.util')
 local ERROR = vim.log.levels.ERROR
-if not require('project.utils.util').mod_exists('telescope') then
+if not Util.mod_exists('telescope') then
     Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
     error(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
 end
-local copy = vim.deepcopy
 local in_list = vim.list_contains
-local empty = vim.tbl_isempty
 
 local Pickers = require('telescope.pickers')
 local Actions = require('telescope.actions')
@@ -15,7 +14,6 @@ local State = require('telescope.actions.state')
 local telescope_config = require('telescope.config').values
 local _Actions = require('telescope._extensions.projects.actions')
 local _Util = require('telescope._extensions.projects.util')
-local Util = require('project.utils.util')
 
 ---@class TelescopeProjects.Main
 local Main = {}
@@ -41,22 +39,24 @@ local valid_acts = {
 local function normal_attach(prompt_bufnr, map)
     local is_type = require('project.utils.util').is_type
     local Keys = require('project.config').options.telescope.mappings or {}
-    if not is_type('table', Keys) or empty(Keys) then
-        Keys = copy(require('project.config.defaults').telescope.mappings)
+    if not is_type('table', Keys) or vim.tbl_isempty(Keys) then
+        Keys = vim.deepcopy(require('project.config.defaults').telescope.mappings)
     end
 
     for mode, group in pairs(Keys) do
-        if in_list({ 'n', 'i' }, mode) and is_type('table', group) and not empty(group) then
-            if mode == 'n' then
-                group['?'] = 'help_mappings'
-            else
-                group['<C-?>'] = 'help_mappings'
-            end
-            for lhs, act in pairs(group) do
-                ---@type function|false
-                local rhs = (_Actions[act] and in_list(valid_acts, act)) and _Actions[act] or false
-                if rhs and vim.is_callable(rhs) and is_type('string', lhs) then
-                    map(mode, lhs, rhs)
+        if in_list({ 'n', 'i' }, mode) then
+            if is_type('table', group) and not vim.tbl_isempty(group) then
+                if mode == 'n' then
+                    group['?'] = 'help_mappings'
+                else
+                    group['<C-?>'] = 'help_mappings'
+                end
+                for lhs, act in pairs(group) do
+                    ---@type function|false
+                    local rhs = in_list(valid_acts, act) and _Actions[act] or false
+                    if rhs and vim.is_callable(rhs) and is_type('string', lhs) then
+                        map(mode, lhs, rhs)
+                    end
                 end
             end
         end
@@ -76,8 +76,10 @@ end
 ---@param opts? table
 function Main.setup(opts)
     Main.default_opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
-    vim.g.project_telescope_loaded = 1
-    Log.info(('(%s.setup): `projects` picker setup successful!'):format(MODSTR))
+    if vim.g.project_telescope_loaded ~= 1 then
+        Log.info(('(%s.setup): `projects` picker setup successful!'):format(MODSTR))
+        vim.g.project_telescope_loaded = 1
+    end
 end
 
 ---Main entrypoint for Telescope.
