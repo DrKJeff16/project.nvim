@@ -28,14 +28,11 @@ local copy = vim.deepcopy
 
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
-local dir_exists = Util.dir_exists
-local normalise_path = Util.normalise_path
-local dedup = Util.dedup
-local vim_has = Util.vim_has
 
 ---@class Project.Utils.History
 ---@field has_watch_setup? boolean
 ---@field historysize? integer
+---@field hist_loc? { bufnr: integer, win: integer }|nil
 local History = {}
 
 ---Projects from previous neovim sessions.
@@ -51,7 +48,7 @@ History.session_projects = {}
 ---@param mode OpenMode
 ---@return integer|nil fd
 function History.open_history(mode)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('mode', mode, 'string', false, 'OpenMode')
     else
         vim.validate({ mode = { mode, 'string' } })
@@ -71,7 +68,7 @@ end
 ---@param tbl string[]
 ---@return string[] res
 local function delete_duplicates(tbl)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('tbl', tbl, 'table', false, 'string[]')
     else
         vim.validate({ tbl = { tbl, 'table' } })
@@ -79,7 +76,7 @@ local function delete_duplicates(tbl)
 
     local cache_dict = {} ---@type table<string, integer>
     for _, v in ipairs(tbl) do
-        local normalised_path = normalise_path(v)
+        local normalised_path = Util.normalise_path(v)
         if cache_dict[normalised_path] == nil then
             cache_dict[normalised_path] = 1
         else
@@ -89,21 +86,21 @@ local function delete_duplicates(tbl)
 
     local res = {} ---@type string[]
     for _, v in ipairs(tbl) do
-        local normalised_path = normalise_path(v)
+        local normalised_path = Util.normalise_path(v)
         if cache_dict[normalised_path] == 1 then
             table.insert(res, normalised_path)
         else
             cache_dict[normalised_path] = cache_dict[normalised_path] - 1
         end
     end
-    return dedup(res)
+    return Util.dedup(res)
 end
 
 ---Deletes a project string, or a Telescope Entry type.
 --- ---
 ---@param project string|Project.ActionEntry
 function History.delete_project(project)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('project', project, { 'string', 'table' }, false, 'string|Project.ActionEntry')
     else
         vim.validate({ project = { project, { 'string', 'table' } } })
@@ -149,7 +146,7 @@ end
 --- ---
 ---@param history_data string
 function History.deserialize_history(history_data)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('history_data', history_data, 'string', false)
     else
         vim.validate({ history_data = { history_data, 'string' } })
@@ -157,7 +154,7 @@ function History.deserialize_history(history_data)
 
     local projects = {} ---@type string[]
     for s in history_data:gmatch('[^\r\n]+') do
-        if not Path.is_excluded(s) and dir_exists(s) then
+        if not Path.is_excluded(s) and Util.dir_exists(s) then
             table.insert(projects, s)
         end
     end
@@ -213,18 +210,18 @@ function History.get_recent_projects()
 
     local recents = {} ---@type string[]
     for _, dir in ipairs(tbl) do
-        if dir_exists(dir) then
+        if Util.dir_exists(dir) then
             table.insert(recents, dir)
         end
     end
-    return dedup(recents)
+    return Util.dedup(recents)
 end
 
 ---Write projects to history file.
 --- ---
 ---@param close? boolean
 function History.write_history(close)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('close', close, 'boolean', true, 'boolean?')
     else
         vim.validate({ close = { close, { 'boolean', 'nil' } } })
@@ -259,6 +256,59 @@ function History.write_history(close)
         uv.fs_close(fd)
         Log.debug(('(%s.write_history): File descriptor closed!'):format(MODSTR))
     end
+end
+
+function History.open_win()
+    if not Path.historyfile then
+        return
+    end
+    local Log = require('project.utils.log')
+    if not Path.exists(Path.historyfile) then
+        Log.error(('(%s.open_win): Bad historyfile path!'):format(MODSTR))
+        error(('(%s.open_win): Bad historyfile path!'):format(MODSTR), ERROR)
+    end
+
+    if History.hist_loc ~= nil then
+        return
+    end
+
+    vim.cmd.tabedit(Path.historyfile)
+    local set_hist_loc = vim.schedule_wrap(function()
+        History.hist_loc = {
+            bufnr = vim.api.nvim_get_current_buf(),
+            win = vim.api.nvim_get_current_win(),
+        }
+        local win_opts = { win = History.hist_loc.win } ---@type vim.api.keyset.option
+        vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
+        vim.api.nvim_set_option_value('list', false, win_opts)
+        vim.api.nvim_set_option_value('number', false, win_opts)
+        vim.api.nvim_set_option_value('wrap', false, win_opts)
+        vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
+
+        local buf_opts = { buf = History.hist_loc.bufnr } ---@type vim.api.keyset.option
+        vim.api.nvim_set_option_value('filetype', '', buf_opts)
+        vim.api.nvim_set_option_value('fileencoding', 'utf-8', buf_opts)
+        vim.api.nvim_set_option_value('buftype', 'nowrite', buf_opts)
+        vim.api.nvim_set_option_value('modifiable', false, buf_opts)
+
+        vim.keymap.set('n', 'q', History.close_win, {
+            buffer = History.hist_loc.bufnr,
+            noremap = true,
+            silent = true,
+        })
+    end)
+
+    set_hist_loc()
+end
+
+function History.close_win()
+    if not History.hist_loc then
+        return
+    end
+
+    vim.api.nvim_buf_delete(History.hist_loc.bufnr, {})
+    pcall(vim.cmd.tabclose)
+    History.hist_loc = nil
 end
 
 return History

@@ -93,6 +93,36 @@ function M.create_user_commands()
             bang = true,
         },
         {
+            name = 'ProjectAdd',
+            with_ctx = true,
+            callback = function(ctx)
+                ---@type vim.ui.input.Opts
+                local opts = {
+                    prompt = 'Input a valid path to the project:',
+                    completion = 'dir',
+                }
+                if ctx and ctx.bang ~= nil then
+                    if ctx.bang then
+                        opts.default =
+                            vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
+                    end
+                end
+
+                vim.ui.input(opts, require('project.popup').prompt_project)
+            end,
+            desc = 'Prompt to add the current directory to the project history',
+            bang = true,
+        },
+        {
+            name = 'ProjectConfig',
+            with_ctx = false,
+            callback = function()
+                local cfg = require('project').get_config()
+                vim.notify(vim.inspect(cfg), INFO)
+            end,
+            desc = 'Prints out the current configuratiion for `project.nvim`',
+        },
+        {
             name = 'ProjectDelete',
             with_ctx = true,
             callback = function(ctx)
@@ -138,15 +168,6 @@ function M.create_user_commands()
             end,
         },
         {
-            name = 'ProjectConfig',
-            with_ctx = false,
-            callback = function()
-                local cfg = require('project').get_config()
-                vim.notify(vim.inspect(cfg), INFO)
-            end,
-            desc = 'Prints out the current configuratiion for `project.nvim`',
-        },
-        {
             name = 'ProjectFzf',
             with_ctx = false,
             callback = function()
@@ -155,24 +176,17 @@ function M.create_user_commands()
             desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
         },
         {
-            name = 'ProjectAdd',
+            name = 'ProjectHistory',
             with_ctx = true,
             callback = function(ctx)
-                ---@type vim.ui.input.Opts
-                local opts = {
-                    prompt = 'Input a valid path to the project:',
-                    completion = 'dir',
-                }
-                if ctx and ctx.bang ~= nil then
-                    if ctx.bang then
-                        opts.default =
-                            vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
-                    end
+                local bang = ctx.bang ~= nil and ctx.bang or false
+                if not bang then
+                    require('project.utils.history').open_win()
+                    return
                 end
-
-                vim.ui.input(opts, require('project.popup').prompt_project)
+                require('project.utils.history').close_win()
             end,
-            desc = 'Prompt to add the current directory to the project history',
+            desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
             bang = true,
         },
         {

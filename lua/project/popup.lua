@@ -181,6 +181,9 @@ Popup.open_menu = Popup.select.new({
             ['Show Config'] = function()
                 require('project.commands').ProjectConfig()
             end,
+            ['Open History'] = function()
+                vim.cmd.ProjectHistory()
+            end,
             ['Open Help Docs'] = function()
                 vim.cmd.help('project-nvim')
             end,
@@ -226,6 +229,7 @@ Popup.open_menu = Popup.select.new({
             table.insert(res_list, 'Clear Log')
         end
         table.insert(res_list, 'Show Config')
+        table.insert(res_list, 'Open History')
         table.insert(res_list, 'Run Checkhealth')
         table.insert(res_list, 'Open Help Docs')
         table.insert(res_list, 'Exit')
