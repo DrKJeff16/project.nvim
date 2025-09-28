@@ -241,7 +241,7 @@ require('project').setup()
 
 ### Defaults
 
-> [!NOTE]
+> [!TIP]
 > You can find these in [`project/config/defaults.lua`](./lua/project/config/defaults.lua).
 
 > [!NOTE]
@@ -253,6 +253,7 @@ require('project').setup()
 > ---|'change_working_directory'
 > ---|'delete_project'
 > ---|'find_project_files'
+> ---|'help_mappings'
 > ---|'recent_project_files'
 > ---|'search_in_project_files'
 > ```
@@ -621,11 +622,9 @@ For your convenience here come some examples:
   patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
   ```
 
-
 > [!IMPORTANT]
 > - Make sure to put your pattern exclusions first, and then the patterns you DO want included.
 > - If you have `allow_patterns_for_lsp` enabled, it will also work somewhat for your LSP clients.
-
 
 <div align="right">
 
@@ -689,7 +688,6 @@ require('telescope').load_extension('projects')
 After that you can now call it from the command line:
 
 ```vim
-" Vim command line
 :Telescope projects
 ```
 
@@ -745,10 +743,17 @@ After that you can now call it from the command line:
 
 These are the user commands you can call from the cmdline:
 
+---
+
 ### `:Project`
 
 The `:Project` command will open a UI window pointing to all the useful operations
 this plugin can provide. This one is subject to change, just as `vim.ui` is.
+
+> [!TIP]
+> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
+
+---
 
 ### `:ProjectFzf`
 
@@ -762,6 +767,8 @@ For now it just executes `require('project').run_fzf_lua()`.
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
 
+---
+
 ### `:ProjectTelescope`
 
 > [!IMPORTANT]
@@ -774,6 +781,8 @@ A shortcut, to be honest.
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
 
+---
+
 ### `:ProjectHistory`
 
 The `:ProjectHistory` command opens the `project.nvim` history file in a new tab,
@@ -784,6 +793,8 @@ any instance of a previously opened history file, if found. Otherwise nothing wi
 
 > [!TIP]
 > _See [`history.lua`](./lua/project/utils/history.lua) for more info_.
+
+---
 
 ### `:ProjectLog`
 
@@ -799,6 +810,8 @@ any instance of a previously opened log file, if found. Otherwise nothing will h
 
 > [!TIP]
 > _See [_`log.lua`_](./lua/project/utils/log.lua) for more info_.
+
+---
 
 ### `:ProjectLogClear`
 
@@ -821,6 +834,8 @@ If this is called from a logfile tab, then it will attempt to close it.
 > [!TIP]
 > _See [_`log.lua`_](./lua/project/utils/log.lua) for more info_.
 
+---
+
 ### `:ProjectAdd`
 
 The `:ProjectAdd` command is a manual hook that opens a prompt to input any
@@ -834,6 +849,8 @@ Adding a [!] will set the prompt to your cwd.
 
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
+
+---
 
 ### `:ProjectRoot`
 
@@ -851,6 +868,8 @@ The command does essentially the following:
 > [!TIP]
 > _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
 
+---
+
 ### `:ProjectConfig`
 
 The `:ProjectConfig` command is a hook to display your current config
@@ -865,6 +884,8 @@ The command does essentially the following:
 
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
+
+---
 
 ### `:ProjectDelete`
 
@@ -892,6 +913,8 @@ If there's a successful deletion, you'll recieve a notification denoting success
 > - _See `:h :ProjectDelete` for more info_.
 > - _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
 
+---
+
 ### `:ProjectSession`
 
 The `:ProjectSession` command prints out the current session projects, in numerical order,
@@ -899,6 +922,8 @@ found in `History.session_projects`.
 
 > [!TIP]
 > - _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
+
+---
 
 <div align="right">
 
