@@ -38,13 +38,14 @@ Table of Contents                                             *project-nvim.toc*
     7.1. `:Project`                                                     |:Project|
     7.2. `:ProjectLog`                                               |:ProjectLog|
     7.3. `:ProjectLogClear`                                     |:ProjectLogClear|
-    7.2. `:ProjectFzf`                                               |:ProjectFzf|
-    7.3. `:ProjectTelescope`                                   |:ProjectTelescope|
-    7.4. `:ProjectAdd`                                               |:ProjectAdd|
-    7.5. `:ProjectRoot`                                             |:ProjectRoot|
-    7.6. `:ProjectConfig`                                         |:ProjectConfig|
-    7.7. `:ProjectDelete`                                         |:ProjectDelete|
-    7.8. `:ProjectSession`                                       |:ProjectSession|
+    7.4. `:ProjectHistory`                                       |:ProjectHistory|
+    7.5. `:ProjectFzf`                                               |:ProjectFzf|
+    7.6. `:ProjectTelescope`                                   |:ProjectTelescope|
+    7.7. `:ProjectAdd`                                               |:ProjectAdd|
+    7.8. `:ProjectRoot`                                             |:ProjectRoot|
+    7.9. `:ProjectConfig`                                         |:ProjectConfig|
+    7.10. `:ProjectDelete`                                        |:ProjectDelete|
+    7.11. `:ProjectSession`                                      |:ProjectSession|
 8. API                                                        |project-nvim.api|
     8.1. `get_project_root()`                    |project-nvim.get_project_root()|
     8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
@@ -667,6 +668,18 @@ Table of Contents                                             *project-nvim.toc*
                             to a value different to `1`.
                             THIS SOLUTION IS NOT TESTED FULLY. ~
                             EXPECT WEIRD BEHAVIOUR IF YOU DO THIS! ~
+
+
+                                               *ProjectHistory*  *:ProjectHistory*
+`:ProjectHistory[!]`
+                            The `:ProjectHistory` command opens
+                            the `project.nvim` history file in a new tab,
+                            which can be exited by pressing `q` in Normal Mode.
+                            If a `[!]` is supplied at the end of the command
+                            (i.e. `:ProjectHistory!`), then it'll close
+                            any instance of a previously opened
+                            history file, if found.
+                            Otherwise nothing will happen
 
 
                                                        *ProjectFzf*  *:ProjectFzf*

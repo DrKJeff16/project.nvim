@@ -98,13 +98,14 @@ Show these much love!
     1. [`:Project`](#project)
     2. [`:ProjectFzf`](#projectfzf)
     3. [`:ProjectTelescope`](#projecttelescope)
-    4. [`:ProjectLog`](#projectlog)
-    5. [`:ProjectLogClear`](#projectlogclear)
-    6. [`:ProjectAdd`](#projectadd)
-    7. [`:ProjectRoot`](#projectroot)
-    8. [`:ProjectConfig`](#projectconfig)
-    9. [`:ProjectDelete`](#projectdelete)
-    10. [`:ProjectSession`](#projectsession)
+    4. [`:ProjectHistory`](#projecthistory)
+    5. [`:ProjectLog`](#projectlog)
+    6. [`:ProjectLogClear`](#projectlogclear)
+    7. [`:ProjectAdd`](#projectadd)
+    8. [`:ProjectRoot`](#projectroot)
+    9. [`:ProjectConfig`](#projectconfig)
+    10. [`:ProjectDelete`](#projectdelete)
+    11. [`:ProjectSession`](#projectsession)
 4. [API](#api)
     1. [`get_project_root()`](#get_project_root)
     2. [`get_recent_projects()`](#get_recent_projects)
@@ -773,6 +774,17 @@ A shortcut, to be honest.
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
 
+### `:ProjectHistory`
+
+The `:ProjectHistory` command opens the `project.nvim` history file in a new tab,
+which can be exited by pressing `q` in Normal Mode.
+
+If a `[!]` is supplied at the end of the command (i.e. `:ProjectHistory!`), then it'll close
+any instance of a previously opened history file, if found. Otherwise nothing will happen.
+
+> [!TIP]
+> _See [`history.lua`](./lua/project/utils/history.lua) for more info_.
+
 ### `:ProjectLog`
 
 > [!IMPORTANT]
@@ -783,7 +795,7 @@ The `:ProjectLog` command opens the `project.nvim` log file in a new tab,
 which can be exited by pressing `q` in Normal Mode.
 
 If a `[!]` is supplied at the end of the command (i.e. `:ProjectLog!`), then it'll close
-any instance of a previously opened log file, if found. Otherwise nothing will happen
+any instance of a previously opened log file, if found. Otherwise nothing will happen.
 
 > [!TIP]
 > _See [_`log.lua`_](./lua/project/utils/log.lua) for more info_.
