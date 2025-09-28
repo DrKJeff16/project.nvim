@@ -61,9 +61,7 @@ function M.new(specs)
             __tostring = function()
                 return T.desc
             end,
-
-            ---@param ctx? vim.api.keyset.create_user_command.command_args
-            __call = function(_, ctx)
+            __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args
                 if ctx then
                     spec.callback(ctx)
                     return
