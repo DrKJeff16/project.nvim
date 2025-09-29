@@ -71,11 +71,12 @@ function M.new(specs)
         })
         vim.api.nvim_create_user_command(M[spec.name].name, function(ctx)
             local with_ctx = spec.with_ctx ~= nil and spec.with_ctx or false
+            local cmd = M[spec.name]
             if with_ctx then
-                M[spec.name](ctx)
+                cmd(ctx)
                 return
             end
-            M[spec.name]()
+            cmd()
         end, opts)
     end
 end
@@ -131,8 +132,10 @@ function M.create_user_commands()
                     return
                 end
 
+                local Log = require('project.utils.log')
                 local recent = require('project.utils.history').get_recent_projects()
                 if not recent then
+                    Log.error('(:ProjectDelete): No recent projects!')
                     return
                 end
 
@@ -143,6 +146,9 @@ function M.create_user_commands()
                         path = path:sub(1, path:len() - 1)
                     end
                     if not (force or in_list(recent, path) or path ~= '') then
+                        Log.error(
+                            ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path)
+                        )
                         error(
                             ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path),
                             ERROR
@@ -203,9 +209,11 @@ function M.create_user_commands()
             name = 'ProjectSession',
             with_ctx = false,
             callback = function()
+                local Log = require('project.utils.log')
                 local session = require('project.utils.history').session_projects
                 if vim.tbl_isempty(session) then
-                    vim.notify('No sessions available!', ERROR)
+                    Log.error('(:ProjectSession): No sessions available!')
+                    vim.notify('(:ProjectSession): No sessions available!', ERROR)
                     return
                 end
 
