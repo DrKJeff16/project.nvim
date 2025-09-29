@@ -1,5 +1,6 @@
 std = "vim" # Points to the `vim.yml` file
 
 [lints]
+global_usage    = "allow"
 mixed_table     = "allow"
 unused_variable = "allow"
