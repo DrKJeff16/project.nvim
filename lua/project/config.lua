@@ -1,8 +1,6 @@
 local MODSTR = 'project.config'
 local Util = require('project.utils.util')
 local Glob = require('project.utils.globtopattern')
-local mod_exists = Util.mod_exists
-local pattern_exclude = Glob.pattern_exclude
 
 ---@class Project.Config
 local Config = {}
@@ -31,7 +29,7 @@ function Config.setup(options)
     options = options or {}
 
     Config.options = Config.get_defaults().new(options)
-    Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
+    Config.options.exclude_dirs = vim.tbl_map(Glob.pattern_exclude, Config.options.exclude_dirs)
     Config.options:verify() -- Verify config integrity
 
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
@@ -43,13 +41,15 @@ function Config.setup(options)
     if Config.options.log.enabled then
         Log.init()
     end
-    if Config.options.telescope.enabled and mod_exists('telescope') then
+    if Config.options.telescope.enabled and Util.mod_exists('telescope') then
         require('telescope').load_extension('projects')
         Log.info(('(%s.setup): Telescope Picker initialized.'):format(MODSTR))
     end
 
-    vim.g.project_setup = 1
-    Log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
+    if vim.g.project_setup ~= 1 then
+        vim.g.project_setup = 1
+        Log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
+    end
     require('project.commands').create_user_commands()
 end
 
