@@ -75,8 +75,8 @@ end
 
 ---@param opts? table
 function Main.setup(opts)
-    Main.default_opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
     if vim.g.project_telescope_loaded ~= 1 then
+        Main.default_opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
         Log.info(('(%s.setup): `projects` picker setup successful!'):format(MODSTR))
         vim.g.project_telescope_loaded = 1
     end

@@ -20,8 +20,6 @@ local Generate = require('telescope.actions.generate')
 local Builtin = require('telescope.builtin')
 local State = require('telescope.actions.state')
 
-local copy = vim.deepcopy
-
 ---@class Project.Telescope.Actions
 local M = {}
 
@@ -57,13 +55,13 @@ end
 
 ---@param prompt_bufnr integer
 function M.find_project_files(prompt_bufnr)
-    local hidden = Config.options.show_hidden
-    local prefer_file_browser = Config.options.telescope.prefer_file_browser
     local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
     if not cd_successful then
         return
     end
 
+    local hidden = Config.options.show_hidden
+    local prefer_file_browser = Config.options.telescope.prefer_file_browser
     local opts = {
         path = project_path,
         cwd = project_path,
@@ -82,13 +80,13 @@ end
 
 ---@param prompt_bufnr integer
 function M.browse_project_files(prompt_bufnr)
-    local hidden = Config.options.show_hidden
-    local prefer_file_browser = Config.options.telescope.prefer_file_browser
     local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
     if not cd_successful then
         return
     end
 
+    local hidden = Config.options.show_hidden
+    local prefer_file_browser = Config.options.telescope.prefer_file_browser
     local opts = {
         path = project_path,
         cwd = project_path,
@@ -121,11 +119,12 @@ end
 
 ---@param prompt_bufnr integer
 function M.recent_project_files(prompt_bufnr)
-    local hidden = Config.options.show_hidden
     local _, cd_successful = M.change_working_directory(prompt_bufnr)
     if not cd_successful then
         return
     end
+
+    local hidden = Config.options.show_hidden
     Builtin.oldfiles({ cwd_only = true, hidden = hidden })
 end
 
@@ -155,7 +154,7 @@ function M.delete_project(prompt_bufnr)
             local results = History.get_recent_projects()
             if Config.options.telescope.sort == 'newest' then
                 Log.debug(('(%s.create_finder): Sorting order to `newest`.'):format(MODSTR))
-                results = reverse(copy(results))
+                results = reverse(results)
             end
             return Finders.new_table({
                 results = results,
