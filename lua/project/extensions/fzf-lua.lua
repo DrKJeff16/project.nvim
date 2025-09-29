@@ -1,7 +1,6 @@
 local MODSTR = 'project.extensions.fzf-lua'
 local ERROR = vim.log.levels.ERROR
 local Util = require('project.utils.util')
-local Log = require('project.utils.log')
 local mod_exists = Util.mod_exists
 
 ---@class Project.Extensions.FzfLua
@@ -9,8 +8,10 @@ local M = {}
 
 ---@param selected string[]
 function M.default(selected)
-    Log.debug(('(%s.default): Running default fzf-lua action.'):format(MODSTR))
     local Opts = require('project.config').options
+    require('project.utils.log').debug(
+        ('(%s.default): Running default fzf-lua action.'):format(MODSTR)
+    )
     require('fzf-lua').files({
         cwd = selected[1],
         silent = Opts.silent_chdir,
@@ -20,7 +21,9 @@ end
 
 ---@param selected string[]
 function M.delete_project(selected)
-    Log.debug(('(%s.delete_project): Deleting project `%s`'):format(MODSTR, selected[1]))
+    require('project.utils.log').debug(
+        ('(%s.delete_project): Deleting project `%s`'):format(MODSTR, selected[1])
+    )
     require('project.utils.history').delete_project(selected[1])
 end
 
@@ -39,6 +42,7 @@ end
 ---CREDITS: [@deathmaz](https://github.com/ahmedkhalf/project.nvim/issues/71#issuecomment-1212993659)
 --- ---
 function M.run_fzf_lua()
+    local Log = require('project.utils.log')
     if not mod_exists('fzf-lua') then
         Log.error(('(%s.run_fzf_lua): `fzf-lua` is not installed!'):format(MODSTR))
         vim.notify(('(%s.run_fzf_lua): `fzf-lua` is not installed!'):format(MODSTR), ERROR)

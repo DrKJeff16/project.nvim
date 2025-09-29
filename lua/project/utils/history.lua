@@ -22,7 +22,7 @@
 
 local MODSTR = 'project.utils.history'
 local ERROR = vim.log.levels.ERROR
-local WARN = vim.log.levels.WARN
+local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
 local copy = vim.deepcopy
 
@@ -54,10 +54,11 @@ function History.open_history(mode)
         vim.validate({ mode = { mode, 'string' } })
     end
     Path.create_path()
-    local Log = require('project.utils.log')
     local dir_stat = uv.fs_stat(Path.projectpath)
     if not dir_stat then
-        Log.error(('(%s.open_history): History file unavailable!'):format(MODSTR))
+        require('project.utils.log').error(
+            ('(%s.open_history): History file unavailable!'):format(MODSTR)
+        )
         error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
     end
 
@@ -136,8 +137,8 @@ function History.delete_project(project)
     History.session_projects = copy(new_tbl)
 
     if found then
-        Log.warn(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj))
-        vim.notify(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj), WARN)
+        Log.info(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj))
+        vim.notify(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj), INFO)
         History.write_history(true)
     end
 end
@@ -262,12 +263,10 @@ function History.open_win()
     if not Path.historyfile then
         return
     end
-    local Log = require('project.utils.log')
     if not Path.exists(Path.historyfile) then
-        Log.error(('(%s.open_win): Bad historyfile path!'):format(MODSTR))
+        require('project.utils.log').error(('(%s.open_win): Bad historyfile path!'):format(MODSTR))
         error(('(%s.open_win): Bad historyfile path!'):format(MODSTR), ERROR)
     end
-
     if History.hist_loc ~= nil then
         return
     end
