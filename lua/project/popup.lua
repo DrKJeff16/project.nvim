@@ -67,6 +67,11 @@ end
 ---@param path string
 ---@return boolean
 local function is_hidden(path)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('path', path, 'string', false)
+    else
+        vim.validate({ path = { path, 'string' } })
+    end
     local FILE_ATTRIBUTE_HIDDEN = 0x2
     if ffi and Util.is_windows() then
         return bit.band(ffi.C.GetFileAttributesA(path), FILE_ATTRIBUTE_HIDDEN) ~= 0
@@ -79,6 +84,17 @@ end
 ---@param only_cd boolean
 ---@param ran_cd boolean
 local function open_node(proj, only_cd, ran_cd)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('proj', proj, 'string', false)
+        vim.validate('only_cd', only_cd, 'boolean', false)
+        vim.validate('ran_cd', ran_cd, 'boolean', false)
+    else
+        vim.validate({
+            proj = { proj, 'string' },
+            only_cd = { only_cd, 'boolean' },
+            ran_cd = { ran_cd, 'boolean' },
+        })
+    end
     if not ran_cd then
         local success = require('project.api').set_pwd(proj, 'prompt')
         if not success then
