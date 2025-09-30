@@ -218,6 +218,29 @@ local DEFAULTS = {
     historysize = 100,
 }
 
+---Plugin integrations.
+--- ---
+---@class Project.Config.Integrations
+DEFAULTS.integrations = {}
+
+---Integration with [folke/persistence.nvim](https://github.com/folke/persistence.nvim).
+---@class Project.Config.Integrations.Persistence
+DEFAULTS.integrations.persistence = {
+    ---Enables integration with the plugin.
+    --- ---
+    ---Default: `true`
+    --- ---
+    ---@type boolean
+    enabled = true,
+    ---If enabled the integration will auto-save the current project
+    ---if not found in session list.
+    --- ---
+    ---Default: `false`
+    --- ---
+    ---@type boolean
+    auto_save = false,
+}
+
 ---Table of options used for `fzf-lua` integration
 --- ---
 ---@class Project.Config.FzfLua

@@ -45,6 +45,9 @@ function Config.setup(options)
         require('telescope').load_extension('projects')
         Log.info(('(%s.setup): Telescope Picker initialized.'):format(MODSTR))
     end
+    if Config.options.integrations.persistence.enabled then
+        require('project.extensions.session.persistence').init()
+    end
 
     if vim.g.project_setup ~= 1 then
         vim.g.project_setup = 1
