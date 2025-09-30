@@ -134,6 +134,10 @@ local function open_node(proj, only_cd, ran_cd)
             return vim.fn.isdirectory(item) == 1 and (item .. '/') or item
         end,
     }, function(item) ---@param item string
+        if not item then
+            return
+        end
+
         local stat = vim.uv.fs_stat(item)
         if not stat then
             return
