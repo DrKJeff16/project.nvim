@@ -39,7 +39,14 @@ function Health.setup_check()
     else
         h_warn('nvim version is lower than `v0.11`!')
     end
-    if is_windows() then
+
+    if vim.fn.executable('fd') == 1 then
+        ok('`fd` executable in `PATH`')
+    else
+        h_warn('`fd` executable not found! Some utilities from this plugin may not work.')
+    end
+
+    if is_windows() and vim.g.project_disable_win32_warning ~= 1 then
         h_warn([[
         `DISCLAIMER`
 
@@ -47,6 +54,8 @@ function Health.setup_check()
         bear that in mind.
 
         Please report any issues to the maintainers.
+
+        If you wish to disable this warning, set `g:project_disable_win32_warning` to `1`.
         ]])
     end
     return setup_called
