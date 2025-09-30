@@ -107,11 +107,12 @@ local function open_node(proj, only_cd, ran_cd)
         vim.g.project_nvim_cwd = proj
     end
 
-    local hidden = require('project.config').options.show_hidden
     local dir = vim.uv.fs_scandir(proj)
     if not dir then
         error(('NO DIR `%s`!'):format(proj))
     end
+
+    local hidden = require('project.config').options.show_hidden
     local ls = {}
     while true do
         local node = vim.uv.fs_scandir_next(dir)
