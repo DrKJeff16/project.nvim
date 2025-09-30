@@ -19,6 +19,94 @@ local exists = Path.exists
 local get_recent_projects = History.get_recent_projects
 local vim_has = Util.vim_has
 
+---@param path string
+---@param hidden boolean
+---@return boolean
+local function hidden_avail(path, hidden)
+    if vim.fn.executable('fd') ~= 1 then
+        error('`fd` not found in your PATH!', ERROR)
+    end
+
+    local cmd = { 'fd', '-Iad1' }
+    if hidden then
+        table.insert(cmd, '-H')
+    end
+
+    local out = vim.system(cmd, {
+        text = true,
+        cwd = vim.g.project_nvim_cwd,
+    })
+        :wait().stdout
+    if not out then
+        return false
+    end
+
+    local ret = false
+    local nodes = vim.split(out, '\n', { plain = true, trimempty = true })
+    vim.tbl_map(function(value)
+        if value == path or vim.startswith(value, path) then
+            ret = true
+        end
+    end, nodes)
+    return ret
+end
+
+---@param proj string
+---@param only_cd boolean
+---@param ran_cd boolean
+local function open_node(proj, only_cd, ran_cd)
+    if not ran_cd then
+        local success = require('project.api').set_pwd(proj, 'prompt')
+        if not success then
+            error('(open_node): Unsucessful `set_pwd`!')
+        end
+        if only_cd then
+            return
+        end
+        ran_cd = not ran_cd
+        vim.g.project_nvim_cwd = proj
+    end
+
+    local hidden = require('project.config').options.show_hidden
+    local dir = vim.uv.fs_scandir(proj)
+    if not dir then
+        error(('NO DIR `%s`!'):format(proj))
+    end
+    local ls = {}
+    while true do
+        local node = vim.uv.fs_scandir_next(dir)
+        if not node then
+            break
+        end
+        node = proj .. '/' .. node
+        local stat = vim.uv.fs_stat(node)
+        if stat and hidden_avail(node, hidden) then
+            table.insert(ls, node)
+        end
+    end
+
+    vim.ui.select(ls, {
+        prompt = 'Select a file:',
+        format_item = function(item) ---@param item string
+            return vim.fn.isdirectory(item) == 1 and (item .. '/') or item
+        end,
+    }, function(item) ---@param item string
+        local stat = vim.uv.fs_stat(item)
+        if not stat then
+            return
+        end
+        if stat.type == 'file' then
+            vim.g.project_nvim_cwd = ''
+            vim.cmd.edit(item)
+            return
+        end
+        if stat.type == 'directory' then
+            vim.g.project_nvim_cwd = item
+            open_node(item, false, ran_cd)
+        end
+    end)
+end
+
 ---@class Project.Popup
 local Popup = {}
 
@@ -234,6 +322,51 @@ Popup.open_menu = Popup.select.new({
         table.insert(res_list, 'Open Help Docs')
         table.insert(res_list, 'Exit')
         return res_list
+    end,
+})
+
+Popup.session_menu = Popup.select.new({
+    callback = function(ctx)
+        local only_cd = ctx.bang ~= nil and ctx.bang or false
+        vim.ui.select(Popup.session_menu.choices_list(), {
+            prompt = 'Select a project from your session:',
+            format_item = function(item) ---@param item string
+                return vim.fn.isdirectory(item) == 1 and (item .. '/') or item
+            end,
+        }, function(item)
+            if not item then
+                return
+            end
+            if not in_list(Popup.session_menu.choices_list(), item) then
+                error('Bad selection!', ERROR)
+            end
+            local choices = Popup.session_menu.choices()
+            local op = choices[item]
+            if not (op and vim.is_callable(op)) then
+                error('Bad selection!', ERROR)
+            end
+
+            op(item, only_cd, false)
+        end)
+    end,
+    choices = function()
+        local sessions = require('project.utils.history').session_projects
+        local choices = {
+            ['Exit'] = function(_, _, _) end,
+        }
+        if vim.tbl_isempty(sessions) then
+            return choices
+        end
+        for _, proj in ipairs(sessions) do
+            choices[proj] = open_node
+        end
+
+        return choices
+    end,
+    choices_list = function()
+        local choices = vim.deepcopy(require('project.utils.history').session_projects)
+        table.insert(choices, 'Exit')
+        return choices
     end,
 })
 

@@ -207,24 +207,12 @@ function M.create_user_commands()
         },
         {
             name = 'ProjectSession',
-            with_ctx = false,
-            callback = function()
-                local Log = require('project.utils.log')
-                local session = require('project.utils.history').session_projects
-                if vim.tbl_isempty(session) then
-                    Log.error('(:ProjectSession): No sessions available!')
-                    vim.notify('(:ProjectSession): No sessions available!', ERROR)
-                    return
-                end
-
-                local len = #session
-                local msg = ''
-                for i, proj in ipairs(session) do
-                    msg = msg .. (len ~= i and '%s. %s\n' or '%s. %s'):format(i, proj)
-                end
-                vim.notify(msg, INFO)
+            with_ctx = true,
+            callback = function(ctx)
+                require('project.popup').session_menu(ctx)
             end,
-            desc = 'Prints out the current `project.nvim` projects session',
+            desc = 'Opens a menu to switch between sessions',
+            bang = true,
         },
         {
             name = 'ProjectTelescope',
