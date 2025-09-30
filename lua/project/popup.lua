@@ -231,8 +231,8 @@ function Popup.prompt_project(input)
     end
 
     local Api = require('project.api')
-    local recent = History.get_recent_projects()
-    if Api.current_project == input or in_list(recent, input) then
+    local session = History.session_projects
+    if Api.current_project == input or in_list(session, input) then
         vim.notify('Already added that directory!', WARN)
         return
     end
