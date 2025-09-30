@@ -104,8 +104,8 @@ function M.create_user_commands()
                 }
                 if ctx and ctx.bang ~= nil then
                     if ctx.bang then
-                        opts.default =
-                            vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
+                        local bufnr = curr_buf()
+                        opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
                     end
                 end
 
