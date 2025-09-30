@@ -19,6 +19,15 @@ local exists = Path.exists
 local get_recent_projects = History.get_recent_projects
 local vim_has = Util.vim_has
 
+---CREDITS: [u/Some_Derpy_Pineapple](https://www.reddit.com/r/neovim/comments/1nu5ehj/comment/ngyz21m/)
+local ffi = nil ---@type nil|ffilib
+if Util.mod_exists('ffi') then
+    ffi = require('ffi')
+    ffi.cdef([[
+    int GetFileAttributesA(const char *path);
+    ]])
+end
+
 ---@param path string
 ---@param hidden boolean
 ---@return boolean
@@ -51,6 +60,21 @@ local function hidden_avail(path, hidden)
     return ret
 end
 
+---For Windows.
+---
+---CREDITS: [`neo-tree.nvim`](https://github.com/nvim-neo-tree/neo-tree.nvim/blob/8dd9f08ff086d09d112f1873f88dc0f74b598cdb/lua/neo-tree/utils/init.lua#L1299)
+--- ---
+---@param path string
+---@return boolean
+local function is_hidden(path)
+    local FILE_ATTRIBUTE_HIDDEN = 0x2
+    if ffi and Util.is_windows() then
+        return bit.band(ffi.C.GetFileAttributesA(path), FILE_ATTRIBUTE_HIDDEN) ~= 0
+    end
+
+    return false
+end
+
 ---@param proj string
 ---@param only_cd boolean
 ---@param ran_cd boolean
@@ -80,8 +104,11 @@ local function open_node(proj, only_cd, ran_cd)
         end
         node = proj .. '/' .. node
         local stat = vim.uv.fs_stat(node)
-        if stat and hidden_avail(node, hidden) then
-            table.insert(ls, node)
+        if stat then
+            local hid = is_hidden(node)
+            if (hidden and hid) or hidden_avail(node, hidden) then
+                table.insert(ls, node)
+            end
         end
     end
 
