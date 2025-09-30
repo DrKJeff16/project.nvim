@@ -15,12 +15,12 @@ body:
           required: true
         - label: I have checked for existing issues related to this one, whether open or closed
           required: true
-        - label: I have read the docs (`README.md`, `:h project-nvim`, etc.), and also the ones for `telescope.nvim`
+        - label: I have read the pertinent documentation (`README.md`, `:h project-nvim`, etc.)
           required: true
 
   - type: checkboxes
     attributes:
-      label: What is the problem you encountered relate to?
+      label: What does the problem you encountered relate to?
       description: "Check one or more types of concepts your issue relates to:"
       options:
         - label: The plugin is not detecting directories correctly
@@ -29,11 +29,15 @@ body:
           required: false
         - label: Logging issues
           required: false
-        - label: Another plugin interferes with `project.nvim`
+        - label: UI errors
+          required: false
+        - label: "Another plugin interferes with `project.nvim`"
           required: false
         - label: Project history broke
           required: false
         - label: The Telescope picker is having issues
+          required: false
+        - label: "`fzf-lua` integration issues"
           required: false
         - label: Windows is causing undesirable behaviour
           required: false
@@ -87,6 +91,11 @@ body:
     attributes:
       label: Steps To Reproduce
       description: Steps to reproduce the behavior
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+        ...
     validations:
       required: true
 
@@ -100,7 +109,9 @@ body:
   - type: textarea
     attributes:
       label: How did you setup the plugin?
-      description: Paste the relevant code snippet of how you configured this plugin
+      description: |
+        If the plugin itself is causing an issue
+        please paste the relevant code snippet of how you configured this plugin
       value: |
         require("lazy").setup({
           spec = {
