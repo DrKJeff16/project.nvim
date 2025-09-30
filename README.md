@@ -124,6 +124,7 @@ Show these much love!
 >
 > **Requirements:**
 > - Neovim >= 0.11.0
+> - [`fd`](https://github.com/sharkdp/fd) **(REQUIRED FOR SESSION MANAGEMENT)**
 > - [`fzf-lua`](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
 > - [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
 >   - [`plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
@@ -917,11 +918,20 @@ If there's a successful deletion, you'll recieve a notification denoting success
 
 ### `:ProjectSession`
 
-The `:ProjectSession` command prints out the current session projects, in numerical order,
-found in `History.session_projects`.
+> [!IMPORTANT]
+> **This command requires `fd` to be installed for it to work!**
+
+The `:ProjectSession` command opens a custom picker with a selection of
+your current session projects (stored in `History.session_projects`). **Bear in mind this table gets
+filled on runtime**.
+
+If you select a session project, your `cwd` will be changed to what you selected.
+If the command is called with a `!` (`:ProjectSession!`) the UI will close.
+Otherwise, another custom UI picker will appear for you to select the files/dirs.
+Selecting a directory will open another UI picker with its contents, and so on.
 
 > [!TIP]
-> - _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
+> - _See [_`popup.lua`_](./lua/project/popup.lua) for more info_.
 
 ---
 

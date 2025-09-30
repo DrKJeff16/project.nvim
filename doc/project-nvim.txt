@@ -783,10 +783,24 @@ Table of Contents                                             *project-nvim.toc*
                                                *ProjectSession*  *:ProjectSession*
 `:ProjectSession`
 
-                            The `:ProjectSession` command prints out
-                            the current session projects,
-                            in numerical order,
-                            found in `History.session_projects`
+                            IMPORTANT ~
+                            This command requires `fd` to be installed ~
+                            for it to work! ~
+
+                            The `:ProjectSession` command opens a
+                            custom picker (using |vim.ui|) with a selection of
+                            your current session projects
+                            (stored in `History.session_projects`).
+                            Bear in mind this table gets filled on runtime. ~
+
+                            If you select a session project your `cwd`
+                            will be changed to what you selected.
+                            If the command is called with [!]
+                            (`:ProjectSession!`) the UI will close.
+                            Otherwise, another custom UI picker will appear
+                            for you to select the containing files/dirs.
+                            Selecting a directory will open another
+                            UI picker with its contents, and so on...
 
 
 ==============================================================================
