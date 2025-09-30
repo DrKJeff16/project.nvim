@@ -132,13 +132,21 @@ local function open_node(proj, only_cd, ran_cd)
     vim.ui.select(ls, {
         prompt = 'Select a file:',
         format_item = function(item) ---@param item string
+            if item == 'Exit' then
+                return item
+            end
+
+            item = vim.fn.fnamemodify(item, ':p')
+            item = item:sub(-1, -1) == '/' and item:sub(1, item:len() - 1) or item
             return vim.fn.isdirectory(item) == 1 and (item .. '/') or item
         end,
     }, function(item) ---@param item string
-        if not item then
+        if not item or in_list({ '', 'Exit' }, item) then
             return
         end
 
+        item = vim.fn.fnamemodify(item, ':p')
+        item = item:sub(-1, -1) == '/' and item:sub(1, item:len() - 1) or item
         local stat = vim.uv.fs_stat(item)
         if not stat then
             return
@@ -221,11 +229,15 @@ function Popup.prompt_project(input)
     if not input or input == '' then
         return
     end
+
+    input = vim.fn.fnamemodify(input, ':p')
+    input = input:sub(-1, -1) == '/' and (input:sub(1, input:len() - 1)) or input
     if not (exists(input) and exists(vim.fn.fnamemodify(input, ':p:h'))) then
         error('Invalid path!', ERROR)
     end
     if not Util.dir_exists(input) then
         input = vim.fn.fnamemodify(input, ':p:h')
+        input = input:sub(-1, -1) == '/' and (input:sub(1, input:len() - 1)) or input
         if not Util.dir_exists(input) then
             error('Path is not a directory, and parent could not be retrieved!', ERROR)
         end
