@@ -260,6 +260,9 @@ Popup.open_menu = Popup.select.new({
     choices = function()
         ---@type table<string, ProjectCmdFun>
         local res = {
+            ['Project Session'] = function()
+                Popup.session_menu()
+            end,
             ['New Project'] = function()
                 require('project.commands').ProjectAdd()
             end,
@@ -303,6 +306,7 @@ Popup.open_menu = Popup.select.new({
     choices_list = function()
         ---@type string[]
         local res_list = {
+            'Project Session',
             'New Project',
             'Delete A Project',
         }
@@ -327,7 +331,10 @@ Popup.open_menu = Popup.select.new({
 
 Popup.session_menu = Popup.select.new({
     callback = function(ctx)
-        local only_cd = ctx.bang ~= nil and ctx.bang or false
+        local only_cd = false
+        if ctx then
+            only_cd = ctx.bang ~= nil and ctx.bang or only_cd
+        end
         vim.ui.select(Popup.session_menu.choices_list(), {
             prompt = 'Select a project from your session:',
             format_item = function(item) ---@param item string
