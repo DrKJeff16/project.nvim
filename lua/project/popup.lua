@@ -128,6 +128,7 @@ local function open_node(proj, only_cd, ran_cd)
             end
         end
     end
+    table.insert(ls, 'Exit')
 
     vim.ui.select(ls, {
         prompt = 'Select a file:',
