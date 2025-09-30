@@ -141,7 +141,7 @@ function Util.lstrip(char, str)
             str = { str, 'string' },
         })
     end
-    if str == '' then
+    if str == '' or not vim.startswith(str, char) then
         return str
     end
 
@@ -179,18 +179,10 @@ function Util.rstrip(char, str)
     end
 
     str = str:reverse()
-    local i, len, new_str = 1, str:len(), ''
-    local other = false
-    while i <= len + 1 do
-        if str:sub(i, i) ~= char and not other then
-            other = true
-        end
-        if other then
-            new_str = ('%s%s'):format(new_str, str:sub(i, i))
-        end
-        i = i + 1
+    if not vim.startswith(str, char) then
+        return str:reverse()
     end
-    return new_str:reverse()
+    return Util.lstrip(char, str):reverse()
 end
 
 ---Strip a given leading `char` in a string, if any, bidirectionally.
