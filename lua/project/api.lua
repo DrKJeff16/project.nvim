@@ -157,6 +157,7 @@ function Api.set_pwd(dir, method)
         return false
     end
 
+    dir = vim.fn.expand(dir)
     if not Config.options.allow_different_owners then
         if not Api.verify_owner(dir) then
             Log.error(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))
@@ -187,11 +188,12 @@ function Api.set_pwd(dir, method)
     end
 
     if dir == vim.fn.getcwd(0, 0) then
+        Api.current_project = dir
+        Api.current_method = method
         Log.info(('(%s.set_pwd): Current directory is selected project.'):format(MODSTR))
         return true
     end
     if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
-        Log.debug(('(%s.set_pwd): Running `before_attach` hook.'):format(MODSTR))
         Config.options.before_attach(dir, method)
         Log.debug(('(%s.set_pwd): Ran `before_attach` hook successfully.'):format(MODSTR))
     end
@@ -216,6 +218,9 @@ function Api.set_pwd(dir, method)
     end
     msg = ('%s\nMethod: %s\nStatus: %s'):format(msg, method, (ok and 'SUCCESS' or 'FAILED'))
     if ok then
+        Api.current_project = dir
+        Api.current_method = method
+
         Log.info(msg)
         if Config.options.on_attach and vim.is_callable(Config.options.on_attach) then
             Log.debug(('(%s.set_pwd): Running `on_attach` hook.'):format(MODSTR))
