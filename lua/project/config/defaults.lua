@@ -7,7 +7,7 @@
 ---|'recent_project_files'
 ---|'search_in_project_files'
 
-local in_tbl = vim.tbl_contains
+local in_list = vim.tbl_contains
 local empty = vim.tbl_isempty
 local WARN = vim.log.levels.WARN
 local MODSTR = 'project.config.defaults'
@@ -179,6 +179,7 @@ local DEFAULTS = {
     --- ---
     ---@type { ft: string[], bt: string[] }
     disable_on = {
+        ---`filetype`
         ft = {
             '',
             'TelescopePrompt',
@@ -189,13 +190,13 @@ local DEFAULTS = {
             'notify',
             'packer',
             'qf',
-        }, ---`filetype`
-
+        },
+        ---`buftype`
         bt = {
             'help',
             'nofile',
             'terminal',
-        }, ---`buftype`
+        },
     },
     ---The path where `project.nvim` will store the project history directory,
     ---containing the project history in it.
@@ -244,10 +245,10 @@ DEFAULTS.log = {
     enabled = false,
     ---The maximum logfile size (in megabytes).
     --- ---
-    ---Default: `1.0`
+    ---Default: `1.1`
     --- ---
     ---@type number
-    max_size = 1.0,
+    max_size = 1.1,
     ---Path in which the log file will be saved.
     --- ---
     ---Default: `vim.fn.stdpath('state')`
@@ -357,17 +358,22 @@ function DEFAULTS:verify_scope_chdir()
     end
 
     local VALID = { 'global', 'tab', 'win' }
-    if in_tbl(VALID, self.scope_chdir) then
+    if in_list(VALID, self.scope_chdir) then
         return
     end
 
-    vim.notify('`scope_chdir` option invalid. Reverting to default option.', WARN)
+    vim.notify(
+        ('`scope_chdir` option invalid (`%s`). Reverting to default option.'):format(
+            self.scope_chdir
+        ),
+        WARN
+    )
     self.scope_chdir = DEFAULTS.scope_chdir
 end
 
 function DEFAULTS:verify_datapath()
     if not require('project.utils.util').dir_exists(self.datapath) then
-        vim.notify('Invalid `datapath`, reverting to default.', WARN)
+        vim.notify(('Invalid datapath `%s`, reverting to default.'):format(self.datapath), WARN)
         self.datapath = DEFAULTS.datapath
     end
 end
