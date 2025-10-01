@@ -196,6 +196,14 @@ function M.create_user_commands()
             bang = true,
         },
         {
+            name = 'ProjectRecents',
+            with_ctx = false,
+            callback = function()
+                require('project.popup').recents_menu()
+            end,
+            desc = 'Opens a menu to select a project from your history',
+        },
+        {
             name = 'ProjectRoot',
             with_ctx = true,
             callback = function(ctx)

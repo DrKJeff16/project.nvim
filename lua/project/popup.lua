@@ -294,6 +294,50 @@ Popup.delete_menu = Popup.select.new({
     end,
 })
 
+Popup.recents_menu = Popup.select.new({
+    callback = function()
+        vim.ui.select(Popup.recents_menu.choices_list(), {
+            prompt = 'Select a project:',
+        }, function(item)
+            if not item then
+                return
+            end
+            if not in_list(Popup.recents_menu.choices_list(), item) then
+                error('Bad selection!', ERROR)
+            end
+            local choices = Popup.recents_menu.choices()
+            local op = choices[item]
+            if not (op and vim.is_callable(op)) then
+                error('Bad selection!', ERROR)
+            end
+
+            op(item, false, false)
+        end)
+    end,
+    choices_list = function()
+        local choices_list = vim.deepcopy(require('project.utils.history').get_recent_projects())
+        if require('project.config').options.telescope.sort == 'newest' then
+            choices_list = Util.reverse(choices_list)
+        end
+
+        table.insert(choices_list, 'Exit')
+        return choices_list
+    end,
+    choices = function()
+        ---@type table<string, function>
+        local choices = {}
+        for _, s in ipairs(Popup.recents_menu.choices_list()) do
+            if s == 'Exit' then
+                choices[s] = function(_, _, _) end
+            else
+                choices[s] = open_node
+            end
+        end
+
+        return choices
+    end,
+})
+
 Popup.open_menu = Popup.select.new({
     callback = function()
         vim.ui.select(Popup.open_menu.choices_list(), {
