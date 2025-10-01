@@ -19,9 +19,6 @@ local function gen_log(lvl)
     ---@param ... any
     ---@return string|nil output
     return function(...)
-        if vim.g.project_setup ~= 1 then
-            return
-        end
         if not require('project.config').options.log.enabled then
             return
         end
