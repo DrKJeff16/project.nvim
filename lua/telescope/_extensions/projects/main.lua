@@ -1,7 +1,12 @@
 local MODSTR = 'telescope._extensions.projects.main'
+local ERROR = vim.log.levels.ERROR
+if vim.g.project_setup ~= 1 then
+    vim.notify(('(%s): `project.nvim` is not loaded!'):format(MODSTR), ERROR)
+    return
+end
+
 local Log = require('project.utils.log')
 local Util = require('project.utils.util')
-local ERROR = vim.log.levels.ERROR
 if not Util.mod_exists('telescope') then
     Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
     error(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
