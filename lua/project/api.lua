@@ -223,7 +223,6 @@ function Api.set_pwd(dir, method)
 
         Log.info(msg)
         if Config.options.on_attach and vim.is_callable(Config.options.on_attach) then
-            Log.debug(('(%s.set_pwd): Running `on_attach` hook.'):format(MODSTR))
             Config.options.on_attach(dir, method)
             Log.debug(('(%s.set_pwd): Ran `on_attach` hook successfully.'):format(MODSTR))
         end
