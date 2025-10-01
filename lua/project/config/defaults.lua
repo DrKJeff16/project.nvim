@@ -75,8 +75,8 @@ local DEFAULTS = {
     --- ---
     ---Default: `function(target_dir, method) end`
     --- ---
-    ---@param target_dir? string
-    ---@param method? string
+    ---@param target_dir string
+    ---@param method string
     before_attach = function(target_dir, method) end, ---@diagnostic disable-line:unused-local
     ---Hook to run after attaching to a new project.
     ---**_This only runs if the directory changes successfully._**
@@ -88,8 +88,8 @@ local DEFAULTS = {
     --- ---
     ---Default: `function(dir, method) end`
     --- ---
-    ---@param dir? string
-    ---@param method? string
+    ---@param dir string
+    ---@param method string
     on_attach = function(dir, method) end, ---@diagnostic disable-line:unused-local
     ---Sets whether to use Pattern Matching rules to the LSP client.
     ---
