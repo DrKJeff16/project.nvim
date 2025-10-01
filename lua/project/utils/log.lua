@@ -26,7 +26,7 @@ local function gen_log(lvl)
         local msg = ''
         for i = 1, select('#', ...) do
             local sel = select(i, ...)
-            if sel ~= nil then
+            if sel then
                 if is_type('number', sel) or is_type('boolean', sel) then
                     sel = tostring(sel)
                 elseif not is_type('string', sel) then
@@ -55,11 +55,11 @@ function Log.read_log()
         return
     end
     local fd = Log.open('r')
-    Log.setup_watch()
     if not fd then
         return
     end
 
+    Log.setup_watch()
     local data = uv.fs_read(fd, stat.size, -1)
     return data
 end
@@ -83,7 +83,7 @@ function Log.setup_watch()
         return
     end
     event:start(Log.logpath, {}, function(err, _, events)
-        if not (err == nil and events.change) then
+        if err or not events.change then
             return
         end
 
@@ -118,6 +118,37 @@ function Log.write(data, lvl)
     uv.fs_write(fd, msg, -1)
     uv.fs_close(fd)
     return msg
+end
+
+function Log.create_commands()
+    local Commands = require('project.commands')
+    Commands.new({
+        {
+            name = 'ProjectLog',
+            with_ctx = true,
+            callback = function(ctx)
+                local close = ctx.bang ~= nil and ctx.bang or false
+                if close then
+                    Log.close_win()
+                    return
+                end
+                Log.open_win()
+            end,
+            desc = 'Opens the `project.nvim` log in a new tab',
+            bang = true,
+        },
+        {
+            name = 'ProjectLogClear',
+            with_ctx = false,
+            callback = function()
+                if Log.log_loc then
+                    Log.close_win()
+                end
+                Log.clear_log()
+            end,
+            desc = 'Clears the `project.nvim` log',
+        },
+    })
 end
 
 ---@param mode OpenMode
@@ -165,34 +196,8 @@ function Log.init()
         (stat.size >= 1 and '\n' or '')
             .. os.date(('%s    %s    %s\n'):format(head, '%x  (%H:%M:%S)', head))
     )
-    local Commands = require('project.commands')
-    Commands.new({
-        {
-            name = 'ProjectLog',
-            with_ctx = true,
-            callback = function(ctx)
-                local close = ctx.bang ~= nil and ctx.bang or false
-                if close then
-                    Log.close_win()
-                    return
-                end
-                Log.open_win()
-            end,
-            desc = 'Opens the `project.nvim` log in a new tab',
-            bang = true,
-        },
-        {
-            name = 'ProjectLogClear',
-            with_ctx = false,
-            callback = function()
-                if Log.log_loc then
-                    Log.close_win()
-                end
-                Log.clear_log()
-            end,
-            desc = 'Clears the `project.nvim` log',
-        },
-    })
+
+    Log.create_commands()
 end
 
 function Log.open_win()

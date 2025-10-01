@@ -5,10 +5,10 @@
 ---|ProjectCmdFun
 
 ---@class Project.Commands.Spec
----@field with_ctx? boolean
 ---@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@field name string
 ---@field desc string
+---@field with_ctx? boolean
 ---@field complete? string|CompletorFun
 ---@field bang? boolean
 ---@field nargs? string|integer
@@ -20,7 +20,7 @@ local in_list = vim.list_contains
 local curr_buf = vim.api.nvim_get_current_buf
 local vim_has = require('project.utils.util').vim_has
 
----@type { create_user_commands: (fun()), new: fun(specs: Project.Commands.Spec[]) }|table<string, Project.CMD>
+---@type { create_user_commands: function, new: fun(specs: Project.Commands.Spec[]) }|table<string, Project.CMD>
 local M = {}
 
 ---@param specs Project.Commands.Spec[]
