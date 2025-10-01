@@ -34,7 +34,7 @@ end
 ---@return boolean
 local function hidden_avail(path, hidden)
     if vim.fn.executable('fd') ~= 1 then
-        error('`fd` not found in your PATH!', ERROR)
+        error(('(%s.hidden_avail): `fd` not found in your PATH!'):format(MODSTR), ERROR)
     end
 
     local cmd = { 'fd', '-Iad1' }
@@ -110,7 +110,7 @@ local function open_node(proj, only_cd, ran_cd)
 
     local dir = vim.uv.fs_scandir(proj)
     if not dir then
-        error(('NO DIR `%s`!'):format(proj))
+        error(('(%s.open_node): NO DIR `%s`!'):format(MODSTR, proj), ERROR)
     end
 
     local hidden = require('project.config').options.show_hidden
@@ -170,7 +170,7 @@ local Popup = {}
 Popup.select = {}
 
 ---@param opts Project.Popup.SelectSpec
----@return Project.Popup.Select|Project.Popup.SelectChoices|ProjectCmdFun
+---@return Project.Popup.SelectChoices|ProjectCmdFun
 function Popup.select.new(opts)
     if vim_has('nvim-0.11') then
         vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
@@ -197,12 +197,12 @@ function Popup.select.new(opts)
         })
     end
 
-    ---@type Project.Popup.Select|Project.Popup.SelectChoices|ProjectCmdFun
+    ---@type Project.Popup.SelectChoices|ProjectCmdFun
     local T = setmetatable({
         choices = opts.choices,
         choices_list = opts.choices_list,
     }, {
-        ---@param t Project.Popup.Select|Project.Popup.SelectChoices|ProjectCmdFun
+        ---@param t Project.Popup.SelectChoices|ProjectCmdFun
         ---@param k string
         __index = function(t, k)
             return rawget(t, k)
