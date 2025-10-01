@@ -162,11 +162,7 @@ if has('nvim-0.11')
   Plug 'ibhagwan/fzf-lua'
 
   lua << EOF
-  require('project').setup({
-    -- your configuration comes here
-    -- or leave it empty to use the default settings
-    -- refer to the configuration section below
-  })
+  require('project').setup()
   EOF
 endif
 ```
@@ -185,12 +181,8 @@ endif
   ---@module 'project'
 
   ---@type Project.Config.Options
-  opts = {
-    -- your configuration comes here
-    -- or leave it empty to use the default settings
-    -- refer to the configuration section below
-  },
-  cond = vim.fn.has('nvim-0.11') == 1, -- RECOMMENDED
+  opts = {},
+  enabled = vim.fn.has('nvim-0.11') == 1, -- RECOMMENDED
 }
 ```
 
@@ -220,11 +212,7 @@ endif
 >   ---@module 'project'
 >
 >   ---@type Project.Config.Options
->   opts = {
->     -- your configuration comes here
->     -- or leave it empty to use the default settings
->     -- refer to the configuration section below
->   },
+>   opts = {},
 > }
 > ```
 
@@ -241,11 +229,7 @@ if vim.fn.has('nvim-0.11') == 1 then
         'ibhagwan/fzf-lua',
       },
       config = function()
-        require('project').setup({
-          -- your configuration comes here
-          -- or leave it empty to use the default settings
-          -- refer to the configuration section below
-        })
+        require('project').setup()
       end,
     };
   })
