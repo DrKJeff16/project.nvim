@@ -18,6 +18,7 @@ local Config = require('project.config')
 local exists = Path.exists
 local get_recent_projects = History.get_recent_projects
 local vim_has = Util.vim_has
+local reverse = Util.reverse
 
 ---CREDITS: [u/Some_Derpy_Pineapple](https://www.reddit.com/r/neovim/comments/1nu5ehj/comment/ngyz21m/)
 local ffi = nil ---@type nil|ffilib
@@ -277,7 +278,7 @@ Popup.delete_menu = Popup.select.new({
     end,
     choices_list = function()
         ---@type string[]
-        local recents = Util.reverse(get_recent_projects())
+        local recents = reverse(get_recent_projects())
         table.insert(recents, 'Exit')
         return recents
     end,
@@ -298,6 +299,10 @@ Popup.recents_menu = Popup.select.new({
     callback = function()
         vim.ui.select(Popup.recents_menu.choices_list(), {
             prompt = 'Select a project:',
+            format_item = function(item)
+                local curr = require('project.api').current_project or ''
+                return item == curr and '* ' .. item or item
+            end,
         }, function(item)
             if not item then
                 return
@@ -317,7 +322,7 @@ Popup.recents_menu = Popup.select.new({
     choices_list = function()
         local choices_list = vim.deepcopy(get_recent_projects())
         if require('project.config').options.telescope.sort == 'newest' then
-            choices_list = Util.reverse(choices_list)
+            choices_list = reverse(choices_list)
         end
 
         table.insert(choices_list, 'Exit')
@@ -385,6 +390,9 @@ Popup.open_menu = Popup.select.new({
             ['Run Checkhealth'] = function()
                 vim.cmd.checkhealth('project')
             end,
+            ['Go To Source Code'] = function()
+                vim.ui.open('https://github.com/DrKJeff16/project.nvim')
+            end,
             ['Exit'] = function() end,
         }
         if vim.g.project_telescope_loaded == 1 then
@@ -429,6 +437,7 @@ Popup.open_menu = Popup.select.new({
         table.insert(res_list, 'Open History')
         table.insert(res_list, 'Run Checkhealth')
         table.insert(res_list, 'Open Help Docs')
+        table.insert(res_list, 'Go To Source Code')
         table.insert(res_list, 'Exit')
         return res_list
     end,
