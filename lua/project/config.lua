@@ -1,6 +1,4 @@
 local MODSTR = 'project.config'
-local Util = require('project.utils.util')
-local Glob = require('project.utils.globtopattern')
 
 ---@class Project.Config
 local Config = {}
@@ -15,21 +13,23 @@ end
 ---Default: `{}` (before calling `setup()`).
 --- ---
 ---@type Project.Config.Options
-Config.options = {}
+Config.options = setmetatable({}, { __index = Config.get_defaults() })
 
 ---The function called when running `require('project').setup()`.
 --- ---
 ---@param options? Project.Config.Options
 function Config.setup(options)
+    local Util = require('project.utils.util')
     if Util.vim_has('nvim-0.11') then
-        vim.validate('options', options, 'table', true, 'Project.Config.Options')
+        vim.validate('options', options, 'table', true, 'Project.Config.Options?')
     else
         vim.validate({ options = { options, { 'table', 'nil' } } })
     end
     options = options or {}
 
-    Config.options = Config.get_defaults().new(options)
-    Config.options.exclude_dirs = vim.tbl_map(Glob.pattern_exclude, Config.options.exclude_dirs)
+    local pattern_exclude = require('project.utils.globtopattern').pattern_exclude
+    Config.options = Config.get_defaults():new(options)
+    Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
     Config.options:verify() -- Verify config integrity
 
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111

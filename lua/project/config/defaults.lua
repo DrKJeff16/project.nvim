@@ -458,7 +458,7 @@ end
 
 ---@param opts? Project.Config.Options
 ---@return Project.Config.Options
-function DEFAULTS.new(opts)
+function DEFAULTS:new(opts)
     if require('project.utils.util').vim_has('nvim-0.11') then
         vim.validate('opts', opts, 'table', true, 'Project.Config.Options')
     else
@@ -466,9 +466,13 @@ function DEFAULTS.new(opts)
     end
     opts = opts or {}
 
-    local self = setmetatable(opts, { __index = DEFAULTS }) ---@type Project.Config.Options
-    self = vim.tbl_deep_extend('keep', self, DEFAULTS)
-    return self
+    self.__index = self
+    self.__newindex = function(t, k, v)
+        rawset(t, k, v)
+    end
+    ---@type Project.Config.Options
+    local obj = setmetatable(opts, self)
+    return obj
 end
 
 return DEFAULTS
