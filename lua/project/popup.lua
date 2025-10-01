@@ -367,6 +367,9 @@ Popup.open_menu = Popup.select.new({
             ['New Project'] = function()
                 require('project.commands').ProjectAdd()
             end,
+            ['Open Recent Project'] = function()
+                Popup.recents_menu()
+            end,
             ['Delete A Project'] = function()
                 Popup.delete_menu()
             end,
@@ -409,6 +412,7 @@ Popup.open_menu = Popup.select.new({
         local res_list = {
             'Project Session',
             'New Project',
+            'Open Recent Project',
             'Delete A Project',
         }
         if vim.g.project_telescope_loaded == 1 then
