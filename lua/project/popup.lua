@@ -315,7 +315,7 @@ Popup.recents_menu = Popup.select.new({
         end)
     end,
     choices_list = function()
-        local choices_list = vim.deepcopy(require('project.utils.history').get_recent_projects())
+        local choices_list = vim.deepcopy(get_recent_projects())
         if require('project.config').options.telescope.sort == 'newest' then
             choices_list = Util.reverse(choices_list)
         end
