@@ -20,20 +20,34 @@
 ---|"xw"
 ---|"xw+"
 
+---@class Project.History.Spec
+---@field name string
+---@field path string
+---@field bufs integer[]
+
 local MODSTR = 'project.utils.history'
 local ERROR = vim.log.levels.ERROR
+local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
 local copy = vim.deepcopy
+local in_list = vim.list_contains
 
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
 
 ---@class Project.Utils.History
 ---@field has_watch_setup? boolean
+---@field has_watch_setup_v2? boolean
 ---@field historysize? integer
 ---@field hist_loc? { bufnr: integer, win: integer }|nil
 local History = {}
+
+---@type Project.History.Spec[]
+History.recent_projects_v2 = {}
+
+---@type Project.History.Spec[]
+History.session_projects_v2 = {}
 
 ---Projects from previous neovim sessions.
 --- ---
@@ -66,6 +80,42 @@ function History.open_history(mode)
     return fd
 end
 
+---@param tbl Project.History.Spec[]
+---@return Project.History.Spec[] res
+local function delete_duplicates_v2(tbl)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('tbl', tbl, 'table', false, 'string[]')
+    else
+        vim.validate({ tbl = { tbl, 'table' } })
+    end
+
+    local cache_dict = {} ---@type table<string, integer>
+    for _, v in ipairs(tbl) do
+        local normalised_path = Util.normalise_path(v.path)
+        if cache_dict[normalised_path] == nil then
+            cache_dict[normalised_path] = 1
+        else
+            cache_dict[normalised_path] = cache_dict[normalised_path] + 1
+        end
+    end
+
+    local res = {} ---@type Project.History.Spec[]
+    for _, v in ipairs(tbl) do
+        ---@type Project.History.Spec
+        local spec = {
+            name = v.name,
+            path = Util.normalise_path(v.path),
+            bufs = v.bufs,
+        }
+        if cache_dict[spec.path] == 1 then
+            table.insert(res, spec)
+        else
+            cache_dict[spec.path] = cache_dict[spec.path] - 1
+        end
+    end
+    return Util.dedup(res)
+end
+
 ---@param tbl string[]
 ---@return string[] res
 local function delete_duplicates(tbl)
@@ -95,6 +145,34 @@ local function delete_duplicates(tbl)
         end
     end
     return Util.dedup(res)
+end
+
+---Deletes a project string, or a Telescope Entry type.
+--- ---
+---@param project string|Project.ActionEntry
+function History.delete_project_v2(project)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('project', project, { 'string', 'table' }, false, 'string|Project.ActionEntry')
+    else
+        vim.validate({ project = { project, { 'string', 'table' } } })
+    end
+    local Log = require('project.utils.log')
+    if vim.tbl_isempty(History.recent_projects_v2) then
+        Log.warn(('(%s.delete_project_v2): `recent_projects` is empty. Aborting.'):format(MODSTR))
+        vim.notify(
+            ('(%s.delete_project_v2): `recent_projects` is empty. Aborting.'):format(MODSTR),
+            WARN
+        )
+        return
+    end
+
+    if in_list(vim.tbl_keys(History.recent_projects_v2), project) then
+        History.recent_projects_v2[project] = nil
+    end
+    if in_list(vim.tbl_keys(History.session_projects_v2), project) then
+        History.session_projects_v2[project] = nil
+    end
+    History.write_history_v2()
 end
 
 ---Deletes a project string, or a Telescope Entry type.
@@ -162,6 +240,25 @@ function History.deserialize_history(history_data)
     History.recent_projects = delete_duplicates(projects)
 end
 
+function History.setup_watch_v2()
+    if History.has_watch_setup_v2 then
+        return
+    end
+
+    local event = uv.new_fs_event()
+    if not event then
+        return
+    end
+    event:start(Path.projectpath, {}, function(err, _, events)
+        if err ~= nil or not events.change then
+            return
+        end
+        History.recent_projects = {}
+        History.read_history_v2()
+    end)
+    History.has_watch_setup_v2 = true
+end
+
 ---Only runs once.
 --- ---
 function History.setup_watch()
@@ -181,6 +278,25 @@ function History.setup_watch()
         History.read_history()
     end)
     History.has_watch_setup = true
+end
+
+function History.read_history_v2()
+    local fd = History.open_history('r')
+    if not fd then
+        return
+    end
+    local stat = uv.fs_fstat(fd)
+    if not stat then
+        return
+    end
+    History.setup_watch()
+    local data = uv.fs_read(fd, stat.size, -1)
+    uv.fs_close(fd)
+
+    ---@type Project.History.Spec[]
+    local projects = Util.dedup(vim.json.decode(data))
+    table.sort(projects)
+    return projects
 end
 
 function History.read_history()
@@ -213,6 +329,64 @@ function History.get_recent_projects()
     for _, dir in ipairs(tbl) do
         if Util.dir_exists(dir) then
             table.insert(recents, dir)
+        end
+    end
+    return Util.dedup(recents)
+end
+
+---Write projects to history file.
+--- ---
+---@param close? boolean
+function History.write_history_v2(close)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('close', close, 'boolean', true)
+    else
+        vim.validate({ close = { close, { 'boolean', 'nil' } } })
+    end
+    close = close ~= nil and close or false
+    local Config = require('project.config')
+    local Log = require('project.utils.log')
+    local fd = History.open_history(vim.tbl_isempty(History.recent_projects_v2) and 'w' or 'a')
+    if not fd then
+        Log.error(('(%s.write_history_v2): File restricted!'):format(MODSTR))
+        error(('(%s.write_history_v2): File restricted!'):format(MODSTR), ERROR)
+    end
+    History.historysize = Config.options.historysize or 100
+    local res = History.get_recent_projects_v2()
+    local len_res = #res
+    local tbl_out = copy(res)
+
+    if History.historysize and History.historysize > 0 then
+        -- Trim table to last 100 entries
+        tbl_out = len_res > History.historysize
+                and vim.list_slice(res, len_res - History.historysize, len_res)
+            or res
+    end
+
+    local out = vim.json.encode(tbl_out, { sort_keys = true })
+    Log.debug(('(%s.write_history_v2): Writing to file...'):format(MODSTR))
+    uv.fs_write(fd, out, -1)
+    if close then
+        uv.fs_close(fd)
+        Log.debug(('(%s.write_history_v2): File descriptor closed!'):format(MODSTR))
+    end
+end
+
+---@return Project.History.Spec[]
+function History.get_recent_projects_v2()
+    local tbl = {} ---@type Project.History.Spec[]
+    if not vim.tbl_isempty(History.recent_projects_v2) then
+        vim.list_extend(tbl, History.recent_projects_v2)
+        vim.list_extend(tbl, History.session_projects_v2)
+    else
+        tbl = History.session_projects_v2
+    end
+    tbl = delete_duplicates_v2(copy(tbl))
+
+    local recents = {} ---@type Project.History.Spec[]
+    for _, spec in ipairs(tbl) do
+        if Util.dir_exists(spec.path) then
+            table.insert(recents, spec)
         end
     end
     return Util.dedup(recents)
