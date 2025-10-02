@@ -16,7 +16,7 @@ local History = require('project.utils.history')
 local Path = require('project.utils.path')
 local Config = require('project.config')
 local exists = Path.exists
-local get_recent_projects = History.get_recent_projects
+local get_recent_projects_v2 = History.get_recent_projects_v2
 local vim_has = Util.vim_has
 local reverse = Util.reverse
 
@@ -242,13 +242,17 @@ function Popup.prompt_project(input)
     end
 
     local Api = require('project.api')
-    local session = History.session_projects
+    local s = History.session_projects_v2
+    local session = {}
+    for _, v in ipairs(s) do
+        table.insert(session, v.path)
+    end
     if Api.current_project == input or in_list(session, input) then
         vim.notify('Already added that directory!', WARN)
         return
     end
     Api.set_pwd(input, 'prompt')
-    History.write_history()
+    History.write_history_v2()
 end
 
 Popup.delete_menu = Popup.select.new({
@@ -256,7 +260,11 @@ Popup.delete_menu = Popup.select.new({
         vim.ui.select(Popup.delete_menu.choices_list(), {
             prompt = 'Select a project to delete:',
             format_item = function(item)
-                local session = History.session_projects
+                local s = History.session_projects_v2
+                local session = {}
+                for _, v in ipairs(s) do
+                    table.insert(session, v.path)
+                end
                 if in_list(session, item) then
                     return '* ' .. item
                 end
@@ -278,16 +286,16 @@ Popup.delete_menu = Popup.select.new({
     end,
     choices_list = function()
         ---@type string[]
-        local recents = reverse(get_recent_projects())
+        local recents = reverse(get_recent_projects_v2())
         table.insert(recents, 'Exit')
         return recents
     end,
     choices = function()
         ---@type table<string, fun()>
         local T = {}
-        for _, proj in ipairs(get_recent_projects()) do
+        for _, proj in ipairs(get_recent_projects_v2()) do
             T[proj] = function()
-                History.delete_project(proj)
+                History.delete_project_v2(proj)
             end
         end
         T['Exit'] = function() end
@@ -320,7 +328,7 @@ Popup.recents_menu = Popup.select.new({
         end)
     end,
     choices_list = function()
-        local choices_list = vim.deepcopy(get_recent_projects())
+        local choices_list = get_recent_projects_v2()
         if require('project.config').options.telescope.sort == 'newest' then
             choices_list = reverse(choices_list)
         end
@@ -471,7 +479,7 @@ Popup.session_menu = Popup.select.new({
         end)
     end,
     choices = function()
-        local sessions = require('project.utils.history').session_projects
+        local sessions = require('project.utils.history').session_projects_v2('path')
         local choices = {
             ['Exit'] = function(_, _, _) end,
         }
@@ -485,7 +493,7 @@ Popup.session_menu = Popup.select.new({
         return choices
     end,
     choices_list = function()
-        local choices = vim.deepcopy(require('project.utils.history').session_projects)
+        local choices = require('project.utils.history').session_projects_v2('path')
         table.insert(choices, 'Exit')
         return choices
     end,

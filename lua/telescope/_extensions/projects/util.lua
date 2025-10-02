@@ -34,7 +34,7 @@ end
 ---@return table
 function M.create_finder()
     local sort = require('project.config').options.telescope.sort
-    local results = require('project.utils.history').get_recent_projects()
+    local results = require('project.utils.history').get_recent_projects_v2()
     Log.info(('(%s.create_finder): Sorting by `%s`.'):format(MODSTR, sort))
     if sort == 'newest' then
         results = require('project.utils.util').reverse(results)

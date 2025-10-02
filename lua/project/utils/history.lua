@@ -20,6 +20,8 @@
 ---|"xw"
 ---|"xw+"
 
+---@alias Project.History.SpecFun fun(get?: 'path'|'bufs'|'name'): list: ((integer[])[]|string[])
+
 ---@class Project.History.Spec
 ---@field name string
 ---@field path string
@@ -43,15 +45,47 @@ local Path = require('project.utils.path')
 ---@field hist_loc? { bufnr: integer, win: integer }|nil
 local History = {}
 
+---@param spec Project.History.Spec[]
+---@return Project.History.Spec[]|Project.History.SpecFun
+function History.regen_v2(spec)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('spec', spec, 'table', false)
+    else
+        vim.validate({ spec = { spec, 'table' } })
+    end
+    return setmetatable({}, {
+        __index = function(t, k)
+            return rawget(t, k)
+        end,
+        ---@param t Project.History.Spec[]
+        ---@param get? 'path'|'name'|'bufs'
+        ---@return (integer[])[]|string[] list
+        __call = function(t, get)
+            if Util.vim_has('nvim-0.11') then
+                vim.validate('get', get, 'string', true)
+            else
+                vim.validate({ get = { get, { 'string', 'nil' } } })
+            end
+            get = get or 'path'
+            get = in_list({ 'path', 'name', 'bufs' }, get) and get or 'path'
+
+            local list = {} ---@type (integer[])[]|string[]
+            for _, v in ipairs(t) do
+                table.insert(list, v[get])
+            end
+            return list
+        end,
+    })
+end
+
 ---Projects from previous Neovim sessions.
 --- ---
----@type Project.History.Spec[]
-History.recent_projects_v2 = {}
-
+---@type Project.History.Spec[]|Project.History.SpecFun
+History.recent_projects_v2 = History.regen_v2({})
 ---Projects from current Neovim session.
 --- ---
----@type Project.History.Spec[]
-History.session_projects_v2 = {}
+---@type Project.History.Spec[]|Project.History.SpecFun
+History.session_projects_v2 = History.regen_v2({})
 
 ---Projects from previous Neovim sessions.
 --- ---
@@ -105,8 +139,8 @@ function History.open_history(mode)
     return fd
 end
 
----@param tbl Project.History.Spec[]
----@return Project.History.Spec[] res
+---@param tbl Project.History.Spec[]|Project.History.SpecFun
+---@return Project.History.Spec[]|Project.History.SpecFun res
 local function delete_duplicates_v2(tbl)
     if Util.vim_has('nvim-0.11') then
         vim.validate('tbl', tbl, 'table', false, 'string[]')
@@ -138,7 +172,7 @@ local function delete_duplicates_v2(tbl)
             cache_dict[spec.path] = cache_dict[spec.path] - 1
         end
     end
-    return Util.dedup(res)
+    return History.regen_v2(Util.dedup(res))
 end
 
 ---@param tbl string[]
@@ -191,10 +225,10 @@ function History.delete_project_v2(project)
         return
     end
 
-    if in_list(vim.tbl_keys(History.recent_projects_v2), project) then
+    if in_list(History.recent_projects_v2('path'), project) then
         History.recent_projects_v2[project] = nil
     end
-    if in_list(vim.tbl_keys(History.session_projects_v2), project) then
+    if in_list(History.session_projects_v2('path'), project) then
         History.session_projects_v2[project] = nil
     end
     History.write_history_v2()
@@ -244,6 +278,27 @@ function History.delete_project(project)
         vim.notify(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj), INFO)
         History.write_history(true)
     end
+end
+
+---Splits data into table (v2).
+--- ---
+---@param history_data Project.History.Spec[]
+function History.deserialize_history_v2(history_data)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('history_data', history_data, 'table', false)
+    else
+        vim.validate({ history_data = { history_data, 'table' } })
+    end
+
+    local projects = {} ---@type Project.History.Spec[]
+    for _, v in ipairs(history_data) do
+        for s in v.path:gmatch('[^\r\n]+') do
+            if not Path.is_excluded(s) and Util.dir_exists(s) then
+                table.insert(projects, v)
+            end
+        end
+    end
+    History.recent_projects_v2 = delete_duplicates_v2(projects)
 end
 
 ---Splits data into table.
@@ -314,14 +369,14 @@ function History.read_history_v2()
     if not stat then
         return
     end
-    History.setup_watch()
+    History.setup_watch_v2()
     local data = uv.fs_read(fd, stat.size, -1)
     uv.fs_close(fd)
 
     ---@type Project.History.Spec[]
     local projects = Util.dedup(vim.json.decode(data))
     table.sort(projects)
-    return projects
+    History.deserialize_history_v2(projects)
 end
 
 function History.read_history()
@@ -377,7 +432,7 @@ function History.write_history_v2(close)
         error(('(%s.write_history_v2): File restricted!'):format(MODSTR), ERROR)
     end
     History.historysize = Config.options.historysize or 100
-    local res = History.get_recent_projects_v2()
+    local res = History.get_recent_projects_v2(true)
     local len_res = #res
     local tbl_out = copy(res)
 
@@ -387,11 +442,8 @@ function History.write_history_v2(close)
                 and vim.list_slice(res, len_res - History.historysize, len_res)
             or res
     end
-    for i, _ in ipairs(tbl_out) do
-        tbl_out[i].bufs = nil -- Delete the session buffers
-    end
 
-    local out = vim.json.encode(tbl_out, { sort_keys = true, indent = '  ' })
+    local out = vim.json.encode(tbl_out, { sort_keys = true })
     Log.debug(('(%s.write_history_v2): Writing to file...'):format(MODSTR))
     uv.fs_write(fd, out, -1)
     if close then
@@ -400,9 +452,17 @@ function History.write_history_v2(close)
     end
 end
 
----@return Project.History.Spec[]
-function History.get_recent_projects_v2()
-    local tbl = {} ---@type Project.History.Spec[]
+---@param full? boolean
+---@return string[]|Project.History.Spec|Project.History.SpecFun
+function History.get_recent_projects_v2(full)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('full', full, 'boolean', true)
+    else
+        vim.validate({ full = { full, { 'boolean', 'nil' } } })
+    end
+    full = full ~= nil and full or false
+
+    local tbl = {}
     if not vim.tbl_isempty(History.recent_projects_v2) then
         vim.list_extend(tbl, History.recent_projects_v2)
         vim.list_extend(tbl, History.session_projects_v2)
@@ -411,13 +471,7 @@ function History.get_recent_projects_v2()
     end
     tbl = delete_duplicates_v2(copy(tbl))
 
-    local recents = {} ---@type Project.History.Spec[]
-    for _, spec in ipairs(tbl) do
-        if Util.dir_exists(spec.path) then
-            table.insert(recents, spec)
-        end
-    end
-    return Util.dedup(recents)
+    return full and tbl or tbl('path')
 end
 
 ---Write projects to history file.

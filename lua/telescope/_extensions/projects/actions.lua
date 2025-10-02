@@ -153,11 +153,11 @@ function M.delete_project(prompt_bufnr)
         Log.info('(%s.delete_project): Aborting project deletion.')
         return
     end
-    History.delete_project(active_entry.value)
+    History.delete_project_v2(active_entry.value)
     Log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
     State.get_current_picker(prompt_bufnr):refresh(
         (function()
-            local results = History.get_recent_projects()
+            local results = History.get_recent_projects_v2()
             if Config.options.telescope.sort == 'newest' then
                 Log.debug(('(%s.create_finder): Sorting order to `newest`.'):format(MODSTR))
                 results = reverse(results)

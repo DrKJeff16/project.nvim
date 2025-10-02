@@ -16,6 +16,7 @@
 local MODSTR = 'project.commands'
 local ERROR = vim.log.levels.ERROR
 local in_list = vim.list_contains
+local INFO = vim.log.levels.INFO
 local curr_buf = vim.api.nvim_get_current_buf
 local vim_has = require('project.utils.util').vim_has
 
@@ -136,37 +137,36 @@ function M.create_user_commands()
                 end
 
                 local Log = require('project.utils.log')
-                local recent = require('project.utils.history').get_recent_projects()
-                if not recent then
+                local recent = require('project.utils.history').get_recent_projects_v2()
+                if not recent or vim.tbl_isempty(recent) then
                     Log.error('(:ProjectDelete): No recent projects!')
                     return
                 end
 
                 local force = ctx.bang ~= nil and ctx.bang or false
                 for _, v in ipairs(ctx.fargs) do
-                    local path = vim.fn.fnamemodify(v, ':p')
-                    if path:sub(-1) == '/' then ---HACK: Getting rid of trailing `/` in string
-                        path = path:sub(1, path:len() - 1)
+                    local path =
+                        require('project.utils.util').rstrip('/', vim.fn.fnamemodify(v, ':p'))
+                    local found = false
+                    for _, val in ipairs(recent) do
+                        if val == path then
+                            found = true
+                            break
+                        end
                     end
-                    if not (force or in_list(recent, path) or path ~= '') then
-                        Log.error(
-                            ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path)
-                        )
-                        error(
-                            ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path),
-                            ERROR
-                        )
+                    if not (force or found) then
+                        Log.error(('(:ProjectDelete): Could not delete `%s`!'):format(path))
+                        error(('(:ProjectDelete): Could not delete `%s`!'):format(path), ERROR)
                     end
-                    if vim.list_contains(recent, path) then
-                        require('project.utils.history').delete_project(path)
-                    end
+                    require('project.utils.history').delete_project_v2(path)
                 end
             end,
             desc = 'Deletes the projects given as args, assuming they are valid. No args open a popup',
             nargs = '*',
             bang = true,
-            complete = function(_, line) ---@param line string
-                local recent = require('project.utils.history').get_recent_projects()
+            ---@param line string
+            complete = function(_, line)
+                local recent = require('project.utils.history').get_recent_projects_v2()
                 local input = vim.split(line, '%s+')
                 local prefix = input[#input]
                 return vim.tbl_filter(function(cmd) ---@param cmd string
