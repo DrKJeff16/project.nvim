@@ -227,7 +227,15 @@ function Util.dedup(T)
 
     local NT = {}
     for _, v in next, T do
-        if not in_tbl(NT, v) then
+        local not_dup = false
+        if Util.is_type('table', v) then
+            not_dup = not in_tbl(NT, function(val)
+                return vim.deep_equal(val, v)
+            end, { predicate = true })
+        else
+            not_dup = not in_tbl(NT, v)
+        end
+        if not_dup then
             table.insert(NT, v)
         end
     end
@@ -381,6 +389,25 @@ function Util.path_exists(path)
 
     --- CREDITS: @tomaskallup
     return vim.fn.empty(vim.fn.glob(path:gsub('%[', '\\['))) == 0
+end
+
+---@param T table<string|integer, any>
+---@return integer len
+function Util.get_dict_size(T)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('T', T, 'table', false)
+    else
+        vim.validate({ T = { T, 'table' } })
+    end
+    local len = 0
+    if vim.tbl_isempty(T) then
+        return len
+    end
+
+    for _, _ in pairs(T) do
+        len = len + 1
+    end
+    return len
 end
 
 ---@param path string
