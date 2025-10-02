@@ -141,8 +141,8 @@ function Health.project_check()
     info(msg)
 
     start('Active Sessions')
-    local active = History.has_watch_setup
-    local projects = History.session_projects
+    local active = History.has_watch_setup_v2
+    local projects = History.session_projects_v2
     if not active or empty(projects) then
         h_warn('No active session projects!')
         return
@@ -210,7 +210,7 @@ end
 
 function Health.recent_proj_check()
     start('Recent Projects')
-    local recents = History.get_recent_projects()
+    local recents = History.get_recent_projects_v2()
     if empty(recents) then
         h_warn([[
             `No projects found in history!`

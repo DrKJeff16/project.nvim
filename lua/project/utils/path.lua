@@ -239,7 +239,7 @@ function Path.init()
     Path.datapath = datapath
     Path.projectpath = ('%s/project_nvim'):format(Path.datapath)
     Path.historyfile = ('%s/project_history'):format(Path.projectpath)
-    Path.historyfile = ('%s/project_history.json'):format(Path.projectpath)
+    Path.historyfile_v2 = ('%s/project_history.json'):format(Path.projectpath)
 end
 
 return Path
