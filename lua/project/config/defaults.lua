@@ -7,19 +7,15 @@
 ---|'recent_project_files'
 ---|'search_in_project_files'
 
+local MODSTR = 'project.config.defaults'
+local WARN = vim.log.levels.WARN
 local in_list = vim.tbl_contains
 local empty = vim.tbl_isempty
-local WARN = vim.log.levels.WARN
-local MODSTR = 'project.config.defaults'
-
 local Util = require('project.utils.util')
-local vim_has = Util.vim_has
-local is_type = Util.is_type
 
 ---The options available for in `require('project').setup()`.
 --- ---
 ---@class Project.Config.Options
----@field logging? boolean
 local DEFAULTS = {
     ---If `true` your root directory won't be changed automatically,
     ---so you have the option to manually do so
@@ -330,9 +326,8 @@ DEFAULTS.telescope = {
 ---If the option is not valid, a warning will be raised and
 ---the value will revert back to the default.
 --- ---
----@param self Project.Config.Options
 function DEFAULTS:verify_histsize()
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('historysize', self.historysize, 'number', false, 'integer')
     else
         vim.validate({ historysize = { self.historysize, 'number' } })
@@ -349,9 +344,8 @@ end
 ---If the option is not valid, a warning will be raised and
 ---the value will revert back to the default.
 --- ---
----@param self Project.Config.Options
 function DEFAULTS:verify_scope_chdir()
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('scope_chdir', self.scope_chdir, 'string', false, "'global'|'tab'|'win'")
     else
         vim.validate({ scope_chdir = { self.scope_chdir, 'string' } })
@@ -388,27 +382,24 @@ end
 ---The option will be stripped from any duplicates and/or
 ---invalid values.
 --- ---
----@param self Project.Config.Options
 function DEFAULTS:verify_methods()
-    if not is_type('table', self.detection_methods) then
+    if not Util.is_type('table', self.detection_methods) then
         vim.notify('`detection_methods` option is not a table. Reverting to default option.', WARN)
         self.detection_methods = DEFAULTS.detection_methods
         return
     end
-    if empty(self.detection_methods) and not vim.g.project_trigger_once then
+    if empty(self.detection_methods) then
         vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
-        vim.g.project_trigger_once = true
         return
     end
 
-    ---@type ('lsp'|'pattern')[]|table
-    local methods = {}
+    local methods = {} ---@type ('lsp'|'pattern')[]
     local checker = { lsp = false, pattern = false }
-    for _, v in next, self.detection_methods do
+    for _, v in ipairs(self.detection_methods) do
         if checker.lsp and checker.pattern then
             break
         end
-        if is_type('string', v) then
+        if Util.is_type('string', v) then
             if v == 'lsp' and not checker.lsp then
                 table.insert(methods, v)
                 checker.lsp = true
@@ -419,15 +410,13 @@ function DEFAULTS:verify_methods()
             end
         end
     end
-    if empty(methods) and not vim.g.project_trigger_once then
+    if empty(methods) then
         vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
-        vim.g.project_trigger_once = true
         return
     end
     self.detection_methods = methods
 end
 
----@param self Project.Config.Options
 function DEFAULTS:verify_logging()
     if self.log == nil or type(self.log) ~= 'table' then
         self.log = vim.deepcopy(DEFAULTS.log)
@@ -436,19 +425,17 @@ function DEFAULTS:verify_logging()
         self.log.enabled = self.logging
         self.logging = nil
         vim.notify(
-            ('(%s:verify_logging): `options.logging` has migrated to `options.log.enabled`!'):format(
-                MODSTR
-            ),
+            ('`options.logging` is deprecated, use `options.log.enabled`!'):format(MODSTR),
             WARN
         )
     end
 
     local logpath = self.log.logpath
-    if not (is_type('string', logpath) and require('project.utils.path').exists(logpath)) then
+    if not (Util.is_type('string', logpath) and require('project.utils.path').exists(logpath)) then
         self.log.logpath = DEFAULTS.log.logpath
     end
     local max_size = self.log.max_size
-    if not (is_type('number', max_size) and max_size > 0) then
+    if not (Util.is_type('number', max_size) and max_size > 0) then
         self.log.max_size = DEFAULTS.log.max_size
     end
 end

@@ -117,7 +117,6 @@ function M.create_user_commands()
         },
         {
             name = 'ProjectConfig',
-            with_ctx = false,
             callback = function()
                 local cfg = require('project').get_config()
                 vim.notify(vim.inspect(cfg), INFO)
@@ -163,9 +162,7 @@ function M.create_user_commands()
             desc = 'Deletes the projects given as args, assuming they are valid. No args open a popup',
             nargs = '*',
             bang = true,
-
-            ---@param line string
-            complete = function(_, line)
+            complete = function(_, line) ---@param line string
                 local recent = require('project.utils.history').get_recent_projects()
                 local input = vim.split(line, '%s+')
                 local prefix = input[#input]
@@ -176,7 +173,6 @@ function M.create_user_commands()
         },
         {
             name = 'ProjectFzf',
-            with_ctx = false,
             callback = function()
                 require('project.extensions.fzf-lua').run_fzf_lua()
             end,
@@ -198,7 +194,6 @@ function M.create_user_commands()
         },
         {
             name = 'ProjectRecents',
-            with_ctx = false,
             callback = function()
                 require('project.popup').recents_menu()
             end,
@@ -225,7 +220,6 @@ function M.create_user_commands()
         },
         {
             name = 'ProjectTelescope',
-            with_ctx = false,
             callback = function()
                 if vim.g.project_telescope_loaded == 1 then
                     require('telescope._extensions.projects').projects()

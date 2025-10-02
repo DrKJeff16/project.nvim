@@ -10,8 +10,6 @@ function Config.get_defaults()
     return require('project.config.defaults')
 end
 
----Default: `{}` (before calling `setup()`).
---- ---
 ---@type Project.Config.Options
 Config.options = setmetatable({}, { __index = Config.get_defaults() })
 
@@ -21,12 +19,11 @@ Config.options = setmetatable({}, { __index = Config.get_defaults() })
 function Config.setup(options)
     local Util = require('project.utils.util')
     if Util.vim_has('nvim-0.11') then
-        vim.validate('options', options, 'table', true, 'Project.Config.Options?')
+        vim.validate('options', options, 'table', true)
     else
         vim.validate({ options = { options, { 'table', 'nil' } } })
     end
     options = options or {}
-
     local pattern_exclude = require('project.utils.globtopattern').pattern_exclude
     Config.options = Config.get_defaults():new(options)
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
