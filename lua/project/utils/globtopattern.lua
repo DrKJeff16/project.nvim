@@ -13,6 +13,118 @@ function Glob.escape(char, c)
     return char:match('^%w$') and c or ('%' .. c)
 end
 
+---@param glob string
+---@param char string
+---@param pattern string
+---@param i integer
+---@return boolean
+---@return string char
+---@return string pattern
+---@return integer i
+function Glob.unescape(glob, char, pattern, i)
+    if char ~= '\\' then
+        return true, char, pattern, i
+    end
+    i = i + 1
+    char = glob:sub(i, i)
+    if char == '' then
+        return false, char, '[^]', i
+    end
+    return true, char, pattern, i
+end
+
+---Convert tokens at end of charset.
+--- ---
+---@param glob string
+---@param char string
+---@param pattern string
+---@param i integer
+---@return boolean
+---@return string char
+---@return string pattern
+---@return integer i
+function Glob.charset_end(glob, char, pattern, i)
+    local un = false
+    while true do
+        if char == '' then
+            return false, char, '[^]', i
+        end
+        if char == ']' then
+            return true, char, ('%s]'):format(pattern), i
+        end
+        un, char, pattern, i = Glob.unescape(glob, char, pattern, i)
+        if not un then
+            return true, char, pattern, i
+        end
+        local c1 = char
+        i = i + 1
+        char = glob:sub(i, i)
+        if char == '' then
+            return false, char, '[^]', i
+        end
+        if char == ']' then
+            return true, char, ('%s%s]'):format(pattern, Glob.escape(c1, char)), i
+        end
+        if char ~= '-' then
+            pattern = ('%s%s'):format(pattern, Glob.escape(c1, char))
+            i = i - 1 -- put back
+        else
+            i = i + 1
+            char = glob:sub(i, i)
+            if char == '' then
+                return false, char, '[^]', i
+            end
+            if char == ']' then
+                return true, char, ('%s%s'):format(pattern, Glob.escape(c1, char)) .. '%-]', i
+            end
+            un, char, pattern, i = Glob.unescape(glob, char, pattern, i)
+            if not un then
+                return true, char, pattern, i
+            end
+            pattern = ('%s%s-%s'):format(pattern, Glob.escape(c1, char), Glob.escape(char, char))
+        end
+        i = i + 1
+        char = glob:sub(i, i)
+    end
+end
+
+---Convert tokens in charset.
+--- ---
+---@param glob string
+---@param char string
+---@param pattern string
+---@param i integer
+---@return boolean
+---@return string char
+---@return string pattern
+---@return integer i
+function Glob.charset(glob, char, pattern, i)
+    local chs_end = false
+    i = i + 1
+    char = glob:sub(i, i)
+    if in_list({ '', ']' }, char) then
+        return false, char, '[^]', i
+    end
+    if in_list({ '^', '!' }, char) then
+        i = i + 1
+        char = glob:sub(i, i)
+        if char ~= ']' then
+            pattern = ('%s[^'):format(pattern)
+            chs_end, char, pattern, i = Glob.charset_end(glob, char, pattern, i)
+            if not chs_end then
+                return false, char, pattern, i
+            end
+        end
+    else
+        pattern = ('%s['):format(pattern)
+        chs_end, char, pattern, i = Glob.charset_end(glob, char, pattern, i)
+        if not chs_end then
+            return false, char, pattern, i
+        end
+    end
+    return true, char, pattern, i
+end
+
 ---Some useful references:
 --- - [`apr_fnmatch`](http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html)
 --- ---
@@ -22,127 +134,34 @@ function Glob.globtopattern(glob)
     local pattern = '^'
     local i = 0
     local char = ''
-
-    local function unescape()
-        if char == '\\' then
-            i = i + 1
-            char = glob:sub(i, i)
-            if char == '' then
-                pattern = '[^]'
-                return false
-            end
-        end
-        return true
-    end
-
-    ---Convert tokens at end of charset.
-    --- ---
-    ---@return boolean
-    local function charset_end()
-        while true do
-            if char == '' then
-                pattern = '[^]'
-                return false
-            elseif char == ']' then
-                pattern = ('%s]'):format(pattern)
-                break
-            else
-                if not unescape() then
-                    break
-                end
-                local c1 = char
-                i = i + 1
-                char = glob:sub(i, i)
-                if char == '' then
-                    pattern = '[^]'
-                    return false
-                elseif char == '-' then
-                    i = i + 1
-                    char = glob:sub(i, i)
-                    if char == '' then
-                        pattern = '[^]'
-                        return false
-                    elseif char == ']' then
-                        pattern = ('%s%s'):format(pattern, Glob.escape(c1, char)) .. '%-]'
-                        break
-                    else
-                        if not unescape() then
-                            break
-                        end
-                        pattern = ('%s%s-%s'):format(
-                            pattern,
-                            Glob.escape(c1, char),
-                            Glob.escape(char, char)
-                        )
-                    end
-                elseif char == ']' then
-                    pattern = ('%s%s]'):format(pattern, Glob.escape(c1, char))
-                    break
-                else
-                    pattern = ('%s%s'):format(pattern, Glob.escape(c1, char))
-                    i = i - 1 -- put back
-                end
-            end
-            i = i + 1
-            char = glob:sub(i, i)
-        end
-        return true
-    end
-
-    ---Convert tokens in charset.
-    --- ---
-    ---@return boolean
-    local function charset()
-        i = i + 1
-        char = glob:sub(i, i)
-        if in_list({ '', ']' }, char) then
-            pattern = '[^]'
-            return false
-        elseif in_list({ '^', '!' }, char) then
-            i = i + 1
-            char = glob:sub(i, i)
-            if char ~= ']' then
-                pattern = ('%s[^'):format(pattern)
-                if not charset_end() then
-                    return false
-                end
-            end
-        else
-            pattern = ('%s['):format(pattern)
-            if not charset_end() then
-                return false
-            end
-        end
-        return true
-    end
+    local chs = false
 
     while true do
         i = i + 1
         char = glob:sub(i, i)
         if char == '' then
-            pattern = ('%s$'):format(pattern)
-            break
-        elseif char == '?' then
+            return ('%s$'):format(pattern)
+        end
+        if char == '?' then
             pattern = ('%s.'):format(pattern)
         elseif char == '*' then
             pattern = ('%s.*'):format(pattern)
         elseif char == '[' then
-            if not charset() then
-                break
+            chs, char, pattern, i = Glob.charset(glob, char, pattern, i)
+            if not chs then
+                return pattern
             end
         elseif char == '\\' then
             i = i + 1
             char = glob:sub(i, i)
             if char == '' then
-                pattern = ('%s\\$'):format(pattern)
-                break
+                return ('%s\\$'):format(pattern)
             end
             pattern = ('%s%s'):format(pattern, Glob.escape(char, char))
         else
             pattern = ('%s%s'):format(pattern, Glob.escape(char, char))
         end
     end
-    return pattern
 end
 
 ---@param pattern string
