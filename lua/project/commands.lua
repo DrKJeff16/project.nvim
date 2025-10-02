@@ -20,10 +20,10 @@ local in_list = vim.list_contains
 local curr_buf = vim.api.nvim_get_current_buf
 local vim_has = require('project.utils.util').vim_has
 
----@type { create_user_commands: function, new: fun(specs: Project.Commands.Spec[]) }|table<string, Project.CMD>
+---@type table<string, Project.CMD>
 local M = {}
 
----@param specs Project.Commands.Spec[]
+---@type fun(specs: Project.Commands.Spec[])
 function M.new(specs)
     if vim_has('nvim-0.11') then
         vim.validate('specs', specs, 'table', false, 'Project.Commands.Spec[]')
@@ -81,6 +81,7 @@ function M.new(specs)
     end
 end
 
+---@type function
 function M.create_user_commands()
     M.new({
         {
