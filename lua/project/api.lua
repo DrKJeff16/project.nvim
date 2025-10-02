@@ -177,7 +177,7 @@ function Api.set_pwd(dir, method)
     if not modified and #History.session_projects > 1 then
         ---@type integer
         local old_pos
-        for k, v in next, History.session_projects do
+        for k, v in ipairs(History.session_projects) do
             if v == dir then
                 old_pos = k
                 break
