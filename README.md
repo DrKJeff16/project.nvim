@@ -6,20 +6,18 @@
 
 [**Announcements**](https://github.com/DrKJeff16/project.nvim/discussions/1) | [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions) | [**Wiki**](https://github.com/DrKJeff16/project.nvim/wiki) | [**Credits**](./CREDITS.md) | [**Contributing**](./CONTRIBUTING.md) | [**Roadmap**](./TODO.md)
 
-<span>
-  <a href="#project">
-  <img
-    alt="project_nvim-showcase"
-    src="https://github.com/user-attachments/assets/aa2b130d-9ebd-489c-b001-4529d1b463b0"
-  />
-  </a>
-  <a href="#projectsession">
-  <img
-    alt="project_nvim_session"
-    src="https://github.com/user-attachments/assets/4d537c1c-a01f-4362-a898-921111219cee"
-  />
-  </a>
-</span>
+<a href="#project">
+<img
+alt="project_nvim-showcase"
+src="https://github.com/user-attachments/assets/aa2b130d-9ebd-489c-b001-4529d1b463b0"
+/>
+</a>
+<a href="#projectsession">
+<img
+alt="project_nvim_session"
+src="https://github.com/user-attachments/assets/4d537c1c-a01f-4362-a898-921111219cee"
+/>
+</a>
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that,
 under configurable conditions, automatically sets the user's `cwd` to the current project root
@@ -70,11 +68,6 @@ Show these much love!
 - [`folke/snacks.nvim`](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md#projects)
 - [`coffebar/neovim-project`](https://github.com/coffebar/neovim-project)
 - [`LintaoAmons/cd-project.nvim`](https://github.com/LintaoAmons/cd-project.nvim)
-
-> [!CAUTION]
-> At the time of writing this, the following **ONLY** works with the original `project.nvim`.
->
-> - [`jakobwesthoff/project-fzf.nvim`](https://github.com/jakobwesthoff/project-fzf.nvim) (**BASED OFF `project.nvim`**)
 
 ---
 
@@ -182,7 +175,6 @@ endif
 
   ---@type Project.Config.Options
   opts = {},
-  enabled = vim.fn.has('nvim-0.11') == 1, -- RECOMMENDED
 }
 ```
 
@@ -249,6 +241,8 @@ paq({
   'nvim-telescope/telescope.nvim', -- OPTIONAL
   'ibhagwan/fzf-lua', -- OPTIONAL
 })
+
+require('project.nvim').setup()
 ```
 
 <div align="right">
@@ -261,7 +255,7 @@ paq({
 
 ## Configuration
 
-To enable the plugin you may call `setup()`:
+To enable the plugin you must call `setup()`:
 
 ```lua
 require('project').setup()
@@ -305,10 +299,10 @@ require('project').setup()
 
         ---The maximum logfile size (in megabytes).
         --- ---
-        ---Default: `1.0`
+        ---Default: `1.1`
         --- ---
         ---@type number
-        max_size = 1.0,
+        max_size = 1.1,
 
         ---Path in which the log file will be saved.
         --- ---
@@ -356,13 +350,12 @@ require('project').setup()
             'notify',
             'packer',
             'qf',
-        }, ---`filetype`
-
+        },
         bt = {
             'help',
             'nofile',
             'terminal',
-        }, ---`buftype`
+        },
     },
 
     ---If `true` your root directory won't be changed automatically,
@@ -709,7 +702,6 @@ code in your config:
 
 ```lua
 require('telescope').setup(...)
--- Other stuff may come here...
 require('telescope').load_extension('projects')
 ```
 
@@ -725,9 +717,9 @@ After that you can now call it from the command line:
 >
 > ```lua
 > require('telescope').setup({
->   --- ...
 >   extensions = {
 >     projects = {
+>       prompt_prefix = "󱎸  ",
 >       layout_strategy = "horizontal",
 >       layout_config = {
 >         anchor = "N",
@@ -735,8 +727,6 @@ After that you can now call it from the command line:
 >         width = 0.6,
 >         prompt_position = "bottom",
 >       },
->
->       prompt_prefix = "󱎸  ",
 >     },
 >   },
 > })
@@ -873,7 +863,7 @@ If your prompt is valid, your `cwd` will be switched to said directory.
 Adding a [!] will set the prompt to your cwd.
 
 > [!NOTE]
-> This is particularly useful if you've enabled `manual_mode` in `setup()`.
+> **This is particularly useful if you've enabled `manual_mode` in `setup()`.**
 
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
@@ -886,10 +876,9 @@ The `:ProjectRoot` command is a manual hook to set the working directory to the 
 file's root, attempting to use any of the `setup()` detection methods
 set by the user.
 
-The command does essentially the following:
+The command is like doing the following in the cmdline:
 
 ```vim
-" Vim command line
 :lua require('project.api').on_buf_enter()
 ```
 
@@ -903,10 +892,9 @@ The command does essentially the following:
 The `:ProjectConfig` command is a hook to display your current config
 using `vim.notify(inspect())`
 
-The command does essentially the following:
+The command is like doing the following in the cmdline:
 
 ```vim
-" Vim command line
 :lua vim.notify(vim.inspect(require('project').get_config()))
 ```
 
@@ -989,17 +977,12 @@ local root, lsp_or_method = require('project').get_project_root()
 You can get a list of recent projects by running the code below:
 
 ```lua
----@type string[]
-local recent_projects = require('project').get_recent_projects()
-
--- Using `vim.notify()`
+local recent_projects = require('project').get_recent_projects() ---@type string[]
 vim.notify(vim.inspect(recent_projects))
-
--- Using `vim.print()`
-vim.print(recent_projects)
 ```
 
-Where `get_recent_projects()` returns either an empty table `{}` or a string array `{ '/path/to/project1', ... }`
+Where `get_recent_projects()` returns either an empty table `{}`
+or a string array `{ '/path/to/project1', ... }`.
 
 ### `get_config()`
 
@@ -1053,19 +1036,20 @@ vim.print(get_history_paths('historyfile'))
 
 ## Utils
 
-> [!NOTE]
-> _These utilities are in part inspired by my own utilities found in [**`Jnvim`**](https://github.com/DrKJeff16/Jnvim),_
-> _my own Nvim configuration; particularly the **(WIP)** [**`User API`**](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)_.
-
 A set of utilities that get repeated across the board.
 
-You can import them the follow way:
+> [!TIP]
+> You can import them the follow way:
+>
+> ```lua
+> local ProjUtil = require('project.utils.util')
+> ```
+>
+> _See [`util.lua`](./lua/project/utils/util.lua) for further reference_.
 
-```lua
-local ProjUtil = require('project.utils.util')
-```
-
-_See [`util.lua`](./lua/project/utils/util.lua) for further reference_.
+> [!NOTE]
+> _These utilities are in part inspired by my own utilities found in [**`Jnvim`**](https://github.com/DrKJeff16/Jnvim),_
+> _my own Nvim configuration; particularly the [**`User API`**](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)_ **(WIP)**.
 
 <div align="right">
 
@@ -1090,7 +1074,6 @@ If you're in a UNIX environment, make sure you have _**read, write and access pe
 > You can get the value of `projectpath` by running the following in the cmdline:
 >
 > ```vim
-> " Vim command line
 > :lua vim.print(require('project').get_history_paths('projectpath'))
 > ```
 
@@ -1116,5 +1099,4 @@ If you lack the required permissions for that directory, you can either:
 [Go To Top](#projectnvim-)
 
 </div>
-
 <!--vim:ts=2:sts=2:sw=2:et:ai:si:sta:noci:nopi:-->
