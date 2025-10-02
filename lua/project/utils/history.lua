@@ -43,21 +43,46 @@ local Path = require('project.utils.path')
 ---@field hist_loc? { bufnr: integer, win: integer }|nil
 local History = {}
 
+---Projects from previous Neovim sessions.
+--- ---
 ---@type Project.History.Spec[]
 History.recent_projects_v2 = {}
 
+---Projects from current Neovim session.
+--- ---
 ---@type Project.History.Spec[]
 History.session_projects_v2 = {}
 
----Projects from previous neovim sessions.
+---Projects from previous Neovim sessions.
 --- ---
 ---@type string[]|nil
 History.recent_projects = nil
 
----Projects from current neovim session.
+---Projects from current Neovim session.
 --- ---
 ---@type string[]
 History.session_projects = {}
+
+---@param mode OpenMode
+---@return integer|nil fd
+function History.open_history_v2(mode)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('mode', mode, 'string', false, 'OpenMode')
+    else
+        vim.validate({ mode = { mode, 'string' } })
+    end
+    Path.create_path()
+    local dir_stat = uv.fs_stat(Path.projectpath)
+    if not dir_stat then
+        require('project.utils.log').error(
+            ('(%s.open_history_v2): History file unavailable!'):format(MODSTR)
+        )
+        error(('(%s.open_history_v2): History file unavailable!'):format(MODSTR), ERROR)
+    end
+
+    local fd = uv.fs_open(Path.historyfile_v2, mode, tonumber('644', 8))
+    return fd
+end
 
 ---@param mode OpenMode
 ---@return integer|nil fd
@@ -147,7 +172,7 @@ local function delete_duplicates(tbl)
     return Util.dedup(res)
 end
 
----Deletes a project string, or a Telescope Entry type.
+---Deletes a project string, or a Telescope Entry type (v2).
 --- ---
 ---@param project string|Project.ActionEntry
 function History.delete_project_v2(project)
@@ -281,7 +306,7 @@ function History.setup_watch()
 end
 
 function History.read_history_v2()
-    local fd = History.open_history('r')
+    local fd = History.open_history_v2('r')
     if not fd then
         return
     end
@@ -346,7 +371,7 @@ function History.write_history_v2(close)
     close = close ~= nil and close or false
     local Config = require('project.config')
     local Log = require('project.utils.log')
-    local fd = History.open_history(vim.tbl_isempty(History.recent_projects_v2) and 'w' or 'a')
+    local fd = History.open_history_v2(vim.tbl_isempty(History.recent_projects_v2) and 'w' or 'a')
     if not fd then
         Log.error(('(%s.write_history_v2): File restricted!'):format(MODSTR))
         error(('(%s.write_history_v2): File restricted!'):format(MODSTR), ERROR)
@@ -362,8 +387,11 @@ function History.write_history_v2(close)
                 and vim.list_slice(res, len_res - History.historysize, len_res)
             or res
     end
+    for i, _ in ipairs(tbl_out) do
+        tbl_out[i].bufs = nil -- Delete the session buffers
+    end
 
-    local out = vim.json.encode(tbl_out, { sort_keys = true })
+    local out = vim.json.encode(tbl_out, { sort_keys = true, indent = '  ' })
     Log.debug(('(%s.write_history_v2): Writing to file...'):format(MODSTR))
     uv.fs_write(fd, out, -1)
     if close then

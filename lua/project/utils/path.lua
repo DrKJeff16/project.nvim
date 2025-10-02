@@ -13,6 +13,9 @@ local vim_has = require('project.utils.util').vim_has
 ---The project history file.
 --- ---
 ---@field historyfile? string
+---The project history file (v2).
+--- ---
+---@field historyfile_v2? string
 local Path = {}
 Path.last_dir_cache = ''
 Path.curr_dir_cache = {} ---@type string[]
@@ -236,6 +239,7 @@ function Path.init()
     Path.datapath = datapath
     Path.projectpath = ('%s/project_nvim'):format(Path.datapath)
     Path.historyfile = ('%s/project_history'):format(Path.projectpath)
+    Path.historyfile = ('%s/project_history.json'):format(Path.projectpath)
 end
 
 return Path
