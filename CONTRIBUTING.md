@@ -24,18 +24,20 @@ First of all thank you for being passionate about this plugin as I am.
 It means the world to me.
 
 Please follow the instructions stated below. These are not set in stone.
-For transparency if yow have any suggestions, even regarding this very document,
-open a blank issue so we can discuss these publicly.
+For transparency's sake if yow have any suggestions, even regarding this very document,
+you may open a blank issue.
 
 ---
 
 ## What I Will Not Accept
 
+- **BAD COMMIT MESSAGES**. Read [this guide](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13) to get familiarized
 - **UNCREDITED CODE**. If pulling from somewhere else, _**paste the reference URL in a comment**_
+- **AI-GENERATED CODE**. The code here must be up to date and made with effort
 - **MISSING LUA ANNOTATIONS**. See [Code Annotations](#code-annotations)
 - **MERGE COMMITS**. Favour `git rebase` instead
-- **UNSIGNED COMMITS**. Read the guide on signing your commits[^2]
-- **UNTESTED CHANGES** _(if warranted)_. Make sure to test your changes before making a PR
+- **UNSIGNED COMMITS**. Read the guide on signing your commits[^2]. All unsigned commits will be rejected
+- **UNTESTED CHANGES** _(if warranted)_. Make sure to test your changes before making a Pull Request
 - **UNFORMATTED CODE**. See the [StyLua](#stylua) section
 - **NON-UNIX LINE ENDINGS**. Make sure to set your config in your CLI:
     ```sh
@@ -65,7 +67,7 @@ open a blank issue so we can discuss these publicly.
 ### StyLua
 
 > [!IMPORTANT]
-> **This one's a requirement.**
+> **This one is a requirement.**
 
 This will format any Lua file that needs it.
 
@@ -81,11 +83,11 @@ You can install StyLua through your package manager or by following
 > ```
 
 > [!WARNING]
-> **I will NOT accept any changes to** `.stylua.toml`.
+> **I WILL NOT ACCEPT ANY CHANGES TO** `.stylua.toml`. Create an issue instead.
 
 ### `pre-commit`
 
-Preferably use `pre-commit` to run the hooks contained in [`.pre-commit-config.yaml`](./.pre-commit-config.yaml).
+I encourage you to use `pre-commit` to run the hooks contained in [`.pre-commit-config.yaml`](./.pre-commit-config.yaml).
 
 To install it, follow [these instructions](https://pre-commit.com/#install) in the `pre-commit` website.
 After that, run the following command in your terminal:
@@ -97,7 +99,7 @@ After that, run the following command in your terminal:
 pre-commit install
 ```
 
-And now every time you run `git commit` the hooks contained in `.pre-commit-config.yaml` will run.
+Now every time you run `git commit` the hooks contained in `.pre-commit-config.yaml` will run.
 
 > [!TIP]
 > It is recommended for you to update the hooks if required to:
@@ -141,7 +143,7 @@ or your package manager of preference.
 > [!IMPORTANT]
 > Please refer to LuaLS' code annotations to understand the syntax.[^1]
 
-Let's say you create a new submodule `lua/project_nvim/foo.lua`. If said module returns a table
+Let's say you create a new submodule `lua/project/foo.lua`. If said module returns a table
 with fields, the optimal way to document is to do it **in the same file**, and following this format:
 
 ```lua
@@ -192,6 +194,17 @@ return Foo
 > **BEAR IN MIND THAT ANY FIELD THAT'S NOT EXPLICITLY DEFINED
 > SHOULD GO UNDER THE** `---@class` **ANNOTATION**.
 > e.g. `Foo.things` from above.
+
+> [!WARNING]
+> Any instance of wrapping already existing data types will be cause for rejection.
+>
+> ```lua
+> ---NOT ALLOWED
+> ---@alias StringType string
+>
+> ---ALLOWED
+> ---@alias StringDict table<string, any>
+> ```
 
 ---
 
