@@ -167,24 +167,24 @@ function Api.set_pwd(dir, method)
     end
 
     local modified = false
-    if vim.tbl_isempty(History.session_projects) then
-        History.session_projects = { dir }
+    local spec = { path = dir, name = '', bufs = {} }
+    if vim.tbl_isempty(History.session_projects_v2) then
+        History.session_projects_v2 = History.regen_v2({ spec })
         modified = true
-    elseif not in_list(History.session_projects, dir) then
-        table.insert(History.session_projects, dir)
+    elseif not in_list(vim.tbl_keys(History.session_projects_v2('path')), dir) then
+        table.insert(History.session_projects_v2, spec)
         modified = true
     end
-    if not modified and #History.session_projects > 1 then
-        ---@type integer
-        local old_pos
-        for k, v in ipairs(History.session_projects) do
-            if v == dir then
-                old_pos = k
+    if not modified and #History.session_projects_v2 > 1 then
+        local old_pos ---@type integer
+        for i, v in ipairs(History.session_projects_v2) do
+            if v.path == spec.path then
+                old_pos = i
                 break
             end
         end
-        table.remove(History.session_projects, old_pos)
-        table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
+        table.remove(History.session_projects_v2, old_pos)
+        table.insert(History.session_projects_v2, 1, spec) -- HACK: Move project to start of table
     end
 
     if dir == vim.fn.getcwd(0, 0) then
@@ -311,14 +311,13 @@ end
 
 ---@return string|nil last
 function Api.get_last_project()
-    local recent = History.get_recent_projects()
+    local recent = History.get_recent_projects_v2()
     if vim.tbl_isempty(recent) or #recent == 1 then
         return nil
     end
 
-    ---@type string[]
-    recent = Util.reverse(recent)
-    return #History.session_projects <= 1 and recent[2] or recent[1]
+    recent = Util.reverse(recent) ---@type string[]
+    return #History.session_projects_v2 <= 1 and recent[2] or recent[1]
 end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
@@ -392,7 +391,7 @@ function Api.on_buf_enter(verbose, bufnr)
 
     Api.last_project = Api.get_last_project()
     if write then
-        History.write_history()
+        History.write_history_v2()
     end
 end
 
@@ -403,7 +402,7 @@ function Api.init()
         pattern = '*',
         group = group,
         callback = function()
-            History.write_history(true)
+            History.write_history_v2(true)
         end,
     })
     if not Config.options.manual_mode then
@@ -422,7 +421,7 @@ function Api.init()
             Api.gen_lsp_autocmd(group)
         end
     end
-    History.read_history()
+    History.read_history_v2()
 end
 
 return Api

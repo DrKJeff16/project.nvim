@@ -24,13 +24,13 @@ function M.delete_project(selected)
     require('project.utils.log').debug(
         ('(%s.delete_project): Deleting project `%s`'):format(MODSTR, selected[1])
     )
-    require('project.utils.history').delete_project(selected[1])
+    require('project.utils.history').delete_project_v2(selected[1])
 end
 
 ---@param cb fun(entry?: string|number, cb?: function)
 function M.exec(cb)
     ---@type string[]
-    local results = Util.reverse(require('project.utils.history').get_recent_projects())
+    local results = Util.reverse(require('project.utils.history').get_recent_projects_v2())
     for _, entry in ipairs(results) do
         cb(entry)
     end
