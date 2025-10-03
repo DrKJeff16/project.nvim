@@ -2,6 +2,8 @@
 
 # project.nvim [![Mentioned in Awesome Neovim](https://awesome.re/mentioned-badge.svg)](https://github.com/rockerBOO/awesome-neovim)
 
+[![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/DrKJeff16)[![Last Commit](https://img.shields.io/github/last-commit/DrKJeff16/project.nvim.svg)](https://github.com/DrKJeff16/project.nvim/commits/main/)[![LICENSE](https://img.shields.io/github/license/DrKJeff16/project.nvim.svg)](./LICENSE)[![Issues](https://img.shields.io/github/issues/DrKJeff16/project.nvim.svg)](https://github.com/DrKJeff16/project.nvim/issues)[![GitHub Release](https://img.shields.io/github/v/release/DrKJeff16/project.nvim.svg?sort=date&display_name=release)](https://github.com/DrKJeff16/project.nvim/releases/latest)
+
 **========================  [Breaking Changes](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes)  ========================**
 
 [**Announcements**](https://github.com/DrKJeff16/project.nvim/discussions/1) | [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions) | [**Wiki**](https://github.com/DrKJeff16/project.nvim/wiki) | [**Credits**](./CREDITS.md) | [**Contributing**](./CONTRIBUTING.md) | [**Roadmap**](./TODO.md)
