@@ -440,6 +440,16 @@ function DEFAULTS:verify_logging()
     end
 end
 
+function DEFAULTS:expand_excluded()
+    if vim.tbl_isempty(self.exclude_dirs) then
+        return
+    end
+
+    for i, v in ipairs(self.exclude_dirs) do
+        self.exclude_dirs[i] = Util.rstrip('/', vim.fn.fnamemodify(v, ':p'))
+    end
+end
+
 ---@param self Project.Config.Options
 function DEFAULTS:verify()
     self:verify_datapath()

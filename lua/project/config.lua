@@ -26,6 +26,7 @@ function Config.setup(options)
     options = options or {}
     local pattern_exclude = require('project.utils.globtopattern').pattern_exclude
     Config.options = Config.get_defaults():new(options)
+    Config.options:expand_excluded()
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
     Config.options:verify() -- Verify config integrity
 

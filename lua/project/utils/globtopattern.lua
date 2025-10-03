@@ -27,7 +27,7 @@ function Glob.unescape(glob, char, pattern, i)
     end
     i = i + 1
     char = glob:sub(i, i)
-    if char == '' then
+    if char:len() == 0 then
         return false, char, '[^]', i
     end
     return true, char, pattern, i
@@ -46,7 +46,7 @@ end
 function Glob.charset_end(glob, char, pattern, i)
     local un = false
     while true do
-        if char == '' then
+        if char:len() == 0 then
             return false, char, '[^]', i
         end
         if char == ']' then
@@ -59,7 +59,7 @@ function Glob.charset_end(glob, char, pattern, i)
         local c1 = char
         i = i + 1
         char = glob:sub(i, i)
-        if char == '' then
+        if char:len() == 0 then
             return false, char, '[^]', i
         end
         if char == ']' then
@@ -71,7 +71,7 @@ function Glob.charset_end(glob, char, pattern, i)
         else
             i = i + 1
             char = glob:sub(i, i)
-            if char == '' then
+            if char:len() == 0 then
                 return false, char, '[^]', i
             end
             if char == ']' then
@@ -134,12 +134,11 @@ function Glob.globtopattern(glob)
     local pattern = '^'
     local i = 0
     local char = ''
-    local chs = false
-
     while true do
+        local chs = false
         i = i + 1
         char = glob:sub(i, i)
-        if char == '' then
+        if char:len() == 0 then
             return ('%s$'):format(pattern)
         end
         if char == '?' then
@@ -154,7 +153,7 @@ function Glob.globtopattern(glob)
         elseif char == '\\' then
             i = i + 1
             char = glob:sub(i, i)
-            if char == '' then
+            if char:len() == 0 then
                 return ('%s\\$'):format(pattern)
             end
             pattern = ('%s%s'):format(pattern, Glob.escape(char, char))
@@ -167,10 +166,8 @@ end
 ---@param pattern string
 ---@return string pattern
 function Glob.pattern_exclude(pattern)
-    local HOME = vim.fn.expand('~')
-    local pattern_len = pattern:len()
     if vim.startswith(pattern, '~/') then
-        pattern = ('%s/%s'):format(HOME, pattern:sub(3, pattern_len))
+        pattern = ('%s/%s'):format(vim.fn.expand('~'), pattern:sub(3, pattern:len()))
     end
     return Glob.globtopattern(pattern)
 end
