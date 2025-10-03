@@ -1,13 +1,31 @@
+<div align="center">
+
 # CONTRIBUTING
+
+</div>
+
+---
 
 ## Table of Contents
 
-1. [What I Will Not Accept](#what-i-will-not-accept)
-2. [Recommendations](#recommendations)
+1. [Note For Co-Maintainers](#note-for-co-maintainers)
+2. [What I Will Not Accept](#what-i-will-not-accept)
+3. [Recommendations](#recommendations)
     1. [StyLua](#stylua)
     2. [`pre-commit`](#pre-commit)
     3. [`selene`](#selene)
-3. [Code Annotations](#code-annotations)
+4. [Code Annotations](#code-annotations)
+
+---
+
+## Note For Co-Maintainers
+
+First of all thank you for being passionate about this plugin as I am.
+It means the world to me.
+
+Please follow the instructions stated below. These are not set in stone.
+For transparency if yow have any suggestions, even regarding this very document,
+open a blank issue so we can discuss these publicly.
 
 ---
 
