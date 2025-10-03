@@ -190,7 +190,10 @@ function Api.set_pwd(dir, method)
     if dir == vim.fn.getcwd(0, 0) then
         Api.current_project = dir
         Api.current_method = method
-        Log.info(('(%s.set_pwd): Current directory is selected project.'):format(MODSTR))
+        if vim.g.project_cwd_log ~= 1 then
+            Log.info(('(%s.set_pwd): Current directory is selected project.'):format(MODSTR))
+        end
+        vim.g.project_cwd_log = 1
         return true
     end
     if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
@@ -205,6 +208,7 @@ function Api.set_pwd(dir, method)
         error(('%s INVALID value for `scope_chdir`'):format(msg), ERROR)
     end
 
+    vim.g.project_cwd_log = 0
     local ok = false
     if scope_chdir == 'global' then
         ok = pcall(vim.api.nvim_set_current_dir, dir)
