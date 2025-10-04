@@ -15,7 +15,7 @@ Config.options = setmetatable({}, { __index = Config.get_defaults() })
 
 ---The function called when running `require('project').setup()`.
 --- ---
----@param options? Project.Config.Options
+---@param options? Project.Config.Options the `project.nvim` config options
 function Config.setup(options)
     local Util = require('project.utils.util')
     if Util.vim_has('nvim-0.11') then
