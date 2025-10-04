@@ -16,6 +16,7 @@ Project.get_last_project = require('project.api').get_last_project
 Project.open_menu = require('project.popup').open_menu
 Project.delete_menu = require('project.popup').delete_menu
 Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
+Project.get_config = require('project.config').get_config
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
@@ -38,18 +39,6 @@ function Project.current_project(refresh)
     end
     Log.debug(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
     return Api.current_project, Api.current_method, Api.last_project
-end
-
----@return Project.Config.Options|nil
-function Project.get_config()
-    local Log = require('project.utils.log')
-    local Config = require('project.config')
-    if vim.g.project_setup == 1 then
-        Log.info(('(%s.get_config): Project is set up. Returning setup options.'):format(MODSTR))
-        return Config.options
-    end
-    Log.error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR))
-    error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR), ERROR)
 end
 
 return Project

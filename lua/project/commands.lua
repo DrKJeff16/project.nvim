@@ -15,7 +15,6 @@
 
 local MODSTR = 'project.commands'
 local ERROR = vim.log.levels.ERROR
-local INFO = vim.log.levels.INFO
 local in_list = vim.list_contains
 local curr_buf = vim.api.nvim_get_current_buf
 local vim_has = require('project.utils.util').vim_has
@@ -118,8 +117,12 @@ function M.create_user_commands()
         {
             name = 'ProjectConfig',
             callback = function()
-                local cfg = require('project').get_config()
-                vim.notify(vim.inspect(cfg), INFO)
+                local Config = require('project.config')
+                if not Config.conf_loc then
+                    Config.open_win()
+                    return
+                end
+                Config.close_win()
             end,
             desc = 'Prints out the current configuratiion for `project.nvim`',
         },
