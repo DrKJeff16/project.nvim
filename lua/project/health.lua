@@ -74,6 +74,7 @@ function Health.options_check()
         'telescope',
         'verify_datapath',
         'verify_histsize',
+        'verify_logging',
         'verify_methods',
         'verify_scope_chdir',
     }
