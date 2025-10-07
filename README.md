@@ -85,6 +85,7 @@ Show these much love!
 - [`Fzf-Lua` Integration](#ProjectFzf)
 - [`nvim-tree` Integration](#nvim-tree)
 - [`neo-tree` Integration](#neo-tree)
+- [`mini.starter` Integration](#ministarter)
 
 ---
 
@@ -102,6 +103,7 @@ Show these much love!
     4. [Neo Tree](#neo-tree)
     5. [Telescope](#telescope)
         1. [Telescope Mappings](#telescope-mappings)
+    6. [`mini.starter`](#ministarter)
 3. [Commands](#commands)
     1. [`:Project`](#project)
     2. [`:ProjectFzf`](#projectfzf)
@@ -751,6 +753,24 @@ After that you can now call it from the command line:
 > [!TIP]
 > _You can find the Actions in [`telescope/_extensions/projects/actions.lua`](./lua/telescope/_extensions/projects/actions.lua)_.
 
+---
+
+### `mini.starter`
+
+If you use [`nvim-mini/mini.starter`](https://github.com/nvim-mini/mini.starter) you can include the
+following snippet in your `MiniStarter` setup:
+
+```lua
+require('mini.starter').setup({
+  evaluate_single = true,
+  items = {
+    { name = 'Projects', action = 'Project', section = 'Projects' }, -- Runs `:Project`
+    { name = 'Recent Projects', action = 'ProjectRecents', section = 'Projects' }, -- `:ProjectRecents`
+    -- Other items...
+  },
+})
+```
+
 <div align="right">
 
 [Go To Top](#projectnvim-)
@@ -762,8 +782,6 @@ After that you can now call it from the command line:
 ## Commands
 
 These are the user commands you can call from the cmdline:
-
----
 
 ### `:Project`
 
