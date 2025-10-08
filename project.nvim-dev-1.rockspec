@@ -3,7 +3,7 @@
 rockspec_format = '3.1'
 
 package = 'project.nvim'
-version = 'dev-1'
+version = '0.0.27-1'
 
 source = {
     url = 'git://github.com/DrKJeff16/project.nvim',
@@ -19,11 +19,12 @@ description = {
     license = 'Apache-2.0',
     labels = { 'neovim' },
 }
-dependencies = { 'Lua==5.1' }
-
+dependencies = {
+    'lua==5.1',
+}
 build = {
     type = 'builtin',
-    ['install.lua'] = {
+    modules = {
         project = 'lua/project.lua',
         ['project.api'] = 'lua/project/api.lua',
         ['project.commands'] = 'lua/project/commands.lua',
@@ -42,5 +43,7 @@ build = {
         ['telescope._extensions.projects.main'] = 'lua/telescope/_extensions/projects/main.lua',
         ['telescope._extensions.projects.util'] = 'lua/telescope/_extensions/projects/util.lua',
     },
-    copy_directories = { 'doc' },
+    copy_directories = {
+        'doc',
+    },
 }
