@@ -263,7 +263,10 @@ Popup.delete_menu = Popup.select.new({
                 return item
             end,
         }, function(item)
-            if not (item and in_list(Popup.delete_menu.choices_list(), item)) then
+            if not item then
+                return
+            end
+            if not in_list(Popup.delete_menu.choices_list(), item) then
                 error('Bad selection!', ERROR)
             end
 
