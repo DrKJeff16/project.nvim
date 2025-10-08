@@ -228,7 +228,6 @@ function History.write_history(close)
         vim.validate({ close = { close, { 'boolean', 'nil' } } })
     end
     close = close ~= nil and close or false
-    local Config = require('project.config')
     local Log = require('project.utils.log')
     local fd = History.open_history(History.recent_projects ~= nil and 'w' or 'a')
     if not fd then
@@ -236,7 +235,7 @@ function History.write_history(close)
         error(('(%s.write_history): File restricted!'):format(MODSTR), ERROR)
     end
 
-    History.historysize = Config.options.historysize or 100
+    History.historysize = require('project.config').options.historysize or 100
     local res = History.get_recent_projects()
     local len_res = #res
     local tbl_out = copy(res)
@@ -247,10 +246,7 @@ function History.write_history(close)
             or res
     end
 
-    local out = '' -- Transform table to string
-    for _, v in ipairs(tbl_out) do
-        out = ('%s%s\n'):format(out, v)
-    end
+    local out = table.concat(tbl_out, '\n')
     Log.debug(('(%s.write_history): Writing to file...'):format(MODSTR))
     uv.fs_write(fd, out, -1)
     if close then
