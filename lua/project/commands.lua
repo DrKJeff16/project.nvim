@@ -68,7 +68,7 @@ function M.new(specs)
                 spec.callback()
             end,
         })
-        vim.api.nvim_create_user_command(M[spec.name].name, function(ctx)
+        vim.api.nvim_create_user_command(spec.name, function(ctx)
             local with_ctx = spec.with_ctx ~= nil and spec.with_ctx or false
             local cmd = M[spec.name]
             if with_ctx then
