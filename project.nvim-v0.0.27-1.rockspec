@@ -7,7 +7,7 @@ version = 'v0.0.27-1'
 
 source = {
     url = 'git://github.com/DrKJeff16/project.nvim',
-    tag = 'v0.0.26',
+    tag = 'v0.0.27-1',
 }
 
 description = {
