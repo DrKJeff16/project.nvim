@@ -133,6 +133,7 @@ function Config.close_win()
     end
 
     vim.api.nvim_buf_delete(Config.conf_loc.bufnr, { force = true })
+    pcall(vim.api.nvim_win_close, Config.conf_loc.win, true)
 
     Config.conf_loc = nil
 end

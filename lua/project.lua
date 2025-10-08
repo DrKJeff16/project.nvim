@@ -1,5 +1,4 @@
 local MODSTR = 'project'
-local ERROR = vim.log.levels.ERROR
 local vim_has = require('project.utils.util').vim_has
 
 ---The `project.nvim` module.
