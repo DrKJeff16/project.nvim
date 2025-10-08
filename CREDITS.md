@@ -9,6 +9,8 @@ Thank you all for your contributions and support, or imported code.
 
 </div>
 
+---
+
 - [@ahmedkhalf](https://github.com/ahmedkhalf): The author of the original `project.nvim`
 - [@jay-babu](https://github.com/jay-babu): Solved many issues way earlier in [their fork](https://github.com/jay-babu/project.nvim)
 - [@Zeioth](https://github.com/Zeioth): Implemented the filetype/buftype exclusions [in their fork](https://github.com/Zeioth/project.nvim/commit/95f56b8454f3285b819340d7d769e67242d59b53)
