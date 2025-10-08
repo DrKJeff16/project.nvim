@@ -3,7 +3,7 @@
 rockspec_format = '3.1'
 
 package = 'project.nvim'
-version = '0.0.27-1'
+version = 'v0.0.27-1'
 
 source = {
     url = 'git://github.com/DrKJeff16/project.nvim',

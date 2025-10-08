@@ -1,3 +1,6 @@
+# Rocks
+*.rock
+
 # Vim Helptags
 doc/tags
 
