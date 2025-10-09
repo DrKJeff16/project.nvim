@@ -75,7 +75,7 @@ Show these much love!
 
 ## Features
 
-- Automatically sets the `cwd` to the project root directory using either `vim.lsp` or pattern matching
+- Automatically sets the `cwd` to the project root directory using either pattern matching (LSP optionally)
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook `:checkhealth project`
 - Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
@@ -378,10 +378,10 @@ require('project').setup()
     ---
     ---The detection methods get filtered and rid of duplicates during runtime.
     --- ---
-    ---Default: `{ 'lsp' , 'pattern' }`
+    ---Default: `{ 'pattern' }`
     --- ---
-    ---@type ("lsp"|"pattern")[]
-    detection_methods = { 'lsp', 'pattern' },
+    ---@type ('lsp'|'pattern')[]
+    detection_methods = { 'pattern' },
 
     ---All the patterns used to detect root dir, when **'pattern'** is in
     ---detection_methods.
