@@ -253,7 +253,8 @@ end
 
 Popup.delete_menu = Popup.select.new({
     callback = function()
-        vim.ui.select(Popup.delete_menu.choices_list(), {
+        local choices_list = Popup.delete_menu.choices_list()
+        vim.ui.select(choices_list, {
             prompt = 'Select a project to delete:',
             format_item = function(item)
                 local session = History.session_projects
@@ -266,17 +267,16 @@ Popup.delete_menu = Popup.select.new({
             if not item then
                 return
             end
-            if not in_list(Popup.delete_menu.choices_list(), item) then
+            if not in_list(choices_list, item) then
                 error('Bad selection!', ERROR)
             end
 
-            local choices = Popup.delete_menu.choices()
-            local op = choices[item]
-            if not (op and vim.is_callable(op)) then
+            local choice = Popup.delete_menu.choices()[item]
+            if not (choice and vim.is_callable(choice)) then
                 error('Bad selection!', ERROR)
             end
 
-            op()
+            choice()
         end)
     end,
     choices_list = function()
@@ -293,14 +293,15 @@ Popup.delete_menu = Popup.select.new({
                 History.delete_project(proj)
             end
         end
-        T['Exit'] = function() end
+        T.Exit = function() end
         return T
     end,
 })
 
 Popup.recents_menu = Popup.select.new({
     callback = function()
-        vim.ui.select(Popup.recents_menu.choices_list(), {
+        local choices_list = Popup.recents_menu.choices_list()
+        vim.ui.select(choices_list, {
             prompt = 'Select a project:',
             format_item = function(item)
                 local curr = require('project.api').current_project or ''
@@ -310,16 +311,15 @@ Popup.recents_menu = Popup.select.new({
             if not item then
                 return
             end
-            if not in_list(Popup.recents_menu.choices_list(), item) then
+            if not in_list(choices_list, item) then
                 error('Bad selection!', ERROR)
             end
-            local choices = Popup.recents_menu.choices()
-            local op = choices[item]
-            if not (op and vim.is_callable(op)) then
+            local choice = Popup.recents_menu.choices()[item]
+            if not (choice and vim.is_callable(choice)) then
                 error('Bad selection!', ERROR)
             end
 
-            op(item, false, false)
+            choice(item, false, false)
         end)
     end,
     choices_list = function()
@@ -332,38 +332,32 @@ Popup.recents_menu = Popup.select.new({
         return choices_list
     end,
     choices = function()
-        ---@type table<string, function>
-        local choices = {}
+        local choices = {} ---@type table<string, function>
         for _, s in ipairs(Popup.recents_menu.choices_list()) do
-            if s == 'Exit' then
-                choices[s] = function(_, _, _) end
-            else
-                choices[s] = open_node
-            end
+            choices[s] = s ~= 'Exit' and open_node or function(_, _, _) end
         end
-
         return choices
     end,
 })
 
 Popup.open_menu = Popup.select.new({
     callback = function()
-        vim.ui.select(Popup.open_menu.choices_list(), {
+        local choices_list = Popup.open_menu.choices_list()
+        vim.ui.select(choices_list, {
             prompt = 'Select an operation:',
         }, function(item)
             if not item then
                 return
             end
-            if not in_list(Popup.open_menu.choices_list(), item) then
+            if not in_list(choices_list, item) then
                 error('Bad selection!', ERROR)
             end
-            local choices = Popup.open_menu.choices()
-            local op = choices[item]
-            if not (op and vim.is_callable(op)) then
+            local choice = Popup.open_menu.choices()[item]
+            if not (choice and vim.is_callable(choice)) then
                 error('Bad selection!', ERROR)
             end
 
-            op()
+            choice()
         end)
     end,
     choices = function()
@@ -452,7 +446,9 @@ Popup.session_menu = Popup.select.new({
         if ctx then
             only_cd = ctx.bang ~= nil and ctx.bang or only_cd
         end
-        vim.ui.select(Popup.session_menu.choices_list(), {
+
+        local choices_list = Popup.session_menu.choices_list()
+        vim.ui.select(choices_list, {
             prompt = 'Select a project from your session:',
             format_item = function(item) ---@param item string
                 return vim.fn.isdirectory(item) == 1 and (item .. '/') or item
@@ -461,16 +457,15 @@ Popup.session_menu = Popup.select.new({
             if not item then
                 return
             end
-            if not in_list(Popup.session_menu.choices_list(), item) then
+            if not in_list(choices_list, item) then
                 error('Bad selection!', ERROR)
             end
-            local choices = Popup.session_menu.choices()
-            local op = choices[item]
-            if not (op and vim.is_callable(op)) then
+            local choice = Popup.session_menu.choices()[item]
+            if not (choice and vim.is_callable(choice)) then
                 error('Bad selection!', ERROR)
             end
 
-            op(item, only_cd, false)
+            choice(item, only_cd, false)
         end)
     end,
     choices = function()
