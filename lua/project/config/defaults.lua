@@ -23,8 +23,7 @@ local DEFAULTS = {
     --- ---
     ---Default: `false`
     --- ---
-    ---@type boolean
-    manual_mode = false,
+    manual_mode = false, ---@type boolean
     ---Methods of detecting the root directory.
     ---
     --- - `'pattern'`: uses `vim-rooter`-like glob pattern matching
@@ -38,8 +37,7 @@ local DEFAULTS = {
     --- ---
     ---Default: `{ 'pattern' }`
     --- ---
-    ---@type ('lsp'|'pattern')[]
-    detection_methods = { 'pattern' },
+    detection_methods = { 'pattern' }, ---@type ('lsp'|'pattern')[]
     ---All the patterns used to detect the project's root directory.
     ---
     ---By default it only triggers when `'pattern'` is in `detection_methods`.
@@ -48,8 +46,7 @@ local DEFAULTS = {
     --- ---
     ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile', ... }`
     --- ---
-    ---@type string[]
-    patterns = {
+    patterns = { ---@type string[]
         '.git',
         '.github',
         '_darcs',
@@ -96,8 +93,7 @@ local DEFAULTS = {
     --- ---
     ---Default: `false`
     --- ---
-    ---@type boolean
-    allow_patterns_for_lsp = false,
+    allow_patterns_for_lsp = false, ---@type boolean
     ---Determines whether a project will be added if its project root is owned by a different user.
     ---
     ---If `true`, it will add a project to the history even if its root
@@ -105,22 +101,19 @@ local DEFAULTS = {
     --- ---
     ---Default: `false`
     --- ---
-    ---@type boolean
-    allow_different_owners = false,
+    allow_different_owners = false, ---@type boolean
     ---If enabled, set `vim.o.autochdir` to `true`.
     ---
     ---This is disabled by default because the plugin implicitly disables `autochdir`.
     --- ---
     ---Default: `false`
     --- ---
-    ---@type boolean
-    enable_autochdir = false,
+    enable_autochdir = false, ---@type boolean
     ---Make hidden files visible when using any picker.
     --- ---
     ---Default: `false`
     --- ---
-    ---@type boolean
-    show_hidden = false,
+    show_hidden = false, ---@type boolean
     ---Table of lsp clients to ignore by name,
     ---e.g. `{ 'efm', ... }`.
     ---
@@ -129,8 +122,7 @@ local DEFAULTS = {
     --- ---
     ---Default: `{}`
     --- ---
-    ---@type string[]
-    ignore_lsp = {},
+    ignore_lsp = {}, ---@type string[]
     ---Don't calculate root dir on specific directories,
     ---e.g. `{ '~/.cargo/*', ... }`.
     ---
@@ -138,8 +130,7 @@ local DEFAULTS = {
     --- ---
     ---Default: `{}`
     --- ---
-    ---@type string[]
-    exclude_dirs = {},
+    exclude_dirs = {}, ---@type string[]
     ---If `false`, you'll get a _notification_ every time
     ---`project.nvim` changes directory.
     ---
@@ -148,8 +139,7 @@ local DEFAULTS = {
     --- ---
     ---Default: `true`
     --- ---
-    ---@type boolean
-    silent_chdir = true,
+    silent_chdir = true, ---@type boolean
     ---Determines the scope for changing the directory.
     ---
     ---Valid options are:
@@ -159,8 +149,7 @@ local DEFAULTS = {
     --- ---
     ---Default: `'global'`
     --- ---
-    ---@type 'global'|'tab'|'win'
-    scope_chdir = 'global',
+    scope_chdir = 'global', ---@type 'global'|'tab'|'win'
     ---Determines in what filetypes/buftypes the plugin won't execute.
     ---It's a table with two fields:
     ---
@@ -172,11 +161,11 @@ local DEFAULTS = {
     --- ---
     ---The default value for this one can be found in the project's `README.md`.
     --- ---
-    ---@type { ft: string[], bt: string[] }
-    disable_on = {
+    disable_on = { ---@type { ft: string[], bt: string[] }
         ---`filetype`
         ft = {
             '',
+            'log',
             'TelescopePrompt',
             'TelescopeResults',
             'alpha',
@@ -200,8 +189,7 @@ local DEFAULTS = {
     --- ---
     ---Default: `vim.fn.stdpath('data')`
     --- ---
-    ---@type string
-    datapath = vim.fn.stdpath('data'),
+    datapath = vim.fn.stdpath('data'), ---@type string
     ---The history size. (by `@acristoffers`)
     ---
     ---This will indicate how many entries will be
@@ -210,8 +198,7 @@ local DEFAULTS = {
     --- ---
     ---Default: `100`
     --- ---
-    ---@type integer
-    historysize = 100,
+    historysize = 100, ---@type integer
 }
 
 ---Table of options used for `fzf-lua` integration
@@ -224,8 +211,7 @@ DEFAULTS.fzf_lua = {
     --- ---
     ---Default: `false`
     --- ---
-    ---@type boolean
-    enabled = false,
+    enabled = false, ---@type boolean
 }
 
 ---Options for logging utility.
@@ -237,19 +223,17 @@ DEFAULTS.log = {
     --- ---
     ---Default: `false`
     --- ---
-    enabled = false,
+    enabled = false, ---@type boolean
     ---The maximum logfile size (in megabytes).
     --- ---
     ---Default: `1.1`
     --- ---
-    ---@type number
-    max_size = 1.1,
+    max_size = 1.1, ---@type number
     ---Path in which the log file will be saved.
     --- ---
     ---Default: `vim.fn.stdpath('state')`
     --- ---
-    ---@type string
-    logpath = vim.fn.stdpath('state'),
+    logpath = vim.fn.stdpath('state'), ---@type string
 }
 
 ---Table of options used for the telescope picker.
@@ -265,15 +249,13 @@ DEFAULTS.telescope = {
     --- ---
     ---Default: `false`
     --- ---
-    ---@type boolean
-    enabled = false,
+    enabled = false, ---@type boolean
     ---Determines whether the newest projects come first in the
     ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
     --- ---
     ---Default: `'newest'`
     --- ---
-    ---@type 'oldest'|'newest'
-    sort = 'newest',
+    sort = 'newest', ---@type 'oldest'|'newest'
     ---If you have `telescope-file-browser.nvim` installed, you can enable this
     ---so that the Telescope picker uses it instead of the `find_files` builtin.
     ---
@@ -282,8 +264,7 @@ DEFAULTS.telescope = {
     --- ---
     ---Default: `false`
     --- ---
-    ---@type boolean
-    prefer_file_browser = false,
+    prefer_file_browser = false, ---@type boolean
     ---Set this to `true` if you don't want the file picker to appear
     ---after you've selected a project.
     ---
@@ -291,16 +272,14 @@ DEFAULTS.telescope = {
     --- ---
     ---Default: `false`
     --- ---
-    ---@type boolean
-    disable_file_picker = false,
+    disable_file_picker = false, ---@type boolean
     ---Table of mappings for the Telescope picker.
     ---
     ---Only supports Normal and Insert modes.
     --- ---
     ---Default: check the README
     --- ---
-    ---@type table<'n'|'i', table<string, Project.Telescope.ActionNames>>
-    mappings = {
+    mappings = { ---@type table<'n'|'i', table<string, Project.Telescope.ActionNames>>
         n = {
             b = 'browse_project_files',
             d = 'delete_project',
@@ -466,7 +445,6 @@ function DEFAULTS:expand_excluded()
     end
 end
 
----@param self Project.Config.Options
 function DEFAULTS:verify()
     self:verify_datapath()
     self:verify_histsize()
@@ -489,8 +467,7 @@ function DEFAULTS:new(opts)
     self.__newindex = function(t, k, v)
         rawset(t, k, v)
     end
-    ---@type Project.Config.Options
-    local obj = setmetatable(opts, self)
+    local obj = setmetatable(opts, self) ---@type Project.Config.Options
     return obj
 end
 

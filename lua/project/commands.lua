@@ -34,12 +34,15 @@ function M.new(specs)
     end
 
     for _, spec in ipairs(specs) do
-        ---@type { name: string, desc: string, bang: boolean, complete?: string|CompletorFun, nargs?: string|integer }
-        local T = {
-            name = spec.name,
-            desc = spec.desc,
-            bang = spec.bang ~= nil and spec.bang or false,
-        }
+        if not (spec.callback and vim.is_callable(spec.callback)) then
+            error(('(%s.new): Missing callback!'):format(MODSTR), ERROR)
+        end
+        local T =
+            { ---@type { name: string, desc: string, bang: boolean, complete?: string|CompletorFun, nargs?: string|integer }
+                name = spec.name,
+                desc = spec.desc,
+                bang = spec.bang ~= nil and spec.bang or false,
+            }
         local opts = {
             desc = spec.desc,
             bang = spec.bang ~= nil and spec.bang or false,
@@ -80,8 +83,7 @@ function M.new(specs)
     end
 end
 
----@type function
-function M.create_user_commands()
+function M.create_user_commands() ---@type function
     M.new({
         {
             name = 'Project',

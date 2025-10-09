@@ -256,7 +256,7 @@ Popup.delete_menu = Popup.select.new({
         local choices_list = Popup.delete_menu.choices_list()
         vim.ui.select(choices_list, {
             prompt = 'Select a project to delete:',
-            format_item = function(item)
+            format_item = function(item) ---@param item string
                 local session = History.session_projects
                 if in_list(session, item) then
                     return '* ' .. item
@@ -303,7 +303,7 @@ Popup.recents_menu = Popup.select.new({
         local choices_list = Popup.recents_menu.choices_list()
         vim.ui.select(choices_list, {
             prompt = 'Select a project:',
-            format_item = function(item)
+            format_item = function(item) ---@param item string
                 local curr = require('project.api').current_project or ''
                 return item == curr and '* ' .. item or item
             end,
@@ -413,8 +413,7 @@ Popup.open_menu = Popup.select.new({
         return res
     end,
     choices_list = function()
-        ---@type string[]
-        local res_list = {
+        local res_list = { ---@type string[]
             'Project Session',
             'New Project',
             'Open Recent Project',
