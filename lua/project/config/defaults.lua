@@ -27,9 +27,8 @@ local DEFAULTS = {
     manual_mode = false,
     ---Methods of detecting the root directory.
     ---
-    --- - `'lsp'`: uses the native Neovim LSP
-    ---          (see [`vim.lsp`](lua://vim.lsp))
     --- - `'pattern'`: uses `vim-rooter`-like glob pattern matching
+    --- - `'lsp'`: uses the native Neovim LSP (**CAN CAUSE BUGGY BEHAVIOUR**)
     ---
     ---**Order matters**: if one is not detected, the other is used as fallback. You
     ---can also delete or rearrange the detection methods.
@@ -37,10 +36,10 @@ local DEFAULTS = {
     ---Any values that aren't valid will be discarded on setup;
     ---same thing with duplicates.
     --- ---
-    ---Default: `{ 'lsp' , 'pattern' }`
+    ---Default: `{ 'pattern' }`
     --- ---
-    ---@type ("lsp"|"pattern")[]
-    detection_methods = { 'lsp', 'pattern' },
+    ---@type ('lsp'|'pattern')[]
+    detection_methods = { 'pattern' },
     ---All the patterns used to detect the project's root directory.
     ---
     ---By default it only triggers when `'pattern'` is in `detection_methods`.
@@ -392,15 +391,32 @@ function DEFAULTS:verify_methods()
         vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
         return
     end
+    local lsp_warning = [[
+WARNING (project.nvim): Using the `lsp` method has been the cause of some
+annoying bugs (see https://github.com/DrKJeff16/project.nvim/issues/24 for more details).
+
+If you don't want this warning to pop up just set `vim.g.project_lsp_nowarn = 1`
+in your config **before calling `setup()`**.
+Otherwise you can just not include the `lsp` method it in your `setup()`
+(`detection_methods = { 'pattern' }`).
+
+I apologize for the inconvenience, I'm trying to fix this bug.
+    ]]
 
     local methods = {} ---@type ('lsp'|'pattern')[]
     local checker = { lsp = false, pattern = false }
+    local warning = function() end
     for _, v in ipairs(self.detection_methods) do
         if checker.lsp and checker.pattern then
             break
         end
         if Util.is_type('string', v) then
             if v == 'lsp' and not checker.lsp then
+                if vim.g.project_lsp_nowarn ~= 1 then
+                    warning = vim.schedule_wrap(function()
+                        vim.api.nvim_echo({ { lsp_warning, 'WarningMsg' } }, true, { err = true })
+                    end)
+                end
                 table.insert(methods, v)
                 checker.lsp = true
             end
@@ -411,10 +427,10 @@ function DEFAULTS:verify_methods()
         end
     end
     if empty(methods) then
-        vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
-        return
+        vim.notify('`detection_methods` table is empty! `project.nvim` may not work!', WARN)
     end
     self.detection_methods = methods
+    warning()
 end
 
 function DEFAULTS:verify_logging()
