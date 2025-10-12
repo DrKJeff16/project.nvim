@@ -3,11 +3,10 @@
 rockspec_format = '3.1'
 
 package = 'project.nvim'
-version = 'v0.0.28-1'
+version = 'scm-1'
 
 source = {
     url = 'git://github.com/DrKJeff16/project.nvim',
-    tag = 'v0.0.28-1',
 }
 
 description = {
