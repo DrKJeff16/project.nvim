@@ -20,10 +20,10 @@ local curr_buf = vim.api.nvim_get_current_buf
 local vim_has = require('project.utils.util').vim_has
 
 ---@type table<string, Project.CMD>
-local M = {}
+local Commands = {}
 
 ---@type fun(specs: Project.Commands.Spec[])
-function M.new(specs)
+function Commands.new(specs)
     if vim_has('nvim-0.11') then
         vim.validate('specs', specs, 'table', false, 'Project.Commands.Spec[]')
     else
@@ -37,12 +37,11 @@ function M.new(specs)
         if not (spec.callback and vim.is_callable(spec.callback)) then
             error(('(%s.new): Missing callback!'):format(MODSTR), ERROR)
         end
-        local T =
-            { ---@type { name: string, desc: string, bang: boolean, complete?: string|CompletorFun, nargs?: string|integer }
-                name = spec.name,
-                desc = spec.desc,
-                bang = spec.bang ~= nil and spec.bang or false,
-            }
+        local T = {
+            name = spec.name,
+            desc = spec.desc,
+            bang = spec.bang ~= nil and spec.bang or false,
+        }
         local opts = {
             desc = spec.desc,
             bang = spec.bang ~= nil and spec.bang or false,
@@ -55,7 +54,7 @@ function M.new(specs)
             T.complete = spec.complete
             opts.complete = spec.complete
         end
-        M[spec.name] = setmetatable({}, {
+        Commands[spec.name] = setmetatable({}, {
             ---@param k string
             __index = function(_, k)
                 return T[k]
@@ -73,7 +72,7 @@ function M.new(specs)
         })
         vim.api.nvim_create_user_command(spec.name, function(ctx)
             local with_ctx = spec.with_ctx ~= nil and spec.with_ctx or false
-            local cmd = M[spec.name]
+            local cmd = Commands[spec.name]
             if with_ctx then
                 cmd(ctx)
                 return
@@ -83,8 +82,8 @@ function M.new(specs)
     end
 end
 
-function M.create_user_commands() ---@type function
-    M.new({
+function Commands.create_user_commands() ---@type function
+    Commands.new({
         {
             name = 'Project',
             with_ctx = true,
@@ -99,7 +98,6 @@ function M.create_user_commands() ---@type function
             name = 'ProjectAdd',
             with_ctx = true,
             callback = function(ctx)
-                ---@type vim.ui.input.Opts
                 local opts = {
                     prompt = 'Input a valid path to the project:',
                     completion = 'dir',
@@ -235,5 +233,5 @@ function M.create_user_commands() ---@type function
     })
 end
 
-return M
+return Commands
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

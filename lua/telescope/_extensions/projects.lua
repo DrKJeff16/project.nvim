@@ -17,11 +17,11 @@ local Telescope = require('telescope')
 ---@field exports { projects: fun(opts?: table) }
 ---@field projects fun(opts?: table)
 ---@field setup fun(opts?: table)
-local M = Telescope.register_extension({
+local Projects = Telescope.register_extension({
     setup = Main.setup,
     exports = { projects = Main.projects },
     projects = Main.projects,
 })
 
-return M
+return Projects
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

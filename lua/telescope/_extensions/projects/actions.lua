@@ -27,9 +27,9 @@ local Builtin = require('telescope.builtin')
 local State = require('telescope.actions.state')
 
 ---@class Project.Telescope.Actions
-local M = {}
+local T_Actions = {}
 
-M.help_mappings = Generate.which_key({
+T_Actions.help_mappings = Generate.which_key({
     only_show_curret_mode = true,
     name_width = 30,
     max_height = 0.6,
@@ -40,11 +40,11 @@ M.help_mappings = Generate.which_key({
 ---@param prompt_bufnr integer
 ---@return string|nil
 ---@return boolean|nil
-function M.change_working_directory(prompt_bufnr)
-    ---@type Project.ActionEntry
-    local selected_entry = State.get_selected_entry()
+function T_Actions.change_working_directory(prompt_bufnr)
+    local selected_entry = State.get_selected_entry() ---@type Project.ActionEntry
     Actions.close(prompt_bufnr)
     Log.debug(('(%s.change_working_directory): Closed prompt `%s`.'):format(MODSTR, prompt_bufnr))
+
     if not (selected_entry and is_type('string', selected_entry.value)) then
         Log.error(('(%s.change_working_directory): Invalid entry!'):format(MODSTR))
         return
@@ -56,16 +56,16 @@ function M.change_working_directory(prompt_bufnr)
     else
         Log.error(('(%s.change_working_directory): Failed to change directory!'):format(MODSTR))
     end
+
     return selected_entry.value, cd_successful
 end
 
 ---@param prompt_bufnr integer
-function M.find_project_files(prompt_bufnr)
-    local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
+function T_Actions.find_project_files(prompt_bufnr)
+    local project_path, cd_successful = T_Actions.change_working_directory(prompt_bufnr)
     if not cd_successful then
         return
     end
-
     local hidden = Config.options.show_hidden
     local prefer_file_browser = Config.options.telescope.prefer_file_browser
     local opts = {
@@ -85,12 +85,11 @@ function M.find_project_files(prompt_bufnr)
 end
 
 ---@param prompt_bufnr integer
-function M.browse_project_files(prompt_bufnr)
-    local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
+function T_Actions.browse_project_files(prompt_bufnr)
+    local project_path, cd_successful = T_Actions.change_working_directory(prompt_bufnr)
     if not cd_successful then
         return
     end
-
     local hidden = Config.options.show_hidden
     local prefer_file_browser = Config.options.telescope.prefer_file_browser
     local opts = {
@@ -110,12 +109,11 @@ function M.browse_project_files(prompt_bufnr)
 end
 
 ---@param prompt_bufnr integer
-function M.search_in_project_files(prompt_bufnr)
-    local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
+function T_Actions.search_in_project_files(prompt_bufnr)
+    local project_path, cd_successful = T_Actions.change_working_directory(prompt_bufnr)
     if not cd_successful then
         return
     end
-
     Builtin.live_grep({
         cwd = project_path,
         hidden = Config.options.show_hidden,
@@ -124,18 +122,17 @@ function M.search_in_project_files(prompt_bufnr)
 end
 
 ---@param prompt_bufnr integer
-function M.recent_project_files(prompt_bufnr)
-    local _, cd_successful = M.change_working_directory(prompt_bufnr)
+function T_Actions.recent_project_files(prompt_bufnr)
+    local _, cd_successful = T_Actions.change_working_directory(prompt_bufnr)
     if not cd_successful then
         return
     end
-
     local hidden = Config.options.show_hidden
     Builtin.oldfiles({ cwd_only = true, hidden = hidden })
 end
 
 ---@param prompt_bufnr integer
-function M.delete_project(prompt_bufnr)
+function T_Actions.delete_project(prompt_bufnr)
     ---@type Project.ActionEntry
     local active_entry = State.get_selected_entry()
     if not (active_entry and is_type('string', active_entry.value)) then
@@ -164,16 +161,12 @@ function M.delete_project(prompt_bufnr)
             end
             return Finders.new_table({
                 results = results,
-
-                ---@param value string
-                entry_maker = function(value)
+                entry_maker = function(value) ---@param value string
                     local name = ('%s/%s'):format(
                         vim.fn.fnamemodify(value, ':h:t'),
                         vim.fn.fnamemodify(value, ':t')
                     )
-
-                    ---@class Project.ActionEntry
-                    local action_entry = {
+                    local action_entry = { ---@class Project.ActionEntry
                         display = make_display,
                         name = name,
                         value = value,
@@ -187,5 +180,5 @@ function M.delete_project(prompt_bufnr)
     )
 end
 
-return M
+return T_Actions
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

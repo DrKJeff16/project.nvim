@@ -8,16 +8,18 @@ end
 local Log = require('project.utils.log')
 if not require('project.utils.util').mod_exists('telescope') then
     Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
-    error(('(%s): Telescope is not installed!'):format(MODSTR), vim.log.levels.ERROR)
+    vim.notify(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
+    return
 end
+
 local Finders = require('telescope.finders')
 local Entry_display = require('telescope.pickers.entry_display')
 
 ---@class Project.Telescope.Util
-local M = {}
+local T_Util = {}
 
 ---@param entry { name: string, value: string, display: fun(...: any), index: integer, ordinal: string }
-function M.make_display(entry)
+function T_Util.make_display(entry)
     Log.debug(
         ('(%s.make_display): Creating display. Entry values: %s'):format(MODSTR, vim.inspect(entry))
     )
@@ -32,10 +34,11 @@ function M.make_display(entry)
 end
 
 ---@return table
-function M.create_finder()
+function T_Util.create_finder()
     local sort = require('project.config').options.telescope.sort
-    local results = require('project.utils.history').get_recent_projects()
     Log.info(('(%s.create_finder): Sorting by `%s`.'):format(MODSTR, sort))
+
+    local results = require('project.utils.history').get_recent_projects()
     if sort == 'newest' then
         results = require('project.utils.util').reverse(results)
     end
@@ -49,7 +52,7 @@ function M.create_finder()
                 vim.fn.fnamemodify(entry, ':t')
             )
             return {
-                display = M.make_display,
+                display = T_Util.make_display,
                 name = name,
                 value = entry,
                 ordinal = ('%s %s'):format(name, entry),
@@ -58,5 +61,5 @@ function M.create_finder()
     })
 end
 
-return M
+return T_Util
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

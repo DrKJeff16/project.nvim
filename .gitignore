@@ -68,3 +68,6 @@ luacov*
 minimal_init.lua
 minimal.lua
 repro.lua
+
+# Make Dependencies
+deps/
