@@ -4,7 +4,7 @@
 
 [![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/DrKJeff16)[![Last Commit](https://img.shields.io/github/last-commit/DrKJeff16/project.nvim.svg)](https://github.com/DrKJeff16/project.nvim/commits/main/)[![LICENSE](https://img.shields.io/github/license/DrKJeff16/project.nvim)](./LICENSE)[![Issues](https://img.shields.io/github/issues/DrKJeff16/project.nvim)](https://github.com/DrKJeff16/project.nvim/issues)[![GitHub Release](https://img.shields.io/github/v/release/DrKJeff16/project.nvim?sort=date&display_name=release)](https://github.com/DrKJeff16/project.nvim/releases/latest)
 
-**========================  [Breaking Changes](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes)  ========================**
+**============================  [Breaking Changes](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes)  ============================**
 
 [**Announcements**](https://github.com/DrKJeff16/project.nvim/discussions/1) | [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions) | [**Wiki**](https://github.com/DrKJeff16/project.nvim/wiki) | [**Credits**](./CREDITS.md) | [**Contributing**](./CONTRIBUTING.md) | [**Roadmap**](./TODO.md)
 
@@ -96,6 +96,7 @@ Show these much love!
     2. [`lazy.nvim`](#lazynvim)
     3. [`pckr.nvim`](#pckrnvim)
     4. [`paq-nvim`](#paq-nvim)
+    5. [`luarocks`](#luarocks)
 2. [Configuration](#configuration)
     1. [Defaults](#defaults)
     2. [Pattern Matching](#pattern-matching)
@@ -247,6 +248,12 @@ paq({
 })
 
 require('project.nvim').setup()
+```
+
+### luarocks
+
+```sh
+luarocks install --server=https://luarocks.org/m/neovim project.nvim
 ```
 
 <div align="right">
