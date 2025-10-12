@@ -12,11 +12,11 @@ source = {
 description = {
     detailed = [[
         A Neovim plugin written in Lua that, under configurable conditions, automatically sets
-        the user's cwd to the current project root provides project management.
+        the user's cwd to the current project root and provides project management.
     ]],
     homepage = 'https://github.com/DrKJeff16/project.nvim',
     license = 'Apache-2.0',
-    labels = { 'neovim' },
+    labels = { "neovim", "neovim-plugin" },
 }
 dependencies = {
     'lua==5.1',
