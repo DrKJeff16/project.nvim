@@ -20,9 +20,19 @@ jobs:
         with:
           fetch-depth: 0 # Required to count the commits
 
+      - name: Set LuaRocks version
+        run: |
+          echo "LUAROCKS_VERSION=0.0.$(git log --oneline | wc -l)" >> "$GITHUB_ENV"
+
+      - name: Get new commit count
+        run: |
+          echo "NEW_COMMIT_COUNT=$(git log --oneline --since '24 hours ago' | wc -l)" >> "$GITHUB_ENV"
+
       - name: LuaRocks Upload
         uses: nvim-neorocks/luarocks-tag-release@v7
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         with:
+          version: ${{ env.LUAROCKS_VERSION }}
           dependencies: |
             plenary.nvim
             telescope.nvim
