@@ -1,0 +1,39 @@
+name: LuaRocks release
+
+on:
+  push:
+    tags: # Will upload to luarocks.org when a tag is pushed
+      - "*"
+      - "v*"
+  pull_request: # Will test a local install without uploading to luarocks.org
+  workflow_dispatch: # allows manual triggering
+  schedule:
+    - cron: '0 0 * * *' # runs daily at 00:00
+
+jobs:
+  luarocks-release:
+    runs-on: ubuntu-latest
+    name: LuaRocks upload
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Required to count the commits
+
+      - name: LuaRocks Upload
+        uses: nvim-neorocks/luarocks-tag-release@v7
+        with:
+          dependencies: |
+            plenary.nvim
+            telescope.nvim
+            fzf-lua
+          license: "Apache-2.0"
+          detailed_description: |
+            A Neovim plugin written in Lua that, under configurable conditions, automatically sets
+            the user's cwd to the current project root and provides project management.
+          labels: |
+            neovim
+          copy_directories: |
+            {{ neovim.plugin.dirs }}
+        env:
+          LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
