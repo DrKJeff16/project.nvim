@@ -1,6 +1,7 @@
 local MODSTR = 'project.config'
 local ERROR = vim.log.levels.ERROR
 local in_list = vim.list_contains
+local floor = math.floor
 
 ---@class Project.Config
 ---@field conf_loc? { win: integer, bufnr: integer }
@@ -83,48 +84,54 @@ function Config.open_win()
         return
     end
 
-    Config.conf_loc = {}
-    Config.conf_loc.bufnr = vim.api.nvim_create_buf(false, true)
+    local bufnr = vim.api.nvim_create_buf(false, true)
+    local height = floor(vim.o.lines * 0.85)
+    local width = floor(vim.o.columns * 0.85)
+    local title = 'project.nvim'
+    local current_config = (' '):rep(floor((width - title:len()) / 2))
+        .. title
+        .. '\n'
+        .. Config.get_config()
     vim.api.nvim_buf_set_lines(
-        Config.conf_loc.bufnr,
+        bufnr,
         0,
         -1,
         true,
-        vim.split(Config.get_config(), '\n', { plain = true, trimempty = true })
+        vim.split(current_config, '\n', { plain = true, trimempty = true })
     )
-    local height = math.floor(vim.o.lines * 0.75)
-    local width = math.floor(vim.o.columns * 0.8)
-    Config.conf_loc.win = vim.api.nvim_open_win(Config.conf_loc.bufnr, true, {
+    local win = vim.api.nvim_open_win(bufnr, true, {
         focusable = true,
         noautocmd = true,
         relative = 'editor',
-        row = math.floor((vim.o.lines - height) / 2) - 1,
-        col = math.floor((vim.o.columns - width) / 2) - 1,
+        row = floor((vim.o.lines - height) / 2) - 1,
+        col = floor((vim.o.columns - width) / 2) - 1,
         style = 'minimal',
         title = 'Project Config',
         title_pos = 'center',
         width = width,
         height = height,
         border = 'single',
-        zindex = 40,
+        zindex = 30,
     })
 
-    vim.wo[Config.conf_loc.win].signcolumn = 'no'
-    vim.wo[Config.conf_loc.win].list = false
-    vim.wo[Config.conf_loc.win].number = false
-    vim.wo[Config.conf_loc.win].wrap = false
-    vim.wo[Config.conf_loc.win].colorcolumn = ''
+    vim.wo[win].signcolumn = 'no'
+    vim.wo[win].list = false
+    vim.wo[win].number = false
+    vim.wo[win].wrap = false
+    vim.wo[win].colorcolumn = ''
 
-    vim.bo[Config.conf_loc.bufnr].filetype = ''
-    vim.bo[Config.conf_loc.bufnr].fileencoding = 'utf-8'
-    vim.bo[Config.conf_loc.bufnr].buftype = 'nowrite'
-    vim.bo[Config.conf_loc.bufnr].modifiable = false
+    vim.bo[bufnr].filetype = ''
+    vim.bo[bufnr].fileencoding = 'utf-8'
+    vim.bo[bufnr].buftype = 'nowrite'
+    vim.bo[bufnr].modifiable = false
 
     vim.keymap.set('n', 'q', Config.close_win, {
-        buffer = Config.conf_loc.bufnr,
+        buffer = bufnr,
         noremap = true,
         silent = true,
     })
+
+    Config.conf_loc = { bufnr = bufnr, win = win }
 end
 
 function Config.close_win()
