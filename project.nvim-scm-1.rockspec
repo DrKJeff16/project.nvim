@@ -7,6 +7,7 @@ version = 'scm-1'
 
 source = {
     url = 'git://github.com/DrKJeff16/project.nvim',
+    tag = 'v0.0.28-2',
 }
 
 description = {
@@ -16,7 +17,7 @@ description = {
     ]],
     homepage = 'https://github.com/DrKJeff16/project.nvim',
     license = 'Apache-2.0',
-    labels = { "neovim", "neovim-plugin" },
+    labels = { 'neovim', 'neovim-plugin' },
 }
 dependencies = {
     'lua==5.1',
