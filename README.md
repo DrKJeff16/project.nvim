@@ -253,7 +253,10 @@ require('project.nvim').setup()
 ### luarocks
 
 ```sh
-luarocks install --server=https://luarocks.org/m/neovim project.nvim
+# Global install
+luarocks install project.nvim
+# Local install
+luarocks install --local project.nvim
 ```
 
 <div align="right">
