@@ -27,3 +27,5 @@ Thank you all for your contributions and support, or imported code.
 - [@kamack38](https://github.com/kamack38): For their continuous support and help in issues
 - [@steinbrueckri](https://github.com/steinbrueckri): Thank you for your support!
 - [@gmelodie](https://github.com/gmelodie): Thank you for your support!
+- [@mrcjkb](https://github.com/mrcjkb) and [@Lumen](https://github.com/lumen-oss): Thank you for the help with `luarocks`!
+  (https://github.com/lumen-oss/nurr/issues/59)
