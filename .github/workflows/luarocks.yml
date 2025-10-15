@@ -1,4 +1,4 @@
-name: LuaRocks release
+name: LuaRocks Release
 
 on:
   push:
@@ -7,8 +7,6 @@ on:
       - "v*"
   pull_request: # Will test a local install without uploading to luarocks.org
   workflow_dispatch: # allows manual triggering
-  schedule:
-    - cron: '0 0 * * *' # runs daily at 00:00
 
 jobs:
   luarocks-release:
@@ -17,18 +15,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 0 # Required to count the commits
-
-      - name: Set LuaRocks version
-        run: |
-          echo "LUAROCKS_VERSION=0.1.0-1" >> "$GITHUB_ENV"
 
       - name: LuaRocks Upload
         uses: nvim-neorocks/luarocks-tag-release@v7
-        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         with:
-          version: ${{ env.LUAROCKS_VERSION }}
+          version: "0.1.0"
           license: "Apache-2.0"
           detailed_description: |
             A Neovim plugin written in Lua that, under configurable conditions, automatically sets
