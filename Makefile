@@ -1,6 +1,6 @@
 CMD = nvim --clean --headless
 
-RETAB_CMD = $(CMD) -c 'set ts=4 sts=4 sw=4 et ai si sta' -c '%retab!' -c 'w' -c 'qa!' doc/project-nvim.txt
+RETAB_CMD = $(CMD) -c 'set ts=4 sts=4 sw=4 et' -c '%retab!' -c 'w' -c 'qa!' doc/project-nvim.txt
 TAGS_CMD = $(CMD) -c 'helptags doc/' -c 'qa!'
 
 helptags:
@@ -9,12 +9,16 @@ helptags:
 
 doc/project-nvim.txt: helptags
 
+lint:
+	stylua .
+
 clean:
 	rm -rf doc/tags
 
-all: helptags
+all: helptags lint
 
 .PHONY: \
 	all \
 	clean \
-	helptags
+	helptags \
+	lint
