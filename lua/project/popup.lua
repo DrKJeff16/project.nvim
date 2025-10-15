@@ -21,6 +21,7 @@ local vim_has = Util.vim_has
 local reverse = Util.reverse
 
 ---CREDITS: [u/Some_Derpy_Pineapple](https://www.reddit.com/r/neovim/comments/1nu5ehj/comment/ngyz21m/)
+local FILE_ATTRIBUTE_HIDDEN = 0x2
 local ffi = nil ---@type nil|ffilib
 if Util.mod_exists('ffi') then
     ffi = require('ffi')
@@ -61,9 +62,11 @@ local function hidden_avail(path, hidden)
     return ret
 end
 
----For Windows.
+---Attempt to find out if given path is a hidden file.
+---**Works only Windows, currently!**
 ---
----CREDITS: [`neo-tree.nvim`](https://github.com/nvim-neo-tree/neo-tree.nvim/blob/8dd9f08ff086d09d112f1873f88dc0f74b598cdb/lua/neo-tree/utils/init.lua#L1299)
+---CREDITS:
+---https://github.com/nvim-neo-tree/neo-tree.nvim/blob/8dd9f08ff086d09d112f1873f88dc0f74b598cdb/lua/neo-tree/utils/init.lua#L1299
 --- ---
 ---@param path string
 ---@return boolean
@@ -73,12 +76,15 @@ local function is_hidden(path)
     else
         vim.validate({ path = { path, 'string' } })
     end
-    local FILE_ATTRIBUTE_HIDDEN = 0x2
-    if ffi and Util.is_windows() then
-        return bit.band(ffi.C.GetFileAttributesA(path), FILE_ATTRIBUTE_HIDDEN) ~= 0
+    if Util.is_windows() then
+        if ffi then
+            return bit.band(ffi.C.GetFileAttributesA(path), FILE_ATTRIBUTE_HIDDEN) ~= 0
+        end
+
+        return false -- FIXME: Find a reliable alternative
     end
 
-    return false
+    return false --- TODO: Find a reliable method for UNIX systems
 end
 
 ---@param proj string
@@ -110,7 +116,8 @@ local function open_node(proj, only_cd, ran_cd)
 
     local dir = vim.uv.fs_scandir(proj)
     if not dir then
-        error(('(%s.open_node): NO DIR `%s`!'):format(MODSTR, proj), ERROR)
+        vim.notify(('(%s.open_node): NO DIR `%s`!'):format(MODSTR, proj), ERROR)
+        return
     end
 
     local hidden = require('project.config').options.show_hidden
