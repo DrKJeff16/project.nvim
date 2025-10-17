@@ -91,6 +91,8 @@ function Config.open_win()
     local current_config = (' '):rep(floor((width - title:len()) / 2))
         .. title
         .. '\n'
+        .. ('='):rep(width)
+        .. '\n'
         .. Config.get_config()
     vim.api.nvim_buf_set_lines(
         bufnr,
