@@ -1,7 +1,8 @@
+local MODSTR = 'project.health'
 local uv = vim.uv or vim.loop
 local start = vim.health.start or vim.health.report_start
-local ok = vim.health.ok or vim.health.report_ok
-local info = vim.health.info or vim.health.report_info
+local h_ok = vim.health.ok or vim.health.report_ok
+local h_info = vim.health.info or vim.health.report_info
 local h_warn = vim.health.warn or vim.health.report_warn
 local h_error = vim.health.error or vim.health.report_error
 local empty = vim.tbl_isempty
@@ -13,6 +14,7 @@ local Path = require('project.utils.path')
 local History = require('project.utils.history')
 local Config = require('project.config')
 local Api = require('project.api')
+local Log = require('project.utils.log')
 local is_type = Util.is_type
 local dedup = Util.dedup
 local format_per_type = Util.format_per_type
@@ -33,15 +35,15 @@ function Health.setup_check()
         return setup_called
     end
 
-    ok('`setup()` has been called!')
+    h_ok('`setup()` has been called!')
     if vim_has('nvim-0.11') then
-        ok('nvim version is at least `v0.11`')
+        h_ok('nvim version is at least `v0.11`')
     else
         h_warn('nvim version is lower than `v0.11`!')
     end
 
     if vim.fn.executable('fd') == 1 then
-        ok('`fd` executable in `PATH`')
+        h_ok('`fd` executable in `PATH`')
     else
         h_warn('`fd` executable not found! Some utilities from this plugin may not work.')
     end
@@ -91,7 +93,7 @@ function Health.options_check()
             if is_type('boolean', warning) and warning then
                 h_warn(str)
             else
-                ok(str)
+                h_ok(str)
             end
         end
     end
@@ -126,7 +128,7 @@ function Health.history_check()
             h_error(('%s: `%s` is not of type `%s`!'):format(v.name, v.path, v.type))
             return
         end
-        ok(('%s: `%s`'):format(v.name, v.path))
+        h_ok(('%s: `%s`'):format(v.name, v.path))
     end
 end
 
@@ -139,26 +141,23 @@ function Health.project_check()
         msg,
         (last ~= nil and last or 'No Last Project In History')
     )
-    info(msg)
+    h_info(msg)
 
     start('Active Sessions')
     local active = History.has_watch_setup
-    local projects = History.session_projects
+    local projects = copy(History.session_projects)
     if not active or empty(projects) then
         h_warn('No active session projects!')
         return
     end
 
-    ---@type string[]
-    projects = dedup(copy(projects))
-    for k, v in ipairs(projects) do
-        info(('[`%s`]: `%s`'):format(k, v))
+    for k, v in ipairs(dedup(projects)) do
+        h_info(('[`%s`]: `%s`'):format(k, v))
     end
 end
 
 function Health.telescope_check()
     start('Telescope')
-    local Opts = copy(Config.options)
     if not mod_exists('telescope') then
         h_warn([[
         `telescope.nvim` is not installed.
@@ -171,21 +170,21 @@ function Health.telescope_check()
         h_warn('`projects` Telescope picker is missing!\nHave you loaded it?')
         return
     end
+    h_ok('`projects` picker extension loaded')
 
-    ok('`projects` picker extension loaded')
-    if not is_type('table', Opts.telescope) then
+    if not is_type('table', Config.options.telescope) then
         h_warn('`projects` does not have telescope options set up')
         return
     end
 
     start('Telescope Config')
-    for k, v in pairs(Opts.telescope) do
+    for k, v in pairs(Config.options.telescope) do
         local str, warning = format_per_type(type(v), v)
         str = ('`%s`: %s'):format(k, str)
         if is_type('boolean', warning) and warning then
             h_warn(str)
         else
-            ok(str)
+            h_ok(str)
         end
     end
 end
@@ -201,11 +200,11 @@ function Health.fzf_lua_check()
         return
     end
 
-    ok('`fzf-lua` integration enabled!')
+    h_ok('`fzf-lua` integration enabled!')
     if not (vim.cmd.ProjectFzf and vim.is_callable(vim.cmd.ProjectFzf)) then
         h_warn('`:ProjectFzf` user command is not loaded!')
     else
-        ok('`:ProjectFzf` user command loaded!')
+        h_ok('`:ProjectFzf` user command loaded!')
     end
 end
 
@@ -223,10 +222,11 @@ function Health.recent_proj_check()
             If this keeps appearing, though, check your config
             and submit an issue if pertinent.
                 ]])
+
         return
     end
-    for i, project in ipairs(reverse(copy(recents))) do
-        info(('`%s`. `%s`'):format(i, project))
+    for i, project in ipairs(reverse(recents)) do
+        h_info(('`%s`. `%s`'):format(i, project))
     end
 end
 
@@ -242,6 +242,8 @@ function Health.check()
     Health.fzf_lua_check()
     Health.options_check()
     Health.recent_proj_check()
+
+    Log.debug(('(%s): `checkhealth` successfully called!'):format(MODSTR))
 end
 
 return Health
