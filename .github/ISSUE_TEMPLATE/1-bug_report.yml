@@ -4,7 +4,6 @@ title: "[BUG]: <TITLE>"
 labels: ["bug", "important", 'needs-triage']
 assignees:
   - DrKJeff16
-
 body:
   - type: checkboxes
     attributes:
@@ -17,7 +16,6 @@ body:
           required: true
         - label: I have read the pertinent documentation (`README.md`, `:h project-nvim`, etc.)
           required: true
-
   - type: checkboxes
     attributes:
       label: What does the problem you encountered relate to?
@@ -45,21 +43,18 @@ body:
           required: false
         - label: Other
           required: false
-
   - type: input
     attributes:
       label: "What neovim version are you using? (`nvim -v`)"
       placeholder: "v0.12.0-dev-839+ga08d6a8ac1"
     validations:
       required: true
-
   - type: input
     attributes:
       label: "Operating system and, if possible, what version?"
       placeholder: Linux 6.15.6-arch1-1
     validations:
       required: true
-
   - type: textarea
     attributes:
       label: "Output Of `:ProjectConfig`"
@@ -71,7 +66,6 @@ body:
       placeholder: "<PASTE HERE IF POSSIBLE>"
     validations:
       required: false
-
   - type: textarea
     attributes:
       label: Output of `:checkhealth project`
@@ -79,14 +73,12 @@ body:
       placeholder: "<PASTE HERE IF POSSIBLE>"
     validations:
       required: false
-
   - type: textarea
     attributes:
       label: Describe the bug
       description: Write down what happened, as detailed as you can. Avoid irrelevant info
     validations:
       required: true
-
   - type: textarea
     attributes:
       label: Steps To Reproduce
@@ -98,14 +90,12 @@ body:
         ...
     validations:
       required: true
-
   - type: textarea
     attributes:
       label: Expected Behavior
       description: Describe clearly what were you expecting to occur
     validations:
       required: true
-
   - type: textarea
     attributes:
       label: How did you setup the plugin?
@@ -127,7 +117,6 @@ body:
       render: lua
     validations:
       required: false
-
   - type: textarea
     attributes:
       label: Additional Info and/or Screenshots

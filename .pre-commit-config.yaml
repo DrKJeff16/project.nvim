@@ -3,13 +3,11 @@ repos:
     rev: v6.0.0
     hooks:
       - id: end-of-file-fixer
-
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
       - id: remove-crlf
-      - id: forbid-crlf  # Forbid files containing CRLF end-lines to be committed
-
+      - id: forbid-crlf # Forbid files containing CRLF end-lines to be committed
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.7
     hooks:
@@ -21,7 +19,6 @@ repos:
         files: ^\.github/workflows/
         entry: actionlint
         minimum_pre_commit_version: 3.0.0
-
   - repo: local
     hooks:
       - id: stylua
@@ -30,21 +27,18 @@ repos:
         entry: stylua
         types: [lua]
         verbose: true
-
       - id: selene
         name: Selene
         language: system
         entry: selene
         types: [lua]
         verbose: true
-
       - id: make_clean
         name: Clean help tags
         language: system
         entry: "make clean"
         files: doc/.*\.txt$
         verbose: true
-
       - id: make_docs
         name: Generate local help tags
         language: system

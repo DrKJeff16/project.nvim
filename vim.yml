@@ -1,7 +1,5 @@
----
 base: lua51
 name: vim
-
 globals:
   _:
     any: true

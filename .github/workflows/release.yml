@@ -1,5 +1,4 @@
 name: Action Release
-
 # Controls when the workflow will run
 on:
   push:
@@ -12,12 +11,10 @@ on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   release:
     types: [created]
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
     runs-on: ubuntu-latest
-
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v5
@@ -31,7 +28,6 @@ jobs:
           sha512sum project.nvim.zip > project.nvim.zip.sha512sum
           sha512sum project.nvim.tar.xz > project.nvim.tar.xz.sha512sum
           rm -rfv project.nvim
-
       - name: Get Release
         id: get_current_release
         uses: joutvhu/get-release@v1.0.3
@@ -48,12 +44,10 @@ jobs:
           throwing: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build Release File
         run: echo ${{ github.sha }} > Release.txt
       - name: Test Release
         run: cat Release.txt
-
       - name: Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
