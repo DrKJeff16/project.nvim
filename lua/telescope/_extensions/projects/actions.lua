@@ -8,7 +8,8 @@ end
 local Log = require('project.utils.log')
 if not require('project.utils.util').mod_exists('telescope') then
     Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
-    error(('(%s): Telescope is not installed!'):format(MODSTR))
+    vim.notify(('(%s): Telescope is not installed!'):format(MODSTR))
+    return
 end
 
 local History = require('project.utils.history')
@@ -44,7 +45,6 @@ function T_Actions.change_working_directory(prompt_bufnr)
     local selected_entry = State.get_selected_entry() ---@type Project.ActionEntry
     Actions.close(prompt_bufnr)
     Log.debug(('(%s.change_working_directory): Closed prompt `%s`.'):format(MODSTR, prompt_bufnr))
-
     if not (selected_entry and is_type('string', selected_entry.value)) then
         Log.error(('(%s.change_working_directory): Invalid entry!'):format(MODSTR))
         return

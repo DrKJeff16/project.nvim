@@ -9,7 +9,7 @@ local Log = require('project.utils.log')
 local Util = require('project.utils.util')
 if not Util.mod_exists('telescope') then
     Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
-    error(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
+    vim.notify(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
 end
 local in_list = vim.list_contains
 
@@ -94,7 +94,8 @@ end
 function Main.projects(opts)
     if vim.g.project_telescope_loaded ~= 1 then
         Log.error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
-        error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR), ERROR)
+        vim.notify(('(%s.projects): Telescope picker not loaded!'):format(MODSTR), ERROR)
+        return
     end
     opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
 
