@@ -34,6 +34,15 @@ end
 ---@param hidden boolean
 ---@return boolean
 local function hidden_avail(path, hidden)
+    if Util.vim_has('nvim-0.11') then
+        vim.validate('path', path, 'string', false)
+        vim.validate('hidden', hidden, 'boolean', false)
+    else
+        vim.validate({
+            path = { path, 'string' },
+            hidden = { hidden, 'boolean' },
+        })
+    end
     if vim.fn.executable('fd') ~= 1 then
         error(('(%s.hidden_avail): `fd` not found in your PATH!'):format(MODSTR), ERROR)
     end
@@ -52,8 +61,7 @@ local function hidden_avail(path, hidden)
         return false
     end
 
-    local ret = false
-    local nodes = vim.split(out, '\n', { plain = true, trimempty = true })
+    local ret, nodes = false, vim.split(out, '\n', { plain = true, trimempty = true })
     vim.tbl_map(function(value)
         if value == path or vim.startswith(value, path) then
             ret = true
@@ -105,7 +113,8 @@ local function open_node(proj, only_cd, ran_cd)
     if not ran_cd then
         local success = require('project.api').set_pwd(proj, 'prompt')
         if not success then
-            error('(open_node): Unsucessful `set_pwd`!')
+            vim.notfy('(open_node): Unsucessful `set_pwd`!', ERROR)
+            return
         end
         if only_cd then
             return
@@ -237,14 +246,17 @@ function Popup.prompt_project(input)
         return
     end
 
+    local original_input = input
     input = Util.rstrip('/', vim.fn.fnamemodify(input, ':p'))
     if not (exists(input) and exists(vim.fn.fnamemodify(input, ':p:h'))) then
-        error('Invalid path!', ERROR)
+        vim.notify(('Invalid path `%s`'):format(original_input), ERROR)
+        return
     end
     if not Util.dir_exists(input) then
         input = Util.rstrip('/', vim.fn.fnamemodify(input, ':p:h'))
         if not Util.dir_exists(input) then
-            error('Path is not a directory, and parent could not be retrieved!', ERROR)
+            vim.notify('Path is not a directory, and parent could not be retrieved!', ERROR)
+            return
         end
     end
 
