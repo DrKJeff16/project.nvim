@@ -310,14 +310,12 @@ require('project').setup()
         --- ---
         ---@type boolean
         enabled = false,
-
         ---The maximum logfile size (in megabytes).
         --- ---
         ---Default: `1.1`
         --- ---
         ---@type number
         max_size = 1.1,
-
         ---Path in which the log file will be saved.
         --- ---
         ---Default: `vim.fn.stdpath('state')`
@@ -325,7 +323,6 @@ require('project').setup()
         ---@type string
         logpath = vim.fn.stdpath('state'),
     },
-
     ---Table of options used for `fzf-lua` integration
     --- ---
     ---@type Project.Config.FzfLua
@@ -339,7 +336,6 @@ require('project').setup()
         ---@type boolean
         enabled = false,
     },
-
     ---Determines in what filetypes/buftypes the plugin won't execute.
     ---It's a table with two fields:
     ---
@@ -371,7 +367,6 @@ require('project').setup()
             'terminal',
         },
     },
-
     ---If `true` your root directory won't be changed automatically,
     ---so you have the option to manually do so
     ---using the `:ProjectRoot` command.
@@ -380,7 +375,6 @@ require('project').setup()
     --- ---
     ---@type boolean
     manual_mode = false,
-
     ---Methods of detecting the root directory. `'lsp'` uses the native Neovim
     ---LSP, while `'pattern'` uses vim-rooter like glob pattern matching. Here
     ---order matters: if one is not detected, the other is used as fallback. You
@@ -392,7 +386,6 @@ require('project').setup()
     --- ---
     ---@type ('lsp'|'pattern')[]
     detection_methods = { 'pattern' },
-
     ---All the patterns used to detect root dir, when **'pattern'** is in
     ---detection_methods.
     ---
@@ -410,7 +403,6 @@ require('project').setup()
         '.svn',
         'Pipfile',
     },
-
     ---Sets whether to use Pattern Matching rules on the LSP.
     ---
     ---If `false`, the Pattern Matching will only apply to the `pattern` detection method.
@@ -419,7 +411,6 @@ require('project').setup()
     --- ---
     ---@type boolean
     allow_patterns_for_lsp = true,
-
     ---Determines whether a project will be added if its project root is owned by a different user.
     ---
     ---If `false`, it won't add a project if its root is not owned by the
@@ -429,7 +420,6 @@ require('project').setup()
     --- ---
     ---@type boolean
     allow_different_owners = true,
-
     ---If enabled, set `vim.opt.autochdir` to `true`.
     ---
     ---This is disabled by default because the plugin implicitly disables `autochdir`.
@@ -438,7 +428,6 @@ require('project').setup()
     --- ---
     ---@type boolean
     enable_autochdir = false,
-
     ---The history size. (by @acristoffers)
     ---
     ---This will indicate how many entries will be written to the history file.
@@ -448,7 +437,6 @@ require('project').setup()
     --- ---
     ---@type integer
     historysize = 100
-
     ---Table of options used for the telescope picker.
     --- ---
     ---@type Project.Config.Telescope
@@ -464,7 +452,6 @@ require('project').setup()
         --- ---
         ---@type boolean
         enabled = false,
-
         ---Determines whether the newest projects come first in the
         ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
         --- ---
@@ -472,7 +459,6 @@ require('project').setup()
         --- ---
         ---@type 'oldest'|'newest'
         sort = 'newest',
-
         ---If you have `telescope-file-browser.nvim` installed, you can enable this
         ---so that the Telescope picker uses it instead of the `find_files` builtin.
         ---
@@ -483,7 +469,6 @@ require('project').setup()
         --- ---
         ---@type boolean
         prefer_file_browser = false,
-
         ---Set this to `true` if you don't want the file picker to appear
         ---after you've selected a project.
         ---
@@ -493,7 +478,6 @@ require('project').setup()
         --- ---
         ---@type boolean
         disable_file_picker = false,
-
         ---Table of mappings for the Telescope picker.
         ---
         ---Only supports Normal and Insert modes.
@@ -510,7 +494,6 @@ require('project').setup()
                 s = 'search_in_project_files',
                 w = 'change_working_directory',
             },
-
             i = {
                 ['<C-b>'] = 'browse_project_files',
                 ['<C-d>'] = 'delete_project',
@@ -521,14 +504,12 @@ require('project').setup()
             },
         },
     },
-
     ---Make hidden files visible when using any picker.
     --- ---
     ---Default: `false`
     --- ---
     ---@type boolean
     show_hidden = false,
-
     ---Table of lsp clients to ignore by name,
     ---e.g. `{ 'efm', ... }`.
     ---
@@ -539,17 +520,15 @@ require('project').setup()
     --- ---
     ---@type string[]
     ignore_lsp = {},
-
     ---Don't calculate root dir on specific directories,
     ---e.g. `{ '~/.cargo/*', ... }`.
     ---
-    ---See the `Pattern Matching` section in the `README.md` for more info.
+    ---For more info see `:h project-nvim.pattern-matching`.
     --- ---
     ---Default: `{}`
     --- ---
     ---@type string[]
     exclude_dirs = {},
-
     ---If `false`, you'll get a _notification_ every time
     ---`project.nvim` changes directory.
     ---
@@ -560,7 +539,6 @@ require('project').setup()
     --- ---
     ---@type boolean
     silent_chdir = true,
-
     ---Determines the scope for changing the directory.
     ---
     ---Valid options are:
@@ -572,7 +550,6 @@ require('project').setup()
     --- ---
     ---@type 'global'|'tab'|'win'
     scope_chdir = 'global',
-
     ---Hook to run before attaching to a new project.
     ---
     ---It recieves `target_dir` and, optionally,
@@ -585,7 +562,6 @@ require('project').setup()
     ---@param target_dir? string
     ---@param method? string
     before_attach = function(target_dir, method) end,
-
     ---Hook to run after attaching to a new project.
     ---**_This only runs if the directory changes successfully._**
     ---
@@ -599,7 +575,6 @@ require('project').setup()
     ---@param dir? string
     ---@param method? string
     on_attach = function(dir, method) end,
-
     ---The path where `project.nvim` will store the project history directory,
     ---containing the project history in it.
     ---

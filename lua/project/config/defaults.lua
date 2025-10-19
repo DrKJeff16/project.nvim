@@ -126,7 +126,7 @@ local DEFAULTS = {
     ---Don't calculate root dir on specific directories,
     ---e.g. `{ '~/.cargo/*', ... }`.
     ---
-    ---See the `Pattern Matching` section in the `README.md` for more info.
+    ---For more info see `:h project-nvim.pattern-matching`.
     --- ---
     ---Default: `{}`
     --- ---
