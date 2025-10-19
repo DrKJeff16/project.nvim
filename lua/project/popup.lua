@@ -43,11 +43,20 @@ local function hidden_avail(path, hidden)
             hidden = { hidden, 'boolean' },
         })
     end
-    if vim.fn.executable('fd') ~= 1 then
-        error(('(%s.hidden_avail): `fd` not found in your PATH!'):format(MODSTR), ERROR)
+
+    local fd = ''
+    if vim.fn.executable('fd') == 1 then
+        fd = 'fd'
+    elseif vim.fn.executable('fdfind') == 1 then -- Debian Users
+        fd = 'fdfind'
+    else
+        error(
+            ('(%s.hidden_avail): `fd` nor `fdfind` not found in your PATH!'):format(MODSTR),
+            ERROR
+        )
     end
 
-    local cmd = { 'fd', '-Iad1' }
+    local cmd = { fd, '-Iad1' }
     if hidden then
         table.insert(cmd, '-H')
     end
