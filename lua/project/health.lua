@@ -44,8 +44,10 @@ function Health.setup_check()
 
     if vim.fn.executable('fd') == 1 then
         h_ok('`fd` executable in `PATH`')
+    elseif vim.fn.executable('fdfind') == 1 then
+        h_ok('`fdfind` executable in `PATH`')
     else
-        h_warn('`fd` executable not found! Some utilities from this plugin may not work.')
+        h_warn('`fd` nor `fdfind` were found! Some utilities from this plugin may not work.')
     end
 
     if is_windows() and vim.g.project_disable_win32_warning ~= 1 then
