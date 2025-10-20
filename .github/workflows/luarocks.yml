@@ -16,7 +16,7 @@ jobs:
       - name: LuaRocks Upload
         uses: nvim-neorocks/luarocks-tag-release@v7
         with:
-          version: "0.1.0"
+          version: "0.1.1"
           license: "Apache-2.0"
           detailed_description: |
             A Neovim plugin written in Lua that, under configurable conditions, automatically sets
