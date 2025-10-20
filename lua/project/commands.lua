@@ -25,7 +25,7 @@ local Commands = {}
 ---@type fun(specs: Project.Commands.Spec[])
 function Commands.new(specs)
     if vim_has('nvim-0.11') then
-        vim.validate('specs', specs, 'table', false, 'Project.Commands.Spec[]')
+        vim.validate('specs', specs, 'table', false)
     else
         vim.validate({ specs = { specs, 'table' } })
     end
@@ -152,10 +152,11 @@ function Commands.create_user_commands() ---@type function
                         Log.error(
                             ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path)
                         )
-                        error(
+                        vim.notify(
                             ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path),
                             ERROR
                         )
+                        return
                     end
                     if vim.list_contains(recent, path) then
                         require('project.utils.history').delete_project(path)

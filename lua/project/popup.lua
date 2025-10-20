@@ -296,12 +296,14 @@ Popup.delete_menu = Popup.select.new({
                 return
             end
             if not in_list(choices_list, item) then
-                error('Bad selection!', ERROR)
+                vim.notify('Bad selection!', ERROR)
+                return
             end
 
             local choice = Popup.delete_menu.choices()[item]
             if not (choice and vim.is_callable(choice)) then
-                error('Bad selection!', ERROR)
+                vim.notify('Bad selection!', ERROR)
+                return
             end
 
             choice()
@@ -340,11 +342,13 @@ Popup.recents_menu = Popup.select.new({
                 return
             end
             if not in_list(choices_list, item) then
-                error('Bad selection!', ERROR)
+                vim.notify('Bad selection!', ERROR)
+                return
             end
             local choice = Popup.recents_menu.choices()[item]
             if not (choice and vim.is_callable(choice)) then
-                error('Bad selection!', ERROR)
+                vim.notify('Bad selection!', ERROR)
+                return
             end
 
             choice(item, false, false)
@@ -378,11 +382,13 @@ Popup.open_menu = Popup.select.new({
                 return
             end
             if not in_list(choices_list, item) then
-                error('Bad selection!', ERROR)
+                vim.notify('Bad selection!', ERROR)
+                return
             end
             local choice = Popup.open_menu.choices()[item]
             if not (choice and vim.is_callable(choice)) then
-                error('Bad selection!', ERROR)
+                vim.notify('Bad selection!', ERROR)
+                return
             end
 
             choice()
@@ -485,11 +491,13 @@ Popup.session_menu = Popup.select.new({
                 return
             end
             if not in_list(choices_list, item) then
-                error('Bad selection!', ERROR)
+                vim.notify('Bad selection!', ERROR)
+                return
             end
             local choice = Popup.session_menu.choices()[item]
             if not (choice and vim.is_callable(choice)) then
-                error('Bad selection!', ERROR)
+                vim.notify('Bad selection!', ERROR)
+                return
             end
 
             choice(item, only_cd, false)

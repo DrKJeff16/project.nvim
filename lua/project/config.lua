@@ -58,9 +58,11 @@ end
 ---@return string|nil
 function Config.get_config()
     if vim.g.project_setup ~= 1 then
-        local Log = require('project.utils.log')
-        Log.error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR))
-        error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR), ERROR)
+        require('project.utils.log').error(
+            ('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR)
+        )
+        vim.notify(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR), ERROR)
+        return
     end
     local exceptions = {
         'new',
@@ -80,7 +82,7 @@ function Config.get_config()
 end
 
 function Config.open_win()
-    if Config.conf_loc ~= nil then
+    if Config.conf_loc then
         return
     end
 

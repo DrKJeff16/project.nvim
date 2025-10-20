@@ -87,7 +87,8 @@ function Api.verify_owner(dir)
     local stat = uv.fs_stat(dir)
     if not stat then
         Log.error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR))
-        error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
+        vim.notify(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
+        return false
     end
     return stat.uid == uv.getuid()
 end
