@@ -52,14 +52,14 @@ function Health.setup_check()
 
     if is_windows() and vim.g.project_disable_win32_warning ~= 1 then
         h_warn([[
-        `DISCLAIMER`
+`DISCLAIMER`
 
-        You're running on Windows. Issues are more likely to occur,
-        bear that in mind.
+You're running on Windows. Issues are more likely to occur,
+bear that in mind.
 
-        Please report any issues to the maintainers.
+Please report any issues to the maintainers.
 
-        If you wish to disable this warning, set `g:project_disable_win32_warning` to `1`.
+If you wish to disable this warning, set `g:project_disable_win32_warning` to `1`.
         ]])
     end
     return setup_called
@@ -162,9 +162,9 @@ function Health.telescope_check()
     start('Telescope')
     if not mod_exists('telescope') then
         h_warn([[
-        `telescope.nvim` is not installed.
+`telescope.nvim` is not installed.
 
-        This doesn't represent an issue necessarily
+This doesn't represent an issue necessarily
         ]])
         return
     end
@@ -195,9 +195,9 @@ function Health.fzf_lua_check()
     start('Fzf-Lua')
     if not Config.options.fzf_lua.enabled then
         h_warn([[
-        `fzf-lua` integration is disabled.
+`fzf-lua` integration is disabled.
 
-        This doesn't represent an issue necessarily
+This doesn't represent an issue necessarily
         ]])
         return
     end
@@ -215,15 +215,15 @@ function Health.recent_proj_check()
     local recents = History.get_recent_projects()
     if empty(recents) then
         h_warn([[
-            `No projects found in history!`
+`No projects found in history!`
 
-            If this is your first time using this plugin,
-            or you just set a different `historypath` for your plugin,
-            then you can ignore this.
+If this is your first time using this plugin,
+or you just set a different `historypath` for your plugin,
+then you can ignore this.
 
-            If this keeps appearing, though, check your config
-            and submit an issue if pertinent.
-                ]])
+If this keeps appearing, though, check your config
+and submit an issue if pertinent.
+        ]])
 
         return
     end
@@ -245,7 +245,7 @@ function Health.check()
     Health.options_check()
     Health.recent_proj_check()
 
-    Log.debug(('(%s): `checkhealth` successfully called!'):format(MODSTR))
+    Log.debug(('(%s): `checkhealth` successfully called.'):format(MODSTR))
 end
 
 return Health
