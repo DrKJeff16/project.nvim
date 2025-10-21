@@ -70,6 +70,7 @@ Show these much love!
 - [`folke/snacks.nvim`](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md#projects)
 - [`coffebar/neovim-project`](https://github.com/coffebar/neovim-project)
 - [`LintaoAmons/cd-project.nvim`](https://github.com/LintaoAmons/cd-project.nvim)
+- [`wsdjeg/rooter.nvim`](https://github.com/wsdjeg/rooter.nvim)
 
 ---
 
