@@ -126,6 +126,7 @@ function Api.gen_lsp_autocmd(group)
 
     vim.api.nvim_create_autocmd('LspAttach', {
         group = group,
+        nested = true,
         callback = function(ev)
             Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
         end,
