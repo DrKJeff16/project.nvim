@@ -30,12 +30,12 @@ local Api = {}
 ---If successful, returns a tuple of two `string` results.
 ---Otherwise, nothing is returned.
 --- ---
----@param bufnr? integer
+---@param bufnr integer|nil
 ---@return string|nil dir
 ---@return string|nil name
 function Api.find_lsp_root(bufnr)
     if Util.vim_has('nvim-0.11') then
-        vim.validate('bufnr', bufnr, 'number', true, 'integer?')
+        vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
     else
         vim.validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
@@ -93,12 +93,12 @@ function Api.verify_owner(dir)
     return stat.uid == uv.getuid()
 end
 
----@param bufnr? integer
+---@param bufnr integer|nil
 ---@return string|nil dir_res
 ---@return string|nil method
 function Api.find_pattern_root(bufnr)
     if Util.vim_has('nvim-0.11') then
-        vim.validate('bufnr', bufnr, 'number', true, 'integer?')
+        vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
     else
         vim.validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
@@ -254,8 +254,7 @@ function Api.get_history_paths(path)
         historyfile = Path.historyfile,
     }
     if path and in_list(vim.tbl_keys(res), path) then
-        ---@type string
-        res = Path[path]
+        res = Path[path] ---@type string
     end
     return res
 end
@@ -264,12 +263,12 @@ end
 ---
 ---If no project root is found, nothing will be returned.
 --- ---
----@param bufnr? integer
+---@param bufnr integer|nil
 ---@return string|nil root
 ---@return string|nil method
 function Api.get_project_root(bufnr)
     if Util.vim_has('nvim-0.11') then
-        vim.validate('bufnr', bufnr, 'number', true, 'integer?')
+        vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
     else
         vim.validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
@@ -281,21 +280,16 @@ function Api.get_project_root(bufnr)
     local SWITCH = {
         lsp = function()
             local root, lsp_name = Api.find_lsp_root(bufnr)
-
             if root ~= nil then
                 return true, root, ('"%s" lsp'):format(lsp_name)
             end
-
             return false
         end,
-
         pattern = function()
             local root, method = Api.find_pattern_root(bufnr)
-
             if root ~= nil then
                 return true, root, method
             end
-
             return false
         end,
     }
@@ -324,13 +318,13 @@ end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
----@param bufnr? integer
+---@param bufnr integer|nil
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
 function Api.get_current_project(bufnr)
     if Util.vim_has('nvim-0.11') then
-        vim.validate('bufnr', bufnr, 'number', true, 'integer?')
+        vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
     else
         vim.validate({ bufnr = { bufnr, { 'number', 'nil' } } })
     end
@@ -369,6 +363,7 @@ function Api.on_buf_enter(verbose, bufnr)
     end
     verbose = verbose ~= nil and verbose or false
     bufnr = bufnr or current_buf()
+
     if not Api.buf_is_file(bufnr) then
         return
     end
@@ -390,8 +385,8 @@ function Api.on_buf_enter(verbose, bufnr)
     Api.current_project, Api.current_method = Api.get_current_project(bufnr)
     local write = Api.current_project ~= vim.fn.getcwd(0, 0)
     Api.set_pwd(Api.current_project, Api.current_method)
-
     Api.last_project = Api.get_last_project()
+
     if write then
         History.write_history()
     end
@@ -418,7 +413,6 @@ function Api.init()
                 end,
             })
         end
-
         if in_list(detection_methods, 'lsp') then
             Api.gen_lsp_autocmd(group)
         end
