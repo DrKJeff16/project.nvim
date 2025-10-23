@@ -1,9 +1,5 @@
 name: LuaRocks Release
 on:
-  push:
-    tags: # Will upload to luarocks.org when a tag is pushed
-      - "*"
-      - "v*"
   pull_request: # Will test a local install without uploading to luarocks.org
   workflow_dispatch: # allows manual triggering
 jobs:
