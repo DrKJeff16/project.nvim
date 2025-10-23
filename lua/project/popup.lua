@@ -15,10 +15,7 @@ local Util = require('project.utils.util')
 local History = require('project.utils.history')
 local Path = require('project.utils.path')
 local Config = require('project.config')
-local exists = Path.exists
 local get_recent_projects = History.get_recent_projects
-local vim_has = Util.vim_has
-local reverse = Util.reverse
 
 ---CREDITS: [u/Some_Derpy_Pineapple](https://www.reddit.com/r/neovim/comments/1nu5ehj/comment/ngyz21m/)
 local FILE_ATTRIBUTE_HIDDEN = 0x2
@@ -51,7 +48,7 @@ local function hidden_avail(path, hidden)
         fd = 'fdfind'
     else
         error(
-            ('(%s.hidden_avail): `fd` nor `fdfind` not found in your PATH!'):format(MODSTR),
+            ('(%s.hidden_avail): `fd` nor `fdfind` could be found in your PATH!'):format(MODSTR),
             ERROR
         )
     end
@@ -197,7 +194,7 @@ Popup.select = {}
 ---@param opts Project.Popup.SelectSpec
 ---@return Project.Popup.SelectChoices|ProjectCmdFun
 function Popup.select.new(opts)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
     else
         vim.validate({
@@ -210,7 +207,7 @@ function Popup.select.new(opts)
     if empty(opts) then
         error(('(%s.select.new): Empty args for constructor!'):format(MODSTR), ERROR)
     end
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('choices', opts.choices, 'function', false, 'fun(): table<string, function>')
         vim.validate('choices_list', opts.choices_list, 'function', false, 'fun(): string[]')
         vim.validate('callback', opts.callback, 'function', false)
@@ -246,7 +243,7 @@ end
 
 ---@param input string|nil
 function Popup.prompt_project(input)
-    if vim_has('nvim-0.11') then
+    if Util.vim_has('nvim-0.11') then
         vim.validate('input', input, 'string', true, 'string|nil')
     else
         vim.validate({ input = { input, { 'string', 'nil' } } })
@@ -257,7 +254,7 @@ function Popup.prompt_project(input)
 
     local original_input = input
     input = Util.rstrip('/', vim.fn.fnamemodify(input, ':p'))
-    if not (exists(input) and exists(vim.fn.fnamemodify(input, ':p:h'))) then
+    if not (Path.exists(input) and Path.exists(vim.fn.fnamemodify(input, ':p:h'))) then
         vim.notify(('Invalid path `%s`'):format(original_input), ERROR)
         return
     end
@@ -311,7 +308,7 @@ Popup.delete_menu = Popup.select.new({
     end,
     choices_list = function()
         ---@type string[]
-        local recents = reverse(get_recent_projects())
+        local recents = Util.reverse(get_recent_projects())
         table.insert(recents, 'Exit')
         return recents
     end,
@@ -357,7 +354,7 @@ Popup.recents_menu = Popup.select.new({
     choices_list = function()
         local choices_list = vim.deepcopy(get_recent_projects())
         if require('project.config').options.telescope.sort == 'newest' then
-            choices_list = reverse(choices_list)
+            choices_list = Util.reverse(choices_list)
         end
 
         table.insert(choices_list, 'Exit')
@@ -452,6 +449,7 @@ Popup.open_menu = Popup.select.new({
             'New Project',
             'Open Recent Project',
             'Delete A Project',
+            'Run Checkhealth',
         }
         if vim.g.project_telescope_loaded == 1 then
             table.insert(res_list, 'Open Telescope Picker')
@@ -465,7 +463,6 @@ Popup.open_menu = Popup.select.new({
         end
         table.insert(res_list, 'Show Config')
         table.insert(res_list, 'Open History')
-        table.insert(res_list, 'Run Checkhealth')
         table.insert(res_list, 'Open Help Docs')
         table.insert(res_list, 'Go To Source Code')
         table.insert(res_list, 'Exit')
