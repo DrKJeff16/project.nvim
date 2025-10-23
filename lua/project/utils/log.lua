@@ -106,11 +106,11 @@ function Log.write(data, lvl)
 
     -- stylua: ignore start
     local PFX = {
-        [TRACE] = '[TRACE]  ',
-        [DEBUG] = '[DEBUG]  ',
-        [INFO]  = '[INFO]   ',
-        [WARN]  = '[WARN]   ',
-        [ERROR] = '[ERROR]  ',
+        [TRACE] = '[TRACE] ',
+        [DEBUG] = '[DEBUG] ',
+        [INFO]  = '[INFO]  ',
+        [WARN]  = '[WARN]  ',
+        [ERROR] = '[ERROR] ',
     }
     -- stylua: ignore end
 
