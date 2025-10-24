@@ -58,16 +58,13 @@ local function hidden_avail(path, hidden)
         table.insert(cmd, '-H')
     end
 
-    local out = vim.system(cmd, {
-        text = true,
-        cwd = vim.g.project_nvim_cwd,
-    })
-        :wait().stdout
+    local out = vim.system(cmd, { text = true, cwd = vim.g.project_nvim_cwd }):wait().stdout
     if not out then
         return false
     end
 
-    local ret, nodes = false, vim.split(out, '\n', { plain = true, trimempty = true })
+    local ret = false
+    local nodes = vim.split(out, '\n', { plain = true, trimempty = true })
     vim.tbl_map(function(value)
         if value == path or vim.startswith(value, path) then
             ret = true
@@ -421,7 +418,7 @@ Popup.open_menu = Popup.select.new({
             ['Go To Source Code'] = function()
                 vim.ui.open('https://github.com/DrKJeff16/project.nvim')
             end,
-            ['Exit'] = function() end,
+            Exit = function() end,
         }
         if vim.g.project_telescope_loaded == 1 then
             res['Open Telescope Picker'] = function()
@@ -450,22 +447,22 @@ Popup.open_menu = Popup.select.new({
             'Open Recent Project',
             'Delete A Project',
             'Run Checkhealth',
+            'Show Config',
+            'Open History',
+            'Open Help Docs',
+            'Go To Source Code',
+            'Exit',
         }
         if vim.g.project_telescope_loaded == 1 then
-            table.insert(res_list, 'Open Telescope Picker')
+            table.insert(res_list, #res_list - 5, 'Open Telescope Picker')
         end
         if Config.options.fzf_lua.enabled then
-            table.insert(res_list, 'Open Fzf-Lua Picker')
+            table.insert(res_list, #res_list - 5, 'Open Fzf-Lua Picker')
         end
         if Config.options.log.enabled then
-            table.insert(res_list, 'Open Log')
-            table.insert(res_list, 'Clear Log')
+            table.insert(res_list, #res_list - 5, 'Open Log')
+            table.insert(res_list, #res_list - 5, 'Clear Log')
         end
-        table.insert(res_list, 'Show Config')
-        table.insert(res_list, 'Open History')
-        table.insert(res_list, 'Open Help Docs')
-        table.insert(res_list, 'Go To Source Code')
-        table.insert(res_list, 'Exit')
         return res_list
     end,
 })
