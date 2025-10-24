@@ -110,14 +110,15 @@ Show these much love!
     1. [`:Project`](#project)
     2. [`:ProjectFzf`](#projectfzf)
     3. [`:ProjectTelescope`](#projecttelescope)
-    4. [`:ProjectHistory`](#projecthistory)
-    5. [`:ProjectLog`](#projectlog)
-    6. [`:ProjectLogClear`](#projectlogclear)
-    7. [`:ProjectAdd`](#projectadd)
-    8. [`:ProjectRoot`](#projectroot)
-    9. [`:ProjectConfig`](#projectconfig)
-    10. [`:ProjectDelete`](#projectdelete)
-    11. [`:ProjectSession`](#projectsession)
+    4. [`:ProjectHealth`](#projecthealth)
+    5. [`:ProjectHistory`](#projecthistory)
+    6. [`:ProjectLog`](#projectlog)
+    7. [`:ProjectLogClear`](#projectlogclear)
+    8. [`:ProjectAdd`](#projectadd)
+    9. [`:ProjectRoot`](#projectroot)
+    10. [`:ProjectConfig`](#projectconfig)
+    11. [`:ProjectDelete`](#projectdelete)
+    12. [`:ProjectSession`](#projectsession)
 4. [API](#api)
     1. [`get_project_root()`](#get_project_root)
     2. [`get_recent_projects()`](#get_recent_projects)
@@ -190,7 +191,6 @@ endif
 > ```lua
 > {
 >   'DrKJeff16/project.nvim',
->   lazy = true,
 >   version = false, -- Get the latest release
 >   cmd = { -- Lazy-load by commands
 >     'Project',
@@ -807,6 +807,15 @@ A shortcut, to be honest.
 
 ---
 
+### `:ProjectHealth`
+
+The `:ProjectHealth` command runs `:checkhealth project` in a single command.
+
+> [!TIP]
+> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
+
+---
+
 ### `:ProjectHistory`
 
 The `:ProjectHistory` command opens the `project.nvim` history file in a new tab,
@@ -895,14 +904,10 @@ The command is like doing the following in the cmdline:
 
 ### `:ProjectConfig`
 
-The `:ProjectConfig` command is a hook to display your current config
-using `vim.notify(inspect())`
+The `:ProjectConfig` command will open your current config in a floating window,
+making it easier to access.
 
-The command is like doing the following in the cmdline:
-
-```vim
-:lua vim.notify(vim.inspect(require('project').get_config()))
-```
+To exit the window you can either press `q` in normal mode or by runnning `:ProjectConfig!`.
 
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.

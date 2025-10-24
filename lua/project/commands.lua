@@ -116,15 +116,19 @@ function Commands.create_user_commands() ---@type function
         },
         {
             name = 'ProjectConfig',
-            callback = function()
+            with_ctx = true,
+            callback = function(ctx)
                 local Config = require('project.config')
-                if not Config.conf_loc then
-                    Config.open_win()
+                if ctx.bang ~= nil and ctx.bang then
+                    Config.close_win()
                     return
                 end
-                Config.close_win()
+                if not Config.conf_loc then
+                    Config.open_win()
+                end
             end,
             desc = 'Prints out the current configuratiion for `project.nvim`',
+            bang = true,
         },
         {
             name = 'ProjectDelete',
@@ -181,6 +185,14 @@ function Commands.create_user_commands() ---@type function
                 require('project.extensions.fzf-lua').run_fzf_lua()
             end,
             desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
+        },
+        {
+            name = 'ProjectHealth',
+            with_ctx = false,
+            callback = function()
+                vim.cmd.checkhealth('project')
+            end,
+            desc = 'Run checkhealth for project.nvim',
         },
         {
             name = 'ProjectHistory',
