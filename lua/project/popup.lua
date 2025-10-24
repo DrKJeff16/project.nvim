@@ -478,6 +478,11 @@ Popup.session_menu = Popup.select.new({
         end
 
         local choices_list = Popup.session_menu.choices_list()
+        if #choices_list == 1 then
+            vim.notify('No sessions available!', WARN)
+            return
+        end
+
         vim.ui.select(choices_list, {
             prompt = 'Select a project from your session:',
             format_item = function(item) ---@param item string
@@ -502,9 +507,7 @@ Popup.session_menu = Popup.select.new({
     end,
     choices = function()
         local sessions = require('project.utils.history').session_projects
-        local choices = {
-            ['Exit'] = function(_, _, _) end,
-        }
+        local choices = { Exit = function(_, _, _) end }
         if vim.tbl_isempty(sessions) then
             return choices
         end
