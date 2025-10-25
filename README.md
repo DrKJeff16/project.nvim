@@ -392,7 +392,7 @@ require('project').setup()
     ---
     ---See `:h project-nvim.pattern-matching`
     --- ---
-    ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile' }`
+    ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile', ... }`
     --- ---
     ---@type string[]
     patterns = {
@@ -403,6 +403,11 @@ require('project').setup()
         '.bzr',
         '.svn',
         'Pipfile',
+        'pyproject.toml',
+        '.pre-commit-config.yaml',
+        '.pre-commit-config.yml',
+        '.csproj',
+        '.sln',
     },
     ---Sets whether to use Pattern Matching rules on the LSP.
     ---
