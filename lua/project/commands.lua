@@ -119,9 +119,11 @@ function Commands.create_user_commands() ---@type function
             with_ctx = true,
             callback = function(ctx)
                 local Config = require('project.config')
-                if ctx.bang ~= nil and ctx.bang then
-                    Config.close_win()
-                    return
+                if ctx then
+                    if ctx.bang ~= nil and ctx.bang then
+                        Config.close_win()
+                        return
+                    end
                 end
                 if not Config.conf_loc then
                     Config.open_win()

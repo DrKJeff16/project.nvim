@@ -57,6 +57,8 @@ local DEFAULTS = {
         'pyproject.toml',
         '.pre-commit-config.yaml',
         '.pre-commit-config.yml',
+        '.csproj',
+        '.sln',
     },
     ---Hook to run before attaching to a new project.
     ---
@@ -461,13 +463,8 @@ function DEFAULTS:new(opts)
     else
         vim.validate({ opts = { opts, { 'table', 'nil' } } })
     end
-    opts = opts or {}
 
-    self.__index = self
-    self.__newindex = function(t, k, v)
-        rawset(t, k, v)
-    end
-    local obj = setmetatable(opts, self) ---@type Project.Config.Options
+    local obj = vim.tbl_deep_extend('keep', opts or {}, DEFAULTS) ---@type Project.Config.Options
     return obj
 end
 
