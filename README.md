@@ -81,6 +81,7 @@ Show these much love!
 - Functional `checkhealth` hook `:checkhealth project`
 - Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
 - Logging capabilities `:ProjectLog`, `:ProjectLogClear`
+- Natively supports `.nvim.lua` files
 - `vim.ui` menu support
 - [Telescope Integration](#telescope) `:Telescope projects`
 - [`Fzf-Lua` Integration](#ProjectFzf)
