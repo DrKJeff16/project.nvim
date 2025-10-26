@@ -4,7 +4,7 @@
 # Vim Helptags
 doc/tags
 
-# Local issue template
+# Local Issue Template
 ISSUE.md
 
 # Patching
@@ -64,10 +64,10 @@ luarc.jsonc
 luacov*
 
 # Testing
-.repro/
+deps/
+
+# In-place Neovim Configs
 minimal_init.lua
 minimal.lua
 repro.lua
-
-# Make Dependencies
-deps/
+.repro/
