@@ -408,6 +408,7 @@ require('project').setup()
         '.pre-commit-config.yml',
         '.csproj',
         '.sln',
+        '.nvim.lua',
     },
     ---Sets whether to use Pattern Matching rules on the LSP.
     ---

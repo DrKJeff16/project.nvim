@@ -59,6 +59,7 @@ local DEFAULTS = {
         '.pre-commit-config.yml',
         '.csproj',
         '.sln',
+        '.nvim.lua',
     },
     ---Hook to run before attaching to a new project.
     ---
