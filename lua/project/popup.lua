@@ -12,10 +12,6 @@ local in_list = vim.list_contains
 local empty = vim.tbl_isempty
 
 local Util = require('project.utils.util')
-local History = require('project.utils.history')
-local Path = require('project.utils.path')
-local Config = require('project.config')
-local get_recent_projects = History.get_recent_projects
 
 ---CREDITS: [u/Some_Derpy_Pineapple](https://www.reddit.com/r/neovim/comments/1nu5ehj/comment/ngyz21m/)
 local FILE_ATTRIBUTE_HIDDEN = 0x2
@@ -58,7 +54,7 @@ local function hidden_avail(path, hidden)
         table.insert(cmd, '-H')
     end
 
-    local out = vim.system(cmd, { text = true, cwd = vim.g.project_nvim_cwd }):wait().stdout
+    local out = vim.system(cmd, { text = true, cwd = vim.g.project_nvim_cwd }):wait(1000).stdout
     if not out then
         return false
     end
@@ -249,6 +245,7 @@ function Popup.prompt_project(input)
         return
     end
 
+    local Path = require('project.utils.path')
     local original_input = input
     input = Util.rstrip('/', vim.fn.fnamemodify(input, ':p'))
     if not (Path.exists(input) and Path.exists(vim.fn.fnamemodify(input, ':p:h'))) then
@@ -264,13 +261,13 @@ function Popup.prompt_project(input)
     end
 
     local Api = require('project.api')
-    local session = History.session_projects
+    local session = require('project.utils.history').session_projects
     if Api.current_project == input or in_list(session, input) then
         vim.notify('Already added that directory!', WARN)
         return
     end
     Api.set_pwd(input, 'prompt')
-    History.write_history()
+    require('project.utils.history').write_history()
 end
 
 Popup.delete_menu = Popup.select.new({
@@ -279,7 +276,7 @@ Popup.delete_menu = Popup.select.new({
         vim.ui.select(choices_list, {
             prompt = 'Select a project to delete:',
             format_item = function(item) ---@param item string
-                local session = History.session_projects
+                local session = require('project.utils.history').session_projects
                 if in_list(session, item) then
                     return '* ' .. item
                 end
@@ -305,16 +302,16 @@ Popup.delete_menu = Popup.select.new({
     end,
     choices_list = function()
         ---@type string[]
-        local recents = Util.reverse(get_recent_projects())
+        local recents = Util.reverse(require('project.utils.history').get_recent_projects())
         table.insert(recents, 'Exit')
         return recents
     end,
     choices = function()
         ---@type table<string, fun()>
         local T = {}
-        for _, proj in ipairs(get_recent_projects()) do
+        for _, proj in ipairs(require('project.utils.history').get_recent_projects()) do
             T[proj] = function()
-                History.delete_project(proj)
+                require('project.utils.history').delete_project(proj)
             end
         end
         T.Exit = function() end
@@ -349,7 +346,7 @@ Popup.recents_menu = Popup.select.new({
         end)
     end,
     choices_list = function()
-        local choices_list = vim.deepcopy(get_recent_projects())
+        local choices_list = vim.deepcopy(require('project.utils.history').get_recent_projects())
         if require('project.config').options.telescope.sort == 'newest' then
             choices_list = Util.reverse(choices_list)
         end
@@ -389,8 +386,8 @@ Popup.open_menu = Popup.select.new({
         end)
     end,
     choices = function()
-        ---@type table<string, ProjectCmdFun>
-        local res = {
+        local Config = require('project.config')
+        local res = { ---@type table<string, ProjectCmdFun>
             ['Project Session'] = function()
                 Popup.session_menu()
             end,
@@ -441,7 +438,8 @@ Popup.open_menu = Popup.select.new({
         return res
     end,
     choices_list = function()
-        local res_list = { ---@type string[]
+        local Config = require('project.config')
+        local res_list = {
             'Project Session',
             'New Project',
             'Open Recent Project',
@@ -511,7 +509,6 @@ Popup.session_menu = Popup.select.new({
         for _, proj in ipairs(sessions) do
             choices[proj] = open_node
         end
-
         return choices
     end,
     choices_list = function()
