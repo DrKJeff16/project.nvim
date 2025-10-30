@@ -1,21 +1,24 @@
 local MODSTR = 'project'
-local vim_has = require('project.utils.util').vim_has
+local Api = require('project.api')
+local Config = require('project.config')
+local History = require('project.utils.history')
+local Popup = require('project.popup')
 
 ---The `project.nvim` module.
 --- ---
 ---@class Project
 local Project = {}
 
-Project.setup = require('project.config').setup
-Project.get_recent_projects = require('project.utils.history').get_recent_projects
-Project.delete_project = require('project.utils.history').delete_project
-Project.get_project_root = require('project.api').get_project_root
-Project.get_history_paths = require('project.api').get_history_paths
-Project.get_last_project = require('project.api').get_last_project
-Project.open_menu = require('project.popup').open_menu
-Project.delete_menu = require('project.popup').delete_menu
+Project.setup = Config.setup
+Project.get_config = Config.get_config
+Project.get_recent_projects = History.get_recent_projects
+Project.delete_project = History.delete_project
+Project.get_project_root = Api.get_project_root
+Project.get_history_paths = Api.get_history_paths
+Project.get_last_project = Api.get_last_project
+Project.open_menu = Popup.open_menu
+Project.delete_menu = Popup.delete_menu
 Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
-Project.get_config = require('project.config').get_config
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
@@ -24,13 +27,12 @@ Project.get_config = require('project.config').get_config
 ---@return string|nil method
 ---@return string|nil last
 function Project.current_project(refresh)
-    if vim_has('nvim-0.11') then
+    if require('project.utils.util').vim_has('nvim-0.11') then
         vim.validate('refresh', refresh, 'boolean', true)
     else
         vim.validate({ refresh = { refresh, { 'boolean', 'nil' } } })
     end
     refresh = refresh ~= nil and refresh or false
-    local Api = require('project.api')
     local Log = require('project.utils.log')
     if refresh then
         Log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
