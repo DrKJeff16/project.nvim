@@ -39,22 +39,21 @@ according to your needs.
 > [!IMPORTANT]
 > **_I'm looking for other maintainers in case I'm unable to keep this repo up to date!_**
 
+<br />
 <details>
-<summary><b><ins>Checkhealth Support Example</ins></b></summary>
+<summary><b>Checkhealth Support Example</b></summary>
 
 https://github.com/user-attachments/assets/436f5cbe-7549-4b8a-b962-4fce3d2a2fc3
 
 </details>
-<br />
 <details>
-<summary><b><ins>Telescope Integration Example</ins></b></summary>
+<summary><b>Telescope Integration Example</b></summary>
 
 https://github.com/user-attachments/assets/376cbca0-a746-4992-8223-8475fcd99fc9
 
 </details>
-<br />
 <details>
-<summary><b><ins>Fzf-Lua Integration Example</ins></b></summary>
+<summary><b>Fzf-Lua Integration Example</b></summary>
 
 https://github.com/user-attachments/assets/1516ff2e-29d9-4e0d-b592-bf2f79ab8158
 
@@ -296,8 +295,9 @@ require('project').setup()
 > ---|'search_in_project_files'
 > ```
 
+<br />
 <details>
-<summary><b><code>setup()</code><ins>comes with these defaults.</ins></b></summary>
+<summary><code>setup()</code><b>comes with these defaults.</b></summary>
 
 ```lua
 {
