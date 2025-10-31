@@ -37,15 +37,9 @@ function Commands.new(specs)
         if not (spec.callback and vim.is_callable(spec.callback)) then
             error(('(%s.new): Missing callback!'):format(MODSTR), ERROR)
         end
-        local T = {
-            name = spec.name,
-            desc = spec.desc,
-            bang = spec.bang ~= nil and spec.bang or false,
-        }
-        local opts = {
-            desc = spec.desc,
-            bang = spec.bang ~= nil and spec.bang or false,
-        }
+        local bang = spec.bang ~= nil and spec.bang or false
+        local T = { name = spec.name, desc = spec.desc, bang = bang }
+        local opts = { desc = spec.desc, bang = bang }
         if spec.nargs ~= nil then
             T.nargs = spec.nargs
             opts.nargs = spec.nargs
@@ -59,7 +53,7 @@ function Commands.new(specs)
             __index = function(_, k)
                 return T[k]
             end,
-            __tostring = function()
+            __tostring = function(_)
                 return T.desc
             end,
             __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args
