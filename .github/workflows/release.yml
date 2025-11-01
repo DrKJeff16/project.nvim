@@ -1,5 +1,4 @@
 name: Action Release
-# Controls when the workflow will run
 on:
   push:
     tags:
@@ -8,14 +7,12 @@ on:
   merge_group:
     branches:
       - main
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   release:
-    types: [created]
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+    types:
+      - created
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v5
       - name: Build project assets
@@ -25,22 +22,16 @@ jobs:
           cp -rv lua doc README.md CREDITS.md LICENSE Makefile project.nvim
           zip -r -9 project.nvim.zip project.nvim
           tar cvJf project.nvim.tar.xz project.nvim
-          sha512sum project.nvim.zip > project.nvim.zip.sha512sum
-          sha512sum project.nvim.tar.xz > project.nvim.tar.xz.sha512sum
+          sha512sum project.nvim.zip project.nvim.tar.xz > sha512sums.txt
           rm -rfv project.nvim
       - name: Get Release
         id: get_current_release
         uses: joutvhu/get-release@v1.0.3
         with:
-          # Should get latest release?
           latest: true
-          # Find the latest release including the pre-releases
           prerelease: true
-          # A pattern string to filter the releases by tag_name
           pattern: '^v.*'
-          # Show ouputs
           debug: true
-          # Fail when no release was found
           throwing: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -55,7 +46,6 @@ jobs:
           files: |
             Release.txt
             project.nvim.tar.xz
-            project.nvim.tar.xz.sha512sum
             project.nvim.zip
-            project.nvim.zip.sha512sum
+            sha512sums.txt
           token: ${{ secrets.GITHUB_TOKEN }}
