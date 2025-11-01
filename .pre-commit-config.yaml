@@ -9,7 +9,7 @@ repos:
       - id: remove-crlf
       - id: forbid-crlf # Forbid files containing CRLF end-lines to be committed
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
+    rev: v1.7.8
     hooks:
       - id: actionlint
         name: Lint GitHub Actions workflow files
