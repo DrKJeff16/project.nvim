@@ -24,15 +24,22 @@ function Health.setup_check()
     end
 
     h_ok('`setup()` has been called!')
+
+    local split_opts = { plain = true, trimempty = true } ---@type vim.gsplit.Opts
+    local version = vim.split(
+        vim.split(vim.api.nvim_exec2('version', { output = true }).output, '\n', split_opts)[1],
+        ' ',
+        split_opts
+    )[2]
     if Util.vim_has('nvim-0.11') then
-        h_ok('nvim version is at least `v0.11`')
+        h_ok(('nvim version is at least `v0.11` (`%s`)'):format(version))
     else
-        h_warn('nvim version is lower than `v0.11`!')
+        h_warn(('nvim version is lower than `v0.11`! (`%s`)'):format(version))
     end
 
-    if vim.fn.executable('fd') == 1 then
+    if Util.executable('fd') then
         h_ok('`fd` executable in `PATH`')
-    elseif vim.fn.executable('fdfind') == 1 then
+    elseif Util.executable('fdfind') then
         h_ok('`fdfind` executable in `PATH`')
     else
         h_warn('`fd` nor `fdfind` were found! Some utilities from this plugin may not work.')

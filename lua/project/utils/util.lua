@@ -11,6 +11,29 @@ function Util.vim_has(feature)
     return vim.fn.has(feature) == 1
 end
 
+---@param exe string[]|string
+---@return boolean
+function Util.executable(exe)
+    if vim.fn.has('nvim-0.11') == 1 then
+        vim.validate('exe', exe, { 'string', 'table' }, false, 'string[]|string')
+    else
+        vim.validate({ exe = { exe, { 'string', 'table' } } })
+    end
+
+    if Util.is_type('string', exe) then
+        return vim.fn.executable(exe) == 1
+    end
+
+    local res = false
+    for _, v in ipairs(exe) do ---@cast exe string[]
+        res = Util.executable(v)
+        if not res then
+            break
+        end
+    end
+    return res
+end
+
 ---Checks whether nvim is running on Windows.
 --- ---
 ---@return boolean
