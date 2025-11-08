@@ -37,16 +37,9 @@ local function hidden_avail(path, hidden)
         })
     end
 
-    local fd = ''
-    if vim.fn.executable('fd') == 1 then
-        fd = 'fd'
-    elseif vim.fn.executable('fdfind') == 1 then -- Debian Users
-        fd = 'fdfind'
-    else
-        error(
-            ('(%s.hidden_avail): `fd` nor `fdfind` could be found in your PATH!'):format(MODSTR),
-            ERROR
-        )
+    local fd = Util.executable('fd') and 'fd' or (Util.executable('fdfind') and 'fdfind' or '')
+    if fd == '' then
+        error(('(%s.hidden_avail): `fd`/`fdfind` could be found PATH!'):format(MODSTR), ERROR)
     end
 
     local cmd = { fd, '-Iad1' }
