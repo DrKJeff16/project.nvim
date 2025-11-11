@@ -198,24 +198,11 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `false` ~
 
 
-    * {detection_methods}       (`('lsp'|'pattern')[]`)
-                                Methods of detecting the root directory.
-                                 - `'pattern'`: uses `vim-rooter`-like
-                                              glob pattern matching
-                                              (see
-                                              |project-nvim.pattern-matching|)
-                                - `'lsp'`: uses the native Neovim LSP
-                                         (see |vim.lsp|). CAN BE BUGGY!
+    * {use_lsp}                 (boolean)
+                                If `true` then LSP detection will take
+                                precedence over pattern matching
 
-                                ORDER MATTERS HERE! ~
-                                If one is not detected, the other is used
-                                as fallback.
-                                You can also delete or rearrange them.
-                                Any values that aren't valid will be
-                                discarded on setup; same thing
-                                with duplicates.
-
-                                Default: `{ 'lsp', 'pattern' }` ~
+                                Default: `true` ~
 
 
     * {patterns}                (`string[]`)

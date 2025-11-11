@@ -69,12 +69,12 @@ function Health.options_check()
     end
     table.sort(Options)
     local exceptions = {
+        'gen_methods',
         'new',
         'telescope',
         'verify_datapath',
         'verify_histsize',
         'verify_logging',
-        'verify_methods',
         'verify_scope_chdir',
     }
     for k, v in pairs(Options) do
@@ -138,6 +138,15 @@ function Health.project_check()
         msg,
         (last ~= nil and last or 'No Last Project In History')
     )
+    h_info(msg)
+
+    start('Detection Methods')
+    local methods = require('project.config').detection_methods
+    msg = ''
+    for k, m in ipairs(methods) do
+        local str = Util.format_per_type(type(m), m)
+        msg = ('%s\n[`%d`]: %s'):format(msg, k, str)
+    end
     h_info(msg)
 
     start('Active Sessions')

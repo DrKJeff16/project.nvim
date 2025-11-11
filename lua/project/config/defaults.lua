@@ -10,13 +10,17 @@
 local MODSTR = 'project.config.defaults'
 local WARN = vim.log.levels.WARN
 local in_list = vim.tbl_contains
-local empty = vim.tbl_isempty
 local Util = require('project.utils.util')
 
 ---The options available for in `require('project').setup()`.
 --- ---
 ---@class Project.Config.Options
 local DEFAULTS = {
+    ---If `true` then LSP-based method detection will take precedence over pattern matching.
+    --- ---
+    ---Default: `true`
+    --- ---
+    use_lsp = true, ---@type boolean
     ---If `true` your root directory won't be changed automatically,
     ---so you have the option to manually do so
     ---using the `:ProjectRoot` command.
@@ -24,20 +28,6 @@ local DEFAULTS = {
     ---Default: `false`
     --- ---
     manual_mode = false, ---@type boolean
-    ---Methods of detecting the root directory.
-    ---
-    --- - `'pattern'`: uses `vim-rooter`-like glob pattern matching
-    --- - `'lsp'`: uses the native Neovim LSP (**CAN CAUSE BUGGY BEHAVIOUR**)
-    ---
-    ---**Order matters**: if one is not detected, the other is used as fallback. You
-    ---can also delete or rearrange the detection methods.
-    ---
-    ---Any values that aren't valid will be discarded on setup;
-    ---same thing with duplicates.
-    --- ---
-    ---Default: `{ 'lsp', 'pattern' }`
-    --- ---
-    detection_methods = { 'lsp', 'pattern' }, ---@type ('lsp'|'pattern')[]
     ---All the patterns used to detect the project's root directory.
     ---
     ---By default it only triggers when `'pattern'` is in `detection_methods`.
@@ -353,66 +343,19 @@ function DEFAULTS:verify_datapath()
     end
 end
 
----Checks the `detection_methods` option.
----
----If the option is not a table, a warning will be raised and
----the option will revert back to the default.
----
----If the option is an empty table, the function will stop.
----
----The option will be stripped from any duplicates and/or
----invalid values.
---- ---
-function DEFAULTS:verify_methods()
-    if not Util.is_type('table', self.detection_methods) then
-        vim.notify('`detection_methods` option is not a table. Reverting to default option.', WARN)
-        self.detection_methods = DEFAULTS.detection_methods
-        return
+---@return { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' } methods
+function DEFAULTS:gen_methods()
+    local methods = { 'pattern' } ---@type { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
+    if self.use_lsp then
+        table.insert(methods, 1, 'lsp')
     end
-    if empty(self.detection_methods) then
-        vim.notify('`detection_methods` option is empty. `project.nvim` may not work.', WARN)
-        return
-    end
-    local lsp_warning = [[
-WARNING (project.nvim): Using the `lsp` method has been the cause of some
-annoying bugs (see https://github.com/DrKJeff16/project.nvim/issues/24 for more details).
 
-If you don't want this warning to pop up just set `vim.g.project_lsp_nowarn = 1`
-in your config **before calling `setup()`**.
-Otherwise you can just not include the `lsp` method it in your `setup()`
-(`detection_methods = { 'pattern' }`).
-
-I apologize for the inconvenience, I'm trying to fix this bug.
-    ]]
-
-    local methods = {} ---@type ('lsp'|'pattern')[]
-    local checker = { lsp = false, pattern = false }
-    local warning = function() end
-    for _, v in ipairs(self.detection_methods) do
-        if checker.lsp and checker.pattern then
-            break
-        end
-        if Util.is_type('string', v) then
-            if v == 'lsp' and not checker.lsp then
-                if vim.g.project_lsp_nowarn ~= 1 then
-                    warning = vim.schedule_wrap(function()
-                        vim.api.nvim_echo({ { lsp_warning, 'WarningMsg' } }, true, { err = true })
-                    end)
-                end
-                table.insert(methods, v)
-                checker.lsp = true
-            end
-            if v == 'pattern' and not checker.pattern then
-                table.insert(methods, v)
-                checker.pattern = true
-            end
-        end
-    end
-    if empty(methods) then
-        vim.notify('`detection_methods` table is empty! `project.nvim` may not work!', WARN)
-    end
-    self.detection_methods = methods
-    warning()
+    return setmetatable(methods, {
+        __index = methods,
+        __newindex = function(_, _, _)
+            vim.notify('Detection methods are immutable!', vim.log.levels.ERROR)
+        end,
+    })
 end
 
 function DEFAULTS:verify_logging()
@@ -451,7 +394,6 @@ end
 function DEFAULTS:verify()
     self:verify_datapath()
     self:verify_histsize()
-    self:verify_methods()
     self:verify_scope_chdir()
     self:verify_logging()
 end

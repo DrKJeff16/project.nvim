@@ -358,16 +358,13 @@ require('project').setup()
             'alpha',
             'checkhealth',
             'lazy',
-            'minimap', -- from `mini.map`
+            'minimap',
+            'ministarter',
             'notify',
             'packer',
             'qf',
         },
-        bt = {
-            'help',
-            'nofile',
-            'terminal',
-        },
+        bt = { 'help', 'nofile', 'terminal' },
     },
     ---If `true` your root directory won't be changed automatically,
     ---so you have the option to manually do so
@@ -375,19 +372,12 @@ require('project').setup()
     --- ---
     ---Default: `false`
     --- ---
-    ---@type boolean
-    manual_mode = false,
-    ---Methods of detecting the root directory. `'lsp'` uses the native Neovim
-    ---LSP, while `'pattern'` uses vim-rooter like glob pattern matching. Here
-    ---order matters: if one is not detected, the other is used as fallback. You
-    ---can also delete or rearrange the detection methods.
-    ---
-    ---The detection methods get filtered and rid of duplicates during runtime.
+    manual_mode = false, ---@type boolean
+    ---If `true` then LSP detection will take precedence over pattern matching.
     --- ---
-    ---Default: `{ 'lsp', 'pattern' }`
+    ---Default: `true`
     --- ---
-    ---@type ('lsp'|'pattern')[]
-    detection_methods = { 'lsp', 'pattern' },
+    use_lsp = true, ---@type boolean
     ---All the patterns used to detect root dir, when **'pattern'** is in
     ---detection_methods.
     ---

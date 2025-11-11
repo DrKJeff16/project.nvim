@@ -277,7 +277,7 @@ function Api.get_project_root(bufnr)
     end
     bufnr = bufnr or current_buf()
 
-    if vim.tbl_isempty(Config.options.detection_methods) then
+    if vim.tbl_isempty(Config.detection_methods) then
         return
     end
     local SWITCH = {
@@ -301,7 +301,7 @@ function Api.get_project_root(bufnr)
     local root = nil
     local lsp_method = nil
     local ops = vim.tbl_keys(SWITCH) ---@type string[]
-    for _, method in ipairs(Config.options.detection_methods) do
+    for _, method in ipairs(Config.detection_methods) do
         if in_list(ops, method) then
             success, root, lsp_method = SWITCH[method]()
             if success then
@@ -413,9 +413,8 @@ end
 
 function Api.init()
     local group = vim.api.nvim_create_augroup('project.nvim', { clear = false })
-    local detection_methods = Config.options.detection_methods
+    local detection_methods = Config.detection_methods
     vim.api.nvim_create_autocmd('VimLeavePre', {
-        pattern = '*',
         group = group,
         callback = function()
             History.write_history(true)
@@ -424,7 +423,6 @@ function Api.init()
     if not Config.options.manual_mode then
         if in_list(detection_methods, 'pattern') then
             vim.api.nvim_create_autocmd('BufEnter', {
-                pattern = '*',
                 group = group,
                 nested = true,
                 callback = function(ev)
