@@ -35,9 +35,9 @@ local DEFAULTS = {
     ---Any values that aren't valid will be discarded on setup;
     ---same thing with duplicates.
     --- ---
-    ---Default: `{ 'pattern' }`
+    ---Default: `{ 'lsp', 'pattern' }`
     --- ---
-    detection_methods = { 'pattern' }, ---@type ('lsp'|'pattern')[]
+    detection_methods = { 'lsp', 'pattern' }, ---@type ('lsp'|'pattern')[]
     ---All the patterns used to detect the project's root directory.
     ---
     ---By default it only triggers when `'pattern'` is in `detection_methods`.

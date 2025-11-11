@@ -205,7 +205,7 @@ Table of Contents                                             *project-nvim.toc*
                                               (see
                                               |project-nvim.pattern-matching|)
                                 - `'lsp'`: uses the native Neovim LSP
-                                        (see |vim.lsp|). CAN BE BUGGY!
+                                         (see |vim.lsp|). CAN BE BUGGY!
 
                                 ORDER MATTERS HERE! ~
                                 If one is not detected, the other is used
@@ -215,7 +215,7 @@ Table of Contents                                             *project-nvim.toc*
                                 discarded on setup; same thing
                                 with duplicates.
 
-                                Default: `{ 'pattern' }` ~
+                                Default: `{ 'lsp', 'pattern' }` ~
 
 
     * {patterns}                (`string[]`)

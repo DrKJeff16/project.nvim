@@ -384,10 +384,10 @@ require('project').setup()
     ---
     ---The detection methods get filtered and rid of duplicates during runtime.
     --- ---
-    ---Default: `{ 'pattern' }`
+    ---Default: `{ 'lsp', 'pattern' }`
     --- ---
     ---@type ('lsp'|'pattern')[]
-    detection_methods = { 'pattern' },
+    detection_methods = { 'lsp', 'pattern' },
     ---All the patterns used to detect root dir, when **'pattern'** is in
     ---detection_methods.
     ---
