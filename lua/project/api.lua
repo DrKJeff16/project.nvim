@@ -51,17 +51,21 @@ function Api.find_lsp_root(bufnr)
     for _, client in ipairs(clients) do
         ---@type string[]
         local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
-        local valid = Util.is_type('table', filetypes) and not vim.tbl_isempty(filetypes)
-        if valid and in_list(filetypes, ft) and not in_list(ignore_lsp, client.name) then
-            if client.config.root_dir then
-                local dir, name = client.config.root_dir, client.name
-                if Config.options.allow_patterns_for_lsp then
-                    if Path.root_included(dir) == nil then
-                        return
-                    end
+        local valid = (
+            type(filetypes) == 'table'
+            and not vim.tbl_isempty(filetypes)
+            and in_list(filetypes, ft)
+            and not in_list(ignore_lsp, client.name)
+            and client.config.root_dir
+        )
+        if valid then
+            local dir, name = client.config.root_dir, client.name
+            if Config.options.allow_patterns_for_lsp then
+                if Path.root_included(dir) == nil then
+                    return
                 end
-                return dir, name
             end
+            return dir, name
         end
     end
 end
@@ -177,8 +181,7 @@ function Api.set_pwd(dir, method)
         modified = true
     end
     if not modified and #History.session_projects > 1 then
-        ---@type integer
-        local old_pos
+        local old_pos ---@type integer
         for k, v in ipairs(History.session_projects) do
             if v == dir then
                 old_pos = k
@@ -248,8 +251,7 @@ end
 ---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|{ datapath: string, projectpath: string, historyfile: string } res
 function Api.get_history_paths(path)
-    ---@type { datapath: string, projectpath: string, historyfile: string }|string
-    local res = {
+    local res = { ---@type { datapath: string, projectpath: string, historyfile: string }|string
         datapath = Path.datapath,
         projectpath = Path.projectpath,
         historyfile = Path.historyfile,
@@ -294,13 +296,30 @@ function Api.get_project_root(bufnr)
             return false
         end,
     }
-    for _, detection_method in ipairs(Config.options.detection_methods) do
-        if in_list(vim.tbl_keys(SWITCH), detection_method) then
-            local func = SWITCH[detection_method]
-            local success, root, lsp_method = func()
+    local success = false
+    local roots = {} ---@type { [1]: string, [2]: string, [3]: 'lsp'|'pattern' }[]
+    local root = nil
+    local lsp_method = nil
+    local ops = vim.tbl_keys(SWITCH) ---@type string[]
+    for _, method in ipairs(Config.options.detection_methods) do
+        if in_list(ops, method) then
+            success, root, lsp_method = SWITCH[method]()
             if success then
-                return root, lsp_method
+                table.insert(roots, { root, lsp_method, method })
             end
+        end
+    end
+
+    if #roots == 1 then
+        return roots[1][1], roots[1][2]
+    end
+    if roots[1][1] == roots[2][1] then
+        return roots[1][1], roots[1][2]
+    end
+
+    for _, tbl in ipairs(roots) do
+        if tbl[3] == 'pattern' then
+            return tbl[1], tbl[2]
         end
     end
 end
@@ -309,11 +328,10 @@ end
 function Api.get_last_project()
     local recent = History.get_recent_projects()
     if vim.tbl_isempty(recent) or #recent == 1 then
-        return nil
+        return
     end
 
-    ---@type string[]
-    recent = Util.reverse(recent)
+    recent = Util.reverse(recent) ---@type string[]
     return #History.session_projects <= 1 and recent[2] or recent[1]
 end
 
