@@ -15,6 +15,7 @@ local Util = require('project.utils.util')
 ---The options available for in `require('project').setup()`.
 --- ---
 ---@class Project.Config.Options
+---@field detection_methods? ('lsp'|'pattern')[]
 local DEFAULTS = {
     ---If `true` then LSP-based method detection will take precedence over pattern matching.
     --- ---
@@ -29,8 +30,6 @@ local DEFAULTS = {
     --- ---
     manual_mode = false, ---@type boolean
     ---All the patterns used to detect the project's root directory.
-    ---
-    ---By default it only triggers when `'pattern'` is in `detection_methods`.
     ---
     ---See `:h project.nvim-pattern-matching`.
     --- ---
@@ -396,6 +395,15 @@ function DEFAULTS:verify()
     self:verify_histsize()
     self:verify_scope_chdir()
     self:verify_logging()
+
+    if self.detection_methods then
+        vim.schedule(function()
+            vim.notify(
+                '(project.nvim): the `detection_methods` option has been deprecated!\nUse `use_lsp` instead.',
+                WARN
+            )
+        end)
+    end
 end
 
 ---@param opts? Project.Config.Options
