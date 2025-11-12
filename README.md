@@ -1,3 +1,12 @@
+> [!NOTE]
+> This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim/pull/158).
+> Ever since I've decided to extend it and address issues.
+>
+> _**I will be maintaining this plugin for the foreseeable future!**_
+
+> [!IMPORTANT]
+> **_I'm looking for other maintainers in case I'm unable to keep this repo up to date!_**
+
 <div align="center">
 
 # project.nvim [![Mentioned in Awesome Neovim](https://awesome.re/mentioned-badge.svg)](https://github.com/rockerBOO/awesome-neovim)
@@ -29,15 +38,6 @@ This plugin allows you to navigate through projects, _"bookmark"_ and/or discard
 according to your needs.
 
 </div>
-
-> [!NOTE]
-> This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim/pull/158).
-> Ever since I've decided to extend it and address issues.
->
-> _**I will be maintaining this plugin for the foreseeable future!**_
-
-> [!IMPORTANT]
-> **_I'm looking for other maintainers in case I'm unable to keep this repo up to date!_**
 
 <br />
 <details>
