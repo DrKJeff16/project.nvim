@@ -33,14 +33,14 @@ repos:
         entry: selene
         types: [lua]
         verbose: true
-      - id: clean
+      - id: make_clean
         name: Clean help tags
         language: system
-        entry: make clean
-        files: (doc/.*\.txt|Makefile)$
+        entry: "make clean"
+        files: doc/.*\.txt$
         verbose: true
-      - id: make
-        name: Run make
+      - id: make_docs
+        name: Generate local help tags
         language: system
         entry: make
         files: doc/.*\.txt$
