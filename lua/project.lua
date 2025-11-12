@@ -18,6 +18,8 @@ Project.get_history_paths = Api.get_history_paths
 Project.get_last_project = Api.get_last_project
 Project.open_menu = Popup.open_menu
 Project.delete_menu = Popup.delete_menu
+Project.recents_menu = Popup.recents_menu
+Project.session_menu = Popup.session_menu
 Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
@@ -30,14 +32,16 @@ function Project.current_project(refresh)
     if require('project.utils.util').vim_has('nvim-0.11') then
         vim.validate('refresh', refresh, 'boolean', true)
     else
-        vim.validate({ refresh = { refresh, { 'boolean', 'nil' } } })
+        vim.validate({ refresh = { refresh, { 'boolean' }, true } })
     end
     refresh = refresh ~= nil and refresh or false
+
     local Log = require('project.utils.log')
     if refresh then
         Log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
         return Api.get_current_project()
     end
+
     Log.debug(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
     return Api.current_project, Api.current_method, Api.last_project
 end

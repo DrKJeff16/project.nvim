@@ -25,7 +25,7 @@ function Config.setup(options)
     if Util.vim_has('nvim-0.11') then
         vim.validate('options', options, 'table', true)
     else
-        vim.validate({ options = { options, { 'table', 'nil' } } })
+        vim.validate({ options = { options, { 'table' }, true } })
     end
     options = options or {}
     local pattern_exclude = require('project.utils.globtopattern').pattern_exclude

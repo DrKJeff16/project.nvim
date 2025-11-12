@@ -32,8 +32,8 @@ local function hidden_avail(path, hidden)
         vim.validate('hidden', hidden, 'boolean', false)
     else
         vim.validate({
-            path = { path, 'string' },
-            hidden = { hidden, 'boolean' },
+            path = { path, { 'string' } },
+            hidden = { hidden, { 'boolean' } },
         })
     end
 
@@ -74,13 +74,12 @@ local function is_hidden(path)
     if Util.vim_has('nvim-0.11') then
         vim.validate('path', path, 'string', false)
     else
-        vim.validate({ path = { path, 'string' } })
+        vim.validate({ path = { path, { 'string' } } })
     end
     if Util.is_windows() then
         if ffi then
             return bit.band(ffi.C.GetFileAttributesA(path), FILE_ATTRIBUTE_HIDDEN) ~= 0
         end
-
         return false -- FIXME: Find a reliable alternative
     end
 
@@ -97,9 +96,9 @@ local function open_node(proj, only_cd, ran_cd)
         vim.validate('ran_cd', ran_cd, 'boolean', false)
     else
         vim.validate({
-            proj = { proj, 'string' },
-            only_cd = { only_cd, 'boolean' },
-            ran_cd = { ran_cd, 'boolean' },
+            proj = { proj, { 'string' } },
+            only_cd = { only_cd, { 'boolean' } },
+            ran_cd = { ran_cd, { 'boolean' } },
         })
     end
     if not ran_cd then
@@ -184,10 +183,10 @@ function Popup.select.new(opts)
         vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
     else
         vim.validate({
-            opts = { opts, 'table' },
-            choices = { opts.choices, 'function' },
-            choices_list = { opts.choices_list, 'function' },
-            callback = { opts.callback, 'function' },
+            opts = { opts, { 'table' } },
+            choices = { opts.choices, { 'function' } },
+            choices_list = { opts.choices_list, { 'function' } },
+            callback = { opts.callback, { 'function' } },
         })
     end
     if empty(opts) then
@@ -199,9 +198,9 @@ function Popup.select.new(opts)
         vim.validate('callback', opts.callback, 'function', false)
     else
         vim.validate({
-            choices = { opts.choices, 'function' },
-            choices_list = { opts.choices_list, 'function' },
-            callback = { opts.callback, 'function' },
+            choices = { opts.choices, { 'function' } },
+            choices_list = { opts.choices_list, { 'function' } },
+            callback = { opts.callback, { 'function' } },
         })
     end
 
@@ -215,8 +214,7 @@ function Popup.select.new(opts)
         __index = function(t, k)
             return rawget(t, k)
         end,
-        ---@param ctx? vim.api.keyset.create_user_command.command_args
-        __call = function(_, ctx)
+        __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args
             if not ctx then
                 opts.callback()
                 return
@@ -232,7 +230,7 @@ function Popup.prompt_project(input)
     if Util.vim_has('nvim-0.11') then
         vim.validate('input', input, 'string', true, 'string|nil')
     else
-        vim.validate({ input = { input, { 'string', 'nil' } } })
+        vim.validate({ input = { input, { 'string' }, true } })
     end
     if not input or input == '' then
         return
@@ -385,7 +383,7 @@ Popup.open_menu = Popup.select.new({
                 Popup.session_menu()
             end,
             ['New Project'] = function()
-                require('project.commands').ProjectAdd()
+                require('project.commands').cmds.ProjectAdd()
             end,
             ['Open Recent Project'] = function()
                 Popup.recents_menu()
@@ -394,7 +392,7 @@ Popup.open_menu = Popup.select.new({
                 Popup.delete_menu()
             end,
             ['Show Config'] = function()
-                require('project.commands').ProjectConfig()
+                require('project.commands').cmds.ProjectConfig()
             end,
             ['Open History'] = function()
                 vim.cmd.ProjectHistory()

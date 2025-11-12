@@ -302,7 +302,7 @@ function DEFAULTS:verify_histsize()
     if Util.vim_has('nvim-0.11') then
         vim.validate('historysize', self.historysize, 'number', false, 'integer')
     else
-        vim.validate({ historysize = { self.historysize, 'number' } })
+        vim.validate({ historysize = { self.historysize, { 'number' } } })
     end
     if self.historysize >= 0 or self.historysize == math.floor(self.historysize) then
         return
@@ -320,7 +320,7 @@ function DEFAULTS:verify_scope_chdir()
     if Util.vim_has('nvim-0.11') then
         vim.validate('scope_chdir', self.scope_chdir, 'string', false, "'global'|'tab'|'win'")
     else
-        vim.validate({ scope_chdir = { self.scope_chdir, 'string' } })
+        vim.validate({ scope_chdir = { self.scope_chdir, { 'string' } } })
     end
 
     local VALID = { 'global', 'tab', 'win' }
@@ -414,7 +414,7 @@ function DEFAULTS:new(opts)
     if require('project.utils.util').vim_has('nvim-0.11') then
         vim.validate('opts', opts, 'table', true, 'Project.Config.Options')
     else
-        vim.validate({ opts = { opts, { 'table', 'nil' } } })
+        vim.validate({ opts = { opts, { 'table' }, true } })
     end
 
     local obj = vim.tbl_deep_extend('keep', opts or {}, DEFAULTS) ---@type Project.Config.Options

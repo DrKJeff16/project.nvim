@@ -3,6 +3,7 @@
 local uv = vim.uv or vim.loop
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
+local in_list = vim.list_contains
 
 ---@class Project.Utils.Util
 local Util = {}
@@ -52,9 +53,9 @@ function Util.capitalize(str, use_dot, triggers)
         vim.validate('triggers', triggers, 'table', true, 'string[]')
     else
         vim.validate({
-            str = { str, 'string' },
-            use_dot = { use_dot, { 'boolean', 'nil' } },
-            triggers = { triggers, { 'table', 'nil' } },
+            str = { str, { 'string' } },
+            use_dot = { use_dot, { 'boolean' }, true },
+            triggers = { triggers, { 'table' }, true },
         })
     end
     use_dot = use_dot ~= nil and use_dot or false
@@ -62,10 +63,11 @@ function Util.capitalize(str, use_dot, triggers)
     if str == '' then
         return str
     end
-    if not in_tbl(triggers, ' ') then
+
+    if not in_list(triggers, ' ') then
         table.insert(triggers, ' ')
     end
-    if not in_tbl(triggers, '') then
+    if not in_list(triggers, '') then
         table.insert(triggers, '')
     end
 
@@ -74,7 +76,7 @@ function Util.capitalize(str, use_dot, triggers)
     local dot = true
     while i <= strlen do
         local char = str:sub(i, i)
-        if char == char:lower() and in_tbl(triggers, prev_char) then
+        if char == char:lower() and in_list(triggers, prev_char) then
             char = dot and char:upper() or char:lower()
             if dot then
                 dot = false
@@ -113,7 +115,7 @@ function Util.is_type(t, data)
             if v == nil or type(v) ~= 'string' then
                 return false
             end
-            return in_tbl(TYPES, v)
+            return in_list(TYPES, v)
         end, false, "'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'")
     else
         vim.validate({
@@ -124,7 +126,7 @@ function Util.is_type(t, data)
                     if v == nil or type(v) ~= 'string' then
                         return false
                     end
-                    return in_tbl(TYPES, v)
+                    return in_list(TYPES, v)
                 end,
             },
         })
@@ -140,7 +142,7 @@ function Util.mod_exists(mod)
     if Util.vim_has('nvim-0.11') then
         vim.validate('mod', mod, 'string', false)
     else
-        vim.validate({ mod = { mod, 'string' } })
+        vim.validate({ mod = { mod, { 'string' } } })
     end
     if mod == '' then
         return false
@@ -160,8 +162,8 @@ function Util.lstrip(char, str)
         vim.validate('str', str, 'string', false)
     else
         vim.validate({
-            char = { char, 'string' },
-            str = { str, 'string' },
+            char = { char, { 'string' } },
+            str = { str, { 'string' } },
         })
     end
     if str == '' or not vim.startswith(str, char) then
@@ -193,8 +195,8 @@ function Util.rstrip(char, str)
         vim.validate('str', str, 'string', false)
     else
         vim.validate({
-            char = { char, 'string' },
-            str = { str, 'string' },
+            char = { char, { 'string' } },
+            str = { str, { 'string' } },
         })
     end
     if str == '' then
@@ -219,8 +221,8 @@ function Util.strip(char, str)
         vim.validate('str', str, 'string', false)
     else
         vim.validate({
-            char = { char, 'string' },
-            str = { str, 'string' },
+            char = { char, { 'string' } },
+            str = { str, { 'string' } },
         })
     end
     if str == '' then
@@ -242,7 +244,7 @@ function Util.dedup(T)
     if Util.vim_has('nvim-0.11') then
         vim.validate('T', T, 'table', false)
     else
-        vim.validate({ T = { T, 'table' } })
+        vim.validate({ T = { T, { 'table' } } })
     end
     if empty(T) then
         return T
@@ -256,7 +258,7 @@ function Util.dedup(T)
                 return vim.deep_equal(val, v)
             end, { predicate = true })
         else
-            not_dup = not in_tbl(NT, v)
+            not_dup = not in_list(NT, v)
         end
         if not_dup then
             table.insert(NT, v)
@@ -266,7 +268,7 @@ function Util.dedup(T)
 end
 
 ---@param t 'number'|'string'|'boolean'|'table'|'function'
----@param data nil|number|string|boolean|table|fun()
+---@param data nil|number|string|boolean|table|function
 ---@param sep? string
 ---@param constraints? string[]
 ---@return string
@@ -278,7 +280,7 @@ function Util.format_per_type(t, data, sep, constraints)
                 return false
             end
 
-            return in_tbl({ 'number', 'string', 'boolean', 'table', 'function' }, v)
+            return in_list({ 'number', 'string', 'boolean', 'table', 'function' }, v)
         end, false, "'number'|'string'|'boolean'|'table'|'function'")
         vim.validate(
             'data',
@@ -298,15 +300,16 @@ function Util.format_per_type(t, data, sep, constraints)
                         return false
                     end
 
-                    return in_tbl({ 'number', 'string', 'boolean', 'table', 'function' }, v)
+                    return in_list({ 'number', 'string', 'boolean', 'table', 'function' }, v)
                 end,
             },
             data = {
                 data,
-                { 'number', 'string', 'boolean', 'table', 'function', 'nil' },
+                { 'number', 'string', 'boolean', 'table', 'function' },
+                true,
             },
-            sep = { sep, { 'string', 'nil' } },
-            constraints = { constraints, { 'table', 'nil' } },
+            sep = { sep, { 'string' }, true },
+            constraints = { constraints, { 'table' }, true },
         })
     end
 
@@ -318,7 +321,7 @@ function Util.format_per_type(t, data, sep, constraints)
         if not is_type('table', constraints) then
             return res
         end
-        if constraints ~= nil and in_tbl(constraints, data) then
+        if constraints ~= nil and in_list(constraints, data) then
             return res
         end
         return res, true
@@ -367,7 +370,7 @@ function Util.reverse(T)
     if Util.vim_has('nvim-0.11') then
         vim.validate('T', T, 'table', false)
     else
-        vim.validate({ T = { T, 'table' } })
+        vim.validate({ T = { T, { 'table' } } })
     end
     if empty(T) then
         return T
@@ -391,7 +394,7 @@ function Util.dir_exists(dir)
     if Util.vim_has('nvim-0.11') then
         vim.validate('dir', dir, 'string', false)
     else
-        vim.validate({ dir = { dir, 'string' } })
+        vim.validate({ dir = { dir, { 'string' } } })
     end
 
     local stat = uv.fs_stat(dir)
@@ -404,7 +407,7 @@ function Util.path_exists(path)
     if Util.vim_has('nvim-0.11') then
         vim.validate('path', path, 'string', false)
     else
-        vim.validate({ path = { path, 'string' } })
+        vim.validate({ path = { path, { 'string' } } })
     end
     if Util.dir_exists(path) then
         return true
@@ -420,7 +423,7 @@ function Util.get_dict_size(T)
     if Util.vim_has('nvim-0.11') then
         vim.validate('T', T, 'table', false)
     else
-        vim.validate({ T = { T, 'table' } })
+        vim.validate({ T = { T, { 'table' } } })
     end
     local len = 0
     if vim.tbl_isempty(T) then
@@ -439,7 +442,7 @@ function Util.normalise_path(path)
     if Util.vim_has('nvim-0.11') then
         vim.validate('path', path, 'string', false)
     else
-        vim.validate({ path = { path, 'string' } })
+        vim.validate({ path = { path, { 'string' } } })
     end
     local normalised_path = path:gsub('\\', '/'):gsub('//', '/')
     if Util.is_windows() then

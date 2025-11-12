@@ -19,23 +19,24 @@ local in_list = vim.list_contains
 local curr_buf = vim.api.nvim_get_current_buf
 local vim_has = require('project.utils.util').vim_has
 
----@type table<string, Project.CMD>
+---@class Project.Commands
 local Commands = {}
 
----@type fun(specs: Project.Commands.Spec[])
-function Commands.new(specs)
+function Commands.new(specs) ---@type fun(specs: Project.Commands.Spec[])
     if vim_has('nvim-0.11') then
         vim.validate('specs', specs, 'table', false)
     else
-        vim.validate({ specs = { specs, 'table' } })
+        vim.validate({ specs = { specs, { 'table' } } })
     end
     if vim.tbl_isempty(specs) then
-        error(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
+        vim.notify(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
+        return
     end
 
     for _, spec in ipairs(specs) do
         if not (spec.callback and vim.is_callable(spec.callback)) then
-            error(('(%s.new): Missing callback!'):format(MODSTR), ERROR)
+            vim.notify(('(%s.new): Missing callback!'):format(MODSTR), ERROR)
+            return
         end
         local bang = spec.bang ~= nil and spec.bang or false
         local T = { name = spec.name, desc = spec.desc, bang = bang }
@@ -48,9 +49,8 @@ function Commands.new(specs)
             T.complete = spec.complete
             opts.complete = spec.complete
         end
-        Commands[spec.name] = setmetatable({}, {
-            ---@param k string
-            __index = function(_, k)
+        Commands.cmds[spec.name] = setmetatable({}, {
+            __index = function(_, k) ---@param k string
                 return T[k]
             end,
             __tostring = function(_)
@@ -66,7 +66,7 @@ function Commands.new(specs)
         })
         vim.api.nvim_create_user_command(spec.name, function(ctx)
             local with_ctx = spec.with_ctx ~= nil and spec.with_ctx or false
-            local cmd = Commands[spec.name]
+            local cmd = Commands.cmds[spec.name]
             if with_ctx then
                 cmd(ctx)
                 return
@@ -241,6 +241,9 @@ function Commands.create_user_commands() ---@type function
         },
     })
 end
+
+---@type table<string, Project.CMD>
+Commands.cmds = {}
 
 return Commands
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

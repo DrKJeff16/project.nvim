@@ -23,7 +23,7 @@ function Path.get_files(file_dir)
     if vim_has('nvim-0.11') then
         vim.validate('file_dir', file_dir, 'string', false)
     else
-        vim.validate({ file_dir = { file_dir, 'string' } })
+        vim.validate({ file_dir = { file_dir, { 'string' } } })
     end
     Path.last_dir_cache = file_dir
     Path.curr_dir_cache = {}
@@ -48,8 +48,8 @@ function Path.has(dir, identifier)
         vim.validate('identifier', identifier, 'string', false)
     else
         vim.validate({
-            dir = { dir, 'string' },
-            identifier = { identifier, 'string' },
+            dir = { dir, { 'string' } },
+            identifier = { identifier, { 'string' } },
         })
     end
     local globtopattern = require('project.utils.globtopattern').globtopattern
@@ -75,8 +75,8 @@ function Path.is(dir, identifier)
         vim.validate('identifier', identifier, 'string', false)
     else
         vim.validate({
-            dir = { dir, 'string' },
-            identifier = { identifier, 'string' },
+            dir = { dir, { 'string' } },
+            identifier = { identifier, { 'string' } },
         })
     end
     return dir:match('.*/(.*)') == identifier
@@ -88,7 +88,7 @@ function Path.get_parent(path_str)
     if vim_has('nvim-0.11') then
         vim.validate('path_str', path_str, 'string', false)
     else
-        vim.validate({ path_str = { path_str, 'string' } })
+        vim.validate({ path_str = { path_str, { 'string' } } })
     end
     path_str = path_str:match('^(.*)/') ---@type string
     return (path_str ~= '') and path_str or '/'
@@ -103,8 +103,8 @@ function Path.sub(dir, identifier)
         vim.validate('identifier', identifier, 'string', false)
     else
         vim.validate({
-            dir = { dir, 'string' },
-            identifier = { identifier, 'string' },
+            dir = { dir, { 'string' } },
+            identifier = { identifier, { 'string' } },
         })
     end
     local path_str = Path.get_parent(dir)
@@ -129,8 +129,8 @@ function Path.child(dir, identifier)
         vim.validate('identifier', identifier, 'string', false)
     else
         vim.validate({
-            dir = { dir, 'string' },
-            identifier = { identifier, 'string' },
+            dir = { dir, { 'string' } },
+            identifier = { identifier, { 'string' } },
         })
     end
     return Path.is(Path.get_parent(dir), identifier)
@@ -145,8 +145,8 @@ function Path.match(dir, pattern)
         vim.validate('pattern', pattern, 'string', false)
     else
         vim.validate({
-            dir = { dir, 'string' },
-            pattern = { pattern, 'string' },
+            dir = { dir, { 'string' } },
+            pattern = { pattern, { 'string' } },
         })
     end
 
@@ -169,7 +169,7 @@ function Path.create_path(path)
     if vim_has('nvim-0.11') then
         vim.validate('path', path, 'string', true)
     else
-        vim.validate({ path = { path, { 'string', 'nil' } } })
+        vim.validate({ path = { path, { 'string' }, true } })
     end
     path = path or Path.projectpath
 
@@ -187,7 +187,7 @@ function Path.root_included(dir)
     if vim_has('nvim-0.11') then
         vim.validate('dir', dir, 'string', false)
     else
-        vim.validate({ dir = { dir, 'string' } })
+        vim.validate({ dir = { dir, { 'string' } } })
     end
     local Config = require('project.config')
     while true do ---Breadth-First search
@@ -217,7 +217,7 @@ function Path.is_excluded(dir)
     if vim_has('nvim-0.11') then
         vim.validate('dir', dir, 'string', false)
     else
-        vim.validate({ dir = { dir, 'string' } })
+        vim.validate({ dir = { dir, { 'string' } } })
     end
     local exclude_dirs = require('project.config').options.exclude_dirs
     for _, excluded in ipairs(exclude_dirs) do

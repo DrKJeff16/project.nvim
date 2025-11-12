@@ -51,7 +51,7 @@ function History.open_history(mode)
     if Util.vim_has('nvim-0.11') then
         vim.validate('mode', mode, 'string', false, 'OpenMode')
     else
-        vim.validate({ mode = { mode, 'string' } })
+        vim.validate({ mode = { mode, { 'string' } } })
     end
     Path.create_path()
     local dir_stat = uv.fs_stat(Path.projectpath)
@@ -72,7 +72,7 @@ local function delete_duplicates(tbl)
     if Util.vim_has('nvim-0.11') then
         vim.validate('tbl', tbl, 'table', false, 'string[]')
     else
-        vim.validate({ tbl = { tbl, 'table' } })
+        vim.validate({ tbl = { tbl, { 'table' } } })
     end
 
     local cache_dict = {} ---@type table<string, integer>
@@ -150,7 +150,7 @@ function History.deserialize_history(history_data)
     if Util.vim_has('nvim-0.11') then
         vim.validate('history_data', history_data, 'string', false)
     else
-        vim.validate({ history_data = { history_data, 'string' } })
+        vim.validate({ history_data = { history_data, { 'string' } } })
     end
 
     local projects = {} ---@type string[]
@@ -225,7 +225,7 @@ function History.write_history(close)
     if Util.vim_has('nvim-0.11') then
         vim.validate('close', close, 'boolean', true, 'boolean?')
     else
-        vim.validate({ close = { close, { 'boolean', 'nil' } } })
+        vim.validate({ close = { close, { 'boolean' }, true } })
     end
     close = close ~= nil and close or false
     local Log = require('project.utils.log')
