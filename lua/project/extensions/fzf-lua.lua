@@ -1,7 +1,6 @@
 local MODSTR = 'project.extensions.fzf-lua'
 local ERROR = vim.log.levels.ERROR
 local Util = require('project.utils.util')
-local mod_exists = Util.mod_exists
 
 ---@class Project.Extensions.FzfLua
 local FzfLua = {}
@@ -43,7 +42,7 @@ end
 --- ---
 function FzfLua.run_fzf_lua()
     local Log = require('project.utils.log')
-    if not mod_exists('fzf-lua') then
+    if not Util.mod_exists('fzf-lua') then
         Log.error(('(%s.run_fzf_lua): `fzf-lua` is not installed!'):format(MODSTR))
         vim.notify(('(%s.run_fzf_lua): `fzf-lua` is not installed!'):format(MODSTR), ERROR)
         return
