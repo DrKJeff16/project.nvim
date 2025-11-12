@@ -17,7 +17,10 @@ local Util = require('project.utils.util')
 ---@class Project.Config.Options
 ---@field detection_methods? ('lsp'|'pattern')[]
 local DEFAULTS = {
-    ---If `true` then LSP-based method detection will take precedence over pattern matching.
+    ---If `true` then LSP-based method detection
+    ---will take precedence over traditional pattern matching.
+    ---
+    ---See |project-nvim.pattern-matching| for more info.
     --- ---
     ---Default: `true`
     --- ---
@@ -78,15 +81,17 @@ local DEFAULTS = {
     ---Sets whether to use Pattern Matching rules to the LSP client.
     ---
     ---If `false` the Pattern Matching will only apply
-    ---to the `'pattern'` detection method.
+    ---to normal pattern matching.
     ---
-    ---If `true` the `patters` setting will also filter
-    ---your LSP's `root_dir`, assuming there is one and `'lsp'` is in `patterns`.
+    ---If `true` the `patterns` setting will also filter
+    ---your LSP's `root_dir`, assuming there is one
+    ---and `use_lsp` is set to `true`.
     --- ---
     ---Default: `false`
     --- ---
     allow_patterns_for_lsp = false, ---@type boolean
-    ---Determines whether a project will be added if its project root is owned by a different user.
+    ---Determines whether a project will be added
+    ---if its project root is owned by a different user.
     ---
     ---If `true`, it will add a project to the history even if its root
     ---is not owned by the current nvim `UID` **(UNIX only)**.
@@ -154,25 +159,22 @@ local DEFAULTS = {
     ---The default value for this one can be found in the project's `README.md`.
     --- ---
     disable_on = { ---@type { ft: string[], bt: string[] }
-        ---`filetype`
-        ft = {
+        ft = { -- `filetype`
             '',
-            'log',
+            'NvimTree',
             'TelescopePrompt',
             'TelescopeResults',
             'alpha',
             'checkhealth',
             'lazy',
+            'log',
+            'ministarter',
+            'neo-tree',
             'notify',
             'packer',
             'qf',
         },
-        ---`buftype`
-        bt = {
-            'help',
-            'nofile',
-            'terminal',
-        },
+        bt = { 'help', 'nofile', 'nowrite', 'terminal' }, -- `buftype`
     },
     ---The path where `project.nvim` will store the project history directory,
     ---containing the project history in it.

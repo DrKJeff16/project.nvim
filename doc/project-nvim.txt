@@ -199,16 +199,17 @@ Table of Contents                                             *project-nvim.toc*
 
 
     * {use_lsp}                 (boolean)
-                                If `true` then LSP detection will take
-                                precedence over pattern matching
+                                If `true` then LSP-based method detection
+                                will take precedence over traditional
+                                pattern matching.
+                                See |project-nvim.pattern-matching|
+                                for more info
 
                                 Default: `true` ~
 
 
     * {patterns}                (`string[]`)
-                                All the patterns used to detect the root dir
-                                when `pattern` is in {detection_methods}.
-
+                                All the patterns used to detect the root dir.
                                 See |project-nvim.pattern-matching| for more
                                 info on pattern matching.
 
@@ -229,11 +230,11 @@ Table of Contents                                             *project-nvim.toc*
                                 to the LSP client.
 
                                 If `false` the Pattern Matching will
-                                only apply to the `'pattern'` detection method.
-                                If `true` the {patters} setting will
+                                only apply to normal pattern matching.
+                                If `true` the {patterns} setting will
                                 also filter your LSP's `root_dir`,
-                                assuming there is one and `'lsp'`
-                                is in {patterns}.
+                                assuming there is one and {use_lsp}
+                                is set to `true`.
 
                                 See |project-nvim.pattern-matching| for more
                                 info on pattern matching
