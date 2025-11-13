@@ -57,7 +57,7 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: "Output Of `:ProjectConfig`"
+      label: "Output Of `:ProjectConfig!`"
       description: |
         In case the bug does not impair this user command, it is highly encouraged
         for you to paste the output in this issue.

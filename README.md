@@ -691,9 +691,10 @@ The command is like doing the following in the cmdline:
 ### `:ProjectConfig`
 
 The `:ProjectConfig` command will open your current config in a floating window,
-making it easier to access.
+making it easier to access. To exit the window you can either press `q` in normal mode
+or by runnning `:ProjectConfig` again.
 
-To exit the window you can either press `q` in normal mode or by runnning `:ProjectConfig!`.
+You can also print the output instead by running `:ProjectConfig!`.
 
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.

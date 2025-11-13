@@ -726,8 +726,11 @@ Table of Contents                                             *project-nvim.toc*
                             your current config in a floating window,
                             making it easier to access.
                             To exit the window you can either
-                            press `q` in normal mode
-                            or by runnning `:ProjectConfig!`.
+                            press `q` in normal mode or
+                            by runnning `:ProjectConfig` again.
+
+                            You can also print the output instead
+                            by running `:ProjectConfig!`.
                             Useful for debugging
 
 
