@@ -52,7 +52,7 @@ function Api.find_lsp_root(bufnr)
         ---@type string[]
         local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
         local valid = (
-            type(filetypes) == 'table'
+            Util.is_type('table', filetypes)
             and not vim.tbl_isempty(filetypes)
             and in_list(filetypes, ft)
             and not in_list(ignore_lsp, client.name)
@@ -138,8 +138,8 @@ function Api.gen_lsp_autocmd(group)
     vim.g.project_lspattach = 1
 end
 
----@param dir? string
----@param method? string
+---@param dir string|nil
+---@param method string|nil
 ---@return boolean
 function Api.set_pwd(dir, method)
     if Util.vim_has('nvim-0.11') then
@@ -210,8 +210,13 @@ function Api.set_pwd(dir, method)
     local scope_chdir = Config.options.scope_chdir
     local msg = ('(%s.set_pwd):'):format(MODSTR)
     if not in_list({ 'global', 'tab', 'win' }, scope_chdir) then
-        Log.error(('%s INVALID value for `scope_chdir`'):format(msg))
-        error(('%s INVALID value for `scope_chdir`'):format(msg), ERROR)
+        Log.error(
+            ('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir))
+        )
+        vim.notify(
+            ('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)),
+            ERROR
+        )
     end
 
     vim.g.project_cwd_log = 0
@@ -240,8 +245,7 @@ function Api.set_pwd(dir, method)
         Log.error(msg)
     end
 
-    local verbose = not Config.options.silent_chdir
-    if verbose then
+    if not Config.options.silent_chdir then
         vim.schedule(function()
             vim.notify(msg, (ok and INFO or ERROR))
         end)
@@ -297,11 +301,10 @@ function Api.get_project_root(bufnr)
             return false
         end,
     }
-    local success = false
     local roots = {} ---@type { [1]: string, [2]: string, [3]: 'lsp'|'pattern' }[]
-    local root = nil
-    local lsp_method = nil
+    local root, lsp_method = nil, nil
     local ops = vim.tbl_keys(SWITCH) ---@type string[]
+    local success = false
     for _, method in ipairs(Config.detection_methods) do
         if in_list(ops, method) then
             success, root, lsp_method = SWITCH[method]()
@@ -357,7 +360,7 @@ end
 
 ---@param bufnr? integer
 ---@return boolean
-function Api.buf_is_file(bufnr)
+function Api.valid_bt(bufnr)
     if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer?')
     else
@@ -383,7 +386,7 @@ function Api.on_buf_enter(verbose, bufnr)
     end
     verbose = verbose ~= nil and verbose or false
     bufnr = bufnr or current_buf()
-    if not Api.buf_is_file(bufnr) then
+    if not Api.valid_bt(bufnr) then
         return
     end
 
@@ -396,8 +399,7 @@ function Api.on_buf_enter(verbose, bufnr)
     end
 
     local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
-    local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
-    if in_list(Config.options.disable_on.ft, ft) or in_list(Config.options.disable_on.bt, bt) then
+    if in_list(Config.options.disable_on.ft, ft) then
         return
     end
 

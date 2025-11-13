@@ -12,20 +12,17 @@ if not require('project.utils.util').mod_exists('telescope') then
     return
 end
 
-local History = require('project.utils.history')
-local Api = require('project.api')
-local Config = require('project.config')
-local Util = require('project.utils.util')
-local make_display = require('telescope._extensions.projects.util').make_display
-local reverse = Util.reverse
-local is_type = Util.is_type
-
 local Telescope = require('telescope')
 local Finders = require('telescope.finders')
 local Actions = require('telescope.actions')
 local Generate = require('telescope.actions.generate')
 local Builtin = require('telescope.builtin')
 local State = require('telescope.actions.state')
+local History = require('project.utils.history')
+local Api = require('project.api')
+local Config = require('project.config')
+local Util = require('project.utils.util')
+local make_display = require('telescope._extensions.projects.util').make_display
 
 ---@class Project.Telescope.Actions
 local T_Actions = {}
@@ -45,7 +42,7 @@ function T_Actions.change_working_directory(prompt_bufnr)
     local selected_entry = State.get_selected_entry() ---@type Project.ActionEntry
     Actions.close(prompt_bufnr)
     Log.debug(('(%s.change_working_directory): Closed prompt `%s`.'):format(MODSTR, prompt_bufnr))
-    if not (selected_entry and is_type('string', selected_entry.value)) then
+    if not selected_entry then
         Log.error(('(%s.change_working_directory): Invalid entry!'):format(MODSTR))
         return
     end
@@ -76,11 +73,13 @@ function T_Actions.find_project_files(prompt_bufnr)
         hide_parent_dir = true,
         mode = 'insert',
     }
+
+    ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
     if prefer_file_browser and Telescope.extensions.file_browser then
-        ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
         Telescope.extensions.file_browser.file_browser(opts)
         return
     end
+
     Builtin.find_files(opts)
 end
 
@@ -90,6 +89,7 @@ function T_Actions.browse_project_files(prompt_bufnr)
     if not cd_successful then
         return
     end
+
     local hidden = Config.options.show_hidden
     local prefer_file_browser = Config.options.telescope.prefer_file_browser
     local opts = {
@@ -100,8 +100,9 @@ function T_Actions.browse_project_files(prompt_bufnr)
         hide_parent_dir = true,
         mode = 'insert',
     }
+
+    ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
     if prefer_file_browser and Telescope.extensions.file_browser then
-        ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
         Telescope.extensions.file_browser.file_browser(opts)
         return
     end
@@ -114,11 +115,8 @@ function T_Actions.search_in_project_files(prompt_bufnr)
     if not cd_successful then
         return
     end
-    Builtin.live_grep({
-        cwd = project_path,
-        hidden = Config.options.show_hidden,
-        mode = 'insert',
-    })
+
+    Builtin.live_grep({ cwd = project_path, hidden = Config.options.show_hidden, mode = 'insert' })
 end
 
 ---@param prompt_bufnr integer
@@ -127,15 +125,15 @@ function T_Actions.recent_project_files(prompt_bufnr)
     if not cd_successful then
         return
     end
+
     local hidden = Config.options.show_hidden
     Builtin.oldfiles({ cwd_only = true, hidden = hidden })
 end
 
 ---@param prompt_bufnr integer
 function T_Actions.delete_project(prompt_bufnr)
-    ---@type Project.ActionEntry
-    local active_entry = State.get_selected_entry()
-    if not (active_entry and is_type('string', active_entry.value)) then
+    local active_entry = State.get_selected_entry() ---@type Project.ActionEntry
+    if not active_entry then
         Actions.close(prompt_bufnr)
         Log.error(('(%s.delete_project): Entry not available!'):format(MODSTR, prompt_bufnr))
         return
@@ -150,6 +148,7 @@ function T_Actions.delete_project(prompt_bufnr)
         Log.info('(%s.delete_project): Aborting project deletion.')
         return
     end
+
     History.delete_project(active_entry.value)
     Log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
     State.get_current_picker(prompt_bufnr):refresh(
@@ -157,7 +156,7 @@ function T_Actions.delete_project(prompt_bufnr)
             local results = History.get_recent_projects()
             if Config.options.telescope.sort == 'newest' then
                 Log.debug(('(%s.create_finder): Sorting order to `newest`.'):format(MODSTR))
-                results = reverse(results)
+                results = Util.reverse(results)
             end
             return Finders.new_table({
                 results = results,

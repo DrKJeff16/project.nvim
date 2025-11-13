@@ -9,6 +9,7 @@ if not require('project.utils.util').mod_exists('telescope') then
     vim.notify(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
     return
 end
+
 local Main = require('telescope._extensions.projects.main')
 
 ---@class TelescopeProjects

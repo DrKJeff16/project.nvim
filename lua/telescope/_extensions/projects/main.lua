@@ -11,8 +11,8 @@ if not Util.mod_exists('telescope') then
     Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
     vim.notify(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
 end
-local in_list = vim.list_contains
 
+local in_list = vim.list_contains
 local Pickers = require('telescope.pickers')
 local Actions = require('telescope.actions')
 local State = require('telescope.actions.state')
@@ -24,9 +24,7 @@ local _Util = require('telescope._extensions.projects.util')
 local Main = {}
 
 --- CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
-Main.default_opts = {
-    prompt_prefix = '󱎸  ',
-}
+Main.default_opts = { prompt_prefix = '󱎸  ' }
 
 local valid_acts = {
     'browse_project_files',
@@ -49,23 +47,21 @@ local function normal_attach(prompt_bufnr, map)
     end
 
     for mode, group in pairs(Keys) do
-        if in_list({ 'n', 'i' }, mode) then
-            if is_type('table', group) and not vim.tbl_isempty(group) then
-                if mode == 'n' then
-                    group['?'] = 'help_mappings'
-                else
-                    group['<C-?>'] = 'help_mappings'
-                end
-                for lhs, act in pairs(group) do
-                    ---@type function|false
-                    local rhs = in_list(valid_acts, act) and _Actions[act] or false
-                    if rhs and vim.is_callable(rhs) and is_type('string', lhs) then
-                        map(mode, lhs, rhs)
-                    end
+        if in_list({ 'n', 'i' }, mode) and group and not vim.tbl_isempty(group) then
+            if mode == 'n' then
+                group['?'] = 'help_mappings'
+            else
+                group['<C-?>'] = 'help_mappings'
+            end
+            for lhs, act in pairs(group) do
+                local rhs = in_list(valid_acts, act) and _Actions[act] or false ---@type function|false
+                if rhs and vim.is_callable(rhs) and is_type('string', lhs) then
+                    map(mode, lhs, rhs)
                 end
             end
         end
     end
+
     Actions.select_default:replace(function()
         if require('project.config').options.telescope.disable_file_picker then
             local entry = State.get_selected_entry()
@@ -78,7 +74,7 @@ local function normal_attach(prompt_bufnr, map)
     return true
 end
 
----@param opts? table
+---@param opts table|nil
 function Main.setup(opts)
     if vim.g.project_telescope_loaded ~= 1 then
         Main.default_opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
@@ -90,7 +86,7 @@ end
 ---
 ---CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
 --- ---
----@param opts? table
+---@param opts table|nil
 function Main.projects(opts)
     if vim.g.project_telescope_loaded ~= 1 then
         Log.error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
@@ -112,7 +108,7 @@ function Main.projects(opts)
     }):find()
 end
 
----@type TelescopeProjects.Main
-local M = setmetatable({}, { __index = Main })
+local M = setmetatable({}, { __index = Main }) ---@type TelescopeProjects.Main
+
 return M
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

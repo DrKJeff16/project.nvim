@@ -24,7 +24,7 @@ Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
----@param refresh? boolean
+---@param refresh boolean|nil
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last

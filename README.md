@@ -75,7 +75,7 @@ Show these much love!
 
 ## Features
 
-- Automatically sets the `cwd` to the project root directory using either pattern matching (LSP optionally)
+- Automatically sets the `cwd` to the project root directory using pattern matching (LSP optionally)
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook `:checkhealth project`
 - Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)

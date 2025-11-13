@@ -18,22 +18,17 @@ local Entry_display = require('telescope.pickers.entry_display')
 ---@class Project.Telescope.Util
 local T_Util = {}
 
----@param entry { name: string, value: string, display: fun(...: any), index: integer, ordinal: string }
+---@param entry { name: string, value: string, display: function, index: integer, ordinal: string }
 function T_Util.make_display(entry)
     Log.debug(
         ('(%s.make_display): Creating display. Entry values: %s'):format(MODSTR, vim.inspect(entry))
     )
-    local displayer = Entry_display.create({
+    return Entry_display.create({
         separator = ' ',
-        items = {
-            { width = 30 },
-            { remaining = true },
-        },
-    })
-    return displayer({ entry.name, { entry.value, 'Comment' } })
+        items = { { width = 30 }, { remaining = true } },
+    })({ entry.name, { entry.value, 'Comment' } })
 end
 
----@return table
 function T_Util.create_finder()
     local sort = require('project.config').options.telescope.sort
     Log.info(('(%s.create_finder): Sorting by `%s`.'):format(MODSTR, sort))
@@ -46,7 +41,7 @@ function T_Util.create_finder()
     Log.debug(('(%s.create_finder): Returning new Finder table.'):format(MODSTR))
     return Finders.new_table({
         results = results,
-        entry_maker = function(entry)
+        entry_maker = function(entry) ---@param entry string
             local name = ('%s/%s'):format(
                 vim.fn.fnamemodify(entry, ':h:t'),
                 vim.fn.fnamemodify(entry, ':t')

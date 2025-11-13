@@ -28,10 +28,14 @@ function Config.setup(options)
         vim.validate({ options = { options, { 'table' }, true } })
     end
     options = options or {}
+
     local pattern_exclude = require('project.utils.globtopattern').pattern_exclude
     Config.options = Config.get_defaults():new(options)
+
     Config.detection_methods = Config.options:gen_methods()
+
     Config.options:expand_excluded()
+
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
     Config.options:verify() -- Verify config integrity
 
@@ -67,6 +71,7 @@ function Config.get_config()
     end
     local exceptions = {
         'new',
+        'verify',
         'verify_datapath',
         'verify_histsize',
         'verify_logging',
@@ -130,11 +135,7 @@ function Config.open_win()
     vim.bo[bufnr].buftype = 'nowrite'
     vim.bo[bufnr].modifiable = false
 
-    vim.keymap.set('n', 'q', Config.close_win, {
-        buffer = bufnr,
-        noremap = true,
-        silent = true,
-    })
+    vim.keymap.set('n', 'q', Config.close_win, { buffer = bufnr, noremap = true, silent = true })
 
     Config.conf_loc = { bufnr = bufnr, win = win }
 end
