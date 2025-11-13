@@ -392,9 +392,6 @@ function Api.on_buf_enter(verbose, bufnr)
 
     local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
     if not (Path.exists(dir) and Path.root_included(dir)) or Path.is_excluded(dir) then
-        if verbose then
-            vim.notify('Directory is either excluded or does not exist!', WARN)
-        end
         return
     end
 
