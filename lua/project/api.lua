@@ -369,7 +369,7 @@ function Api.valid_bt(bufnr)
     bufnr = bufnr or current_buf()
 
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
-    return in_list({ '', 'acwrite' }, bt)
+    return not in_list(Config.options.disable_on.bt, bt)
 end
 
 ---@param verbose? boolean
