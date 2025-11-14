@@ -171,6 +171,7 @@ local DEFAULTS = {
             'ministarter',
             'neo-tree',
             'notify',
+            'nvim-pack',
             'packer',
             'qf',
         },

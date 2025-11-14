@@ -342,6 +342,7 @@ require('project').setup()
             'ministarter',
             'neo-tree',
             'notify',
+            'nvim-pack',
             'packer',
             'qf',
         },
