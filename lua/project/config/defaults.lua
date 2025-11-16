@@ -235,16 +235,6 @@ DEFAULTS.log = {
 --- ---
 ---@class Project.Config.Telescope
 DEFAULTS.telescope = {
-    ---Determines whether the `telescope` picker should be called
-    ---from the `setup()` function.
-    ---
-    ---If telescope is not installed, this doesn't make a difference.
-    ---
-    ---Note that even if set to `false`, you can still load the extension manually.
-    --- ---
-    ---Default: `false`
-    --- ---
-    enabled = false, ---@type boolean
     ---Determines whether the newest projects come first in the
     ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
     --- ---

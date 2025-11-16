@@ -370,16 +370,6 @@ Table of Contents                                             *project-nvim.toc*
 2.2 `Project.Config.Telescope`                          *Project.Config.Telescope*
                                                  *project-nvim.telescope-config*
 
-    * {enabled}                 (boolean)
-                                Determines whether the `telescope` picker
-                                should be called from `setup()`.
-                                If `telescope` is not installed, then
-                                this won't make a difference.
-                                Note that even if set to `false`,
-                                you can still load the extension manually
-
-                                Default: `false` ~
-
 
     * {sort}                    (`'newest'|'oldest'`)
                                 Determines whether the newest projects come

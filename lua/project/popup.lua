@@ -8,6 +8,7 @@
 local MODSTR = 'project.popup'
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
+local uv = vim.uv or vim.loop
 local in_list = vim.list_contains
 local empty = vim.tbl_isempty
 
@@ -39,7 +40,7 @@ local function hidden_avail(path, hidden)
 
     local fd = Util.executable('fd') and 'fd' or (Util.executable('fdfind') and 'fdfind' or '')
     if fd == '' then
-        error(('(%s.hidden_avail): `fd`/`fdfind` could be found PATH!'):format(MODSTR), ERROR)
+        error(('(%s.hidden_avail): `fd`/`fdfind` not found in found PATH!'):format(MODSTR), ERROR)
     end
 
     local cmd = { fd, '-Iad1' }
@@ -102,8 +103,7 @@ local function open_node(proj, only_cd, ran_cd)
         })
     end
     if not ran_cd then
-        local success = require('project.api').set_pwd(proj, 'prompt')
-        if not success then
+        if not require('project.api').set_pwd(proj, 'prompt') then
             vim.notfy('(open_node): Unsucessful `set_pwd`!', ERROR)
             return
         end
@@ -114,7 +114,7 @@ local function open_node(proj, only_cd, ran_cd)
         vim.g.project_nvim_cwd = proj
     end
 
-    local dir = vim.uv.fs_scandir(proj)
+    local dir = uv.fs_scandir(proj)
     if not dir then
         vim.notify(('(%s.open_node): NO DIR `%s`!'):format(MODSTR, proj), ERROR)
         return
@@ -123,13 +123,12 @@ local function open_node(proj, only_cd, ran_cd)
     local hidden = require('project.config').options.show_hidden
     local ls = {}
     while true do
-        local node = vim.uv.fs_scandir_next(dir)
+        local node = uv.fs_scandir_next(dir)
         if not node then
             break
         end
         node = proj .. '/' .. node
-        local stat = vim.uv.fs_stat(node)
-        if stat then
+        if uv.fs_stat(node) then
             local hid = is_hidden(node)
             if (hidden and hid) or hidden_avail(node, hidden) then
                 table.insert(ls, node)
@@ -154,7 +153,7 @@ local function open_node(proj, only_cd, ran_cd)
         end
 
         item = Util.rstrip('/', vim.fn.fnamemodify(item, ':p'))
-        local stat = vim.uv.fs_stat(item)
+        local stat = uv.fs_stat(item)
         if not stat then
             return
         end
@@ -192,6 +191,7 @@ function Popup.select.new(opts)
     if empty(opts) then
         error(('(%s.select.new): Empty args for constructor!'):format(MODSTR), ERROR)
     end
+
     if Util.vim_has('nvim-0.11') then
         vim.validate('choices', opts.choices, 'function', false, 'fun(): table<string, function>')
         vim.validate('choices_list', opts.choices_list, 'function', false, 'fun(): string[]')
@@ -204,8 +204,7 @@ function Popup.select.new(opts)
         })
     end
 
-    ---@type Project.Popup.SelectChoices|ProjectCmdFun
-    local T = setmetatable({
+    local T = setmetatable({ ---@type Project.Popup.SelectChoices|ProjectCmdFun
         choices = opts.choices,
         choices_list = opts.choices_list,
     }, {
@@ -267,8 +266,7 @@ Popup.delete_menu = Popup.select.new({
         vim.ui.select(choices_list, {
             prompt = 'Select a project to delete:',
             format_item = function(item) ---@param item string
-                local session = require('project.utils.history').session_projects
-                if in_list(session, item) then
+                if in_list(require('project.utils.history').session_projects, item) then
                     return '* ' .. item
                 end
                 return item
@@ -298,8 +296,7 @@ Popup.delete_menu = Popup.select.new({
         return recents
     end,
     choices = function()
-        ---@type table<string, fun()>
-        local T = {}
+        local T = {} ---@type table<string, function>
         for _, proj in ipairs(require('project.utils.history').get_recent_projects()) do
             T[proj] = function()
                 require('project.utils.history').delete_project(proj)
@@ -357,9 +354,7 @@ Popup.recents_menu = Popup.select.new({
 Popup.open_menu = Popup.select.new({
     callback = function()
         local choices_list = Popup.open_menu.choices_list()
-        vim.ui.select(choices_list, {
-            prompt = 'Select an operation:',
-        }, function(item)
+        vim.ui.select(choices_list, { prompt = 'Select an operation:' }, function(item)
             if not item then
                 return
             end
@@ -379,28 +374,16 @@ Popup.open_menu = Popup.select.new({
     choices = function()
         local Config = require('project.config')
         local res = { ---@type table<string, ProjectCmdFun>
-            ['Project Session'] = function()
-                Popup.session_menu()
-            end,
-            ['New Project'] = function()
-                require('project.commands').cmds.ProjectAdd()
-            end,
-            ['Open Recent Project'] = function()
-                Popup.recents_menu()
-            end,
-            ['Delete A Project'] = function()
-                Popup.delete_menu()
-            end,
-            ['Show Config'] = function()
-                require('project.commands').cmds.ProjectConfig()
-            end,
-            ['Open History'] = function()
-                vim.cmd.ProjectHistory()
-            end,
+            ['Project Session'] = Popup.session_menu,
+            ['New Project'] = require('project.commands').cmds.ProjectAdd,
+            ['Open Recent Project'] = Popup.recents_menu,
+            ['Delete A Project'] = Popup.delete_menu,
+            ['Show Config'] = require('project.commands').cmds.ProjectConfig,
+            ['Open History'] = vim.cmd.ProjectHistory,
             ['Open Help Docs'] = function()
                 vim.cmd.help('project-nvim')
             end,
-            ['Run Checkhealth'] = function()
+            ['Run Checkhealth'] = vim.cmd.ProjectHealth or function()
                 vim.cmd.checkhealth('project')
             end,
             ['Go To Source Code'] = function()
@@ -409,22 +392,14 @@ Popup.open_menu = Popup.select.new({
             Exit = function() end,
         }
         if vim.g.project_telescope_loaded == 1 then
-            res['Open Telescope Picker'] = function()
-                require('telescope._extensions.projects').projects()
-            end
+            res['Open Telescope Picker'] = require('telescope._extensions.projects').projects
         end
         if Config.options.fzf_lua.enabled then
-            res['Open Fzf-Lua Picker'] = function()
-                require('project.extensions.fzf-lua').run_fzf_lua()
-            end
+            res['Open Fzf-Lua Picker'] = require('project.extensions.fzf-lua').run_fzf_lua
         end
         if Config.options.log.enabled then
-            res['Open Log'] = function()
-                require('project.utils.log').open_win()
-            end
-            res['Clear Log'] = function()
-                require('project.utils.log').clear_log()
-            end
+            res['Open Log'] = require('project.utils.log').open_win
+            res['Clear Log'] = require('project.utils.log').clear_log
         end
         return res
     end,

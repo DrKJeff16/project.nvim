@@ -349,7 +349,6 @@ require('project').setup()
         bt = { 'help', 'nofile', 'nowrite', 'terminal' }, -- `buftype`
     },
     telescope = { ---@type Project.Config.Telescope
-        enabled = false,
         sort = 'newest', ---@type 'oldest'|'newest'
         prefer_file_browser = false,
         disable_file_picker = false,

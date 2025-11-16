@@ -1,7 +1,6 @@
 local MODSTR = 'project.config'
 local ERROR = vim.log.levels.ERROR
 local in_list = vim.list_contains
-local floor = math.floor
 
 ---@class Project.Config
 ---@field conf_loc? { win: integer, bufnr: integer }
@@ -48,10 +47,6 @@ function Config.setup(options)
     if Config.options.log.enabled then
         Log.init()
     end
-    if Config.options.telescope.enabled and Util.mod_exists('telescope') then
-        require('telescope').load_extension('projects')
-        Log.info(('(%s.setup): Telescope Picker initialized.'):format(MODSTR))
-    end
 
     if vim.g.project_setup ~= 1 then
         vim.g.project_setup = 1
@@ -93,10 +88,10 @@ function Config.open_win()
     end
 
     local bufnr = vim.api.nvim_create_buf(false, true)
-    local height = floor(vim.o.lines * 0.85)
-    local width = floor(vim.o.columns * 0.85)
+    local height = math.floor(vim.o.lines * 0.85)
+    local width = math.floor(vim.o.columns * 0.85)
     local title = 'project.nvim'
-    local current_config = (' '):rep(floor((width - title:len()) / 2))
+    local current_config = (' '):rep(math.floor((width - title:len()) / 2))
         .. title
         .. '\n'
         .. ('='):rep(width)
@@ -107,20 +102,20 @@ function Config.open_win()
         0,
         -1,
         true,
-        vim.split(current_config, '\n', { plain = true, trimempty = true })
+        vim.split(current_config, '\n', { plain = true })
     )
     local win = vim.api.nvim_open_win(bufnr, true, {
         focusable = true,
+        border = 'single',
+        col = math.floor((vim.o.columns - width) / 2) - 1,
+        row = math.floor((vim.o.lines - height) / 2) - 1,
         noautocmd = true,
         relative = 'editor',
-        row = floor((vim.o.lines - height) / 2) - 1,
-        col = floor((vim.o.columns - width) / 2) - 1,
         style = 'minimal',
         title = 'Project Config',
         title_pos = 'center',
         width = width,
         height = height,
-        border = 'single',
         zindex = 30,
     })
 
