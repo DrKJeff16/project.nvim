@@ -150,14 +150,14 @@ function Glob.globtopattern(glob)
             if not chs then
                 return pattern
             end
-        elseif char == '\\' then
-            i = i + 1
-            char = glob:sub(i, i)
-            if char:len() == 0 then
-                return ('%s\\$'):format(pattern)
-            end
-            pattern = ('%s%s'):format(pattern, Glob.escape(char, char))
         else
+            if char == '\\' then
+                i = i + 1
+                char = glob:sub(i, i)
+                if char:len() == 0 then
+                    return ('%s\\$'):format(pattern)
+                end
+            end
             pattern = ('%s%s'):format(pattern, Glob.escape(char, char))
         end
     end
