@@ -162,40 +162,6 @@ function Health.project_check()
     end
 end
 
-function Health.telescope_check()
-    start('Telescope')
-    if not Util.mod_exists('telescope') then
-        h_warn([[
-`telescope.nvim` is not installed.
-
-This doesn't represent an issue necessarily!
-        ]])
-        return
-    end
-    if not require('telescope').extensions.projects then
-        h_warn('`projects` Telescope picker is missing!\nHave you loaded it?')
-        return
-    end
-    h_ok('`projects` picker extension loaded')
-
-    local opts_telescope = require('project.config').options.telescope
-    if not Util.is_type('table', opts_telescope) then
-        h_warn('`projects` does not have telescope options set up')
-        return
-    end
-
-    start('Telescope Config')
-    for k, v in pairs(opts_telescope) do
-        local str, warning = Util.format_per_type(type(v), v)
-        str = ('`%s`: %s'):format(k, str)
-        if Util.is_type('boolean', warning) and warning then
-            h_warn(str)
-        else
-            h_ok(str)
-        end
-    end
-end
-
 function Health.fzf_lua_check()
     start('Fzf-Lua')
     if not require('project.config').options.fzf_lua.enabled then
@@ -245,7 +211,6 @@ function Health.check()
     end
     Health.project_check()
     Health.history_check()
-    Health.telescope_check()
     Health.fzf_lua_check()
     Health.options_check()
     Health.recent_proj_check()
