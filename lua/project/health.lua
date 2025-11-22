@@ -69,6 +69,7 @@ function Health.options_check()
     end
     table.sort(Options)
     local exceptions = {
+        'fzf_lua',
         'gen_methods',
         'new',
         'telescope',
