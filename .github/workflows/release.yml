@@ -14,9 +14,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v6
       - name: Build project assets
-        id: checkout
         run: |
           mkdir -pv project.nvim
           cp -rv lua doc README.md CREDITS.md LICENSE Makefile project.nvim
@@ -25,7 +25,6 @@ jobs:
           sha512sum project.nvim.zip project.nvim.tar.xz > sha512sums.txt
           rm -rfv project.nvim
       - name: Get Release
-        id: get_current_release
         uses: joutvhu/get-release@v1.0.3
         with:
           latest: true
@@ -36,11 +35,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Release File
-        run: echo ${{ github.sha }} > Release.txt
-      - name: Test Release
-        run: cat Release.txt
+        run: |
+          echo ${{ github.sha }} > Release.txt
+          cat Release.txt
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.4.2
         if: github.ref_type == 'tag'
         with:
           files: |
