@@ -2,8 +2,12 @@ local MODSTR = 'project.config'
 local ERROR = vim.log.levels.ERROR
 local in_list = vim.list_contains
 
+---@class Project.Config.ConfLoc
+---@field win integer
+---@field bufnr integer
+
 ---@class Project.Config
----@field conf_loc? { win: integer, bufnr: integer }
+---@field conf_loc? Project.Config.ConfLoc
 local Config = {}
 
 ---Get the default options for configuring `project`.
@@ -24,7 +28,7 @@ function Config.setup(options)
     if Util.vim_has('nvim-0.11') then
         vim.validate('options', options, 'table', true)
     else
-        vim.validate({ options = { options, { 'table' }, true } })
+        vim.validate({ options = { options, { 'table', 'nil' }, true } })
     end
     options = options or {}
 
@@ -36,7 +40,7 @@ function Config.setup(options)
     Config.options:expand_excluded()
 
     Config.options.exclude_dirs = vim.tbl_map(pattern_exclude, Config.options.exclude_dirs)
-    Config.options:verify() -- Verify config integrity
+    Config.options:verify()
 
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
     vim.o.autochdir = Config.options.enable_autochdir

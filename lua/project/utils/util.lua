@@ -54,8 +54,8 @@ function Util.capitalize(str, use_dot, triggers)
     else
         vim.validate({
             str = { str, { 'string' } },
-            use_dot = { use_dot, { 'boolean' }, true },
-            triggers = { triggers, { 'table' }, true },
+            use_dot = { use_dot, { 'boolean', 'nil' }, true },
+            triggers = { triggers, { 'table', 'nil' }, true },
         })
     end
     use_dot = use_dot ~= nil and use_dot or false
@@ -251,7 +251,7 @@ function Util.dedup(T)
     end
 
     local NT = {}
-    for _, v in next, T do
+    for _, v in pairs(T) do
         local not_dup = false
         if Util.is_type('table', v) then
             not_dup = not in_tbl(NT, function(val)
@@ -308,17 +308,16 @@ function Util.format_per_type(t, data, sep, constraints)
                 { 'number', 'string', 'boolean', 'table', 'function' },
                 true,
             },
-            sep = { sep, { 'string' }, true },
-            constraints = { constraints, { 'table' }, true },
+            sep = { sep, { 'string', 'nil' }, true },
+            constraints = { constraints, { 'table', 'nil' }, true },
         })
     end
 
-    local is_type = Util.is_type
     sep = sep or ''
     constraints = constraints or nil
     if t == 'string' then
         local res = ('%s`"%s"`'):format(sep, data)
-        if not is_type('table', constraints) then
+        if not Util.is_type('table', constraints) then
             return res
         end
         if constraints ~= nil and in_list(constraints, data) then
@@ -345,10 +344,10 @@ function Util.format_per_type(t, data, sep, constraints)
     end
 
     sep = ('%s '):format(sep)
-    for k, v in next, data do
-        k = is_type('number', k) and ('[%s]'):format(tostring(k)) or k
+    for k, v in pairs(data) do
+        k = Util.is_type('number', k) and ('[%s]'):format(tostring(k)) or k
         msg = ('%s\n%s%s: '):format(msg, sep, k)
-        if not is_type('string', v) then
+        if not Util.is_type('string', v) then
             msg = ('%s%s'):format(msg, Util.format_per_type(type(v), v, sep))
         else
             msg = ('%s`"%s"`'):format(msg, v)

@@ -383,6 +383,8 @@ function DEFAULTS:expand_excluded()
     end
 end
 
+---Verify config integrity.
+--- ---
 function DEFAULTS:verify()
     self:verify_datapath()
     self:verify_histsize()

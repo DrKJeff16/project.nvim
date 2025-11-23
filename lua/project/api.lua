@@ -37,7 +37,7 @@ function Api.find_lsp_root(bufnr)
     if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
     else
-        vim.validate({ bufnr = { bufnr, { 'number' }, true } })
+        vim.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
     end
     bufnr = bufnr or current_buf()
 
@@ -104,7 +104,7 @@ function Api.find_pattern_root(bufnr)
     if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
     else
-        vim.validate({ bufnr = { bufnr, { 'number' }, true } })
+        vim.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
     end
     bufnr = bufnr or current_buf()
 
@@ -147,8 +147,8 @@ function Api.set_pwd(dir, method)
         vim.validate('method', method, 'string', true, 'string?')
     else
         vim.validate({
-            dir = { dir, { 'string' }, true },
-            method = { method, { 'string' }, true },
+            dir = { dir, { 'string', 'nil' }, true },
+            method = { method, { 'string', 'nil' }, true },
         })
     end
 
@@ -278,7 +278,7 @@ function Api.get_project_root(bufnr)
     if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
     else
-        vim.validate({ bufnr = { bufnr, { 'number' }, true } })
+        vim.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
     end
     bufnr = bufnr or current_buf()
 
@@ -349,7 +349,7 @@ function Api.get_current_project(bufnr)
     if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
     else
-        vim.validate({ bufnr = { bufnr, { 'number' }, true } })
+        vim.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
     end
     bufnr = bufnr or current_buf()
 
@@ -364,7 +364,7 @@ function Api.valid_bt(bufnr)
     if Util.vim_has('nvim-0.11') then
         vim.validate('bufnr', bufnr, 'number', true, 'integer?')
     else
-        vim.validate({ bufnr = { bufnr, { 'number' }, true } })
+        vim.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
     end
     bufnr = bufnr or current_buf()
 
@@ -380,8 +380,8 @@ function Api.on_buf_enter(verbose, bufnr)
         vim.validate('bufnr', bufnr, 'number', true, 'integer?')
     else
         vim.validate({
-            verbose = { verbose, { 'boolean' }, true },
-            bufnr = { bufnr, { 'number' }, true },
+            verbose = { verbose, { 'boolean', 'nil' }, true },
+            bufnr = { bufnr, { 'number', 'nil' }, true },
         })
     end
     verbose = verbose ~= nil and verbose or false

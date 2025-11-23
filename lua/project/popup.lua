@@ -180,6 +180,9 @@ Popup.select = {}
 function Popup.select.new(opts)
     if Util.vim_has('nvim-0.11') then
         vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
+        vim.validate('choices', opts.choices, 'function', false)
+        vim.validate('choices_list', opts.choices_list, 'function', false)
+        vim.validate('callback', opts.callback, 'function', false)
     else
         vim.validate({
             opts = { opts, { 'table' } },
@@ -190,18 +193,6 @@ function Popup.select.new(opts)
     end
     if empty(opts) then
         error(('(%s.select.new): Empty args for constructor!'):format(MODSTR), ERROR)
-    end
-
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('choices', opts.choices, 'function', false, 'fun(): table<string, function>')
-        vim.validate('choices_list', opts.choices_list, 'function', false, 'fun(): string[]')
-        vim.validate('callback', opts.callback, 'function', false)
-    else
-        vim.validate({
-            choices = { opts.choices, { 'function' } },
-            choices_list = { opts.choices_list, { 'function' } },
-            callback = { opts.callback, { 'function' } },
-        })
     end
 
     local T = setmetatable({ ---@type Project.Popup.SelectChoices|ProjectCmdFun
@@ -229,7 +220,7 @@ function Popup.prompt_project(input)
     if Util.vim_has('nvim-0.11') then
         vim.validate('input', input, 'string', true, 'string|nil')
     else
-        vim.validate({ input = { input, { 'string' }, true } })
+        vim.validate({ input = { input, { 'string', 'nil' }, true } })
     end
     if not input or input == '' then
         return

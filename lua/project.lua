@@ -32,7 +32,7 @@ function Project.current_project(refresh)
     if require('project.utils.util').vim_has('nvim-0.11') then
         vim.validate('refresh', refresh, 'boolean', true)
     else
-        vim.validate({ refresh = { refresh, { 'boolean' }, true } })
+        vim.validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })
     end
     refresh = refresh ~= nil and refresh or false
 
