@@ -7,7 +7,6 @@
 local MODSTR = 'project.api'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
-local WARN = vim.log.levels.WARN
 local uv = vim.uv or vim.loop
 local in_list = vim.list_contains
 local current_buf = vim.api.nvim_get_current_buf
@@ -34,11 +33,7 @@ local Api = {}
 ---@return string|nil dir
 ---@return string|nil name
 function Api.find_lsp_root(bufnr)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
-    else
-        vim.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-    end
+    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
     bufnr = bufnr or current_buf()
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
@@ -77,11 +72,8 @@ end
 ---@param dir string
 ---@return boolean
 function Api.verify_owner(dir)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('dir', dir, 'string', false)
-    else
-        vim.validate({ dir = { dir, { 'string' } } })
-    end
+    vim.validate('dir', dir, 'string', false)
+
     local Log = require('project.utils.log')
     if Util.is_windows() then
         Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
@@ -101,11 +93,7 @@ end
 ---@return string|nil dir_res
 ---@return string|nil method
 function Api.find_pattern_root(bufnr)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
-    else
-        vim.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-    end
+    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
     bufnr = bufnr or current_buf()
 
     local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
@@ -119,11 +107,8 @@ end
 --- ---
 ---@param group integer
 function Api.gen_lsp_autocmd(group)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('group', group, 'number', false, 'integer')
-    else
-        vim.validate({ group = { group, { 'number' } } })
-    end
+    vim.validate('group', group, 'number', false, 'integer')
+
     if vim.g.project_lspattach == 1 then
         return
     end
@@ -140,17 +125,10 @@ end
 
 ---@param dir string|nil
 ---@param method string|nil
----@return boolean
+---@return boolean success
 function Api.set_pwd(dir, method)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('dir', dir, 'string', true, 'string?')
-        vim.validate('method', method, 'string', true, 'string?')
-    else
-        vim.validate({
-            dir = { dir, { 'string', 'nil' }, true },
-            method = { method, { 'string', 'nil' }, true },
-        })
-    end
+    vim.validate('dir', dir, { 'string', 'nil' }, true, 'string|nil')
+    vim.validate('method', method, { 'string', 'nil' }, true, 'string|nil')
 
     local Log = require('project.utils.log')
     if not dir then
@@ -275,11 +253,7 @@ end
 ---@return string|nil root
 ---@return string|nil method
 function Api.get_project_root(bufnr)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
-    else
-        vim.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-    end
+    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
     bufnr = bufnr or current_buf()
 
     if vim.tbl_isempty(Config.detection_methods) then
@@ -346,11 +320,7 @@ end
 ---@return string|nil method
 ---@return string|nil last
 function Api.get_current_project(bufnr)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('bufnr', bufnr, 'number', true, 'integer|nil')
-    else
-        vim.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-    end
+    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
     bufnr = bufnr or current_buf()
 
     local curr, method = Api.get_project_root(bufnr)
@@ -358,34 +328,24 @@ function Api.get_current_project(bufnr)
     return curr, method, last
 end
 
----@param bufnr? integer
+---@param bufnr integer|nil
 ---@return boolean
 function Api.valid_bt(bufnr)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('bufnr', bufnr, 'number', true, 'integer?')
-    else
-        vim.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-    end
+    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
     bufnr = bufnr or current_buf()
 
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
     return not in_list(Config.options.disable_on.bt, bt)
 end
 
----@param verbose? boolean
----@param bufnr? integer
+---@param verbose? boolean|nil
+---@param bufnr? integer|nil
 function Api.on_buf_enter(verbose, bufnr)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('verbose', verbose, 'boolean', true, 'boolean?')
-        vim.validate('bufnr', bufnr, 'number', true, 'integer?')
-    else
-        vim.validate({
-            verbose = { verbose, { 'boolean', 'nil' }, true },
-            bufnr = { bufnr, { 'number', 'nil' }, true },
-        })
-    end
+    vim.validate('verbose', verbose, { 'boolean', 'nil' }, true, 'boolean|nil')
+    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
     verbose = verbose ~= nil and verbose or false
     bufnr = bufnr or current_buf()
+
     if not Api.valid_bt(bufnr) then
         return
     end

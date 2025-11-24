@@ -17,20 +17,15 @@ local MODSTR = 'project.commands'
 local ERROR = vim.log.levels.ERROR
 local in_list = vim.list_contains
 local curr_buf = vim.api.nvim_get_current_buf
-local vim_has = require('project.utils.util').vim_has
 
 ---@class Project.Commands
 local Commands = {}
 
 function Commands.new(specs) ---@type fun(specs: Project.Commands.Spec[])
-    if vim_has('nvim-0.11') then
-        vim.validate('specs', specs, 'table', false)
-    else
-        vim.validate({ specs = { specs, { 'table' } } })
-    end
+    vim.validate('specs', specs, 'table', false)
+
     if vim.tbl_isempty(specs) then
-        vim.notify(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
-        return
+        error(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
     end
 
     for _, spec in ipairs(specs) do

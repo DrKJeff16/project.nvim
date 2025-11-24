@@ -24,12 +24,7 @@ Config.options = setmetatable({}, { __index = Config.get_defaults() })
 --- ---
 ---@param options? Project.Config.Options the `project.nvim` config options
 function Config.setup(options)
-    local Util = require('project.utils.util')
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('options', options, 'table', true)
-    else
-        vim.validate({ options = { options, { 'table', 'nil' }, true } })
-    end
+    vim.validate('options', options, { 'table', 'nil' }, true)
     options = options or {}
 
     local pattern_exclude = require('project.utils.globtopattern').pattern_exclude

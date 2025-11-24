@@ -15,18 +15,16 @@ end
 ---@param exe string[]|string
 ---@return boolean
 function Util.executable(exe)
-    if vim.fn.has('nvim-0.11') == 1 then
-        vim.validate('exe', exe, { 'string', 'table' }, false, 'string[]|string')
-    else
-        vim.validate({ exe = { exe, { 'string', 'table' } } })
-    end
+    vim.validate('exe', exe, { 'string', 'table' }, false, 'string[]|string')
 
     if Util.is_type('string', exe) then
         return vim.fn.executable(exe) == 1
     end
 
     local res = false
-    for _, v in ipairs(exe) do ---@cast exe string[]
+
+    ---@cast exe string[]
+    for _, v in ipairs(exe) do
         res = Util.executable(v)
         if not res then
             break
@@ -37,7 +35,7 @@ end
 
 ---Checks whether nvim is running on Windows.
 --- ---
----@return boolean
+---@return boolean win32
 function Util.is_windows()
     return vim.fn.has('win32') == 1
 end
@@ -47,19 +45,12 @@ end
 ---@param triggers? string[]
 ---@return string new_str
 function Util.capitalize(str, use_dot, triggers)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('str', str, 'string', false)
-        vim.validate('use_dot', use_dot, 'boolean', true)
-        vim.validate('triggers', triggers, 'table', true, 'string[]')
-    else
-        vim.validate({
-            str = { str, { 'string' } },
-            use_dot = { use_dot, { 'boolean', 'nil' }, true },
-            triggers = { triggers, { 'table', 'nil' }, true },
-        })
-    end
+    vim.validate('str', str, 'string', false)
+    vim.validate('use_dot', use_dot, { 'boolean', 'nil' }, true, 'boolean|nil')
+    vim.validate('triggers', triggers, { 'table', 'nil' }, true, 'string[]|nil')
     use_dot = use_dot ~= nil and use_dot or false
     triggers = triggers or { ' ', '' }
+
     if str == '' then
         return str
     end
@@ -98,9 +89,10 @@ end
 --- ---
 ---@param t Project.Utils.Util.Types Any return value the `type()` function would return
 ---@param data any The data to be type-checked
----@return boolean
+---@return boolean correct_type
 function Util.is_type(t, data)
-    local TYPES = {
+    vim.validate('t', t, 'string', false)
+    vim.validate('data', data, {
         'number',
         'string',
         'boolean',
@@ -108,29 +100,8 @@ function Util.is_type(t, data)
         'function',
         'thread',
         'userdata',
-    }
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('data', data, TYPES, true, 'any')
-        vim.validate('t', t, function(v)
-            if v == nil or type(v) ~= 'string' then
-                return false
-            end
-            return in_list(TYPES, v)
-        end, false, "'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'")
-    else
-        vim.validate({
-            data = { data, TYPES },
-            t = {
-                t,
-                function(v)
-                    if v == nil or type(v) ~= 'string' then
-                        return false
-                    end
-                    return in_list(TYPES, v)
-                end,
-            },
-        })
-    end
+        'nil',
+    }, true, 'any')
     return data ~= nil and type(data) == t
 end
 
@@ -139,11 +110,8 @@ end
 ---@param mod string The `require()` argument to be checked
 ---@return boolean exists A boolean indicating whether the module exists or not
 function Util.mod_exists(mod)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('mod', mod, 'string', false)
-    else
-        vim.validate({ mod = { mod, { 'string' } } })
-    end
+    vim.validate('mod', mod, 'string', false)
+
     if mod == '' then
         return false
     end
@@ -157,15 +125,9 @@ end
 ---@param str string
 ---@return string new_str
 function Util.lstrip(char, str)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('char', char, 'string', false)
-        vim.validate('str', str, 'string', false)
-    else
-        vim.validate({
-            char = { char, { 'string' } },
-            str = { str, { 'string' } },
-        })
-    end
+    vim.validate('char', char, 'string', false)
+    vim.validate('str', str, 'string', false)
+
     if str == '' or not vim.startswith(str, char) then
         return str
     end
@@ -190,15 +152,9 @@ end
 ---@param str string
 ---@return string new_str
 function Util.rstrip(char, str)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('char', char, 'string', false)
-        vim.validate('str', str, 'string', false)
-    else
-        vim.validate({
-            char = { char, { 'string' } },
-            str = { str, { 'string' } },
-        })
-    end
+    vim.validate('char', char, 'string', false)
+    vim.validate('str', str, 'string', false)
+
     if str == '' then
         return str
     end
@@ -216,15 +172,9 @@ end
 ---@param str string
 ---@return string new_str
 function Util.strip(char, str)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('char', char, 'string', false)
-        vim.validate('str', str, 'string', false)
-    else
-        vim.validate({
-            char = { char, { 'string' } },
-            str = { str, { 'string' } },
-        })
-    end
+    vim.validate('char', char, 'string', false)
+    vim.validate('str', str, 'string', false)
+
     if str == '' then
         return str
     end
@@ -241,11 +191,8 @@ end
 ---@param T table
 ---@return table NT
 function Util.dedup(T)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('T', T, 'table', false)
-    else
-        vim.validate({ T = { T, { 'table' } } })
-    end
+    vim.validate('T', T, 'table', false)
+
     if empty(T) then
         return T
     end
@@ -274,44 +221,16 @@ end
 ---@return string
 ---@return boolean|nil
 function Util.format_per_type(t, data, sep, constraints)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('t', t, function(v)
-            if v == nil or type(v) ~= 'string' then
-                return false
-            end
-
-            return in_list({ 'number', 'string', 'boolean', 'table', 'function' }, v)
-        end, false, "'number'|'string'|'boolean'|'table'|'function'")
-        vim.validate(
-            'data',
-            data,
-            { 'number', 'string', 'boolean', 'table', 'function' },
-            true,
-            'nil|number|string|boolean|table|fun()'
-        )
-        vim.validate('sep', sep, 'string', true)
-        vim.validate('constraints', constraints, 'table', true, 'string[]')
-    else
-        vim.validate({
-            t = {
-                t,
-                function(v)
-                    if v == nil or type(v) ~= 'string' then
-                        return false
-                    end
-
-                    return in_list({ 'number', 'string', 'boolean', 'table', 'function' }, v)
-                end,
-            },
-            data = {
-                data,
-                { 'number', 'string', 'boolean', 'table', 'function' },
-                true,
-            },
-            sep = { sep, { 'string', 'nil' }, true },
-            constraints = { constraints, { 'table', 'nil' }, true },
-        })
-    end
+    vim.validate('t', t, 'string', false, "'number'|'string'|'boolean'|'table'|'function'")
+    vim.validate(
+        'data',
+        data,
+        { 'number', 'string', 'boolean', 'table', 'function', 'nil' },
+        true,
+        'nil|number|string|boolean|table|function'
+    )
+    vim.validate('sep', sep, { 'string', 'nil' }, true, 'string|nil')
+    vim.validate('constraints', constraints, { 'table', 'nil' }, true, 'string[]|nil')
 
     sep = sep or ''
     constraints = constraints or nil
@@ -366,11 +285,8 @@ end
 ---@param T table
 ---@return table T
 function Util.reverse(T)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('T', T, 'table', false)
-    else
-        vim.validate({ T = { T, { 'table' } } })
-    end
+    vim.validate('T', T, 'table', false)
+
     if empty(T) then
         return T
     end
@@ -390,11 +306,7 @@ end
 ---@param dir string
 ---@return boolean
 function Util.dir_exists(dir)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('dir', dir, 'string', false)
-    else
-        vim.validate({ dir = { dir, { 'string' } } })
-    end
+    vim.validate('dir', dir, 'string', false)
 
     local stat = uv.fs_stat(dir)
     return stat ~= nil and stat.type == 'directory'
@@ -403,11 +315,8 @@ end
 ---@param path string
 ---@return boolean
 function Util.path_exists(path)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('path', path, 'string', false)
-    else
-        vim.validate({ path = { path, { 'string' } } })
-    end
+    vim.validate('path', path, 'string', false)
+
     if Util.dir_exists(path) then
         return true
     end
@@ -419,11 +328,8 @@ end
 ---@param T table<string|integer, any>
 ---@return integer len
 function Util.get_dict_size(T)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('T', T, 'table', false)
-    else
-        vim.validate({ T = { T, { 'table' } } })
-    end
+    vim.validate('T', T, 'table', false)
+
     local len = 0
     if vim.tbl_isempty(T) then
         return len
@@ -438,11 +344,8 @@ end
 ---@param path string
 ---@return string normalised_path
 function Util.normalise_path(path)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('path', path, 'string', false)
-    else
-        vim.validate({ path = { path, { 'string' } } })
-    end
+    vim.validate('path', path, 'string', false)
+
     local normalised_path = path:gsub('\\', '/'):gsub('//', '/')
     if Util.is_windows() then
         normalised_path = normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)

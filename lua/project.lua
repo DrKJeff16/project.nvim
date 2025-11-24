@@ -29,11 +29,7 @@ Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
 ---@return string|nil method
 ---@return string|nil last
 function Project.current_project(refresh)
-    if require('project.utils.util').vim_has('nvim-0.11') then
-        vim.validate('refresh', refresh, 'boolean', true)
-    else
-        vim.validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })
-    end
+    vim.validate('refresh', refresh, { 'boolean', 'nil' }, true)
     refresh = refresh ~= nil and refresh or false
 
     local Log = require('project.utils.log')

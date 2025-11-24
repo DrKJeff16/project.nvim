@@ -290,11 +290,8 @@ DEFAULTS.telescope = {
 ---the value will revert back to the default.
 --- ---
 function DEFAULTS:verify_histsize()
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('historysize', self.historysize, 'number', false, 'integer')
-    else
-        vim.validate({ historysize = { self.historysize, { 'number' } } })
-    end
+    vim.validate('historysize', self.historysize, 'number', false, 'integer')
+
     if self.historysize >= 0 or self.historysize == math.floor(self.historysize) then
         return
     end
@@ -308,14 +305,9 @@ end
 ---the value will revert back to the default.
 --- ---
 function DEFAULTS:verify_scope_chdir()
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('scope_chdir', self.scope_chdir, 'string', false, "'global'|'tab'|'win'")
-    else
-        vim.validate({ scope_chdir = { self.scope_chdir, { 'string' } } })
-    end
+    vim.validate('scope_chdir', self.scope_chdir, 'string', false, "'global'|'tab'|'win'")
 
-    local VALID = { 'global', 'tab', 'win' }
-    if in_list(VALID, self.scope_chdir) then
+    if in_list({ 'global', 'tab', 'win' }, self.scope_chdir) then
         return
     end
 
@@ -404,11 +396,7 @@ end
 ---@param opts? Project.Config.Options
 ---@return Project.Config.Options
 function DEFAULTS:new(opts)
-    if require('project.utils.util').vim_has('nvim-0.11') then
-        vim.validate('opts', opts, 'table', true, 'Project.Config.Options')
-    else
-        vim.validate({ opts = { opts, { 'table' }, true } })
-    end
+    vim.validate('opts', opts, { 'table', 'nil' }, true, 'Project.Config.Options')
 
     local obj = vim.tbl_deep_extend('keep', opts or {}, DEFAULTS) ---@type Project.Config.Options
     return obj

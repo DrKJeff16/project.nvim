@@ -48,11 +48,8 @@ History.session_projects = {}
 ---@param mode OpenMode
 ---@return integer|nil fd
 function History.open_history(mode)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('mode', mode, 'string', false, 'OpenMode')
-    else
-        vim.validate({ mode = { mode, { 'string' } } })
-    end
+    vim.validate('mode', mode, 'string', false, 'OpenMode')
+
     Path.create_path()
     local dir_stat = uv.fs_stat(Path.projectpath)
     if not dir_stat then
@@ -69,11 +66,7 @@ end
 ---@param tbl string[]
 ---@return string[] res
 local function delete_duplicates(tbl)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('tbl', tbl, 'table', false, 'string[]')
-    else
-        vim.validate({ tbl = { tbl, { 'table' } } })
-    end
+    vim.validate('tbl', tbl, 'table', false, 'string[]')
 
     local cache_dict = {} ---@type table<string, integer>
     for _, v in ipairs(tbl) do
@@ -101,11 +94,7 @@ end
 --- ---
 ---@param project string|Project.ActionEntry
 function History.delete_project(project)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('project', project, { 'string', 'table' }, false, 'string|Project.ActionEntry')
-    else
-        vim.validate({ project = { project, { 'string', 'table' } } })
-    end
+    vim.validate('project', project, { 'string', 'table' }, false, 'string|Project.ActionEntry')
 
     local Log = require('project.utils.log')
     if not History.recent_projects then
@@ -147,11 +136,7 @@ end
 --- ---
 ---@param history_data string
 function History.deserialize_history(history_data)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('history_data', history_data, 'string', false)
-    else
-        vim.validate({ history_data = { history_data, { 'string' } } })
-    end
+    vim.validate('history_data', history_data, 'string', false)
 
     local projects = {} ---@type string[]
     for s in history_data:gmatch('[^\r\n]+') do
@@ -220,14 +205,11 @@ end
 
 ---Write projects to history file.
 --- ---
----@param close? boolean
+---@param close? boolean|nil
 function History.write_history(close)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('close', close, 'boolean', true, 'boolean?')
-    else
-        vim.validate({ close = { close, { 'boolean' }, true } })
-    end
+    vim.validate('close', close, { 'boolean', 'nil' }, true, 'boolean|nil')
     close = close ~= nil and close or false
+
     local Log = require('project.utils.log')
     local fd = History.open_history(History.recent_projects ~= nil and 'w' or 'a')
     if not fd then

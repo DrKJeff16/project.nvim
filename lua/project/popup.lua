@@ -28,15 +28,8 @@ end
 ---@param hidden boolean
 ---@return boolean
 local function hidden_avail(path, hidden)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('path', path, 'string', false)
-        vim.validate('hidden', hidden, 'boolean', false)
-    else
-        vim.validate({
-            path = { path, { 'string' } },
-            hidden = { hidden, { 'boolean' } },
-        })
-    end
+    vim.validate('path', path, 'string', false)
+    vim.validate('hidden', hidden, 'boolean', false)
 
     local fd = Util.executable('fd') and 'fd' or (Util.executable('fdfind') and 'fdfind' or '')
     if fd == '' then
@@ -72,11 +65,8 @@ end
 ---@param path string
 ---@return boolean
 local function is_hidden(path)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('path', path, 'string', false)
-    else
-        vim.validate({ path = { path, { 'string' } } })
-    end
+    vim.validate('path', path, 'string', false)
+
     if Util.is_windows() then
         if ffi then
             return bit.band(ffi.C.GetFileAttributesA(path), FILE_ATTRIBUTE_HIDDEN) ~= 0
@@ -91,17 +81,10 @@ end
 ---@param only_cd boolean
 ---@param ran_cd boolean
 local function open_node(proj, only_cd, ran_cd)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('proj', proj, 'string', false)
-        vim.validate('only_cd', only_cd, 'boolean', false)
-        vim.validate('ran_cd', ran_cd, 'boolean', false)
-    else
-        vim.validate({
-            proj = { proj, { 'string' } },
-            only_cd = { only_cd, { 'boolean' } },
-            ran_cd = { ran_cd, { 'boolean' } },
-        })
-    end
+    vim.validate('proj', proj, 'string', false)
+    vim.validate('only_cd', only_cd, 'boolean', false)
+    vim.validate('ran_cd', ran_cd, 'boolean', false)
+
     if not ran_cd then
         if not require('project.api').set_pwd(proj, 'prompt') then
             vim.notfy('(open_node): Unsucessful `set_pwd`!', ERROR)
@@ -178,19 +161,11 @@ Popup.select = {}
 ---@param opts Project.Popup.SelectSpec
 ---@return Project.Popup.SelectChoices|ProjectCmdFun
 function Popup.select.new(opts)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
-        vim.validate('choices', opts.choices, 'function', false)
-        vim.validate('choices_list', opts.choices_list, 'function', false)
-        vim.validate('callback', opts.callback, 'function', false)
-    else
-        vim.validate({
-            opts = { opts, { 'table' } },
-            choices = { opts.choices, { 'function' } },
-            choices_list = { opts.choices_list, { 'function' } },
-            callback = { opts.callback, { 'function' } },
-        })
-    end
+    vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
+    vim.validate('choices', opts.choices, 'function', false)
+    vim.validate('choices_list', opts.choices_list, 'function', false)
+    vim.validate('callback', opts.callback, 'function', false)
+
     if empty(opts) then
         error(('(%s.select.new): Empty args for constructor!'):format(MODSTR), ERROR)
     end
@@ -217,11 +192,8 @@ end
 
 ---@param input string|nil
 function Popup.prompt_project(input)
-    if Util.vim_has('nvim-0.11') then
-        vim.validate('input', input, 'string', true, 'string|nil')
-    else
-        vim.validate({ input = { input, { 'string', 'nil' }, true } })
-    end
+    vim.validate('input', input, { 'string', 'nil' }, true, 'string|nil')
+
     if not input or input == '' then
         return
     end
