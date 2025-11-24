@@ -130,9 +130,14 @@ function Path.create_path(path)
     path = path or Path.projectpath
 
     if not Path.exists(path) then
-        local Log = require('project.utils.log')
-        Log.debug(('(%s.create_path): Creating directory `%s`.'):format(MODSTR, path))
+        local safeguard = vim.schedule_wrap(function()
+            require('project.utils.log').debug(
+                ('(%s.create_path): Creating directory `%s`.'):format(MODSTR, path)
+            )
+        end)
         uv.fs_mkdir(path, tonumber('755', 8))
+
+        safeguard()
     end
 end
 
