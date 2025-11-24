@@ -45,9 +45,6 @@ end
 ---@param triggers? string[]
 ---@return string new_str
 function Util.capitalize(str, use_dot, triggers)
-    vim.validate('str', str, 'string', false)
-    vim.validate('use_dot', use_dot, { 'boolean', 'nil' }, true, 'boolean|nil')
-    vim.validate('triggers', triggers, { 'table', 'nil' }, true, 'string[]|nil')
     use_dot = use_dot ~= nil and use_dot or false
     triggers = triggers or { ' ', '' }
 
@@ -91,17 +88,6 @@ end
 ---@param data any The data to be type-checked
 ---@return boolean correct_type
 function Util.is_type(t, data)
-    vim.validate('t', t, 'string', false)
-    vim.validate('data', data, {
-        'number',
-        'string',
-        'boolean',
-        'table',
-        'function',
-        'thread',
-        'userdata',
-        'nil',
-    }, true, 'any')
     return data ~= nil and type(data) == t
 end
 
@@ -222,13 +208,6 @@ end
 ---@return boolean|nil
 function Util.format_per_type(t, data, sep, constraints)
     vim.validate('t', t, 'string', false, "'number'|'string'|'boolean'|'table'|'function'")
-    vim.validate(
-        'data',
-        data,
-        { 'number', 'string', 'boolean', 'table', 'function', 'nil' },
-        true,
-        'nil|number|string|boolean|table|function'
-    )
     vim.validate('sep', sep, { 'string', 'nil' }, true, 'string|nil')
     vim.validate('constraints', constraints, { 'table', 'nil' }, true, 'string[]|nil')
 
