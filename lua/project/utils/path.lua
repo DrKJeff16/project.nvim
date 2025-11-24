@@ -127,7 +127,6 @@ end
 
 ---@param path? string|nil
 function Path.create_path(path)
-    vim.validate('path', path, { 'string', 'nil' }, true)
     path = path or Path.projectpath
 
     if not Path.exists(path) then

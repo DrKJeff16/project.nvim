@@ -40,12 +40,13 @@ function Config.setup(options)
     ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
     vim.o.autochdir = Config.options.enable_autochdir
 
-    require('project.utils.path').init()
-    require('project.api').init()
     local Log = require('project.utils.log')
     if Config.options.log.enabled then
         Log.init()
     end
+
+    require('project.utils.path').init()
+    require('project.api').init()
 
     if vim.g.project_setup ~= 1 then
         vim.g.project_setup = 1

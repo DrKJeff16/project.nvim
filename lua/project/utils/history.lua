@@ -48,9 +48,8 @@ History.session_projects = {}
 ---@param mode OpenMode
 ---@return integer|nil fd
 function History.open_history(mode)
-    vim.validate('mode', mode, 'string', false, 'OpenMode')
-
     Path.create_path()
+
     local dir_stat = uv.fs_stat(Path.projectpath)
     if not dir_stat then
         require('project.utils.log').error(
@@ -210,8 +209,8 @@ function History.write_history(close)
     vim.validate('close', close, { 'boolean', 'nil' }, true, 'boolean|nil')
     close = close ~= nil and close or false
 
-    local Log = require('project.utils.log')
     local fd = History.open_history(History.recent_projects ~= nil and 'w' or 'a')
+    local Log = require('project.utils.log')
     if not fd then
         Log.error(('(%s.write_history): File restricted!'):format(MODSTR))
         error(('(%s.write_history): File restricted!'):format(MODSTR), ERROR)
