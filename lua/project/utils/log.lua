@@ -22,14 +22,13 @@ local function gen_log(lvl)
         if not require('project.config').options.log.enabled then
             return
         end
-        local is_type = require('project.utils.util').is_type
         local msg = ''
         for i = 1, select('#', ...) do
             local sel = select(i, ...)
             if sel then
-                if is_type('number', sel) or is_type('boolean', sel) then
+                if type(sel) == 'number' or type(sel) == 'boolean' then
                     sel = tostring(sel)
-                elseif not is_type('string', sel) then
+                elseif not type(sel) == 'string' then
                     sel = vim.inspect(sel)
                 end
                 msg = ('%s %s'):format(msg, sel)
