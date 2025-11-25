@@ -40,19 +40,20 @@ local valid_acts = {
 ---@param map fun(mode: string, lhs: string, rhs: string|function)
 ---@return boolean
 local function normal_attach(prompt_bufnr, map)
+    vim.validate('prompt_bufnr', prompt_bufnr, 'number', false, 'integer')
+    vim.validate('map', map, 'function', false)
+
     local is_type = require('project.utils.util').is_type
-    local Keys = require('project.config').options.telescope.mappings or {}
+    local Keys = vim.deepcopy(require('project.config').options.telescope.mappings) or {}
+
     if not is_type('table', Keys) or vim.tbl_isempty(Keys) then
         Keys = vim.deepcopy(require('project.config.defaults').telescope.mappings)
     end
 
     for mode, group in pairs(Keys) do
         if in_list({ 'n', 'i' }, mode) and group and not vim.tbl_isempty(group) then
-            if mode == 'n' then
-                group['?'] = 'help_mappings'
-            else
-                group['<C-?>'] = 'help_mappings'
-            end
+            group[mode == 'n' and '?' or '<C-?>'] = 'help_mappings'
+
             for lhs, act in pairs(group) do
                 local rhs = in_list(valid_acts, act) and _Actions[act] or false ---@type function|false
                 if rhs and vim.is_callable(rhs) and is_type('string', lhs) then
@@ -76,6 +77,8 @@ end
 
 ---@param opts table|nil
 function Main.setup(opts)
+    vim.validate('opts', opts, { 'table', 'nil' }, true)
+
     if vim.g.project_telescope_loaded ~= 1 then
         Main.default_opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
         vim.g.project_telescope_loaded = 1
@@ -88,17 +91,16 @@ end
 --- ---
 ---@param opts table|nil
 function Main.projects(opts)
+    vim.validate('opts', opts, { 'table', 'nil' }, true)
+
     if vim.g.project_telescope_loaded ~= 1 then
         Log.error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
-        vim.notify(('(%s.projects): Telescope picker not loaded!'):format(MODSTR), ERROR)
-        return
+        error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR), ERROR)
     end
-    opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
 
     local Options = require('project.config').options
-    local scope_chdir = Options.scope_chdir
-    local scope = scope_chdir == 'win' and 'window' or scope_chdir
-    Pickers.new(opts, {
+    local scope = Options.scope_chdir == 'win' and 'window' or Options.scope_chdir
+    Pickers.new(vim.tbl_deep_extend('keep', opts or {}, Main.default_opts), {
         prompt_title = ('Select Your Project (%s)'):format(Util.capitalize(scope)),
         results_title = 'Projects',
         finder = _Util.create_finder(),
@@ -108,7 +110,5 @@ function Main.projects(opts)
     }):find()
 end
 
-local M = setmetatable({}, { __index = Main }) ---@type TelescopeProjects.Main
-
-return M
+return Main
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:
