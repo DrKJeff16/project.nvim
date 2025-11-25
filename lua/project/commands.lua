@@ -21,7 +21,8 @@ local curr_buf = vim.api.nvim_get_current_buf
 ---@class Project.Commands
 local Commands = {}
 
-function Commands.new(specs) ---@type fun(specs: Project.Commands.Spec[])
+---@param specs Project.Commands.Spec[]
+function Commands.new(specs)
     vim.validate('specs', specs, 'table', false)
 
     if vim.tbl_isempty(specs) then
@@ -71,7 +72,7 @@ function Commands.new(specs) ---@type fun(specs: Project.Commands.Spec[])
     end
 end
 
-function Commands.create_user_commands() ---@type function
+function Commands.create_user_commands()
     Commands.new({
         {
             name = 'Project',
@@ -87,10 +88,7 @@ function Commands.create_user_commands() ---@type function
             name = 'ProjectAdd',
             with_ctx = true,
             callback = function(ctx)
-                local opts = {
-                    prompt = 'Input a valid path to the project:',
-                    completion = 'dir',
-                }
+                local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' }
                 if ctx and ctx.bang ~= nil then
                     if ctx.bang then
                         local bufnr = curr_buf()
@@ -136,6 +134,7 @@ function Commands.create_user_commands() ---@type function
                 local recent = require('project.utils.history').get_recent_projects()
                 if not recent then
                     Log.error('(:ProjectDelete): No recent projects!')
+                    vim.notify('(:ProjectDelete): No recent projects!', ERROR)
                     return
                 end
 
@@ -181,7 +180,6 @@ function Commands.create_user_commands() ---@type function
         },
         {
             name = 'ProjectHealth',
-            with_ctx = false,
             callback = function()
                 vim.cmd.checkhealth('project')
             end,
