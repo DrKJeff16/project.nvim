@@ -351,6 +351,7 @@ function Api.on_buf_enter(verbose, bufnr)
     end
 
     local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
+    dir = Util.is_windows() and dir:gsub('\\', '/') or dir
     if not (Path.exists(dir) and Path.root_included(dir)) or Path.is_excluded(dir) then
         return
     end
