@@ -23,6 +23,7 @@ jobs:
           zip -r -9 project.nvim.zip project.nvim
           tar cvJf project.nvim.tar.xz project.nvim
           sha512sum project.nvim.zip project.nvim.tar.xz >| sha512sums.txt
+          md5sum project.nvim.zip project.nvim.tar.xz >| md5sums.txt
           rm -rfv project.nvim
       - name: Get Release
         uses: joutvhu/get-release@v1.0.3
@@ -46,5 +47,6 @@ jobs:
             Release.txt
             project.nvim.tar.xz
             project.nvim.zip
+            md5sums.txt
             sha512sums.txt
           token: ${{ secrets.GITHUB_TOKEN }}
