@@ -135,7 +135,7 @@ local function open_node(proj, only_cd, ran_cd)
             return
         end
 
-        item = Util.rstrip('/', vim.fn.fnamemodify(item, ':p'))
+        item = Util.rstrip('\\', Util.rstrip('/', vim.fn.fnamemodify(item, ':p')))
         local stat = uv.fs_stat(item)
         if not stat then
             return
