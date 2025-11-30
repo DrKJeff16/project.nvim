@@ -97,7 +97,7 @@ Show these much love!
     2. [`lazy.nvim`](#lazynvim)
     3. [`pckr.nvim`](#pckrnvim)
     4. [`paq-nvim`](#paq-nvim)
-    5. [`luarocks`](#luarocks)
+    5. [LuaRocks](#luarocks)
 2. [Configuration](#configuration)
     1. [Defaults](#defaults)
     2. [Pattern Matching](#pattern-matching)
@@ -240,7 +240,10 @@ paq({
 require('project.nvim').setup()
 ```
 
-### luarocks
+### LuaRocks
+
+> [!NOTE]
+> The package can be found [here](https://luarocks.org/modules/drkjeff16/project.nvim).
 
 ```bash
 # Global install
