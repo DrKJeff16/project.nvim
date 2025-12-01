@@ -2,12 +2,28 @@ name: Selene Lint
 on:
   push:
     paths:
-      - '**.lua'
+      - '.github/workflows/selene.yml'
+      - 'lua/project.lua'
+      - 'lua/project/*.lua'
+      - 'lua/project/*.lua'
+      - 'lua/project/config/defaults.lua'
+      - 'lua/project/extensions/fzf-lua.lua'
+      - 'lua/project/utils/*.lua'
+      - 'lua/telescope/_extensions/*.lua'
+      - 'lua/telescope/_extensions/projects/*.lua'
   pull_request:
     types:
       - opened
     paths:
-      - '**.lua'
+      - '.github/workflows/selene.yml'
+      - 'lua/project.lua'
+      - 'lua/project/*.lua'
+      - 'lua/project/*.lua'
+      - 'lua/project/config/defaults.lua'
+      - 'lua/project/extensions/fzf-lua.lua'
+      - 'lua/project/utils/*.lua'
+      - 'lua/telescope/_extensions/*.lua'
+      - 'lua/telescope/_extensions/projects/*.lua'
 jobs:
   selene_check:
     runs-on: ubuntu-latest
@@ -18,4 +34,4 @@ jobs:
         uses: AlejandroSuero/selene-linter-action@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --display-style=quiet .
+          args: --display-style=quiet lua

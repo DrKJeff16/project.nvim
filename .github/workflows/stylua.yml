@@ -3,11 +3,13 @@ on:
   push:
     paths:
       - '**.lua'
+      - '.github/workflows/stylua.yml'
   pull_request:
     types:
       - opened
     paths:
       - '**.lua'
+      - '.github/workflows/stylua.yml'
 jobs:
   stylua_check:
     runs-on: ubuntu-latest
