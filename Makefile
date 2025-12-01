@@ -7,6 +7,13 @@ all:
 	@$(MAKE) retab
 	@$(MAKE) helptags
 
+test:
+	@./scripts/deps.sh mini
+	@nvim --version | head -n 1
+	@nvim --headless --noplugin -u ./scripts/minimal_init.lua \
+		-c "lua require('mini.test').setup()" \
+		-c "lua MiniTest.run({ execute = { reporter = MiniTest.gen_reporter.stdout({ group_depth = 2 }) } })"
+
 retab:
 	@echo -e "\nRetabbing helpdocs...\n"
 	@$(RETAB_CMD) > /dev/null 2>&1
@@ -40,4 +47,5 @@ clean:
 	clean \
 	helptags \
 	lint \
-	retab
+	retab \
+	test
