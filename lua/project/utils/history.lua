@@ -193,6 +193,22 @@ function History.get_recent_projects()
     end
     tbl = delete_duplicates(copy(tbl))
 
+    local i, removed = 1, false
+    while i <= #tbl do
+        local v = tbl[i]
+        if not Path.exists(v) or Path.is_excluded(v) then
+            table.remove(tbl, i)
+            removed = true
+            i = i - 1
+        end
+
+        i = i + 1
+    end
+
+    if removed then
+        History.write_history()
+    end
+
     local recents = {} ---@type string[]
     for _, dir in ipairs(tbl) do
         if Util.dir_exists(dir) then
