@@ -171,7 +171,8 @@ function Api.set_pwd(dir, method)
         table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
     end
 
-    if dir == vim.fn.getcwd(0, 0) then
+    local cwd = uv.cwd() or vim.fn.getcwd()
+    if dir == cwd then
         Api.current_project = dir
         Api.current_method = method
         if vim.g.project_cwd_log ~= 1 then
