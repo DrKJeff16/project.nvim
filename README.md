@@ -246,10 +246,9 @@ require('project.nvim').setup()
 > The package can be found [here](https://luarocks.org/modules/drkjeff16/project.nvim).
 
 ```bash
-# Global install
-luarocks install project.nvim
-# Local install
-luarocks install --local project.nvim
+luarocks install project.nvim # Global install
+
+luarocks install --local project.nvim # Local install
 ```
 
 <div align="right">
