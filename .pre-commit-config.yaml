@@ -21,17 +21,17 @@ repos:
         minimum_pre_commit_version: 3.0.0
   - repo: local
     hooks:
-      - id: stylua
-        name: StyLua
+      - id: make_lint
+        name: Run StyLua
         language: system
-        entry: stylua
-        types: [lua]
+        entry: "make lint"
+        files: (lua|test)/.*lua$
         verbose: true
-      - id: selene
-        name: Selene
+      - id: make_check
+        name: Run Selene
         language: system
-        entry: selene
-        types: [lua]
+        entry: "make check"
+        files: lua/.*lua$
         verbose: true
       - id: make_clean
         name: Clean help tags
