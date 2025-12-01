@@ -1,6 +1,6 @@
 ---@module 'mini.test'
 
--- imported from https://github.com/nvim-mini/mini.nvim
+---Shamelessly copy-pasted from https://github.com/stephansama/fzf-nerdfont.nvim
 local Helpers = {}
 
 -- Add extra expectations
@@ -21,7 +21,11 @@ Helpers.expect.global = MiniTest.new_expectation(
 Helpers.expect.config = MiniTest.new_expectation(
     'config option matches',
     function(child, field, value)
-        return Helpers.expect.global(child, [[require('project.config').options.]] .. field, value)
+        return Helpers.expect.global(
+            child,
+            ('require("project.config").options.%s'):format(field),
+            value
+        )
     end,
     error_message
 )
@@ -31,7 +35,7 @@ Helpers.expect.config_type = MiniTest.new_expectation(
     function(child, field, value)
         return Helpers.expect.global(
             child,
-            [[type(require('project.config').options.]] .. field .. ')',
+            ('type(require("project.config").options.%s)'):format(field),
             value
         )
     end,
@@ -55,9 +59,7 @@ Helpers.new_child_neovim = function()
             return
         end
 
-        local msg =
-            string.format('Can not use `child.%s` because child process is blocked.', method)
-        error(msg)
+        error(('Can not use `child.%s` because child process is blocked.'):format(method))
     end
 
     child.wait = function(ms)
