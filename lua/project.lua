@@ -7,20 +7,20 @@ local Popup = require('project.popup')
 ---The `project.nvim` module.
 --- ---
 ---@class Project
-local Project = {}
-
-Project.setup = Config.setup
-Project.get_config = Config.get_config
-Project.get_recent_projects = History.get_recent_projects
-Project.delete_project = History.delete_project
-Project.get_project_root = Api.get_project_root
-Project.get_history_paths = Api.get_history_paths
-Project.get_last_project = Api.get_last_project
-Project.open_menu = Popup.open_menu
-Project.delete_menu = Popup.delete_menu
-Project.recents_menu = Popup.recents_menu
-Project.session_menu = Popup.session_menu
-Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
+local M = {
+    setup = Config.setup,
+    get_config = Config.get_config,
+    get_recent_projects = History.get_recent_projects,
+    delete_project = History.delete_project,
+    get_project_root = Api.get_project_root,
+    get_history_paths = Api.get_history_paths,
+    get_last_project = Api.get_last_project,
+    open_menu = Popup.open_menu,
+    delete_menu = Popup.delete_menu,
+    recents_menu = Popup.recents_menu,
+    session_menu = Popup.session_menu,
+    run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua,
+}
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
@@ -28,7 +28,7 @@ Project.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
-function Project.current_project(refresh)
+function M.current_project(refresh)
     vim.validate('refresh', refresh, { 'boolean', 'nil' }, true)
     refresh = refresh ~= nil and refresh or false
 
@@ -41,6 +41,13 @@ function Project.current_project(refresh)
     Log.debug(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
     return Api.current_project, Api.current_method, Api.last_project
 end
+
+local Project = setmetatable(M, { ---@type Project
+    __index = M,
+    __newindex = function()
+        vim.notify('Project module is Read-Only!', vim.log.levels.ERROR)
+    end,
+})
 
 return Project
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

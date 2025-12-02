@@ -11,10 +11,38 @@ local uv = vim.uv or vim.loop
 ---The project history file.
 --- ---
 ---@field historyfile? string
-local Path = {}
-Path.last_dir_cache = ''
-Path.curr_dir_cache = {} ---@type string[]
-Path.exists = require('project.utils.util').path_exists
+local Path = {
+    last_dir_cache = '',
+    curr_dir_cache = {}, ---@type string[]
+    exists = require('project.utils.util').path_exists,
+    ---@param dir string
+    is_excluded = function(dir)
+        vim.validate('dir', dir, 'string', false)
+
+        local exclude_dirs = require('project.config').options.exclude_dirs
+        for _, excluded in ipairs(exclude_dirs) do
+            if dir:match(excluded) ~= nil then
+                return true
+            end
+        end
+        return false
+    end,
+    ---@param dir string
+    ---@param identifier string
+    is = function(dir, identifier)
+        vim.validate('dir', dir, 'string', false)
+        vim.validate('identifier', identifier, 'string', false)
+
+        return dir:match('.*/(.*)') == identifier
+    end,
+    ---@param path_str string
+    get_parent = function(path_str)
+        vim.validate('path_str', path_str, 'string', false)
+
+        path_str = path_str:match('^(.*)/') ---@type string
+        return (path_str ~= '') and path_str or '/'
+    end,
+}
 
 ---@param file_dir string
 function Path.get_files(file_dir)
@@ -53,25 +81,6 @@ function Path.has(dir, identifier)
         end
     end
     return false
-end
-
----@param dir string
----@param identifier string
----@return boolean
-function Path.is(dir, identifier)
-    vim.validate('dir', dir, 'string', false)
-    vim.validate('identifier', identifier, 'string', false)
-
-    return dir:match('.*/(.*)') == identifier
-end
-
----@param path_str string
----@return string|'/'
-function Path.get_parent(path_str)
-    vim.validate('path_str', path_str, 'string', false)
-
-    path_str = path_str:match('^(.*)/') ---@type string
-    return (path_str ~= '') and path_str or '/'
 end
 
 ---@param dir string
@@ -167,20 +176,6 @@ function Path.root_included(dir)
         end
         dir = parent
     end
-end
-
----@param dir string
----@return boolean
-function Path.is_excluded(dir)
-    vim.validate('dir', dir, 'string', false)
-
-    local exclude_dirs = require('project.config').options.exclude_dirs
-    for _, excluded in ipairs(exclude_dirs) do
-        if dir:match(excluded) ~= nil then
-            return true
-        end
-    end
-    return false
 end
 
 function Path.init()

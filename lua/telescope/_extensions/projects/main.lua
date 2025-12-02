@@ -20,11 +20,11 @@ local telescope_config = require('telescope.config').values
 local _Actions = require('telescope._extensions.projects.actions')
 local _Util = require('telescope._extensions.projects.util')
 
----@class TelescopeProjects.Main
-local Main = {}
-
---- CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
-Main.default_opts = { prompt_prefix = '󱎸  ' }
+---@class Project.Telescope.Main
+local M = {
+    --- CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
+    default_opts = { prompt_prefix = '󱎸  ' },
+}
 
 local valid_acts = {
     'browse_project_files',
@@ -76,11 +76,11 @@ local function normal_attach(prompt_bufnr, map)
 end
 
 ---@param opts table|nil
-function Main.setup(opts)
+function M.setup(opts)
     vim.validate('opts', opts, { 'table', 'nil' }, true)
 
     if vim.g.project_telescope_loaded ~= 1 then
-        Main.default_opts = vim.tbl_deep_extend('keep', opts or {}, Main.default_opts)
+        M.default_opts = vim.tbl_deep_extend('keep', opts or {}, M.default_opts)
         vim.g.project_telescope_loaded = 1
     end
 end
@@ -90,7 +90,7 @@ end
 ---CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
 --- ---
 ---@param opts table|nil
-function Main.projects(opts)
+function M.projects(opts)
     vim.validate('opts', opts, { 'table', 'nil' }, true)
 
     if vim.g.project_telescope_loaded ~= 1 then
@@ -100,7 +100,7 @@ function Main.projects(opts)
 
     local Options = require('project.config').options
     local scope = Options.scope_chdir == 'win' and 'window' or Options.scope_chdir
-    Pickers.new(vim.tbl_deep_extend('keep', opts or {}, Main.default_opts), {
+    Pickers.new(vim.tbl_deep_extend('keep', opts or {}, M.default_opts), {
         prompt_title = ('Select Your Project (%s)'):format(Util.capitalize(scope)),
         results_title = 'Projects',
         finder = _Util.create_finder(),
@@ -109,6 +109,13 @@ function Main.projects(opts)
         attach_mappings = normal_attach,
     }):find()
 end
+
+local Main = setmetatable(M, { ---@type Project.Telescope.Main
+    __index = M,
+    __newindex = function()
+        vim.notify('Project.Telescope.Main is Read-Only!', ERROR)
+    end,
+})
 
 return Main
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

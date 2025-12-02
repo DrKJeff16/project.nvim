@@ -28,8 +28,8 @@ end
 ---@param hidden boolean
 ---@return boolean
 local function hidden_avail(path, hidden)
-    vim.validate('path', path, 'string', false)
-    vim.validate('hidden', hidden, 'boolean', false)
+    vim.validate('path', path, { 'string' }, false)
+    vim.validate('hidden', hidden, { 'boolean' }, false)
 
     local fd = Util.executable('fd') and 'fd' or (Util.executable('fdfind') and 'fdfind' or '')
     if fd == '' then
@@ -41,7 +41,7 @@ local function hidden_avail(path, hidden)
         table.insert(cmd, '-H')
     end
 
-    local out = vim.system(cmd, { text = true, cwd = vim.g.project_nvim_cwd }):wait(1000).stdout
+    local out = vim.system(cmd, { text = true, cwd = vim.g.project_nvim_cwd }):wait(10000).stdout
     if not out then
         return false
     end
@@ -63,9 +63,9 @@ end
 ---https://github.com/nvim-neo-tree/neo-tree.nvim/blob/8dd9f08ff086d09d112f1873f88dc0f74b598cdb/lua/neo-tree/utils/init.lua#L1299
 --- ---
 ---@param path string
----@return boolean
+---@return boolean hidden
 local function is_hidden(path)
-    vim.validate('path', path, 'string', false)
+    vim.validate('path', path, { 'string' }, false)
 
     if Util.is_windows() then
         if ffi then
@@ -161,10 +161,10 @@ Popup.select = {}
 ---@param opts Project.Popup.SelectSpec
 ---@return Project.Popup.SelectChoices|ProjectCmdFun
 function Popup.select.new(opts)
-    vim.validate('opts', opts, 'table', false, 'Project.Popup.SelectSpec')
-    vim.validate('choices', opts.choices, 'function', false)
-    vim.validate('choices_list', opts.choices_list, 'function', false)
-    vim.validate('callback', opts.callback, 'function', false)
+    vim.validate('opts', opts, { 'table' }, false, 'Project.Popup.SelectSpec')
+    vim.validate('opts.choices', opts.choices, { 'function' }, false)
+    vim.validate('opts.choices_list', opts.choices_list, { 'function' }, false)
+    vim.validate('opts.callback', opts.callback, { 'function' }, false)
 
     if empty(opts) then
         error(('(%s.select.new): Empty args for constructor!'):format(MODSTR), ERROR)

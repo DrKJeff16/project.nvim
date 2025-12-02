@@ -8,17 +8,16 @@ local in_list = vim.list_contains
 
 ---@class Project.Config
 ---@field conf_loc? Project.Config.ConfLoc
-local Config = {}
+local Config = {
+    ---Get the default options for configuring `project`.
+    --- ---
+    ---@return Project.Config.Options defaults
+    get_defaults = function()
+        return require('project.config.defaults')
+    end,
+}
 
----Get the default options for configuring `project`.
---- ---
----@return Project.Config.Options
-function Config.get_defaults()
-    return require('project.config.defaults')
-end
-
----@type Project.Config.Options
-Config.options = setmetatable({}, { __index = Config.get_defaults() })
+Config.options = setmetatable({}, { __index = Config.get_defaults() }) ---@type Project.Config.Options
 
 ---The function called when running `require('project').setup()`.
 --- ---

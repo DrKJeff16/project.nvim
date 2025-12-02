@@ -3,35 +3,34 @@ local in_list = vim.list_contains
 ---Credits for this module goes to [David Manura](https://github.com/davidm/lua-glob-pattern).
 --- ---
 ---@class Project.Utils.Glob
-local Glob = {}
-
----Escape pattern char.
---- ---
----@param char string
----@return string
-function Glob.escape(char, c)
-    return char:match('^%w$') and c or ('%' .. c)
-end
-
----@param glob string
----@param char string
----@param pattern string
----@param i integer
----@return boolean
----@return string char
----@return string pattern
----@return integer i
-function Glob.unescape(glob, char, pattern, i)
-    if char ~= '\\' then
+local M = {
+    ---Escape pattern char.
+    --- ---
+    ---@param char string
+    ---@return string escaped_char
+    escape = function(char, c)
+        return char:match('^%w$') and c or ('%' .. c)
+    end,
+    ---@param glob string
+    ---@param char string
+    ---@param pattern string
+    ---@param i integer
+    ---@return boolean
+    ---@return string char
+    ---@return string pattern
+    ---@return integer i
+    unescape = function(glob, char, pattern, i)
+        if char ~= '\\' then
+            return true, char, pattern, i
+        end
+        i = i + 1
+        char = glob:sub(i, i)
+        if char:len() == 0 then
+            return false, char, '[^]', i
+        end
         return true, char, pattern, i
-    end
-    i = i + 1
-    char = glob:sub(i, i)
-    if char:len() == 0 then
-        return false, char, '[^]', i
-    end
-    return true, char, pattern, i
-end
+    end,
+}
 
 ---Convert tokens at end of charset.
 --- ---
@@ -43,7 +42,7 @@ end
 ---@return string char
 ---@return string pattern
 ---@return integer i
-function Glob.charset_end(glob, char, pattern, i)
+function M.charset_end(glob, char, pattern, i)
     local un = false
     while true do
         if char:len() == 0 then
@@ -52,7 +51,7 @@ function Glob.charset_end(glob, char, pattern, i)
         if char == ']' then
             return true, char, ('%s]'):format(pattern), i
         end
-        un, char, pattern, i = Glob.unescape(glob, char, pattern, i)
+        un, char, pattern, i = M.unescape(glob, char, pattern, i)
         if not un then
             return true, char, pattern, i
         end
@@ -63,10 +62,10 @@ function Glob.charset_end(glob, char, pattern, i)
             return false, char, '[^]', i
         end
         if char == ']' then
-            return true, char, ('%s%s]'):format(pattern, Glob.escape(c1, char)), i
+            return true, char, ('%s%s]'):format(pattern, M.escape(c1, char)), i
         end
         if char ~= '-' then
-            pattern = ('%s%s'):format(pattern, Glob.escape(c1, char))
+            pattern = ('%s%s'):format(pattern, M.escape(c1, char))
             i = i - 1 -- put back
         else
             i = i + 1
@@ -75,13 +74,13 @@ function Glob.charset_end(glob, char, pattern, i)
                 return false, char, '[^]', i
             end
             if char == ']' then
-                return true, char, ('%s%s'):format(pattern, Glob.escape(c1, char)) .. '%-]', i
+                return true, char, ('%s%s'):format(pattern, M.escape(c1, char)) .. '%-]', i
             end
-            un, char, pattern, i = Glob.unescape(glob, char, pattern, i)
+            un, char, pattern, i = M.unescape(glob, char, pattern, i)
             if not un then
                 return true, char, pattern, i
             end
-            pattern = ('%s%s-%s'):format(pattern, Glob.escape(c1, char), Glob.escape(char, char))
+            pattern = ('%s%s-%s'):format(pattern, M.escape(c1, char), M.escape(char, char))
         end
         i = i + 1
         char = glob:sub(i, i)
@@ -98,7 +97,7 @@ end
 ---@return string char
 ---@return string pattern
 ---@return integer i
-function Glob.charset(glob, char, pattern, i)
+function M.charset(glob, char, pattern, i)
     local chs_end = false
     i = i + 1
     char = glob:sub(i, i)
@@ -110,14 +109,14 @@ function Glob.charset(glob, char, pattern, i)
         char = glob:sub(i, i)
         if char ~= ']' then
             pattern = ('%s[^'):format(pattern)
-            chs_end, char, pattern, i = Glob.charset_end(glob, char, pattern, i)
+            chs_end, char, pattern, i = M.charset_end(glob, char, pattern, i)
             if not chs_end then
                 return false, char, pattern, i
             end
         end
     else
         pattern = ('%s['):format(pattern)
-        chs_end, char, pattern, i = Glob.charset_end(glob, char, pattern, i)
+        chs_end, char, pattern, i = M.charset_end(glob, char, pattern, i)
         if not chs_end then
             return false, char, pattern, i
         end
@@ -130,7 +129,7 @@ end
 --- ---
 ---@param glob string
 ---@return string pattern
-function Glob.globtopattern(glob)
+function M.globtopattern(glob)
     local pattern = '^'
     local i = 0
     local char = ''
@@ -146,7 +145,7 @@ function Glob.globtopattern(glob)
         elseif char == '*' then
             pattern = ('%s.*'):format(pattern)
         elseif char == '[' then
-            chs, char, pattern, i = Glob.charset(glob, char, pattern, i)
+            chs, char, pattern, i = M.charset(glob, char, pattern, i)
             if not chs then
                 return pattern
             end
@@ -158,19 +157,26 @@ function Glob.globtopattern(glob)
                     return ('%s\\$'):format(pattern)
                 end
             end
-            pattern = ('%s%s'):format(pattern, Glob.escape(char, char))
+            pattern = ('%s%s'):format(pattern, M.escape(char, char))
         end
     end
 end
 
 ---@param pattern string
 ---@return string pattern
-function Glob.pattern_exclude(pattern)
+function M.pattern_exclude(pattern)
     if vim.startswith(pattern, '~/') then
         pattern = ('%s/%s'):format(vim.fn.expand('~'), pattern:sub(3, pattern:len()))
     end
-    return Glob.globtopattern(pattern)
+    return M.globtopattern(pattern)
 end
+
+local Glob = setmetatable(M, { ---@type Project.Utils.Glob
+    __index = M,
+    __newindex = function()
+        vim.notify('User.Utils.Glob is Read-Only!', vim.log.levels.ERROR)
+    end,
+})
 
 return Glob
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

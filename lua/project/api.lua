@@ -22,84 +22,114 @@ local History = require('project.utils.history')
 ---@field last_project? string
 ---@field current_project? string
 ---@field current_method? string
-local Api = {}
+local Api = {
+    ---@param bufnr integer|nil
+    ---@return boolean
+    valid_bt = function(bufnr)
+        vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
+        bufnr = bufnr or current_buf()
 
----Get the LSP client for current buffer.
----
----If successful, returns a tuple of two `string` results.
----Otherwise, nothing is returned.
---- ---
----@param bufnr integer|nil
----@return string|nil dir
----@return string|nil name
-function Api.find_lsp_root(bufnr)
-    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
-    bufnr = bufnr or current_buf()
-
-    local clients = vim.lsp.get_clients({ bufnr = bufnr })
-    if vim.tbl_isempty(clients) then
-        return
-    end
-
-    local ignore_lsp = Config.options.ignore_lsp
-    local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
-    for _, client in ipairs(clients) do
-        ---@type string[]
-        local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
-        local valid = (
-            Util.is_type('table', filetypes)
-            and not vim.tbl_isempty(filetypes)
-            and in_list(filetypes, ft)
-            and not in_list(ignore_lsp, client.name)
-            and client.config.root_dir
-        )
-        if valid then
-            local dir, name = client.config.root_dir, client.name
-            if Config.options.allow_patterns_for_lsp then
-                if Path.root_included(dir) == nil then
-                    return
-                end
-            end
-            return dir, name
+        local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
+        return not in_list(Config.options.disable_on.bt, bt)
+    end,
+    ---@return string|nil last
+    get_last_project = function()
+        local recent = History.get_recent_projects()
+        if vim.tbl_isempty(recent) or #recent == 1 then
+            return
         end
-    end
-end
 
----Check if given directory is owned by the user running Nvim.
----
----If running under Windows, this will return `true` regardless.
---- ---
----@param dir string
----@return boolean
-function Api.verify_owner(dir)
-    vim.validate('dir', dir, 'string', false)
+        recent = Util.reverse(recent) ---@type string[]
+        return #History.session_projects <= 1 and recent[2] or recent[1]
+    end,
+    ---@param path? 'datapath'|'projectpath'|'historyfile'
+    ---@return string|{ datapath: string, projectpath: string, historyfile: string } res
+    get_history_paths = function(path)
+        local res = { ---@type { datapath: string, projectpath: string, historyfile: string }|string
+            datapath = Path.datapath,
+            projectpath = Path.projectpath,
+            historyfile = Path.historyfile,
+        }
+        if path and in_list(vim.tbl_keys(res), path) then
+            res = Path[path] ---@type string
+        end
+        return res
+    end,
+    ---Get the LSP client for current buffer.
+    ---
+    ---If successful, returns a tuple of two `string` results.
+    ---Otherwise, nothing is returned.
+    --- ---
+    ---@param bufnr integer|nil
+    ---@return string|nil dir
+    ---@return string|nil name
+    find_lsp_root = function(bufnr)
+        vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
+        bufnr = bufnr or current_buf()
 
-    local Log = require('project.utils.log')
-    if Util.is_windows() then
-        Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
-        return true
-    end
+        local clients = vim.lsp.get_clients({ bufnr = bufnr })
+        if vim.tbl_isempty(clients) then
+            return
+        end
 
-    local stat = uv.fs_stat(dir)
-    if not stat then
-        Log.error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR))
-        vim.notify(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
-        return false
-    end
-    return stat.uid == uv.getuid()
-end
+        local ignore_lsp = Config.options.ignore_lsp
+        local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
+        for _, client in ipairs(clients) do
+            ---@type string[]
+            local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
+            local valid = (
+                Util.is_type('table', filetypes)
+                and not vim.tbl_isempty(filetypes)
+                and in_list(filetypes, ft)
+                and not in_list(ignore_lsp, client.name)
+                and client.config.root_dir
+            )
+            if valid then
+                local dir, name = client.config.root_dir, client.name
+                if Config.options.allow_patterns_for_lsp then
+                    if Path.root_included(dir) == nil then
+                        return
+                    end
+                end
+                return dir, name
+            end
+        end
+    end,
+    ---Check if given directory is owned by the user running Nvim.
+    ---
+    ---If running under Windows, this will return `true` regardless.
+    --- ---
+    ---@param dir string
+    ---@return boolean
+    verify_owner = function(dir)
+        vim.validate('dir', dir, 'string', false)
 
----@param bufnr integer|nil
----@return string|nil dir_res
----@return string|nil method
-function Api.find_pattern_root(bufnr)
-    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
-    bufnr = bufnr or current_buf()
+        local Log = require('project.utils.log')
+        if Util.is_windows() then
+            Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
+            return true
+        end
 
-    local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
-    dir = Util.is_windows() and dir:gsub('\\', '/') or dir
-    return Path.root_included(dir)
-end
+        local stat = uv.fs_stat(dir)
+        if not stat then
+            Log.error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR))
+            vim.notify(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
+            return false
+        end
+        return stat.uid == uv.getuid()
+    end,
+    ---@param bufnr integer|nil
+    ---@return string|nil dir_res
+    ---@return string|nil method
+    find_pattern_root = function(bufnr)
+        vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
+        bufnr = bufnr or current_buf()
+
+        local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
+        dir = Util.is_windows() and dir:gsub('\\', '/') or dir
+        return Path.root_included(dir)
+    end,
+}
 
 ---Generates the autocommand for the `LspAttach` event.
 ---
@@ -232,20 +262,6 @@ function Api.set_pwd(dir, method)
     return ok
 end
 
----@param path? 'datapath'|'projectpath'|'historyfile'
----@return string|{ datapath: string, projectpath: string, historyfile: string } res
-function Api.get_history_paths(path)
-    local res = { ---@type { datapath: string, projectpath: string, historyfile: string }|string
-        datapath = Path.datapath,
-        projectpath = Path.projectpath,
-        historyfile = Path.historyfile,
-    }
-    if path and in_list(vim.tbl_keys(res), path) then
-        res = Path[path] ---@type string
-    end
-    return res
-end
-
 ---Returns the project root, as well as the method used.
 ---
 ---If no project root is found, nothing will be returned.
@@ -303,17 +319,6 @@ function Api.get_project_root(bufnr)
     end
 end
 
----@return string|nil last
-function Api.get_last_project()
-    local recent = History.get_recent_projects()
-    if vim.tbl_isempty(recent) or #recent == 1 then
-        return
-    end
-
-    recent = Util.reverse(recent) ---@type string[]
-    return #History.session_projects <= 1 and recent[2] or recent[1]
-end
-
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
 ---@param bufnr integer|nil
@@ -327,16 +332,6 @@ function Api.get_current_project(bufnr)
     local curr, method = Api.get_project_root(bufnr)
     local last = Api.get_last_project()
     return curr, method, last
-end
-
----@param bufnr integer|nil
----@return boolean
-function Api.valid_bt(bufnr)
-    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
-    bufnr = bufnr or current_buf()
-
-    local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
-    return not in_list(Config.options.disable_on.bt, bt)
 end
 
 ---@param verbose? boolean|nil

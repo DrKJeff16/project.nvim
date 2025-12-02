@@ -16,20 +16,23 @@ local Finders = require('telescope.finders')
 local Entry_display = require('telescope.pickers.entry_display')
 
 ---@class Project.Telescope.Util
-local T_Util = {}
+local M = {
+    ---@param entry { name: string, value: string, display: function, index: integer, ordinal: string }
+    make_display = function(entry)
+        Log.debug(
+            ('(%s.make_display): Creating display. Entry values: %s'):format(
+                MODSTR,
+                vim.inspect(entry)
+            )
+        )
+        return Entry_display.create({
+            separator = ' ',
+            items = { { width = 30 }, { remaining = true } },
+        })({ entry.name, { entry.value, 'Comment' } })
+    end,
+}
 
----@param entry { name: string, value: string, display: function, index: integer, ordinal: string }
-function T_Util.make_display(entry)
-    Log.debug(
-        ('(%s.make_display): Creating display. Entry values: %s'):format(MODSTR, vim.inspect(entry))
-    )
-    return Entry_display.create({
-        separator = ' ',
-        items = { { width = 30 }, { remaining = true } },
-    })({ entry.name, { entry.value, 'Comment' } })
-end
-
-function T_Util.create_finder()
+function M.create_finder()
     local sort = require('project.config').options.telescope.sort
     Log.info(('(%s.create_finder): Sorting by `%s`.'):format(MODSTR, sort))
 
@@ -47,7 +50,7 @@ function T_Util.create_finder()
                 vim.fn.fnamemodify(entry, ':t')
             )
             return {
-                display = T_Util.make_display,
+                display = M.make_display,
                 name = name,
                 value = entry,
                 ordinal = ('%s %s'):format(name, entry),
@@ -55,6 +58,13 @@ function T_Util.create_finder()
         end,
     })
 end
+
+local T_Util = setmetatable(M, { ---@type Project.Telescope.Util
+    __index = M,
+    __newindex = function()
+        vim.notify('Project.Telescope.Util is Read-Only!', ERROR)
+    end,
+})
 
 return T_Util
 -- vim:ts=4:sts=4:sw=4:et:ai:si:sta:

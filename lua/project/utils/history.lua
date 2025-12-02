@@ -33,34 +33,33 @@ local Path = require('project.utils.path')
 ---@field has_watch_setup? boolean
 ---@field historysize? integer
 ---@field hist_loc? { bufnr: integer, win: integer }|nil
-local History = {}
+local History = {
+    ---Projects from current neovim session.
+    --- ---
+    ---@type string[]
+    session_projects = {},
+    ---@param mode OpenMode
+    ---@return integer|nil fd
+    open_history = function(mode)
+        Path.create_path()
+
+        local dir_stat = uv.fs_stat(Path.projectpath)
+        if not dir_stat then
+            require('project.utils.log').error(
+                ('(%s.open_history): History file unavailable!'):format(MODSTR)
+            )
+            error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
+        end
+
+        local fd = uv.fs_open(Path.historyfile, mode, tonumber('644', 8))
+        return fd
+    end,
+}
 
 ---Projects from previous neovim sessions.
 --- ---
 ---@type string[]|nil
 History.recent_projects = nil
-
----Projects from current neovim session.
---- ---
----@type string[]
-History.session_projects = {}
-
----@param mode OpenMode
----@return integer|nil fd
-function History.open_history(mode)
-    Path.create_path()
-
-    local dir_stat = uv.fs_stat(Path.projectpath)
-    if not dir_stat then
-        require('project.utils.log').error(
-            ('(%s.open_history): History file unavailable!'):format(MODSTR)
-        )
-        error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
-    end
-
-    local fd = uv.fs_open(Path.historyfile, mode, tonumber('644', 8))
-    return fd
-end
 
 ---@param tbl string[]
 ---@return string[] res
