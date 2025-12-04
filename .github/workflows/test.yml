@@ -1,0 +1,23 @@
+name: Unit Tests
+on:
+  push:
+    paths:
+      - '.github/workflows/test.yml'
+      - 'scripts/minimal_init.lua'
+      - 'tests/**.lua'
+  pull_request:
+    types:
+      - opened
+    paths:
+      - '.github/workflows/test.yml'
+      - 'scripts/minimal_init.lua'
+      - 'tests/**.lua'
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Run Tests
+        run: |
+          make test
