@@ -11,9 +11,9 @@ on:
       - 'lua/project/utils/*.lua'
       - 'lua/telescope/_extensions/*.lua'
       - 'lua/telescope/_extensions/projects/*.lua'
+      - 'selene.toml'
+      - 'vim.yml'
   pull_request:
-    types:
-      - opened
     paths:
       - '.github/workflows/selene.yml'
       - 'lua/project.lua'
@@ -24,6 +24,8 @@ on:
       - 'lua/project/utils/*.lua'
       - 'lua/telescope/_extensions/*.lua'
       - 'lua/telescope/_extensions/projects/*.lua'
+      - 'selene.toml'
+      - 'vim.yml'
 jobs:
   selene_check:
     runs-on: ubuntu-latest

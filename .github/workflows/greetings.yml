@@ -6,13 +6,13 @@ on:
   issues:
     types:
       - opened
+permissions:
+  issues: write
+  pull-requests: write
 jobs:
   greet:
     name: Greet First-Time Contributors
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
     steps:
       - name: First Interaction
         uses: actions/first-interaction@v3.1.0
@@ -27,6 +27,6 @@ jobs:
           pr-message: |
             ### Automated Greeting
 
-            Many many thanks for your contributions!
+            Many thanks for your contribution!
 
             Your PR will be checked **ASAP**.

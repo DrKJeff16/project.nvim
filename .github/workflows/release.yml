@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Build project assets
+      - name: Build Project Assets
         run: |
           mkdir -pv project.nvim
           cp -rv lua doc README.md CREDITS.md LICENSE Makefile project.nvim
@@ -40,7 +40,7 @@ jobs:
           echo ${{ github.sha }} > Release.txt
           cat Release.txt
       - name: Release
-        uses: softprops/action-gh-release@v2.4.2
+        uses: softprops/action-gh-release@v2.5.0
         if: github.ref_type == 'tag'
         with:
           files: |

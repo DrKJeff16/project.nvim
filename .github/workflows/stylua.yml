@@ -4,12 +4,14 @@ on:
     paths:
       - '**.lua'
       - '.github/workflows/stylua.yml'
+      - '.stylua.toml'
+      - 'stylua.toml'
   pull_request:
-    types:
-      - opened
     paths:
       - '**.lua'
       - '.github/workflows/stylua.yml'
+      - '.stylua.toml'
+      - 'stylua.toml'
 jobs:
   stylua_check:
     runs-on: ubuntu-latest
@@ -21,5 +23,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: latest
-          # CLI arguments
           args: --check .
