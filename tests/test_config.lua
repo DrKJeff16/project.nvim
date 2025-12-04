@@ -12,6 +12,12 @@ local T = MiniTest.new_set({
         pre_case = function()
             -- Restart child process with custom 'init.lua' script
             child.restart({ '-u', 'scripts/minimal_init.lua' })
+            child.lua('Project = require("project")')
+            child.lua('Util = require("project.utils.util")')
+            child.lua('History = require("project.utils.history")')
+            child.lua('Path = require("project.utils.path")')
+            child.lua('API = require("project.api")')
+            child.lua('Config = require("project.config")')
         end,
         -- This will be executed one after all tests from this set are finished
         post_once = child.stop,
@@ -22,7 +28,7 @@ local T = MiniTest.new_set({
 T.config = MiniTest.new_set()
 
 T.config['sets exposed methods and default options value'] = function()
-    child.lua('require("project").setup()')
+    child.lua('Project.setup()')
 
     -- assert the value, and the type
     Helpers.expect.config(child, 'use_lsp', true)
@@ -66,8 +72,22 @@ T.config['sets exposed methods and default options value'] = function()
     Helpers.expect.config_type(child, 'historysize', 'number')
 end
 
+T.config['logging is disabled by default'] = function()
+    child.lua('Project.setup()')
+
+    Helpers.expect.config(child, 'log.enabled', false)
+    Helpers.expect.config_type(child, 'log.enabled', 'boolean')
+end
+
+T.config['logging ignores setup nil value'] = function()
+    child.lua('Project.setup({ log = { enabled = nil } })')
+
+    Helpers.expect.config(child, 'log.enabled', false)
+    Helpers.expect.config_type(child, 'log.enabled', 'boolean')
+end
+
 T.config['overrides default values'] = function()
-    child.lua('require("project").setup({ use_lsp = false })')
+    child.lua('Project.setup({ use_lsp = false })')
 
     -- assert the value, and the type
     Helpers.expect.config(child, 'use_lsp', false)
