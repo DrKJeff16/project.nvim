@@ -53,7 +53,7 @@ https://github.com/user-attachments/assets/376cbca0-a746-4992-8223-8475fcd99fc9
 
 </details>
 <details>
-<summary><b>Fzf-Lua Integration Example</b></summary>
+<summary><b><code>fzf-Lua</code> Integration Example</b></summary>
 
 https://github.com/user-attachments/assets/1516ff2e-29d9-4e0d-b592-bf2f79ab8158
 
@@ -125,7 +125,7 @@ Show these much love!
 - Natively supports `.nvim.lua` files
 - `vim.ui` menu support
 - [Telescope Integration](#telescope) `:Telescope projects`
-- [`Fzf-Lua` Integration](#ProjectFzf)
+- [`fzf-lua` Integration](#ProjectFzf)
 - [`nvim-tree` Integration](#nvim-tree)
 - [`neo-tree` Integration](#neo-tree)
 - [`mini.starter` Integration](#ministarter)
