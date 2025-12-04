@@ -9,7 +9,8 @@
 ## Table of Contents
 
 1. [Note For Co-Maintainers](#note-for-co-maintainers)
-2. [What I Will Not Accept](#what-i-will-not-accept)
+2. [Guidelines](#guidelines)
+    1. [What I Will Not Accept](#what-i-will-not-accept)
 3. [Recommendations](#recommendations)
     1. [StyLua](#stylua)
     2. [`pre-commit`](#pre-commit)
@@ -29,7 +30,9 @@ you may open a blank issue.
 
 ---
 
-## What I Will Not Accept
+## Guidelines
+
+### What I Will Not Accept
 
 - **BAD COMMIT MESSAGES**. Read [this guide](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13) to get familiarized
 - **UNCREDITED CODE**. If pulling from somewhere else, _**paste the reference URL in a comment**_
@@ -207,8 +210,6 @@ return Foo
 > ```
 
 ---
-
-## Footnotes
 
 [^1]: https://luals.github.io/wiki/annotations/
 [^2]: https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
