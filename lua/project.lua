@@ -20,27 +20,26 @@ local M = {
     recents_menu = Popup.recents_menu,
     session_menu = Popup.session_menu,
     run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua,
+    ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
+    --- ---
+    ---@param refresh boolean|nil
+    ---@return string|nil curr
+    ---@return string|nil method
+    ---@return string|nil last
+    current_project = function(refresh)
+        vim.validate('refresh', refresh, { 'boolean', 'nil' }, true)
+        refresh = refresh ~= nil and refresh or false
+
+        local Log = require('project.utils.log')
+        if refresh then
+            Log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
+            return Api.get_current_project()
+        end
+
+        Log.debug(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
+        return Api.current_project, Api.current_method, Api.last_project
+    end,
 }
-
----CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
---- ---
----@param refresh boolean|nil
----@return string|nil curr
----@return string|nil method
----@return string|nil last
-function M.current_project(refresh)
-    vim.validate('refresh', refresh, { 'boolean', 'nil' }, true)
-    refresh = refresh ~= nil and refresh or false
-
-    local Log = require('project.utils.log')
-    if refresh then
-        Log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
-        return Api.get_current_project()
-    end
-
-    Log.debug(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
-    return Api.current_project, Api.current_method, Api.last_project
-end
 
 local Project = setmetatable(M, { ---@type Project
     __index = M,
