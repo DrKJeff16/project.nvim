@@ -13,11 +13,6 @@ local T = MiniTest.new_set({
             -- Restart child process with custom 'init.lua' script
             child.restart({ '-u', 'scripts/minimal_init.lua' })
             child.lua('Project = require("project")')
-            child.lua('Util = require("project.utils.util")')
-            child.lua('History = require("project.utils.history")')
-            child.lua('Path = require("project.utils.path")')
-            child.lua('API = require("project.api")')
-            child.lua('Config = require("project.config")')
         end,
         -- This will be executed one after all tests from this set are finished
         post_once = child.stop,

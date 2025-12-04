@@ -23,6 +23,12 @@ jobs:
         with:
           version: nightly
           neovim: true
+      - name: Get Neovim Version
+        run: |
+          nvim --version | head -n 1
+      - name: Debug stdpath
+        run: |
+          nvim --headless -c "echo stdpath('data')" -c "quitall!"
       - name: Run Tests
         run: |
           make test
