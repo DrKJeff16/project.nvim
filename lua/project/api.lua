@@ -23,16 +23,13 @@ local History = require('project.utils.history')
 ---@field current_project? string
 ---@field current_method? string
 local Api = {
-    ---@param bufnr integer|nil
-    ---@return boolean
-    valid_bt = function(bufnr)
+    valid_bt = function(bufnr) ---@param bufnr integer|nil
         vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
         bufnr = bufnr or current_buf()
 
         local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
         return not in_list(Config.options.disable_on.bt, bt)
     end,
-    ---@return string|nil last
     get_last_project = function()
         local recent = History.get_recent_projects()
         if vim.tbl_isempty(recent) or #recent == 1 then
@@ -42,9 +39,7 @@ local Api = {
         recent = Util.reverse(recent) ---@type string[]
         return #History.session_projects <= 1 and recent[2] or recent[1]
     end,
-    ---@param path? 'datapath'|'projectpath'|'historyfile'
-    ---@return string|{ datapath: string, projectpath: string, historyfile: string } res
-    get_history_paths = function(path)
+    get_history_paths = function(path) ---@param path? 'datapath'|'projectpath'|'historyfile'
         local res = { ---@type { datapath: string, projectpath: string, historyfile: string }|string
             datapath = Path.datapath,
             projectpath = Path.projectpath,
@@ -79,8 +74,8 @@ local Api = {
             local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
             local valid = (
                 Util.is_type('table', filetypes)
-                and not vim.tbl_isempty(filetypes)
                 and in_list(filetypes, ft)
+                and not vim.tbl_isempty(filetypes)
                 and not in_list(ignore_lsp, client.name)
                 and client.config.root_dir
             )
@@ -99,9 +94,7 @@ local Api = {
     ---
     ---If running under Windows, this will return `true` regardless.
     --- ---
-    ---@param dir string
-    ---@return boolean
-    verify_owner = function(dir)
+    verify_owner = function(dir) ---@param dir string
         vim.validate('dir', dir, 'string', false)
 
         local Log = require('project.utils.log')
