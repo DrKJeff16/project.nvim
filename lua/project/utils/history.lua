@@ -61,33 +61,6 @@ local History = {
 ---@type string[]|nil
 History.recent_projects = nil
 
----@param tbl string[]
----@return string[] res
-local function delete_duplicates(tbl)
-    vim.validate('tbl', tbl, 'table', false, 'string[]')
-
-    local cache_dict = {} ---@type table<string, integer>
-    for _, v in ipairs(tbl) do
-        local normalised_path = Util.normalise_path(v)
-        if cache_dict[normalised_path] == nil then
-            cache_dict[normalised_path] = 1
-        else
-            cache_dict[normalised_path] = cache_dict[normalised_path] + 1
-        end
-    end
-
-    local res = {} ---@type string[]
-    for _, v in ipairs(tbl) do
-        local normalised_path = Util.normalise_path(v)
-        if cache_dict[normalised_path] == 1 then
-            table.insert(res, normalised_path)
-        else
-            cache_dict[normalised_path] = cache_dict[normalised_path] - 1
-        end
-    end
-    return Util.dedup(res)
-end
-
 ---Deletes a project string, or a Telescope Entry type.
 --- ---
 ---@param project string|Project.ActionEntry
@@ -142,7 +115,7 @@ function History.deserialize_history(history_data)
             table.insert(projects, s)
         end
     end
-    History.recent_projects = delete_duplicates(projects)
+    History.recent_projects = Util.delete_duplicates(projects)
 end
 
 ---Only runs once.
@@ -190,7 +163,7 @@ function History.get_recent_projects()
     else
         tbl = History.session_projects
     end
-    tbl = delete_duplicates(copy(tbl))
+    tbl = Util.delete_duplicates(copy(tbl))
 
     local i, removed = 1, false
     while i <= #tbl do

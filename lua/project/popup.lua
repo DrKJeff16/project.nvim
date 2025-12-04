@@ -14,16 +14,6 @@ local empty = vim.tbl_isempty
 
 local Util = require('project.utils.util')
 
----CREDITS: [u/Some_Derpy_Pineapple](https://www.reddit.com/r/neovim/comments/1nu5ehj/comment/ngyz21m/)
-local FILE_ATTRIBUTE_HIDDEN = 0x2
-local ffi = nil ---@type nil|ffilib
-if Util.mod_exists('ffi') then
-    ffi = require('ffi')
-    ffi.cdef([[
-    int GetFileAttributesA(const char *path);
-    ]])
-end
-
 ---@param path string
 ---@param hidden boolean
 ---@return boolean
@@ -54,27 +44,6 @@ local function hidden_avail(path, hidden)
         end
     end, nodes)
     return ret
-end
-
----Attempt to find out if given path is a hidden file.
----**Works only Windows, currently!**
----
----CREDITS:
----https://github.com/nvim-neo-tree/neo-tree.nvim/blob/8dd9f08ff086d09d112f1873f88dc0f74b598cdb/lua/neo-tree/utils/init.lua#L1299
---- ---
----@param path string
----@return boolean hidden
-local function is_hidden(path)
-    vim.validate('path', path, { 'string' }, false)
-
-    if Util.is_windows() then
-        if ffi then
-            return bit.band(ffi.C.GetFileAttributesA(path), FILE_ATTRIBUTE_HIDDEN) ~= 0
-        end
-        return false -- FIXME: Find a reliable alternative
-    end
-
-    return false --- TODO: Find a reliable method for UNIX systems
 end
 
 ---@param proj string
@@ -112,7 +81,7 @@ local function open_node(proj, only_cd, ran_cd)
         end
         node = proj .. '/' .. node
         if uv.fs_stat(node) then
-            local hid = is_hidden(node)
+            local hid = Util.is_hidden(node)
             if (hidden and hid) or hidden_avail(node, hidden) then
                 table.insert(ls, node)
             end
@@ -153,14 +122,14 @@ local function open_node(proj, only_cd, ran_cd)
 end
 
 ---@class Project.Popup
-local Popup = {}
+local M = {}
 
 ---@class Project.Popup.Select
-Popup.select = {}
+M.select = {}
 
 ---@param opts Project.Popup.SelectSpec
 ---@return Project.Popup.SelectChoices|ProjectCmdFun
-function Popup.select.new(opts)
+function M.select.new(opts)
     vim.validate('opts', opts, { 'table' }, false, 'Project.Popup.SelectSpec')
     vim.validate('opts.choices', opts.choices, { 'function' }, false)
     vim.validate('opts.choices_list', opts.choices_list, { 'function' }, false)
@@ -191,7 +160,7 @@ function Popup.select.new(opts)
 end
 
 ---@param input string|nil
-function Popup.prompt_project(input)
+function M.prompt_project(input)
     vim.validate('input', input, { 'string', 'nil' }, true, 'string|nil')
 
     if not input or input == '' then
@@ -223,9 +192,9 @@ function Popup.prompt_project(input)
     require('project.utils.history').write_history()
 end
 
-Popup.delete_menu = Popup.select.new({
+M.delete_menu = M.select.new({
     callback = function()
-        local choices_list = Popup.delete_menu.choices_list()
+        local choices_list = M.delete_menu.choices_list()
         vim.ui.select(choices_list, {
             prompt = 'Select a project to delete:',
             format_item = function(item) ---@param item string
@@ -243,7 +212,7 @@ Popup.delete_menu = Popup.select.new({
                 return
             end
 
-            local choice = Popup.delete_menu.choices()[item]
+            local choice = M.delete_menu.choices()[item]
             if not (choice and vim.is_callable(choice)) then
                 vim.notify('Bad selection!', ERROR)
                 return
@@ -270,9 +239,9 @@ Popup.delete_menu = Popup.select.new({
     end,
 })
 
-Popup.recents_menu = Popup.select.new({
+M.recents_menu = M.select.new({
     callback = function()
-        local choices_list = Popup.recents_menu.choices_list()
+        local choices_list = M.recents_menu.choices_list()
         vim.ui.select(choices_list, {
             prompt = 'Select a project:',
             format_item = function(item) ---@param item string
@@ -287,7 +256,7 @@ Popup.recents_menu = Popup.select.new({
                 vim.notify('Bad selection!', ERROR)
                 return
             end
-            local choice = Popup.recents_menu.choices()[item]
+            local choice = M.recents_menu.choices()[item]
             if not (choice and vim.is_callable(choice)) then
                 vim.notify('Bad selection!', ERROR)
                 return
@@ -307,16 +276,16 @@ Popup.recents_menu = Popup.select.new({
     end,
     choices = function()
         local choices = {} ---@type table<string, function>
-        for _, s in ipairs(Popup.recents_menu.choices_list()) do
+        for _, s in ipairs(M.recents_menu.choices_list()) do
             choices[s] = s ~= 'Exit' and open_node or function(_, _, _) end
         end
         return choices
     end,
 })
 
-Popup.open_menu = Popup.select.new({
+M.open_menu = M.select.new({
     callback = function()
-        local choices_list = Popup.open_menu.choices_list()
+        local choices_list = M.open_menu.choices_list()
         vim.ui.select(choices_list, { prompt = 'Select an operation:' }, function(item)
             if not item then
                 return
@@ -325,7 +294,7 @@ Popup.open_menu = Popup.select.new({
                 vim.notify('Bad selection!', ERROR)
                 return
             end
-            local choice = Popup.open_menu.choices()[item]
+            local choice = M.open_menu.choices()[item]
             if not (choice and vim.is_callable(choice)) then
                 vim.notify('Bad selection!', ERROR)
                 return
@@ -337,10 +306,10 @@ Popup.open_menu = Popup.select.new({
     choices = function()
         local Config = require('project.config')
         local res = { ---@type table<string, ProjectCmdFun>
-            ['Project Session'] = Popup.session_menu,
+            ['Project Session'] = M.session_menu,
             ['New Project'] = require('project.commands').cmds.ProjectAdd,
-            ['Open Recent Project'] = Popup.recents_menu,
-            ['Delete A Project'] = Popup.delete_menu,
+            ['Open Recent Project'] = M.recents_menu,
+            ['Delete A Project'] = M.delete_menu,
             ['Show Config'] = require('project.commands').cmds.ProjectConfig,
             ['Open History'] = vim.cmd.ProjectHistory,
             ['Open Help Docs'] = function()
@@ -394,14 +363,14 @@ Popup.open_menu = Popup.select.new({
     end,
 })
 
-Popup.session_menu = Popup.select.new({
+M.session_menu = M.select.new({
     callback = function(ctx)
         local only_cd = false
         if ctx then
             only_cd = ctx.bang ~= nil and ctx.bang or only_cd
         end
 
-        local choices_list = Popup.session_menu.choices_list()
+        local choices_list = M.session_menu.choices_list()
         if #choices_list == 1 then
             vim.notify('No sessions available!', WARN)
             return
@@ -420,7 +389,7 @@ Popup.session_menu = Popup.select.new({
                 vim.notify('Bad selection!', ERROR)
                 return
             end
-            local choice = Popup.session_menu.choices()[item]
+            local choice = M.session_menu.choices()[item]
             if not (choice and vim.is_callable(choice)) then
                 vim.notify('Bad selection!', ERROR)
                 return
@@ -444,6 +413,13 @@ Popup.session_menu = Popup.select.new({
         local choices = vim.deepcopy(require('project.utils.history').session_projects)
         table.insert(choices, 'Exit')
         return choices
+    end,
+})
+
+local Popup = setmetatable(M, {
+    __index = M,
+    __newindex = function()
+        vim.notify('Project.Popup is Read-Only!', ERROR)
     end,
 })
 

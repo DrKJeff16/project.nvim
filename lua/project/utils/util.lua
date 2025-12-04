@@ -130,6 +130,37 @@ local M = {
     end,
 }
 
+---Attempt to find out if given path is a hidden file.
+---**Works only Windows, currently!**
+---
+---CREDITS:
+---https://github.com/nvim-neo-tree/neo-tree.nvim/blob/8dd9f08ff086d09d112f1873f88dc0f74b598cdb/lua/neo-tree/utils/init.lua#L1299
+--- ---
+---@param path string
+---@return boolean hidden
+function M.is_hidden(path)
+    vim.validate('path', path, { 'string' }, false)
+
+    ---CREDITS: [u/Some_Derpy_Pineapple](https://www.reddit.com/r/neovim/comments/1nu5ehj/comment/ngyz21m/)
+    local FILE_ATTRIBUTE_HIDDEN = 0x2
+    local ffi = nil ---@type nil|ffilib
+    if M.mod_exists('ffi') then
+        ffi = require('ffi')
+        ffi.cdef([[
+            int GetFileAttributesA(const char *path);
+        ]])
+    end
+
+    if M.is_windows() then
+        if ffi then
+            return bit.band(ffi.C.GetFileAttributesA(path), FILE_ATTRIBUTE_HIDDEN) ~= 0
+        end
+        return false -- FIXME: Find a reliable alternative
+    end
+
+    return false --- TODO: Find a reliable method for UNIX systems
+end
+
 ---@param exe string[]|string
 ---@return boolean
 function M.executable(exe)
@@ -149,6 +180,33 @@ function M.executable(exe)
         end
     end
     return res
+end
+
+---@param tbl string[]
+---@return string[] res
+function M.delete_duplicates(tbl)
+    vim.validate('tbl', tbl, 'table', false, 'string[]')
+
+    local cache_dict = {} ---@type table<string, integer>
+    for _, v in ipairs(tbl) do
+        local normalised_path = M.normalise_path(v)
+        if cache_dict[normalised_path] == nil then
+            cache_dict[normalised_path] = 1
+        else
+            cache_dict[normalised_path] = cache_dict[normalised_path] + 1
+        end
+    end
+
+    local res = {} ---@type string[]
+    for _, v in ipairs(tbl) do
+        local normalised_path = M.normalise_path(v)
+        if cache_dict[normalised_path] == 1 then
+            table.insert(res, normalised_path)
+        else
+            cache_dict[normalised_path] = cache_dict[normalised_path] - 1
+        end
+    end
+    return M.dedup(res)
 end
 
 ---Left strip a given leading `char` in a string, if any.
