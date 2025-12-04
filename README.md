@@ -73,6 +73,48 @@ Show these much love!
 
 ---
 
+## Table of Contents
+
+1. [Features](#features)
+2. [Installation](#installation)
+    1. [`vim-plug`](#vim-plug)
+    2. [`lazy.nvim`](#lazynvim)
+    3. [`pckr.nvim`](#pckrnvim)
+    4. [`paq-nvim`](#paq-nvim)
+    5. [LuaRocks](#luarocks)
+3. [Configuration](#configuration)
+    1. [Defaults](#defaults)
+    2. [Pattern Matching](#pattern-matching)
+    3. [Nvim Tree](#nvim-tree)
+    4. [Neo Tree](#neo-tree)
+    5. [Telescope](#telescope)
+        1. [Telescope Mappings](#telescope-mappings)
+    6. [`mini.starter`](#ministarter)
+4. [Commands](#commands)
+    1. [`:Project`](#project)
+    2. [`:ProjectFzf`](#projectfzf)
+    3. [`:ProjectTelescope`](#projecttelescope)
+    4. [`:ProjectHealth`](#projecthealth)
+    5. [`:ProjectHistory`](#projecthistory)
+    6. [`:ProjectLog`](#projectlog)
+    7. [`:ProjectLogClear`](#projectlogclear)
+    8. [`:ProjectAdd`](#projectadd)
+    9. [`:ProjectRoot`](#projectroot)
+    10. [`:ProjectConfig`](#projectconfig)
+    11. [`:ProjectDelete`](#projectdelete)
+    12. [`:ProjectSession`](#projectsession)
+5. [API](#api)
+    1. [`get_project_root()`](#get_project_root)
+    2. [`get_recent_projects()`](#get_recent_projects)
+    3. [`get_config()`](#get_config)
+    4. [`get_history_paths()`](#get_history_paths)
+6. [Utils](#utils)
+7. [Troubleshooting](#troubleshooting)
+    1. [History File Not Created](#history-file-not-created)
+8. [License](#license)
+
+---
+
 ## Features
 
 - Automatically sets the `cwd` to the project root directory using pattern matching (LSP optionally)
@@ -88,46 +130,11 @@ Show these much love!
 - [`neo-tree` Integration](#neo-tree)
 - [`mini.starter` Integration](#ministarter)
 
----
+<div align="right">
 
-## Table of Contents
+[Go To Top](#projectnvim-)
 
-1. [Installation](#installation)
-    1. [`vim-plug`](#vim-plug)
-    2. [`lazy.nvim`](#lazynvim)
-    3. [`pckr.nvim`](#pckrnvim)
-    4. [`paq-nvim`](#paq-nvim)
-    5. [LuaRocks](#luarocks)
-2. [Configuration](#configuration)
-    1. [Defaults](#defaults)
-    2. [Pattern Matching](#pattern-matching)
-    3. [Nvim Tree](#nvim-tree)
-    4. [Neo Tree](#neo-tree)
-    5. [Telescope](#telescope)
-        1. [Telescope Mappings](#telescope-mappings)
-    6. [`mini.starter`](#ministarter)
-3. [Commands](#commands)
-    1. [`:Project`](#project)
-    2. [`:ProjectFzf`](#projectfzf)
-    3. [`:ProjectTelescope`](#projecttelescope)
-    4. [`:ProjectHealth`](#projecthealth)
-    5. [`:ProjectHistory`](#projecthistory)
-    6. [`:ProjectLog`](#projectlog)
-    7. [`:ProjectLogClear`](#projectlogclear)
-    8. [`:ProjectAdd`](#projectadd)
-    9. [`:ProjectRoot`](#projectroot)
-    10. [`:ProjectConfig`](#projectconfig)
-    11. [`:ProjectDelete`](#projectdelete)
-    12. [`:ProjectSession`](#projectsession)
-4. [API](#api)
-    1. [`get_project_root()`](#get_project_root)
-    2. [`get_recent_projects()`](#get_recent_projects)
-    3. [`get_config()`](#get_config)
-    4. [`get_history_paths()`](#get_history_paths)
-5. [Utils](#utils)
-6. [Troubleshooting](#troubleshooting)
-    1. [History File Not Created](#history-file-not-created)
-7. [License](#license)
+</div>
 
 ---
 
