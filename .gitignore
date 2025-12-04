@@ -64,7 +64,6 @@ luacov*
 deps/
 
 # In-place Neovim Configs
-minimal_init.lua
 minimal.lua
 repro.lua
 .repro/
