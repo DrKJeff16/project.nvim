@@ -355,12 +355,10 @@ function DEFAULTS:verify_logging()
         )
     end
 
-    local logpath = self.log.logpath
-    if not (Util.is_type('string', logpath) and require('project.utils.path').exists(logpath)) then
+    if not require('project.utils.path').exists(self.log.logpath) then
         self.log.logpath = DEFAULTS.log.logpath
     end
-    local max_size = self.log.max_size
-    if not (Util.is_type('number', max_size) and max_size > 0) then
+    if not (Util.is_type('number', self.log.max_size) and self.log.max_size > 0) then
         self.log.max_size = DEFAULTS.log.max_size
     end
 end
