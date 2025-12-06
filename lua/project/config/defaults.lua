@@ -290,7 +290,11 @@ DEFAULTS.telescope = {
 ---the value will revert back to the default.
 --- ---
 function DEFAULTS:verify_histsize()
-    vim.validate('historysize', self.historysize, 'number', false, 'integer')
+    vim.validate('historysize', self.historysize, { 'number', 'nil' }, true, 'integer')
+
+    if not self.historysize or type(self.historysize) ~= 'number' then
+        self.historysize = DEFAULTS.historysize
+    end
 
     if self.historysize >= 0 or self.historysize == math.floor(self.historysize) then
         return
@@ -305,9 +309,9 @@ end
 ---the value will revert back to the default.
 --- ---
 function DEFAULTS:verify_scope_chdir()
-    vim.validate('scope_chdir', self.scope_chdir, 'string', false, "'global'|'tab'|'win'")
+    vim.validate('scope_chdir', self.scope_chdir, { 'string', 'nil' }, true, "'global'|'tab'|'win'")
 
-    if in_list({ 'global', 'tab', 'win' }, self.scope_chdir) then
+    if self.scope_chdir and in_list({ 'global', 'tab', 'win' }, self.scope_chdir) then
         return
     end
 
@@ -321,7 +325,7 @@ function DEFAULTS:verify_scope_chdir()
 end
 
 function DEFAULTS:verify_datapath()
-    if not require('project.utils.util').dir_exists(self.datapath) then
+    if not (self.datapath and require('project.utils.util').dir_exists(self.datapath)) then
         vim.notify(('Invalid datapath `%s`, reverting to default.'):format(self.datapath), WARN)
         self.datapath = DEFAULTS.datapath
     end
@@ -343,7 +347,9 @@ function DEFAULTS:gen_methods()
 end
 
 function DEFAULTS:verify_logging()
-    if self.log == nil or type(self.log) ~= 'table' then
+    local Path = require('project.utils.path')
+    local log = self.log
+    if not log or type(log) ~= 'table' then
         self.log = vim.deepcopy(DEFAULTS.log)
     end
     if self.logging ~= nil and type(self.logging) == 'boolean' then
@@ -355,15 +361,18 @@ function DEFAULTS:verify_logging()
         )
     end
 
-    if not require('project.utils.path').exists(self.log.logpath) then
+    if not (Util.is_type('string', log.logpath) and Path.exists(log.logpath)) then
         self.log.logpath = DEFAULTS.log.logpath
     end
-    if not (Util.is_type('number', self.log.max_size) and self.log.max_size > 0) then
+    if not (Util.is_type('number', log.max_size) and log.max_size > 0) then
         self.log.max_size = DEFAULTS.log.max_size
     end
 end
 
 function DEFAULTS:expand_excluded()
+    if not self.exclude_dirs or type(self.exclude_dirs) ~= 'table' then
+        self.exclude_dirs = {}
+    end
     if vim.tbl_isempty(self.exclude_dirs) then
         return
     end
@@ -381,14 +390,15 @@ function DEFAULTS:verify()
     self:verify_scope_chdir()
     self:verify_logging()
 
-    if self.detection_methods then
-        vim.schedule(function()
-            vim.notify(
-                '(project.nvim): the `detection_methods` option has been deprecated!\nUse `use_lsp` instead.',
-                WARN
-            )
-        end)
+    if not self.detection_methods then
+        return
     end
+    vim.schedule(function()
+        vim.notify(
+            '(project.nvim): the `detection_methods` option has been deprecated!\nUse `use_lsp` instead.',
+            WARN
+        )
+    end)
 end
 
 ---@param opts? Project.Config.Options
@@ -396,7 +406,10 @@ end
 function DEFAULTS:new(opts)
     vim.validate('opts', opts, { 'table', 'nil' }, true, 'Project.Config.Options')
 
-    local obj = vim.tbl_deep_extend('keep', opts or {}, DEFAULTS) ---@type Project.Config.Options
+    ---@type Project.Config.Options
+    local obj = setmetatable(vim.tbl_deep_extend('keep', opts or {}, DEFAULTS), {
+        __index = DEFAULTS,
+    })
     return obj
 end
 

@@ -65,6 +65,7 @@ function Config.get_config()
         return
     end
     local exceptions = {
+        'gen_methods',
         'new',
         'verify',
         'verify_datapath',
