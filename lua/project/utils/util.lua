@@ -209,19 +209,30 @@ function M.delete_duplicates(tbl)
     return M.dedup(res)
 end
 
----Left strip a given leading `char` in a string, if any.
+---Left strip given a leading string (or list of strings) within a string, if any.
 --- ---
----@param char string
+---@param char string[]|string
 ---@param str string
 ---@return string new_str
 function M.lstrip(char, str)
-    vim.validate('char', char, 'string', false)
-    vim.validate('str', str, 'string', false)
+    vim.validate('char', char, { 'string', 'table' }, false)
+    vim.validate('str', str, { 'string' }, false)
 
     if str == '' or not vim.startswith(str, char) then
         return str
     end
 
+    ---@cast char string[]
+    if type(char) == 'table' then
+        if not vim.tbl_isempty(char) then
+            for _, c in ipairs(char) do
+                str = M.lstrip(c, str)
+            end
+        end
+        return str
+    end
+
+    ---@cast char string
     local i, len, new_str = 1, str:len(), ''
     local other = false
     while i <= len + 1 do
@@ -236,38 +247,62 @@ function M.lstrip(char, str)
     return new_str
 end
 
----Right strip a given leading `char` in a string, if any.
+---Right strip given a leading string (or list of strings) within a string, if any.
 --- ---
----@param char string
+---@param char string[]|string
 ---@param str string
 ---@return string new_str
 function M.rstrip(char, str)
-    vim.validate('char', char, 'string', false)
-    vim.validate('str', str, 'string', false)
+    vim.validate('char', char, { 'string', 'table' }, false)
+    vim.validate('str', str, { 'string' }, false)
 
     if str == '' then
         return str
     end
 
+    ---@cast char string[]
+    if type(char) == 'table' then
+        if not vim.tbl_isempty(char) then
+            for _, c in ipairs(char) do
+                str = M.rstrip(c, str)
+            end
+        end
+        return str
+    end
+
+    ---@cast char string
     str = str:reverse()
+
     if not vim.startswith(str, char) then
         return str:reverse()
     end
     return M.lstrip(char, str):reverse()
 end
 
----Strip a given leading `char` in a string, if any, bidirectionally.
+---Strip given a leading string (or list of strings) within a string, if any, bidirectionally.
 --- ---
----@param char string
+---@param char string[]|string
 ---@param str string
 ---@return string new_str
 function M.strip(char, str)
-    vim.validate('char', char, 'string', false)
-    vim.validate('str', str, 'string', false)
+    vim.validate('char', char, { 'string', 'table' }, false)
+    vim.validate('str', str, { 'string' }, false)
 
     if str == '' then
         return str
     end
+
+    ---@cast char string[]
+    if type(char) == 'table' then
+        if not vim.tbl_isempty(char) then
+            for _, c in ipairs(char) do
+                str = M.strip(c, str)
+            end
+        end
+        return str
+    end
+
+    ---@cast char string
     return M.rstrip(char, M.lstrip(char, str))
 end
 
@@ -281,7 +316,7 @@ end
 ---@param T table
 ---@return table NT
 function M.dedup(T)
-    vim.validate('T', T, 'table', false)
+    vim.validate('T', T, { 'table' }, false)
 
     if empty(T) then
         return T
