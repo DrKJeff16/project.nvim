@@ -22,7 +22,7 @@ local M = {
     ---@param mod string The `require()` argument to be checked
     ---@return boolean exists A boolean indicating whether the module exists or not
     mod_exists = function(mod)
-        vim.validate('mod', mod, 'string', false)
+        vim.validate('mod', mod, { 'string' }, false)
 
         if mod == '' then
             return false
@@ -38,7 +38,7 @@ local M = {
     ---@param dir string
     ---@return boolean
     dir_exists = function(dir)
-        vim.validate('dir', dir, 'string', false)
+        vim.validate('dir', dir, { 'string' }, false)
 
         local stat = uv.fs_stat(dir)
         return stat ~= nil and stat.type == 'directory'
@@ -101,7 +101,7 @@ local M = {
     ---@param T table
     ---@return table T
     reverse = function(T)
-        vim.validate('T', T, 'table', false)
+        vim.validate('T', T, { 'table' }, false)
 
         if empty(T) then
             return T
@@ -116,7 +116,7 @@ local M = {
     ---@param T table<string|integer, any>
     ---@return integer len
     get_dict_size = function(T)
-        vim.validate('T', T, 'table', false)
+        vim.validate('T', T, { 'table' }, false)
 
         local len = 0
         if vim.tbl_isempty(T) then
@@ -185,7 +185,7 @@ end
 ---@param tbl string[]
 ---@return string[] res
 function M.delete_duplicates(tbl)
-    vim.validate('tbl', tbl, 'table', false, 'string[]')
+    vim.validate('tbl', tbl, { 'table' }, false, 'string[]')
 
     local cache_dict = {} ---@type table<string, integer>
     for _, v in ipairs(tbl) do
@@ -346,7 +346,7 @@ end
 ---@return string
 ---@return boolean|nil
 function M.format_per_type(t, data, sep, constraints)
-    vim.validate('t', t, 'string', false, "'number'|'string'|'boolean'|'table'|'function'")
+    vim.validate('t', t, { 'string' }, false, "'number'|'string'|'boolean'|'table'|'function'")
     vim.validate('sep', sep, { 'string', 'nil' }, true, 'string|nil')
     vim.validate('constraints', constraints, { 'table', 'nil' }, true, 'string[]|nil')
 
@@ -396,7 +396,7 @@ end
 ---@param path string
 ---@return boolean exists
 function M.path_exists(path)
-    vim.validate('path', path, 'string', false)
+    vim.validate('path', path, { 'string' }, false)
 
     if M.dir_exists(path) then
         return true
@@ -409,7 +409,7 @@ end
 ---@param path string
 ---@return string normalised_path
 function M.normalise_path(path)
-    vim.validate('path', path, 'string', false)
+    vim.validate('path', path, { 'string' }, false)
 
     local normalised_path = path:gsub('\\', '/'):gsub('//', '/')
     if M.is_windows() then
