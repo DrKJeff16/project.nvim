@@ -378,7 +378,7 @@ function DEFAULTS:expand_excluded()
     end
 
     for i, v in ipairs(self.exclude_dirs) do
-        self.exclude_dirs[i] = Util.rstrip('/', vim.fn.fnamemodify(v, ':p'))
+        self.exclude_dirs[i] = Util.rstrip('\\', Util.rstrip('/', vim.fn.fnamemodify(v, ':p')))
     end
 end
 
@@ -395,7 +395,7 @@ function DEFAULTS:verify()
     end
     vim.schedule(function()
         vim.notify(
-            '(project.nvim): the `detection_methods` option has been deprecated!\nUse `use_lsp` instead.',
+            '(project.nvim): `detection_methods` has been deprecated!\nUse `use_lsp` instead.',
             WARN
         )
     end)
