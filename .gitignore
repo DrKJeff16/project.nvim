@@ -67,3 +67,7 @@ deps/
 minimal.lua
 repro.lua
 .repro/
+
+# Python Stuff
+.mypy_cache/
+.ropeproject/
