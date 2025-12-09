@@ -41,31 +41,26 @@ def die(*msg, code: int = 0, end: str = "\n", sep: str = " ", flush: bool = Fals
     """Kill program execution."""
     try:
         code = int(code)
-    except KeyboardInterrupt:
-        Exit(1)
     except Exception:
         code = 1
 
     try:
         end = str(end)
-    except KeyboardInterrupt:
-        Exit(1)
     except Exception:
         end = "\n"
+        code = 1
 
     try:
         sep = str(sep)
-    except KeyboardInterrupt:
-        Exit(1)
     except Exception:
         sep = " "
+        code = 1
 
     try:
         flush = bool(flush)
-    except KeyboardInterrupt:
-        Exit(1)
     except Exception:
         flush = False
+        code = 1
 
     if msg and len(msg) > 0 and code == 0:
         print(*msg, end=end, sep=sep, flush=flush)
