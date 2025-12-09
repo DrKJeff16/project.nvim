@@ -1,23 +1,20 @@
 CMD = nvim --clean --headless
 
-RETAB_CMD = $(CMD) -c 'set ts=4 sts=4 sw=4 et' -c '%retab!' -c 'w' -c 'qa!' doc/project-nvim.txt
 TAGS_CMD = $(CMD) -c 'helptags doc/' -c 'qa!'
 
 all:
-	@$(MAKE) retab
+	@$(MAKE) ensure_eof
 	@$(MAKE) helptags
+	@$(MAKE) test
+
+ensure_eof: scripts/ensure_eof_comment.py
+	@python scripts/ensure_eof_comment.py
 
 test:
 	@./scripts/deps.sh mini
-	@nvim --version | head -n 1
-	@nvim --headless --noplugin -u ./scripts/minimal_init.lua \
+	@nvim --headless --clean --noplugin -u ./scripts/minimal_init.lua \
 		-c "lua require('mini.test').setup()" \
 		-c "lua MiniTest.run({ execute = { reporter = MiniTest.gen_reporter.stdout({ group_depth = 2 }) } })"
-
-retab:
-	@echo -e "\nRetabbing helpdocs...\n"
-	@$(RETAB_CMD) > /dev/null 2>&1
-	@echo
 
 helptags:
 	@echo -e "\nGenerating helptags...\n"
@@ -25,7 +22,6 @@ helptags:
 	@echo
 
 doc/project-nvim.txt:
-	@$(MAKE) retab
 	@$(MAKE) helptags
 
 lint:
@@ -45,7 +41,7 @@ clean:
 	all \
 	check \
 	clean \
+	ensure_eof \
 	helptags \
 	lint \
-	retab \
 	test
