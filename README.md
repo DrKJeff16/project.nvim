@@ -1,34 +1,11 @@
-> [!NOTE]
-> This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim/pull/158).
-> Ever since I've decided to extend it and address issues.
->
-> _**I will be maintaining this plugin for the foreseeable future!**_
-
-> [!IMPORTANT]
-> **_I'm looking for other maintainers in case I'm unable to keep this repo up to date!_**
-
-<div align="center">
-
 # project.nvim [![Mentioned in Awesome Neovim](https://awesome.re/mentioned-badge.svg)](https://github.com/rockerBOO/awesome-neovim)
 
 [![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/DrKJeff16)[![Last Commit](https://img.shields.io/github/last-commit/DrKJeff16/project.nvim.svg)](https://github.com/DrKJeff16/project.nvim/commits/main/)[![LICENSE](https://img.shields.io/github/license/DrKJeff16/project.nvim)](./LICENSE)[![Issues](https://img.shields.io/github/issues/DrKJeff16/project.nvim)](https://github.com/DrKJeff16/project.nvim/issues)[![GitHub Release](https://img.shields.io/github/v/release/DrKJeff16/project.nvim?sort=date&display_name=release)](https://github.com/DrKJeff16/project.nvim/releases/latest)
 
-**============================  [Breaking Changes](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes)  ============================**
+[**Breaking Changes**](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes) | [**Announcements**](https://github.com/DrKJeff16/project.nvim/discussions/1) | [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions) | [**Wiki**](https://github.com/DrKJeff16/project.nvim/wiki) | [**Credits**](./CREDITS.md) | [**Contributing**](./CONTRIBUTING.md) | [**Roadmap**](./TODO.md)
 
-[**Announcements**](https://github.com/DrKJeff16/project.nvim/discussions/1) | [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions) | [**Wiki**](https://github.com/DrKJeff16/project.nvim/wiki) | [**Credits**](./CREDITS.md) | [**Contributing**](./CONTRIBUTING.md) | [**Roadmap**](./TODO.md)
-
-<a href="#project">
-<img
-alt="project_nvim-showcase"
-src="https://github.com/user-attachments/assets/aa2b130d-9ebd-489c-b001-4529d1b463b0"
-/>
-</a>
-<a href="#projectsession">
-<img
-alt="project_nvim_session"
-src="https://github.com/user-attachments/assets/4d537c1c-a01f-4362-a898-921111219cee"
-/>
-</a>
+[![project_nvim-showcase](https://github.com/user-attachments/assets/aa2b130d-9ebd-489c-b001-4529d1b463b0)](#project)
+[![project_nvim_session](https://github.com/user-attachments/assets/4d537c1c-a01f-4362-a898-921111219cee)](#projectsession)
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that,
 under configurable conditions, automatically sets the user's `cwd` to the current project root
@@ -37,81 +14,53 @@ and also allows users to manage, access and selectively include their projects i
 This plugin allows you to navigate through projects, _"bookmark"_ and/or discard them,
 according to your needs.
 
-</div>
+This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim/pull/158).
+Ever since I've decided to extend it and address issues.
 
-<br />
-<details>
-<summary><b>Checkhealth Support Example</b></summary>
-
-https://github.com/user-attachments/assets/436f5cbe-7549-4b8a-b962-4fce3d2a2fc3
-
-</details>
-<details>
-<summary><b>Telescope Integration Example</b></summary>
-
-https://github.com/user-attachments/assets/376cbca0-a746-4992-8223-8475fcd99fc9
-
-</details>
-<details>
-<summary><b><code>fzf-Lua</code> Integration Example</b></summary>
-
-https://github.com/user-attachments/assets/1516ff2e-29d9-4e0d-b592-bf2f79ab8158
-
-</details>
-
----
-
-### Alternatives
-
-Show these much love!
-
-- [`nvim-telescope/telescope-project.nvim`](https://github.com/nvim-telescope/telescope-project.nvim)
-- [`folke/snacks.nvim`](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md#projects)
-- [`coffebar/neovim-project`](https://github.com/coffebar/neovim-project)
-- [`LintaoAmons/cd-project.nvim`](https://github.com/LintaoAmons/cd-project.nvim)
-- [`wsdjeg/rooter.nvim`](https://github.com/wsdjeg/rooter.nvim)
+You can check some sample videos [here](/EXAMPLES.md).
 
 ---
 
 ## Table of Contents
 
-1. [Features](#features)
-2. [Installation](#installation)
-    1. [`vim-plug`](#vim-plug)
-    2. [`lazy.nvim`](#lazynvim)
-    3. [`pckr.nvim`](#pckrnvim)
-    4. [`paq-nvim`](#paq-nvim)
-    5. [LuaRocks](#luarocks)
-3. [Configuration](#configuration)
-    1. [Defaults](#defaults)
-    2. [Pattern Matching](#pattern-matching)
-    3. [Nvim Tree](#nvim-tree)
-    4. [Neo Tree](#neo-tree)
-    5. [Telescope](#telescope)
-        1. [Telescope Mappings](#telescope-mappings)
-    6. [`mini.starter`](#ministarter)
-4. [Commands](#commands)
-    1. [`:Project`](#project)
-    2. [`:ProjectFzf`](#projectfzf)
-    3. [`:ProjectTelescope`](#projecttelescope)
-    4. [`:ProjectHealth`](#projecthealth)
-    5. [`:ProjectHistory`](#projecthistory)
-    6. [`:ProjectLog`](#projectlog)
-    7. [`:ProjectLogClear`](#projectlogclear)
-    8. [`:ProjectAdd`](#projectadd)
-    9. [`:ProjectRoot`](#projectroot)
-    10. [`:ProjectConfig`](#projectconfig)
-    11. [`:ProjectDelete`](#projectdelete)
-    12. [`:ProjectSession`](#projectsession)
-5. [API](#api)
-    1. [`get_project_root()`](#get_project_root)
-    2. [`get_recent_projects()`](#get_recent_projects)
-    3. [`get_config()`](#get_config)
-    4. [`get_history_paths()`](#get_history_paths)
-6. [Utils](#utils)
-7. [Troubleshooting](#troubleshooting)
-    1. [History File Not Created](#history-file-not-created)
-8. [License](#license)
+- [Features](#features)
+- [Installation](#installation)
+    - [`vim-plug`](#vim-plug)
+    - [`lazy.nvim`](#lazynvim)
+    - [`pckr.nvim`](#pckrnvim)
+    - [`paq-nvim`](#paq-nvim)
+    - [LuaRocks](#luarocks)
+- [Configuration](#configuration)
+    - [Defaults](#defaults)
+    - [Pattern Matching](#pattern-matching)
+    - [Nvim Tree](#nvim-tree)
+    - [Neo Tree](#neo-tree)
+    - [Telescope](#telescope)
+        - [Telescope Mappings](#telescope-mappings)
+    - [`mini.starter`](#ministarter)
+- [Commands](#commands)
+    - [`:Project`](#project)
+    - [`:ProjectFzf`](#projectfzf)
+    - [`:ProjectTelescope`](#projecttelescope)
+    - [`:ProjectHealth`](#projecthealth)
+    - [`:ProjectHistory`](#projecthistory)
+    - [`:ProjectLog`](#projectlog)
+    - [`:ProjectLogClear`](#projectlogclear)
+    - [`:ProjectAdd`](#projectadd)
+    - [`:ProjectRoot`](#projectroot)
+    - [`:ProjectConfig`](#projectconfig)
+    - [`:ProjectDelete`](#projectdelete)
+    - [`:ProjectSession`](#projectsession)
+- [API](#api)
+    - [`get_project_root()`](#get_project_root)
+    - [`get_recent_projects()`](#get_recent_projects)
+    - [`get_config()`](#get_config)
+    - [`get_history_paths()`](#get_history_paths)
+- [Utils](#utils)
+- [Troubleshooting](#troubleshooting)
+    - [History File Not Created](#history-file-not-created)
+- [Alternative](#alternatives)
+- [License](#license)
 
 ---
 
@@ -129,12 +78,6 @@ Show these much love!
 - [`nvim-tree` Integration](#nvim-tree)
 - [`neo-tree` Integration](#neo-tree)
 - [`mini.starter` Integration](#ministarter)
-
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
 
 ---
 
@@ -258,12 +201,6 @@ luarocks install project.nvim # Global install
 luarocks install --local project.nvim # Local install
 ```
 
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-
 ---
 
 ## Configuration
@@ -293,9 +230,7 @@ require('project').setup()
 > ---|'search_in_project_files'
 > ```
 
-<br />
-<details>
-<summary><code>setup()</code><b>comes with these defaults.</b></summary>
+`setup()` comes with these defaults:
 
 ```lua
 {
@@ -355,7 +290,7 @@ require('project').setup()
             'packer',
             'qf',
         },
-        bt = { 'help', 'nofile', 'nowrite', 'terminal' }, -- `buftype`
+        bt = { 'help', 'nofile', 'nowrite', 'terminal' },
     },
     telescope = { ---@type Project.Config.Telescope
         sort = 'newest', ---@type 'oldest'|'newest'
@@ -382,14 +317,6 @@ require('project').setup()
     },
 }
 ```
-
-</details>
-
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
 
 ---
 
@@ -432,12 +359,6 @@ For your convenience here come some examples:
 > - Make sure to put your pattern exclusions first, and then the patterns you DO want included.
 > - If you have `allow_patterns_for_lsp` enabled, it will also work somewhat for your LSP clients.
 
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-
 ### Nvim Tree
 
 Make sure these flags are enabled to support [`nvim-tree.lua`](https://github.com/nvim-tree/nvim-tree.lua):
@@ -453,12 +374,6 @@ require('nvim-tree').setup({
 })
 ```
 
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-
 ### Neo Tree
 
 You can use `:Neotree filesystem ...` when changing a project:
@@ -473,12 +388,6 @@ vim.keymap.set('n', '<YOUR-FLOAT-MAP>', ':Neotree filesystem float reveal_force_
 > [!NOTE]
 > Not 100% certain whether the `reveal_force_cwd` flag is necessary,
 > but better safe than sorry!
-
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
 
 ### Telescope
 
@@ -551,12 +460,6 @@ require('mini.starter').setup({
   },
 })
 ```
-
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
 
 ---
 
@@ -757,14 +660,6 @@ Selecting a directory will open another UI picker with its contents, and so on.
 
 ---
 
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-
----
-
 ## API
 
 The API can be found in [_`api.lua`_](./lua/project/api.lua).
@@ -833,12 +728,6 @@ vim.print(get_history_paths('projectpath'))
 vim.print(get_history_paths('historyfile'))
 ```
 
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-
 ---
 
 ## Utils
@@ -857,12 +746,6 @@ A set of utilities that get repeated across the board.
 > [!NOTE]
 > _These utilities are in part inspired by my own utilities found in [**`Jnvim`**](https://github.com/DrKJeff16/Jnvim),_
 > _my own Nvim configuration; particularly the [**`User API`**](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)_ **(WIP)**.
-
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
 
 ---
 
@@ -889,11 +772,17 @@ If you lack the required permissions for that directory, you can either:
 - Delete that directory **(RECOMMENDED)**
 - Run `chmod 755 <project/path>` **(NOT SURE IF THIS WILL FIX IT)**
 
-<div align="right">
+---
 
-[Go To Top](#projectnvim-)
+## Alternatives
 
-</div>
+Show these much love!
+
+- [`nvim-telescope/telescope-project.nvim`](https://github.com/nvim-telescope/telescope-project.nvim)
+- [`folke/snacks.nvim`](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md#projects)
+- [`coffebar/neovim-project`](https://github.com/coffebar/neovim-project)
+- [`LintaoAmons/cd-project.nvim`](https://github.com/LintaoAmons/cd-project.nvim)
+- [`wsdjeg/rooter.nvim`](https://github.com/wsdjeg/rooter.nvim)
 
 ---
 
@@ -901,9 +790,4 @@ If you lack the required permissions for that directory, you can either:
 
 [Apache-2.0](./LICENSE)
 
-<div align="right">
-
-[Go To Top](#projectnvim-)
-
-</div>
-<!--vim:ts=2:sts=2:sw=2:et:ai:si:sta:noci:nopi:-->
+<!--vim:ts=2:sts=2:sw=2:et:ai:si:sta:-->
