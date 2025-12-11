@@ -3,12 +3,12 @@ CMD = nvim --clean --headless
 TAGS_CMD = $(CMD) -c 'helptags doc/' -c 'qa!'
 
 all:
-	@$(MAKE) ensure_eof
+	@$(MAKE) ensure-eof
 	@$(MAKE) helptags
 	@$(MAKE) test
 
-ensure_eof: scripts/ensure_eof_comment.py
-	@python scripts/ensure_eof_comment.py
+ensure-eof:
+	@python3 scripts/ensure_eof_comment.py lua -e lua
 
 test:
 	@./scripts/deps.sh mini
@@ -20,9 +20,6 @@ helptags:
 	@echo -e "\nGenerating helptags...\n"
 	@$(TAGS_CMD) > /dev/null 2>&1
 	@echo
-
-doc/project-nvim.txt:
-	@$(MAKE) helptags
 
 lint:
 	@echo -e "\nRunning StyLua...\n"
@@ -41,7 +38,7 @@ clean:
 	all \
 	check \
 	clean \
-	ensure_eof \
+	ensure-eof \
 	helptags \
 	lint \
 	test
