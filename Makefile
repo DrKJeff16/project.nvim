@@ -3,12 +3,8 @@ CMD = nvim --clean --headless
 TAGS_CMD = $(CMD) -c 'helptags doc/' -c 'qa!'
 
 all:
-	@$(MAKE) ensure-eof
 	@$(MAKE) helptags
 	@$(MAKE) test
-
-ensure-eof:
-	@python3 scripts/ensure_eof_comment.py lua -e lua
 
 test:
 	@./scripts/deps.sh mini
@@ -38,7 +34,6 @@ clean:
 	all \
 	check \
 	clean \
-	ensure-eof \
 	helptags \
 	lint \
 	test

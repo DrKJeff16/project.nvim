@@ -790,4 +790,4 @@ Show these much love!
 
 [Apache-2.0](./LICENSE)
 
-<!--vim:ts=2:sts=2:sw=2:et:ai:si:sta:-->
+<!-- vim: set ts=2 sts=2 sw=2 et ai si sta: -->

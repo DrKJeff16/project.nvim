@@ -63,3 +63,5 @@
 
 - [x] Fix `file_browser` mapping ([**CREDITS**](https://github.com/ahmedkhalf/project.nvim/pull/107))
 - [x] Add option to control picker sorting order ([_solves this_](https://github.com/ahmedkhalf/project.nvim/issues/140))
+
+<!-- vim: set ts=2 sts=2 sw=2 et ai si sta: -->

@@ -213,3 +213,5 @@ return Foo
 
 [^1]: https://luals.github.io/wiki/annotations/
 [^2]: https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
+
+<!-- vim: set ts=2 sts=2 sw=2 et ai si sta: -->

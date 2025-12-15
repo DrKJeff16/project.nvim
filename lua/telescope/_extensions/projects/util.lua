@@ -67,4 +67,4 @@ local T_Util = setmetatable(M, { ---@type Project.Telescope.Util
 })
 
 return T_Util
--- vim:ts=4:sts=4:sw=4:et:ai:si:sta:
+-- vim: set ts=4 sts=4 sw=4 et ai si sta:

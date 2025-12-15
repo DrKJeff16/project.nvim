@@ -189,4 +189,4 @@ local T_Actions = setmetatable(M, { ---@type Project.Telescope.Actions
 })
 
 return T_Actions
--- vim:ts=4:sts=4:sw=4:et:ai:si:sta:
+-- vim: set ts=4 sts=4 sw=4 et ai si sta:

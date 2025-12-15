@@ -30,3 +30,5 @@ Thank you all for your contributions and support, or imported code.
 - [@gmelodie](https://github.com/gmelodie): Thank you for your support!
 - [@mrcjkb](https://github.com/mrcjkb) and [@Lumen](https://github.com/lumen-oss): Thank you for the help with `luarocks`!
   (https://github.com/lumen-oss/nurr/issues/59)
+
+<!-- vim: set ts=2 sts=2 sw=2 et ai si sta: -->

@@ -179,4 +179,4 @@ local Glob = setmetatable(M, { ---@type Project.Utils.Glob
 })
 
 return Glob
--- vim:ts=4:sts=4:sw=4:et:ai:si:sta:
+-- vim: set ts=4 sts=4 sw=4 et ai si sta:
