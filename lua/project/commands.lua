@@ -42,7 +42,7 @@ function Commands.new(specs)
             T.nargs = spec.nargs
             opts.nargs = spec.nargs
         end
-        if spec.complete and vim.is_callable(spec.complete) then
+        if spec.complete then
             T.complete = spec.complete
             opts.complete = spec.complete
         end
@@ -138,6 +138,7 @@ function Commands.create_user_commands()
             end,
             bang = true,
             nargs = 1,
+            complete = 'file',
         },
         {
             name = 'ProjectConfig',
@@ -174,7 +175,7 @@ function Commands.create_user_commands()
                 local force = ctx.bang ~= nil and ctx.bang or false
                 for _, v in ipairs(ctx.fargs) do
                     local path = vim.fn.fnamemodify(v, ':p')
-                    if path:sub(-1) == '/' then ---HACK: Getting rid of trailing `/` in string
+                    if path:sub(-1) == '/' then
                         path = path:sub(1, path:len() - 1)
                     end
                     if not (force or in_list(recent, path) or path ~= '') then
@@ -187,7 +188,7 @@ function Commands.create_user_commands()
                         )
                         return
                     end
-                    if vim.list_contains(recent, path) then
+                    if in_list(recent, path) then
                         require('project.utils.history').delete_project(path)
                     end
                 end
