@@ -1,6 +1,6 @@
 ---@module 'mini.test'
 
-local Helpers = dofile('tests/helpers.lua')
+local Helpers = dofile('tests/helpers.lua') ---@module 'tests.helpers'
 
 -- See https://github.com/echasnovski/mini.nvim/blob/main/lua/mini/test.lua for more documentation
 

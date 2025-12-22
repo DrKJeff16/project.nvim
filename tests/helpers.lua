@@ -6,6 +6,9 @@ local Helpers = {}
 -- Add extra expectations
 Helpers.expect = vim.deepcopy(MiniTest.expect)
 
+---@param str string
+---@param pattern any
+---@return string
 local function error_message(str, pattern)
     return ('Pattern: %s\nObserved string: %s'):format(vim.inspect(pattern), str)
 end
@@ -63,7 +66,8 @@ Helpers.new_child_neovim = function()
     end
 
     child.wait = function(ms)
-        child.loop.sleep(ms or 10)
+        local loop = child.loop ---@type uv
+        loop.sleep(ms or 10)
     end
 
     child.nnp = function()
