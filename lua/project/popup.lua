@@ -22,7 +22,15 @@ local function gen_export_prompt()
             return
         end
 
-        vim.cmd.ProjectExportJSON(input)
+        vim.ui.input(
+            { prompt = 'Select your indent level (default: 0):', default = '0' },
+            function(indent)
+                if not indent or indent == '' then
+                    return
+                end
+                vim.cmd.ProjectExportJSON({ args = { input, indent } })
+            end
+        )
     end)
 end
 

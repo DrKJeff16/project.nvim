@@ -82,7 +82,7 @@ function History.export_history_json(path, ind, force_name)
         Log.error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path))
         error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
     end
-    if vim.fn.isdirectory(path) then
+    if vim.fn.isdirectory(path) == 1 then
         Log.error(('(%s.import_history_json): Target is a directory! `%s`'):format(MODSTR, path))
         error(('(%s.import_history_json): Target is a directory! `%s`'):format(MODSTR, path), ERROR)
     end
@@ -120,7 +120,7 @@ function History.import_history_json(path, force_name)
         Log.error(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path))
         error(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
     end
-    if vim.fn.isdirectory(path) then
+    if vim.fn.isdirectory(path) == 1 then
         Log.error(('(%s.import_history_json): Target is a directory! `%s`'):format(MODSTR, path))
         error(('(%s.import_history_json): Target is a directory! `%s`'):format(MODSTR, path), ERROR)
     end
