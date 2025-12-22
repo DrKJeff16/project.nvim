@@ -22,8 +22,9 @@ jobs:
           cp -rv lua doc README.md CREDITS.md LICENSE Makefile project.nvim
           zip -r -9 project.nvim.zip project.nvim
           tar cvJf project.nvim.tar.xz project.nvim
-          sha512sum project.nvim.zip project.nvim.tar.xz >| sha512sums.txt
-          md5sum project.nvim.zip project.nvim.tar.xz >| md5sums.txt
+          tar cvzf project.nvim.tar.gz project.nvim
+          sha512sum project.nvim.zip project.nvim.tar.xz project.nvim.tar.gz >| sha512sums.txt
+          md5sum project.nvim.zip project.nvim.tar.xz project.nvim.tar.gz >| md5sums.txt
           rm -rfv project.nvim
       - name: Get Release
         uses: joutvhu/get-release@v1.0.3
@@ -45,6 +46,7 @@ jobs:
         with:
           files: |
             Release.txt
+            project.nvim.tar.gz
             project.nvim.tar.xz
             project.nvim.zip
             md5sums.txt
