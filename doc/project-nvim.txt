@@ -812,6 +812,24 @@ Table of Contents                                             *project-nvim.toc*
                             UI picker with its contents, and so on...
 
 
+                                          *ProjectExportJSON*  *:ProjectExportJSON*
+`:ProjectExportJSON </path/to/file[.json]> [<INDENT>]`
+
+                            IMPORTANT ~
+                            This feature is experimental, ~
+                            expect changes in the future! ~
+
+                            The `:ProjectExportJSON` user command
+                            allows the user to save their project history
+                            in a JSON format, allowing a custom indent level
+                            if desired.
+
+                            WARNING ~
+                            Use this script with caution! ~
+                            You may overwrite important files ~
+                            if doing something reckless! ~
+
+
 ==============================================================================
 9. API                                                        *project-nvim.api*
 

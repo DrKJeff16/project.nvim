@@ -51,6 +51,7 @@ You can check some sample videos [here](/EXAMPLES.md).
     - [`:ProjectConfig`](#projectconfig)
     - [`:ProjectDelete`](#projectdelete)
     - [`:ProjectSession`](#projectsession)
+    - [`:ProjectExportJSON`](#projectexportjson)
 - [API](#api)
     - [`get_project_root()`](#get_project_root)
     - [`get_recent_projects()`](#get_recent_projects)
@@ -475,8 +476,6 @@ this plugin can provide. This one is subject to change, just as `vim.ui` is.
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
 
----
-
 ### `:ProjectFzf`
 
 > [!IMPORTANT]
@@ -488,8 +487,6 @@ For now it just executes `require('project').run_fzf_lua()`.
 
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
-
----
 
 ### `:ProjectTelescope`
 
@@ -503,16 +500,12 @@ A shortcut, to be honest.
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
 
----
-
 ### `:ProjectHealth`
 
 The `:ProjectHealth` command runs `:checkhealth project` in a single command.
 
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
-
----
 
 ### `:ProjectHistory`
 
@@ -524,8 +517,6 @@ any instance of a previously opened history file, if found. Otherwise nothing wi
 
 > [!TIP]
 > _See [`history.lua`](./lua/project/utils/history.lua) for more info_.
-
----
 
 ### `:ProjectLog`
 
@@ -541,8 +532,6 @@ any instance of a previously opened log file, if found. Otherwise nothing will h
 
 > [!TIP]
 > _See [_`log.lua`_](./lua/project/utils/log.lua) for more info_.
-
----
 
 ### `:ProjectLogClear`
 
@@ -565,8 +554,6 @@ If this is called from a logfile tab, then it will attempt to close it.
 > [!TIP]
 > _See [_`log.lua`_](./lua/project/utils/log.lua) for more info_.
 
----
-
 ### `:ProjectAdd`
 
 The `:ProjectAdd` command is a manual hook that opens a prompt to input any
@@ -580,8 +567,6 @@ Adding a [!] will set the prompt to your cwd.
 
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
-
----
 
 ### `:ProjectRoot`
 
@@ -598,8 +583,6 @@ The command is like doing the following in the cmdline:
 > [!TIP]
 > _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
 
----
-
 ### `:ProjectConfig`
 
 The `:ProjectConfig` command will open your current config in a floating window,
@@ -610,8 +593,6 @@ You can also print the output instead by running `:ProjectConfig!`.
 
 > [!TIP]
 > _See [`commands.lua`](./lua/project/commands.lua) for more info_.
-
----
 
 ### `:ProjectDelete`
 
@@ -639,8 +620,6 @@ If there's a successful deletion, you'll recieve a notification denoting success
 > - _See `:h :ProjectDelete` for more info_.
 > - _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
 
----
-
 ### `:ProjectSession`
 
 > [!IMPORTANT]
@@ -657,6 +636,25 @@ Selecting a directory will open another UI picker with its contents, and so on.
 
 > [!TIP]
 > - _See [_`popup.lua`_](./lua/project/popup.lua) for more info_.
+
+### `:ProjectExportJSON`
+
+The `:ProjectExportJSON` allows the user to save their project history in a JSON format,
+allowing a custom indent level if desired.
+
+> [!WARNING]
+> **_Use this script with caution, as you may overwrite your files if doing something reckless!_**
+
+Example usage:
+
+```vim
+:ProjectExportJSON a  " VALID: The output file will be `a.json`
+:ProjectExportJSON b 12  " VALID: The output file will be `b.json`, with a tab size of 12
+:ProjectExportJSON ~/.c.json " VALID: The command won't correct for this filename
+```
+
+> [!IMPORTANT]
+> **This feature is experimental, expect changes in the future!**
 
 ---
 
