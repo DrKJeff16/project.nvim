@@ -64,10 +64,13 @@ History.recent_projects = nil ---@type string[]|nil
 
 ---@param path string
 ---@param ind? integer
-function History.export_history_json(path, ind)
+---@param force_name? boolean
+function History.export_history_json(path, ind, force_name)
     vim.validate('path', path, { 'string' }, false)
     vim.validate('ind', ind, { 'number', 'nil' }, true)
+    vim.validate('force_name', force_name, { 'boolean', 'nil' }, true)
     ind = ind or 2
+    force_name = force_name ~= nil and force_name or false
 
     local spc = nil ---@type string|nil
     if ind >= 1 then
@@ -80,7 +83,7 @@ function History.export_history_json(path, ind)
         error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
     end
 
-    if path:sub(-5) ~= '.json' then
+    if path:sub(-5) ~= '.json' and not force_name then
         path = ('%s.json'):format(path)
     end
     path = vim.fn.fnamemodify(path, ':p')
@@ -102,8 +105,11 @@ function History.export_history_json(path, ind)
 end
 
 ---@param path string
-function History.import_history_json(path)
+---@param force_name? boolean
+function History.import_history_json(path, force_name)
     vim.validate('path', path, { 'string' }, false)
+    vim.validate('force_name', force_name, { 'boolean', 'nil' }, true)
+    force_name = force_name ~= nil and force_name or false
 
     local Log = require('project.utils.log')
     if path == '' then
@@ -111,7 +117,7 @@ function History.import_history_json(path)
         error(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
     end
 
-    if path:sub(-5) ~= '.json' then
+    if path:sub(-5) ~= '.json' and not force_name then
         path = ('%s.json'):format(path)
     end
     path = vim.fn.fnamemodify(path, ':p')
