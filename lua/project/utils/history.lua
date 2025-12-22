@@ -101,6 +101,49 @@ function History.export_history_json(path, ind)
     Log.debug(('(%s.export_history_json): File descriptor closed!'):format(MODSTR))
 end
 
+---@param path string
+function History.import_history_json(path)
+    vim.validate('path', path, { 'string' }, false)
+
+    local Log = require('project.utils.log')
+    if path == '' then
+        Log.error(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path))
+        error(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
+    end
+
+    if path:sub(-5) ~= '.json' then
+        path = ('%s.json'):format(path)
+    end
+    path = vim.fn.fnamemodify(path, ':p')
+
+    local fd = uv.fs_open(path, 'r', tonumber('644', 8))
+    if not fd then
+        Log.error(('(%s.import_history_json): File restricted! `%s`'):format(MODSTR, path))
+        error(('(%s.import_history_json): File restricted! `%s`'):format(MODSTR, path), ERROR)
+    end
+
+    local stat = uv.fs_fstat(fd)
+    if not stat then
+        Log.error(('(%s.import_history_json): File stat unavailable! `%s`'):format(MODSTR, path))
+        error(('(%s.import_history_json): File stat unavailable! `%s`'):format(MODSTR, path), ERROR)
+    end
+
+    local data = uv.fs_read(fd, stat.size)
+    if not data or data == '' then
+        Log.error(('(%s.import_history_json): Data unavailable! `%s`'):format(MODSTR, path))
+        error(('(%s.import_history_json): Data unavailable! `%s`'):format(MODSTR, path), ERROR)
+    end
+
+    local ok, hist = pcall(vim.json.decode, data, {}) ---@type boolean, string[]
+    if not ok then
+        Log.error(('(%s.import_history_json): JSON decoding failed! `%s`'):format(MODSTR, path))
+        error(('(%s.import_history_json): JSON decoding failed! `%s`'):format(MODSTR, path), ERROR)
+    end
+
+    History.recent_projects = hist
+    History.write_history(true)
+end
+
 ---Deletes a project string, or a Telescope Entry type.
 --- ---
 ---@param project string|Project.ActionEntry
