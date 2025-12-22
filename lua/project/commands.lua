@@ -104,7 +104,7 @@ function Commands.create_user_commands()
         },
         {
             name = 'ProjectExportJSON',
-            desc = 'Project export-to-JSON',
+            desc = 'Export project.nvim history to JSON file',
             with_ctx = true,
             callback = function(ctx)
                 if not (ctx and in_list({ 1, 2 }, #ctx.fargs)) then
@@ -117,10 +117,27 @@ function Commands.create_user_commands()
 
                 require('project.utils.history').export_history_json(
                     ctx.fargs[1],
-                    #ctx.fargs == 2 and tonumber(ctx.fargs[2]) or nil
+                    #ctx.fargs == 2 and tonumber(ctx.fargs[2]) or nil,
+                    ctx.bang
                 )
             end,
+            bang = true,
             nargs = '+',
+        },
+        {
+            name = 'ProjectImportJSON',
+            desc = 'Import project history from JSON file',
+            with_ctx = true,
+            callback = function(ctx)
+                if not (ctx and #ctx.fargs == 1) then
+                    vim.notify('Usage\n  :ProjectImportJSON </path/to/file[.json]>', INFO)
+                    return
+                end
+
+                require('project.utils.history').import_history_json(ctx.fargs[1], ctx.bang)
+            end,
+            bang = true,
+            nargs = 1,
         },
         {
             name = 'ProjectConfig',

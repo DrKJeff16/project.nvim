@@ -46,15 +46,17 @@ Table of Contents                                             *project-nvim.toc*
     8.7. `:ProjectTelescope`                                   |:ProjectTelescope|
     8.8. `:ProjectAdd`                                               |:ProjectAdd|
     8.9. `:ProjectRoot`                                             |:ProjectRoot|
-    8.10. `:ProjectConfig`                                         |:ProjectConfig|
+    8.10. `:ProjectConfig`                                        |:ProjectConfig|
     8.11. `:ProjectDelete`                                        |:ProjectDelete|
     8.12. `:ProjectSession`                                      |:ProjectSession|
+    8.13. `:ProjectExportJSON`                                |:ProjectExportJSON|
+    8.14. `:ProjectImportJSON`                                |:ProjectImportJSON|
 9. API                                                        |project-nvim.api|
     9.1. `get_project_root()`                    |project-nvim.get_project_root()|
     9.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
     9.3. `get_config()`                                |project-nvim.get_config()|
     9.4. `get_history_paths()`                  |project-nvim.get_history_paths()|
-10. Util                                                      |project-nvim.util|
+10. Util                                                     |project-nvim.util|
 11. Troubleshooting                               |project-nvim.troubleshooting|
 
 ==============================================================================
@@ -813,7 +815,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
                                           *ProjectExportJSON*  *:ProjectExportJSON*
-`:ProjectExportJSON </path/to/file[.json]> [<INDENT>]`
+`:ProjectExportJSON[!] </path/to/file[.json]> [<INDENT>]`
 
                             IMPORTANT ~
                             This feature is experimental, ~
@@ -824,10 +826,45 @@ Table of Contents                                             *project-nvim.toc*
                             in a JSON format, allowing a custom indent level
                             if desired.
 
+>vim
+        " VALID: The output file will be `a.json`
+        :ProjectExportJSON a
+
+        " VALID: The output file will be `b`, with a tab size of 12
+        :ProjectExportJSON! b 12
+
+        " VALID: The output file will be `~/.c.json` (bang here is irrelevant)
+        :ProjectExportJSON! ~/.c.json
+<
+
                             WARNING ~
                             Use this script with caution! ~
                             You may overwrite important files ~
                             if doing something reckless! ~
+
+
+                                          *ProjectImportJSON*  *:ProjectImportJSON*
+`:ProjectImportJSON[!] </path/to/file[.json]> [<INDENT>]`
+
+                            IMPORTANT ~
+                            This feature is experimental, ~
+                            expect changes in the future! ~
+
+                            The `:ProjectImportJSON` allows the user
+                            to retrieve their saved project history
+                            in a JSON format.
+
+                            Example Usage ~
+
+>vim
+        " Will be treated as `a.json`
+        :ProjectExportJSON a
+        :ProjectImportJSON a
+
+        " Will be treated as `b`
+        :ProjectExportJSON! b
+        :ProjectImportJSON! b
+<
 
 
 ==============================================================================

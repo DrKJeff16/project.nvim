@@ -52,6 +52,7 @@ You can check some sample videos [here](/EXAMPLES.md).
     - [`:ProjectDelete`](#projectdelete)
     - [`:ProjectSession`](#projectsession)
     - [`:ProjectExportJSON`](#projectexportjson)
+    - [`:ProjectImportJSON`](#projectimportjson)
 - [API](#api)
     - [`get_project_root()`](#get_project_root)
     - [`get_recent_projects()`](#get_recent_projects)
@@ -648,9 +649,33 @@ allowing a custom indent level if desired.
 Example usage:
 
 ```vim
-:ProjectExportJSON a  " VALID: The output file will be `a.json`
-:ProjectExportJSON b 12  " VALID: The output file will be `b.json`, with a tab size of 12
-:ProjectExportJSON ~/.c.json " VALID: The command won't correct for this filename
+" VALID: The output file will be `a.json`
+:ProjectExportJSON a
+
+" VALID: The output file will be `b`, with a tab size of 12
+:ProjectExportJSON! b 12
+
+" VALID: The output file will be `~/.c.json` (bang here is irrelevant)
+:ProjectExportJSON! ~/.c.json
+```
+
+> [!IMPORTANT]
+> **This feature is experimental, expect changes in the future!**
+
+### `:ProjectImportJSON`
+
+The `:ProjectImportJSON` allows the user to retrieved their saved project history in a JSON format.
+
+Example usage:
+
+```vim
+" Will be treated as `a.json`
+:ProjectExportJSON a
+:ProjectImportJSON a
+
+" Will be treated as `b`
+:ProjectExportJSON! b
+:ProjectImportJSON! b
 ```
 
 > [!IMPORTANT]
