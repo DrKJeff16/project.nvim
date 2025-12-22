@@ -147,5 +147,14 @@ function Config.close_win()
     Config.conf_loc = nil
 end
 
+function Config.toggle_win()
+    if not Config.conf_loc then
+        Config.open_win()
+        return
+    end
+
+    Config.close_win()
+end
+
 return Config
 -- vim: set ts=4 sts=4 sw=4 et ai si sta:

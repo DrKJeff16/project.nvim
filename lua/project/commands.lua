@@ -144,17 +144,12 @@ function Commands.create_user_commands()
             with_ctx = true,
             callback = function(ctx)
                 local Config = require('project.config')
-                if ctx then
-                    if ctx.bang ~= nil and ctx.bang then
-                        vim.print(Config.get_config())
-                        return
-                    end
-                end
-                if not Config.conf_loc then
-                    Config.open_win()
+                if ctx and ctx.bang ~= nil and ctx.bang then
+                    vim.print(Config.get_config())
                     return
                 end
-                Config.close_win()
+
+                Config.toggle_win()
             end,
             desc = 'Prints out the current configuratiion for `project.nvim`',
             bang = true,
