@@ -16,26 +16,14 @@ local Util = require('project.utils.util')
 
 ---TODO: Make this public so that `:ProjectExportJSON` could be invoked without args
 ---
----@return string path
----@return string indent
 local function gen_export_prompt()
-    local indent ---@type string
-    vim.ui.input(
-        { default = '0', prompt = 'Input the indent level (default: 0):' },
-        function(input) ---@param input string
-            indent = input or '0'
+    vim.ui.input({ prompt = 'Input the export file:' }, function(input) ---@param input? string
+        if not input or input == '' then
+            return
         end
-    )
 
-    local path ---@type string
-    vim.ui.input(
-        { completion = 'file', default = '', prompt = 'Input the export file:' },
-        function(input) ---@param input string
-            path = input or ''
-        end
-    )
-
-    return path, indent
+        vim.cmd.ProjectExportJSON(input)
+    end)
 end
 
 ---@param path string
@@ -336,10 +324,7 @@ M.open_menu = M.select.new({
             ['Delete A Project'] = M.delete_menu,
             ['Show Config'] = require('project.commands').cmds.ProjectConfig,
             ['Open History'] = vim.cmd.ProjectHistory,
-            ['Export History (JSON)'] = function()
-                local path, indent = gen_export_prompt()
-                vim.cmd.ProjectExportJSON(('%s %s'):format(path, indent))
-            end,
+            ['Export History (JSON)'] = gen_export_prompt,
             ['Open Help Docs'] = function()
                 vim.cmd.help('project-nvim')
             end,
