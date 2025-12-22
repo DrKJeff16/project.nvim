@@ -26,6 +26,18 @@ local function gen_export_prompt()
     end)
 end
 
+---TODO: Make this public so that `:ProjectImportJSON` could be invoked without args
+---
+local function gen_import_prompt()
+    vim.ui.input({ prompt = 'Input the import file:' }, function(input) ---@param input? string
+        if not input or input == '' then
+            return
+        end
+
+        vim.cmd.ProjectImportJSON(input)
+    end)
+end
+
 ---@param path string
 ---@param hidden boolean
 ---@return boolean
@@ -325,6 +337,7 @@ M.open_menu = M.select.new({
             ['Show Config'] = require('project.commands').cmds.ProjectConfig,
             ['Open History'] = vim.cmd.ProjectHistory,
             ['Export History (JSON)'] = gen_export_prompt,
+            ['Import History (JSON)'] = gen_import_prompt,
             ['Open Help Docs'] = function()
                 vim.cmd.help('project-nvim')
             end,
@@ -359,6 +372,7 @@ M.open_menu = M.select.new({
             'Show Config',
             'Open History',
             'Export History (JSON)',
+            'Import History (JSON)',
             'Open Help Docs',
             'Go To Source Code',
             'Exit',
