@@ -14,6 +14,7 @@
 ---@field nargs? string|integer
 
 local MODSTR = 'project.commands'
+local INFO = vim.log.levels.INFO
 local ERROR = vim.log.levels.ERROR
 local in_list = vim.list_contains
 local curr_buf = vim.api.nvim_get_current_buf
@@ -100,6 +101,26 @@ function Commands.create_user_commands()
             end,
             desc = 'Prompt to add the current directory to the project history',
             bang = true,
+        },
+        {
+            name = 'ProjectExportJSON',
+            desc = 'Project export-to-JSON',
+            with_ctx = true,
+            callback = function(ctx)
+                if not (ctx and in_list({ 1, 2 }, #ctx.fargs)) then
+                    vim.notify(
+                        'Usage\n  :ProjectExportJSON </path/to/file[.json]> [<INDENT>]',
+                        INFO
+                    )
+                    return
+                end
+
+                require('project.utils.history').export_history_json(
+                    ctx.fargs[1],
+                    #ctx.fargs == 2 and tonumber(ctx.fargs[2]) or nil
+                )
+            end,
+            nargs = '+',
         },
         {
             name = 'ProjectConfig',
