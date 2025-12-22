@@ -25,6 +25,9 @@ local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
 local copy = vim.deepcopy
+local in_list = vim.list_contains
+local floor = math.floor
+local ceil = math.ceil
 
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
@@ -36,8 +39,7 @@ local Path = require('project.utils.path')
 local History = {
     ---Projects from current neovim session.
     --- ---
-    ---@type string[]
-    session_projects = {},
+    session_projects = {}, ---@type string[]
     ---@param mode OpenMode
     ---@return integer|nil fd
     open_history = function(mode)
@@ -58,8 +60,46 @@ local History = {
 
 ---Projects from previous neovim sessions.
 --- ---
----@type string[]|nil
-History.recent_projects = nil
+History.recent_projects = nil ---@type string[]|nil
+
+---@param path string
+---@param ind? integer
+function History.export_history_json(path, ind)
+    vim.validate('path', path, { 'string' }, false)
+    vim.validate('ind', ind, { 'number', 'nil' }, true)
+    ind = ind or 2
+
+    local spc = nil ---@type string|nil
+    if ind >= 1 then
+        spc = (' '):rep(not in_list({ floor(ind), ceil(ind) }, ind) and floor(ind) or ind)
+    end
+
+    local Log = require('project.utils.log')
+    if path == '' then
+        Log.error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path))
+        error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
+    end
+
+    if path:sub(-5) ~= '.json' then
+        path = ('%s.json'):format(path)
+    end
+    path = vim.fn.fnamemodify(path, ':p')
+
+    History.write_history(true)
+
+    local fd = uv.fs_open(path, 'w', tonumber('644', 8))
+    if not fd then
+        Log.error(('(%s.export_history_json): File restricted! `%s`'):format(MODSTR, path))
+        error(('(%s.export_history_json): File restricted! `%s`'):format(MODSTR, path), ERROR)
+    end
+
+    local data = vim.json.encode(Util.reverse(History.get_recent_projects()), { indent = spc })
+
+    Log.debug(('(%s.export_history_json): Writing to file `%s`...'):format(MODSTR, path))
+    uv.fs_write(fd, data)
+    uv.fs_close(fd)
+    Log.debug(('(%s.export_history_json): File descriptor closed!'):format(MODSTR))
+end
 
 ---Deletes a project string, or a Telescope Entry type.
 --- ---
