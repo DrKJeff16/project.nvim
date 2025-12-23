@@ -31,8 +31,6 @@ die() {
 	exit "$EC"
 }
 
-LUALS_URL="https://github.com/LuaLS/lua-language-server/releases/download/3.7.4/lua-language-server-3.7.4-darwin-x64.tar.gz"
-
 __get_mini() {
 	if ! [ -d deps/mini.nvim ]; then
 		printf "git clone --depth 1 https://github.com/nvim-mini/mini.nvim deps/mini.nvim\n"
@@ -41,37 +39,23 @@ __get_mini() {
 	return 0
 }
 
-__get_lua_ls() {
-	if [[ -d .ci/lua-ls ]]; then
-		printf "rm -rf .ci/lua-ls/log\n"
-		rm -rf .ci/lua-ls/log
-		return 0
-	fi
-
-	printf "%s\n" "mkdir -p .ci/lua-ls" "curl -sL \"\$LUALS_URL\" | tar xzf - -C \"\$(pwd)/.ci/lua-ls\""
-
-	mkdir -p .ci/lua-ls
-	curl -sL "$LUALS_URL" | tar xzf - -C "$(pwd)/.ci/lua-ls"
-
-	return $?
-}
+if ! [[ -d ./.git ]] && ! [[ -d ./doc ]] && ! [[ -d ./lua ]] && ! [[ -f ./version.txt ]] ; then
+	die 1 "Not on the repository root!"
+fi
 
 if [[ $# -eq 0 ]]; then
 	__get_mini || die 1 "Mini installation failed!"
-	__get_lua_ls || die 1 "LuaLS installation failed!"
 	die 0
 fi
 
 DEP="$1"
 
 case "$DEP" in
-[Mm][Ii][Nn][Ii])
-	__get_mini
-	die $?
-	;;
-[Ll][Uu][Aa][Ll][Ss])
-	__get_lua_ls
-	die $?
-	;;
-*) die 1 "Bad argument \`${DEP}\`" ;;
+	[Mm][Ii][Nn][Ii])
+		__get_mini
+		die $?
+		;;
+	*) die 1 "Bad argument \`${DEP}\`" ;;
 esac
+
+# vim: set ts=4 sts=4 sw=0 noet ai si sta:
