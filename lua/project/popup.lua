@@ -14,38 +14,6 @@ local empty = vim.tbl_isempty
 
 local Util = require('project.utils.util')
 
----TODO: Make this public so that `:ProjectExportJSON` could be invoked without args
----
-local function gen_export_prompt()
-    vim.ui.input({ prompt = 'Input the export file:' }, function(input) ---@param input? string
-        if not input or input == '' then
-            return
-        end
-
-        vim.ui.input(
-            { prompt = 'Select your indent level (default: 0):', default = '0' },
-            function(indent)
-                if not indent or indent == '' then
-                    return
-                end
-                vim.cmd.ProjectExportJSON({ args = { input, indent } })
-            end
-        )
-    end)
-end
-
----TODO: Make this public so that `:ProjectImportJSON` could be invoked without args
----
-local function gen_import_prompt()
-    vim.ui.input({ prompt = 'Input the import file:' }, function(input) ---@param input? string
-        if not input or input == '' then
-            return
-        end
-
-        vim.cmd.ProjectImportJSON(input)
-    end)
-end
-
 ---@param path string
 ---@param hidden boolean
 ---@return boolean
@@ -158,6 +126,34 @@ local M = {}
 
 ---@class Project.Popup.Select
 M.select = {}
+
+function M.gen_import_prompt()
+    vim.ui.input({ prompt = 'Input the import file:' }, function(input) ---@param input? string
+        if not input or input == '' then
+            return
+        end
+
+        vim.cmd.ProjectImportJSON(input)
+    end)
+end
+
+function M.gen_export_prompt()
+    vim.ui.input({ prompt = 'Input the export file:' }, function(input) ---@param input? string
+        if not input or input == '' then
+            return
+        end
+
+        vim.ui.input(
+            { prompt = 'Select your indent level (default: 0):', default = '0' },
+            function(indent)
+                if not indent or indent == '' then
+                    return
+                end
+                vim.cmd.ProjectExportJSON({ args = { input, indent } })
+            end
+        )
+    end)
+end
 
 ---@param opts Project.Popup.SelectSpec
 ---@return Project.Popup.SelectChoices|ProjectCmdFun
@@ -344,8 +340,8 @@ M.open_menu = M.select.new({
             ['Delete A Project'] = M.delete_menu,
             ['Show Config'] = require('project.commands').cmds.ProjectConfig,
             ['Open History'] = vim.cmd.ProjectHistory,
-            ['Export History (JSON)'] = gen_export_prompt,
-            ['Import History (JSON)'] = gen_import_prompt,
+            ['Export History (JSON)'] = M.gen_export_prompt,
+            ['Import History (JSON)'] = M.gen_import_prompt,
             ['Open Help Docs'] = function()
                 vim.cmd.help('project-nvim')
             end,
