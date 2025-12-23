@@ -1,17 +1,15 @@
-<div align="center">
+# Roadmap
 
-# TODO / Roadmap
-
-</div>
+Here's a list of some of the long term TODOs for this plugin.
 
 ---
 
 ## Table of Contents
 
-1. [Important](#important)
-2. [Logging](#logging)
-3. [API](#api)
-4. [Telescope](#telescope)
+- [Important](#important)
+- [Logging](#logging)
+- [API](#api)
+- [Telescope](#telescope)
 
 ---
 
@@ -38,12 +36,12 @@
 
 ## Logging
 
-- [x] Create basic utilities
-- [x] Add logging toggle to `setup()`
+- [X] Create basic utilities
+- [X] Add logging toggle to `setup()`
 - [X] Implement logging utilities across codebase
 - [X] Create command with interface for end-user
-- [ ] Link logging with checkhealth
-- [ ] Document logging
+- [X] Link logging with checkhealth
+- [X] Document logging
 
 ---
 

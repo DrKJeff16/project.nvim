@@ -1,13 +1,9 @@
-<div align="center">
-
 # Credits
 
 A growing list of users with deserved attribution for supporting this plugin's
 development.
 
 Thank you all for your contributions and support, or imported code.
-
-</div>
 
 ---
 

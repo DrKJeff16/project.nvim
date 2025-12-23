@@ -8,14 +8,14 @@
 
 ## Table of Contents
 
-1. [Note For Co-Maintainers](#note-for-co-maintainers)
-2. [Guidelines](#guidelines)
-    1. [What I Will Not Accept](#what-i-will-not-accept)
-3. [Recommendations](#recommendations)
-    1. [StyLua](#stylua)
-    2. [`pre-commit`](#pre-commit)
-    3. [`selene`](#selene)
-4. [Code Annotations](#code-annotations)
+- [Note For Co-Maintainers](#note-for-co-maintainers)
+- [Guidelines](#guidelines)
+    - [What I Will Not Accept](#what-i-will-not-accept)
+- [Recommendations](#recommendations)
+    - [StyLua](#stylua)
+    - [`pre-commit`](#pre-commit)
+    - [`selene`](#selene)
+- [Code Annotations](#code-annotations)
 
 ---
 
