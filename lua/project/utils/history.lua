@@ -77,6 +77,10 @@ function History.export_history_json(path, ind, force_name)
     ind = math.floor(tonumber(ind))
     force_name = force_name ~= nil and force_name or false
 
+    if vim.g.project_setup ~= 1 then
+        return
+    end
+
     local spc = nil ---@type string|nil
     if ind >= 1 then
         spc = (' '):rep(not in_list({ floor(ind), ceil(ind) }, ind) and floor(ind) or ind)
@@ -156,6 +160,10 @@ function History.import_history_json(path, force_name)
     vim.validate('force_name', force_name, { 'boolean', 'nil' }, true)
     force_name = force_name ~= nil and force_name or false
 
+    if vim.g.project_setup ~= 1 then
+        return
+    end
+
     path = Util.strip(' ', path)
     local Log = require('project.utils.log')
     if path == '' then
@@ -196,12 +204,54 @@ function History.import_history_json(path, force_name)
         error(('(%s.import_history_json): JSON decoding failed! `%s`'):format(MODSTR, path), ERROR)
     end
 
-    History.recent_projects = hist
+    History.recent_projects = Util.reverse(hist)
     History.write_history(true)
 
     vim.notify(('Imported history from `%s`'):format(vim.fn.fnamemodify(path, ':~')), INFO, {
         title = 'project.nvim',
     })
+end
+
+---Remove a project from a session.
+--- ---
+---@param session string
+---@param found boolean
+---@return boolean found
+function History.remove_session(session, found)
+    vim.validate('session', session, { 'string' }, false)
+    vim.validate('found', found, { 'boolean' }, false)
+
+    local new_tbl = {} ---@type string[]
+    for _, v in ipairs(History.session_projects) do
+        if v ~= session then
+            table.insert(new_tbl, v)
+        else
+            found = true
+        end
+    end
+    History.session_projects = copy(new_tbl)
+
+    return found
+end
+
+---Remove a project from recent projects.
+--- ---
+---@param project string
+---@return boolean found
+function History.remove_recent(project)
+    vim.validate('project', project, { 'string' }, false)
+
+    local new_tbl, found = {}, false ---@type string[], boolean
+    for _, v in ipairs(History.recent_projects) do
+        if v ~= project then
+            table.insert(new_tbl, v)
+        else
+            found = true
+        end
+    end
+    History.recent_projects = copy(new_tbl)
+
+    return found
 end
 
 ---Deletes a project string, or a Telescope Entry type.
@@ -217,27 +267,10 @@ function History.delete_project(project)
         return
     end
 
-    ---@type string[], boolean
-    local new_tbl, found = {}, false
     local proj = type(project) == 'string' and project or project.value
-    for _, v in ipairs(History.recent_projects) do
-        if v ~= proj then
-            table.insert(new_tbl, v)
-        else
-            found = true
-        end
-    end
-    History.recent_projects = copy(new_tbl)
-
-    new_tbl = {}
-    for _, v in ipairs(History.session_projects) do
-        if v ~= proj then
-            table.insert(new_tbl, v)
-        else
-            found = true
-        end
-    end
-    History.session_projects = copy(new_tbl)
+    local found = false
+    found = History.remove_recent(proj)
+    found = History.remove_session(proj, found)
 
     if found then
         Log.info(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj))
