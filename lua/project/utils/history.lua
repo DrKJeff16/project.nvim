@@ -63,13 +63,14 @@ local History = {
 History.recent_projects = nil ---@type string[]|nil
 
 ---@param path string
----@param ind? integer
+---@param ind? integer|string
 ---@param force_name? boolean
 function History.export_history_json(path, ind, force_name)
     vim.validate('path', path, { 'string' }, false)
-    vim.validate('ind', ind, { 'number', 'nil' }, true)
+    vim.validate('ind', ind, { 'string', 'number', 'nil' }, true)
     vim.validate('force_name', force_name, { 'boolean', 'nil' }, true)
     ind = ind or 2
+    ind = math.floor(tonumber(ind))
     force_name = force_name ~= nil and force_name or false
 
     local spc = nil ---@type string|nil
@@ -77,14 +78,15 @@ function History.export_history_json(path, ind, force_name)
         spc = (' '):rep(not in_list({ floor(ind), ceil(ind) }, ind) and floor(ind) or ind)
     end
 
+    path = Util.strip(' ', path)
     local Log = require('project.utils.log')
     if path == '' then
         Log.error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path))
         error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
     end
     if vim.fn.isdirectory(path) == 1 then
-        Log.error(('(%s.import_history_json): Target is a directory! `%s`'):format(MODSTR, path))
-        error(('(%s.import_history_json): Target is a directory! `%s`'):format(MODSTR, path), ERROR)
+        Log.error(('(%s.export_history_json): Target is a directory! `%s`'):format(MODSTR, path))
+        error(('(%s.export_history_json): Target is a directory! `%s`'):format(MODSTR, path), ERROR)
     end
 
     if path:sub(-5) ~= '.json' and not force_name then
@@ -115,6 +117,7 @@ function History.import_history_json(path, force_name)
     vim.validate('force_name', force_name, { 'boolean', 'nil' }, true)
     force_name = force_name ~= nil and force_name or false
 
+    path = Util.strip(' ', path)
     local Log = require('project.utils.log')
     if path == '' then
         Log.error(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path))

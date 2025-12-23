@@ -127,17 +127,25 @@ local M = {}
 ---@class Project.Popup.Select
 M.select = {}
 
-function M.gen_import_prompt()
+---@param bang? boolean
+function M.gen_import_prompt(bang)
+    vim.validate('bang', bang, { 'boolean', 'nil' }, true)
+    bang = bang ~= nil and bang or false
+
     vim.ui.input({ prompt = 'Input the import file:' }, function(input) ---@param input? string
         if not input or input == '' then
             return
         end
 
-        vim.cmd.ProjectImportJSON(input)
+        require('project.utils.history').import_history_json(input, bang)
     end)
 end
 
-function M.gen_export_prompt()
+---@param bang? boolean
+function M.gen_export_prompt(bang)
+    vim.validate('bang', bang, { 'boolean', 'nil' }, true)
+    bang = bang ~= nil and bang or false
+
     vim.ui.input({ prompt = 'Input the export file:' }, function(input) ---@param input? string
         if not input or input == '' then
             return
@@ -149,7 +157,7 @@ function M.gen_export_prompt()
                 if not indent or indent == '' then
                     return
                 end
-                vim.cmd.ProjectExportJSON({ args = { input, indent } })
+                require('project.utils.history').export_history_json(input, indent, bang)
             end
         )
     end)
