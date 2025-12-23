@@ -32,10 +32,14 @@ local ceil = math.ceil
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
 
+---@class Project.HistoryLoc
+---@field bufnr integer
+---@field win integer
+
 ---@class Project.Utils.History
 ---@field has_watch_setup? boolean
 ---@field historysize? integer
----@field hist_loc? { bufnr: integer, win: integer }|nil
+---@field hist_loc Project.HistoryLoc|nil
 local History = {
     ---Projects from current neovim session.
     --- ---
@@ -415,6 +419,15 @@ function History.close_win()
     vim.api.nvim_buf_delete(History.hist_loc.bufnr, {})
     pcall(vim.cmd.tabclose)
     History.hist_loc = nil
+end
+
+function History.toggle_win()
+    if not History.hist_loc then
+        History.open_win()
+        return
+    end
+
+    History.close_win()
 end
 
 return History

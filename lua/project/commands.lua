@@ -231,14 +231,8 @@ function Commands.create_user_commands()
         },
         {
             name = 'ProjectHistory',
-            with_ctx = true,
-            callback = function(ctx)
-                local bang = ctx.bang ~= nil and ctx.bang or false
-                if not bang then
-                    require('project.utils.history').open_win()
-                    return
-                end
-                require('project.utils.history').close_win()
+            callback = function()
+                require('project.utils.history').toggle_win()
             end,
             desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
             bang = true,

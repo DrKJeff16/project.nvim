@@ -8,9 +8,11 @@ local WARN   =  vim.log.levels.WARN   -- `3`
 local ERROR  =  vim.log.levels.ERROR  -- `4`
 -- stylua: ignore end
 
+---@class Project.LogLoc: Project.HistoryLoc
+
 ---@class Project.Log
 ---@field logfile? string
----@field log_loc? { bufnr: integer, win: integer }|nil
+---@field log_loc? Project.LogLoc|nil
 local Log = {}
 
 ---@param lvl vim.log.levels
@@ -124,17 +126,10 @@ function Log.create_commands()
     Commands.new({
         {
             name = 'ProjectLog',
-            with_ctx = true,
-            callback = function(ctx)
-                local close = ctx.bang ~= nil and ctx.bang or false
-                if close then
-                    Log.close_win()
-                    return
-                end
-                Log.open_win()
+            callback = function()
+                Log.toggle_win()
             end,
             desc = 'Opens the `project.nvim` log in a new tab',
-            bang = true,
         },
         {
             name = 'ProjectLogClear',
@@ -259,6 +254,15 @@ function Log.close_win()
     pcall(vim.cmd.tabclose)
 
     Log.log_loc = nil
+end
+
+function Log.toggle_win()
+    if not Log.log_loc then
+        Log.open_win()
+        return
+    end
+
+    Log.close_win()
 end
 
 return Log

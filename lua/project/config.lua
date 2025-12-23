@@ -2,12 +2,10 @@ local MODSTR = 'project.config'
 local ERROR = vim.log.levels.ERROR
 local in_list = vim.list_contains
 
----@class Project.Config.ConfLoc
----@field win integer
----@field bufnr integer
+---@class Project.ConfigLoc: Project.HistoryLoc
 
 ---@class Project.Config
----@field conf_loc? Project.Config.ConfLoc
+---@field conf_loc? Project.ConfigLoc
 local Config = {
     ---Get the default options for configuring `project`.
     --- ---

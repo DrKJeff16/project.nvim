@@ -510,11 +510,8 @@ The `:ProjectHealth` command runs `:checkhealth project` in a single command.
 
 ### `:ProjectHistory`
 
-The `:ProjectHistory` command opens the `project.nvim` history file in a new tab,
+The `:ProjectHistory` command toggles the `project.nvim` history file in a new tab,
 which can be exited by pressing `q` in Normal Mode.
-
-If a `[!]` is supplied at the end of the command (i.e. `:ProjectHistory!`), then it'll close
-any instance of a previously opened history file, if found. Otherwise nothing will happen.
 
 > [!TIP]
 > _See [`history.lua`](./lua/project/utils/history.lua) for more info_.
@@ -525,11 +522,8 @@ any instance of a previously opened history file, if found. Otherwise nothing wi
 > This command will not be available unless you set `log.enabled = true`
 > in your `setup()`.
 
-The `:ProjectLog` command opens the `project.nvim` log file in a new tab,
+The `:ProjectLog` command toggles the `project.nvim` log file in a new tab,
 which can be exited by pressing `q` in Normal Mode.
-
-If a `[!]` is supplied at the end of the command (i.e. `:ProjectLog!`), then it'll close
-any instance of a previously opened log file, if found. Otherwise nothing will happen.
 
 > [!TIP]
 > _See [_`log.lua`_](./lua/project/utils/log.lua) for more info_.
@@ -586,7 +580,7 @@ The command is like doing the following in the cmdline:
 
 ### `:ProjectConfig`
 
-The `:ProjectConfig` command will open your current config in a floating window,
+The `:ProjectConfig` command will toggle your current config in a floating window,
 making it easier to access. To exit the window you can either press `q` in normal mode
 or by runnning `:ProjectConfig` again.
 
