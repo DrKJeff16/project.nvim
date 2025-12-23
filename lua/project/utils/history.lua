@@ -94,6 +94,37 @@ function History.export_history_json(path, ind, force_name)
     end
     path = vim.fn.fnamemodify(path, ':p')
 
+    local stat = uv.fs_stat(path)
+    if stat then
+        if stat.type ~= 'file' then
+            Log.error(
+                ('(%s.export_history_json): Target exists and is not a file! `%s`'):format(
+                    MODSTR,
+                    path
+                )
+            )
+            error(
+                ('(%s.export_history_json): Target exists and is not a file! `%s`'):format(
+                    MODSTR,
+                    path
+                ),
+                ERROR
+            )
+        end
+
+        if stat.size ~= 0 then
+            local choice = vim.fn.confirm(
+                ('File exists! Do you really want to export to it?'):format(path),
+                '&Yes\n&No',
+                2
+            )
+            if choice ~= 1 then
+                Log.info('(%s.delete_project): Aborting project export.')
+                return
+            end
+        end
+    end
+
     History.write_history(true)
 
     local fd = uv.fs_open(path, 'w', tonumber('644', 8))
@@ -108,6 +139,10 @@ function History.export_history_json(path, ind, force_name)
     uv.fs_write(fd, data)
     uv.fs_close(fd)
     Log.debug(('(%s.export_history_json): File descriptor closed!'):format(MODSTR))
+
+    vim.notify(('Exported history to `%s`'):format(vim.fn.fnamemodify(path, ':~')), INFO, {
+        title = 'project.nvim',
+    })
 end
 
 ---@param path string
@@ -159,6 +194,10 @@ function History.import_history_json(path, force_name)
 
     History.recent_projects = hist
     History.write_history(true)
+
+    vim.notify(('Imported history from `%s`'):format(vim.fn.fnamemodify(path, ':~')), INFO, {
+        title = 'project.nvim',
+    })
 end
 
 ---Deletes a project string, or a Telescope Entry type.
