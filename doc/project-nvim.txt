@@ -810,14 +810,19 @@ Table of Contents                                             *project-nvim.toc*
                                           *ProjectExportJSON*  *:ProjectExportJSON*
 `:ProjectExportJSON[!] [</path/to/file[.json]> [<INDENT>]]`
 
-                            IMPORTANT ~
-                            This feature is experimental, ~
-                            expect changes in the future! ~
+                            WARNING ~
+                            Use this script with caution! ~
+                            You may overwrite important files ~
+                            if doing something reckless! ~
 
                             The `:ProjectExportJSON` user command
                             allows the user to save their project history
                             in a JSON format, allowing a custom indent level
                             if desired.
+
+                            If the target file already exists
+                            and is not empty then a confirmation prompt
+                            will appear.
 
 >vim
         " Will open a prompt
@@ -833,18 +838,14 @@ Table of Contents                                             *project-nvim.toc*
         :ProjectExportJSON! ~/.c.json
 <
 
-                            WARNING ~
-                            Use this script with caution! ~
-                            You may overwrite important files ~
-                            if doing something reckless! ~
+                            IMPORTANT ~
+                            This feature is experimental, ~
+                            expect changes in the future! ~
 
 
                                           *ProjectImportJSON*  *:ProjectImportJSON*
 `:ProjectImportJSON[!] [</path/to/file[.json]>]`
 
-                            IMPORTANT ~
-                            This feature is experimental, ~
-                            expect changes in the future! ~
 
                             The `:ProjectImportJSON` allows the user
                             to retrieve their saved project history
@@ -864,6 +865,10 @@ Table of Contents                                             *project-nvim.toc*
         :ProjectExportJSON! b
         :ProjectImportJSON! b
 <
+
+                            IMPORTANT ~
+                            This feature is experimental, ~
+                            expect changes in the future! ~
 
 
 ==============================================================================

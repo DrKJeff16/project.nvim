@@ -634,11 +634,14 @@ Selecting a directory will open another UI picker with its contents, and so on.
 
 ### `:ProjectExportJSON`
 
+> [!WARNING]
+> **_Use this script with caution, as you may overwrite your files if doing something reckless!_**
+
 The `:ProjectExportJSON` allows the user to save their project history in a JSON format,
 allowing a custom indent level if desired.
 
-> [!WARNING]
-> **_Use this script with caution, as you may overwrite your files if doing something reckless!_**
+If the target file already exists and is not empty then a confirmation prompt
+will appear.
 
 Example usage:
 
