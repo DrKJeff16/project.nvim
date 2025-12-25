@@ -101,51 +101,45 @@ Table of Contents                                             *project-nvim.toc*
 ------------------------------------------------------------------------------
 2.2 lazy.nvim                                        *project-nvim.install-lazy*
 >lua
-    require('lazy').setup({
-      spec = {
-        -- Other plugins
-        {
-          'DrKJeff16/project.nvim',
-          dependencies = { -- OPTIONAL
-            'nvim-lua/plenary.nvim',
-            'nvim-telescope/telescope.nvim',
-            'ibhagwan/fzf-lua',
-          },
-          ---@module 'project'
-
-          ---@type Project.Config.Options
-          opts = {
-            -- your configuration comes here
-            -- or leave it empty to use the default settings
-            -- refer to the configuration section below
-          },
-          cond = vim.fn.has('nvim-0.11') == 1, -- RECOMMENDED
+    -- Other plugins
+      {
+        'DrKJeff16/project.nvim',
+        dependencies = { -- OPTIONAL
+          'nvim-lua/plenary.nvim',
+          'nvim-telescope/telescope.nvim',
+          'ibhagwan/fzf-lua',
         },
+        ---@module 'project'
+
+        ---@type Project.Config.Options
+        opts = {
+          -- your configuration comes here
+          -- or leave it empty to use the default settings
+          -- refer to the configuration section below
+        },
+        cond = vim.fn.has('nvim-0.11') == 1, -- RECOMMENDED
       },
-    })
 <
 ------------------------------------------------------------------------------
 2.3 pckr.nvim                                        *project-nvim.install-pckr*
 >lua
-    if vim.fn.has('nvim-0.11') == 1 then
-      require('pckr').add({
-        {
-          'DrKJeff16/project.nvim',
-          requires = { -- OPTIONAL
-            'nvim-lua/plenary.nvim',
-            'nvim-telescope/telescope.nvim',
-            'ibhagwan/fzf-lua',
-          },
-          config = function()
-            require('project').setup({
-              -- your configuration comes here
-              -- or leave it empty to use the default settings
-              -- refer to the configuration section below
-            })
-          end,
-        };
-      })
-    end
+    require('pckr').add({
+      {
+        'DrKJeff16/project.nvim',
+        requires = { -- OPTIONAL
+          'nvim-lua/plenary.nvim',
+          'nvim-telescope/telescope.nvim',
+          'ibhagwan/fzf-lua',
+        },
+        config = function()
+          require('project').setup({
+            -- your configuration comes here
+            -- or leave it empty to use the default settings
+            -- refer to the configuration section below
+          })
+        end,
+      };
+    })
 <
 ------------------------------------------------------------------------------
 2.4 paq-nvim                                          *project-nvim.install-paq*
