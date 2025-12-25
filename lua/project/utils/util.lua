@@ -7,127 +7,127 @@ local in_list = vim.list_contains
 
 ---@class Project.Utils.Util
 local M = {
-    ---Checks whether `data` is of type `t` or not.
-    ---
-    ---If `data` is `nil`, the function will always return `false`.
-    --- ---
-    ---@param t Project.Utils.Util.Types Any return value the `type()` function would return
-    ---@param data any The data to be type-checked
-    ---@return boolean correct_type
-    is_type = function(t, data)
-        return data ~= nil and type(data) == t
-    end,
-    ---Checks if module `mod` exists to be imported.
-    --- ---
-    ---@param mod string The `require()` argument to be checked
-    ---@return boolean exists A boolean indicating whether the module exists or not
-    mod_exists = function(mod)
-        vim.validate('mod', mod, { 'string' }, false)
+  ---Checks whether `data` is of type `t` or not.
+  ---
+  ---If `data` is `nil`, the function will always return `false`.
+  --- ---
+  ---@param t Project.Utils.Util.Types Any return value the `type()` function would return
+  ---@param data any The data to be type-checked
+  ---@return boolean correct_type
+  is_type = function(t, data)
+    return data ~= nil and type(data) == t
+  end,
+  ---Checks if module `mod` exists to be imported.
+  --- ---
+  ---@param mod string The `require()` argument to be checked
+  ---@return boolean exists A boolean indicating whether the module exists or not
+  mod_exists = function(mod)
+    vim.validate('mod', mod, { 'string' }, false)
 
-        if mod == '' then
-            return false
-        end
-        local exists = pcall(require, mod)
-        return exists
-    end,
-    ---Checks whether a given path is a directory or not.
-    ---
-    ---If the data passed to the function is not a string,
-    ---an error will be raised.
-    --- ---
-    ---@param dir string
-    ---@return boolean
-    dir_exists = function(dir)
-        vim.validate('dir', dir, { 'string' }, false)
+    if mod == '' then
+      return false
+    end
+    local exists = pcall(require, mod)
+    return exists
+  end,
+  ---Checks whether a given path is a directory or not.
+  ---
+  ---If the data passed to the function is not a string,
+  ---an error will be raised.
+  --- ---
+  ---@param dir string
+  ---@return boolean
+  dir_exists = function(dir)
+    vim.validate('dir', dir, { 'string' }, false)
 
-        local stat = uv.fs_stat(dir)
-        return stat ~= nil and stat.type == 'directory'
-    end,
-    vim_has = function(feature)
-        return vim.fn.has(feature) == 1
-    end,
-    ---Checks whether nvim is running on Windows.
-    --- ---
-    ---@return boolean win32
-    is_windows = function()
-        return vim.fn.has('win32') == 1
-    end,
-    ---@param str string
-    ---@param use_dot? boolean
-    ---@param triggers? string[]
-    ---@return string new_str
-    capitalize = function(str, use_dot, triggers)
-        use_dot = use_dot ~= nil and use_dot or false
-        triggers = triggers or { ' ', '' }
+    local stat = uv.fs_stat(dir)
+    return stat ~= nil and stat.type == 'directory'
+  end,
+  vim_has = function(feature)
+    return vim.fn.has(feature) == 1
+  end,
+  ---Checks whether nvim is running on Windows.
+  --- ---
+  ---@return boolean win32
+  is_windows = function()
+    return vim.fn.has('win32') == 1
+  end,
+  ---@param str string
+  ---@param use_dot? boolean
+  ---@param triggers? string[]
+  ---@return string new_str
+  capitalize = function(str, use_dot, triggers)
+    use_dot = use_dot ~= nil and use_dot or false
+    triggers = triggers or { ' ', '' }
 
-        if str == '' then
-            return str
-        end
+    if str == '' then
+      return str
+    end
 
-        if not in_list(triggers, ' ') then
-            table.insert(triggers, ' ')
-        end
-        if not in_list(triggers, '') then
-            table.insert(triggers, '')
-        end
+    if not in_list(triggers, ' ') then
+      table.insert(triggers, ' ')
+    end
+    if not in_list(triggers, '') then
+      table.insert(triggers, '')
+    end
 
-        local strlen = str:len()
-        local prev_char, new_str, i = '', '', 1
-        local dot = true
-        while i <= strlen do
-            local char = str:sub(i, i)
-            if char == char:lower() and in_list(triggers, prev_char) then
-                char = dot and char:upper() or char:lower()
-                if dot then
-                    dot = false
-                end
-            else
-                char = char:lower()
-            end
-            dot = (use_dot and not dot) and (char == '.') or (use_dot and dot or true)
-            new_str = ('%s%s'):format(new_str, char)
-            prev_char = char
-            i = i + 1
+    local strlen = str:len()
+    local prev_char, new_str, i = '', '', 1
+    local dot = true
+    while i <= strlen do
+      local char = str:sub(i, i)
+      if char == char:lower() and in_list(triggers, prev_char) then
+        char = dot and char:upper() or char:lower()
+        if dot then
+          dot = false
         end
-        return new_str
-    end,
-    ---Reverses a given table.
-    ---
-    ---If the passed data is an empty table, it'll be returned as-is.
-    ---
-    ---If the data passed to the function is not a table,
-    ---an error will be raised.
-    --- ---
-    ---@param T table
-    ---@return table T
-    reverse = function(T)
-        vim.validate('T', T, { 'table' }, false)
+      else
+        char = char:lower()
+      end
+      dot = (use_dot and not dot) and (char == '.') or (use_dot and dot or true)
+      new_str = ('%s%s'):format(new_str, char)
+      prev_char = char
+      i = i + 1
+    end
+    return new_str
+  end,
+  ---Reverses a given table.
+  ---
+  ---If the passed data is an empty table, it'll be returned as-is.
+  ---
+  ---If the data passed to the function is not a table,
+  ---an error will be raised.
+  --- ---
+  ---@param T table
+  ---@return table T
+  reverse = function(T)
+    vim.validate('T', T, { 'table' }, false)
 
-        if empty(T) then
-            return T
-        end
+    if empty(T) then
+      return T
+    end
 
-        local len = #T
-        for i = 1, math.floor(len / 2) do
-            T[i], T[len - i + 1] = T[len - i + 1], T[i]
-        end
-        return T
-    end,
-    ---@param T table<string|integer, any>
-    ---@return integer len
-    get_dict_size = function(T)
-        vim.validate('T', T, { 'table' }, false)
+    local len = #T
+    for i = 1, math.floor(len / 2) do
+      T[i], T[len - i + 1] = T[len - i + 1], T[i]
+    end
+    return T
+  end,
+  ---@param T table<string|integer, any>
+  ---@return integer len
+  get_dict_size = function(T)
+    vim.validate('T', T, { 'table' }, false)
 
-        local len = 0
-        if vim.tbl_isempty(T) then
-            return len
-        end
+    local len = 0
+    if vim.tbl_isempty(T) then
+      return len
+    end
 
-        for _, _ in pairs(T) do
-            len = len + 1
-        end
-        return len
-    end,
+    for _, _ in pairs(T) do
+      len = len + 1
+    end
+    return len
+  end,
 }
 
 ---Attempt to find out if given path is a hidden file.
@@ -139,74 +139,74 @@ local M = {
 ---@param path string
 ---@return boolean hidden
 function M.is_hidden(path)
-    vim.validate('path', path, { 'string' }, false)
+  vim.validate('path', path, { 'string' }, false)
 
-    ---CREDITS: [u/Some_Derpy_Pineapple](https://www.reddit.com/r/neovim/comments/1nu5ehj/comment/ngyz21m/)
-    local FILE_ATTRIBUTE_HIDDEN = 0x2
-    local ffi = nil ---@type nil|ffilib
-    if M.mod_exists('ffi') then
-        ffi = require('ffi')
-        ffi.cdef([[
+  ---CREDITS: [u/Some_Derpy_Pineapple](https://www.reddit.com/r/neovim/comments/1nu5ehj/comment/ngyz21m/)
+  local FILE_ATTRIBUTE_HIDDEN = 0x2
+  local ffi = nil ---@type nil|ffilib
+  if M.mod_exists('ffi') then
+    ffi = require('ffi')
+    ffi.cdef([[
             int GetFileAttributesA(const char *path);
         ]])
-    end
+  end
 
-    if M.is_windows() then
-        if ffi then
-            return bit.band(ffi.C.GetFileAttributesA(path), FILE_ATTRIBUTE_HIDDEN) ~= 0
-        end
-        return false -- FIXME: Find a reliable alternative
+  if M.is_windows() then
+    if ffi then
+      return bit.band(ffi.C.GetFileAttributesA(path), FILE_ATTRIBUTE_HIDDEN) ~= 0
     end
+    return false -- FIXME: Find a reliable alternative
+  end
 
-    return false --- TODO: Find a reliable method for UNIX systems
+  return false --- TODO: Find a reliable method for UNIX systems
 end
 
 ---@param exe string[]|string
 ---@return boolean
 function M.executable(exe)
-    vim.validate('exe', exe, { 'string', 'table' }, false, 'string[]|string')
+  vim.validate('exe', exe, { 'string', 'table' }, false, 'string[]|string')
 
-    if M.is_type('string', exe) then
-        return vim.fn.executable(exe) == 1
+  if M.is_type('string', exe) then
+    return vim.fn.executable(exe) == 1
+  end
+
+  local res = false
+
+  ---@cast exe string[]
+  for _, v in ipairs(exe) do
+    res = M.executable(v)
+    if not res then
+      break
     end
-
-    local res = false
-
-    ---@cast exe string[]
-    for _, v in ipairs(exe) do
-        res = M.executable(v)
-        if not res then
-            break
-        end
-    end
-    return res
+  end
+  return res
 end
 
 ---@param tbl string[]
 ---@return string[] res
 function M.delete_duplicates(tbl)
-    vim.validate('tbl', tbl, { 'table' }, false, 'string[]')
+  vim.validate('tbl', tbl, { 'table' }, false, 'string[]')
 
-    local cache_dict = {} ---@type table<string, integer>
-    for _, v in ipairs(tbl) do
-        local normalised_path = M.normalise_path(v)
-        if cache_dict[normalised_path] == nil then
-            cache_dict[normalised_path] = 1
-        else
-            cache_dict[normalised_path] = cache_dict[normalised_path] + 1
-        end
+  local cache_dict = {} ---@type table<string, integer>
+  for _, v in ipairs(tbl) do
+    local normalised_path = M.normalise_path(v)
+    if cache_dict[normalised_path] == nil then
+      cache_dict[normalised_path] = 1
+    else
+      cache_dict[normalised_path] = cache_dict[normalised_path] + 1
     end
+  end
 
-    local res = {} ---@type string[]
-    for _, v in ipairs(tbl) do
-        local normalised_path = M.normalise_path(v)
-        if cache_dict[normalised_path] == 1 then
-            table.insert(res, normalised_path)
-        else
-            cache_dict[normalised_path] = cache_dict[normalised_path] - 1
-        end
+  local res = {} ---@type string[]
+  for _, v in ipairs(tbl) do
+    local normalised_path = M.normalise_path(v)
+    if cache_dict[normalised_path] == 1 then
+      table.insert(res, normalised_path)
+    else
+      cache_dict[normalised_path] = cache_dict[normalised_path] - 1
     end
-    return M.dedup(res)
+  end
+  return M.dedup(res)
 end
 
 ---Left strip given a leading string (or list of strings) within a string, if any.
@@ -215,36 +215,36 @@ end
 ---@param str string
 ---@return string new_str
 function M.lstrip(char, str)
-    vim.validate('char', char, { 'string', 'table' }, false)
-    vim.validate('str', str, { 'string' }, false)
+  vim.validate('char', char, { 'string', 'table' }, false)
+  vim.validate('str', str, { 'string' }, false)
 
-    if str == '' or not vim.startswith(str, char) then
-        return str
-    end
+  if str == '' or not vim.startswith(str, char) then
+    return str
+  end
 
-    ---@cast char string[]
-    if type(char) == 'table' then
-        if not vim.tbl_isempty(char) then
-            for _, c in ipairs(char) do
-                str = M.lstrip(c, str)
-            end
-        end
-        return str
+  ---@cast char string[]
+  if type(char) == 'table' then
+    if not vim.tbl_isempty(char) then
+      for _, c in ipairs(char) do
+        str = M.lstrip(c, str)
+      end
     end
+    return str
+  end
 
-    ---@cast char string
-    local i, len, new_str = 1, str:len(), ''
-    local other = false
-    while i <= len + 1 do
-        if str:sub(i, i) ~= char and not other then
-            other = true
-        end
-        if other then
-            new_str = ('%s%s'):format(new_str, str:sub(i, i))
-        end
-        i = i + 1
+  ---@cast char string
+  local i, len, new_str = 1, str:len(), ''
+  local other = false
+  while i <= len + 1 do
+    if str:sub(i, i) ~= char and not other then
+      other = true
     end
-    return new_str
+    if other then
+      new_str = ('%s%s'):format(new_str, str:sub(i, i))
+    end
+    i = i + 1
+  end
+  return new_str
 end
 
 ---Right strip given a leading string (or list of strings) within a string, if any.
@@ -253,30 +253,30 @@ end
 ---@param str string
 ---@return string new_str
 function M.rstrip(char, str)
-    vim.validate('char', char, { 'string', 'table' }, false)
-    vim.validate('str', str, { 'string' }, false)
+  vim.validate('char', char, { 'string', 'table' }, false)
+  vim.validate('str', str, { 'string' }, false)
 
-    if str == '' then
-        return str
+  if str == '' then
+    return str
+  end
+
+  ---@cast char string[]
+  if type(char) == 'table' then
+    if not vim.tbl_isempty(char) then
+      for _, c in ipairs(char) do
+        str = M.rstrip(c, str)
+      end
     end
+    return str
+  end
 
-    ---@cast char string[]
-    if type(char) == 'table' then
-        if not vim.tbl_isempty(char) then
-            for _, c in ipairs(char) do
-                str = M.rstrip(c, str)
-            end
-        end
-        return str
-    end
+  ---@cast char string
+  str = str:reverse()
 
-    ---@cast char string
-    str = str:reverse()
-
-    if not vim.startswith(str, char) then
-        return str:reverse()
-    end
-    return M.lstrip(char, str):reverse()
+  if not vim.startswith(str, char) then
+    return str:reverse()
+  end
+  return M.lstrip(char, str):reverse()
 end
 
 ---Strip given a leading string (or list of strings) within a string, if any, bidirectionally.
@@ -285,25 +285,25 @@ end
 ---@param str string
 ---@return string new_str
 function M.strip(char, str)
-    vim.validate('char', char, { 'string', 'table' }, false)
-    vim.validate('str', str, { 'string' }, false)
+  vim.validate('char', char, { 'string', 'table' }, false)
+  vim.validate('str', str, { 'string' }, false)
 
-    if str == '' then
-        return str
+  if str == '' then
+    return str
+  end
+
+  ---@cast char string[]
+  if type(char) == 'table' then
+    if not vim.tbl_isempty(char) then
+      for _, c in ipairs(char) do
+        str = M.strip(c, str)
+      end
     end
+    return str
+  end
 
-    ---@cast char string[]
-    if type(char) == 'table' then
-        if not vim.tbl_isempty(char) then
-            for _, c in ipairs(char) do
-                str = M.strip(c, str)
-            end
-        end
-        return str
-    end
-
-    ---@cast char string
-    return M.rstrip(char, M.lstrip(char, str))
+  ---@cast char string
+  return M.rstrip(char, M.lstrip(char, str))
 end
 
 ---Get rid of all duplicates in input table.
@@ -316,27 +316,27 @@ end
 ---@param T table
 ---@return table NT
 function M.dedup(T)
-    vim.validate('T', T, { 'table' }, false)
+  vim.validate('T', T, { 'table' }, false)
 
-    if empty(T) then
-        return T
-    end
+  if empty(T) then
+    return T
+  end
 
-    local NT = {}
-    for _, v in pairs(T) do
-        local not_dup = false
-        if M.is_type('table', v) then
-            not_dup = not in_tbl(NT, function(val)
-                return vim.deep_equal(val, v)
-            end, { predicate = true })
-        else
-            not_dup = not in_list(NT, v)
-        end
-        if not_dup then
-            table.insert(NT, v)
-        end
+  local NT = {}
+  for _, v in pairs(T) do
+    local not_dup = false
+    if M.is_type('table', v) then
+      not_dup = not in_tbl(NT, function(val)
+        return vim.deep_equal(val, v)
+      end, { predicate = true })
+    else
+      not_dup = not in_list(NT, v)
     end
-    return NT
+    if not_dup then
+      table.insert(NT, v)
+    end
+  end
+  return NT
 end
 
 ---@param t 'number'|'string'|'boolean'|'table'|'function'
@@ -346,84 +346,84 @@ end
 ---@return string
 ---@return boolean|nil
 function M.format_per_type(t, data, sep, constraints)
-    vim.validate('t', t, { 'string' }, false, "'number'|'string'|'boolean'|'table'|'function'")
-    vim.validate('sep', sep, { 'string', 'nil' }, true, 'string|nil')
-    vim.validate('constraints', constraints, { 'table', 'nil' }, true, 'string[]|nil')
+  vim.validate('t', t, { 'string' }, false, "'number'|'string'|'boolean'|'table'|'function'")
+  vim.validate('sep', sep, { 'string', 'nil' }, true, 'string|nil')
+  vim.validate('constraints', constraints, { 'table', 'nil' }, true, 'string[]|nil')
 
-    sep = sep or ''
-    constraints = constraints or nil
-    if t == 'string' then
-        local res = ('%s`"%s"`'):format(sep, data)
-        if not M.is_type('table', constraints) then
-            return res
-        end
-        if constraints ~= nil and in_list(constraints, data) then
-            return res
-        end
-        return res, true
+  sep = sep or ''
+  constraints = constraints or nil
+  if t == 'string' then
+    local res = ('%s`"%s"`'):format(sep, data)
+    if not M.is_type('table', constraints) then
+      return res
     end
-    if t == 'number' or t == 'boolean' then
-        return ('%s`%s`'):format(sep, tostring(data))
+    if constraints ~= nil and in_list(constraints, data) then
+      return res
     end
-    if t == 'function' then
-        return ('%s`%s`'):format(sep, t)
-    end
+    return res, true
+  end
+  if t == 'number' or t == 'boolean' then
+    return ('%s`%s`'):format(sep, tostring(data))
+  end
+  if t == 'function' then
+    return ('%s`%s`'):format(sep, t)
+  end
 
-    local msg = ''
-    if t == 'nil' then
-        return ('%s%s `nil`'):format(sep, msg)
-    end
-    if t ~= 'table' then
-        return ('%s%s `?`'):format(sep, msg)
-    end
-    if empty(data) then
-        return ('%s%s `{}`'):format(sep, msg)
-    end
+  local msg = ''
+  if t == 'nil' then
+    return ('%s%s `nil`'):format(sep, msg)
+  end
+  if t ~= 'table' then
+    return ('%s%s `?`'):format(sep, msg)
+  end
+  if empty(data) then
+    return ('%s%s `{}`'):format(sep, msg)
+  end
 
-    sep = ('%s '):format(sep)
-    for k, v in pairs(data) do
-        k = M.is_type('number', k) and ('[%s]'):format(tostring(k)) or k
-        msg = ('%s\n%s%s: '):format(msg, sep, k)
-        if not M.is_type('string', v) then
-            msg = ('%s%s'):format(msg, M.format_per_type(type(v), v, sep))
-        else
-            msg = ('%s`"%s"`'):format(msg, v)
-        end
+  sep = ('%s '):format(sep)
+  for k, v in pairs(data) do
+    k = M.is_type('number', k) and ('[%s]'):format(tostring(k)) or k
+    msg = ('%s\n%s%s: '):format(msg, sep, k)
+    if not M.is_type('string', v) then
+      msg = ('%s%s'):format(msg, M.format_per_type(type(v), v, sep))
+    else
+      msg = ('%s`"%s"`'):format(msg, v)
     end
-    return msg
+  end
+  return msg
 end
 
 ---@param path string
 ---@return boolean exists
 function M.path_exists(path)
-    vim.validate('path', path, { 'string' }, false)
+  vim.validate('path', path, { 'string' }, false)
 
-    if M.dir_exists(path) then
-        return true
-    end
+  if M.dir_exists(path) then
+    return true
+  end
 
-    --- CREDITS: @tomaskallup
-    return vim.fn.empty(vim.fn.glob(path:gsub('%[', '\\['))) == 0
+  --- CREDITS: @tomaskallup
+  return vim.fn.empty(vim.fn.glob(path:gsub('%[', '\\['))) == 0
 end
 
 ---@param path string
 ---@return string normalised_path
 function M.normalise_path(path)
-    vim.validate('path', path, { 'string' }, false)
+  vim.validate('path', path, { 'string' }, false)
 
-    local normalised_path = path:gsub('\\', '/'):gsub('//', '/')
-    if M.is_windows() then
-        normalised_path = normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)
-    end
-    return normalised_path
+  local normalised_path = path:gsub('\\', '/'):gsub('//', '/')
+  if M.is_windows() then
+    normalised_path = normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)
+  end
+  return normalised_path
 end
 
 local Util = setmetatable(M, { ---@type Project.Utils.Util
-    __index = M,
-    __newindex = function()
-        vim.notify('Project.Utils.Util is Read-Only!', vim.log.levels.ERROR)
-    end,
+  __index = M,
+  __newindex = function()
+    vim.notify('Project.Utils.Util is Read-Only!', vim.log.levels.ERROR)
+  end,
 })
 
 return Util
--- vim: set ts=4 sts=4 sw=4 et ai si sta:
+-- vim: set ts=2 sts=2 sw=2 et ai si sta:

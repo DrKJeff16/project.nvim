@@ -24,259 +24,253 @@ local Commands = {}
 
 ---@param specs Project.Commands.Spec[]
 function Commands.new(specs)
-    vim.validate('specs', specs, 'table', false)
+  vim.validate('specs', specs, 'table', false)
 
-    if vim.tbl_isempty(specs) then
-        error(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
-    end
+  if vim.tbl_isempty(specs) then
+    error(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
+  end
 
-    for _, spec in ipairs(specs) do
-        if not (spec.callback and vim.is_callable(spec.callback)) then
-            vim.notify(('(%s.new): Missing callback!'):format(MODSTR), ERROR)
-            return
-        end
-        local bang = spec.bang ~= nil and spec.bang or false
-        local T = { name = spec.name, desc = spec.desc, bang = bang }
-        local opts = { desc = spec.desc, bang = bang }
-        if spec.nargs ~= nil then
-            T.nargs = spec.nargs
-            opts.nargs = spec.nargs
-        end
-        if spec.complete then
-            T.complete = spec.complete
-            opts.complete = spec.complete
-        end
-        Commands.cmds[spec.name] = setmetatable({}, {
-            __index = function(_, k) ---@param k string
-                return T[k]
-            end,
-            __tostring = function(_)
-                return T.desc
-            end,
-            __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args
-                if ctx then
-                    spec.callback(ctx)
-                    return
-                end
-                spec.callback()
-            end,
-        })
-        vim.api.nvim_create_user_command(spec.name, function(ctx)
-            local with_ctx = spec.with_ctx ~= nil and spec.with_ctx or false
-            local cmd = Commands.cmds[spec.name]
-            if with_ctx then
-                cmd(ctx)
-                return
-            end
-            cmd()
-        end, opts)
+  for _, spec in ipairs(specs) do
+    if not (spec.callback and vim.is_callable(spec.callback)) then
+      vim.notify(('(%s.new): Missing callback!'):format(MODSTR), ERROR)
+      return
     end
+    local bang = spec.bang ~= nil and spec.bang or false
+    local T = { name = spec.name, desc = spec.desc, bang = bang }
+    local opts = { desc = spec.desc, bang = bang }
+    if spec.nargs ~= nil then
+      T.nargs = spec.nargs
+      opts.nargs = spec.nargs
+    end
+    if spec.complete then
+      T.complete = spec.complete
+      opts.complete = spec.complete
+    end
+    Commands.cmds[spec.name] = setmetatable({}, {
+      __index = function(_, k) ---@param k string
+        return T[k]
+      end,
+      __tostring = function(_)
+        return T.desc
+      end,
+      __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args
+        if ctx then
+          spec.callback(ctx)
+          return
+        end
+        spec.callback()
+      end,
+    })
+    vim.api.nvim_create_user_command(spec.name, function(ctx)
+      local with_ctx = spec.with_ctx ~= nil and spec.with_ctx or false
+      local cmd = Commands.cmds[spec.name]
+      if with_ctx then
+        cmd(ctx)
+        return
+      end
+      cmd()
+    end, opts)
+  end
 end
 
 function Commands.create_user_commands()
-    Commands.new({
-        {
-            name = 'Project',
-            with_ctx = true,
-            callback = function(ctx)
-                require('project.popup').open_menu(ctx.fargs)
-            end,
-            desc = 'Run the main project.nvim UI',
-            nargs = '*',
-            bang = true,
-        },
-        {
-            name = 'ProjectAdd',
-            with_ctx = true,
-            callback = function(ctx)
-                local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' }
-                if ctx and ctx.bang ~= nil then
-                    if ctx.bang then
-                        local bufnr = curr_buf()
-                        opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
-                    end
-                end
+  Commands.new({
+    {
+      name = 'Project',
+      with_ctx = true,
+      callback = function(ctx)
+        require('project.popup').open_menu(ctx.fargs)
+      end,
+      desc = 'Run the main project.nvim UI',
+      nargs = '*',
+      bang = true,
+    },
+    {
+      name = 'ProjectAdd',
+      with_ctx = true,
+      callback = function(ctx)
+        local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' }
+        if ctx and ctx.bang ~= nil then
+          if ctx.bang then
+            local bufnr = curr_buf()
+            opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
+          end
+        end
 
-                vim.ui.input(opts, require('project.popup').prompt_project)
-            end,
-            desc = 'Prompt to add the current directory to the project history',
-            bang = true,
-        },
-        {
-            name = 'ProjectExportJSON',
-            desc = 'Export project.nvim history to JSON file',
-            with_ctx = true,
-            callback = function(ctx)
-                if not (ctx and #ctx.fargs <= 2) then
-                    vim.notify(
-                        'Usage\n  :ProjectExportJSON </path/to/file[.json]> [<INDENT>]',
-                        INFO
-                    )
-                    return
-                end
+        vim.ui.input(opts, require('project.popup').prompt_project)
+      end,
+      desc = 'Prompt to add the current directory to the project history',
+      bang = true,
+    },
+    {
+      name = 'ProjectExportJSON',
+      desc = 'Export project.nvim history to JSON file',
+      with_ctx = true,
+      callback = function(ctx)
+        if not (ctx and #ctx.fargs <= 2) then
+          vim.notify('Usage\n  :ProjectExportJSON </path/to/file[.json]> [<INDENT>]', INFO)
+          return
+        end
 
-                if vim.tbl_isempty(ctx.fargs) then
-                    require('project.popup').gen_export_prompt()
-                    return
-                end
+        if vim.tbl_isempty(ctx.fargs) then
+          require('project.popup').gen_export_prompt()
+          return
+        end
 
-                require('project.utils.history').export_history_json(
-                    ctx.fargs[1],
-                    #ctx.fargs == 2 and tonumber(ctx.fargs[2]) or nil,
-                    ctx.bang
-                )
-            end,
-            bang = true,
-            nargs = '*',
-        },
-        {
-            name = 'ProjectImportJSON',
-            desc = 'Import project history from JSON file',
-            with_ctx = true,
-            callback = function(ctx)
-                if not (ctx and #ctx.fargs <= 1) then
-                    vim.notify('Usage\n  :ProjectImportJSON </path/to/file[.json]>', INFO)
-                    return
-                end
+        require('project.utils.history').export_history_json(
+          ctx.fargs[1],
+          #ctx.fargs == 2 and tonumber(ctx.fargs[2]) or nil,
+          ctx.bang
+        )
+      end,
+      bang = true,
+      nargs = '*',
+    },
+    {
+      name = 'ProjectImportJSON',
+      desc = 'Import project history from JSON file',
+      with_ctx = true,
+      callback = function(ctx)
+        if not (ctx and #ctx.fargs <= 1) then
+          vim.notify('Usage\n  :ProjectImportJSON </path/to/file[.json]>', INFO)
+          return
+        end
 
-                if vim.tbl_isempty(ctx.fargs) then
-                    require('project.popup').gen_import_prompt()
-                    return
-                end
+        if vim.tbl_isempty(ctx.fargs) then
+          require('project.popup').gen_import_prompt()
+          return
+        end
 
-                require('project.utils.history').import_history_json(ctx.fargs[1], ctx.bang)
-            end,
-            bang = true,
-            nargs = '?',
-            complete = 'file',
-        },
-        {
-            name = 'ProjectConfig',
-            with_ctx = true,
-            callback = function(ctx)
-                local Config = require('project.config')
-                if ctx and ctx.bang ~= nil and ctx.bang then
-                    vim.print(Config.get_config())
-                    return
-                end
+        require('project.utils.history').import_history_json(ctx.fargs[1], ctx.bang)
+      end,
+      bang = true,
+      nargs = '?',
+      complete = 'file',
+    },
+    {
+      name = 'ProjectConfig',
+      with_ctx = true,
+      callback = function(ctx)
+        local Config = require('project.config')
+        if ctx and ctx.bang ~= nil and ctx.bang then
+          vim.print(Config.get_config())
+          return
+        end
 
-                Config.toggle_win()
-            end,
-            desc = 'Prints out the current configuratiion for `project.nvim`',
-            bang = true,
-        },
-        {
-            name = 'ProjectDelete',
-            with_ctx = true,
-            callback = function(ctx)
-                if not ctx or vim.tbl_isempty(ctx.fargs) then
-                    require('project.popup').delete_menu()
-                    return
-                end
+        Config.toggle_win()
+      end,
+      desc = 'Prints out the current configuratiion for `project.nvim`',
+      bang = true,
+    },
+    {
+      name = 'ProjectDelete',
+      with_ctx = true,
+      callback = function(ctx)
+        if not ctx or vim.tbl_isempty(ctx.fargs) then
+          require('project.popup').delete_menu()
+          return
+        end
 
-                local Log = require('project.utils.log')
-                local recent = require('project.utils.history').get_recent_projects()
-                if not recent then
-                    Log.error('(:ProjectDelete): No recent projects!')
-                    vim.notify('(:ProjectDelete): No recent projects!', ERROR)
-                    return
-                end
+        local Log = require('project.utils.log')
+        local recent = require('project.utils.history').get_recent_projects()
+        if not recent then
+          Log.error('(:ProjectDelete): No recent projects!')
+          vim.notify('(:ProjectDelete): No recent projects!', ERROR)
+          return
+        end
 
-                local force = ctx.bang ~= nil and ctx.bang or false
-                for _, v in ipairs(ctx.fargs) do
-                    local path = vim.fn.fnamemodify(v, ':p')
-                    if path:sub(-1) == '/' then
-                        path = path:sub(1, path:len() - 1)
-                    end
-                    if not (force or in_list(recent, path) or path ~= '') then
-                        Log.error(
-                            ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path)
-                        )
-                        vim.notify(
-                            ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path),
-                            ERROR
-                        )
-                        return
-                    end
-                    if in_list(recent, path) then
-                        require('project.utils.history').delete_project(path)
-                    end
-                end
-            end,
-            desc = 'Deletes the projects given as args, assuming they are valid. No args open a popup',
-            nargs = '*',
-            bang = true,
-            complete = function(_, line) ---@param line string
-                local recent = require('project.utils.history').get_recent_projects()
-                local input = vim.split(line, '%s+')
-                local prefix = input[#input]
-                return vim.tbl_filter(function(cmd) ---@param cmd string
-                    return vim.startswith(cmd, prefix)
-                end, recent)
-            end,
-        },
-        {
-            name = 'ProjectFzf',
-            callback = function()
-                require('project.extensions.fzf-lua').run_fzf_lua()
-            end,
-            desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
-        },
-        {
-            name = 'ProjectHealth',
-            callback = function()
-                vim.cmd.checkhealth('project')
-            end,
-            desc = 'Run checkhealth for project.nvim',
-        },
-        {
-            name = 'ProjectHistory',
-            callback = function()
-                require('project.utils.history').toggle_win()
-            end,
-            desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
-            bang = true,
-        },
-        {
-            name = 'ProjectRecents',
-            callback = function()
-                require('project.popup').recents_menu()
-            end,
-            desc = 'Opens a menu to select a project from your history',
-        },
-        {
-            name = 'ProjectRoot',
-            with_ctx = true,
-            callback = function(ctx)
-                local verbose = ctx.bang ~= nil and ctx.bang or false
-                require('project.api').on_buf_enter(verbose)
-            end,
-            desc = 'Sets the current project root to the current CWD',
-            bang = true,
-        },
-        {
-            name = 'ProjectSession',
-            with_ctx = true,
-            callback = function(ctx)
-                require('project.popup').session_menu(ctx)
-            end,
-            desc = 'Opens a menu to switch between sessions',
-            bang = true,
-        },
-        {
-            name = 'ProjectTelescope',
-            callback = function()
-                if vim.g.project_telescope_loaded == 1 then
-                    require('telescope._extensions.projects').projects()
-                end
-            end,
-            desc = 'Telescope shortcut for project.nvim picker',
-        },
-    })
+        local force = ctx.bang ~= nil and ctx.bang or false
+        local msg
+        for _, v in ipairs(ctx.fargs) do
+          local path = vim.fn.fnamemodify(v, ':p')
+          if path:sub(-1) == '/' then
+            path = path:sub(1, path:len() - 1)
+          end
+          if not (force or in_list(recent, path) or path ~= '') then
+            msg = ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path)
+            Log.error(msg)
+            vim.notify(msg, ERROR)
+            return
+          end
+          if in_list(recent, path) then
+            require('project.utils.history').delete_project(path)
+          end
+        end
+      end,
+      desc = 'Deletes the projects given as args, assuming they are valid. No args open a popup',
+      nargs = '*',
+      bang = true,
+      complete = function(_, line) ---@param line string
+        local recent = require('project.utils.history').get_recent_projects()
+        local input = vim.split(line, '%s+')
+        local prefix = input[#input]
+        return vim.tbl_filter(function(cmd) ---@param cmd string
+          return vim.startswith(cmd, prefix)
+        end, recent)
+      end,
+    },
+    {
+      name = 'ProjectFzf',
+      callback = function()
+        require('project.extensions.fzf-lua').run_fzf_lua()
+      end,
+      desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
+    },
+    {
+      name = 'ProjectHealth',
+      callback = function()
+        vim.cmd.checkhealth('project')
+      end,
+      desc = 'Run checkhealth for project.nvim',
+    },
+    {
+      name = 'ProjectHistory',
+      callback = function()
+        require('project.utils.history').toggle_win()
+      end,
+      desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
+      bang = true,
+    },
+    {
+      name = 'ProjectRecents',
+      callback = function()
+        require('project.popup').recents_menu()
+      end,
+      desc = 'Opens a menu to select a project from your history',
+    },
+    {
+      name = 'ProjectRoot',
+      with_ctx = true,
+      callback = function(ctx)
+        local verbose = ctx.bang ~= nil and ctx.bang or false
+        require('project.api').on_buf_enter(verbose)
+      end,
+      desc = 'Sets the current project root to the current CWD',
+      bang = true,
+    },
+    {
+      name = 'ProjectSession',
+      with_ctx = true,
+      callback = function(ctx)
+        require('project.popup').session_menu(ctx)
+      end,
+      desc = 'Opens a menu to switch between sessions',
+      bang = true,
+    },
+    {
+      name = 'ProjectTelescope',
+      callback = function()
+        if vim.g.project_telescope_loaded == 1 then
+          require('telescope._extensions.projects').projects()
+        end
+      end,
+      desc = 'Telescope shortcut for project.nvim picker',
+    },
+  })
 end
 
 ---@type table<string, Project.CMD>
 Commands.cmds = {}
 
 return Commands
--- vim: set ts=4 sts=4 sw=4 et ai si sta:
+-- vim: set ts=2 sts=2 sw=2 et ai si sta:
