@@ -28,12 +28,16 @@ check:
 	@echo
 
 clean:
-	rm -rf doc/tags
+	@rm -rf doc/tags
+
+distclean: clean
+	@rm -rf deps .ropeproject
 
 .PHONY: \
 	all \
 	check \
 	clean \
+	distclean \
 	helptags \
 	lint \
 	test
