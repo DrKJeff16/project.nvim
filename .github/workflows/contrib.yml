@@ -3,13 +3,13 @@ on:
   push:
     branches:
       - main
+permissions:
+  contents: write
+  pull-requests: write
 jobs:
   contrib-readme-job:
-    name: A job to automate contrib in readme
+    name: Automatic Contributors in README
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - name: Contribute List
         uses: akhilmhdh/contributors-readme-action@v2.3.11
