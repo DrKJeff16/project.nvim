@@ -810,6 +810,20 @@ If you lack the required permissions for that directory, you can either:
 
 ---
 
+## Collaborators
+
+<!-- readme: collaborators -start -->
+<!-- readme: collaborators -end -->
+
+---
+
+## Contributors
+
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
+
+---
+
 ## Alternatives
 
 Show these much love!
