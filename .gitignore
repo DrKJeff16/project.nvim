@@ -69,5 +69,10 @@ repro.lua
 .repro/
 
 # Python Stuff
+Pipfile
+Pipfile.lock
+.venv
+venv
+uv.lock
 .mypy_cache/
 .ropeproject/
