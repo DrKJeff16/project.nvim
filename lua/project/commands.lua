@@ -133,7 +133,7 @@ function Commands.create_user_commands()
           return vim.fn.getcompletion(args[2], 'file', true)
         end
         if #args == 3 then
-          local tbl = Util.range(0, 32) ---@type integer[]
+          local tbl = Util.range(0, 32)
           local res = vim.tbl_map(function(value) ---@param value integer
             return tostring(value)
           end, tbl)
