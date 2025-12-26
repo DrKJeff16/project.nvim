@@ -2,6 +2,17 @@ CMD = nvim --clean --headless
 
 TAGS_CMD = $(CMD) -c 'helptags doc/' -c 'qa!'
 
+.SUFFIXES:
+
+.PHONY: \
+	all \
+	check \
+	clean \
+	distclean \
+	helptags \
+	lint \
+	test
+
 all:
 	@$(MAKE) helptags
 	@$(MAKE) test
@@ -31,13 +42,4 @@ clean:
 	@rm -rf doc/tags
 
 distclean: clean
-	@rm -rf deps .ropeproject
-
-.PHONY: \
-	all \
-	check \
-	clean \
-	distclean \
-	helptags \
-	lint \
-	test
+	@rm -rf deps .ropeproject .mypy_cache
