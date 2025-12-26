@@ -1,5 +1,7 @@
 ---@alias Project.Utils.Util.Types 'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'
 
+local MODSTR = 'project.utils.util'
+local ERROR = vim.log.levels.ERROR
 local uv = vim.uv or vim.loop
 local empty = vim.tbl_isempty
 local in_tbl = vim.tbl_contains
@@ -129,6 +131,87 @@ local M = {
     return len
   end,
 }
+
+---@param nums number[]|number
+---@return boolean int
+function M.is_int(nums)
+  vim.validate('num', nums, { 'number', 'table' }, false)
+
+  ---@cast nums number
+  if M.is_type('number', nums) then
+    return nums == math.floor(nums) and nums == math.ceil(nums)
+  end
+
+  ---@cast nums number[]
+  for _, num in ipairs(nums) do
+    if not M.is_int(num) then
+      return false
+    end
+  end
+  return true
+end
+
+---@param x integer
+---@param y? integer
+---@param step? integer
+---@return integer[] range_list
+function M.range(x, y, step)
+  vim.validate('x', x, { 'number' }, false)
+  vim.validate('y', y, { 'number', 'nil' }, true)
+  vim.validate('step', step, { 'number', 'nil' }, true)
+
+  if not M.is_int(x) then
+    error(('(%s.range): Argument `x` is not an integer: `%s`'):format(MODSTR, x), ERROR)
+  end
+
+  local range_list = {} ---@type integer[]
+  if not (y or step) then
+    y = x
+    x = 1
+    step = x <= y and 1 or -1
+
+    table.insert(range_list, x)
+    for v = x + step, y, step do
+      table.insert(range_list, v)
+    end
+  elseif y and not step then
+    if not M.is_int(y) then
+      error(('(%s.range): Argument `y` is not an integer: `%s`'):format(MODSTR, y), ERROR)
+    end
+    step = x <= y and 1 or -1
+
+    table.insert(range_list, x)
+    for v = x + step, y, step do
+      table.insert(range_list, v)
+    end
+  elseif y and step then
+    if not M.is_int({ y, step }) then
+      error(('(%s.range): Arguments `y` and/or `step` are not an integer!'):format(MODSTR), ERROR)
+    end
+    if step == 0 then
+      error(('(%s.range): Argument `step` cannot be `0`!'):format(MODSTR), ERROR)
+    end
+    if x > y and step >= 1 then
+      error(('(%s.range): Index out of bounds!'):format(MODSTR), ERROR)
+    end
+    if x > y and step <= -1 then
+      local p = x
+      x = y
+      y = p
+      step = step * -1
+    end
+
+    table.insert(range_list, x)
+    for v = x + step, y, step do
+      table.insert(range_list, v)
+    end
+  else
+    error(('(%s.range): Argument `y` is nil while `step` is not: `%s`'):format(MODSTR, step), ERROR)
+  end
+
+  table.sort(range_list)
+  return range_list
+end
 
 ---Attempt to find out if given path is a hidden file.
 ---**Works only Windows, currently!**

@@ -18,6 +18,7 @@ local INFO = vim.log.levels.INFO
 local ERROR = vim.log.levels.ERROR
 local in_list = vim.list_contains
 local curr_buf = vim.api.nvim_get_current_buf
+local Util = require('project.utils.util')
 
 ---@class Project.Commands
 local Commands = {}
@@ -124,6 +125,23 @@ function Commands.create_user_commands()
         )
       end,
       bang = true,
+      complete = function(_, line, _)
+        local args = vim.split(line, '%s+', { trimempty = false })
+        if #args == 2 then
+          return vim.fn.getcompletion(args[2], 'file', true)
+        end
+        if #args == 3 then
+          local tbl = Util.range(0, 32) ---@type integer[]
+          local res = vim.tbl_map(function(value) ---@param value integer
+            return tostring(value)
+          end, tbl)
+          table.sort(res)
+
+          return res
+        end
+
+        return {}
+      end,
       nargs = '*',
     },
     {
