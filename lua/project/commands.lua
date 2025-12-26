@@ -125,9 +125,11 @@ function Commands.create_user_commands()
         )
       end,
       bang = true,
-      complete = function(_, line, _)
+      complete = function(_, line)
         local args = vim.split(line, '%s+', { trimempty = false })
         if #args == 2 then
+          -- Thanks to @TheLeoP for the advice!
+          -- https://www.reddit.com/r/neovim/comments/1pvl1tb/comment/nvwzvvu/
           return vim.fn.getcompletion(args[2], 'file', true)
         end
         if #args == 3 then

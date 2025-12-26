@@ -151,10 +151,14 @@ function M.is_int(nums)
   return true
 end
 
+---Emulates the behaviour of Python's builtin `range()` function.
+--- ---
 ---@param x integer
----@param y? integer
----@param step? integer
+---@param y integer
+---@param step integer
 ---@return integer[] range_list
+---@overload fun(x: integer): range_list: integer[]
+---@overload fun(x: integer, y: integer): range_list: integer[]
 function M.range(x, y, step)
   vim.validate('x', x, { 'number' }, false)
   vim.validate('y', y, { 'number', 'nil' }, true)
@@ -245,10 +249,11 @@ function M.is_hidden(path)
 end
 
 ---@param exe string[]|string
----@return boolean
+---@return boolean is_executable
 function M.executable(exe)
   vim.validate('exe', exe, { 'string', 'table' }, false, 'string[]|string')
 
+  ---@cast exe string
   if M.is_type('string', exe) then
     return vim.fn.executable(exe) == 1
   end
