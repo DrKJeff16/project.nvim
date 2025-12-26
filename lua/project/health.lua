@@ -11,7 +11,6 @@ local Util = require('project.utils.util')
 
 ---@class Project.Health
 local M = {
-
   ---@return boolean setup_called
   setup_check = function()
     start('Setup')
@@ -153,7 +152,7 @@ If you wish to disable this warning, set `g:project_disable_win32_warning` to `1
       return
     end
     for k, v in ipairs(Util.dedup(projects)) do
-      h_info(('[`%s`]: `%s`'):format(k, v))
+      h_info(('%s. `%s`'):format(k, v))
     end
   end,
   fzf_lua_check = function()
