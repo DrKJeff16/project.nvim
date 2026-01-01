@@ -930,8 +930,8 @@ If you lack the required permissions for that directory, you can either:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/invalidoperation">
-                    <img src="https://avatars.githubusercontent.com/u/9612541?v=4" width="100;" alt="invalidoperation"/>
+                <a href="https://github.com/tkappedev">
+                    <img src="https://avatars.githubusercontent.com/u/9612541?v=4" width="100;" alt="tkappedev"/>
                     <br />
                     <sub><b>Tobias Kappe</b></sub>
                 </a>
