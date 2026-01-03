@@ -1,3 +1,4 @@
+name: Readme Contributors
 on:
   workflow_dispatch:
   push:
