@@ -100,6 +100,10 @@ function Log.write(data, lvl)
   if not require('project.config').options.log.enabled or vim.g.project_log_cleared == 1 then
     return
   end
+
+  vim.validate('data', data, { 'string' }, false)
+  vim.validate('lvl', lvl, { 'number' }, false)
+
   local fd = Log.open('a')
   if not fd then
     return
@@ -212,7 +216,7 @@ function Log.open_win()
   end
 
   vim.cmd.tabedit(Log.logfile)
-  local set_log_loc = vim.schedule_wrap(function()
+  vim.schedule(function()
     Log.log_loc = {
       bufnr = vim.api.nvim_get_current_buf(),
       win = vim.api.nvim_get_current_win(),
@@ -220,16 +224,14 @@ function Log.open_win()
 
     vim.api.nvim_buf_set_name(Log.log_loc.bufnr, 'Project Log')
 
-    ---@type vim.api.keyset.option
-    local win_opts = { win = Log.log_loc.win }
+    local win_opts = { win = Log.log_loc.win } ---@type vim.api.keyset.option
     vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
     vim.api.nvim_set_option_value('list', false, win_opts)
     vim.api.nvim_set_option_value('number', false, win_opts)
     vim.api.nvim_set_option_value('wrap', false, win_opts)
     vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
 
-    ---@type vim.api.keyset.option
-    local buf_opts = { buf = Log.log_loc.bufnr }
+    local buf_opts = { buf = Log.log_loc.bufnr } ---@type vim.api.keyset.option
     vim.api.nvim_set_option_value('filetype', 'log', buf_opts)
     vim.api.nvim_set_option_value('fileencoding', 'utf-8', buf_opts)
     vim.api.nvim_set_option_value('buftype', 'nowrite', buf_opts)
@@ -241,8 +243,6 @@ function Log.open_win()
       silent = true,
     })
   end)
-
-  set_log_loc()
 end
 
 function Log.close_win()

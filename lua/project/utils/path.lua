@@ -136,6 +136,7 @@ end
 
 ---@param path? string|nil
 function Path.create_path(path)
+  vim.validate('path', path, { 'string', 'nil' }, true)
   path = path or Path.projectpath
 
   if not Path.exists(path) then
@@ -178,11 +179,11 @@ function Path.root_included(dir)
   end
 end
 
-function Path.init()
-  local datapath = require('project.config').options.datapath
-  if not Path.exists(datapath) then
-    datapath = vim.fn.stdpath('data')
-  end
+---@param datapath string
+function Path.init(datapath)
+  vim.validate('datapath', datapath, { 'string' }, false)
+
+  datapath = Path.exists(datapath) and datapath or vim.fn.stdpath('data')
   Path.datapath = datapath
   Path.projectpath = ('%s/project_nvim'):format(Path.datapath)
   Path.historyfile = ('%s/project_history'):format(Path.projectpath)

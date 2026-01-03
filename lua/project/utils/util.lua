@@ -59,13 +59,15 @@ local M = {
   ---@param triggers? string[]
   ---@return string new_str
   capitalize = function(str, use_dot, triggers)
-    use_dot = use_dot ~= nil and use_dot or false
-    triggers = triggers or { ' ', '' }
-
+    vim.validate('str', str, { 'string' }, false)
+    vim.validate('use_dot', use_dot, { 'boolean', 'nil' }, true)
+    vim.validate('triggers', triggers, { 'table', 'nil' }, true)
     if str == '' then
       return str
     end
 
+    use_dot = use_dot ~= nil and use_dot or false
+    triggers = triggers or { ' ', '' }
     if not in_list(triggers, ' ') then
       table.insert(triggers, ' ')
     end
@@ -437,9 +439,9 @@ function M.format_per_type(t, data, sep, constraints)
   vim.validate('t', t, { 'string' }, false, "'number'|'string'|'boolean'|'table'|'function'")
   vim.validate('sep', sep, { 'string', 'nil' }, true, 'string|nil')
   vim.validate('constraints', constraints, { 'table', 'nil' }, true, 'string[]|nil')
-
   sep = sep or ''
   constraints = constraints or nil
+
   if t == 'string' then
     local res = ('%s`"%s"`'):format(sep, data)
     if not M.is_type('table', constraints) then
