@@ -24,7 +24,7 @@ local History = require('project.utils.history')
 ---@field current_method? string
 local Api = {
   valid_bt = function(bufnr) ---@param bufnr integer|nil
-    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
+    Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
     bufnr = bufnr or current_buf()
 
     local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
@@ -59,7 +59,7 @@ local Api = {
   ---@return string|nil dir
   ---@return string|nil name
   find_lsp_root = function(bufnr)
-    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
+    Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
     bufnr = bufnr or current_buf()
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
@@ -95,7 +95,7 @@ local Api = {
   ---If running under Windows, this will return `true` regardless.
   --- ---
   verify_owner = function(dir) ---@param dir string
-    vim.validate('dir', dir, 'string', false)
+    Util.validate({ dir = { dir, { 'string' } } })
 
     local Log = require('project.utils.log')
     if Util.is_windows() then
@@ -115,7 +115,7 @@ local Api = {
   ---@return string|nil dir_res
   ---@return string|nil method
   find_pattern_root = function(bufnr)
-    vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
+    Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
     bufnr = bufnr or current_buf()
 
     local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
@@ -130,7 +130,7 @@ local Api = {
 --- ---
 ---@param group integer
 function Api.gen_lsp_autocmd(group)
-  vim.validate('group', group, 'number', false, 'integer')
+  Util.validate({ group = { group, { 'number' } } })
 
   if vim.g.project_lspattach == 1 then
     return
@@ -150,8 +150,10 @@ end
 ---@param method string|nil
 ---@return boolean success
 function Api.set_pwd(dir, method)
-  vim.validate('dir', dir, { 'string', 'nil' }, true, 'string|nil')
-  vim.validate('method', method, { 'string', 'nil' }, true, 'string|nil')
+  Util.validate({
+    dir = { dir, { 'string', 'nil' }, true },
+    method = { method, { 'string', 'nil' }, true },
+  })
 
   local Log = require('project.utils.log')
   if not dir then
@@ -261,7 +263,7 @@ end
 ---@return string|nil root
 ---@return string|nil method
 function Api.get_project_root(bufnr)
-  vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = bufnr or current_buf()
 
   if vim.tbl_isempty(Config.detection_methods) then
@@ -317,7 +319,7 @@ end
 ---@return string|nil method
 ---@return string|nil last
 function Api.get_current_project(bufnr)
-  vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = bufnr or current_buf()
 
   local curr, method = Api.get_project_root(bufnr)
@@ -328,8 +330,10 @@ end
 ---@param verbose? boolean|nil
 ---@param bufnr? integer|nil
 function Api.on_buf_enter(verbose, bufnr)
-  vim.validate('verbose', verbose, { 'boolean', 'nil' }, true, 'boolean|nil')
-  vim.validate('bufnr', bufnr, { 'number', 'nil' }, true, 'integer|nil')
+  Util.validate({
+    verbose = { verbose, { 'boolean', 'nil' }, true },
+    bufnr = { bufnr, { 'number', 'nil' }, true },
+  })
   verbose = verbose ~= nil and verbose or false
   bufnr = bufnr or current_buf()
 

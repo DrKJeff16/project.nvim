@@ -1,5 +1,6 @@
 local MODSTR = 'project.utils.path'
 local uv = vim.uv or vim.loop
+local Util = require('project.utils.util')
 
 ---@class Project.Utils.Path
 ---The directory where the project dir will be saved.
@@ -17,7 +18,7 @@ local Path = {
   exists = require('project.utils.util').path_exists,
   ---@param dir string
   is_excluded = function(dir)
-    vim.validate('dir', dir, 'string', false)
+    Util.validate({ dir = { dir, { 'string' } } })
 
     local exclude_dirs = require('project.config').options.exclude_dirs
     for _, excluded in ipairs(exclude_dirs) do
@@ -30,14 +31,16 @@ local Path = {
   ---@param dir string
   ---@param identifier string
   is = function(dir, identifier)
-    vim.validate('dir', dir, 'string', false)
-    vim.validate('identifier', identifier, 'string', false)
+    Util.validate({
+      dir = { dir, { 'string' } },
+      identifier = { identifier, { 'string' } },
+    })
 
     return dir:match('.*/(.*)') == identifier
   end,
   ---@param path_str string
   get_parent = function(path_str)
-    vim.validate('path_str', path_str, 'string', false)
+    Util.validate({ path_str = { path_str, { 'string' } } })
 
     path_str = path_str:match('^(.*)/') ---@type string
     return (path_str ~= '') and path_str or '/'
@@ -46,7 +49,7 @@ local Path = {
 
 ---@param file_dir string
 function Path.get_files(file_dir)
-  vim.validate('file_dir', file_dir, 'string', false)
+  Util.validate({ file_dir = { file_dir, { 'string' } } })
 
   Path.last_dir_cache = file_dir
   Path.curr_dir_cache = {}
@@ -66,8 +69,10 @@ end
 ---@param dir string
 ---@param identifier string
 function Path.has(dir, identifier)
-  vim.validate('dir', dir, 'string', false)
-  vim.validate('identifier', identifier, 'string', false)
+  Util.validate({
+    dir = { dir, { 'string' } },
+    identifier = { identifier, { 'string' } },
+  })
 
   local globtopattern = require('project.utils.globtopattern').globtopattern
   if Path.last_dir_cache ~= dir then
@@ -87,8 +92,10 @@ end
 ---@param identifier string
 ---@return boolean
 function Path.sub(dir, identifier)
-  vim.validate('dir', dir, 'string', false)
-  vim.validate('identifier', identifier, 'string', false)
+  Util.validate({
+    dir = { dir, { 'string' } },
+    identifier = { identifier, { 'string' } },
+  })
 
   local path_str = Path.get_parent(dir)
   local current
@@ -107,8 +114,10 @@ end
 ---@param identifier string
 ---@return boolean
 function Path.child(dir, identifier)
-  vim.validate('dir', dir, 'string', false)
-  vim.validate('identifier', identifier, 'string', false)
+  Util.validate({
+    dir = { dir, { 'string' } },
+    identifier = { identifier, { 'string' } },
+  })
 
   return Path.is(Path.get_parent(dir), identifier)
 end
@@ -117,8 +126,10 @@ end
 ---@param pattern string
 ---@return boolean
 function Path.match(dir, pattern)
-  vim.validate('dir', dir, 'string', false)
-  vim.validate('pattern', pattern, 'string', false)
+  Util.validate({
+    dir = { dir, { 'string' } },
+    pattern = { pattern, { 'string' } },
+  })
 
   local SWITCH = {
     ['='] = Path.is,
@@ -136,7 +147,7 @@ end
 
 ---@param path? string|nil
 function Path.create_path(path)
-  vim.validate('path', path, { 'string', 'nil' }, true)
+  Util.validate({ path = { path, { 'string', 'nil' }, true } })
   path = path or Path.projectpath
 
   if not Path.exists(path) then
@@ -155,7 +166,7 @@ end
 ---@return string|nil
 ---@return string|nil
 function Path.root_included(dir)
-  vim.validate('dir', dir, 'string', false)
+  Util.validate({ dir = { dir, { 'string' } } })
 
   local Config = require('project.config')
   while true do ---Breadth-First search
@@ -181,7 +192,7 @@ end
 
 ---@param datapath string
 function Path.init(datapath)
-  vim.validate('datapath', datapath, { 'string' }, false)
+  Util.validate({ datapath = { datapath, { 'string' } } })
 
   datapath = Path.exists(datapath) and datapath or vim.fn.stdpath('data')
   Path.datapath = datapath

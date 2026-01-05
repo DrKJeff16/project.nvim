@@ -25,7 +25,7 @@ local Commands = {}
 
 ---@param specs Project.Commands.Spec[]
 function Commands.new(specs)
-  vim.validate('specs', specs, 'table', false)
+  Util.validate({ specs = { specs, { 'table' } } })
 
   if vim.tbl_isempty(specs) then
     error(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)

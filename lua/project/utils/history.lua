@@ -70,9 +70,11 @@ History.recent_projects = nil ---@type string[]|nil
 ---@param ind? integer|string
 ---@param force_name? boolean
 function History.export_history_json(path, ind, force_name)
-  vim.validate('path', path, { 'string' }, false)
-  vim.validate('ind', ind, { 'string', 'number', 'nil' }, true)
-  vim.validate('force_name', force_name, { 'boolean', 'nil' }, true)
+  Util.validate({
+    path = { path, { 'string' } },
+    ind = { ind, { 'string', 'number', 'nil' }, true },
+    force_name = { force_name, { 'boolean', 'nil' }, true },
+  })
   ind = ind or 2
   ind = math.floor(tonumber(ind))
   force_name = force_name ~= nil and force_name or false
@@ -150,8 +152,10 @@ end
 ---@param path string
 ---@param force_name? boolean
 function History.import_history_json(path, force_name)
-  vim.validate('path', path, { 'string' }, false)
-  vim.validate('force_name', force_name, { 'boolean', 'nil' }, true)
+  Util.validate({
+    path = { path, { 'string' } },
+    force_name = { force_name, { 'boolean', 'nil' }, true },
+  })
   force_name = force_name ~= nil and force_name or false
 
   if vim.g.project_setup ~= 1 then
@@ -212,8 +216,10 @@ end
 ---@param found boolean
 ---@return boolean found
 function History.remove_session(session, found)
-  vim.validate('session', session, { 'string' }, false)
-  vim.validate('found', found, { 'boolean' }, false)
+  Util.validate({
+    session = { session, { 'string' } },
+    found = { found, { 'boolean' } },
+  })
 
   local new_tbl = {} ---@type string[]
   for _, v in ipairs(History.session_projects) do
@@ -233,7 +239,7 @@ end
 ---@param project string
 ---@return boolean found
 function History.remove_recent(project)
-  vim.validate('project', project, { 'string' }, false)
+  Util.validate({ project = { project, { 'string' } } })
 
   local new_tbl, found = {}, false ---@type string[], boolean
   for _, v in ipairs(History.recent_projects) do
@@ -252,7 +258,7 @@ end
 --- ---
 ---@param project string|Project.ActionEntry
 function History.delete_project(project)
-  vim.validate('project', project, { 'string', 'table' }, false, 'string|Project.ActionEntry')
+  Util.validate({ project = { project, { 'string', 'table' } } })
 
   local Log = require('project.utils.log')
   if not History.recent_projects then
@@ -277,7 +283,7 @@ end
 --- ---
 ---@param history_data string
 function History.deserialize_history(history_data)
-  vim.validate('history_data', history_data, 'string', false)
+  Util.validate({ history_data = { history_data, { 'string' } } })
 
   local projects = {} ---@type string[]
   for s in history_data:gmatch('[^\r\n]+') do
@@ -364,7 +370,7 @@ end
 --- ---
 ---@param close? boolean|nil
 function History.write_history(close)
-  vim.validate('close', close, { 'boolean', 'nil' }, true, 'boolean|nil')
+  Util.validate({ close = { close, { 'boolean', 'nil' }, true } })
   close = close ~= nil and close or false
 
   local fd = History.open_history(History.recent_projects ~= nil and 'w' or 'a')

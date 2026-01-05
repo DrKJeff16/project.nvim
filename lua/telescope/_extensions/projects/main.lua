@@ -40,8 +40,10 @@ local valid_acts = {
 ---@param map fun(mode: string, lhs: string, rhs: string|function)
 ---@return boolean
 local function normal_attach(prompt_bufnr, map)
-  vim.validate('prompt_bufnr', prompt_bufnr, 'number', false, 'integer')
-  vim.validate('map', map, 'function', false)
+  Util.validate({
+    prompt_bufnr = { prompt_bufnr, { 'number' } },
+    map = { map, { 'function' } },
+  })
 
   local is_type = require('project.utils.util').is_type
   local Keys = vim.deepcopy(require('project.config').options.telescope.mappings) or {}
@@ -77,7 +79,7 @@ end
 
 ---@param opts table|nil
 function M.setup(opts)
-  vim.validate('opts', opts, { 'table', 'nil' }, true)
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   if vim.g.project_telescope_loaded ~= 1 then
     M.default_opts = vim.tbl_deep_extend('keep', opts or {}, M.default_opts)
@@ -91,7 +93,7 @@ end
 --- ---
 ---@param opts table|nil
 function M.projects(opts)
-  vim.validate('opts', opts, { 'table', 'nil' }, true)
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   if vim.g.project_telescope_loaded ~= 1 then
     Log.error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))

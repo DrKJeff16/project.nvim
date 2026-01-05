@@ -1,6 +1,7 @@
 local MODSTR = 'project.config'
 local ERROR = vim.log.levels.ERROR
 local in_list = vim.list_contains
+local Util = require('project.utils.util')
 
 ---@class Project.ConfigLoc: Project.HistoryLoc
 
@@ -21,7 +22,7 @@ Config.options = setmetatable({}, { __index = Config.get_defaults() }) ---@type 
 --- ---
 ---@param options? Project.Config.Options the `project.nvim` config options
 function Config.setup(options)
-  vim.validate('options', options, { 'table', 'nil' }, true)
+  Util.validate({ options = { options, { 'table', 'nil' }, true } })
   options = options or {}
 
   local pattern_exclude = require('project.utils.globtopattern').pattern_exclude

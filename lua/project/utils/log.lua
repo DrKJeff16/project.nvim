@@ -10,6 +10,8 @@ local ERROR  =  vim.log.levels.ERROR  -- `4`
 
 ---@class Project.LogLoc: Project.HistoryLoc
 
+local Util = require('project.utils.util')
+
 ---@class Project.Log
 ---@field logfile? string
 ---@field log_loc? Project.LogLoc|nil
@@ -101,8 +103,10 @@ function Log.write(data, lvl)
     return
   end
 
-  vim.validate('data', data, { 'string' }, false)
-  vim.validate('lvl', lvl, { 'number' }, false)
+  Util.validate({
+    data = { data, { 'string' } },
+    lvl = { lvl, { 'number' } },
+  })
 
   local fd = Log.open('a')
   if not fd then

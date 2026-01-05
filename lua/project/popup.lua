@@ -18,8 +18,10 @@ local Util = require('project.utils.util')
 ---@param hidden boolean
 ---@return boolean
 local function hidden_avail(path, hidden)
-  vim.validate('path', path, { 'string' }, false)
-  vim.validate('hidden', hidden, { 'boolean' }, false)
+  Util.validate({
+    path = { path, { 'string' } },
+    hidden = { hidden, { 'boolean' } },
+  })
 
   local fd = Util.executable('fd') and 'fd' or (Util.executable('fdfind') and 'fdfind' or '')
   if fd == '' then
@@ -50,9 +52,11 @@ end
 ---@param only_cd boolean
 ---@param ran_cd boolean
 local function open_node(proj, only_cd, ran_cd)
-  vim.validate('proj', proj, 'string', false)
-  vim.validate('only_cd', only_cd, 'boolean', false)
-  vim.validate('ran_cd', ran_cd, 'boolean', false)
+  Util.validate({
+    proj = { proj, { 'string' } },
+    only_cd = { only_cd, { 'boolean' } },
+    ran_cd = { ran_cd, { 'boolean' } },
+  })
 
   if not ran_cd then
     if not require('project.api').set_pwd(proj, 'prompt') then
@@ -129,7 +133,7 @@ M.select = {}
 
 ---@param bang? boolean
 function M.gen_import_prompt(bang)
-  vim.validate('bang', bang, { 'boolean', 'nil' }, true)
+  Util.validate({ bang = { bang, { 'boolean', 'nil' }, true } })
   bang = bang ~= nil and bang or false
 
   vim.ui.input({ prompt = 'Input the import file:' }, function(input) ---@param input? string
@@ -143,7 +147,7 @@ end
 
 ---@param bang? boolean
 function M.gen_export_prompt(bang)
-  vim.validate('bang', bang, { 'boolean', 'nil' }, true)
+  Util.validate({ bang = { bang, { 'boolean', 'nil' }, true } })
   bang = bang ~= nil and bang or false
 
   vim.ui.input({ prompt = 'Input the export file:' }, function(input) ---@param input? string
@@ -166,10 +170,12 @@ end
 ---@param opts Project.Popup.SelectSpec
 ---@return Project.Popup.SelectChoices|ProjectCmdFun
 function M.select.new(opts)
-  vim.validate('opts', opts, { 'table' }, false, 'Project.Popup.SelectSpec')
-  vim.validate('opts.choices', opts.choices, { 'function' }, false)
-  vim.validate('opts.choices_list', opts.choices_list, { 'function' }, false)
-  vim.validate('opts.callback', opts.callback, { 'function' }, false)
+  Util.validate({
+    opts = { opts, { 'table' } },
+    opts_choices = { opts.choices, { 'function' } },
+    opts_choices_list = { opts.choices_list, { 'function' } },
+    opts_callback = { opts.callback, { 'function' } },
+  })
 
   if empty(opts) then
     error(('(%s.select.new): Empty args for constructor!'):format(MODSTR), ERROR)
@@ -197,7 +203,7 @@ end
 
 ---@param input string|nil
 function M.prompt_project(input)
-  vim.validate('input', input, { 'string', 'nil' }, true, 'string|nil')
+  Util.validate({ input = { input, { 'string', 'nil' }, true } })
 
   if not input or input == '' then
     return

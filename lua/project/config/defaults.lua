@@ -290,7 +290,7 @@ DEFAULTS.telescope = {
 ---the value will revert back to the default.
 --- ---
 function DEFAULTS:verify_histsize()
-  vim.validate('historysize', self.historysize, { 'number', 'nil' }, true, 'integer')
+  Util.validate({ historysize = { self.historysize, { 'number', 'nil' }, true } })
 
   if not self.historysize or type(self.historysize) ~= 'number' then
     self.historysize = DEFAULTS.historysize
@@ -309,7 +309,7 @@ end
 ---the value will revert back to the default.
 --- ---
 function DEFAULTS:verify_scope_chdir()
-  vim.validate('scope_chdir', self.scope_chdir, { 'string', 'nil' }, true, "'global'|'tab'|'win'")
+  Util.validate({ scope_chdir = { self.scope_chdir, { 'string', 'nil' }, true } })
 
   if self.scope_chdir and in_list({ 'global', 'tab', 'win' }, self.scope_chdir) then
     return
@@ -399,7 +399,7 @@ end
 ---@param opts? Project.Config.Options
 ---@return Project.Config.Options
 function DEFAULTS:new(opts)
-  vim.validate('opts', opts, { 'table', 'nil' }, true, 'Project.Config.Options')
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   ---@type Project.Config.Options
   local obj = setmetatable(vim.tbl_deep_extend('keep', opts or {}, DEFAULTS), {

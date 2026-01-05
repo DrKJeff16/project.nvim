@@ -3,6 +3,7 @@ local Api = require('project.api')
 local Config = require('project.config')
 local History = require('project.utils.history')
 local Popup = require('project.popup')
+local Util = require('project.utils.util')
 
 ---The `project.nvim` module.
 --- ---
@@ -27,7 +28,7 @@ local M = {
   ---@return string|nil method
   ---@return string|nil last
   current_project = function(refresh)
-    vim.validate('refresh', refresh, { 'boolean', 'nil' }, true)
+    Util.validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })
     refresh = refresh ~= nil and refresh or false
 
     local Log = require('project.utils.log')
