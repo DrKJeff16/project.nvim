@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.3.0-1](https://github.com/DrKJeff16/project.nvim/tree/v0.3.0-1) (2026-01-05)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v0.2.6-1...v0.3.0-1)
+
+**Merged pull requests:**
+
+- docs\(contributor\): contributors readme action update [\#36](https://github.com/DrKJeff16/project.nvim/pull/36) ([github-actions[bot]](https://github.com/apps/github-actions))
+- docs\(contributor\): contributors readme action update [\#35](https://github.com/DrKJeff16/project.nvim/pull/35) ([github-actions[bot]](https://github.com/apps/github-actions))
+
 ## [v0.2.6-1](https://github.com/DrKJeff16/project.nvim/tree/v0.2.6-1) (2025-12-25)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v0.2.5-1...v0.2.6-1)
