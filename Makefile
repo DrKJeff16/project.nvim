@@ -1,3 +1,4 @@
+LUAROCKS_CMD = luarocks install --local
 CMD = nvim --clean --headless
 
 TAGS_CMD = $(CMD) -c 'helptags doc/' -c 'qa!'
@@ -10,6 +11,7 @@ TAGS_CMD = $(CMD) -c 'helptags doc/' -c 'qa!'
 	clean \
 	distclean \
 	helptags \
+	install-deps \
 	lint \
 	test
 
@@ -17,11 +19,13 @@ all:
 	@$(MAKE) helptags
 	@$(MAKE) test
 
-test:
-	@./scripts/deps.sh mini
-	@nvim --headless --clean --noplugin -u ./scripts/minimal_init.lua \
-		-c "lua require('mini.test').setup()" \
-		-c "lua MiniTest.run({ execute = { reporter = MiniTest.gen_reporter.stdout({ group_depth = 2 }) } })"
+install-deps:
+	@$(LUAROCKS_CMD) luassert
+	@$(LUAROCKS_CMD) busted
+	@$(LUAROCKS_CMD) nlua
+
+test: install-deps
+	@busted spec
 
 helptags:
 	@echo -e "\nGenerating helptags...\n"
