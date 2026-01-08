@@ -298,7 +298,7 @@ function Api.get_project_root(bufnr)
     end
   end
 
-  if #roots == 0 then
+  if vim.tbl_isempty(roots) then
     return
   end
 
