@@ -298,6 +298,10 @@ function Api.get_project_root(bufnr)
     end
   end
 
+  if #roots == 0 then
+    return
+  end
+
   if #roots == 1 then
     return roots[1][1], roots[1][2]
   end
