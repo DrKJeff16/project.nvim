@@ -21,9 +21,11 @@ local M = {}
 --- ---
 ---@return boolean win32
 function M.is_windows()
-  return vim.fn.has('win32') == 1
+  return M.vim_has('win32')
 end
 
+---@param feature string
+---@return boolean has
 function M.vim_has(feature)
   return vim.fn.has(feature) == 1
 end
@@ -31,7 +33,7 @@ end
 ---Dynamic `vim.validate()` wrapper. Covers both legacy and newer implementations
 ---@param T table<string, vim.validate.Spec|ValidateSpec>
 function M.validate(T)
-  if vim.fn.has('nvim-0.11') ~= 1 then
+  if not M.vim_has('nvim-0.11') then
     ---Filter table to fit legacy standard
     ---@cast T table<string, vim.validate.Spec>
     for name, spec in pairs(T) do
