@@ -3,7 +3,6 @@ local Api = require('project.api')
 local Config = require('project.config')
 local History = require('project.utils.history')
 local Popup = require('project.popup')
-local Util = require('project.utils.util')
 
 ---The `project.nvim` module.
 --- ---
@@ -30,7 +29,7 @@ M.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
 ---@return string|nil method
 ---@return string|nil last
 function M.current_project(refresh)
-  Util.validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })
+  require('project.utils.util').validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })
   refresh = refresh ~= nil and refresh or false
 
   local Log = require('project.utils.log')
