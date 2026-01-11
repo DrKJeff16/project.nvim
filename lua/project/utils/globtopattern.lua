@@ -1,36 +1,35 @@
-local in_list = vim.list_contains
-
 ---Credits for this module goes to [David Manura](https://github.com/davidm/lua-glob-pattern).
 --- ---
 ---@class Project.Utils.Glob
-local M = {
-  ---Escape pattern char.
-  --- ---
-  ---@param char string
-  ---@return string escaped_char
-  escape = function(char, c)
-    return char:match('^%w$') and c or ('%' .. c)
-  end,
-  ---@param glob string
-  ---@param char string
-  ---@param pattern string
-  ---@param i integer
-  ---@return boolean
-  ---@return string char
-  ---@return string pattern
-  ---@return integer i
-  unescape = function(glob, char, pattern, i)
-    if char ~= '\\' then
-      return true, char, pattern, i
-    end
-    i = i + 1
-    char = glob:sub(i, i)
-    if char:len() == 0 then
-      return false, char, '[^]', i
-    end
+local M = {}
+
+---Escape pattern char.
+--- ---
+---@param char string
+---@return string escaped_char
+function M.escape(char, c)
+  return char:match('^%w$') and c or ('%' .. c)
+end
+
+---@param glob string
+---@param char string
+---@param pattern string
+---@param i integer
+---@return boolean
+---@return string char
+---@return string pattern
+---@return integer i
+function M.unescape(glob, char, pattern, i)
+  if char ~= '\\' then
     return true, char, pattern, i
-  end,
-}
+  end
+  i = i + 1
+  char = glob:sub(i, i)
+  if char:len() == 0 then
+    return false, char, '[^]', i
+  end
+  return true, char, pattern, i
+end
 
 ---Convert tokens at end of charset.
 --- ---
@@ -101,10 +100,10 @@ function M.charset(glob, char, pattern, i)
   local chs_end = false
   i = i + 1
   char = glob:sub(i, i)
-  if in_list({ '', ']' }, char) then
+  if vim.list_contains({ '', ']' }, char) then
     return false, char, '[^]', i
   end
-  if in_list({ '^', '!' }, char) then
+  if vim.list_contains({ '^', '!' }, char) then
     i = i + 1
     char = glob:sub(i, i)
     if char ~= ']' then

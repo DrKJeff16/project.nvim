@@ -47,6 +47,8 @@ local History = {
   ---@param mode OpenMode
   ---@return integer|nil fd
   open_history = function(mode)
+    Util.validate({ mode = { mode, { 'string', 'number' } } })
+
     Path.create_path()
 
     local dir_stat = uv.fs_stat(Path.projectpath)
@@ -78,7 +80,6 @@ function History.export_history_json(path, ind, force_name)
   ind = ind or 2
   ind = math.floor(tonumber(ind))
   force_name = force_name ~= nil and force_name or false
-
   if vim.g.project_setup ~= 1 then
     return
   end
@@ -260,6 +261,11 @@ end
 function History.delete_project(project)
   Util.validate({ project = { project, { 'string', 'table' } } })
 
+  ---@cast project Project.ActionEntry
+  if Util.is_type('table', project) then
+    Util.validate({ project_value = { project.value, { 'string' } } })
+  end
+
   local Log = require('project.utils.log')
   if not History.recent_projects then
     Log.error(('(%s.delete_project): `recent_projects` is nil! Aborting.'):format(MODSTR))
@@ -267,6 +273,7 @@ function History.delete_project(project)
     return
   end
 
+  ---@cast project string|Project.ActionEntry
   local proj = type(project) == 'string' and project or project.value
   local found = false
   found = History.remove_recent(proj)
@@ -368,7 +375,8 @@ end
 
 ---Write projects to history file.
 --- ---
----@param close? boolean|nil
+---@param close boolean|nil
+---@overload fun()
 function History.write_history(close)
   Util.validate({ close = { close, { 'boolean', 'nil' }, true } })
   close = close ~= nil and close or false

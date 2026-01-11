@@ -3,32 +3,37 @@ local ERROR = vim.log.levels.ERROR
 local Util = require('project.utils.util')
 
 ---@class Project.Extensions.FzfLua
-local M = {
-  default = function(selected) ---@param selected string[]
-    local Opts = require('project.config').options
-    require('project.utils.log').debug(
-      ('(%s.default): Running default fzf-lua action.'):format(MODSTR)
-    )
-    require('fzf-lua').files({
-      cwd = selected[1],
-      silent = Opts.silent_chdir,
-      hidden = Opts.show_hidden,
-    })
-  end,
-  delete_project = function(selected) ---@param selected string[]
-    require('project.utils.log').debug(
-      ('(%s.delete_project): Deleting project `%s`'):format(MODSTR, selected[1])
-    )
-    require('project.utils.history').delete_project(selected[1])
-  end,
-  exec = function(cb) ---@param cb fun(entry?: string|number, cb?: function)
-    local results = Util.reverse(require('project.utils.history').get_recent_projects()) ---@type string[]
-    for _, entry in ipairs(results) do
-      cb(entry)
-    end
-    cb()
-  end,
-}
+local M = {}
+
+---@param selected string[]
+function M.default(selected)
+  local Opts = require('project.config').options
+  require('project.utils.log').debug(
+    ('(%s.default): Running default fzf-lua action.'):format(MODSTR)
+  )
+  require('fzf-lua').files({
+    cwd = selected[1],
+    silent = Opts.silent_chdir,
+    hidden = Opts.show_hidden,
+  })
+end
+
+---@param selected string[]
+function M.delete_project(selected)
+  require('project.utils.log').debug(
+    ('(%s.delete_project): Deleting project `%s`'):format(MODSTR, selected[1])
+  )
+  require('project.utils.history').delete_project(selected[1])
+end
+
+---@param cb fun(entry?: string|number, cb?: function)
+function M.exec(cb)
+  local results = Util.reverse(require('project.utils.history').get_recent_projects()) ---@type string[]
+  for _, entry in ipairs(results) do
+    cb(entry)
+  end
+  cb()
+end
 
 ---This runs assuming you have FZF-Lua installed!
 ---

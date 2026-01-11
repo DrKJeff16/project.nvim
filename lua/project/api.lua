@@ -1,8 +1,7 @@
----For newcommers, in the original project this file was
----`project.lua`.
----
----I decided to make this an API file instead to avoid any
----confusions with naming, e.g. `require('project_nvim.project')`.
+---For newcommers, in the original `project.nvim` this file was
+---`project.lua`. I decided to make this an API file instead
+---to avoid any confusions with naming,
+---e.g. `require('project_nvim.project')`.
 
 local MODSTR = 'project.api'
 local ERROR = vim.log.levels.ERROR
@@ -22,107 +21,124 @@ local History = require('project.utils.history')
 ---@field last_project? string
 ---@field current_project? string
 ---@field current_method? string
-local Api = {
-  valid_bt = function(bufnr) ---@param bufnr integer|nil
-    Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-    bufnr = bufnr or current_buf()
+local Api = {}
 
-    local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
-    return not in_list(Config.options.disable_on.bt, bt)
-  end,
-  get_last_project = function()
-    local recent = History.get_recent_projects()
-    if vim.tbl_isempty(recent) or #recent == 1 then
-      return
-    end
+function Api.get_last_project()
+  local recent = History.get_recent_projects()
+  if vim.tbl_isempty(recent) or #recent == 1 then
+    return
+  end
 
-    recent = Util.reverse(recent) ---@type string[]
-    return #History.session_projects <= 1 and recent[2] or recent[1]
-  end,
-  get_history_paths = function(path) ---@param path? 'datapath'|'projectpath'|'historyfile'
-    local res = { ---@type { datapath: string, projectpath: string, historyfile: string }|string
-      datapath = Path.datapath,
-      projectpath = Path.projectpath,
-      historyfile = Path.historyfile,
-    }
-    if path and in_list(vim.tbl_keys(res), path) then
-      res = Path[path] ---@type string
-    end
-    return res
-  end,
-  ---Get the LSP client for current buffer.
-  ---
-  ---If successful, returns a tuple of two `string` results.
-  ---Otherwise, nothing is returned.
-  --- ---
-  ---@param bufnr integer|nil
-  ---@return string|nil dir
-  ---@return string|nil name
-  find_lsp_root = function(bufnr)
-    Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-    bufnr = bufnr or current_buf()
+  recent = Util.reverse(recent) ---@type string[]
+  return #History.session_projects <= 1 and recent[2] or recent[1]
+end
 
-    local clients = vim.lsp.get_clients({ bufnr = bufnr })
-    if vim.tbl_isempty(clients) then
-      return
-    end
+---@param path? 'datapath'|'projectpath'|'historyfile'
+---@return string|{ datapath: string, projectpath: string, historyfile: string }
+---@overload fun(): string|{ datapath: string, projectpath: string, historyfile: string }
+function Api.get_history_paths(path)
+  Util.validate({ path = { path, { 'string', 'nil' }, true } })
 
-    local ignore_lsp = Config.options.ignore_lsp
-    local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
-    for _, client in ipairs(clients) do
-      ---@type string[]
-      local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
-      local valid = (
-        Util.is_type('table', filetypes)
-        and in_list(filetypes, ft)
-        and not vim.tbl_isempty(filetypes)
-        and not in_list(ignore_lsp, client.name)
-        and client.config.root_dir
-      )
-      if valid then
-        local dir, name = client.config.root_dir, client.name
-        if Config.options.allow_patterns_for_lsp then
-          if Path.root_included(dir) == nil then
-            return
-          end
+  local res = { ---@type { datapath: string, projectpath: string, historyfile: string }|string
+    datapath = Path.datapath,
+    projectpath = Path.projectpath,
+    historyfile = Path.historyfile,
+  }
+  if path and in_list(vim.tbl_keys(res), path) then
+    res = Path[path] ---@type string
+  end
+  return res
+end
+
+---Get the LSP client for current buffer.
+---
+---If successful, returns a tuple of two `string` results.
+---Otherwise, nothing is returned.
+--- ---
+---@param bufnr? integer
+---@return string|nil dir
+---@return string|nil name
+---@overload fun(): dir: string|nil, name: string|nil
+function Api.find_lsp_root(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
+
+  local clients = vim.lsp.get_clients({ bufnr = bufnr })
+  if vim.tbl_isempty(clients) then
+    return
+  end
+
+  local ignore_lsp = Config.options.ignore_lsp
+  local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
+  for _, client in ipairs(clients) do
+    ---@type string[]
+    local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
+    local valid = (
+      Util.is_type('table', filetypes)
+      and in_list(filetypes, ft)
+      and not vim.tbl_isempty(filetypes)
+      and not in_list(ignore_lsp, client.name)
+      and client.config.root_dir
+    )
+    if valid then
+      local dir, name = client.config.root_dir, client.name
+      if Config.options.allow_patterns_for_lsp then
+        if Path.root_included(dir) == nil then
+          return
         end
-        return dir, name
       end
+      return dir, name
     end
-  end,
-  ---Check if given directory is owned by the user running Nvim.
-  ---
-  ---If running under Windows, this will return `true` regardless.
-  --- ---
-  verify_owner = function(dir) ---@param dir string
-    Util.validate({ dir = { dir, { 'string' } } })
+  end
+end
 
-    local Log = require('project.utils.log')
-    if Util.is_windows() then
-      Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
-      return true
-    end
+---Check if given directory is owned by the user running Nvim.
+---
+---If running under Windows, this will return `true` regardless.
+--- ---
+---@param dir string
+---@return boolean verified
+function Api.verify_owner(dir)
+  Util.validate({ dir = { dir, { 'string' } } })
 
-    local stat = uv.fs_stat(dir)
-    if not stat then
-      Log.error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR))
-      vim.notify(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
-      return false
-    end
-    return stat.uid == uv.getuid()
-  end,
-  ---@param bufnr integer|nil
-  ---@return string|nil dir_res
-  ---@return string|nil method
-  find_pattern_root = function(bufnr)
-    Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-    bufnr = bufnr or current_buf()
+  local Log = require('project.utils.log')
+  if Util.is_windows() then
+    Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
+    return true
+  end
 
-    local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
-    dir = Util.is_windows() and dir:gsub('\\', '/') or dir
-    return Path.root_included(dir)
-  end,
-}
+  local stat = uv.fs_stat(dir)
+  if not stat then
+    Log.error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR))
+    vim.notify(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
+    return false
+  end
+  return stat.uid == uv.getuid()
+end
+
+---@param bufnr? integer
+---@return string|nil dir_res
+---@return string|nil method
+---@overload fun(): dir_res: string|nil, method: string|nil
+function Api.find_pattern_root(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
+
+  local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
+  dir = Util.is_windows() and dir:gsub('\\', '/') or dir
+  return Path.root_included(dir)
+end
+
+---@param bufnr? integer
+---@return boolean valid
+---@overload fun(): valid: boolean
+function Api.valid_bt(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
+
+  local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
+  return not in_list(Config.options.disable_on.bt, bt)
+end
 
 ---Generates the autocommand for the `LspAttach` event.
 ---
@@ -131,6 +147,9 @@ local Api = {
 ---@param group integer
 function Api.gen_lsp_autocmd(group)
   Util.validate({ group = { group, { 'number' } } })
+  if not Util.is_int(group) then
+    error(('Parameter group is not an integer `%s`'):format(group))
+  end
 
   if vim.g.project_lspattach == 1 then
     return
@@ -264,7 +283,7 @@ end
 ---@return string|nil method
 function Api.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = bufnr or current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
 
   if vim.tbl_isempty(Config.detection_methods) then
     return
@@ -301,7 +320,6 @@ function Api.get_project_root(bufnr)
   if vim.tbl_isempty(roots) then
     return
   end
-
   if #roots == 1 then
     return roots[1][1], roots[1][2]
   end
@@ -318,29 +336,31 @@ end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
----@param bufnr integer|nil
+---@param bufnr? integer
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
+---@overload fun(): curr: string|nil, method: string|nil, last: string|nil
 function Api.get_current_project(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = bufnr or current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
 
   local curr, method = Api.get_project_root(bufnr)
   local last = Api.get_last_project()
   return curr, method, last
 end
 
----@param verbose? boolean|nil
----@param bufnr? integer|nil
+---@param verbose? boolean
+---@param bufnr? integer
+---@overload fun()
+---@overload fun(verbose: boolean)
 function Api.on_buf_enter(verbose, bufnr)
   Util.validate({
     verbose = { verbose, { 'boolean', 'nil' }, true },
     bufnr = { bufnr, { 'number', 'nil' }, true },
   })
   verbose = verbose ~= nil and verbose or false
-  bufnr = bufnr or current_buf()
-
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
   if not Api.valid_bt(bufnr) then
     return
   end

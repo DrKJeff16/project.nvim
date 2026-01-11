@@ -93,8 +93,7 @@ function Commands.create_user_commands()
         local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' }
         if ctx and ctx.bang ~= nil then
           if ctx.bang then
-            local bufnr = curr_buf()
-            opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
+            opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
           end
         end
 

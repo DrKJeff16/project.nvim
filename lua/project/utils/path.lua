@@ -16,36 +16,41 @@ local Path = {
   last_dir_cache = '',
   curr_dir_cache = {}, ---@type string[]
   exists = require('project.utils.util').path_exists,
-  ---@param dir string
-  is_excluded = function(dir)
-    Util.validate({ dir = { dir, { 'string' } } })
-
-    local exclude_dirs = require('project.config').options.exclude_dirs
-    for _, excluded in ipairs(exclude_dirs) do
-      if dir:match(excluded) ~= nil then
-        return true
-      end
-    end
-    return false
-  end,
-  ---@param dir string
-  ---@param identifier string
-  is = function(dir, identifier)
-    Util.validate({
-      dir = { dir, { 'string' } },
-      identifier = { identifier, { 'string' } },
-    })
-
-    return dir:match('.*/(.*)') == identifier
-  end,
-  ---@param path_str string
-  get_parent = function(path_str)
-    Util.validate({ path_str = { path_str, { 'string' } } })
-
-    path_str = path_str:match('^(.*)/') ---@type string
-    return (path_str ~= '') and path_str or '/'
-  end,
 }
+
+---@param dir string
+---@return boolean excluded
+function Path.is_excluded(dir)
+  Util.validate({ dir = { dir, { 'string' } } })
+
+  local exclude_dirs = require('project.config').options.exclude_dirs
+  for _, excluded in ipairs(exclude_dirs) do
+    if dir:match(excluded) ~= nil then
+      return true
+    end
+  end
+  return false
+end
+
+---@param dir string
+---@param identifier string
+function Path.is(dir, identifier)
+  Util.validate({
+    dir = { dir, { 'string' } },
+    identifier = { identifier, { 'string' } },
+  })
+
+  return dir:match('.*/(.*)') == identifier
+end
+
+---@param path_str string
+---@return string parent
+function Path.get_parent(path_str)
+  Util.validate({ path_str = { path_str, { 'string' } } })
+
+  local parent = path_str:match('^(.*)/') ---@type string
+  return parent ~= '' and parent or '/'
+end
 
 ---@param file_dir string
 function Path.get_files(file_dir)
@@ -68,6 +73,7 @@ end
 
 ---@param dir string
 ---@param identifier string
+---@return boolean has
 function Path.has(dir, identifier)
   Util.validate({
     dir = { dir, { 'string' } },
@@ -90,7 +96,7 @@ end
 
 ---@param dir string
 ---@param identifier string
----@return boolean
+---@return boolean is_sub
 function Path.sub(dir, identifier)
   Util.validate({
     dir = { dir, { 'string' } },
@@ -112,7 +118,7 @@ end
 
 ---@param dir string
 ---@param identifier string
----@return boolean
+---@return boolean is_child
 function Path.child(dir, identifier)
   Util.validate({
     dir = { dir, { 'string' } },
@@ -124,7 +130,7 @@ end
 
 ---@param dir string
 ---@param pattern string
----@return boolean
+---@return boolean matches
 function Path.match(dir, pattern)
   Util.validate({
     dir = { dir, { 'string' } },
@@ -145,7 +151,8 @@ function Path.match(dir, pattern)
   return Path.has(dir, pattern)
 end
 
----@param path? string|nil
+---@param path? string
+---@overload fun()
 function Path.create_path(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
   path = path or Path.projectpath
@@ -163,8 +170,8 @@ function Path.create_path(path)
 end
 
 ---@param dir string
----@return string|nil
----@return string|nil
+---@return string|nil dir
+---@return string|nil pattern
 function Path.root_included(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
