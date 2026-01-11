@@ -4,7 +4,6 @@ describe('project.nvim', function()
   local project ---@type Project
 
   before_each(function()
-    -- Clear module cache to get fresh instance
     package.loaded['project'] = nil
     project = require('project')
   end)
@@ -25,8 +24,7 @@ describe('project.nvim', function()
       assert.is_true(ok)
     end)
 
-    local params = { 1, false, '', function() end }
-    for _, param in ipairs(params) do
+    for _, param in ipairs({ 1, false, '', function() end }) do
       it(('should throw error when called with param of type %s'):format(type(param)), function()
         local ok = pcall(project.setup, param)
         assert.is_false(ok)
