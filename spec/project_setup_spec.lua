@@ -5,7 +5,7 @@ describe('project.nvim', function()
 
   before_each(function()
     -- Clear module cache to get fresh instance
-    package.loaded.project = nil
+    package.loaded['project'] = nil
     project = require('project')
   end)
 

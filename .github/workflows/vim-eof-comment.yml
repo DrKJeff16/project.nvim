@@ -1,4 +1,3 @@
-# GitHub Actions example
 name: Run vim-eof-comment
 on:
   push:
@@ -31,7 +30,8 @@ jobs:
           pipenv install --dev vim-eof-comment
       - name: Run vim-eof-comment
         run: |
-          pipenv run vim-eof-comment -e lua,md,Makefile,yaml,toml -i lua:2:Y,md:2:Y -v .
+          pipenv run vim-eof-comment -e lua,Makefile,yaml,toml -i lua:2:Y -v .
+          pipenv run vim-eof-comment -e md -i md:2:Y -nv .
       - name: Auto Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v7.1.0
         with:
