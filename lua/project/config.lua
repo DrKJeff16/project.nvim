@@ -7,20 +7,22 @@ local Util = require('project.utils.util')
 
 ---@class Project.Config
 ---@field conf_loc? Project.ConfigLoc
-local Config = {
-  ---Get the default options for configuring `project`.
-  --- ---
-  ---@return Project.Config.Options defaults
-  get_defaults = function()
-    return require('project.config.defaults')
-  end,
-}
+local Config = {}
+
+---Get the default options for configuring `project`.
+--- ---
+---@return Project.Config.Options defaults
+function Config.get_defaults()
+  return require('project.config.defaults')
+end
 
 Config.options = setmetatable({}, { __index = Config.get_defaults() }) ---@type Project.Config.Options
 
 ---The function called when running `require('project').setup()`.
 --- ---
 ---@param options? Project.Config.Options the `project.nvim` config options
+---@overload fun()
+---@overload fun(options: Project.Config.Options)
 function Config.setup(options)
   Util.validate({ options = { options, { 'table', 'nil' }, true } })
   options = options or {}

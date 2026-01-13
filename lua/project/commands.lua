@@ -1,4 +1,4 @@
----@alias ProjectCmdFun fun(ctx?: vim.api.keyset.create_user_command.command_args)
+---@alias ProjectCmdFun fun()|fun(ctx: vim.api.keyset.create_user_command.command_args)
 ---@alias CompletorFun fun(a?: string, l?: string, p?: integer): string[]
 ---@alias Project.CMD
 ---|{ desc: string, name: string, bang: boolean, complete?: string|CompletorFun, nargs?: string|integer }

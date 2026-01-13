@@ -37,40 +37,43 @@ local Path = require('project.utils.path')
 ---@field win integer
 
 ---@class Project.Utils.History
----@field has_watch_setup? boolean
----@field historysize? integer
----@field hist_loc Project.HistoryLoc|nil
-local History = {
-  ---Projects from current neovim session.
-  --- ---
-  session_projects = {}, ---@type string[]
-  ---@param mode OpenMode
-  ---@return integer|nil fd
-  open_history = function(mode)
-    Util.validate({ mode = { mode, { 'string', 'number' } } })
-
-    Path.create_path()
-
-    local dir_stat = uv.fs_stat(Path.projectpath)
-    if not dir_stat then
-      require('project.utils.log').error(
-        ('(%s.open_history): History file unavailable!'):format(MODSTR)
-      )
-      error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
-    end
-
-    local fd = uv.fs_open(Path.historyfile, mode, tonumber('644', 8))
-    return fd
-  end,
-}
-
 ---Projects from previous neovim sessions.
 --- ---
-History.recent_projects = nil ---@type string[]|nil
+---@field recent_projects? string[]
+---@field has_watch_setup? boolean
+---@field historysize? integer
+---@field hist_loc? Project.HistoryLoc
+local History = {}
+
+---Projects from current neovim session.
+--- ---
+History.session_projects = {} ---@type string[]
+
+---@param mode OpenMode
+---@return integer|nil fd
+function History.open_history(mode)
+  Util.validate({ mode = { mode, { 'string', 'number' } } })
+
+  Path.create_path()
+
+  local dir_stat = uv.fs_stat(Path.projectpath)
+  if not dir_stat then
+    require('project.utils.log').error(
+      ('(%s.open_history): History file unavailable!'):format(MODSTR)
+    )
+    error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
+  end
+
+  local fd = uv.fs_open(Path.historyfile, mode, tonumber('644', 8))
+  return fd
+end
 
 ---@param path string
 ---@param ind? integer|string
 ---@param force_name? boolean
+---@overload fun(path: string)
+---@overload fun(path: string, ind: integer|string)
+---@overload fun(path: string, ind?: integer|string, force_name: boolean)
 function History.export_history_json(path, ind, force_name)
   Util.validate({
     path = { path, { 'string' } },
@@ -152,6 +155,8 @@ end
 
 ---@param path string
 ---@param force_name? boolean
+---@overload fun(path: string)
+---@overload fun(path: string, force_name: boolean)
 function History.import_history_json(path, force_name)
   Util.validate({
     path = { path, { 'string' } },
@@ -375,8 +380,9 @@ end
 
 ---Write projects to history file.
 --- ---
----@param close boolean|nil
+---@param close? boolean
 ---@overload fun()
+---@overload fun(close: boolean)
 function History.write_history(close)
   Util.validate({ close = { close, { 'boolean', 'nil' }, true } })
   close = close ~= nil and close or false

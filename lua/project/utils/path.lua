@@ -12,11 +12,11 @@ local Util = require('project.utils.util')
 ---The project history file.
 --- ---
 ---@field historyfile? string
-local Path = {
-  last_dir_cache = '',
-  curr_dir_cache = {}, ---@type string[]
-  exists = require('project.utils.util').path_exists,
-}
+local Path = {}
+
+Path.last_dir_cache = ''
+Path.curr_dir_cache = {} ---@type string[]
+Path.exists = require('project.utils.util').path_exists
 
 ---@param dir string
 ---@return boolean excluded

@@ -5,8 +5,6 @@
 ---@field [3]? boolean
 ---@field [4]? string
 
----@alias Project.Utils.Util.Types 'number'|'string'|'boolean'|'table'|'function'|'thread'|'userdata'
-
 local MODSTR = 'project.utils.util'
 local ERROR = vim.log.levels.ERROR
 local uv = vim.uv or vim.loop
@@ -82,6 +80,10 @@ end
 ---@param use_dot? boolean
 ---@param triggers? string[]
 ---@return string new_str
+---@overload fun(str: string): new_str: string
+---@overload fun(str: string, use_dot: boolean): new_str: string
+---@overload fun(str: string, use_dot: boolean, triggers: string[]): new_str: string
+---@overload fun(str: string, use_dot?: boolean, triggers: string[]): new_str: string
 function M.capitalize(str, use_dot, triggers)
   M.validate({
     str = { str, { 'string' } },
@@ -127,7 +129,7 @@ end
 ---
 ---If `data` is `nil`, the function will always return `false`.
 --- ---
----@param t Project.Utils.Util.Types Any return value the `type()` function would return
+---@param t type Any return value the `type()` function would return
 ---@param data any The data to be type-checked
 ---@return boolean correct_type
 function M.is_type(t, data)
@@ -141,8 +143,8 @@ end
 ---If the data passed to the function is not a table,
 ---an error will be raised.
 --- ---
----@param T table
----@return table T
+---@param T any[]
+---@return any[] T
 function M.reverse(T)
   M.validate({ T = { T, { 'table' } } })
 
@@ -492,10 +494,14 @@ end
 
 ---@param t 'number'|'string'|'boolean'|'table'|'function'
 ---@param data nil|number|string|boolean|table|function
----@param sep? string
----@param constraints? string[]
+---@param sep string
+---@param constraints string[]
 ---@return string
 ---@return boolean|nil
+---@overload fun(t: 'number'|'string'|'boolean'|'table'|'function', data: nil|number|string|boolean|table|function): string, boolean|nil
+---@overload fun(t: 'number'|'string'|'boolean'|'table'|'function', data: nil|number|string|boolean|table|function, sep: string): string, boolean|nil
+---@overload fun(t: 'number'|'string'|'boolean'|'table'|'function', data: nil|number|string|boolean|table|function, sep: string, constraints: string[]): string, boolean|nil
+---@overload fun(t: 'number'|'string'|'boolean'|'table'|'function', data: nil|number|string|boolean|table|function, sep?: string, constraints: string[]): string, boolean|nil
 function M.format_per_type(t, data, sep, constraints)
   M.validate({
     t = { t, { 'string' } },

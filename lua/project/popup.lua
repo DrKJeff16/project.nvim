@@ -16,7 +16,7 @@ local Util = require('project.utils.util')
 
 ---@param path string
 ---@param hidden boolean
----@return boolean
+---@return boolean available
 local function hidden_avail(path, hidden)
   Util.validate({
     path = { path, { 'string' } },
@@ -132,6 +132,8 @@ local M = {}
 M.select = {}
 
 ---@param bang? boolean
+---@overload fun()
+---@overload fun(bang: boolean)
 function M.gen_import_prompt(bang)
   Util.validate({ bang = { bang, { 'boolean', 'nil' }, true } })
   bang = bang ~= nil and bang or false
@@ -146,6 +148,8 @@ function M.gen_import_prompt(bang)
 end
 
 ---@param bang? boolean
+---@overload fun()
+---@overload fun(bang: boolean)
 function M.gen_export_prompt(bang)
   Util.validate({ bang = { bang, { 'boolean', 'nil' }, true } })
   bang = bang ~= nil and bang or false
@@ -201,7 +205,9 @@ function M.select.new(opts)
   return T
 end
 
----@param input string|nil
+---@param input? string
+---@overload fun()
+---@overload fun(input: string)
 function M.prompt_project(input)
   Util.validate({ input = { input, { 'string', 'nil' }, true } })
 
@@ -462,7 +468,7 @@ M.session_menu = M.select.new({
   end,
 })
 
-local Popup = setmetatable(M, {
+local Popup = setmetatable(M, { ---@type Project.Popup
   __index = M,
   __newindex = function()
     vim.notify('Project.Popup is Read-Only!', ERROR)

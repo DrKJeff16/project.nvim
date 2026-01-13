@@ -97,7 +97,7 @@ end
 
 ---@param data string
 ---@param lvl vim.log.levels
----@return string|nil
+---@return string|nil written_data
 function Log.write(data, lvl)
   if not require('project.config').options.log.enabled or vim.g.project_log_cleared == 1 then
     return
@@ -154,7 +154,7 @@ function Log.create_commands()
 end
 
 ---@param mode OpenMode
----@return integer|nil
+---@return integer|nil fd
 function Log.open(mode)
   require('project.utils.path').create_path(Log.logpath)
   local dir_stat = uv.fs_stat(Log.logpath)

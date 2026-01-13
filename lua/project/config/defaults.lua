@@ -64,6 +64,9 @@ local DEFAULTS = {
   --- ---
   ---@param target_dir string
   ---@param method string
+  ---@overload fun()
+  ---@overload fun(target_dir: string)
+  ---@overload fun(_, method: string)
   before_attach = function(target_dir, method) end, ---@diagnostic disable-line:unused-local
   ---Hook to run after attaching to a new project.
   ---**_This only runs if the directory changes successfully._**
@@ -77,6 +80,9 @@ local DEFAULTS = {
   --- ---
   ---@param dir string
   ---@param method string
+  ---@overload fun()
+  ---@overload fun(dir: string)
+  ---@overload fun(_, method: string)
   on_attach = function(dir, method) end, ---@diagnostic disable-line:unused-local
   ---Sets whether to use Pattern Matching rules to the LSP client.
   ---
@@ -396,8 +402,9 @@ function DEFAULTS:verify()
   end)
 end
 
----@param opts? Project.Config.Options
+---@param opts Project.Config.Options
 ---@return Project.Config.Options
+---@overload fun(): Project.Config.Options
 function DEFAULTS:new(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 

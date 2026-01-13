@@ -35,7 +35,8 @@ end
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
 ---@return string|{ datapath: string, projectpath: string, historyfile: string }
----@overload fun(): string|{ datapath: string, projectpath: string, historyfile: string }
+---@overload fun(): string
+---@overload fun(path: 'datapath'|'projectpath'|'historyfile'): { datapath: string, projectpath: string, historyfile: string }
 function Api.get_history_paths(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
 
@@ -165,28 +166,17 @@ function Api.gen_lsp_autocmd(group)
   vim.g.project_lspattach = 1
 end
 
----@param dir string|nil
----@param method string|nil
+---@param dir string
+---@param method string
 ---@return boolean success
 function Api.set_pwd(dir, method)
   Util.validate({
-    dir = { dir, { 'string', 'nil' }, true },
-    method = { method, { 'string', 'nil' }, true },
+    dir = { dir, { 'string' } },
+    method = { method, { 'string' } },
   })
+  dir = vim.fn.expand(dir)
 
   local Log = require('project.utils.log')
-  if not dir then
-    Log.error(('(%s.set_pwd): `dir` is `nil`!'):format(MODSTR))
-    vim.notify(('(%s.set_pwd): `dir` is `nil`!'):format(MODSTR), ERROR)
-    return false
-  end
-  if not method then
-    Log.error(('(%s.set_pwd): `method` is `nil`!'):format(MODSTR))
-    vim.notify(('(%s.set_pwd): `method` is `nil`!'):format(MODSTR), ERROR)
-    return false
-  end
-
-  dir = vim.fn.expand(dir)
   if not Config.options.allow_different_owners then
     if not Api.verify_owner(dir) then
       Log.error(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))
@@ -278,9 +268,10 @@ end
 ---
 ---If no project root is found, nothing will be returned.
 --- ---
----@param bufnr integer|nil
+---@param bufnr? integer
 ---@return string|nil root
 ---@return string|nil method
+---@overload fun(): root: string|nil, method: string|nil
 function Api.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
@@ -354,6 +345,8 @@ end
 ---@param bufnr? integer
 ---@overload fun()
 ---@overload fun(verbose: boolean)
+---@overload fun(verbose: boolean, bufnr: integer)
+---@overload fun(verbose?: boolean, bufnr: integer)
 function Api.on_buf_enter(verbose, bufnr)
   Util.validate({
     verbose = { verbose, { 'boolean', 'nil' }, true },
