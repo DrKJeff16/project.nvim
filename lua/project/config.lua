@@ -112,16 +112,17 @@ function Config.open_win()
     zindex = 30,
   })
 
-  vim.wo[win].signcolumn = 'no'
-  vim.wo[win].list = false
-  vim.wo[win].number = false
-  vim.wo[win].wrap = false
-  vim.wo[win].colorcolumn = ''
-
-  vim.bo[bufnr].filetype = ''
-  vim.bo[bufnr].fileencoding = 'utf-8'
-  vim.bo[bufnr].buftype = 'nowrite'
-  vim.bo[bufnr].modifiable = false
+  ---@type vim.api.keyset.option, vim.api.keyset.option
+  local win_opts, buf_opts = { win = win }, { buf = bufnr }
+  vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
+  vim.api.nvim_set_option_value('list', false, win_opts)
+  vim.api.nvim_set_option_value('number', false, win_opts)
+  vim.api.nvim_set_option_value('wrap', false, win_opts)
+  vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
+  vim.api.nvim_set_option_value('filetype', '', buf_opts)
+  vim.api.nvim_set_option_value('fileencoding', 'utf-8', buf_opts)
+  vim.api.nvim_set_option_value('buftype', 'nowrite', buf_opts)
+  vim.api.nvim_set_option_value('modifiable', false, buf_opts)
 
   vim.keymap.set('n', 'q', Config.close_win, { buffer = bufnr })
   vim.keymap.set('n', '<Esc>', Config.close_win, { buffer = bufnr })
