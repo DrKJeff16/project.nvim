@@ -25,81 +25,83 @@ local Util = require('project.utils.util')
 local make_display = require('telescope._extensions.projects.util').make_display
 
 ---@class Project.Telescope.Actions
-local M = {
-  help_mappings = Generate.which_key({
-    only_show_curret_mode = true,
-    name_width = 30,
-    max_height = 0.6,
-    separator = ' | ',
-    close_with_action = false,
-  }),
-  ---@param prompt_bufnr integer
-  delete_project = function(prompt_bufnr)
-    local active_entry = State.get_selected_entry() ---@type Project.ActionEntry
-    if not active_entry then
-      Actions.close(prompt_bufnr)
-      Log.error(('(%s.delete_project): Entry not available!'):format(MODSTR, prompt_bufnr))
-      return
-    end
+local M = {}
 
-    local choice =
-      vim.fn.confirm(("Delete '%s' from project list?"):format(active_entry.value), '&Yes\n&No', 2)
-    if choice ~= 1 then
-      Log.info('(%s.delete_project): Aborting project deletion.')
-      return
-    end
+M.help_mappings = Generate.which_key({
+  only_show_curret_mode = true,
+  name_width = 30,
+  max_height = 0.6,
+  separator = ' | ',
+  close_with_action = false,
+})
 
-    History.delete_project(active_entry.value)
-    Log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
-    State.get_current_picker(prompt_bufnr):refresh(
-      (function()
-        local results = History.get_recent_projects()
-        if Config.options.telescope.sort == 'newest' then
-          Log.debug(('(%s.create_finder): Sorting order to `newest`.'):format(MODSTR))
-          results = Util.reverse(results)
-        end
-        return Finders.new_table({
-          results = results,
-          entry_maker = function(value) ---@param value string
-            local name = ('%s/%s'):format(
-              vim.fn.fnamemodify(value, ':h:t'),
-              vim.fn.fnamemodify(value, ':t')
-            )
-            local action_entry = { ---@class Project.ActionEntry
-              display = make_display,
-              name = name,
-              value = value,
-              ordinal = ('%s %s'):format(name, value),
-            }
-            return action_entry
-          end,
-        })
-      end)(),
-      { reset_prompt = true }
-    )
-  end,
-  ---@param prompt_bufnr integer
-  ---@return string|nil
-  ---@return boolean|nil
-  change_working_directory = function(prompt_bufnr)
-    local selected_entry = State.get_selected_entry() ---@type Project.ActionEntry
+---@param prompt_bufnr integer
+function M.delete_project(prompt_bufnr)
+  local active_entry = State.get_selected_entry() ---@type Project.ActionEntry
+  if not active_entry then
     Actions.close(prompt_bufnr)
-    Log.debug(('(%s.change_working_directory): Closed prompt `%s`.'):format(MODSTR, prompt_bufnr))
-    if not selected_entry then
-      Log.error(('(%s.change_working_directory): Invalid entry!'):format(MODSTR))
-      return
-    end
+    Log.error(('(%s.delete_project): Entry not available!'):format(MODSTR, prompt_bufnr))
+    return
+  end
 
-    local cd_successful = Api.set_pwd(selected_entry.value, 'telescope')
-    if cd_successful then
-      Log.info(('(%s.change_working_directory): Successfully changed directory.'):format(MODSTR))
-    else
-      Log.error(('(%s.change_working_directory): Failed to change directory!'):format(MODSTR))
-    end
+  local choice =
+    vim.fn.confirm(("Delete '%s' from project list?"):format(active_entry.value), '&Yes\n&No', 2)
+  if choice ~= 1 then
+    Log.info('(%s.delete_project): Aborting project deletion.')
+    return
+  end
 
-    return selected_entry.value, cd_successful
-  end,
-}
+  History.delete_project(active_entry.value)
+  Log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
+  State.get_current_picker(prompt_bufnr):refresh(
+    (function()
+      local results = History.get_recent_projects()
+      if Config.options.telescope.sort == 'newest' then
+        Log.debug(('(%s.create_finder): Sorting order to `newest`.'):format(MODSTR))
+        results = Util.reverse(results)
+      end
+      return Finders.new_table({
+        results = results,
+        entry_maker = function(value) ---@param value string
+          local name = ('%s/%s'):format(
+            vim.fn.fnamemodify(value, ':h:t'),
+            vim.fn.fnamemodify(value, ':t')
+          )
+          local action_entry = { ---@class Project.ActionEntry
+            display = make_display,
+            name = name,
+            value = value,
+            ordinal = ('%s %s'):format(name, value),
+          }
+          return action_entry
+        end,
+      })
+    end)(),
+    { reset_prompt = true }
+  )
+end
+
+---@param prompt_bufnr integer
+---@return string|nil
+---@return boolean|nil
+function M.change_working_directory(prompt_bufnr)
+  local selected_entry = State.get_selected_entry() ---@type Project.ActionEntry
+  Actions.close(prompt_bufnr)
+  Log.debug(('(%s.change_working_directory): Closed prompt `%s`.'):format(MODSTR, prompt_bufnr))
+  if not selected_entry then
+    Log.error(('(%s.change_working_directory): Invalid entry!'):format(MODSTR))
+    return
+  end
+
+  local cd_successful = Api.set_pwd(selected_entry.value, 'telescope')
+  if cd_successful then
+    Log.info(('(%s.change_working_directory): Successfully changed directory.'):format(MODSTR))
+  else
+    Log.error(('(%s.change_working_directory): Failed to change directory!'):format(MODSTR))
+  end
+
+  return selected_entry.value, cd_successful
+end
 
 ---@param prompt_bufnr integer
 function M.find_project_files(prompt_bufnr)

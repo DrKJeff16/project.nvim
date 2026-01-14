@@ -77,7 +77,7 @@ local function normal_attach(prompt_bufnr, map)
   return true
 end
 
----@param opts table|nil
+---@param opts? table
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
@@ -91,7 +91,7 @@ end
 ---
 ---CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
 --- ---
----@param opts table|nil
+---@param opts? table
 function M.projects(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
