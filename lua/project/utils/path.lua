@@ -151,21 +151,19 @@ function Path.match(dir, pattern)
   return Path.has(dir, pattern)
 end
 
----@param path? string
+---@param path string
 ---@overload fun()
 function Path.create_path(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
   path = path or Path.projectpath
 
   if not Path.exists(path) then
-    local safeguard = vim.schedule_wrap(function()
+    vim.schedule(function()
       require('project.utils.log').debug(
         ('(%s.create_path): Creating directory `%s`.'):format(MODSTR, path)
       )
     end)
     uv.fs_mkdir(path, tonumber('755', 8))
-
-    safeguard()
   end
 end
 

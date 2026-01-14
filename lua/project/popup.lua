@@ -1,6 +1,6 @@
 ---@class Project.Popup.SelectChoices
----@field choices fun(): table<string, function>
----@field choices_list fun(): string[]
+---@field choices fun(): choices_dict: table<string, function>
+---@field choices_list fun(): choices: string[]
 
 ---@class Project.Popup.SelectSpec: Project.Popup.SelectChoices
 ---@field callback ProjectCmdFun
@@ -8,11 +8,8 @@
 local MODSTR = 'project.popup'
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
-local uv = vim.uv or vim.loop
-local in_list = vim.list_contains
-local empty = vim.tbl_isempty
-
 local Util = require('project.utils.util')
+local uv = vim.uv or vim.loop
 
 ---@param path string
 ---@param hidden boolean
@@ -104,7 +101,7 @@ local function open_node(proj, only_cd, ran_cd)
       return vim.fn.isdirectory(item) == 1 and (item .. '/') or item
     end,
   }, function(item) ---@param item string
-    if not item or in_list({ '', 'Exit' }, item) then
+    if not item or vim.list_contains({ '', 'Exit' }, item) then
       return
     end
 
@@ -131,9 +128,8 @@ local M = {}
 ---@class Project.Popup.Select
 M.select = {}
 
----@param bang? boolean
+---@param bang boolean
 ---@overload fun()
----@overload fun(bang: boolean)
 function M.gen_import_prompt(bang)
   Util.validate({ bang = { bang, { 'boolean', 'nil' }, true } })
   bang = bang ~= nil and bang or false
@@ -147,9 +143,8 @@ function M.gen_import_prompt(bang)
   end)
 end
 
----@param bang? boolean
+---@param bang boolean
 ---@overload fun()
----@overload fun(bang: boolean)
 function M.gen_export_prompt(bang)
   Util.validate({ bang = { bang, { 'boolean', 'nil' }, true } })
   bang = bang ~= nil and bang or false
@@ -181,7 +176,7 @@ function M.select.new(opts)
     opts_callback = { opts.callback, { 'function' } },
   })
 
-  if empty(opts) then
+  if vim.tbl_isempty(opts) then
     error(('(%s.select.new): Empty args for constructor!'):format(MODSTR), ERROR)
   end
 
@@ -205,12 +200,10 @@ function M.select.new(opts)
   return T
 end
 
----@param input? string
+---@param input string
 ---@overload fun()
----@overload fun(input: string)
 function M.prompt_project(input)
   Util.validate({ input = { input, { 'string', 'nil' }, true } })
-
   if not input or input == '' then
     return
   end
@@ -232,7 +225,7 @@ function M.prompt_project(input)
 
   local Api = require('project.api')
   local session = require('project.utils.history').session_projects
-  if Api.current_project == input or in_list(session, input) then
+  if Api.current_project == input or vim.list_contains(session, input) then
     vim.notify('Already added that directory!', WARN)
     return
   end
@@ -246,7 +239,7 @@ M.delete_menu = M.select.new({
     vim.ui.select(choices_list, {
       prompt = 'Select a project to delete:',
       format_item = function(item) ---@param item string
-        if in_list(require('project.utils.history').session_projects, item) then
+        if vim.list_contains(require('project.utils.history').session_projects, item) then
           return '* ' .. item
         end
         return item
@@ -255,7 +248,7 @@ M.delete_menu = M.select.new({
       if not item then
         return
       end
-      if not in_list(choices_list, item) then
+      if not vim.list_contains(choices_list, item) then
         vim.notify('Bad selection!', ERROR)
         return
       end
@@ -270,8 +263,7 @@ M.delete_menu = M.select.new({
     end)
   end,
   choices_list = function()
-    ---@type string[]
-    local recents = Util.reverse(require('project.utils.history').get_recent_projects())
+    local recents = Util.reverse(require('project.utils.history').get_recent_projects()) ---@type string[]
     table.insert(recents, 'Exit')
     return recents
   end,
@@ -300,7 +292,7 @@ M.recents_menu = M.select.new({
       if not item then
         return
       end
-      if not in_list(choices_list, item) then
+      if not vim.list_contains(choices_list, item) then
         vim.notify('Bad selection!', ERROR)
         return
       end
@@ -338,7 +330,7 @@ M.open_menu = M.select.new({
       if not item then
         return
       end
-      if not in_list(choices_list, item) then
+      if not vim.list_contains(choices_list, item) then
         vim.notify('Bad selection!', ERROR)
         return
       end
@@ -417,11 +409,7 @@ M.open_menu = M.select.new({
 
 M.session_menu = M.select.new({
   callback = function(ctx)
-    local only_cd = false
-    if ctx then
-      only_cd = ctx.bang ~= nil and ctx.bang or only_cd
-    end
-
+    local only_cd = (ctx and ctx.bang ~= nil and ctx.bang) and ctx.bang or false
     local choices_list = M.session_menu.choices_list()
     if #choices_list == 1 then
       vim.notify('No sessions available!', WARN)
@@ -437,7 +425,7 @@ M.session_menu = M.select.new({
       if not item then
         return
       end
-      if not in_list(choices_list, item) then
+      if not vim.list_contains(choices_list, item) then
         vim.notify('Bad selection!', ERROR)
         return
       end

@@ -16,12 +16,13 @@
 local MODSTR = 'project.commands'
 local INFO = vim.log.levels.INFO
 local ERROR = vim.log.levels.ERROR
-local in_list = vim.list_contains
 local curr_buf = vim.api.nvim_get_current_buf
 local Util = require('project.utils.util')
 
 ---@class Project.Commands
 local Commands = {}
+
+Commands.cmds = {} ---@type table<string, Project.CMD>
 
 ---@param specs Project.Commands.Spec[]
 function Commands.new(specs)
@@ -91,10 +92,8 @@ function Commands.create_user_commands()
       with_ctx = true,
       callback = function(ctx)
         local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' }
-        if ctx and ctx.bang ~= nil then
-          if ctx.bang then
-            opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
-          end
+        if ctx and ctx.bang ~= nil and ctx.bang then
+          opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
         end
 
         vim.ui.input(opts, require('project.popup').prompt_project)
@@ -124,7 +123,7 @@ function Commands.create_user_commands()
         )
       end,
       bang = true,
-      complete = function(_, line)
+      complete = function(_, line) ---@param line string
         local args = vim.split(line, '%s+', { trimempty = false })
         if #args == 2 then
           -- Thanks to @TheLeoP for the advice!
@@ -205,13 +204,13 @@ function Commands.create_user_commands()
           if path:sub(-1) == '/' then
             path = path:sub(1, path:len() - 1)
           end
-          if not (force or in_list(recent, path) or path ~= '') then
+          if not (force or vim.list_contains(recent, path) or path ~= '') then
             msg = ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path)
             Log.error(msg)
             vim.notify(msg, ERROR)
             return
           end
-          if in_list(recent, path) then
+          if vim.list_contains(recent, path) then
             require('project.utils.history').delete_project(path)
           end
         end
@@ -287,9 +286,6 @@ function Commands.create_user_commands()
     },
   })
 end
-
----@type table<string, Project.CMD>
-Commands.cmds = {}
 
 return Commands
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

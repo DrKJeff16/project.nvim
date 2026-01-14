@@ -254,7 +254,7 @@ function Log.close_win()
     return
   end
 
-  vim.api.nvim_buf_delete(Log.log_loc.bufnr, {})
+  pcall(vim.api.nvim_buf_delete, Log.log_loc.bufnr, { force = true })
   pcall(vim.cmd.tabclose)
 
   Log.log_loc = nil

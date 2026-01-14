@@ -56,7 +56,7 @@ end
 ---If successful, returns a tuple of two `string` results.
 ---Otherwise, nothing is returned.
 --- ---
----@param bufnr? integer
+---@param bufnr integer
 ---@return string|nil dir
 ---@return string|nil name
 ---@overload fun(): dir: string|nil, name: string|nil
@@ -117,7 +117,7 @@ function Api.verify_owner(dir)
   return stat.uid == uv.getuid()
 end
 
----@param bufnr? integer
+---@param bufnr integer
 ---@return string|nil dir_res
 ---@return string|nil method
 ---@overload fun(): dir_res: string|nil, method: string|nil
@@ -130,7 +130,7 @@ function Api.find_pattern_root(bufnr)
   return Path.root_included(dir)
 end
 
----@param bufnr? integer
+---@param bufnr integer
 ---@return boolean valid
 ---@overload fun(): valid: boolean
 function Api.valid_bt(bufnr)
@@ -268,7 +268,7 @@ end
 ---
 ---If no project root is found, nothing will be returned.
 --- ---
----@param bufnr? integer
+---@param bufnr integer
 ---@return string|nil root
 ---@return string|nil method
 ---@overload fun(): root: string|nil, method: string|nil
@@ -327,7 +327,7 @@ end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
----@param bufnr? integer
+---@param bufnr integer
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
@@ -341,11 +341,10 @@ function Api.get_current_project(bufnr)
   return curr, method, last
 end
 
----@param verbose? boolean
----@param bufnr? integer
+---@param verbose boolean
+---@param bufnr integer
 ---@overload fun()
 ---@overload fun(verbose: boolean)
----@overload fun(verbose: boolean, bufnr: integer)
 ---@overload fun(verbose?: boolean, bufnr: integer)
 function Api.on_buf_enter(verbose, bufnr)
   Util.validate({

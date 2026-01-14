@@ -69,8 +69,8 @@ function History.open_history(mode)
 end
 
 ---@param path string
----@param ind? integer|string
----@param force_name? boolean
+---@param ind integer|string
+---@param force_name boolean
 ---@overload fun(path: string)
 ---@overload fun(path: string, ind: integer|string)
 ---@overload fun(path: string, ind?: integer|string, force_name: boolean)
@@ -154,9 +154,8 @@ function History.export_history_json(path, ind, force_name)
 end
 
 ---@param path string
----@param force_name? boolean
+---@param force_name boolean
 ---@overload fun(path: string)
----@overload fun(path: string, force_name: boolean)
 function History.import_history_json(path, force_name)
   Util.validate({
     path = { path, { 'string' } },
@@ -380,9 +379,8 @@ end
 
 ---Write projects to history file.
 --- ---
----@param close? boolean
+---@param close boolean
 ---@overload fun()
----@overload fun(close: boolean)
 function History.write_history(close)
   Util.validate({ close = { close, { 'boolean', 'nil' }, true } })
   close = close ~= nil and close or false
@@ -463,7 +461,7 @@ function History.close_win()
     return
   end
 
-  vim.api.nvim_buf_delete(History.hist_loc.bufnr, {})
+  pcall(vim.api.nvim_buf_delete, History.hist_loc.bufnr, { force = true })
   pcall(vim.cmd.tabclose)
   History.hist_loc = nil
 end

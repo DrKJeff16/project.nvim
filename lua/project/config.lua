@@ -1,6 +1,5 @@
 local MODSTR = 'project.config'
 local ERROR = vim.log.levels.ERROR
-local in_list = vim.list_contains
 local Util = require('project.utils.util')
 
 ---@class Project.ConfigLoc: Project.HistoryLoc
@@ -20,9 +19,8 @@ Config.options = setmetatable({}, { __index = Config.get_defaults() }) ---@type 
 
 ---The function called when running `require('project').setup()`.
 --- ---
----@param options? Project.Config.Options the `project.nvim` config options
+---@param options Project.Config.Options the `project.nvim` config options
 ---@overload fun()
----@overload fun(options: Project.Config.Options)
 function Config.setup(options)
   Util.validate({ options = { options, { 'table', 'nil' }, true } })
   options = options or {}
@@ -56,7 +54,7 @@ function Config.setup(options)
   require('project.commands').create_user_commands()
 end
 
----@return string|nil
+---@return string|nil config
 function Config.get_config()
   if vim.g.project_setup ~= 1 then
     require('project.utils.log').error(
@@ -77,7 +75,7 @@ function Config.get_config()
   }
   local opts = {} ---@type Project.Config.Options
   for k, v in pairs(Config.options) do
-    if not in_list(exceptions, k) then
+    if not vim.list_contains(exceptions, k) then
       opts[k] = v
     end
   end
@@ -105,7 +103,6 @@ function Config.open_win()
     border = 'single',
     col = math.floor((vim.o.columns - width) / 2) - 1,
     row = math.floor((vim.o.lines - height) / 2) - 1,
-    noautocmd = true,
     relative = 'editor',
     style = 'minimal',
     title = 'Project Config',
@@ -126,7 +123,8 @@ function Config.open_win()
   vim.bo[bufnr].buftype = 'nowrite'
   vim.bo[bufnr].modifiable = false
 
-  vim.keymap.set('n', 'q', Config.close_win, { buffer = bufnr, noremap = true, silent = true })
+  vim.keymap.set('n', 'q', Config.close_win, { buffer = bufnr })
+  vim.keymap.set('n', '<Esc>', Config.close_win, { buffer = bufnr })
 
   Config.conf_loc = { bufnr = bufnr, win = win }
 end
@@ -136,7 +134,7 @@ function Config.close_win()
     return
   end
 
-  vim.api.nvim_buf_delete(Config.conf_loc.bufnr, { force = true })
+  pcall(vim.api.nvim_buf_delete, Config.conf_loc.bufnr, { force = true })
   pcall(vim.api.nvim_win_close, Config.conf_loc.win, true)
 
   Config.conf_loc = nil

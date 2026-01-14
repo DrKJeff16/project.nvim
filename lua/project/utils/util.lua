@@ -8,9 +8,6 @@
 local MODSTR = 'project.utils.util'
 local ERROR = vim.log.levels.ERROR
 local uv = vim.uv or vim.loop
-local empty = vim.tbl_isempty
-local in_tbl = vim.tbl_contains
-local in_list = vim.list_contains
 
 ---@class Project.Utils.Util
 local M = {}
@@ -31,25 +28,12 @@ end
 ---Dynamic `vim.validate()` wrapper. Covers both legacy and newer implementations
 ---@param T table<string, vim.validate.Spec|ValidateSpec>
 function M.validate(T)
-  if not M.vim_has('nvim-0.11') then
-    ---Filter table to fit legacy standard
-    ---@cast T table<string, vim.validate.Spec>
-    for name, spec in pairs(T) do
-      while #spec > 3 do
-        table.remove(spec, #spec)
-      end
-
-      T[name] = spec
-    end
-
-    vim.validate(T)
-    return
-  end
+  local max = M.vim_has('nvim-0.11') and 3 or 4
 
   ---Filter table to fit non-legacy standard
   ---@cast T table<string, ValidateSpec>
   for name, spec in pairs(T) do
-    while #spec > 4 do
+    while #spec > max do
       table.remove(spec, #spec)
     end
 
@@ -57,8 +41,12 @@ function M.validate(T)
   end
 
   for name, spec in pairs(T) do
-    table.insert(spec, 1, name)
-    vim.validate(unpack(spec))
+    if M.vim_has('nvim-0.11') then
+      table.insert(spec, 1, name)
+      vim.validate(unpack(spec))
+    else
+      vim.validate(spec)
+    end
   end
 end
 
@@ -77,12 +65,11 @@ function M.dir_exists(dir)
 end
 
 ---@param str string
----@param use_dot? boolean
----@param triggers? string[]
+---@param use_dot boolean
+---@param triggers string[]
 ---@return string new_str
 ---@overload fun(str: string): new_str: string
 ---@overload fun(str: string, use_dot: boolean): new_str: string
----@overload fun(str: string, use_dot: boolean, triggers: string[]): new_str: string
 ---@overload fun(str: string, use_dot?: boolean, triggers: string[]): new_str: string
 function M.capitalize(str, use_dot, triggers)
   M.validate({
@@ -97,10 +84,10 @@ function M.capitalize(str, use_dot, triggers)
 
   use_dot = use_dot ~= nil and use_dot or false
   triggers = triggers or { ' ', '' }
-  if not in_list(triggers, ' ') then
+  if not vim.list_contains(triggers, ' ') then
     table.insert(triggers, ' ')
   end
-  if not in_list(triggers, '') then
+  if not vim.list_contains(triggers, '') then
     table.insert(triggers, '')
   end
 
@@ -109,7 +96,7 @@ function M.capitalize(str, use_dot, triggers)
   local dot = true
   while i <= strlen do
     local char = str:sub(i, i)
-    if char == char:lower() and in_list(triggers, prev_char) then
+    if char == char:lower() and vim.list_contains(triggers, prev_char) then
       char = dot and char:upper() or char:lower()
       if dot then
         dot = false
@@ -148,7 +135,7 @@ end
 function M.reverse(T)
   M.validate({ T = { T, { 'table' } } })
 
-  if empty(T) then
+  if vim.tbl_isempty(T) then
     return T
   end
 
@@ -471,7 +458,7 @@ end
 function M.dedup(T)
   M.validate({ T = { T, { 'table' } } })
 
-  if empty(T) then
+  if vim.tbl_isempty(T) then
     return T
   end
 
@@ -479,11 +466,11 @@ function M.dedup(T)
   for _, v in pairs(T) do
     local not_dup = false
     if M.is_type('table', v) then
-      not_dup = not in_tbl(NT, function(val)
+      not_dup = not vim.tbl_contains(NT, function(val)
         return vim.deep_equal(val, v)
       end, { predicate = true })
     else
-      not_dup = not in_list(NT, v)
+      not_dup = not vim.list_contains(NT, v)
     end
     if not_dup then
       table.insert(NT, v)
@@ -516,7 +503,7 @@ function M.format_per_type(t, data, sep, constraints)
     if not M.is_type('table', constraints) then
       return res
     end
-    if constraints ~= nil and in_list(constraints, data) then
+    if constraints ~= nil and vim.list_contains(constraints, data) then
       return res
     end
     return res, true
@@ -535,7 +522,7 @@ function M.format_per_type(t, data, sep, constraints)
   if t ~= 'table' then
     return ('%s%s `?`'):format(sep, msg)
   end
-  if empty(data) then
+  if vim.tbl_isempty(data) then
     return ('%s%s `{}`'):format(sep, msg)
   end
 
