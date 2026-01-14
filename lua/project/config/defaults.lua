@@ -7,6 +7,79 @@
 ---|'recent_project_files'
 ---|'search_in_project_files'
 
+---@class Project.Telescope.Mappings
+---@field i? table<string, Project.Telescope.ActionNames>
+---@field n? table<string, Project.Telescope.ActionNames>
+
+---@class Project.Config.DisableOn
+---@field ft? string[]
+---@field bt? string[]
+
+---Table of options used for the telescope picker.
+--- ---
+---@class Project.Config.Telescope
+---Determines whether the newest projects come first in the
+---telescope picker (`'newest'`), or the oldest (`'oldest'`).
+--- ---
+---Default: `'newest'`
+--- ---
+---@field sort? 'newest'|'oldest'
+---If you have `telescope-file-browser.nvim` installed, you can enable this
+---so that the Telescope picker uses it instead of the `find_files` builtin.
+---
+---If `true`, use `telescope-file-browser.nvim` instead of builtins.
+---In case it is not available, it'll fall back to `find_files`.
+--- ---
+---Default: `false`
+--- ---
+---@field prefer_file_browser? boolean
+---Set this to `true` if you don't want the file picker to appear
+---after you've selected a project.
+---
+---CREDITS: [UNKNOWN](https://github.com/ahmedkhalf/project.nvim/issues/157#issuecomment-2226419783)
+--- ---
+---Default: `false`
+--- ---
+---@field disable_file_picker? boolean
+---Table of mappings for the Telescope picker.
+---
+---Only supports Normal and Insert modes.
+--- ---
+---Default: check the README
+--- ---
+---@field mappings? Project.Telescope.Mappings
+
+---Table of options used for `fzf-lua` integration
+--- ---
+---@class Project.Config.FzfLua
+---Determines whether the `fzf-lua` integration is enabled.
+---
+---If `fzf-lua` is not installed, this won't make a difference.
+--- ---
+---Default: `false`
+--- ---
+---@field enabled? boolean
+
+---Options for logging utility.
+--- ---
+---@class Project.Config.Logging
+---If `true`, it enables logging in the same directory in which your
+---history file is stored.
+--- ---
+---Default: `false`
+--- ---
+---@field enabled? boolean
+---The maximum logfile size (in megabytes).
+--- ---
+---Default: `1.1`
+--- ---
+---@field max_size? number
+---Path in which the log file will be saved.
+--- ---
+---Default: `vim.fn.stdpath('state')`
+--- ---
+---@field logpath? string
+
 local MODSTR = 'project.config.defaults'
 local WARN = vim.log.levels.WARN
 local in_list = vim.tbl_contains
@@ -64,9 +137,6 @@ local DEFAULTS = {
   --- ---
   ---@param target_dir string
   ---@param method string
-  ---@overload fun()
-  ---@overload fun(target_dir: string)
-  ---@overload fun(_, method: string)
   before_attach = function(target_dir, method) end, ---@diagnostic disable-line:unused-local
   ---Hook to run after attaching to a new project.
   ---**_This only runs if the directory changes successfully._**
@@ -80,9 +150,6 @@ local DEFAULTS = {
   --- ---
   ---@param dir string
   ---@param method string
-  ---@overload fun()
-  ---@overload fun(dir: string)
-  ---@overload fun(_, method: string)
   on_attach = function(dir, method) end, ---@diagnostic disable-line:unused-local
   ---Sets whether to use Pattern Matching rules to the LSP client.
   ---
@@ -164,8 +231,8 @@ local DEFAULTS = {
   --- ---
   ---The default value for this one can be found in the project's `README.md`.
   --- ---
-  disable_on = { ---@type { ft: string[], bt: string[] }
-    ft = { -- `filetype`
+  disable_on = { ---@type Project.Config.DisableOn
+    ft = {
       '',
       'NvimTree',
       'TelescopePrompt',
@@ -181,7 +248,7 @@ local DEFAULTS = {
       'packer',
       'qf',
     },
-    bt = { 'help', 'nofile', 'nowrite', 'terminal' }, -- `buftype`
+    bt = { 'help', 'nofile', 'nowrite', 'terminal' },
   },
   ---The path where `project.nvim` will store the project history directory,
   ---containing the project history in it.
@@ -200,92 +267,29 @@ local DEFAULTS = {
   ---Default: `100`
   --- ---
   historysize = 100, ---@type integer
-}
-
----Table of options used for `fzf-lua` integration
---- ---
----@class Project.Config.FzfLua
-DEFAULTS.fzf_lua = {
-  ---Determines whether the `fzf-lua` integration is enabled.
-  ---
-  ---If `fzf-lua` is not installed, this won't make a difference.
-  --- ---
-  ---Default: `false`
-  --- ---
-  enabled = false, ---@type boolean
-}
-
----Options for logging utility.
---- ---
----@class Project.Config.Logging
-DEFAULTS.log = {
-  ---If `true`, it enables logging in the same directory in which your
-  ---history file is stored.
-  --- ---
-  ---Default: `false`
-  --- ---
-  enabled = false, ---@type boolean
-  ---The maximum logfile size (in megabytes).
-  --- ---
-  ---Default: `1.1`
-  --- ---
-  max_size = 1.1, ---@type number
-  ---Path in which the log file will be saved.
-  --- ---
-  ---Default: `vim.fn.stdpath('state')`
-  --- ---
-  logpath = vim.fn.stdpath('state'), ---@type string
-}
-
----Table of options used for the telescope picker.
---- ---
----@class Project.Config.Telescope
-DEFAULTS.telescope = {
-  ---Determines whether the newest projects come first in the
-  ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
-  --- ---
-  ---Default: `'newest'`
-  --- ---
-  sort = 'newest', ---@type 'oldest'|'newest'
-  ---If you have `telescope-file-browser.nvim` installed, you can enable this
-  ---so that the Telescope picker uses it instead of the `find_files` builtin.
-  ---
-  ---If `true`, use `telescope-file-browser.nvim` instead of builtins.
-  ---In case it is not available, it'll fall back to `find_files`.
-  --- ---
-  ---Default: `false`
-  --- ---
-  prefer_file_browser = false, ---@type boolean
-  ---Set this to `true` if you don't want the file picker to appear
-  ---after you've selected a project.
-  ---
-  ---CREDITS: [UNKNOWN](https://github.com/ahmedkhalf/project.nvim/issues/157#issuecomment-2226419783)
-  --- ---
-  ---Default: `false`
-  --- ---
-  disable_file_picker = false, ---@type boolean
-  ---Table of mappings for the Telescope picker.
-  ---
-  ---Only supports Normal and Insert modes.
-  --- ---
-  ---Default: check the README
-  --- ---
-  mappings = { ---@type table<'n'|'i', table<string, Project.Telescope.ActionNames>>
-    n = {
-      b = 'browse_project_files',
-      d = 'delete_project',
-      f = 'find_project_files',
-      r = 'recent_project_files',
-      s = 'search_in_project_files',
-      w = 'change_working_directory',
-    },
-    i = {
-      ['<C-b>'] = 'browse_project_files',
-      ['<C-d>'] = 'delete_project',
-      ['<C-f>'] = 'find_project_files',
-      ['<C-r>'] = 'recent_project_files',
-      ['<C-s>'] = 'search_in_project_files',
-      ['<C-w>'] = 'change_working_directory',
+  fzf_lua = { enabled = false }, ---@type Project.Config.FzfLua
+  log = { enabled = false, max_size = 1.1, logpath = vim.fn.stdpath('state') }, ---@type Project.Config.Logging
+  telescope = { ---@type Project.Config.Telescope
+    sort = 'newest',
+    prefer_file_browser = false,
+    disable_file_picker = false,
+    mappings = {
+      n = {
+        b = 'browse_project_files',
+        d = 'delete_project',
+        f = 'find_project_files',
+        r = 'recent_project_files',
+        s = 'search_in_project_files',
+        w = 'change_working_directory',
+      },
+      i = {
+        ['<C-b>'] = 'browse_project_files',
+        ['<C-d>'] = 'delete_project',
+        ['<C-f>'] = 'find_project_files',
+        ['<C-r>'] = 'recent_project_files',
+        ['<C-s>'] = 'search_in_project_files',
+        ['<C-w>'] = 'change_working_directory',
+      },
     },
   },
 }

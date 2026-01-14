@@ -19,7 +19,7 @@ Config.options = setmetatable({}, { __index = Config.get_defaults() }) ---@type 
 
 ---The function called when running `require('project').setup()`.
 --- ---
----@param options Project.Config.Options the `project.nvim` config options
+---@param options Project.Config.Options|nil the `project.nvim` config options
 ---@overload fun()
 function Config.setup(options)
   Util.validate({ options = { options, { 'table', 'nil' }, true } })
