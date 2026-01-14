@@ -215,37 +215,54 @@ function Log.open_win()
     error(('(%s.open_win): Bad logfile path!'):format(MODSTR), ERROR)
   end
 
-  if Log.log_loc ~= nil then -- Log window appears to be open
+  if Log.log_loc then -- Log window appears to be open
     return
   end
 
-  vim.cmd.tabedit(Log.logfile)
+  local stat = uv.fs_stat(Log.logfile)
+  if not stat then
+    return
+  end
+
+  local fd = uv.fs_open(Log.logfile, 'r', tonumber('644', 8))
+  if not fd then
+    return
+  end
+
+  local data = uv.fs_read(fd, stat.size)
+  if not data then
+    return
+  end
+
+  vim.cmd.tabnew()
   vim.schedule(function()
-    Log.log_loc = {
-      bufnr = vim.api.nvim_get_current_buf(),
-      win = vim.api.nvim_get_current_win(),
-    }
+    local bufnr = vim.api.nvim_get_current_buf()
+    local win = vim.api.nvim_get_current_win()
 
-    vim.api.nvim_buf_set_name(Log.log_loc.bufnr, 'Project Log')
+    vim.api.nvim_buf_set_name(bufnr, 'Project Log')
+    vim.api.nvim_buf_set_lines(
+      bufnr,
+      0,
+      -1,
+      true,
+      vim.split(data, '\n', { plain = true, trimempty = false })
+    )
 
-    local win_opts = { win = Log.log_loc.win } ---@type vim.api.keyset.option
+    ---@type vim.api.keyset.option, vim.api.keyset.option
+    local win_opts, buf_opts = { win = win }, { buf = bufnr }
     vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
     vim.api.nvim_set_option_value('list', false, win_opts)
     vim.api.nvim_set_option_value('number', false, win_opts)
     vim.api.nvim_set_option_value('wrap', false, win_opts)
     vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
-
-    local buf_opts = { buf = Log.log_loc.bufnr } ---@type vim.api.keyset.option
     vim.api.nvim_set_option_value('filetype', 'log', buf_opts)
     vim.api.nvim_set_option_value('fileencoding', 'utf-8', buf_opts)
     vim.api.nvim_set_option_value('buftype', 'nowrite', buf_opts)
     vim.api.nvim_set_option_value('modifiable', false, buf_opts)
 
-    vim.keymap.set('n', 'q', Log.close_win, {
-      buffer = Log.log_loc.bufnr,
-      noremap = true,
-      silent = true,
-    })
+    vim.keymap.set('n', 'q', Log.close_win, { buffer = bufnr })
+
+    Log.log_loc = { win = win, bufnr = bufnr }
   end)
 end
 
