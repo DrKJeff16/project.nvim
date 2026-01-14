@@ -8,7 +8,6 @@
 ---@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@field name string
 ---@field desc string
----@field with_ctx? boolean
 ---@field complete? string|CompletorFun
 ---@field bang? boolean
 ---@field nargs? string|integer
@@ -16,7 +15,6 @@
 local MODSTR = 'project.commands'
 local INFO = vim.log.levels.INFO
 local ERROR = vim.log.levels.ERROR
-local curr_buf = vim.api.nvim_get_current_buf
 local Util = require('project.utils.util')
 
 ---@class Project.Commands
@@ -33,10 +31,15 @@ function Commands.new(specs)
   end
 
   for _, spec in ipairs(specs) do
-    if not (spec.callback and vim.is_callable(spec.callback)) then
-      vim.notify(('(%s.new): Missing callback!'):format(MODSTR), ERROR)
-      return
-    end
+    Util.validate({
+      name = { spec.name, { 'string' } },
+      desc = { spec.desc, { 'string' } },
+      callback = { spec.callback, { 'function' } },
+      bang = { spec.bang, { 'boolean', 'nil' }, true },
+      nargs = { spec.nargs, { 'string', 'number', 'nil' }, true },
+      complete = { spec.complete, { 'string', 'function', 'nil' }, true },
+    })
+
     local bang = spec.bang ~= nil and spec.bang or false
     local T = { name = spec.name, desc = spec.desc, bang = bang }
     local opts = { desc = spec.desc, bang = bang }
@@ -64,13 +67,8 @@ function Commands.new(specs)
       end,
     })
     vim.api.nvim_create_user_command(spec.name, function(ctx)
-      local with_ctx = spec.with_ctx ~= nil and spec.with_ctx or false
       local cmd = Commands.cmds[spec.name]
-      if with_ctx then
-        cmd(ctx)
-        return
-      end
-      cmd()
+      cmd(ctx)
     end, opts)
   end
 end
@@ -79,7 +77,6 @@ function Commands.create_user_commands()
   Commands.new({
     {
       name = 'Project',
-      with_ctx = true,
       callback = function(ctx)
         require('project.popup').open_menu(ctx.fargs)
       end,
@@ -89,11 +86,11 @@ function Commands.create_user_commands()
     },
     {
       name = 'ProjectAdd',
-      with_ctx = true,
       callback = function(ctx)
         local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' }
         if ctx and ctx.bang ~= nil and ctx.bang then
-          opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(curr_buf()), ':p:h')
+          local bufnr = vim.api.nvim_get_current_buf()
+          opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
         end
 
         vim.ui.input(opts, require('project.popup').prompt_project)
@@ -104,7 +101,6 @@ function Commands.create_user_commands()
     {
       name = 'ProjectExportJSON',
       desc = 'Export project.nvim history to JSON file',
-      with_ctx = true,
       callback = function(ctx)
         if not (ctx and #ctx.fargs <= 2) then
           vim.notify('Usage\n  :ProjectExportJSON </path/to/file[.json]> [<INDENT>]', INFO)
@@ -147,7 +143,6 @@ function Commands.create_user_commands()
     {
       name = 'ProjectImportJSON',
       desc = 'Import project history from JSON file',
-      with_ctx = true,
       callback = function(ctx)
         if not (ctx and #ctx.fargs <= 1) then
           vim.notify('Usage\n  :ProjectImportJSON </path/to/file[.json]>', INFO)
@@ -167,7 +162,6 @@ function Commands.create_user_commands()
     },
     {
       name = 'ProjectConfig',
-      with_ctx = true,
       callback = function(ctx)
         local Config = require('project.config')
         if ctx and ctx.bang ~= nil and ctx.bang then
@@ -182,7 +176,6 @@ function Commands.create_user_commands()
     },
     {
       name = 'ProjectDelete',
-      with_ctx = true,
       callback = function(ctx)
         if not ctx or vim.tbl_isempty(ctx.fargs) then
           require('project.popup').delete_menu()
@@ -258,7 +251,6 @@ function Commands.create_user_commands()
     },
     {
       name = 'ProjectRoot',
-      with_ctx = true,
       callback = function(ctx)
         local verbose = ctx.bang ~= nil and ctx.bang or false
         require('project.api').on_buf_enter(verbose)
@@ -268,7 +260,6 @@ function Commands.create_user_commands()
     },
     {
       name = 'ProjectSession',
-      with_ctx = true,
       callback = function(ctx)
         require('project.popup').session_menu(ctx)
       end,
@@ -278,11 +269,12 @@ function Commands.create_user_commands()
     {
       name = 'ProjectTelescope',
       callback = function()
-        if vim.g.project_telescope_loaded == 1 then
-          require('telescope._extensions.projects').projects()
+        if vim.g.project_telescope_loaded ~= 1 then
+          return
         end
+        require('telescope._extensions.projects').projects()
       end,
-      desc = 'Telescope shortcut for project.nvim picker',
+      desc = 'Telescope shortcut for `projects` picker',
     },
   })
 end
