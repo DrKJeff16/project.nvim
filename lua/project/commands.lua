@@ -212,6 +212,7 @@ function Commands.create_user_commands()
         local force = ctx.bang ~= nil and ctx.bang or false
         local msg
         for _, v in ipairs(ctx.fargs) do
+          v = Util.strip({ '"', "'" }, v)
           local path = vim.fn.fnamemodify(v, ':p')
           if path:sub(-1) == '/' then
             path = path:sub(1, path:len() - 1)
@@ -231,9 +232,9 @@ function Commands.create_user_commands()
       nargs = '*',
       bang = true,
       complete = function(_, line) ---@param line string
+        local args = vim.split(line, '%s+')
         local recent = require('project.utils.history').get_recent_projects()
-        local input = vim.split(line, '%s+')
-        local prefix = input[#input]
+        local prefix = args[#args]
         return vim.tbl_filter(function(cmd) ---@param cmd string
           return vim.startswith(cmd, prefix)
         end, recent)
