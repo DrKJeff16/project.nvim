@@ -34,6 +34,9 @@ function Commands.new(specs)
   if vim.tbl_isempty(specs) then
     error(('(%s.new): Empty command spec!'):format(MODSTR), ERROR)
   end
+  if not vim.islist(specs) then
+    error(('(%s.new): Spec is not a list!'):format(MODSTR), ERROR)
+  end
 
   for _, spec in ipairs(specs) do
     Util.validate({
@@ -239,13 +242,6 @@ function Commands.create_user_commands()
       end,
     },
     {
-      name = 'ProjectFzf',
-      callback = function()
-        require('project.extensions.fzf-lua').run_fzf_lua()
-      end,
-      desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
-    },
-    {
       name = 'ProjectHealth',
       callback = function()
         vim.cmd.checkhealth('project')
@@ -270,8 +266,7 @@ function Commands.create_user_commands()
     {
       name = 'ProjectRoot',
       callback = function(ctx)
-        local verbose = ctx.bang ~= nil and ctx.bang or false
-        Api.on_buf_enter(verbose)
+        Api.on_buf_enter(ctx.bang ~= nil and ctx.bang or false)
       end,
       desc = 'Sets the current project root to the current CWD',
       bang = true,
@@ -283,16 +278,6 @@ function Commands.create_user_commands()
       end,
       desc = 'Opens a menu to switch between sessions',
       bang = true,
-    },
-    {
-      name = 'ProjectTelescope',
-      callback = function()
-        if vim.g.project_telescope_loaded ~= 1 then
-          return
-        end
-        require('telescope._extensions.projects').projects()
-      end,
-      desc = 'Telescope shortcut for `projects` picker',
     },
   })
 end

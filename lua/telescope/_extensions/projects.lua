@@ -23,5 +23,15 @@ local Projects = require('telescope').register_extension({
   projects = projects,
 })
 
+require('project.commands').new({
+  {
+    name = 'ProjectTelescope',
+    callback = function()
+      Projects.projects()
+    end,
+    desc = 'Telescope shortcut for `projects` picker',
+  },
+})
+
 return Projects
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

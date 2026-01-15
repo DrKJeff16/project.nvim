@@ -63,5 +63,15 @@ local FzfLua = setmetatable(M, { ---@type Project.Extensions.FzfLua
   end,
 })
 
+require('project.commands').new({
+  {
+    name = 'ProjectFzf',
+    callback = function()
+      M.run_fzf_lua()
+    end,
+    desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
+  },
+})
+
 return FzfLua
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:
