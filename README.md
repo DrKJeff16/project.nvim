@@ -828,8 +828,8 @@ If you lack the required permissions for that directory, you can either:
 
 <!-- readme: collaborators -start -->
 <table>
-  <tbody>
-    <tr>
+	<tbody>
+		<tr>
             <td align="center">
                 <a href="https://github.com/steinbrueckri">
                     <img src="https://avatars.githubusercontent.com/u/578303?v=4" width="100;" alt="steinbrueckri"/>
@@ -851,8 +851,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Josip Keresman</b></sub>
                 </a>
             </td>
-    </tr>
-  <tbody>
+		</tr>
+	<tbody>
 </table>
 <!-- readme: collaborators -end -->
 
@@ -862,8 +862,8 @@ If you lack the required permissions for that directory, you can either:
 
 <!-- readme: contributors -start -->
 <table>
-  <tbody>
-    <tr>
+	<tbody>
+		<tr>
             <td align="center">
                 <a href="https://github.com/DrKJeff16">
                     <img src="https://avatars.githubusercontent.com/u/72052712?v=4" width="100;" alt="DrKJeff16"/>
@@ -906,8 +906,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Harry Cho</b></sub>
                 </a>
             </td>
-    </tr>
-    <tr>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/acristoffers">
                     <img src="https://avatars.githubusercontent.com/u/2191364?v=4" width="100;" alt="acristoffers"/>
@@ -950,8 +950,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Tobias Kappe</b></sub>
                 </a>
             </td>
-    </tr>
-    <tr>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/ckybonist">
                     <img src="https://avatars.githubusercontent.com/u/3832925?v=4" width="100;" alt="ckybonist"/>
@@ -994,8 +994,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Donie Leigh</b></sub>
                 </a>
             </td>
-    </tr>
-    <tr>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/dominik-schwabe">
                     <img src="https://avatars.githubusercontent.com/u/28463817?v=4" width="100;" alt="dominik-schwabe"/>
@@ -1017,8 +1017,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Axel Dahlberg</b></sub>
                 </a>
             </td>
-    </tr>
-  <tbody>
+		</tr>
+	<tbody>
 </table>
 <!-- readme: contributors -end -->
 
