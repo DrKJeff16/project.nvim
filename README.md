@@ -24,7 +24,7 @@ according to your needs.
 This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim/pull/158).
 Ever since I've decided to extend it and address issues.
 
-You can check some sample videos [here](/EXAMPLES.md).
+You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
 
 ---
 
@@ -32,42 +32,42 @@ You can check some sample videos [here](/EXAMPLES.md).
 
 - [Features](#features)
 - [Installation](#installation)
-    - [`vim-plug`](#vim-plug)
-    - [`lazy.nvim`](#lazynvim)
-    - [`pckr.nvim`](#pckrnvim)
-    - [`paq-nvim`](#paq-nvim)
-    - [LuaRocks](#luarocks)
+  - [`vim-plug`](#vim-plug)
+  - [`lazy.nvim`](#lazynvim)
+  - [`pckr.nvim`](#pckrnvim)
+  - [`paq-nvim`](#paq-nvim)
+  - [LuaRocks](#luarocks)
 - [Configuration](#configuration)
-    - [Defaults](#defaults)
-    - [Pattern Matching](#pattern-matching)
-    - [Nvim Tree](#nvim-tree)
-    - [Neo Tree](#neo-tree)
-    - [Telescope](#telescope)
-        - [Telescope Mappings](#telescope-mappings)
-    - [`mini.starter`](#ministarter)
+  - [Defaults](#defaults)
+  - [Pattern Matching](#pattern-matching)
+  - [Nvim Tree](#nvim-tree)
+  - [Neo Tree](#neo-tree)
+  - [Telescope](#telescope)
+    - [Telescope Mappings](#telescope-mappings)
+  - [`mini.starter`](#ministarter)
 - [Commands](#commands)
-    - [`:Project`](#project)
-    - [`:ProjectFzf`](#projectfzf)
-    - [`:ProjectTelescope`](#projecttelescope)
-    - [`:ProjectHealth`](#projecthealth)
-    - [`:ProjectHistory`](#projecthistory)
-    - [`:ProjectLog`](#projectlog)
-    - [`:ProjectLogClear`](#projectlogclear)
-    - [`:ProjectAdd`](#projectadd)
-    - [`:ProjectRoot`](#projectroot)
-    - [`:ProjectConfig`](#projectconfig)
-    - [`:ProjectDelete`](#projectdelete)
-    - [`:ProjectSession`](#projectsession)
-    - [`:ProjectExportJSON`](#projectexportjson)
-    - [`:ProjectImportJSON`](#projectimportjson)
+  - [`:Project`](#project)
+  - [`:ProjectFzf`](#projectfzf)
+  - [`:ProjectTelescope`](#projecttelescope)
+  - [`:ProjectHealth`](#projecthealth)
+  - [`:ProjectHistory`](#projecthistory)
+  - [`:ProjectLog`](#projectlog)
+  - [`:ProjectLogClear`](#projectlogclear)
+  - [`:ProjectAdd`](#projectadd)
+  - [`:ProjectRoot`](#projectroot)
+  - [`:ProjectConfig`](#projectconfig)
+  - [`:ProjectDelete`](#projectdelete)
+  - [`:ProjectSession`](#projectsession)
+  - [`:ProjectExportJSON`](#projectexportjson)
+  - [`:ProjectImportJSON`](#projectimportjson)
 - [API](#api)
-    - [`get_project_root()`](#get_project_root)
-    - [`get_recent_projects()`](#get_recent_projects)
-    - [`get_config()`](#get_config)
-    - [`get_history_paths()`](#get_history_paths)
+  - [`get_project_root()`](#get_project_root)
+  - [`get_recent_projects()`](#get_recent_projects)
+  - [`get_config()`](#get_config)
+  - [`get_history_paths()`](#get_history_paths)
 - [Utils](#utils)
 - [Troubleshooting](#troubleshooting)
-    - [History File Not Created](#history-file-not-created)
+  - [History File Not Created](#history-file-not-created)
 - [Alternative](#alternatives)
 - [License](#license)
 
@@ -83,7 +83,7 @@ You can check some sample videos [here](/EXAMPLES.md).
 - Natively supports `.nvim.lua` files
 - `vim.ui` menu support
 - [Telescope Integration](#telescope) `:Telescope projects`
-- [`fzf-lua` Integration](#ProjectFzf)
+- [`fzf-lua` Integration](#projectfzf)
 - [`nvim-tree` Integration](#nvim-tree)
 - [`neo-tree` Integration](#neo-tree)
 - [`mini.starter` Integration](#ministarter)
@@ -92,15 +92,14 @@ You can check some sample videos [here](/EXAMPLES.md).
 
 ## Installation
 
-> [!IMPORTANT]
->
-> **Requirements:**
-> - Neovim >= `v0.11`
-> - [`fd`](https://github.com/sharkdp/fd) **(REQUIRED FOR SESSION MANAGEMENT)**
-> - [`ibhagwan/fzf-lua`](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
-> - [`nvim-telescope/telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
->   - [`nvim-lua/plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
->   - [`nvim-telescope/telescope-file-browser.nvim`](https://github.com/nvim-telescope/telescope-file-browser.nvim)
+Requirements:
+
+- Neovim >= `v0.11`
+- [`fd`](https://github.com/sharkdp/fd) **(REQUIRED FOR SESSION MANAGEMENT)**
+- [`ibhagwan/fzf-lua`](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
+- [`nvim-telescope/telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
+  - [`nvim-lua/plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
+  - [`nvim-telescope/telescope-file-browser.nvim`](https://github.com/nvim-telescope/telescope-file-browser.nvim)
 
 Use any plugin manager of your choosing. There currently instructions for the following.
 
@@ -204,8 +203,7 @@ require('project.nvim').setup()
 
 ### LuaRocks
 
-> [!NOTE]
-> The package can be found [here](https://luarocks.org/modules/drkjeff16/project.nvim).
+The package can be found [in the LuaRocks webpage](https://luarocks.org/modules/drkjeff16/project.nvim).
 
 ```bash
 luarocks install project.nvim # Global install
@@ -225,8 +223,7 @@ require('project').setup()
 
 ### Defaults
 
-> [!TIP]
-> You can find these in [`project/config/defaults.lua`](./lua/project/config/defaults.lua).
+You can find these in [`project/config/defaults.lua`](./lua/project/config/defaults.lua)
 
 > [!NOTE]
 > The `Project.Telescope.ActionNames` type is an alias for:
@@ -339,37 +336,64 @@ to give you better handling of your projects.
 
 For your convenience here come some examples:
 
-- To specify the root is a certain directory, prefix it with `=`:
-  ```lua
-  patterns = { '=src' }
-  ```
+<details>
+<summary>To specify the root is a certain directory, prefix it with <code>=</code>:</summary>
 
-- To specify the root has a certain directory or file (which may be a glob), just
-  add it to the pattern list:
-  ```lua
-  patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
-  ```
+```lua
+patterns = { '=src' }
+```
 
-- To specify the root has a certain directory as an ancestor (useful for
-  excluding directories), prefix it with `^`:
-  ```lua
-  patterns = { '^fixtures' }
-  ```
+</details>
 
-- To specify the root has a certain directory as its direct ancestor / parent
-  (useful when you put working projects in a common directory), prefix it with `>`:
-  ```lua
-  patterns = { '>Latex' }
-  ```
+<details>
+<summary>
+To specify the root has a certain directory or file (which may be a glob), just
+add it to the pattern list:
+</summary>
 
-- To exclude a pattern, prefix it with `!`:
-  ```lua
-  patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
-  ```
+```lua
+patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
+```
+
+</details>
+
+<details>
+<summary>
+To specify the root has a certain directory as an ancestor (useful for excluding directories),
+prefix it with <code>^</code>:
+</summary>
+
+```lua
+patterns = { '^fixtures' }
+```
+
+</details>
+
+<details>
+<summary>
+To specify the root has a certain directory as its direct ancestor/parent
+(useful when you put working projects in a common directory), prefix it with <code>\></code>:
+</summary>
+
+```lua
+patterns = { '>Latex' }
+```
+
+</details>
+
+<details>
+<summary>To exclude a pattern, prefix it with `!`</summary>
+
+```lua
+patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
+```
+
+</details>
 
 > [!IMPORTANT]
-> - Make sure to put your pattern exclusions first, and then the patterns you DO want included.
-> - If you have `allow_patterns_for_lsp` enabled, it will also work somewhat for your LSP clients.
+> Make sure to put your pattern exclusions first, and then the patterns you DO want included.
+>
+> Also if you have `allow_patterns_for_lsp` enabled, it will also work somewhat for your LSP clients.
 
 ### Nvim Tree
 
@@ -417,33 +441,32 @@ After that you can now call it from the command line:
 :Telescope projects
 ```
 
-> [!TIP]
-> You can also configure the picker when calling `require('telescope').setup()`
-> **CREDITS**: [@ldfwbebp](https://github.com/ldfwbebp): https://github.com/ahmedkhalf/project.nvim/pull/160
->
-> ```lua
-> require('telescope').setup({
->   extensions = {
->     projects = {
->       prompt_prefix = "󱎸  ",
->       layout_strategy = "horizontal",
->       layout_config = {
->         anchor = "N",
->         height = 0.25,
->         width = 0.6,
->         prompt_position = "bottom",
->       },
->     },
->   },
-> })
-> ```
+You can also configure the picker when calling `require('telescope').setup()`
+**CREDITS**: [@ldfwbebp](https://github.com/ahmedkhalf/project.nvim/pull/160)
+
+```lua
+require('telescope').setup({
+  extensions = {
+    projects = {
+      prompt_prefix = "󱎸  ",
+      layout_strategy = "horizontal",
+      layout_config = {
+        anchor = "N",
+        height = 0.25,
+        width = 0.6,
+        prompt_position = "bottom",
+      },
+    },
+  },
+})
+```
 
 #### Telescope Mappings
 
 `project.nvim` comes with the following mappings for Telescope:
 
-| Normal mode | Insert mode | Action                     |
-| ----------- | ----------- | -------------------------- |
+| Normal mode   | Insert mode   | Action                       |
+|---------------|---------------|------------------------------|
 | `f`           |   `<C-f>`     |   `find_project_files`       |
 | `b`           |   `<C-b>`     |   `browse_project_files`     |
 | `d`           |   `<C-d>`     |   `delete_project`           |
@@ -451,9 +474,7 @@ After that you can now call it from the command line:
 | `r`           |   `<C-r>`     |   `recent_project_files`     |
 | `w`           |   `<C-w>`     |   `change_working_directory` |
 
-
-> [!TIP]
-> _You can find the Actions in [`telescope/_extensions/projects/actions.lua`](./lua/telescope/_extensions/projects/actions.lua)_.
+_You can find the Actions in [`telescope/_extensions/projects/actions.lua`](./lua/telescope/_extensions/projects/actions.lua)_.
 
 ---
 
@@ -556,8 +577,7 @@ If this is called from a logfile tab, then it will attempt to close it.
 > You could set `vim.g.project_log_cleared` to a value different to `1`,
 > **BUT THIS SOLUTION IS NOT TESTED FULLY. EXPECT WEIRD BEHAVIOUR IF YOU DO THIS!**
 
-> [!TIP]
-> _See [_`log.lua`_](./lua/project/utils/log.lua) for more info_.
+See [_`log.lua`_](./lua/project/utils/log.lua) for more info.
 
 ### `:ProjectAdd`
 
@@ -570,8 +590,7 @@ Adding a [!] will set the prompt to your cwd.
 > [!NOTE]
 > **This is particularly useful if you've enabled `manual_mode` in `setup()`.**
 
-> [!TIP]
-> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
+See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 
 ### `:ProjectRoot`
 
@@ -613,17 +632,15 @@ The command will attemptto parse the args and, unless a `!` is passed to the com
 
 If there's a successful deletion, you'll recieve a notification denoting success.
 
-> [!NOTE]
-> **USAGE**
->
-> ```vim
-> " Vim command line
-> :ProjectDelete[!] [/path/to/first [/path/to/second [...]]]
-> ```
+Usage:
 
-> [!TIP]
-> - _See `:h :ProjectDelete` for more info_.
-> - _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
+```vim
+" Vim command line
+:ProjectDelete[!] [/path/to/first [/path/to/second [...]]]
+```
+
+- See _`:h :ProjectDelete`_ for more info.
+- See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 
 ### `:ProjectSession`
 
@@ -639,8 +656,7 @@ If the command is called with a `!` (`:ProjectSession!`) the UI will close.
 Otherwise, another custom UI picker will appear for you to select the files/dirs.
 Selecting a directory will open another UI picker with its contents, and so on.
 
-> [!TIP]
-> - _See [_`popup.lua`_](./lua/project/popup.lua) for more info_.
+See [_`popup.lua`_](./lua/project/popup.lua) for more info.
 
 ### `:ProjectExportJSON`
 
@@ -742,7 +758,6 @@ vim.print(config)
 If no valid args are passed to this function, it will return the following dictionary:
 
 ```lua
----@type fun(path: ('datapath'|'projectpath'|'historyfile')?): string|{ datapath: string, projectpath: string, historyfile: string }
 local get_history_paths = require('project').get_history_paths
 
 -- A dictionary table containing all return values below
@@ -779,9 +794,9 @@ A set of utilities that get repeated across the board.
 >
 > _See [`util.lua`](./lua/project/utils/util.lua) for further reference_.
 
-> [!NOTE]
-> _These utilities are in part inspired by my own utilities found in [**`Jnvim`**](https://github.com/DrKJeff16/Jnvim),_
-> _my own Nvim configuration; particularly the [**`User API`**](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)_ **(WIP)**.
+_These utilities are in part inspired by my own utilities found in [**`Jnvim`**](https://github.com/DrKJeff16/Jnvim),_
+my own Nvim configuration; particularly the [**`User API`**](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)_
+**(WIP)**.
 
 ---
 
@@ -796,12 +811,11 @@ If you're in a UNIX environment, make sure you have _**read, write and access pe
 > The **default** value is `vim.fn.stdpath('data')/project_nvim`.
 > See `:h stdpath()` for more info.
 
-> [!TIP]
-> You can get the value of `projectpath` by running the following in the cmdline:
->
-> ```vim
-> :lua vim.print(require('project').get_history_paths('projectpath'))
-> ```
+You can get the value of `projectpath` by running the following in the cmdline:
+
+```vim
+:lua vim.print(require('project').get_history_paths('projectpath'))
+```
 
 If you lack the required permissions for that directory, you can either:
 
@@ -814,8 +828,8 @@ If you lack the required permissions for that directory, you can either:
 
 <!-- readme: collaborators -start -->
 <table>
-	<tbody>
-		<tr>
+  <tbody>
+    <tr>
             <td align="center">
                 <a href="https://github.com/steinbrueckri">
                     <img src="https://avatars.githubusercontent.com/u/578303?v=4" width="100;" alt="steinbrueckri"/>
@@ -837,8 +851,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Josip Keresman</b></sub>
                 </a>
             </td>
-		</tr>
-	<tbody>
+    </tr>
+  <tbody>
 </table>
 <!-- readme: collaborators -end -->
 
@@ -848,8 +862,8 @@ If you lack the required permissions for that directory, you can either:
 
 <!-- readme: contributors -start -->
 <table>
-	<tbody>
-		<tr>
+  <tbody>
+    <tr>
             <td align="center">
                 <a href="https://github.com/DrKJeff16">
                     <img src="https://avatars.githubusercontent.com/u/72052712?v=4" width="100;" alt="DrKJeff16"/>
@@ -892,8 +906,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Harry Cho</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+    </tr>
+    <tr>
             <td align="center">
                 <a href="https://github.com/acristoffers">
                     <img src="https://avatars.githubusercontent.com/u/2191364?v=4" width="100;" alt="acristoffers"/>
@@ -936,8 +950,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Tobias Kappe</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+    </tr>
+    <tr>
             <td align="center">
                 <a href="https://github.com/ckybonist">
                     <img src="https://avatars.githubusercontent.com/u/3832925?v=4" width="100;" alt="ckybonist"/>
@@ -980,8 +994,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Donie Leigh</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+    </tr>
+    <tr>
             <td align="center">
                 <a href="https://github.com/dominik-schwabe">
                     <img src="https://avatars.githubusercontent.com/u/28463817?v=4" width="100;" alt="dominik-schwabe"/>
@@ -1003,8 +1017,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Axel Dahlberg</b></sub>
                 </a>
             </td>
-		</tr>
-	<tbody>
+    </tr>
+  <tbody>
 </table>
 <!-- readme: contributors -end -->
 

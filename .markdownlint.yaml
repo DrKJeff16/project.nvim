@@ -1,0 +1,18 @@
+MD013:
+  line_length: 120
+  tables: false
+MD033:
+  allowed_elements:
+    - "a"
+    - "b"
+    - "br"
+    - "code"
+    - "details"
+    - "img"
+    - "sub"
+    - "summary"
+    - "table"
+    - "tbody"
+    - "td"
+    - "tr"
+MD049: false
