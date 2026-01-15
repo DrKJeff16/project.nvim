@@ -83,6 +83,25 @@ function Commands.create_user_commands()
       desc = 'Run the main project.nvim UI',
       nargs = '*',
       bang = true,
+      complete = function(_, line)
+        local args = vim.split(line, '%s+', { trimempty = false })
+        if #args == 2 then
+          ---@type string[]
+          local list = vim.tbl_map(function(value) ---@param value string
+            return ('"%s"'):format(value)
+          end, require('project.popup').open_menu.choices_list())
+
+          for i, v in ipairs(list) do
+            if v == '"Exit"' then
+              table.remove(list, i)
+              break
+            end
+          end
+
+          return list
+        end
+        return {}
+      end,
     },
     {
       name = 'ProjectAdd',
