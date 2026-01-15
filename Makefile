@@ -3,21 +3,9 @@ CMD = nvim --clean --headless
 
 TAGS_CMD = $(CMD) -c 'helptags doc/' -c 'qa!'
 
-.SUFFIXES:
+.PHONY: all check clean distclean helptags install-deps lint test
 
-.PHONY: \
-	all \
-	check \
-	clean \
-	distclean \
-	helptags \
-	install-deps \
-	lint \
-	test
-
-all:
-	@$(MAKE) helptags
-	@$(MAKE) test
+all: helptags test
 
 install-deps:
 	@$(LUAROCKS_CMD) luassert
