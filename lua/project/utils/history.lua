@@ -341,8 +341,13 @@ function History.read_history()
   History.deserialize_history(data)
 end
 
+---@param tilde boolean
 ---@return string[] recents
-function History.get_recent_projects()
+---@overload fun(): recents: string[]
+function History.get_recent_projects(tilde)
+  Util.validate({ tilde = { tilde, { 'boolean', 'nil' }, true } })
+  tilde = tilde ~= nil and tilde or false
+
   local tbl = {} ---@type string[]
   if History.recent_projects then
     vim.list_extend(tbl, History.recent_projects)
@@ -371,7 +376,7 @@ function History.get_recent_projects()
   local recents = {} ---@type string[]
   for _, dir in ipairs(tbl) do
     if Util.dir_exists(dir) then
-      table.insert(recents, dir)
+      table.insert(recents, tilde and vim.fn.fnamemodify(dir, ':~') or dir)
     end
   end
   return Util.dedup(recents)

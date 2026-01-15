@@ -5,7 +5,7 @@
 ---|ProjectCmdFun
 
 ---@class Project.Commands.Spec
----@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
+---@field callback ProjectCmdFun
 ---@field name string
 ---@field desc string
 ---@field complete? string|CompletorFun
@@ -16,6 +16,11 @@ local MODSTR = 'project.commands'
 local INFO = vim.log.levels.INFO
 local ERROR = vim.log.levels.ERROR
 local Util = require('project.utils.util')
+local Popup = require('project.popup')
+local History = require('project.utils.history')
+local Api = require('project.api')
+local Log = require('project.utils.log')
+local Config = require('project.config')
 
 ---@class Project.Commands
 local Commands = {}
@@ -40,8 +45,9 @@ function Commands.new(specs)
       complete = { spec.complete, { 'string', 'function', 'nil' }, true },
     })
 
+    local name = spec.name
     local bang = spec.bang ~= nil and spec.bang or false
-    local T = { name = spec.name, desc = spec.desc, bang = bang }
+    local T = { name = name, desc = spec.desc, bang = bang }
     local opts = { desc = spec.desc, bang = bang }
     if spec.nargs ~= nil then
       T.nargs = spec.nargs
@@ -51,7 +57,7 @@ function Commands.new(specs)
       T.complete = spec.complete
       opts.complete = spec.complete
     end
-    Commands.cmds[spec.name] = setmetatable({}, {
+    Commands.cmds[name] = setmetatable({}, {
       __index = function(_, k) ---@param k string
         return T[k]
       end,
@@ -66,9 +72,8 @@ function Commands.new(specs)
         spec.callback()
       end,
     })
-    vim.api.nvim_create_user_command(spec.name, function(ctx)
-      local cmd = Commands.cmds[spec.name]
-      cmd(ctx)
+    vim.api.nvim_create_user_command(name, function(ctx)
+      Commands.cmds[name](ctx)
     end, opts)
   end
 end
@@ -78,7 +83,7 @@ function Commands.create_user_commands()
     {
       name = 'Project',
       callback = function(ctx)
-        require('project.popup').open_menu(ctx)
+        Popup.open_menu(ctx)
       end,
       desc = 'Run the main project.nvim UI',
       nargs = '*',
@@ -89,7 +94,7 @@ function Commands.create_user_commands()
           ---@type string[]
           local list = vim.tbl_map(function(value) ---@param value string
             return ('"%s"'):format(value)
-          end, require('project.popup').open_menu.choices_list())
+          end, Popup.open_menu.choices_list())
 
           for i, v in ipairs(list) do
             if v == '"Exit"' then
@@ -112,7 +117,7 @@ function Commands.create_user_commands()
           opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
         end
 
-        vim.ui.input(opts, require('project.popup').prompt_project)
+        vim.ui.input(opts, Popup.prompt_project)
       end,
       desc = 'Prompt to add the current directory to the project history',
       bang = true,
@@ -127,11 +132,11 @@ function Commands.create_user_commands()
         end
 
         if vim.tbl_isempty(ctx.fargs) then
-          require('project.popup').gen_export_prompt()
+          Popup.gen_export_prompt()
           return
         end
 
-        require('project.utils.history').export_history_json(
+        History.export_history_json(
           ctx.fargs[1],
           #ctx.fargs == 2 and tonumber(ctx.fargs[2]) or nil,
           ctx.bang
@@ -169,11 +174,11 @@ function Commands.create_user_commands()
         end
 
         if vim.tbl_isempty(ctx.fargs) then
-          require('project.popup').gen_import_prompt()
+          Popup.gen_import_prompt()
           return
         end
 
-        require('project.utils.history').import_history_json(ctx.fargs[1], ctx.bang)
+        History.import_history_json(ctx.fargs[1], ctx.bang)
       end,
       bang = true,
       nargs = '?',
@@ -182,7 +187,6 @@ function Commands.create_user_commands()
     {
       name = 'ProjectConfig',
       callback = function(ctx)
-        local Config = require('project.config')
         if ctx and ctx.bang ~= nil and ctx.bang then
           vim.print(Config.get_config())
           return
@@ -197,12 +201,11 @@ function Commands.create_user_commands()
       name = 'ProjectDelete',
       callback = function(ctx)
         if not ctx or vim.tbl_isempty(ctx.fargs) then
-          require('project.popup').delete_menu()
+          Popup.delete_menu()
           return
         end
 
-        local Log = require('project.utils.log')
-        local recent = require('project.utils.history').get_recent_projects()
+        local recent = History.get_recent_projects()
         if not recent then
           Log.error('(:ProjectDelete): No recent projects!')
           vim.notify('(:ProjectDelete): No recent projects!', ERROR)
@@ -224,20 +227,15 @@ function Commands.create_user_commands()
             return
           end
           if vim.list_contains(recent, path) then
-            require('project.utils.history').delete_project(path)
+            History.delete_project(path)
           end
         end
       end,
       desc = 'Deletes the projects given as args, assuming they are valid. No args open a popup',
       nargs = '*',
       bang = true,
-      complete = function(_, line) ---@param line string
-        local args = vim.split(line, '%s+')
-        local recent = require('project.utils.history').get_recent_projects()
-        local prefix = args[#args]
-        return vim.tbl_filter(function(cmd) ---@param cmd string
-          return vim.startswith(cmd, prefix)
-        end, recent)
+      complete = function()
+        return History.get_recent_projects(true)
       end,
     },
     {
@@ -257,7 +255,7 @@ function Commands.create_user_commands()
     {
       name = 'ProjectHistory',
       callback = function()
-        require('project.utils.history').toggle_win()
+        History.toggle_win()
       end,
       desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
       bang = true,
@@ -265,7 +263,7 @@ function Commands.create_user_commands()
     {
       name = 'ProjectRecents',
       callback = function()
-        require('project.popup').recents_menu()
+        Popup.recents_menu()
       end,
       desc = 'Opens a menu to select a project from your history',
     },
@@ -273,7 +271,7 @@ function Commands.create_user_commands()
       name = 'ProjectRoot',
       callback = function(ctx)
         local verbose = ctx.bang ~= nil and ctx.bang or false
-        require('project.api').on_buf_enter(verbose)
+        Api.on_buf_enter(verbose)
       end,
       desc = 'Sets the current project root to the current CWD',
       bang = true,
@@ -281,7 +279,7 @@ function Commands.create_user_commands()
     {
       name = 'ProjectSession',
       callback = function(ctx)
-        require('project.popup').session_menu(ctx)
+        Popup.session_menu(ctx)
       end,
       desc = 'Opens a menu to switch between sessions',
       bang = true,
