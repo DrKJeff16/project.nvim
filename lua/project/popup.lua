@@ -324,7 +324,21 @@ M.recents_menu = M.select.new({
 })
 
 M.open_menu = M.select.new({
-  callback = function()
+  callback = function(ctx)
+    if ctx and ctx.fargs and not vim.tbl_isempty(ctx.fargs) then
+      local fargs = table.concat(
+        vim.tbl_map(function(value) ---@param value string
+          return Util.strip({ "'", '"' }, value)
+        end, ctx.fargs),
+        ' '
+      )
+      local choices = M.open_menu.choices()
+      if not vim.list_contains(vim.tbl_keys(choices), fargs) then
+        return
+      end
+      choices[fargs]()
+      return
+    end
     local choices_list = M.open_menu.choices_list()
     vim.ui.select(choices_list, { prompt = 'Select an operation:' }, function(item)
       if not item then

@@ -78,7 +78,7 @@ function Commands.create_user_commands()
     {
       name = 'Project',
       callback = function(ctx)
-        require('project.popup').open_menu(ctx.fargs)
+        require('project.popup').open_menu(ctx)
       end,
       desc = 'Run the main project.nvim UI',
       nargs = '*',
