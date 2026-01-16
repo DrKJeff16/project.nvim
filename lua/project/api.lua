@@ -295,7 +295,7 @@ function Api.get_project_root(bufnr)
       return false
     end,
   }
-  local roots = {} ---@type { [1]: string, [2]: string, [3]: 'lsp'|'pattern' }[]
+  local roots = {} ---@type { root: string, method_msg: string, method: 'lsp'|'pattern' }[]
   local root, lsp_method = nil, nil
   local ops = vim.tbl_keys(SWITCH) ---@type string[]
   local success = false
@@ -303,7 +303,7 @@ function Api.get_project_root(bufnr)
     if in_list(ops, method) then
       success, root, lsp_method = SWITCH[method]()
       if success then
-        table.insert(roots, { root, lsp_method, method })
+        table.insert(roots, { root = root, method_msg = lsp_method, method = method })
       end
     end
   end
@@ -311,19 +311,16 @@ function Api.get_project_root(bufnr)
   if vim.tbl_isempty(roots) then
     return
   end
-  if #roots == 1 then
-    return roots[1][1], roots[1][2]
+  if #roots == 1 or Config.options.lsp.no_fallback then
+    return roots[1].root, roots[1].method_msg
   end
-  if Config.options.lsp.no_fallback then
-    return roots[1][1], roots[1][2]
-  end
-  if roots[1][1] == roots[2][1] then
-    return roots[1][1], roots[1][2]
+  if roots[1].root == roots[2].root then
+    return roots[1].root, roots[1].method_msg
   end
 
   for _, tbl in ipairs(roots) do
-    if tbl[3] == 'pattern' then
-      return tbl[1], tbl[2]
+    if tbl.method == 'pattern' then
+      return tbl.root, tbl.method_msg
     end
   end
 end
