@@ -15,10 +15,6 @@ local Util = require('project.utils.util')
 ---The options available for in `require('project').setup()`.
 --- ---
 ---@class Project.Config.Options
----@field detection_methods? nil
----@field use_lsp? nil
----@field ignore_lsp? nil
----@field allow_patterns_for_lsp? nil
 local DEFAULTS = {
   ---Table containing all the LSP-adjacent options.
   --- ---
@@ -418,7 +414,7 @@ function DEFAULTS:verify_lsp()
   end
   if self.ignore_lsp and type(self.ignore_lsp) == 'table' then
     vim.notify('`ignore_lsp` is deprecated! Use `lsp.ignore` instead.', WARN)
-    self.lsp.ignore = vim.deepcopy(self.ignore_lsp) ---@diagnostic disable-line:assign-type-mismatch
+    self.lsp.ignore = vim.deepcopy(self.ignore_lsp)
     self.ignore_lsp = nil
   end
 end
