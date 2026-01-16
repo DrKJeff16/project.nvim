@@ -7,7 +7,6 @@
 
 local MODSTR = 'project.utils.util'
 local ERROR = vim.log.levels.ERROR
-local uv = vim.uv or vim.loop
 
 ---@class Project.Utils.Util
 local M = {}
@@ -29,9 +28,6 @@ end
 ---@param T table<string, vim.validate.Spec|ValidateSpec>
 function M.validate(T)
   local max = M.vim_has('nvim-0.11') and 3 or 4
-
-  ---Filter table to fit non-legacy standard
-  ---@cast T table<string, ValidateSpec>
   for name, spec in pairs(T) do
     while #spec > max do
       table.remove(spec, #spec)
@@ -56,11 +52,11 @@ end
 ---an error will be raised.
 --- ---
 ---@param dir string
----@return boolean
+---@return boolean exists
 function M.dir_exists(dir)
   M.validate({ dir = { dir, { 'string' } } })
 
-  local stat = uv.fs_stat(dir)
+  local stat = (vim.uv or vim.loop).fs_stat(dir)
   return stat ~= nil and stat.type == 'directory'
 end
 
@@ -508,7 +504,7 @@ function M.format_per_type(t, data, sep, constraints)
     end
     return res, true
   end
-  if t == 'number' or t == 'boolean' then
+  if vim.list_contains({ 'number', 'boolean' }, t) then
     return ('%s`%s`'):format(sep, tostring(data))
   end
   if t == 'function' then

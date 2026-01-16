@@ -24,13 +24,11 @@ local MODSTR = 'project.utils.history'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
-local copy = vim.deepcopy
-local in_list = vim.list_contains
 local floor = math.floor
 local ceil = math.ceil
-
 local Util = require('project.utils.util')
 local Path = require('project.utils.path')
+local Log = require('project.utils.log')
 
 ---@class Project.HistoryLoc
 ---@field bufnr integer
@@ -69,8 +67,8 @@ function History.open_history(mode)
 end
 
 ---@param path string
----@param ind integer|string
----@param force_name boolean
+---@param ind integer|string|nil
+---@param force_name boolean|nil
 ---@overload fun(path: string)
 ---@overload fun(path: string, ind: integer|string)
 ---@overload fun(path: string, ind?: integer|string, force_name: boolean)
@@ -81,7 +79,7 @@ function History.export_history_json(path, ind, force_name)
     force_name = { force_name, { 'boolean', 'nil' }, true },
   })
   ind = ind or 2
-  ind = math.floor(tonumber(ind))
+  ind = floor(tonumber(ind))
   force_name = force_name ~= nil and force_name or false
   if vim.g.project_setup ~= 1 then
     return
@@ -89,11 +87,10 @@ function History.export_history_json(path, ind, force_name)
 
   local spc = nil ---@type string|nil
   if ind >= 1 then
-    spc = (' '):rep(not in_list({ floor(ind), ceil(ind) }, ind) and floor(ind) or ind)
+    spc = (' '):rep(not vim.list_contains({ floor(ind), ceil(ind) }, ind) and floor(ind) or ind)
   end
 
   path = Util.strip(' ', path)
-  local Log = require('project.utils.log')
   if path == '' then
     Log.error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path))
     error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
@@ -168,7 +165,6 @@ function History.import_history_json(path, force_name)
   end
 
   path = Util.strip(' ', path)
-  local Log = require('project.utils.log')
   if path == '' then
     Log.error(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path))
     error(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
@@ -234,7 +230,7 @@ function History.remove_session(session, found)
       found = true
     end
   end
-  History.session_projects = copy(new_tbl)
+  History.session_projects = vim.deepcopy(new_tbl)
 
   return found
 end
@@ -254,7 +250,7 @@ function History.remove_recent(project)
       found = true
     end
   end
-  History.recent_projects = copy(new_tbl)
+  History.recent_projects = vim.deepcopy(new_tbl)
 
   return found
 end
@@ -270,7 +266,6 @@ function History.delete_project(project)
     Util.validate({ project_value = { project.value, { 'string' } } })
   end
 
-  local Log = require('project.utils.log')
   if not History.recent_projects then
     Log.error(('(%s.delete_project): `recent_projects` is nil! Aborting.'):format(MODSTR))
     vim.notify(('(%s.delete_project): `recent_projects` is nil! Aborting.'):format(MODSTR))
@@ -355,7 +350,7 @@ function History.get_recent_projects(tilde)
   else
     tbl = History.session_projects
   end
-  tbl = Util.delete_duplicates(copy(tbl))
+  tbl = Util.delete_duplicates(vim.deepcopy(tbl))
 
   local i, removed = 1, false
   while i <= #tbl do
@@ -391,7 +386,6 @@ function History.write_history(close)
   close = close ~= nil and close or false
 
   local fd = History.open_history(History.recent_projects ~= nil and 'w' or 'a')
-  local Log = require('project.utils.log')
   if not fd then
     Log.error(('(%s.write_history): File restricted!'):format(MODSTR))
     error(('(%s.write_history): File restricted!'):format(MODSTR), ERROR)
@@ -400,7 +394,7 @@ function History.write_history(close)
   History.historysize = require('project.config').options.historysize or 100
   local res = History.get_recent_projects()
   local len_res = #res
-  local tbl_out = copy(res)
+  local tbl_out = vim.deepcopy(res)
   if History.historysize and History.historysize > 0 then
     -- Trim table to last 100 entries
     tbl_out = len_res > History.historysize

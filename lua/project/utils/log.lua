@@ -11,10 +11,11 @@ local ERROR  =  vim.log.levels.ERROR  -- `4`
 ---@class Project.LogLoc: Project.HistoryLoc
 
 local Util = require('project.utils.util')
+local Config = require('project.config')
 
 ---@class Project.Log
 ---@field logfile? string
----@field log_loc? Project.LogLoc|nil
+---@field log_loc? Project.LogLoc
 local Log = {}
 
 ---@param lvl vim.log.levels
@@ -23,7 +24,7 @@ local function gen_log(lvl)
   ---@param ... any
   ---@return string|nil output
   return function(...)
-    if not require('project.config').options.log.enabled then
+    if not Config.options.log.enabled then
       return
     end
     local msg = ''
@@ -99,7 +100,7 @@ end
 ---@param lvl vim.log.levels
 ---@return string|nil written_data
 function Log.write(data, lvl)
-  if not require('project.config').options.log.enabled or vim.g.project_log_cleared == 1 then
+  if not Config.options.log.enabled or vim.g.project_log_cleared == 1 then
     return
   end
 
@@ -167,7 +168,7 @@ function Log.open(mode)
 end
 
 function Log.init()
-  local log_cfg = require('project.config').options.log
+  local log_cfg = Config.options.log
   if not log_cfg.enabled then
     return
   end
@@ -203,7 +204,7 @@ function Log.init()
 end
 
 function Log.open_win()
-  local enabled = require('project.config').options.log.enabled
+  local enabled = Config.options.log.enabled
   if not (Log.logfile and enabled) then
     return
   end

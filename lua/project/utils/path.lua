@@ -1,6 +1,7 @@
 local MODSTR = 'project.utils.path'
 local uv = vim.uv or vim.loop
 local Util = require('project.utils.util')
+local Config = require('project.config')
 
 ---@class Project.Utils.Path
 ---The directory where the project dir will be saved.
@@ -16,14 +17,14 @@ local Path = {}
 
 Path.last_dir_cache = ''
 Path.curr_dir_cache = {} ---@type string[]
-Path.exists = require('project.utils.util').path_exists
+Path.exists = Util.path_exists
 
 ---@param dir string
 ---@return boolean excluded
 function Path.is_excluded(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
-  local exclude_dirs = require('project.config').options.exclude_dirs
+  local exclude_dirs = Config.options.exclude_dirs
   for _, excluded in ipairs(exclude_dirs) do
     if dir:match(excluded) ~= nil then
       return true
@@ -80,12 +81,11 @@ function Path.has(dir, identifier)
     identifier = { identifier, { 'string' } },
   })
 
-  local globtopattern = require('project.utils.globtopattern').globtopattern
   if Path.last_dir_cache ~= dir then
     Path.get_files(dir)
   end
 
-  local pattern = globtopattern(identifier)
+  local pattern = require('project.utils.globtopattern').globtopattern(identifier)
   for _, file in ipairs(Path.curr_dir_cache) do
     if file:match(pattern) ~= nil then
       return true
@@ -158,11 +158,9 @@ function Path.create_path(path)
   path = path or Path.projectpath
 
   if not Path.exists(path) then
-    vim.schedule(function()
-      require('project.utils.log').debug(
-        ('(%s.create_path): Creating directory `%s`.'):format(MODSTR, path)
-      )
-    end)
+    require('project.utils.log').debug(
+      ('(%s.create_path): Creating directory `%s`.'):format(MODSTR, path)
+    )
     uv.fs_mkdir(path, tonumber('755', 8))
   end
 end
@@ -173,7 +171,6 @@ end
 function Path.root_included(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
-  local Config = require('project.config')
   while true do ---Breadth-First search
     for _, pattern in ipairs(Config.options.patterns) do
       local excluded = false
@@ -182,7 +179,7 @@ function Path.root_included(dir)
       end
       if Path.match(dir, pattern) then
         if not excluded then
-          return dir, 'pattern ' .. pattern
+          return dir, ('pattern %s'):format(pattern)
         end
         break
       end
