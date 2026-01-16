@@ -70,6 +70,7 @@ function Config.get_config()
     'verify_datapath',
     'verify_histsize',
     'verify_logging',
+    'verify_lsp',
     'verify_methods',
     'verify_scope_chdir',
   }

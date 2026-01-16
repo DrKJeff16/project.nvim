@@ -427,6 +427,7 @@ end
 --- ---
 function DEFAULTS:verify()
   self:verify_datapath()
+  self:verify_lsp()
   self:verify_histsize()
   self:verify_scope_chdir()
   self:verify_logging()
