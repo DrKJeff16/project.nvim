@@ -7,79 +7,6 @@
 ---|'recent_project_files'
 ---|'search_in_project_files'
 
----@class Project.Telescope.Mappings
----@field i? table<string, Project.Telescope.ActionNames>
----@field n? table<string, Project.Telescope.ActionNames>
-
----@class Project.Config.DisableOn
----@field ft? string[]
----@field bt? string[]
-
----Table of options used for the telescope picker.
---- ---
----@class Project.Config.Telescope
----Determines whether the newest projects come first in the
----telescope picker (`'newest'`), or the oldest (`'oldest'`).
---- ---
----Default: `'newest'`
---- ---
----@field sort? 'newest'|'oldest'
----If you have `telescope-file-browser.nvim` installed, you can enable this
----so that the Telescope picker uses it instead of the `find_files` builtin.
----
----If `true`, use `telescope-file-browser.nvim` instead of builtins.
----In case it is not available, it'll fall back to `find_files`.
---- ---
----Default: `false`
---- ---
----@field prefer_file_browser? boolean
----Set this to `true` if you don't want the file picker to appear
----after you've selected a project.
----
----CREDITS: [UNKNOWN](https://github.com/ahmedkhalf/project.nvim/issues/157#issuecomment-2226419783)
---- ---
----Default: `false`
---- ---
----@field disable_file_picker? boolean
----Table of mappings for the Telescope picker.
----
----Only supports Normal and Insert modes.
---- ---
----Default: check the README
---- ---
----@field mappings? Project.Telescope.Mappings
-
----Table of options used for `fzf-lua` integration
---- ---
----@class Project.Config.FzfLua
----Determines whether the `fzf-lua` integration is enabled.
----
----If `fzf-lua` is not installed, this won't make a difference.
---- ---
----Default: `false`
---- ---
----@field enabled? boolean
-
----Options for logging utility.
---- ---
----@class Project.Config.Logging
----If `true`, it enables logging in the same directory in which your
----history file is stored.
---- ---
----Default: `false`
---- ---
----@field enabled? boolean
----The maximum logfile size (in megabytes).
---- ---
----Default: `1.1`
---- ---
----@field max_size? number
----Path in which the log file will be saved.
---- ---
----Default: `vim.fn.stdpath('state')`
---- ---
----@field logpath? string
-
 local MODSTR = 'project.config.defaults'
 local WARN = vim.log.levels.WARN
 local in_list = vim.tbl_contains
@@ -89,15 +16,52 @@ local Util = require('project.utils.util')
 --- ---
 ---@class Project.Config.Options
 ---@field detection_methods? ('lsp'|'pattern')[]
+---@field use_lsp? boolean
+---@field ignore_lsp? string[]
+---@field allow_patterns_for_lsp? boolean
 local DEFAULTS = {
-  ---If `true` then LSP-based method detection
-  ---will take precedence over traditional pattern matching.
-  ---
-  ---See |project-nvim.pattern-matching| for more info.
+  ---Table containing all the LSP-adjacent options.
   --- ---
-  ---Default: `true`
-  --- ---
-  use_lsp = true, ---@type boolean
+  ---@class Project.Config.LSP
+  lsp = {
+    ---If `true` then LSP-based method detection
+    ---will take precedence over traditional pattern matching.
+    ---
+    ---See |project-nvim.pattern-matching| for more info.
+    --- ---
+    ---Default: `true`
+    --- ---
+    enabled = true, ---@type boolean
+    ---Table of lsp clients to ignore by name,
+    ---e.g. `{ 'efm', ... }`.
+    ---
+    ---If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
+    ---for a list of servers.
+    --- ---
+    ---Default: `{}`
+    --- ---
+    ignore = {}, ---@type string[]
+    ---If `true` then LSP-based method detection
+    ---will not be compared with pattern-matching-based detection.
+    ---
+    ---**WARNING: USE AT YOUR OWN DISCRETION!**
+    --- ---
+    ---Default: `false`
+    --- ---
+    no_fallback = false, ---@type boolean
+    ---Sets whether to use Pattern Matching rules to the LSP client.
+    ---
+    ---If `false` the Pattern Matching will only apply
+    ---to normal pattern matching.
+    ---
+    ---If `true` the `patterns` setting will also filter
+    ---your LSP's `root_dir`, assuming there is one
+    ---and `lsp.enabled` is set to `true`.
+    --- ---
+    ---Default: `false`
+    --- ---
+    use_pattern_matching = false, ---@type boolean
+  },
   ---If `true` your root directory won't be changed automatically,
   ---so you have the option to manually do so
   ---using the `:ProjectRoot` command.
@@ -151,18 +115,6 @@ local DEFAULTS = {
   ---@param dir string
   ---@param method string
   on_attach = function(dir, method) end, ---@diagnostic disable-line:unused-local
-  ---Sets whether to use Pattern Matching rules to the LSP client.
-  ---
-  ---If `false` the Pattern Matching will only apply
-  ---to normal pattern matching.
-  ---
-  ---If `true` the `patterns` setting will also filter
-  ---your LSP's `root_dir`, assuming there is one
-  ---and `use_lsp` is set to `true`.
-  --- ---
-  ---Default: `false`
-  --- ---
-  allow_patterns_for_lsp = false, ---@type boolean
   ---Determines whether a project will be added
   ---if its project root is owned by a different user.
   ---
@@ -184,15 +136,6 @@ local DEFAULTS = {
   ---Default: `false`
   --- ---
   show_hidden = false, ---@type boolean
-  ---Table of lsp clients to ignore by name,
-  ---e.g. `{ 'efm', ... }`.
-  ---
-  ---If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
-  ---for a list of servers.
-  --- ---
-  ---Default: `{}`
-  --- ---
-  ignore_lsp = {}, ---@type string[]
   ---Don't calculate root dir on specific directories,
   ---e.g. `{ '~/.cargo/*', ... }`.
   ---
@@ -231,7 +174,10 @@ local DEFAULTS = {
   --- ---
   ---The default value for this one can be found in the project's `README.md`.
   --- ---
-  disable_on = { ---@type Project.Config.DisableOn
+  ---@class Project.Config.DisableOn
+  ---@field ft? string[]
+  ---@field bt? string[]
+  disable_on = {
     ft = {
       '',
       'NvimTree',
@@ -267,12 +213,79 @@ local DEFAULTS = {
   ---Default: `100`
   --- ---
   historysize = 100, ---@type integer
-  fzf_lua = { enabled = false }, ---@type Project.Config.FzfLua
-  log = { enabled = false, max_size = 1.1, logpath = vim.fn.stdpath('state') }, ---@type Project.Config.Logging
-  telescope = { ---@type Project.Config.Telescope
-    sort = 'newest',
-    prefer_file_browser = false,
-    disable_file_picker = false,
+  ---Table of options used for `fzf-lua` integration
+  --- ---
+  ---@class Project.Config.FzfLua
+  fzf_lua = {
+    ---Determines whether the `fzf-lua` integration is enabled.
+    ---
+    ---If `fzf-lua` is not installed, this won't make a difference.
+    --- ---
+    ---Default: `false`
+    --- ---
+    enabled = false, ---@type boolean
+  },
+  ---Options for logging utility.
+  --- ---
+  ---@class Project.Config.Logging
+  log = {
+    ---If `true`, it enables logging in the same directory in which your
+    ---history file is stored.
+    --- ---
+    ---Default: `false`
+    --- ---
+    enabled = false, ---@type boolean
+    ---The maximum logfile size (in megabytes).
+    --- ---
+    ---Default: `1.1`
+    --- ---
+    max_size = 1.1, ---@type number
+    ---Path in which the log file will be saved.
+    --- ---
+    ---Default: `vim.fn.stdpath('state')`
+    --- ---
+    logpath = vim.fn.stdpath('state'), ---@type string
+  },
+  ---Table of options used for the telescope picker.
+  --- ---
+  ---@class Project.Config.Telescope
+  telescope = {
+    ---Determines whether the newest projects come first in the
+    ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
+    --- ---
+    ---Default: `'newest'`
+    --- ---
+    sort = 'newest', ---@type 'newest'|'oldest'
+    ---If you have `telescope-file-browser.nvim` installed, you can enable this
+    ---so that the Telescope picker uses it instead of the `find_files` builtin.
+    ---
+    ---If `true`, use `telescope-file-browser.nvim` instead of builtins.
+    ---In case it is not available, it'll fall back to `find_files`.
+    --- ---
+    ---Default: `false`
+    --- ---
+    prefer_file_browser = false, ---@type boolean
+    ---Set this to `true` if you don't want the file picker to appear
+    ---after you've selected a project.
+    ---
+    ---CREDITS: [UNKNOWN](https://github.com/ahmedkhalf/project.nvim/issues/157#issuecomment-2226419783)
+    --- ---
+    ---Default: `false`
+    --- ---
+    disable_file_picker = false, ---@type boolean
+    ---Table of mappings for the Telescope picker.
+    ---
+    ---Only supports Normal and Insert modes.
+    --- ---
+    ---Default: check the README
+    --- ---
+    ---@class Project.Telescope.Mappings
+    ---Normal mode mappings.
+    --- ---
+    ---@field i? table<string, Project.Telescope.ActionNames>
+    ---Insert mode mappings.
+    --- ---
+    ---@field n? table<string, Project.Telescope.ActionNames>
     mappings = {
       n = {
         b = 'browse_project_files',
@@ -341,8 +354,9 @@ end
 
 ---@return { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' } methods
 function DEFAULTS:gen_methods()
+  self:verify_lsp()
   local methods = { 'pattern' } ---@type { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
-  if self.use_lsp then
+  if self.lsp.enabled then
     table.insert(methods, 1, 'lsp')
   end
 
@@ -387,6 +401,28 @@ function DEFAULTS:expand_excluded()
   end
 end
 
+function DEFAULTS:verify_lsp()
+  self.lsp = self.lsp and vim.tbl_deep_extend('keep', self.lsp, DEFAULTS.lsp) or DEFAULTS.lsp
+  if self.use_lsp ~= nil then
+    vim.notify('`use_lsp` is deprecated! Use `lsp.enabled` instead.', WARN)
+    self.lsp.enabled = self.use_lsp
+    self.use_lsp = nil
+  end
+  if self.allow_patterns_for_lsp ~= nil then
+    vim.notify(
+      '`allow_patterns_for_lsp` is deprecated! Use `lsp.use_pattern_matching` instead.',
+      WARN
+    )
+    self.lsp.use_pattern_matching = self.allow_patterns_for_lsp
+    self.allow_patterns_for_lsp = nil
+  end
+  if self.ignore_lsp and type(self.ignore_lsp) == 'table' then
+    vim.notify('`ignore_lsp` is deprecated! Use `lsp.ignore` instead.', WARN)
+    self.lsp.ignore = vim.deepcopy(self.ignore_lsp)
+    self.ignore_lsp = nil
+  end
+end
+
 ---Verify config integrity.
 --- ---
 function DEFAULTS:verify()
@@ -400,7 +436,7 @@ function DEFAULTS:verify()
   end
   vim.schedule(function()
     vim.notify(
-      '(project.nvim): `detection_methods` has been deprecated!\nUse `use_lsp` instead.',
+      '(project.nvim): `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.',
       WARN
     )
   end)

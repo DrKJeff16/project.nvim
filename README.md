@@ -243,87 +243,91 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
 
 ```lua
 {
-    ---@param target_dir string
-    ---@param method string
-    before_attach = function(target_dir, method) end,
-    ---@param dir string
-    ---@param method string
-    on_attach = function(dir, method) end,
-    use_lsp = true,
-    manual_mode = false,
-    patterns = { ---@type string[]
-        '.git',
-        '.github',
-        '_darcs',
-        '.hg',
-        '.bzr',
-        '.svn',
-        'Pipfile',
-        'pyproject.toml',
-        '.pre-commit-config.yaml',
-        '.pre-commit-config.yml',
-        '.csproj',
-        '.sln',
-        '.nvim.lua',
+  ---@param target_dir string
+  ---@param method string
+  before_attach = function(target_dir, method) end,
+  ---@param dir string
+  ---@param method string
+  on_attach = function(dir, method) end,
+  lsp = { ---@type Project.Config.LSP
+    enabled = true, ---@type boolean
+    ignore = {}, ---@type string[]
+    use_pattern_matching = false, ---@type boolean
+    -- WARNING: USE AT YOUR OWN DISCRETION!!!!
+    no_fallback = false, ---@type boolean
+  },
+  manual_mode = false,
+  patterns = { ---@type string[]
+    '.git',
+    '.github',
+    '_darcs',
+    '.hg',
+    '.bzr',
+    '.svn',
+    'Pipfile',
+    'pyproject.toml',
+    '.pre-commit-config.yaml',
+    '.pre-commit-config.yml',
+    '.csproj',
+    '.sln',
+    '.nvim.lua',
+  },
+  allow_different_owners = false,
+  enable_autochdir = false,
+  show_hidden = false,
+  exclude_dirs = {}, ---@type string[]
+  silent_chdir = true,
+  scope_chdir = 'global', ---@type 'global'|'tab'|'win'
+  datapath = vim.fn.stdpath('data'),
+  historysize = 100,
+  log = { ---@type Project.Config.Logging
+    enabled = false,
+    max_size = 1.1,
+    logpath = vim.fn.stdpath('state'),
+  },
+  fzf_lua = { enabled = false }, ---@type Project.Config.FzfLua
+  disable_on = {
+    ft = { -- `filetype`
+      '',
+      'NvimTree',
+      'TelescopePrompt',
+      'TelescopeResults',
+      'alpha',
+      'checkhealth',
+      'lazy',
+      'log',
+      'ministarter',
+      'neo-tree',
+      'notify',
+      'nvim-pack',
+      'packer',
+      'qf',
     },
-    allow_patterns_for_lsp = false,
-    allow_different_owners = false,
-    enable_autochdir = false,
-    show_hidden = false,
-    ignore_lsp = {}, ---@type string[]
-    exclude_dirs = {}, ---@type string[]
-    silent_chdir = true,
-    scope_chdir = 'global', ---@type 'global'|'tab'|'win'
-    datapath = vim.fn.stdpath('data'),
-    historysize = 100,
-    log = { ---@type Project.Config.Logging
-        enabled = false,
-        max_size = 1.1,
-        logpath = vim.fn.stdpath('state'),
+    bt = { 'help', 'nofile', 'nowrite', 'terminal' },
+  },
+  telescope = { ---@type Project.Config.Telescope
+    sort = 'newest', ---@type 'oldest'|'newest'
+    prefer_file_browser = false,
+    disable_file_picker = false,
+    mappings = { ---@type table<'n'|'i', table<string, Project.Telescope.ActionNames>>
+      n = {
+        b = 'browse_project_files',
+        d = 'delete_project',
+        f = 'find_project_files',
+        r = 'recent_project_files',
+        s = 'search_in_project_files',
+        w = 'change_working_directory',
+      },
+      i = {
+        ['<C-b>'] = 'browse_project_files',
+        ['<C-d>'] = 'delete_project',
+        ['<C-f>'] = 'find_project_files',
+        ['<C-r>'] = 'recent_project_files',
+        ['<C-s>'] = 'search_in_project_files',
+        ['<C-w>'] = 'change_working_directory',
+      },
     },
-    fzf_lua = { enabled = false }, ---@type Project.Config.FzfLua
-    disable_on = {
-        ft = { -- `filetype`
-            '',
-            'NvimTree',
-            'TelescopePrompt',
-            'TelescopeResults',
-            'alpha',
-            'checkhealth',
-            'lazy',
-            'log',
-            'ministarter',
-            'neo-tree',
-            'notify',
-            'nvim-pack',
-            'packer',
-            'qf',
-        },
-        bt = { 'help', 'nofile', 'nowrite', 'terminal' },
-    },
-    telescope = { ---@type Project.Config.Telescope
-        sort = 'newest', ---@type 'oldest'|'newest'
-        prefer_file_browser = false,
-        disable_file_picker = false,
-        mappings = { ---@type table<'n'|'i', table<string, Project.Telescope.ActionNames>>
-            n = {
-                b = 'browse_project_files',
-                d = 'delete_project',
-                f = 'find_project_files',
-                r = 'recent_project_files',
-                s = 'search_in_project_files',
-                w = 'change_working_directory',
-            },
-            i = {
-                ['<C-b>'] = 'browse_project_files',
-                ['<C-d>'] = 'delete_project',
-                ['<C-f>'] = 'find_project_files',
-                ['<C-r>'] = 'recent_project_files',
-                ['<C-s>'] = 'search_in_project_files',
-                ['<C-w>'] = 'change_working_directory',
-            },
-        },
-    },
+  },
 }
 ```
 

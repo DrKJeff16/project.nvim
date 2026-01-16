@@ -314,6 +314,9 @@ function Api.get_project_root(bufnr)
   if #roots == 1 then
     return roots[1][1], roots[1][2]
   end
+  if not Config.options.lsp.ignore_pattern_match then
+    return roots[1][1], roots[1][2]
+  end
   if roots[1][1] == roots[2][1] then
     return roots[1][1], roots[1][2]
   end

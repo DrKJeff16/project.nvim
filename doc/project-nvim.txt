@@ -28,9 +28,10 @@ Table of Contents                                             *project-nvim.toc*
     2.5 luarocks                                 |project-nvim.install-luarocks|
 3. project-nvim.setup                                       |project-nvim.setup|
     3.1. `Project.Config.Options`                         |Project.Config.Options|
-    3.2. `Project.Config.Telescope`                     |Project.Config.Telescope|
-    3.3. `Project.Config.FzfLua`                           |Project.Config.FzfLua|
-    3.4. `Project.Config.Logging`                         |Project.Config.Logging|
+    3.2. `Project.Config.LSP`                                 |Project.Config.LSP|
+    3.3. `Project.Config.Telescope`                     |Project.Config.Telescope|
+    3.4. `Project.Config.FzfLua`                           |Project.Config.FzfLua|
+    3.5. `Project.Config.Logging`                         |Project.Config.Logging|
 4. Pattern Matching                              |project-nvim.pattern-matching|
 5. Nvim Tree                                            |project-nvim.nvim-tree|
 6. Neo Tree                                              |project-nvim.neo-tree|
@@ -186,12 +187,6 @@ Table of Contents                                             *project-nvim.toc*
 3.1 `Project.Config.Options`                              *Project.Config.Options*
                                                     *project-nvim.setup-options*
 
-    * {log}                     (|Project.Options.Logging|)
-                                Options for logging.
-
-                                Default: |Project.Options.Logging| ~
-
-
 
     * {disable_on}              (`{ ft: string[], bt: string[] }`)
                                 CREDITS TO @Zeioth! ~
@@ -215,16 +210,6 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `false` ~
 
 
-    * {use_lsp}                 (boolean)
-                                If `true` then LSP-based method detection
-                                will take precedence over traditional
-                                pattern matching.
-                                See |project-nvim.pattern-matching|
-                                for more info
-
-                                Default: `true` ~
-
-
     * {patterns}                (`string[]`)
                                 All the patterns used to detect the root dir.
                                 See |project-nvim.pattern-matching| for more
@@ -240,23 +225,6 @@ Table of Contents                                             *project-nvim.toc*
                                 WARNING ~
                                 It is not a good idea to forcefully
                                 keep this empty!
-
-
-    * {allow_patterns_for_lsp}  (boolean)
-                                Sets whether to use Pattern Matching rules
-                                to the LSP client.
-
-                                If `false` the Pattern Matching will
-                                only apply to normal pattern matching.
-                                If `true` the {patterns} setting will
-                                also filter your LSP's `root_dir`,
-                                assuming there is one and {use_lsp}
-                                is set to `true`.
-
-                                See |project-nvim.pattern-matching| for more
-                                info on pattern matching
-
-                                Default: `false` ~
 
 
     * {allow_different_owners}  (boolean)
@@ -297,6 +265,14 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `false` ~
 
 
+    * {lsp}                     (|Project.Config.LSP|)
+                                Table containing all the
+                                LSP-adjacent options.
+
+                                See |Project.Config.LSP| for more
+                                details
+
+
     * {telescope}               (|Project.Config.Telescope|)
                                 Table of options used for
                                 the telescope picker.
@@ -313,14 +289,11 @@ Table of Contents                                             *project-nvim.toc*
                                 details
 
 
-    * {ignore_lsp}              (`string[]`)
-                                Table of LSP clients to ignore by name,
-                                e.g. `{ 'efm', ... }`
+    * {log}                     (|Project.Options.Logging|)
+                                Options for logging.
 
-                                If you have `nvim-lspconfig` installed you can
-                                look up |lspconfig-all| for a list of servers
-
-                                Default: `{}` ~
+                                See |Project.Config.Logging| for more
+                                details
 
 
     * {exclude_dirs}            (`string[]`)
@@ -354,7 +327,7 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `'global'` ~
 
 
-    * {before_attach}           (`fun(target_dir?: string, method?: string)`)
+    * {before_attach}           (`fun(target_dir: string, method: string)`)
                                 Hook to run before attaching to a new project.
                                 It optionally recieves `target_dir` and
                                 the `method` used to change directory
@@ -362,7 +335,7 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: empty function ~
 
 
-    * {on_attach}               (`fun(dir?: string, method?: string)`)
+    * {on_attach}               (`fun(dir: string, method: string)`)
                                 Hook to run after attaching to a new project.
                                 It optionally recieves `dir` and
                                 the `method` used to change directory.
@@ -384,7 +357,59 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-3.2 `Project.Config.Telescope`                          *Project.Config.Telescope*
+3.2 `Project.Config.LSP`                                    *Project.Config.LSP*
+                                                       *project-nvim.lsp-config*
+
+
+    * {enabled}                 (boolean)
+                                If `true` then LSP-based method detection
+                                will take precedence over traditional
+                                pattern matching.
+                                See |project-nvim.pattern-matching|
+                                for more info
+
+                                Default: `true` ~
+
+
+    * {ignore}                  (`string[]`)
+                                Table of LSP clients to ignore by name,
+                                e.g. `{ 'efm', ... }`
+
+                                If you have `nvim-lspconfig` installed you can
+                                look up |lspconfig-all| for a list of servers
+
+                                Default: `{}` ~
+
+
+    * {no_fallback}             (boolean)
+                                If `true` then LSP-based method detection
+                                will not be compared with
+                                pattern-matching-based detection.
+
+                                WARNING: USE AT YOUR OWN DISCRETION! ~
+
+                                Default: `false` ~
+
+
+    * {use_pattern_matching}    (boolean)
+                                Sets whether to use Pattern Matching rules
+                                to the LSP client.
+
+                                If `false` the Pattern Matching will
+                                only apply to normal pattern matching.
+                                If `true` the {patterns} setting will
+                                also filter your LSP's `root_dir`,
+                                assuming there is one and {lsp.enabled}
+                                is set to `true`.
+
+                                See |project-nvim.pattern-matching| for more
+                                info on pattern matching
+
+                                Default: `false` ~
+
+
+------------------------------------------------------------------------------
+3.3 `Project.Config.Telescope`                          *Project.Config.Telescope*
                                                  *project-nvim.telescope-config*
 
 
@@ -425,7 +450,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-3.3 `Project.Config.FzfLua`                                *Project.Config.FzfLua*
+3.4 `Project.Config.FzfLua`                                *Project.Config.FzfLua*
                                                    *project-nvim.fzf-lua-config*
 
     * {enabled}                 (boolean)
@@ -438,7 +463,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-3.4 `Project.Config.Logging`                              *Project.Config.Logging*
+3.5 `Project.Config.Logging`                              *Project.Config.Logging*
                                                    *project-nvim.logging-config*
 
     * {enabled}                 (boolean)
