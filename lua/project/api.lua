@@ -303,6 +303,8 @@ function Api.get_project_root(bufnr)
     if in_list(ops, method) then
       success, root, lsp_method = SWITCH[method]()
       if success then
+        ---@cast root string
+        ---@cast lsp_method string
         table.insert(roots, { root = root, method_msg = lsp_method, method = method })
       end
     end
