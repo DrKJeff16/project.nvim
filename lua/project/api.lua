@@ -69,7 +69,7 @@ function Api.find_lsp_root(bufnr)
     return
   end
 
-  local ignore_lsp = Config.options.ignore_lsp
+  local ignore_lsp = Config.options.lsp.ignore
   local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
   for _, client in ipairs(clients) do
     ---@type string[]
@@ -83,7 +83,7 @@ function Api.find_lsp_root(bufnr)
     )
     if valid then
       local dir, name = client.config.root_dir, client.name
-      if Config.options.allow_patterns_for_lsp then
+      if Config.options.lsp.use_pattern_matching then
         if Path.root_included(dir) == nil then
           return
         end
@@ -314,7 +314,7 @@ function Api.get_project_root(bufnr)
   if #roots == 1 then
     return roots[1][1], roots[1][2]
   end
-  if not Config.options.lsp.ignore_pattern_match then
+  if Config.options.lsp.no_fallback then
     return roots[1][1], roots[1][2]
   end
   if roots[1][1] == roots[2][1] then
