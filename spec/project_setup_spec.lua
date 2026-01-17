@@ -2,10 +2,12 @@ local assert = require('luassert') ---@type Luassert
 
 describe('project.nvim', function()
   local project ---@type Project
+  local defaults ---@type Project.Config.Options
 
   before_each(function()
     package.loaded['project'] = nil
     project = require('project')
+    defaults = require('project.config.defaults')
   end)
 
   describe('setup', function()
@@ -30,6 +32,14 @@ describe('project.nvim', function()
         assert.is_false(ok)
       end)
     end
+
+    it('should erase any option not in the defaults', function()
+      local ok = pcall(project.setup, { 1, foo = 'bar' })
+      assert.is_true(ok)
+
+      local options = require('project.config').options
+      assert.are_same(defaults, options)
+    end)
   end)
 end)
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

@@ -422,21 +422,27 @@ end
 ---Verify config integrity.
 --- ---
 function DEFAULTS:verify()
+  local keys = vim.tbl_keys(DEFAULTS) ---@type string[]
+  for k, _ in pairs(self) do
+    if not in_list(keys, k) then
+      self[k] = nil
+    end
+  end
+
   self:verify_datapath()
   self:verify_lsp()
   self:verify_histsize()
   self:verify_scope_chdir()
   self:verify_logging()
 
-  if not self.detection_methods then
+  if not self.detection_methods then ---@diagnostic disable-line:undefined-field
     return
   end
-  vim.schedule(function()
-    vim.notify(
-      '(project.nvim): `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.',
-      WARN
-    )
-  end)
+
+  vim.notify(
+    '(project.nvim): `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.',
+    WARN
+  )
 end
 
 ---@param opts Project.Config.Options
