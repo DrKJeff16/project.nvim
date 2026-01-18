@@ -8,7 +8,7 @@
 local MODSTR = 'project.popup'
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
-local Util = require('project.utils.util')
+local Util = require('project.util')
 local uv = vim.uv or vim.loop
 
 ---@param path string
@@ -139,7 +139,7 @@ function M.gen_import_prompt(bang)
       return
     end
 
-    require('project.utils.history').import_history_json(input, bang)
+    require('project.util.history').import_history_json(input, bang)
   end)
 end
 
@@ -160,7 +160,7 @@ function M.gen_export_prompt(bang)
         if not indent or indent == '' then
           return
         end
-        require('project.utils.history').export_history_json(input, indent, bang)
+        require('project.util.history').export_history_json(input, indent, bang)
       end
     )
   end)
@@ -208,7 +208,7 @@ function M.prompt_project(input)
     return
   end
 
-  local Path = require('project.utils.path')
+  local Path = require('project.util.path')
   local original_input = input
   input = Util.rstrip('/', vim.fn.fnamemodify(input, ':p'))
   if not (Path.exists(input) and Path.exists(vim.fn.fnamemodify(input, ':p:h'))) then
@@ -224,13 +224,13 @@ function M.prompt_project(input)
   end
 
   local Api = require('project.api')
-  local session = require('project.utils.history').session_projects
+  local session = require('project.util.history').session_projects
   if Api.current_project == input or vim.list_contains(session, input) then
     vim.notify('Already added that directory!', WARN)
     return
   end
   Api.set_pwd(input, 'prompt')
-  require('project.utils.history').write_history()
+  require('project.util.history').write_history()
 end
 
 M.delete_menu = M.select.new({
@@ -239,7 +239,7 @@ M.delete_menu = M.select.new({
     vim.ui.select(choices_list, {
       prompt = 'Select a project to delete:',
       format_item = function(item) ---@param item string
-        if vim.list_contains(require('project.utils.history').session_projects, item) then
+        if vim.list_contains(require('project.util.history').session_projects, item) then
           return '* ' .. item
         end
         return item
@@ -263,15 +263,15 @@ M.delete_menu = M.select.new({
     end)
   end,
   choices_list = function()
-    local recents = Util.reverse(require('project.utils.history').get_recent_projects()) ---@type string[]
+    local recents = Util.reverse(require('project.util.history').get_recent_projects()) ---@type string[]
     table.insert(recents, 'Exit')
     return recents
   end,
   choices = function()
     local T = {} ---@type table<string, function>
-    for _, proj in ipairs(require('project.utils.history').get_recent_projects()) do
+    for _, proj in ipairs(require('project.util.history').get_recent_projects()) do
       T[proj] = function()
-        require('project.utils.history').delete_project(proj)
+        require('project.util.history').delete_project(proj)
       end
     end
     T.Exit = function() end
@@ -306,7 +306,7 @@ M.recents_menu = M.select.new({
     end)
   end,
   choices_list = function()
-    local choices_list = vim.deepcopy(require('project.utils.history').get_recent_projects())
+    local choices_list = vim.deepcopy(require('project.util.history').get_recent_projects())
     if require('project.config').options.telescope.sort == 'newest' then
       choices_list = Util.reverse(choices_list)
     end
@@ -386,8 +386,8 @@ M.open_menu = M.select.new({
       res['Open Fzf-Lua Picker'] = require('project.extensions.fzf-lua').run_fzf_lua
     end
     if Config.options.log.enabled then
-      res['Open Log'] = require('project.utils.log').open_win
-      res['Clear Log'] = require('project.utils.log').clear_log
+      res['Open Log'] = require('project.util.log').open_win
+      res['Clear Log'] = require('project.util.log').clear_log
     end
     return res
   end,
@@ -453,7 +453,7 @@ M.session_menu = M.select.new({
     end)
   end,
   choices = function()
-    local sessions = require('project.utils.history').session_projects
+    local sessions = require('project.util.history').session_projects
     local choices = { Exit = function(_, _, _) end }
     if vim.tbl_isempty(sessions) then
       return choices
@@ -464,7 +464,7 @@ M.session_menu = M.select.new({
     return choices
   end,
   choices_list = function()
-    local choices = vim.deepcopy(require('project.utils.history').session_projects)
+    local choices = vim.deepcopy(require('project.util.history').session_projects)
     table.insert(choices, 'Exit')
     return choices
   end,

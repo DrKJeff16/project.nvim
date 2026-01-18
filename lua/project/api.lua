@@ -11,9 +11,9 @@ local in_list = vim.list_contains
 local current_buf = vim.api.nvim_get_current_buf
 
 local Config = require('project.config')
-local Path = require('project.utils.path')
-local Util = require('project.utils.util')
-local History = require('project.utils.history')
+local Path = require('project.util.path')
+local Util = require('project.util')
+local History = require('project.util.history')
 
 ---The `project.nvim` API module.
 --- ---
@@ -102,7 +102,7 @@ end
 function Api.verify_owner(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
-  local Log = require('project.utils.log')
+  local Log = require('project.util.log')
   if Util.is_windows() then
     Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
     return true
@@ -176,7 +176,7 @@ function Api.set_pwd(dir, method)
   })
   dir = vim.fn.expand(dir)
 
-  local Log = require('project.utils.log')
+  local Log = require('project.util.log')
   if not Config.options.allow_different_owners then
     if not Api.verify_owner(dir) then
       Log.error(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))

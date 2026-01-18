@@ -20,15 +20,15 @@
 ---|"xw"
 ---|"xw+"
 
-local MODSTR = 'project.utils.history'
+local MODSTR = 'project.util.history'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
 local floor = math.floor
 local ceil = math.ceil
-local Util = require('project.utils.util')
-local Path = require('project.utils.path')
-local Log = require('project.utils.log')
+local Util = require('project.util')
+local Path = require('project.util.path')
+local Log = require('project.util.log')
 
 ---@class Project.HistoryLoc
 ---@field bufnr integer
@@ -56,7 +56,7 @@ function History.open_history(mode)
 
   local dir_stat = uv.fs_stat(Path.projectpath)
   if not dir_stat then
-    require('project.utils.log').error(
+    require('project.util.log').error(
       ('(%s.open_history): History file unavailable!'):format(MODSTR)
     )
     error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
@@ -416,7 +416,7 @@ function History.open_win()
     return
   end
   if not Path.exists(Path.historyfile) then
-    require('project.utils.log').error(('(%s.open_win): Bad historyfile path!'):format(MODSTR))
+    require('project.util.log').error(('(%s.open_win): Bad historyfile path!'):format(MODSTR))
     error(('(%s.open_win): Bad historyfile path!'):format(MODSTR), ERROR)
   end
   if History.hist_loc ~= nil then

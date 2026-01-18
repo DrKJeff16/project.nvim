@@ -5,7 +5,7 @@
 ---@field [3]? boolean
 ---@field [4]? string
 
-local MODSTR = 'project.utils.util'
+local MODSTR = 'project.util'
 local ERROR = vim.log.levels.ERROR
 
 ---@class Project.Utils.Util

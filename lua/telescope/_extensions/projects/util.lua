@@ -5,13 +5,14 @@ if vim.g.project_setup ~= 1 then
   return
 end
 
-local Log = require('project.utils.log')
-if not require('project.utils.util').mod_exists('telescope') then
+local Log = require('project.util.log')
+if not require('project.util').mod_exists('telescope') then
   Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
   vim.notify(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
   return
 end
 
+local Util = require('project.util')
 local Finders = require('telescope.finders')
 local Entry_display = require('telescope.pickers.entry_display')
 
@@ -33,9 +34,9 @@ function M.create_finder()
   local sort = require('project.config').options.telescope.sort
   Log.info(('(%s.create_finder): Sorting by `%s`.'):format(MODSTR, sort))
 
-  local results = require('project.utils.history').get_recent_projects()
+  local results = require('project.util.history').get_recent_projects()
   if sort == 'newest' then
-    results = require('project.utils.util').reverse(results)
+    results = Util.reverse(results) ---@type string[]
   end
 
   Log.debug(('(%s.create_finder): Returning new Finder table.'):format(MODSTR))

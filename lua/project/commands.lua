@@ -15,11 +15,11 @@
 local MODSTR = 'project.commands'
 local INFO = vim.log.levels.INFO
 local ERROR = vim.log.levels.ERROR
-local Util = require('project.utils.util')
+local Util = require('project.util')
 local Popup = require('project.popup')
-local History = require('project.utils.history')
+local History = require('project.util.history')
 local Api = require('project.api')
-local Log = require('project.utils.log')
+local Log = require('project.util.log')
 local Config = require('project.config')
 
 ---@class Project.Commands

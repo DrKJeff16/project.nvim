@@ -4,11 +4,11 @@
 
 local MODSTR = 'project.health'
 
-local Util = require('project.utils.util')
+local Util = require('project.util')
 local Config = require('project.config')
-local Path = require('project.utils.path')
-local History = require('project.utils.history')
-local Log = require('project.utils.log')
+local Path = require('project.util.path')
+local History = require('project.util.history')
+local Log = require('project.util.log')
 local Api = require('project.api')
 
 ---@class Project.Health

@@ -1,7 +1,7 @@
 local MODSTR = 'project'
 local Api = require('project.api')
 local Config = require('project.config')
-local History = require('project.utils.history')
+local History = require('project.util.history')
 local Popup = require('project.popup')
 
 ---The `project.nvim` module.
@@ -30,10 +30,10 @@ M.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
 ---@return string|nil last
 ---@overload fun(): curr: string|nil, method: string|nil, last: string|nil
 function M.current_project(refresh)
-  require('project.utils.util').validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })
+  require('project.util').validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })
   refresh = refresh ~= nil and refresh or false
 
-  local Log = require('project.utils.log')
+  local Log = require('project.util.log')
   if refresh then
     Log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
     return Api.get_current_project()

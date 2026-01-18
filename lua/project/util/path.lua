@@ -1,6 +1,6 @@
-local MODSTR = 'project.utils.path'
+local MODSTR = 'project.util.path'
 local uv = vim.uv or vim.loop
-local Util = require('project.utils.util')
+local Util = require('project.util')
 local Config = require('project.config')
 
 ---@class Project.Utils.Path
@@ -85,7 +85,7 @@ function Path.has(dir, identifier)
     Path.get_files(dir)
   end
 
-  local pattern = require('project.utils.globtopattern').globtopattern(identifier)
+  local pattern = require('project.util.globtopattern').globtopattern(identifier)
   for _, file in ipairs(Path.curr_dir_cache) do
     if file:match(pattern) ~= nil then
       return true
@@ -158,7 +158,7 @@ function Path.create_path(path)
   path = path or Path.projectpath
 
   if not Path.exists(path) then
-    require('project.utils.log').debug(
+    require('project.util.log').debug(
       ('(%s.create_path): Creating directory `%s`.'):format(MODSTR, path)
     )
     uv.fs_mkdir(path, tonumber('755', 8))

@@ -1,6 +1,6 @@
 local MODSTR = 'project.config'
 local ERROR = vim.log.levels.ERROR
-local Util = require('project.utils.util')
+local Util = require('project.util')
 
 ---@class Project.ConfigLoc: Project.HistoryLoc
 
@@ -25,7 +25,7 @@ function Config.setup(options)
   Util.validate({ options = { options, { 'table', 'nil' }, true } })
   options = options or {}
 
-  local pattern_exclude = require('project.utils.globtopattern').pattern_exclude
+  local pattern_exclude = require('project.util.globtopattern').pattern_exclude
   Config.options = Config.get_defaults():new(options)
 
   Config.detection_methods = Config.options:gen_methods()
@@ -38,9 +38,9 @@ function Config.setup(options)
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
   vim.o.autochdir = Config.options.enable_autochdir
 
-  require('project.utils.path').init(Config.options.datapath) -- WARN: THIS GOES FIRST!!!!
+  require('project.util.path').init(Config.options.datapath) -- WARN: THIS GOES FIRST!!!!
 
-  local Log = require('project.utils.log')
+  local Log = require('project.util.log')
   if Config.options.log.enabled then
     Log.init()
   end
@@ -57,7 +57,7 @@ end
 ---@return string|nil config
 function Config.get_config()
   if vim.g.project_setup ~= 1 then
-    require('project.utils.log').error(
+    require('project.util.log').error(
       ('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR)
     )
     vim.notify(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR), ERROR)

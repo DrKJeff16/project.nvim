@@ -1,6 +1,6 @@
 -- stylua: ignore start
 local uv     =  vim.uv or vim.loop
-local MODSTR = 'project.utils.log'
+local MODSTR = 'project.util.log'
 local TRACE  =  vim.log.levels.TRACE  -- `0`
 local DEBUG  =  vim.log.levels.DEBUG  -- `1`
 local INFO   =  vim.log.levels.INFO   -- `2`
@@ -10,7 +10,7 @@ local ERROR  =  vim.log.levels.ERROR  -- `4`
 
 ---@class Project.LogLoc: Project.HistoryLoc
 
-local Util = require('project.utils.util')
+local Util = require('project.util')
 local Config = require('project.config')
 
 ---@class Project.Log
@@ -157,7 +157,7 @@ end
 ---@param mode OpenMode
 ---@return integer|nil fd
 function Log.open(mode)
-  require('project.utils.path').create_path(Log.logpath)
+  require('project.util.path').create_path(Log.logpath)
   local dir_stat = uv.fs_stat(Log.logpath)
   if not dir_stat or dir_stat.type ~= 'directory' then
     error(('(%s.open): Projectpath stat is not valid!'):format(MODSTR), ERROR)
@@ -174,7 +174,7 @@ function Log.init()
   end
   Log.logpath = log_cfg.logpath
   Log.logfile = Log.logpath .. '/project.log'
-  require('project.utils.path').create_path(Log.logpath)
+  require('project.util.path').create_path(Log.logpath)
 
   local fd
   local stat = uv.fs_stat(Log.logfile)
@@ -212,7 +212,7 @@ function Log.open_win()
     vim.notify(('(%s.open_win): Log has been cleared. Try restarting.'):format(MODSTR), WARN)
     return
   end
-  if not require('project.utils.path').exists(Log.logfile) then
+  if not require('project.util.path').exists(Log.logfile) then
     error(('(%s.open_win): Bad logfile path!'):format(MODSTR), ERROR)
   end
 

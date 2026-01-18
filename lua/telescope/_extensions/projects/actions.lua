@@ -5,8 +5,8 @@ if vim.g.project_setup ~= 1 then
   return
 end
 
-local Log = require('project.utils.log')
-if not require('project.utils.util').mod_exists('telescope') then
+local Log = require('project.util.log')
+if not require('project.util').mod_exists('telescope') then
   Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
   vim.notify(('(%s): Telescope is not installed!'):format(MODSTR))
   return
@@ -18,10 +18,10 @@ local Actions = require('telescope.actions')
 local Generate = require('telescope.actions.generate')
 local Builtin = require('telescope.builtin')
 local State = require('telescope.actions.state')
-local History = require('project.utils.history')
+local History = require('project.util.history')
 local Api = require('project.api')
 local Config = require('project.config')
-local Util = require('project.utils.util')
+local Util = require('project.util')
 local make_display = require('telescope._extensions.projects.util').make_display
 
 ---@class Project.Telescope.Actions

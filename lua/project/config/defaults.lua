@@ -10,7 +10,7 @@
 local MODSTR = 'project.config.defaults'
 local WARN = vim.log.levels.WARN
 local in_list = vim.tbl_contains
-local Util = require('project.utils.util')
+local Util = require('project.util')
 
 ---The options available for in `require('project').setup()`.
 --- ---
@@ -342,7 +342,7 @@ function DEFAULTS:verify_scope_chdir()
 end
 
 function DEFAULTS:verify_datapath()
-  if not (self.datapath and require('project.utils.util').dir_exists(self.datapath)) then
+  if not (self.datapath and require('project.util').dir_exists(self.datapath)) then
     vim.notify(('Invalid datapath `%s`, reverting to default.'):format(self.datapath), WARN)
     self.datapath = DEFAULTS.datapath
   end
@@ -365,7 +365,7 @@ function DEFAULTS:gen_methods()
 end
 
 function DEFAULTS:verify_logging()
-  local Path = require('project.utils.path')
+  local Path = require('project.util.path')
   local log = self.log
   if not log or type(log) ~= 'table' then
     self.log = vim.deepcopy(DEFAULTS.log)
