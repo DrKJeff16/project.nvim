@@ -12,21 +12,21 @@ install-deps:
 	@$(LUAROCKS_CMD) busted
 	@$(LUAROCKS_CMD) nlua
 
-test: install-deps
+test:
 	@busted spec
 
 helptags:
-	@echo -e "\nGenerating helptags...\n"
+	@echo -e "Generating helptags...\n"
 	@$(TAGS_CMD) > /dev/null 2>&1
 	@echo
 
 lint:
-	@echo -e "\nRunning StyLua...\n"
+	@echo -e "Running StyLua...\n"
 	@stylua .
 	@echo
 
 check:
-	@echo -e "\nRunning selene...\n"
+	@echo -e "Running selene...\n"
 	@selene lua
 	@echo
 
