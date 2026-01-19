@@ -40,18 +40,17 @@ Table of Contents                                             *project-nvim.toc*
 8. Commands                                              |project-nvim.commands|
     8.1. `:Project`                                                     |:Project|
     8.2. `:ProjectLog`                                               |:ProjectLog|
-    8.3. `:ProjectLogClear`                                     |:ProjectLogClear|
-    8.4. `:ProjectHealth`                                         |:ProjectHealth|
-    8.5. `:ProjectHistory`                                       |:ProjectHistory|
-    8.6. `:ProjectFzf`                                               |:ProjectFzf|
-    8.7. `:ProjectTelescope`                                   |:ProjectTelescope|
-    8.8. `:ProjectAdd`                                               |:ProjectAdd|
-    8.9. `:ProjectRoot`                                             |:ProjectRoot|
-    8.10. `:ProjectConfig`                                        |:ProjectConfig|
-    8.11. `:ProjectDelete`                                        |:ProjectDelete|
-    8.12. `:ProjectSession`                                      |:ProjectSession|
-    8.13. `:ProjectExportJSON`                                |:ProjectExportJSON|
-    8.14. `:ProjectImportJSON`                                |:ProjectImportJSON|
+    8.3. `:ProjectHealth`                                         |:ProjectHealth|
+    8.4. `:ProjectHistory`                                       |:ProjectHistory|
+    8.5. `:ProjectFzf`                                               |:ProjectFzf|
+    8.6. `:ProjectTelescope`                                   |:ProjectTelescope|
+    8.7. `:ProjectAdd`                                               |:ProjectAdd|
+    8.8. `:ProjectRoot`                                             |:ProjectRoot|
+    8.9. `:ProjectConfig`                                         |:ProjectConfig|
+    8.10. `:ProjectDelete`                                        |:ProjectDelete|
+    8.11. `:ProjectSession`                                      |:ProjectSession|
+    8.12. `:ProjectExportJSON`                                |:ProjectExportJSON|
+    8.13. `:ProjectImportJSON`                                |:ProjectImportJSON|
 9. API                                                        |project-nvim.api|
     9.1. `get_project_root()`                    |project-nvim.get_project_root()|
     9.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
@@ -67,7 +66,7 @@ Table of Contents                                             *project-nvim.toc*
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook (`:checkhealth project`)
 - Vim help documentation (|project-nvim|)
-- Logging capabilities (|:ProjectLog|, |:ProjectLogClear|)
+- Logging capabilities (|:ProjectLog|)
 - Natively supports `.nvim.lua` files
 - `vim.ui` menu support
 - Telescope Integration (`:Telescope projects`)
@@ -655,40 +654,20 @@ Table of Contents                                             *project-nvim.toc*
 
 
                                                        *ProjectLog*  *:ProjectLog*
-`:ProjectLog`
+`:ProjectLog [clear]`
                             IMPORTANT ~
                             This command will not be available unless ~
                             you set `log.enabled = true` in your `setup()` ~
 
-                            The `:ProjectLog` command toggles
-                            the `project.nvim` log file in a new tab,
-                            which can be exited by pressing `q` in Normal Mode.
-                            If a `[!]` is supplied at the end of the command
-                            (i.e. `:ProjectLog!`), then it'll close
-                            any instance of a previously opened log file,
-                            if found. Otherwise nothing will happen
+                            If called without arguments, the `:ProjectLog`
+                            command will toggle the `project.nvim` log file
+                            in a new tab, which can be exited
+                            by pressing `q` in Normal Mode.
+                            The only valid argument is `clear`, which will
+                            close any existing log windows
+                            and then clean up the log file.
 
-
-                                             *ProjectLogClear*  *:ProjectLogClear*
-`:ProjectLogClear`
-                            IMPORTANT ~
-                            This command will not be available unless ~
-                            you set `log.enabled = true` in your `setup()` ~
-
-                            The `:ProjectLogClear` command will delete
-                            all the contents of your log file,
-                            assuming there is one.
-                            If this is called from a logfile tab,
-                            then it will attempt to close it
-
-                            NOTE ~
-                            Once this command is called no more logs
-                            will be written for your current Neovim session.
-                            You will have to restart.
-                            You could set `vim.g.project_log_cleared`
-                            to a value different to `1`.
-                            THIS SOLUTION IS NOT TESTED FULLY. ~
-                            EXPECT WEIRD BEHAVIOUR IF YOU DO THIS! ~
+                            Useful for debugging
 
 
                                                  *ProjectHealth*  *:ProjectHealth*
@@ -747,7 +726,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
                                                  *ProjectConfig*  *:ProjectConfig*
-`:ProjectConfig`
+`:ProjectConfig[!]`
 
                             The `:ProjectConfig` command will toggle
                             your current config in a floating window,
@@ -755,6 +734,9 @@ Table of Contents                                             *project-nvim.toc*
                             To exit the window you can either
                             press `q` in normal mode or
                             by runnning `:ProjectConfig` again.
+                            If called with a bang `!` then the output
+                            will instead be printed as a message
+                            (`:h :messages`)
 
                             Useful for debugging
 

@@ -52,7 +52,6 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
   - [`:ProjectHealth`](#projecthealth)
   - [`:ProjectHistory`](#projecthistory)
   - [`:ProjectLog`](#projectlog)
-  - [`:ProjectLogClear`](#projectlogclear)
   - [`:ProjectAdd`](#projectadd)
   - [`:ProjectRoot`](#projectroot)
   - [`:ProjectConfig`](#projectconfig)
@@ -81,7 +80,7 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook `:checkhealth project`
 - Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
-- Logging capabilities `:ProjectLog`, `:ProjectLogClear`
+- Logging capabilities `:ProjectLog`
 - Natively supports `.nvim.lua` files
 - `vim.ui` menu support
 - [Telescope Integration](#telescope) `:Telescope projects`
@@ -103,11 +102,10 @@ Requirements:
   - [`nvim-lua/plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
   - [`nvim-telescope/telescope-file-browser.nvim`](https://github.com/nvim-telescope/telescope-file-browser.nvim)
 
-Use any plugin manager of your choosing. There currently instructions for the following.
+If you want to add instructions for your plugin manager of preference
+please raise a [**_BLANK ISSUE_**](https://github.com/DrKJeff16/project.nvim/issues/new?template=BLANK_ISSUE).
 
-> [!TIP]
-> If you want to add instructions for your plugin manager of preference
-> please raise a [**_BLANK ISSUE_**](https://github.com/DrKJeff16/project.nvim/issues/new?template=BLANK_ISSUE).
+Use any plugin manager of your choosing.
 
 ### `vim-plug`
 
@@ -139,33 +137,32 @@ endif
 }
 ```
 
-> [!TIP]
-> If you wish to lazy-load this plugin:
->
-> ```lua
-> {
->   'DrKJeff16/project.nvim',
->   cmd = { -- Lazy-load by commands
->     'Project',
->     'ProjectAdd',
->     'ProjectConfig',
->     'ProjectDelete',
->     'ProjectExportJSON',
->     'ProjectImportJSON',
->     'ProjectHealth',
->     'ProjectHistory',
->     'ProjectRecents',
->     'ProjectRoot',
->     'ProjectSession',
->   },
->   dependencies = { -- OPTIONAL
->     'nvim-lua/plenary.nvim',
->     'nvim-telescope/telescope.nvim',
->     'ibhagwan/fzf-lua',
->   },
->   opts = {},
-> }
-> ```
+If you wish to lazy-load this plugin:
+
+```lua
+{
+  'DrKJeff16/project.nvim',
+  cmd = { -- Lazy-load by commands
+    'Project',
+    'ProjectAdd',
+    'ProjectConfig',
+    'ProjectDelete',
+    'ProjectExportJSON',
+    'ProjectImportJSON',
+    'ProjectHealth',
+    'ProjectHistory',
+    'ProjectRecents',
+    'ProjectRoot',
+    'ProjectSession',
+  },
+  dependencies = { -- OPTIONAL
+    'nvim-lua/plenary.nvim',
+    'nvim-telescope/telescope.nvim',
+    'ibhagwan/fzf-lua',
+  },
+  opts = {},
+}
+```
 
 ### `pckr.nvim`
 
@@ -511,8 +508,7 @@ These are the user commands you can call from the cmdline:
 The `:Project` command will open a UI window pointing to all the useful operations
 this plugin can provide. This one is subject to change, just as `vim.ui` is.
 
-> [!TIP]
-> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
+See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 
 ### `:ProjectFzf`
 
@@ -523,8 +519,7 @@ The `:ProjectFzf` command is a dynamicly enabled User Command that runs
 `project.nvim` through `fzf-lua`.
 For now it just executes `require('project').run_fzf_lua()`.
 
-> [!TIP]
-> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
+See [_`extensions/fzf-lua.lua`_](./lua/project/extensions/fzf-lua.lua) for more info.
 
 ### `:ProjectTelescope`
 
@@ -535,23 +530,20 @@ The `:ProjectTelescope` command is a dynamicly enabled User Command that runs
 the Telescope `projects` picker.
 A shortcut, to be honest.
 
-> [!TIP]
-> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
+See [_`telescope/_extensions/projects.lua`_](./lua/telescope/_extensions/projects.lua) for more info.
 
 ### `:ProjectHealth`
 
 The `:ProjectHealth` command runs `:checkhealth project` in a single command.
 
-> [!TIP]
-> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
+See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 
 ### `:ProjectHistory`
 
 The `:ProjectHistory` command toggles the `project.nvim` history file in a new tab,
 which can be exited by pressing `q` in Normal Mode.
 
-> [!TIP]
-> _See [`history.lua`](./lua/project/utils/history.lua) for more info_.
+See [_`history.lua`_](./lua/project/util/history.lua) for more info.
 
 ### `:ProjectLog`
 
@@ -559,31 +551,17 @@ which can be exited by pressing `q` in Normal Mode.
 > This command will not be available unless you set `log.enabled = true`
 > in your `setup()`.
 
-The `:ProjectLog` command toggles the `project.nvim` log file in a new tab,
+If called with no args, the `:ProjectLog` command toggles the `project.nvim` log file in a new tab,
 which can be exited by pressing `q` in Normal Mode.
 
-> [!TIP]
-> _See [_`log.lua`_](./lua/project/utils/log.lua) for more info_.
+The only valid argument is `clear`, which will clear the log file:
 
-### `:ProjectLogClear`
+```vim
+:ProjectLog " Opens the Log Window
+:ProjectLog clear " Closes the log window (if opened) and clears the current log file
+```
 
-> [!IMPORTANT]
-> This command will not be available unless you set `log.enabled = true`
-> in your `setup()`.
-
-The `:ProjectLogClear` command will delete all the contents of your log file,
-assuming there is one.
-
-If this is called from a logfile tab, then it will attempt to close it.
-
-> [!NOTE]
-> Once this command is called no more logs will be written for your current
-> Neovim session. You will have to restart.
->
-> You could set `vim.g.project_log_cleared` to a value different to `1`,
-> **BUT THIS SOLUTION IS NOT TESTED FULLY. EXPECT WEIRD BEHAVIOUR IF YOU DO THIS!**
-
-See [_`log.lua`_](./lua/project/utils/log.lua) for more info.
+See [_`log.lua`_](./lua/project/util/log.lua) for more info.
 
 ### `:ProjectAdd`
 
@@ -593,8 +571,7 @@ directory through a UI prompt, to be saved to your project history.
 If your prompt is valid, your `cwd` will be switched to said directory.
 Adding a [!] will set the prompt to your cwd.
 
-> [!NOTE]
-> **This is particularly useful if you've enabled `manual_mode` in `setup()`.**
+**This is particularly useful if you've enabled `manual_mode` in `setup()`.**
 
 See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 
@@ -610,8 +587,7 @@ The command is like doing the following in the cmdline:
 :lua require('project.api').on_buf_enter()
 ```
 
-> [!TIP]
-> _See [_`commands.lua`_](./lua/project/commands.lua) for more info_.
+See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 
 ### `:ProjectConfig`
 
@@ -621,8 +597,7 @@ or by runnning `:ProjectConfig` again.
 
 You can also print the output instead by running `:ProjectConfig!`.
 
-> [!TIP]
-> _See [`commands.lua`](./lua/project/commands.lua) for more info_.
+See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 
 ### `:ProjectDelete`
 
@@ -691,9 +666,6 @@ Example usage:
 :ProjectExportJSON! ~/.c.json
 ```
 
-> [!IMPORTANT]
-> **This feature is experimental, expect changes in the future!**
-
 ### `:ProjectImportJSON`
 
 The `:ProjectImportJSON` allows the user to retrieved their saved project history in a JSON format.
@@ -712,9 +684,6 @@ Example usage:
 :ProjectExportJSON! b
 :ProjectImportJSON! b
 ```
-
-> [!IMPORTANT]
-> **This feature is experimental, expect changes in the future!**
 
 ---
 
@@ -791,14 +760,13 @@ vim.print(get_history_paths('historyfile'))
 
 A set of utilities that get repeated across the board.
 
-> [!TIP]
-> You can import them the follow way:
->
-> ```lua
-> local ProjUtil = require('project.utils.util')
-> ```
->
-> _See [`util.lua`](./lua/project/utils/util.lua) for further reference_.
+You can import them as shown below:
+
+```lua
+local ProjUtil = require('project.util')
+```
+
+_See [`util.lua`](./lua/project/util.lua) for further reference_.
 
 _These utilities are in part inspired by my own utilities found in [**`Jnvim`**](https://github.com/DrKJeff16/Jnvim),_
 my own Nvim configuration; particularly the [**`User API`**](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)_
