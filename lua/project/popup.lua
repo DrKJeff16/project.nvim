@@ -336,7 +336,7 @@ M.open_menu = M.select.new({
       if not vim.list_contains(vim.tbl_keys(choices), fargs) then
         return
       end
-      choices[fargs]()
+      choices[fargs](ctx)
       return
     end
     local choices_list = M.open_menu.choices_list()
@@ -354,7 +354,7 @@ M.open_menu = M.select.new({
         return
       end
 
-      choice()
+      choice(ctx)
     end)
   end,
   choices = function()
