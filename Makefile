@@ -26,7 +26,7 @@ lint:
 	@echo
 
 check:
-	@echo -e "Running selene...\n"
+	@echo -e "Running selene..."
 	@selene lua
 	@echo
 
