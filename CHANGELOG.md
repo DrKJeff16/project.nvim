@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.5.2-1](https://github.com/DrKJeff16/project.nvim/tree/v0.5.2-1) (2026-01-19)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v0.5.1-1...v0.5.2-1)
+
+**Implemented enhancements:**
+
+- refactor\(history\)!: from now on store history in a JSON file instead [\#42](https://github.com/DrKJeff16/project.nvim/pull/42) ([DrKJeff16](https://github.com/DrKJeff16))
+
 ## [v0.5.1-1](https://github.com/DrKJeff16/project.nvim/tree/v0.5.1-1) (2026-01-19)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v0.5.0-1...v0.5.1-1)
