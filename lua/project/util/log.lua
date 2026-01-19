@@ -135,21 +135,30 @@ function Log.create_commands()
   Commands.new({
     {
       name = 'ProjectLog',
-      callback = function()
-        Log.toggle_win()
-      end,
-      desc = 'Opens the `project.nvim` log in a new tab',
-    },
-    {
-      name = 'ProjectLogClear',
-      with_ctx = false,
-      callback = function()
+      callback = function(ctx)
+        if vim.tbl_isempty(ctx.fargs) then
+          Log.toggle_win()
+          return
+        end
+        if ctx.fargs ~= 'clear' then
+          vim.notify('Usage - `:ProjectLog [clear]`', INFO)
+          return
+        end
+
         if Log.log_loc then
           Log.close_win()
         end
         Log.clear_log()
       end,
-      desc = 'Clears the `project.nvim` log',
+      desc = 'Opens the `project.nvim` log in a new tab',
+      nargs = '?',
+      complete = function(_, line)
+        local args = vim.split(line, '%s+', { trimempty = false })
+        if #args == 2 then
+          return { 'clear' }
+        end
+        return {}
+      end,
     },
   })
 end
