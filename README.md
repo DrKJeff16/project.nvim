@@ -68,7 +68,9 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
 - [Utils](#utils)
 - [Troubleshooting](#troubleshooting)
   - [History File Not Created](#history-file-not-created)
-- [Alternative](#alternatives)
+- [Collaborators](#collaborators)
+- [Contributors](#contributors)
+- [Alternatives](#alternatives)
 - [License](#license)
 
 ---
