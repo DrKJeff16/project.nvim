@@ -19,14 +19,13 @@ Config.options = setmetatable({}, { __index = Config.get_defaults() }) ---@type 
 
 ---The function called when running `require('project').setup()`.
 --- ---
----@param options Project.Config.Options|nil the `project.nvim` config options
+---@param options Project.Config.Options the `project.nvim` config options
 ---@overload fun()
 function Config.setup(options)
   Util.validate({ options = { options, { 'table', 'nil' }, true } })
-  options = options or {}
 
   local pattern_exclude = require('project.util.globtopattern').pattern_exclude
-  Config.options = Config.get_defaults():new(options)
+  Config.options = Config.get_defaults():new(options or {})
 
   Config.detection_methods = Config.options:gen_methods()
 
@@ -54,14 +53,13 @@ function Config.setup(options)
   require('project.commands').create_user_commands()
 end
 
----@return string|nil config
+---@return string config
 function Config.get_config()
   if vim.g.project_setup ~= 1 then
     require('project.util.log').error(
       ('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR)
     )
-    vim.notify(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR), ERROR)
-    return
+    error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR), ERROR)
   end
   local exceptions = {
     'gen_methods',
@@ -92,12 +90,12 @@ function Config.open_win()
   local height = math.floor(vim.o.lines * 0.85)
   local width = math.floor(vim.o.columns * 0.85)
   local title = 'project.nvim'
-  local current_config = (' '):rep(math.floor((width - title:len()) / 2))
-    .. title
-    .. '\n'
-    .. ('='):rep(width)
-    .. '\n'
-    .. Config.get_config()
+  local current_config = ('%s%s\n%s\n%s'):format(
+    (' '):rep(math.floor((width - title:len()) / 2)),
+    title,
+    ('='):rep(width),
+    Config.get_config()
+  )
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, vim.split(current_config, '\n', { plain = true }))
   local win = vim.api.nvim_open_win(bufnr, true, {
     focusable = true,
