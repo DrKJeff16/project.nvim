@@ -69,7 +69,7 @@ require('project.commands').new({
     callback = function()
       M.run_fzf_lua()
     end,
-    desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
+    desc = 'Run an fzf-lua prompt for project.nvim (assuming you have it installed)',
   },
 })
 

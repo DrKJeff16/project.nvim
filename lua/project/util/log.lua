@@ -131,8 +131,7 @@ function Log.write(data, lvl)
 end
 
 function Log.create_commands()
-  local Commands = require('project.commands')
-  Commands.new({
+  require('project.commands').new({
     {
       name = 'ProjectLog',
       callback = function(ctx)
@@ -150,7 +149,7 @@ function Log.create_commands()
         end
         Log.clear_log()
       end,
-      desc = 'Opens the `project.nvim` log in a new tab',
+      desc = 'Either opens the `project.nvim` log or clears the log file if `clear` is passed',
       nargs = '?',
       complete = function(_, line)
         local args = vim.split(line, '%s+', { trimempty = false })
