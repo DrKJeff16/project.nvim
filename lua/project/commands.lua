@@ -1,19 +1,62 @@
+---@alias CompleteTypes
+---|'arglist'
+---|'breakpoint'
+---|'buffer'
+---|'color'
+---|'command'
+---|'compiler'
+---|'diff_buffer'
+---|'dir'
+---|'dir_in_path'
+---|'environment'
+---|'event'
+---|'expression'
+---|'file'
+---|'file_in_path'
+---|'filetype'
+---|'function'
+---|'help'
+---|'highlight'
+---|'history'
+---|'keymap'
+---|'locale'
+---|'lua'
+---|'mapclear'
+---|'mapping'
+---|'menu'
+---|'messages'
+---|'option'
+---|'packadd'
+---|'retab'
+---|'runtime'
+---|'scriptnames'
+---|'shellcmd'
+---|'shellcmdline'
+---|'sign'
+---|'syntax'
+---|'syntime'
+---|'tag'
+---|'tag_listfiles'
+---|'user'
+---|'var'
+
 ---@alias ProjectCmdFun fun()|fun(ctx: vim.api.keyset.create_user_command.command_args)
----@alias CompletorFun fun(a?: string, l?: string, p?: integer): string[]
+---@alias CompletorFun fun(a: string, l: string, p: integer): string[]
 ---@alias Project.CMD
----|{ desc: string, name: string, bang: boolean, complete?: string|CompletorFun, nargs?: string|integer }
+---|{ desc: string, name: string, bang: boolean, complete?: (CompletorFun)|CompleteTypes, nargs?: string|integer }
 ---|ProjectCmdFun
 
 ---@class Project.Commands.Spec
 ---@field callback ProjectCmdFun
 ---@field name string
 ---@field desc string
----@field complete? string|CompletorFun
+---@field complete? (CompletorFun)|CompleteTypes
 ---@field bang? boolean
 ---@field nargs? string|integer
 
 local MODSTR = 'project.commands'
 local INFO = vim.log.levels.INFO
+local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
 local Popup = require('project.popup')
@@ -114,22 +157,45 @@ function Commands.create_user_commands()
     {
       name = 'ProjectAdd',
       callback = function(ctx)
-        local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' }
-        if ctx and ctx.bang ~= nil and ctx.bang then
-          local bufnr = vim.api.nvim_get_current_buf()
-          opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
+        if vim.tbl_isempty(ctx.fargs) then
+          local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' }
+          if ctx and ctx.bang ~= nil and ctx.bang then
+            local bufnr = vim.api.nvim_get_current_buf()
+            opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
+          end
+
+          vim.ui.input(opts, Popup.prompt_project)
+          return
         end
 
-        vim.ui.input(opts, Popup.prompt_project)
+        local session = History.session_projects
+        local msg = ''
+        for _, input in ipairs(ctx.fargs) do
+          input = vim.fn.expand(input)
+          if Util.dir_exists(input) then
+            if Api.current_project ~= input and not vim.list_contains(session, input) then
+              Api.set_pwd(input, 'command')
+              History.write_history()
+            else
+              msg = ('%s%sAlready added `%s`!'):format(msg, msg == '' and '' or '\n', input)
+            end
+          else
+            msg = ('%s%s`%s` is not a directory!'):format(msg, msg == '' and '' or '\n', input)
+          end
+        end
+
+        vim.notify(msg, WARN)
       end,
       desc = 'Prompt to add the current directory to the project history',
+      nargs = '*',
+      complete = 'file',
       bang = true,
     },
     {
       name = 'ProjectExportJSON',
       desc = 'Export project.nvim history to JSON file',
       callback = function(ctx)
-        if not (ctx and #ctx.fargs <= 2) then
+        if not ctx or #ctx.fargs > 2 then
           vim.notify('Usage\n  :ProjectExportJSON </path/to/file[.json]> [<INDENT>]', INFO)
           return
         end
@@ -154,10 +220,10 @@ function Commands.create_user_commands()
           return vim.fn.getcompletion(args[2], 'file', true)
         end
         if #args == 3 then
-          local tbl = Util.range(0, 32)
+          ---@type string[]
           local res = vim.tbl_map(function(value) ---@param value integer
             return tostring(value)
-          end, tbl)
+          end, Util.range(0, 32))
           table.sort(res)
 
           return res
