@@ -133,7 +133,7 @@ function History.export_history_json(path, ind, force_name)
     end
   end
 
-  History.write_history(true)
+  History.write_history()
 
   local fd = uv.fs_open(path, 'w', tonumber('644', 8))
   if not fd then
@@ -207,7 +207,7 @@ function History.import_history_json(path, force_name)
   end
 
   History.recent_projects = Util.reverse(hist)
-  History.write_history(true)
+  History.write_history()
 
   vim.notify(('Imported history from `%s`'):format(vim.fn.fnamemodify(path, ':~')), INFO, {
     title = 'project.nvim',
@@ -284,7 +284,7 @@ function History.delete_project(project)
   if found then
     Log.info(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj))
     vim.notify(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj), INFO)
-    History.write_history(true)
+    History.write_history()
   end
 end
 
@@ -326,7 +326,15 @@ end
 
 function History.read_history()
   local fd, stat = History.open_history('r')
-  if not (fd and stat) then
+  if not stat then
+    Log.error(('(%s.read_history): Stat for history file unavailable!'):format(MODSTR))
+    if fd then
+      uv.fs_close(fd)
+    end
+    return
+  end
+  if not fd then
+    Log.error(('(%s.read_history): File descriptor for history file unavailable!'):format(MODSTR))
     return
   end
 
@@ -407,12 +415,7 @@ end
 
 ---Write projects to history file.
 --- ---
----@param close boolean
----@overload fun()
-function History.write_history(close)
-  Util.validate({ close = { close, { 'boolean', 'nil' }, true } })
-  close = close ~= nil and close or false
-
+function History.write_history()
   local fd = History.open_history(History.recent_projects and 'w' or 'a')
   if not fd then
     Log.error(('(%s.write_history): File restricted!'):format(MODSTR))
@@ -447,10 +450,8 @@ function History.write_history(close)
 
   Log.debug(('(%s.write_history): Writing to `%s`'):format(MODSTR, Path.historyfile))
   uv.fs_write(fd, out)
-  if close then
-    uv.fs_close(fd)
-    Log.debug(('(%s.write_history): File descriptor closed!'):format(MODSTR))
-  end
+  uv.fs_close(fd)
+  Log.debug(('(%s.write_history): File descriptor closed!'):format(MODSTR))
 end
 
 function History.open_win()
@@ -466,7 +467,15 @@ function History.open_win()
   end
 
   local fd, stat = History.open_history('r')
-  if not (fd and stat) then
+  if not stat then
+    Log.error(('(%s.open_win): Stat for history file unavailable!'):format(MODSTR))
+    if fd then
+      uv.fs_close(fd)
+    end
+    return
+  end
+  if not fd then
+    Log.error(('(%s.open_win): File descriptor for history file unavailable!'):format(MODSTR))
     return
   end
 
