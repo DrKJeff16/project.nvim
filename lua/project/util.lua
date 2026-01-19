@@ -8,7 +8,7 @@
 local MODSTR = 'project.util'
 local ERROR = vim.log.levels.ERROR
 
----@class Project.Utils.Util
+---@class Project.Util
 local M = {}
 
 ---Checks whether nvim is running on Windows.
@@ -560,10 +560,10 @@ function M.normalise_path(path)
   return normalised_path
 end
 
-local Util = setmetatable(M, { ---@type Project.Utils.Util
+local Util = setmetatable(M, { ---@type Project.Util
   __index = M,
   __newindex = function()
-    vim.notify('Project.Utils.Util is Read-Only!', vim.log.levels.ERROR)
+    vim.notify('Project.Util is Read-Only!', vim.log.levels.ERROR)
   end,
 })
 

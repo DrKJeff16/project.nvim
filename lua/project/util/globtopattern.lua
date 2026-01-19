@@ -1,6 +1,6 @@
 ---Credits for this module goes to [David Manura](https://github.com/davidm/lua-glob-pattern).
 --- ---
----@class Project.Utils.Glob
+---@class Project.Util.Glob
 local M = {}
 
 ---Escape pattern char.
@@ -170,7 +170,7 @@ function M.pattern_exclude(pattern)
   return M.globtopattern(pattern)
 end
 
-local Glob = setmetatable(M, { ---@type Project.Utils.Glob
+local Glob = setmetatable(M, { ---@type Project.Util.Glob
   __index = M,
   __newindex = function()
     vim.notify('User.Utils.Glob is Read-Only!', vim.log.levels.ERROR)

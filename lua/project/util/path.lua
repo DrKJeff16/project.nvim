@@ -3,7 +3,7 @@ local uv = vim.uv or vim.loop
 local Util = require('project.util')
 local Config = require('project.config')
 
----@class Project.Utils.Path
+---@class Project.Util.Path
 ---The directory where the project dir will be saved.
 --- ---
 ---@field datapath? string

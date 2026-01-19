@@ -34,7 +34,7 @@ local Log = require('project.util.log')
 ---@field bufnr integer
 ---@field win integer
 
----@class Project.Utils.History
+---@class Project.Util.History
 ---Projects from previous neovim sessions.
 --- ---
 ---@field recent_projects? string[]
