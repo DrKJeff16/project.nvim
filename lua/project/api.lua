@@ -397,7 +397,7 @@ function Api.init()
   vim.api.nvim_create_autocmd('VimLeavePre', {
     group = group,
     callback = function()
-      History.write_history(true)
+      History.write_history()
     end,
   })
   if not Config.options.manual_mode then
