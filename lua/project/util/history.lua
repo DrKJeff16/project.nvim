@@ -22,6 +22,7 @@
 
 local MODSTR = 'project.util.history'
 local ERROR = vim.log.levels.ERROR
+local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
 local floor = math.floor
@@ -331,7 +332,7 @@ function History.read_history()
     return
   end
   History.setup_watch()
-  local data = uv.fs_read(fd, stat.size, -1)
+  local data = uv.fs_read(fd, stat.size)
   uv.fs_close(fd)
   History.deserialize_history(data)
 end
@@ -385,7 +386,7 @@ function History.write_history(close)
   Util.validate({ close = { close, { 'boolean', 'nil' }, true } })
   close = close ~= nil and close or false
 
-  local fd = History.open_history(History.recent_projects ~= nil and 'w' or 'a')
+  local fd = History.open_history(History.recent_projects and 'w' or 'a')
   if not fd then
     Log.error(('(%s.write_history): File restricted!'):format(MODSTR))
     error(('(%s.write_history): File restricted!'):format(MODSTR), ERROR)
@@ -402,9 +403,16 @@ function History.write_history(close)
       or res
   end
 
+  if vim.tbl_isempty(tbl_out) then
+    uv.fs_close(fd)
+    Log.error(('(%s.write_history): No data available to write!'):format(MODSTR))
+    vim.notify(('(%s.write_history): No data available to write!'):format(MODSTR), WARN)
+    return
+  end
+
   local out = table.concat(tbl_out, '\n')
   Log.debug(('(%s.write_history): Writing to file...'):format(MODSTR))
-  uv.fs_write(fd, out, -1)
+  uv.fs_write(fd, out)
   if close then
     uv.fs_close(fd)
     Log.debug(('(%s.write_history): File descriptor closed!'):format(MODSTR))
@@ -419,7 +427,7 @@ function History.open_win()
     require('project.util.log').error(('(%s.open_win): Bad historyfile path!'):format(MODSTR))
     error(('(%s.open_win): Bad historyfile path!'):format(MODSTR), ERROR)
   end
-  if History.hist_loc ~= nil then
+  if History.hist_loc then
     return
   end
 

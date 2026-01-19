@@ -3,6 +3,15 @@
 ---to avoid any confusions with naming,
 ---e.g. `require('project_nvim.project')`.
 
+---@class HistoryPath
+---@field datapath string
+---@field projectpath string
+---@field historyfile string
+
+---@class ProjectRootSwitch
+---@field lsp fun(bufnr?: integer): boolean, string|nil, string|nil
+---@field pattern fun(bufnr?: integer): boolean, string|nil, string|nil
+
 local MODSTR = 'project.api'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
@@ -23,6 +32,23 @@ local History = require('project.util.history')
 ---@field current_method? string
 local Api = {}
 
+local SWITCH = { ---@type ProjectRootSwitch
+  lsp = function(bufnr)
+    local root, lsp_name = Api.find_lsp_root(bufnr or current_buf())
+    if root then
+      return true, root, ('"%s" lsp'):format(lsp_name)
+    end
+    return false
+  end,
+  pattern = function(bufnr)
+    local root, method = Api.find_pattern_root(bufnr or current_buf())
+    if root then
+      return true, root, method
+    end
+    return false
+  end,
+}
+
 function Api.get_last_project()
   local recent = History.get_recent_projects()
   if vim.tbl_isempty(recent) or #recent == 1 then
@@ -34,13 +60,13 @@ function Api.get_last_project()
 end
 
 ---@param path? 'datapath'|'projectpath'|'historyfile'
----@return string|{ datapath: string, projectpath: string, historyfile: string }
----@overload fun(): string
----@overload fun(path: 'datapath'|'projectpath'|'historyfile'): { datapath: string, projectpath: string, historyfile: string }
+---@return string|HistoryPath
+---@overload fun(): history_path: string
+---@overload fun(path: 'datapath'|'projectpath'|'historyfile'): history_paths: HistoryPath
 function Api.get_history_paths(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
 
-  local res = { ---@type { datapath: string, projectpath: string, historyfile: string }|string
+  local res = { ---@type HistoryPath|string
     datapath = Path.datapath,
     projectpath = Path.projectpath,
     historyfile = Path.historyfile,
@@ -48,6 +74,7 @@ function Api.get_history_paths(path)
   if path and in_list(vim.tbl_keys(res), path) then
     res = Path[path] ---@type string
   end
+  ---@cast res HistoryPath
   return res
 end
 
@@ -279,29 +306,13 @@ function Api.get_project_root(bufnr)
   if vim.tbl_isempty(Config.detection_methods) then
     return
   end
-  local SWITCH = {
-    lsp = function()
-      local root, lsp_name = Api.find_lsp_root(bufnr)
-      if root ~= nil then
-        return true, root, ('"%s" lsp'):format(lsp_name)
-      end
-      return false
-    end,
-    pattern = function()
-      local root, method = Api.find_pattern_root(bufnr)
-      if root ~= nil then
-        return true, root, method
-      end
-      return false
-    end,
-  }
   local roots = {} ---@type { root: string, method_msg: string, method: 'lsp'|'pattern' }[]
   local root, lsp_method = nil, nil
   local ops = vim.tbl_keys(SWITCH) ---@type string[]
   local success = false
   for _, method in ipairs(Config.detection_methods) do
     if in_list(ops, method) then
-      success, root, lsp_method = SWITCH[method]()
+      success, root, lsp_method = SWITCH[method](bufnr)
       if success then
         ---@cast root string
         ---@cast lsp_method string
@@ -347,7 +358,7 @@ end
 ---@param bufnr integer
 ---@overload fun()
 ---@overload fun(verbose: boolean)
----@overload fun(verbose?: boolean, bufnr: integer)
+---@overload fun(verbose: boolean|nil, bufnr: integer)
 function Api.on_buf_enter(verbose, bufnr)
   Util.validate({
     verbose = { verbose, { 'boolean', 'nil' }, true },

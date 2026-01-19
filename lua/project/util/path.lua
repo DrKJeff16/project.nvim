@@ -26,7 +26,7 @@ function Path.is_excluded(dir)
 
   local exclude_dirs = Config.options.exclude_dirs
   for _, excluded in ipairs(exclude_dirs) do
-    if dir:match(excluded) ~= nil then
+    if dir:match(excluded) then
       return true
     end
   end
@@ -87,7 +87,7 @@ function Path.has(dir, identifier)
 
   local pattern = require('project.util.globtopattern').globtopattern(identifier)
   for _, file in ipairs(Path.curr_dir_cache) do
-    if file:match(pattern) ~= nil then
+    if file:match(pattern) then
       return true
     end
   end
