@@ -157,9 +157,9 @@ function Commands.create_user_commands()
     {
       name = 'ProjectAdd',
       callback = function(ctx)
-        if vim.tbl_isempty(ctx.fargs) then
+        if ctx and vim.tbl_isempty(ctx.fargs) then
           local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' }
-          if ctx and ctx.bang ~= nil and ctx.bang then
+          if ctx.bang ~= nil and ctx.bang then
             local bufnr = vim.api.nvim_get_current_buf()
             opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
           end

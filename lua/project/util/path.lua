@@ -199,7 +199,7 @@ function Path.init(datapath)
   datapath = Path.exists(datapath) and datapath or vim.fn.stdpath('data')
   Path.datapath = datapath
   Path.projectpath = ('%s/project_nvim'):format(Path.datapath)
-  Path.historyfile = ('%s/project_history'):format(Path.projectpath)
+  Path.historyfile = ('%s/project_history.json'):format(Path.projectpath)
 end
 
 return Path

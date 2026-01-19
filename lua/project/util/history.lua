@@ -50,6 +50,7 @@ History.session_projects = {} ---@type string[]
 
 ---@param mode OpenMode
 ---@return integer|nil fd
+---@return uv.fs_stat.result|nil stat
 function History.open_history(mode)
   Util.validate({ mode = { mode, { 'string', 'number' } } })
 
@@ -63,8 +64,9 @@ function History.open_history(mode)
     error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
   end
 
+  local stat = uv.fs_stat(Path.historyfile)
   local fd = uv.fs_open(Path.historyfile, mode, tonumber('644', 8))
-  return fd
+  return fd, stat
 end
 
 ---@param path string
@@ -144,7 +146,7 @@ function History.export_history_json(path, ind, force_name)
   Log.debug(('(%s.export_history_json): Writing to file `%s`...'):format(MODSTR, path))
   uv.fs_write(fd, data)
   uv.fs_close(fd)
-  Log.debug(('(%s.export_history_json): File descriptor closed!'):format(MODSTR))
+  Log.debug(('(%s.export_history_json): File descriptor closed'):format(MODSTR))
 
   vim.notify(('Exported history to `%s`'):format(vim.fn.fnamemodify(path, ':~')), INFO, {
     title = 'project.nvim',
@@ -323,18 +325,43 @@ function History.setup_watch()
 end
 
 function History.read_history()
-  local fd = History.open_history('r')
-  if not fd then
+  local fd, stat = History.open_history('r')
+  if not (fd and stat) then
     return
   end
-  local stat = uv.fs_fstat(fd)
-  if not stat then
-    return
-  end
+
   History.setup_watch()
-  local data = uv.fs_read(fd, stat.size)
+
+  if stat.size == 0 and History.session_projects then
+    History.write_history()
+    return
+  end
+
+  ---@type boolean, string[]|nil
+  local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size))
   uv.fs_close(fd)
-  History.deserialize_history(data)
+  if not (ok and data) then
+    Log.error(
+      ('(%s.read_history): Could not decode JSON data from history file! (`stat.size = %s`)'):format(
+        MODSTR,
+        stat.size
+      )
+    )
+    vim.notify(
+      ('(%s.read_history): Could not decode JSON data from history file! (`stat.size = %s`)'):format(
+        MODSTR,
+        stat.size
+      )
+    )
+    return
+  end
+
+  local data_str = ''
+  for _, v in pairs(data) do
+    data_str = ('%s%s%s'):format(data_str, data_str == '' and '' or '\n', v)
+  end
+
+  History.deserialize_history(data_str)
 end
 
 ---@param tilde boolean
@@ -410,8 +437,15 @@ function History.write_history(close)
     return
   end
 
-  local out = table.concat(tbl_out, '\n')
-  Log.debug(('(%s.write_history): Writing to file...'):format(MODSTR))
+  ---@type boolean, string|nil
+  local ok, out = pcall(vim.json.encode, tbl_out)
+  if not (ok and out) then
+    uv.fs_close(fd)
+    Log.error(('(%s.write_history): Unable to encode JSON data!'):format(MODSTR))
+    error(('(%s.write_history): Unable to encode JSON data!'):format(MODSTR), ERROR)
+  end
+
+  Log.debug(('(%s.write_history): Writing to `%s`'):format(MODSTR, Path.historyfile))
   uv.fs_write(fd, out)
   if close then
     uv.fs_close(fd)
@@ -431,13 +465,26 @@ function History.open_win()
     return
   end
 
-  vim.cmd.tabedit(Path.historyfile)
-  local set_hist_loc = vim.schedule_wrap(function()
+  local fd, stat = History.open_history('r')
+  if not (fd and stat) then
+    return
+  end
+
+  ---@type boolean, string[]
+  local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size))
+  if not ok then
+    uv.fs_close(fd)
+    return
+  end
+
+  vim.cmd.tabnew()
+  vim.schedule(function()
     History.hist_loc = {
       bufnr = vim.api.nvim_get_current_buf(),
       win = vim.api.nvim_get_current_win(),
     }
 
+    vim.api.nvim_buf_set_lines(History.hist_loc.bufnr, 0, 1, true, Util.reverse(data))
     vim.api.nvim_buf_set_name(History.hist_loc.bufnr, 'Project History')
 
     local win_opts = { win = History.hist_loc.win } ---@type vim.api.keyset.option
@@ -459,8 +506,6 @@ function History.open_win()
       silent = true,
     })
   end)
-
-  set_hist_loc()
 end
 
 function History.close_win()
