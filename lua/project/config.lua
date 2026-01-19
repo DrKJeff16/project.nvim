@@ -51,6 +51,10 @@ function Config.setup(options)
     Log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
   end
   require('project.commands').create_user_commands()
+
+  if Config.options.fzf_lua.enabled then
+    require('project.extensions.fzf-lua').setup_commands()
+  end
 end
 
 ---@return string config
