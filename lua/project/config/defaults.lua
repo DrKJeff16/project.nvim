@@ -349,6 +349,7 @@ function DEFAULTS:verify_datapath()
 end
 
 ---@return { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' } methods
+---@nodiscard
 function DEFAULTS:gen_methods()
   self:verify_lsp()
   local methods = { 'pattern' } ---@type { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }

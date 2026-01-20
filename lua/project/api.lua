@@ -49,6 +49,8 @@ local SWITCH = { ---@type ProjectRootSwitch
   end,
 }
 
+---@return string|nil last
+---@nodiscard
 function Api.get_last_project()
   local recent = History.get_recent_projects()
   if vim.tbl_isempty(recent) or #recent == 1 then
@@ -63,6 +65,7 @@ end
 ---@return string|HistoryPath
 ---@overload fun(): history_path: string
 ---@overload fun(path: 'datapath'|'projectpath'|'historyfile'): history_paths: HistoryPath
+---@nodiscard
 function Api.get_history_paths(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
 
@@ -87,6 +90,7 @@ end
 ---@return string|nil dir
 ---@return string|nil name
 ---@overload fun(): dir: string|nil, name: string|nil
+---@nodiscard
 function Api.find_lsp_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
@@ -126,6 +130,7 @@ end
 --- ---
 ---@param dir string
 ---@return boolean verified
+---@nodiscard
 function Api.verify_owner(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
@@ -148,6 +153,7 @@ end
 ---@return string|nil dir_res
 ---@return string|nil method
 ---@overload fun(): dir_res: string|nil, method: string|nil
+---@nodiscard
 function Api.find_pattern_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
@@ -160,6 +166,7 @@ end
 ---@param bufnr integer
 ---@return boolean valid
 ---@overload fun(): valid: boolean
+---@nodiscard
 function Api.valid_bt(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
@@ -299,6 +306,7 @@ end
 ---@return string|nil root
 ---@return string|nil method
 ---@overload fun(): root: string|nil, method: string|nil
+---@nodiscard
 function Api.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()

@@ -14,6 +14,7 @@ local uv = vim.uv or vim.loop
 ---@param path string
 ---@param hidden boolean
 ---@return boolean available
+---@nodiscard
 local function hidden_avail(path, hidden)
   Util.validate({
     path = { path, { 'string' } },
@@ -167,7 +168,8 @@ function M.gen_export_prompt(bang)
 end
 
 ---@param opts Project.Popup.SelectSpec
----@return Project.Popup.SelectChoices|ProjectCmdFun
+---@return Project.Popup.SelectChoices|ProjectCmdFun selector
+---@nodiscard
 function M.select.new(opts)
   Util.validate({
     opts = { opts, { 'table' } },

@@ -11,6 +11,7 @@ local Config = {}
 ---Get the default options for configuring `project`.
 --- ---
 ---@return Project.Config.Options defaults
+---@nodiscard
 function Config.get_defaults()
   return require('project.config.defaults')
 end
@@ -58,6 +59,7 @@ function Config.setup(options)
 end
 
 ---@return string config
+---@nodiscard
 function Config.get_config()
   if vim.g.project_setup ~= 1 then
     require('project.util.log').error(

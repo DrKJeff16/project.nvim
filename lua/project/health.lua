@@ -15,6 +15,7 @@ local Api = require('project.api')
 local M = {}
 
 ---@return boolean setup_called
+---@nodiscard
 function M.setup_check()
   vim.health.start('Setup')
   if not vim.g.project_setup == 1 then

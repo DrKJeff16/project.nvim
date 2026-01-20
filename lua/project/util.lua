@@ -14,12 +14,14 @@ local M = {}
 ---Checks whether nvim is running on Windows.
 --- ---
 ---@return boolean win32
+---@nodiscard
 function M.is_windows()
   return M.vim_has('win32')
 end
 
 ---@param feature string
 ---@return boolean has
+---@nodiscard
 function M.vim_has(feature)
   return vim.fn.has(feature) == 1
 end
@@ -53,6 +55,7 @@ end
 --- ---
 ---@param dir string
 ---@return boolean exists
+---@nodiscard
 function M.dir_exists(dir)
   M.validate({ dir = { dir, { 'string' } } })
 
@@ -67,6 +70,7 @@ end
 ---@overload fun(str: string): new_str: string
 ---@overload fun(str: string, use_dot: boolean): new_str: string
 ---@overload fun(str: string, use_dot?: boolean, triggers: string[]): new_str: string
+---@nodiscard
 function M.capitalize(str, use_dot, triggers)
   M.validate({
     str = { str, { 'string' } },
@@ -115,6 +119,7 @@ end
 ---@param t type Any return value the `type()` function would return
 ---@param data any The data to be type-checked
 ---@return boolean correct_type
+---@nodiscard
 function M.is_type(t, data)
   return data ~= nil and type(data) == t
 end
@@ -128,6 +133,7 @@ end
 --- ---
 ---@param T any[]
 ---@return any[] T
+---@nodiscard
 function M.reverse(T)
   M.validate({ T = { T, { 'table' } } })
 
@@ -144,6 +150,7 @@ end
 
 ---@param T table<string|integer, any>
 ---@return integer len
+---@nodiscard
 function M.get_dict_size(T)
   M.validate({ T = { T, { 'table' } } })
 
@@ -162,6 +169,7 @@ end
 --- ---
 ---@param mod string The `require()` argument to be checked
 ---@return boolean exists A boolean indicating whether the module exists or not
+---@nodiscard
 function M.mod_exists(mod)
   M.validate({ mod = { mod, { 'string' } } })
 
@@ -174,6 +182,7 @@ end
 
 ---@param nums number[]|number
 ---@return boolean int
+---@nodiscard
 function M.is_int(nums)
   M.validate({ nums = { nums, { 'number', 'table' } } })
 
@@ -199,6 +208,7 @@ end
 ---@return integer[] range_list
 ---@overload fun(x: integer): range_list: integer[]
 ---@overload fun(x: integer, y: integer): range_list: integer[]
+---@nodiscard
 function M.range(x, y, step)
   M.validate({
     x = { x, { 'number' } },
@@ -267,6 +277,7 @@ end
 --- ---
 ---@param path string
 ---@return boolean hidden
+---@nodiscard
 function M.is_hidden(path)
   M.validate({ path = { path, { 'string' } } })
 
@@ -292,6 +303,7 @@ end
 
 ---@param exe string[]|string
 ---@return boolean is_executable
+---@nodiscard
 function M.executable(exe)
   M.validate({ exe = { exe, { 'string', 'table' } } })
 
@@ -314,6 +326,7 @@ end
 
 ---@param tbl string[]
 ---@return string[] res
+---@nodiscard
 function M.delete_duplicates(tbl)
   M.validate({ tbl = { tbl, { 'table' } } })
 
@@ -344,6 +357,7 @@ end
 ---@param char string[]|string
 ---@param str string
 ---@return string new_str
+---@nodiscard
 function M.lstrip(char, str)
   M.validate({
     char = { char, { 'string', 'table' } },
@@ -384,6 +398,7 @@ end
 ---@param char string[]|string
 ---@param str string
 ---@return string new_str
+---@nodiscard
 function M.rstrip(char, str)
   M.validate({
     char = { char, { 'string', 'table' } },
@@ -418,6 +433,7 @@ end
 ---@param char string[]|string
 ---@param str string
 ---@return string new_str
+---@nodiscard
 function M.strip(char, str)
   M.validate({
     char = { char, { 'string', 'table' } },
@@ -451,6 +467,7 @@ end
 --- ---
 ---@param T table
 ---@return table NT
+---@nodiscard
 function M.dedup(T)
   M.validate({ T = { T, { 'table' } } })
 
@@ -475,16 +492,16 @@ function M.dedup(T)
   return NT
 end
 
----@param t 'number'|'string'|'boolean'|'table'|'function'
+---@param t type
 ---@param data nil|number|string|boolean|table|function
 ---@param sep string
 ---@param constraints string[]
 ---@return string
 ---@return boolean|nil
----@overload fun(t: 'number'|'string'|'boolean'|'table'|'function', data: nil|number|string|boolean|table|function): string, boolean|nil
----@overload fun(t: 'number'|'string'|'boolean'|'table'|'function', data: nil|number|string|boolean|table|function, sep: string): string, boolean|nil
----@overload fun(t: 'number'|'string'|'boolean'|'table'|'function', data: nil|number|string|boolean|table|function, sep: string, constraints: string[]): string, boolean|nil
----@overload fun(t: 'number'|'string'|'boolean'|'table'|'function', data: nil|number|string|boolean|table|function, sep?: string, constraints: string[]): string, boolean|nil
+---@overload fun(t: type, data: nil|number|string|boolean|table|function): string, boolean|nil
+---@overload fun(t: type, data: nil|number|string|boolean|table|function, sep: string): string, boolean|nil
+---@overload fun(t: type, data: nil|number|string|boolean|table|function, sep: string, constraints: string[]): string, boolean|nil
+---@overload fun(t: type, data: nil|number|string|boolean|table|function, sep?: string, constraints: string[]): string, boolean|nil
 function M.format_per_type(t, data, sep, constraints)
   M.validate({
     t = { t, { 'string' } },
