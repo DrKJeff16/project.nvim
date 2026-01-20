@@ -1,25 +1,3 @@
----@alias OpenMode
----|integer
----|string
----|"a"
----|"a+"
----|"ax"
----|"ax+"
----|"r"
----|"r+"
----|"rs"
----|"rs"
----|"sr"
----|"sr+"
----|"w"
----|"w+"
----|"wx"
----|"wx+"
----|"xa"
----|"xa+"
----|"xw"
----|"xw+"
-
 local MODSTR = 'project.util.history'
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
@@ -48,7 +26,7 @@ local History = {}
 --- ---
 History.session_projects = {} ---@type string[]
 
----@param mode OpenMode
+---@param mode uv.fs_open.flags
 ---@return integer|nil fd
 ---@return uv.fs_stat.result|nil stat
 function History.open_history(mode)

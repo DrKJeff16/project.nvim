@@ -354,7 +354,7 @@ M.open_menu = M.select.new({
         return
       end
 
-      choice(ctx)
+      choice()
     end)
   end,
   choices = function()
