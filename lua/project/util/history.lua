@@ -394,20 +394,28 @@ end
 ---Write projects to history file.
 --- ---
 function History.write_history()
-  local fd = History.open_history(History.recent_projects and 'w' or 'a')
-  if not fd then
-    Log.error(('(%s.write_history): File restricted!'):format(MODSTR))
-    error(('(%s.write_history): File restricted!'):format(MODSTR), ERROR)
+  History.historysize = require('project.config').options.historysize or 100
+
+  local file_history = {} ---@type string[]
+  local fd, stat = History.open_history('r')
+  if fd and stat then
+    local data = uv.fs_read(fd, stat.size)
+    uv.fs_close(fd)
+    if data then
+      file_history = vim.json.decode(data) ---@type string[]
+    end
   end
 
-  History.historysize = require('project.config').options.historysize or 100
   local res = History.get_recent_projects()
-  local len_res = #res
+  for _, proj in ipairs(file_history) do
+    if not vim.list_contains(res, proj) then
+      table.insert(res, proj)
+    end
+  end
+
   local tbl_out = vim.deepcopy(res)
   if History.historysize and History.historysize > 0 then
-    -- Trim table to last 100 entries
-    tbl_out = len_res > History.historysize
-        and vim.list_slice(res, len_res - History.historysize, len_res)
+    tbl_out = #res > History.historysize and vim.list_slice(res, #res - History.historysize, #res)
       or res
   end
 
@@ -416,6 +424,12 @@ function History.write_history()
     Log.error(('(%s.write_history): No data available to write!'):format(MODSTR))
     vim.notify(('(%s.write_history): No data available to write!'):format(MODSTR), WARN)
     return
+  end
+
+  fd = History.open_history('w')
+  if not fd then
+    Log.error(('(%s.write_history): File restricted!'):format(MODSTR))
+    error(('(%s.write_history): File restricted!'):format(MODSTR), ERROR)
   end
 
   ---@type boolean, string|nil
