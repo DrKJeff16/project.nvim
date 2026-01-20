@@ -368,7 +368,7 @@ M.open_menu = M.select.new({
       ['Open History'] = vim.cmd.ProjectHistory,
       ['Export History (JSON)'] = M.gen_export_prompt,
       ['Import History (JSON)'] = M.gen_import_prompt,
-      ['Open Help Docs'] = function()
+      ['Help'] = function()
         vim.cmd.help('project-nvim')
       end,
       ['Run Checkhealth'] = vim.cmd.ProjectHealth or function()
@@ -403,7 +403,7 @@ M.open_menu = M.select.new({
       'Open History',
       'Export History (JSON)',
       'Import History (JSON)',
-      'Open Help Docs',
+      'Help',
       'Go To Source Code',
       'Exit',
     }
