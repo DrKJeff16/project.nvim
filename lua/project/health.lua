@@ -1,4 +1,5 @@
 ---@class Project.HistoryPath
+---@field name string
 ---@field type string
 ---@field path string
 
@@ -67,18 +68,21 @@ function M.options_check()
   end
   table.sort(Options)
   local exceptions = {
+    'expand_excluded',
     'fzf_lua',
     'gen_methods',
     'new',
     'telescope',
+    'verify',
     'verify_datapath',
     'verify_histsize',
     'verify_logging',
+    'verify_lsp',
     'verify_scope_chdir',
   }
   for k, v in pairs(Options) do
     if not vim.list_contains(exceptions, k) then
-      local constraints = nil ---@type table|string[]|nil
+      local constraints = nil ---@type string[]|nil
       if k == 'scope_chdir' then
         constraints = { 'global', 'tab', 'win' }
       end
@@ -96,22 +100,23 @@ end
 
 function M.history_check()
   vim.health.start('History')
-  local P = { ---@type table<string, Project.HistoryPath>
-    datapath = { type = 'directory', path = Path.datapath },
-    projectpath = { type = 'directory', path = Path.projectpath },
-    historyfile = { type = 'file', path = Path.historyfile },
+  local P = { ---@type Project.HistoryPath[]
+    { name = 'datapath', type = 'directory', path = Path.datapath },
+    { name = 'projectpath', type = 'directory', path = Path.projectpath },
+    { name = 'historyfile', type = 'file', path = Path.historyfile },
   }
-  for name, v in pairs(P) do
-    local stat = (vim.uv or vim.loop).fs_stat(v.path)
+  for _, v in ipairs(P) do
+    local name, ptype, path = v.name, v.type, v.path
+    local stat = (vim.uv or vim.loop).fs_stat(path)
     if not stat then
-      vim.health.error(('%s: `%s` is missing or not readable!'):format(name, v.path))
+      vim.health.error(('%s: `%s` is missing or not readable!'):format(name, path))
       return
     end
-    if stat.type ~= v.type then
-      vim.health.error(('%s: `%s` is not of type `%s`!'):format(name, v.path, v.type))
+    if stat.type ~= ptype then
+      vim.health.error(('%s: `%s` is not of type `%s`!'):format(name, path, ptype))
       return
     end
-    vim.health.ok(('%s: `%s`'):format(name, v.path))
+    vim.health.ok(('%s: `%s`'):format(name, path))
   end
 end
 
