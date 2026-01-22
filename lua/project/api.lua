@@ -14,6 +14,7 @@
 
 local MODSTR = 'project.api'
 local ERROR = vim.log.levels.ERROR
+local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
 local in_list = vim.list_contains
@@ -211,12 +212,10 @@ function Api.set_pwd(dir, method)
   dir = vim.fn.expand(dir)
 
   local Log = require('project.util.log')
-  if not Config.options.allow_different_owners then
-    if not Api.verify_owner(dir) then
-      Log.error(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))
-      vim.notify(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR), ERROR)
-      return false
-    end
+  if not (Config.options.allow_different_owners or Api.verify_owner(dir)) then
+    Log.warn(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))
+    vim.notify(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR), WARN)
+    return false
   end
 
   local modified = false
@@ -390,18 +389,17 @@ function Api.on_buf_enter(verbose, bufnr)
   end
 
   Api.current_project, Api.current_method = Api.get_current_project(bufnr)
-  local write = Api.current_project ~= vim.fn.getcwd(0, 0)
+  local change = Api.current_project ~= vim.fn.getcwd(0, 0)
   Api.set_pwd(Api.current_project, Api.current_method)
-  Api.last_project = Api.get_last_project()
 
-  if write then
+  if change then
+    Api.last_project = Api.get_last_project()
     History.write_history()
   end
 end
 
 function Api.init()
-  local group = vim.api.nvim_create_augroup('project.nvim', { clear = false })
-  local detection_methods = Config.detection_methods
+  local group = vim.api.nvim_create_augroup('project.nvim', { clear = true })
   vim.api.nvim_create_autocmd('VimLeavePre', {
     group = group,
     callback = function()
@@ -409,7 +407,7 @@ function Api.init()
     end,
   })
   if not Config.options.manual_mode then
-    if in_list(detection_methods, 'pattern') then
+    if in_list(Config.detection_methods, 'pattern') then
       vim.api.nvim_create_autocmd('BufEnter', {
         group = group,
         nested = true,
@@ -418,7 +416,7 @@ function Api.init()
         end,
       })
     end
-    if in_list(detection_methods, 'lsp') then
+    if in_list(Config.detection_methods, 'lsp') then
       Api.gen_lsp_autocmd(group)
     end
   end
