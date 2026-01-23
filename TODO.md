@@ -27,10 +27,10 @@ Here's a list of some of the long term TODOs for this plugin.
 - [x] `fzf-lua` implementation
 - [x] `neo-tree.nvim` implementation
 - [x] Drop the async IO component ([#17](https://github.com/DrKJeff16/project.nvim/pull/17))
+- [X] Finish [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - [ ] Workspace Folders support (https://github.com/ahmedkhalf/project.nvim/pull/178)
 - [ ] Allow the users give their project an identifier (a name, number, a pizza, idk)
 - [ ] Implement attractive features from [`telescope-project.nvim`](https://github.com/nvim-telescope/telescope-project.nvim)
-- [ ] Finish [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 
 ---
 
