@@ -293,6 +293,10 @@ function Api.set_pwd(dir, method)
       vim.notify(msg, (ok and INFO or ERROR))
     end)
   end
+
+  if ok then
+    Log.debug(('Changed directory to `%s` using method `%s`'):format(dir, method))
+  end
   return ok
 end
 
