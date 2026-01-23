@@ -15,9 +15,31 @@ local Config = require('project.config')
 ---@field historyfile? string
 local Path = {}
 
-Path.last_dir_cache = ''
+Path.last_dir_cache = '' ---@type string
 Path.curr_dir_cache = {} ---@type string[]
 Path.exists = Util.path_exists
+
+---@param path string
+---@param flags uv.fs_open.flags
+---@param mode integer
+---@return integer|nil fd
+---@return uv.fs_stat.result|nil stat
+---@overload fun(path: string, flags: uv.fs_open.flags): fd: integer|nil, stat: uv.fs_stat.result|nil
+function Path.open_file(path, flags, mode)
+  Util.validate({
+    path = { path, { 'string' } },
+    flags = { flags, { 'string', 'number' } },
+    mode = { mode, { 'number', 'nil' }, true },
+  })
+  mode = (mode and Util.is_int(mode)) and mode or tonumber('644', 8)
+  if not Path.exists(path) then
+    return
+  end
+
+  local stat = uv.fs_stat(path)
+  local fd = uv.fs_open(path, flags, mode)
+  return fd, stat
+end
 
 ---@param dir string
 ---@return boolean excluded
@@ -35,6 +57,7 @@ end
 
 ---@param dir string
 ---@param identifier string
+---@return boolean is
 function Path.is(dir, identifier)
   Util.validate({
     dir = { dir, { 'string' } },

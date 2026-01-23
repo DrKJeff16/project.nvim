@@ -41,18 +41,14 @@ function History.open_history(mode)
     )
     error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
   end
-
-  local stat = uv.fs_stat(Path.historyfile)
-  local fd = uv.fs_open(Path.historyfile, mode, tonumber('644', 8))
-  return fd, stat
+  return Path.open_file(Path.historyfile, mode)
 end
 
 ---@param path string
----@param ind integer|string|nil
----@param force_name boolean|nil
+---@param ind integer|string
+---@param force_name boolean
 ---@overload fun(path: string)
 ---@overload fun(path: string, ind: integer|string)
----@overload fun(path: string, ind?: integer|string, force_name: boolean)
 function History.export_history_json(path, ind, force_name)
   Util.validate({
     path = { path, { 'string' } },
@@ -113,7 +109,7 @@ function History.export_history_json(path, ind, force_name)
 
   History.write_history()
 
-  local fd = uv.fs_open(path, 'w', tonumber('644', 8))
+  local fd = Path.open_file(path, 'w')
   if not fd then
     Log.error(('(%s.export_history_json): File restricted! `%s`'):format(MODSTR, path))
     error(('(%s.export_history_json): File restricted! `%s`'):format(MODSTR, path), ERROR)
@@ -160,13 +156,11 @@ function History.import_history_json(path, force_name)
   end
   path = vim.fn.fnamemodify(path, ':p')
 
-  local fd = uv.fs_open(path, 'r', tonumber('644', 8))
+  local fd, stat = Path.open_file(path, 'r')
   if not fd then
     Log.error(('(%s.import_history_json): File restricted! `%s`'):format(MODSTR, path))
     error(('(%s.import_history_json): File restricted! `%s`'):format(MODSTR, path), ERROR)
   end
-
-  local stat = uv.fs_fstat(fd)
   if not stat then
     Log.error(('(%s.import_history_json): File stat unavailable! `%s`'):format(MODSTR, path))
     error(('(%s.import_history_json): File stat unavailable! `%s`'):format(MODSTR, path), ERROR)
@@ -274,7 +268,7 @@ function History.deserialize_history(history_data)
 
   local projects = {} ---@type string[]
   for s in history_data:gmatch('[^\r\n]+') do
-    if not Path.is_excluded(s) and Util.dir_exists(s) then
+    if not Path.is_excluded(s) and Path.exists(s) then
       table.insert(projects, s)
     end
   end
