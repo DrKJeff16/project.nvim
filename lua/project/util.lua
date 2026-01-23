@@ -59,8 +59,7 @@ end
 function M.dir_exists(dir)
   M.validate({ dir = { dir, { 'string' } } })
 
-  local stat = (vim.uv or vim.loop).fs_stat(dir)
-  return stat ~= nil and stat.type == 'directory'
+  return vim.fn.isdirectory(dir) == 1
 end
 
 ---@param str string
@@ -561,8 +560,7 @@ function M.path_exists(path)
     return true
   end
 
-  --- CREDITS: @tomaskallup
-  return vim.fn.empty(vim.fn.glob(path:gsub('%[', '\\['))) == 0
+  return vim.fn.filereadable(path) == 1
 end
 
 ---@param path string
