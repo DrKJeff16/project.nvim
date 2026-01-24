@@ -173,6 +173,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ==============================================================================
 3. project-nvim.setup                                       *project-nvim.setup*
+                                                           *project-nvim.config*
 
 
     To enable the plugin you must call `setup()`.

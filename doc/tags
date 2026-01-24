@@ -31,6 +31,7 @@ ProjectTelescope	project-nvim.txt	/*ProjectTelescope*
 project-nvim	project-nvim.txt	/*project-nvim*
 project-nvim.api	project-nvim.txt	/*project-nvim.api*
 project-nvim.commands	project-nvim.txt	/*project-nvim.commands*
+project-nvim.config	project-nvim.txt	/*project-nvim.config*
 project-nvim.features	project-nvim.txt	/*project-nvim.features*
 project-nvim.fzf-lua-config	project-nvim.txt	/*project-nvim.fzf-lua-config*
 project-nvim.get_config()	project-nvim.txt	/*project-nvim.get_config()*

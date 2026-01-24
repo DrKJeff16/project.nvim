@@ -22,12 +22,6 @@ repos:
         entry: "make check"
         files: lua/.*lua$
         verbose: true
-      - id: make_clean
-        name: Clean help tags
-        language: system
-        entry: "make clean"
-        files: doc/.*\.txt$
-        verbose: true
       - id: make_docs
         name: Generate local help tags
         language: system
