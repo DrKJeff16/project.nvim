@@ -36,11 +36,17 @@ function History.open_history(mode)
 
   local dir_stat = uv.fs_stat(Path.projectpath)
   if not dir_stat then
-    require('project.util.log').error(
-      ('(%s.open_history): History file unavailable!'):format(MODSTR)
-    )
-    error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
+    Log.error(('(%s.open_history): History directory unavailable!'):format(MODSTR))
+    error(('(%s.open_history): History directory unavailable!'):format(MODSTR), ERROR)
   end
+
+  if not Path.exists(Path.historyfile) then
+    if vim.fn.writefile({}, Path.historyfile) == -1 then
+      Log.error(('(%s.open_history): History file unavailable!'):format(MODSTR))
+      error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
+    end
+  end
+
   return Path.open_file(Path.historyfile, mode)
 end
 
@@ -445,7 +451,7 @@ function History.open_win()
     return
   end
   if not Path.exists(Path.historyfile) then
-    require('project.util.log').error(('(%s.open_win): Bad historyfile path!'):format(MODSTR))
+    Log.error(('(%s.open_win): Bad historyfile path!'):format(MODSTR))
     error(('(%s.open_win): Bad historyfile path!'):format(MODSTR), ERROR)
   end
   if History.hist_loc then
