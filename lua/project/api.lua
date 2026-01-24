@@ -296,6 +296,7 @@ function Api.set_pwd(dir, method)
 
   if ok then
     Log.debug(('Changed directory to `%s` using method `%s`'):format(dir, method))
+    History.write_history()
   end
   return ok
 end
@@ -397,8 +398,8 @@ function Api.on_buf_enter(verbose, bufnr)
 
   if change then
     Api.last_project = Api.get_last_project()
-    History.write_history()
   end
+  History.write_history()
 end
 
 function Api.init()
