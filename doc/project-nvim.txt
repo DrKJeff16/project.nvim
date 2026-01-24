@@ -1,6 +1,7 @@
 ==============================================================================
 *project-nvim*                  A dynamic project management solution for neovim
 
+
     `project.nvim` is a Neovim plugin written in Lua that,
     under configurable conditions, automatically sets
     the user's `cwd` to the current project root
@@ -16,8 +17,10 @@
                 This plugin will be maintained and extended          ~
                         for the foreseeable future.              ~
 
+
 ==============================================================================
 Table of Contents                                             *project-nvim.toc*
+
 
 1. Features                                              |project-nvim.features|
 2. Installation                                           |project-nvim.install|
@@ -59,10 +62,13 @@ Table of Contents                                             *project-nvim.toc*
 10. Util                                                     |project-nvim.util|
 11. Troubleshooting                               |project-nvim.troubleshooting|
 
+
 ==============================================================================
 1. Features                                             *project-nvim.features*
 
-- Automatically sets the `cwd` to the project root directory using pattern matching (LSP optionally)
+
+- Automatically sets the `cwd` to the project root directory
+  using pattern matching (LSP optionally)
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook (`:checkhealth project`)
 - Vim help documentation (|project-nvim|)
@@ -82,6 +88,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 2.1 vim-plug                                     *project-nvim.install-vim-plug*
+
 >vim
     if has('nvim-0.11')
       Plug 'DrKJeff16/project.nvim'
@@ -98,30 +105,31 @@ Table of Contents                                             *project-nvim.toc*
       EOF
     endif
 <
+
 ------------------------------------------------------------------------------
 2.2 lazy.nvim                                        *project-nvim.install-lazy*
->lua
-    -- Other plugins
-      {
-        'DrKJeff16/project.nvim',
-        dependencies = { -- OPTIONAL
-          'nvim-lua/plenary.nvim',
-          'nvim-telescope/telescope.nvim',
-          'ibhagwan/fzf-lua',
-        },
-        ---@module 'project'
 
-        ---@type Project.Config.Options
-        opts = {
-          -- your configuration comes here
-          -- or leave it empty to use the default settings
-          -- refer to the configuration section below
-        },
-        cond = vim.fn.has('nvim-0.11') == 1, -- RECOMMENDED
-      },
+>lua
+    {
+    'DrKJeff16/project.nvim',
+    dependencies = { -- OPTIONAL
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim',
+      'ibhagwan/fzf-lua',
+    },
+    ---@module 'project'
+    opts = { ---@type Project.Config.Options
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    },
+    cond = vim.fn.has('nvim-0.11') == 1, -- RECOMMENDED
+    }
 <
+
 ------------------------------------------------------------------------------
 2.3 pckr.nvim                                        *project-nvim.install-pckr*
+
 >lua
     require('pckr').add({
       {
@@ -138,46 +146,48 @@ Table of Contents                                             *project-nvim.toc*
             -- refer to the configuration section below
           })
         end,
-      };
+      },
     })
 <
+
 ------------------------------------------------------------------------------
 2.4 paq-nvim                                          *project-nvim.install-paq*
+
 >lua
     local paq = require('paq')
-
     paq({
-      'savq/paq-nvim',
-
       'DrKJeff16/project.nvim',
       'nvim-lua/plenary.nvim', -- OPTIONAL
       'nvim-telescope/telescope.nvim', -- OPTIONAL
       'ibhagwan/fzf-lua', -- OPTIONAL
     })
 <
+
 ------------------------------------------------------------------------------
 2.5 LuaRocks                                     *project-nvim.install-luarocks*
+
 >sh
     luarocks install project.nvim # Global Install
-
     luarocks install --local project.nvim # Local Install
 <
+
 ==============================================================================
 3. project-nvim.setup                                       *project-nvim.setup*
 
-  To enable the plugin you must call `setup()`.
 
-  Parameters ~
+    To enable the plugin you must call `setup()`.
 
-  • `{options}`  (Type: |Project.Config.Options|) The options table
+    Parameters ~
 
-  The `{options}` parameter is not required,
-  but if you're interested in the default config options,
-  see |Project.Config.Options| for all the defaults.
+    • `{options}`  (Type: |Project.Config.Options|) The options table
 
-  Example ~
+    The `{options}` parameter is not required,
+    but if you're interested in the default config options,
+    see |Project.Config.Options| for all the defaults.
 
-  To use the defaults:
+    Example ~
+
+    To use the defaults:
 >lua
     require('project').setup()
 <
@@ -219,7 +229,7 @@ Table of Contents                                             *project-nvim.toc*
                                 as an alternative you can run
                                 this code snippet in your cmdline:
 >vim
-        :lua vim.print(require('project.config').get_defaults().patterns)
+            :lua vim.print(require('project.config').get_defaults().patterns)
 <
                                 WARNING ~
                                 It is not a good idea to forcefully
@@ -441,7 +451,7 @@ Table of Contents                                             *project-nvim.toc*
 
     * {disable_file_picker}     (boolean)
                                 CREDITS: UNKNOWN ~
-                                Set this to `true` if you don't want
+                                Set this to `false` if you don't want
                                 the file picker to appear
                                 after you've selected a project
 
@@ -451,6 +461,7 @@ Table of Contents                                             *project-nvim.toc*
 ------------------------------------------------------------------------------
 3.4 `Project.Config.FzfLua`                                *Project.Config.FzfLua*
                                                    *project-nvim.fzf-lua-config*
+
 
     * {enabled}                 (boolean)
                                 Determines whether the `fzf-lua`
@@ -464,6 +475,7 @@ Table of Contents                                             *project-nvim.toc*
 ------------------------------------------------------------------------------
 3.5 `Project.Config.Logging`                              *Project.Config.Logging*
                                                    *project-nvim.logging-config*
+
 
     * {enabled}                 (boolean)
                                 If `true`, it enables logging
@@ -487,6 +499,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ==============================================================================
 4. Pattern Matching                              *project-nvim.pattern-matching*
+
 
     `project.nvim` comes with a `vim-rooter`-inspired pattern matching
     expression engine to give you better handling of your projects.
@@ -529,6 +542,7 @@ Table of Contents                                             *project-nvim.toc*
 ==============================================================================
 5. Nvim Tree                                            *project-nvim.nvim-tree*
 
+
     Make sure these flags are enabled to support `nvim-tree`:
 >lua
         require('nvim-tree').setup({
@@ -541,9 +555,9 @@ Table of Contents                                             *project-nvim.toc*
         })
 <
 
-
 ==============================================================================
 6. Neo Tree                                              *project-nvim.neo-tree*
+
 
     You can use `:Neotree filesystem ...` when changing a project.
 
@@ -578,6 +592,7 @@ Table of Contents                                             *project-nvim.toc*
 ==============================================================================
 7. Telescope                                            *project-nvim.telescope*
 
+
     To enable `telescope.nvim` integration use the following
     code in your config:
 >lua
@@ -593,7 +608,6 @@ Table of Contents                                             *project-nvim.toc*
         require('telescope').load_extension('projects')
 <
     from within the init process.
-
 
     Example ~
 >lua
@@ -620,9 +634,9 @@ Table of Contents                                             *project-nvim.toc*
         :Telescope projects
 <
 
-
 ------------------------------------------------------------------------------
 7.1 Telescope Mappings                         *project-nvim.telescope.mappings*
+
 
     `project.nvim` comes with the following mappings for the
     Telescope picker:
@@ -639,13 +653,13 @@ Table of Contents                                             *project-nvim.toc*
 ==============================================================================
 8. Commands                                              *project-nvim.commands*
 
+
     There are a bunch of user commands you can call from the cmdline.
 
     NOTE: Some of these might be incomplete and/or reworked in the future. ~
 
+`:Project`                                                              *:Project*
 
-                                                                      *:Project*
-`:Project`
                             The `:Project` command will open a UI window
                             pointing to all the useful operations
                             this plugin can provide.
@@ -653,8 +667,8 @@ Table of Contents                                             *project-nvim.toc*
                             just as |vim.ui| is
 
 
-                                                       *ProjectLog*  *:ProjectLog*
-`:ProjectLog [clear]`
+`:ProjectLog [clear]`                                    *ProjectLog*  *:ProjectLog*
+
                             IMPORTANT ~
                             This command will not be available unless ~
                             you set `log.enabled = true` in your `setup()` ~
@@ -670,22 +684,20 @@ Table of Contents                                             *project-nvim.toc*
                             Useful for debugging
 
 
-                                                 *ProjectHealth*  *:ProjectHealth*
-`:ProjectHealth`
+`:ProjectHealth`                                   *ProjectHealth*  *:ProjectHealth*
 
                             The `:ProjectHealth` command essentially runs
                             `:checkhealth project` in a single command.
 
 
-                                               *ProjectHistory*  *:ProjectHistory*
-`:ProjectHistory`
+`:ProjectHistory`                                *ProjectHistory*  *:ProjectHistory*
+
                             The `:ProjectHistory` command toggles
                             the `project.nvim` history file in a new tab,
                             which can be exited by pressing `q` in Normal Mode
 
 
-                                                       *ProjectFzf*  *:ProjectFzf*
-`:ProjectFzf`
+`:ProjectFzf`                                            *ProjectFzf*  *:ProjectFzf*
 
                             This command works ONLY if you have ~
                             `fzf-lua` installed and loaded ~
@@ -697,8 +709,7 @@ Table of Contents                                             *project-nvim.toc*
                             `require('project.extensions.fzf-lua').run_fzf_lua()`
 
 
-                                           *ProjectTelescope*  *:ProjectTelescope*
-`:ProjectTelescope`
+`:ProjectTelescope`                          *ProjectTelescope*  *:ProjectTelescope*
 
                             This command works ONLY if you have ~
                             `telescope.nvim` installed and loaded ~
@@ -709,8 +720,7 @@ Table of Contents                                             *project-nvim.toc*
                             A shortcut, to be honest
 
 
-                                                       *ProjectAdd*  *:ProjectAdd*
-`:ProjectAdd[!]`
+`:ProjectAdd[!] [</path/to/dir>[ ...]]`                  *ProjectAdd*  *:ProjectAdd*
 
                             The `:ProjectAdd` command is a manual hook
                             that opens a prompt to input any directory
@@ -725,8 +735,7 @@ Table of Contents                                             *project-nvim.toc*
                             See |project-nvim.setup-options|
 
 
-                                                 *ProjectConfig*  *:ProjectConfig*
-`:ProjectConfig[!]`
+`:ProjectConfig[!]`                                *ProjectConfig*  *:ProjectConfig*
 
                             The `:ProjectConfig` command will toggle
                             your current config in a floating window,
@@ -741,8 +750,8 @@ Table of Contents                                             *project-nvim.toc*
                             Useful for debugging
 
 
-                                                 *ProjectDelete*  *:ProjectDelete*
-`:ProjectDelete[!] [/path/to/first [/path/to/second [...]]]`
+`:ProjectDelete[!] [/path/to/first [/path/to/second [...]]]`      *:ProjectDelete*
+                                                                 *ProjectDelete*
 
                             The `:ProjectDelete` command is a utility
                             to delete your projects.
@@ -764,8 +773,7 @@ Table of Contents                                             *project-nvim.toc*
                             you'll recieve a notification denoting success.
 
 
-                                                     *ProjectRoot*  *:ProjectRoot*
-`:ProjectRoot[!]`
+`:ProjectRoot[!]`                                      *ProjectRoot*  *:ProjectRoot*
 
                             The `:ProjectRoot` command is a manual hook
                             to set the current working directory
@@ -785,8 +793,7 @@ Table of Contents                                             *project-nvim.toc*
                             (see |project-nvim.setup-options|).
 
 
-                                               *ProjectSession*  *:ProjectSession*
-`:ProjectSession`
+`:ProjectSession`                                *ProjectSession*  *:ProjectSession*
 
                             IMPORTANT ~
                             This command requires `fd` to be installed ~
@@ -808,8 +815,8 @@ Table of Contents                                             *project-nvim.toc*
                             UI picker with its contents, and so on...
 
 
-                                          *ProjectExportJSON*  *:ProjectExportJSON*
-`:ProjectExportJSON[!] [</path/to/file[.json]> [<INDENT>]]`
+`:ProjectExportJSON[!] [</path/to/file[.json]> [<INDENT>]]`   *:ProjectExportJSON*
+                                                             *ProjectExportJSON*
 
                             WARNING ~
                             Use this script with caution! ~
@@ -824,79 +831,66 @@ Table of Contents                                             *project-nvim.toc*
                             If the target file already exists
                             and is not empty then a confirmation prompt
                             will appear.
-
 >vim
-        " Will open a prompt
-        :ProjectExportJSON
+        :ProjectExportJSON " Will open a prompt
 
-        " The output file will be `a.json`
-        :ProjectExportJSON a
+        :ProjectExportJSON a " Output file is `a.json`
 
-        " The output file will be `b`, with a tab size of 12
-        :ProjectExportJSON! b 12
+        :ProjectExportJSON! b 12 " Output file is `b`, with a tab size of 12
 
         " The output file will be `~/.c.json` (bang here is irrelevant)
         :ProjectExportJSON! ~/.c.json
 <
 
-                            IMPORTANT ~
-                            This feature is experimental, ~
-                            expect changes in the future! ~
-
-
-                                          *ProjectImportJSON*  *:ProjectImportJSON*
-`:ProjectImportJSON[!] [</path/to/file[.json]>]`
-
+`:ProjectImportJSON[!] [</path/to/file[.json]>]`              *:ProjectImportJSON*
+                                                             *ProjectImportJSON*
 
                             The `:ProjectImportJSON` allows the user
                             to retrieve their saved project history
                             in a JSON format.
 
                             Example Usage ~
-
 >vim
-        " Will open a prompt
-        :ProjectImportJSON
+                            " Will open a prompt
+                            :ProjectImportJSON
 
-        " Will be treated as `a.json`
-        :ProjectExportJSON a
-        :ProjectImportJSON a
+                            " Will be treated as `a.json`
+                            :ProjectExportJSON a
+                            :ProjectImportJSON a
 
-        " Will be treated as `b`
-        :ProjectExportJSON! b
-        :ProjectImportJSON! b
+                            " Will be treated as `b`
+                            :ProjectExportJSON! b
+                            :ProjectImportJSON! b
 <
-
-                            IMPORTANT ~
-                            This feature is experimental, ~
-                            expect changes in the future! ~
-
 
 ==============================================================================
 9. API                                                        *project-nvim.api*
 
+
     This is a set of both internal utilities and tools for the user
     to benefit from.
 
+
 ------------------------------------------------------------------------------
 9.1 `get_project_root()`                         *project-nvim.get_project_root()*
+
 
     An internal method for the API to determine
     both the project root and the method/LSP used
 
     Example ~
 >lua
-        ---@type string?, string?
-        local root, lsp_or_method = require('project').get_project_root()
+    ---@type string?, string?
+    local root, lsp_or_method = require('project').get_project_root()
 <
 
 ------------------------------------------------------------------------------
 9.2 `get_recent_procjects()`                 *project-nvim.get_recent_procjects()*
 
+
     This utility returns either an empty table `{}`
     or a string array `{ '/path/to/project1', ... }`
     containing your recent projects.
-
 
     Example ~
 
@@ -915,6 +909,7 @@ Table of Contents                                             *project-nvim.toc*
 ------------------------------------------------------------------------------
 9.3 `get_config()`                                     *project-nvim.get_config()*
 
+
     If `setup()` (|project-nvim.setup|) has been called, it returns
     a table containing the currently set options.
     Otherwise it will return `nil`.
@@ -923,46 +918,44 @@ Table of Contents                                             *project-nvim.toc*
 >lua
         local config = require('project').get_config()
 
-        -- Using `vim.notify()`
-        vim.notify(vim.inspect(config))
-
-        -- Using `vim.print()`
-        vim.print(config)
+        vim.notify(vim.inspect(config)) -- Using `vim.notify()`
+        vim.print(config) -- Using `vim.print()`
 <
 
 ------------------------------------------------------------------------------
 9.4 `get_history_paths()`                       *project-nvim.get_history_paths()*
 
+
     If no valid args are passed to this function
     it will return the following dictionary:
 >lua
-        --- Lua
-        local get_history_paths = require('project').get_history_paths
+    local get_history_paths = require('project').get_history_paths
 
-        -- A dictionary table containing all return values below
-        vim.print(get_history_paths())
-        --- {
-        ---     datapath = <datapath>,
-        ---     projectpath = <projectpath>,
-        ---     historyfile = <historyfile>,
-        --- }
+    -- A dictionary table containing all return values below
+    vim.print(get_history_paths())
+    --- {
+    ---     datapath = <datapath>,
+    ---     projectpath = <projectpath>,
+    ---     historyfile = <historyfile>,
+    --- }
 <
     Otherwise, if either `'datapath'`, `'projectpath'
     or `'historyfile'` are passed, it will return
     the string value of said arg:
 >lua
-        -- The directory where `project` sets its `datapath`
-        vim.print(get_history_paths('datapath'))
+    -- The directory where `project` sets its `datapath`
+    vim.print(get_history_paths('datapath'))
 
-        -- The directory where `project` saves the project history
-        vim.print(get_history_paths('projectpath'))
+    -- The directory where `project` saves the project history
+    vim.print(get_history_paths('projectpath'))
 
-        -- The path to where `project` saves its recent projects history
-        vim.print(get_history_paths('historyfile'))
+    -- The path to where `project` saves its recent projects history
+    vim.print(get_history_paths('historyfile'))
 <
 
 ==============================================================================
 10. Util                                                     *project-nvim.util*
+
 
     A set of utilities that get repeated across the board.
     These utilities are in part inspired by my own utilities
@@ -972,14 +965,16 @@ Table of Contents                                             *project-nvim.toc*
 
     You can import the utilities in Lua:
 >lua
-        local ProjUtil = require('project.utils.util')
+    local ProjUtil = require('project.utils.util')
 <
 
 ==============================================================================
 11. Troubleshooting                               *project-nvim.troubleshooting*
 
 
-    History File Not Created ~
+------------------------------------------------------------------------------
+11.1 History File Not Created
+
 
     If you're in a UNIX environment make sure you have
     `read`, `write` and `access` permissions (`rwx`)
@@ -990,13 +985,13 @@ Table of Contents                                             *project-nvim.toc*
 
     You can get the value of `projectpath` by running in the cmdline:
 >vim
-        :lua vim.print(require('project').get_history_paths('projectpath'))
+    :lua vim.print(require('project').get_history_paths('projectpath'))
 <
     If you lack the required permissions for that directory,
     you can either:
 
-        - Delete that directory (RECOMMENDED)
-        - Run `chmod 755 <project/path>` (NOT SURE IF THIS WILL FIX IT)
+    - Delete that directory (RECOMMENDED)
+    - Run `chmod 755 <project/path>` (NOT SURE IF THIS WILL FIX IT)
 
 
- vim:tw=78:ts=4:sw=4:sts=4:et:ft=help:norl:
+ vim: set tw=78 ts=4 sw=4 sts=4 et ai si sta ft=help norl:
