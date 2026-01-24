@@ -1,9 +1,6 @@
 # Rocks
 *.rock
 
-# Vim Helptags
-doc/tags
-
 # Local Issue Template
 ISSUE.md
 
