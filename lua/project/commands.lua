@@ -158,7 +158,7 @@ function Commands.create_user_commands()
       name = 'ProjectAdd',
       callback = function(ctx)
         if ctx and vim.tbl_isempty(ctx.fargs) then
-          local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' }
+          local opts = { prompt = 'Input a valid path to the project:', completion = 'dir' } ---@type vim.ui.input.Opts
           if ctx.bang ~= nil and ctx.bang then
             local bufnr = vim.api.nvim_get_current_buf()
             opts.default = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
@@ -171,7 +171,7 @@ function Commands.create_user_commands()
         local session = History.session_projects
         local msg = ''
         for _, input in ipairs(ctx.fargs) do
-          input = vim.fn.expand(input)
+          input = Util.rstrip('/', (vim.fn.fnamemodify(input, ':p')))
           if Util.dir_exists(input) then
             if Api.current_project ~= input and not vim.list_contains(session, input) then
               Api.set_pwd(input, 'command')
