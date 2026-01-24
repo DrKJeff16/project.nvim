@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.5.5-1](https://github.com/DrKJeff16/project.nvim/tree/v0.5.5-1) (2026-01-24)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v0.5.4-1...v0.5.5-1)
+
+**Implemented enhancements:**
+
+- fix\(history\): account for missing file descriptor \(closes \#43\) [\#44](https://github.com/DrKJeff16/project.nvim/pull/44) ([DrKJeff16](https://github.com/DrKJeff16))
+
+**Fixed bugs:**
+
+- \[BUG\]: New install fails on :ProjectAdd with "File restricted!" unless project\_history.json exists [\#43](https://github.com/DrKJeff16/project.nvim/issues/43)
+
 ## [v0.5.4-1](https://github.com/DrKJeff16/project.nvim/tree/v0.5.4-1) (2026-01-22)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v0.5.3-1...v0.5.4-1)
