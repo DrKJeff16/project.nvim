@@ -52,3 +52,4 @@ jobs:
             md5sums.txt
             sha512sums.txt
           token: ${{ secrets.GITHUB_TOKEN }}
+# vim: set ts=2 sts=2 sw=2 et ai si sta:

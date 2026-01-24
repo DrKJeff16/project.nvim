@@ -39,3 +39,4 @@ jobs:
           commit_message: "chore: format files with `vim-eof-comment`"
           commit_options: "--signoff"
           branch: ${{ github.head_ref }}
+# vim: set ts=2 sts=2 sw=2 et ai si sta:

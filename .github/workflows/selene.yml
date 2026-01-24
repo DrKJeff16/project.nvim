@@ -37,3 +37,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --display-style=quiet lua
+# vim: set ts=2 sts=2 sw=2 et ai si sta:

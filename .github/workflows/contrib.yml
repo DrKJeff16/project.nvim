@@ -19,3 +19,4 @@ jobs:
           committer_email: "g.maxc.fox@protonmail.com"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# vim: set ts=2 sts=2 sw=2 et ai si sta:

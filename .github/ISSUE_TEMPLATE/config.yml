@@ -3,3 +3,4 @@ contact_links:
   - name: Have a question?
     url: https://github.com/DrKJeff16/project.nvim/discussions
     about: Use GitHub Discussions instead
+# vim: set ts=2 sts=2 sw=2 et ai si sta:
