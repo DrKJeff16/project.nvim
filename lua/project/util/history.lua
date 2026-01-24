@@ -41,7 +41,7 @@ function History.open_history(mode)
   end
 
   if not Path.exists(Path.historyfile) then
-    if vim.fn.writefile({}, Path.historyfile) == -1 then
+    if vim.fn.writefile({ '[', ']' }, Path.historyfile) == -1 then
       Log.error(('(%s.open_history): History file unavailable!'):format(MODSTR))
       error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
     end
