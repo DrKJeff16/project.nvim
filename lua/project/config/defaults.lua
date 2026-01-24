@@ -7,71 +7,249 @@
 ---|'recent_project_files'
 ---|'search_in_project_files'
 
+---Table of options used for the telescope picker.
+--- ---
+---@class Project.Config.Telescope
+---Determines whether the newest projects come first in the
+---telescope picker (`'newest'`), or the oldest (`'oldest'`).
+--- ---
+---Default: `'newest'`
+--- ---
+---@field sort? 'newest'|'oldest'
+---If you have `telescope-file-browser.nvim` installed, you can enable this
+---so that the Telescope picker uses it instead of the `find_files` builtin.
+---
+---If `true`, use `telescope-file-browser.nvim` instead of builtins.
+---In case it is not available, it'll fall back to `find_files`.
+--- ---
+---Default: `false`
+--- ---
+---@field prefer_file_browser? boolean
+---Set this to `true` if you don't want the file picker to appear
+---after you've selected a project.
+---
+---CREDITS: [UNKNOWN](https://github.com/ahmedkhalf/project.nvim/issues/157#issuecomment-2226419783)
+--- ---
+---Default: `false`
+--- ---
+---@field disable_file_picker? boolean
+---Table of mappings for the Telescope picker.
+---
+---Only supports Normal and Insert modes.
+--- ---
+---Default: check the README
+--- ---
+---@field mappings? table<'i'|'n', table<string, Project.Telescope.ActionNames>>
+
+---Options for logging utility.
+--- ---
+---@class Project.Config.Logging
+---If `true`, it enables logging in the same directory in which your
+---history file is stored.
+--- ---
+---Default: `false`
+--- ---
+---@field enabled? boolean
+---The maximum logfile size (in megabytes).
+--- ---
+---Default: `1.1`
+--- ---
+---@field max_size? number
+---Path in which the log file will be saved.
+--- ---
+---Default: `vim.fn.stdpath('state')`
+--- ---
+---@field logpath? string
+
+---Table of options used for `fzf-lua` integration
+--- ---
+---@class Project.Config.FzfLua
+---Determines whether the `fzf-lua` integration is enabled.
+---
+---If `fzf-lua` is not installed, this won't make a difference.
+--- ---
+---Default: `false`
+--- ---
+---@field enabled? boolean
+
+---Table containing all the LSP-adjacent options.
+--- ---
+---@class Project.Config.LSP
+---If `true` then LSP-based method detection
+---will take precedence over traditional pattern matching.
+---
+---See |project-nvim.pattern-matching| for more info.
+--- ---
+---Default: `true`
+--- ---
+---@field enabled? boolean
+---Table of lsp clients to ignore by name,
+---e.g. `{ 'efm', ... }`.
+---
+---If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
+---for a list of servers.
+--- ---
+---Default: `{}`
+--- ---
+---@field ignore? string[]
+---If `true` then LSP-based method detection
+---will not be compared with pattern-matching-based detection.
+---
+---**WARNING: USE AT YOUR OWN DISCRETION!**
+--- ---
+---Default: `false`
+--- ---
+---@field no_fallback? boolean
+---Sets whether to use Pattern Matching rules to the LSP client.
+---
+---If `false` the Pattern Matching will only apply
+---to normal pattern matching.
+---
+---If `true` the `patterns` setting will also filter
+---your LSP's `root_dir`, assuming there is one
+---and `lsp.enabled` is set to `true`.
+--- ---
+---Default: `false`
+--- ---
+---@field use_pattern_matching? boolean
+
 local MODSTR = 'project.config.defaults'
 local WARN = vim.log.levels.WARN
-local in_list = vim.tbl_contains
 local Util = require('project.util')
 
 ---The options available for in `require('project').setup()`.
 --- ---
 ---@class Project.Config.Options
+---Table containing all the LSP-adjacent options.
+--- ---
+---@field lsp? Project.Config.LSP
+---If `true` your root directory won't be changed automatically,
+---so you have the option to manually do so
+---using the `:ProjectRoot` command.
+--- ---
+---Default: `false`
+--- ---
+---@field manual_mode?  boolean
+---All the patterns used to detect the project's root directory.
+---
+---See `:h project.nvim-pattern-matching`.
+--- ---
+---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile', ... }`
+--- ---
+---@field patterns? string[]
+---Hook to run before attaching to a new project.
+---
+---It recieves `target_dir` and, optionally,
+---the `method` used to change directory.
+---
+---CREDITS: @danilevy1212
+--- ---
+---Default: `function(target_dir, method) end`
+--- ---
+---@field before_attach? fun(target_dir: string, method: string)
+---Hook to run after attaching to a new project.
+---**_This only runs if the directory changes successfully._**
+---
+---It recieves `dir` and, optionally,
+---the `method` used to change directory.
+---
+---CREDITS: @danilevy1212
+--- ---
+---Default: `function(dir, method) end`
+--- ---
+---@field on_attach? fun(dir: string, method: string)
+---Determines whether a project will be added
+---if its project root is owned by a different user.
+---
+---If `true`, it will add a project to the history even if its root
+---is not owned by the current nvim `UID` **(UNIX only)**.
+--- ---
+---Default: `false`
+--- ---
+---@field allow_different_owners? boolean
+---If enabled, set `vim.o.autochdir` to `true`.
+---
+---This is disabled by default because the plugin implicitly disables `autochdir`.
+--- ---
+---Default: `false`
+--- ---
+---@field enable_autochdir? boolean
+---Make hidden files visible when using any picker.
+--- ---
+---Default: `false`
+--- ---
+---@field show_hidden? boolean
+---Don't calculate root dir on specific directories,
+---e.g. `{ '~/.cargo/*', ... }`.
+---
+---For more info see `:h project-nvim.pattern-matching`.
+--- ---
+---Default: `{}`
+--- ---
+---@field exclude_dirs? string[]
+---If `false`, you'll get a _notification_ every time
+---`project.nvim` changes directory.
+---
+---This is useful for debugging, or for players that
+---enjoy verbose operations.
+--- ---
+---Default: `true`
+--- ---
+---@field silent_chdir? boolean
+---Determines the scope for changing the directory.
+---
+---Valid options are:
+--- - `'global'`: All your nvim `cwd` will sync to your current buffer's project
+--- - `'tab'`: _Per-tab_ `cwd` sync to the current buffer's project
+--- - `'win'`: _Per-window_ `cwd` sync to the current buffer's project
+--- ---
+---Default: `'global'`
+--- ---
+---@field scope_chdir? 'global'|'tab'|'win'
+---Determines in what filetypes/buftypes the plugin won't execute.
+---It's a table with two fields:
+---
+--- - `ft`: A string array of filetypes to exclude
+--- - `bt`: A string array of buftypes to exclude
+---
+---CREDITS TO [@Zeioth](https://github.com/Zeioth)!:
+---[`Zeioth/project.nvim`](https://github.com/Zeioth/project.nvim/commit/95f56b8454f3285b819340d7d769e67242d59b53)
+--- ---
+---The default value for this one can be found in the project's `README.md`.
+--- ---
+---@field disable_on? table<'ft'|'bt', string[]>
+---The path where `project.nvim` will store the project history directory,
+---containing the project history in it.
+---
+---For more info, run `:lua vim.print(require('project').get_history_paths())`
+--- ---
+---Default: `vim.fn.stdpath('data')`
+--- ---
+---@field datapath? string
+---The history size. (by `@acristoffers`)
+---
+---This will indicate how many entries will be
+---written to the history file.
+---Set to `0` for no limit.
+--- ---
+---Default: `100`
+--- ---
+---@field historysize? integer
+---Table of options used for `fzf-lua` integration
+--- ---
+---@field fzf_lua? Project.Config.FzfLua
+---Options for logging utility.
+--- ---
+---@field log? Project.Config.Logging
+---Table of options used for the telescope picker.
+--- ---
+---@field telescope? Project.Config.Telescope
+
+---@class Project.Config.Defaults: Project.Config.Options
 local DEFAULTS = {
-  ---Table containing all the LSP-adjacent options.
-  --- ---
-  ---@class Project.Config.LSP
-  lsp = {
-    ---If `true` then LSP-based method detection
-    ---will take precedence over traditional pattern matching.
-    ---
-    ---See |project-nvim.pattern-matching| for more info.
-    --- ---
-    ---Default: `true`
-    --- ---
-    enabled = true, ---@type boolean
-    ---Table of lsp clients to ignore by name,
-    ---e.g. `{ 'efm', ... }`.
-    ---
-    ---If you have `nvim-lspconfig` installed **see** `:h lspconfig-all`
-    ---for a list of servers.
-    --- ---
-    ---Default: `{}`
-    --- ---
-    ignore = {}, ---@type string[]
-    ---If `true` then LSP-based method detection
-    ---will not be compared with pattern-matching-based detection.
-    ---
-    ---**WARNING: USE AT YOUR OWN DISCRETION!**
-    --- ---
-    ---Default: `false`
-    --- ---
-    no_fallback = false, ---@type boolean
-    ---Sets whether to use Pattern Matching rules to the LSP client.
-    ---
-    ---If `false` the Pattern Matching will only apply
-    ---to normal pattern matching.
-    ---
-    ---If `true` the `patterns` setting will also filter
-    ---your LSP's `root_dir`, assuming there is one
-    ---and `lsp.enabled` is set to `true`.
-    --- ---
-    ---Default: `false`
-    --- ---
-    use_pattern_matching = false, ---@type boolean
-  },
-  ---If `true` your root directory won't be changed automatically,
-  ---so you have the option to manually do so
-  ---using the `:ProjectRoot` command.
-  --- ---
-  ---Default: `false`
-  --- ---
-  manual_mode = false, ---@type boolean
-  ---All the patterns used to detect the project's root directory.
-  ---
-  ---See `:h project.nvim-pattern-matching`.
-  --- ---
-  ---Default: `{ '.git', '.github', '_darcs', '.hg', '.bzr', '.svn', 'Pipfile', ... }`
-  --- ---
-  patterns = { ---@type string[]
+  lsp = { enabled = true, ignore = {}, no_fallback = false, use_pattern_matching = false },
+  manual_mode = false,
+  patterns = {
     '.git',
     '.github',
     '_darcs',
@@ -86,93 +264,14 @@ local DEFAULTS = {
     '.sln',
     '.nvim.lua',
   },
-  ---Hook to run before attaching to a new project.
-  ---
-  ---It recieves `target_dir` and, optionally,
-  ---the `method` used to change directory.
-  ---
-  ---CREDITS: @danilevy1212
-  --- ---
-  ---Default: `function(target_dir, method) end`
-  --- ---
-  ---@param target_dir string
-  ---@param method string
   before_attach = function(target_dir, method) end, ---@diagnostic disable-line:unused-local
-  ---Hook to run after attaching to a new project.
-  ---**_This only runs if the directory changes successfully._**
-  ---
-  ---It recieves `dir` and, optionally,
-  ---the `method` used to change directory.
-  ---
-  ---CREDITS: @danilevy1212
-  --- ---
-  ---Default: `function(dir, method) end`
-  --- ---
-  ---@param dir string
-  ---@param method string
   on_attach = function(dir, method) end, ---@diagnostic disable-line:unused-local
-  ---Determines whether a project will be added
-  ---if its project root is owned by a different user.
-  ---
-  ---If `true`, it will add a project to the history even if its root
-  ---is not owned by the current nvim `UID` **(UNIX only)**.
-  --- ---
-  ---Default: `false`
-  --- ---
-  allow_different_owners = false, ---@type boolean
-  ---If enabled, set `vim.o.autochdir` to `true`.
-  ---
-  ---This is disabled by default because the plugin implicitly disables `autochdir`.
-  --- ---
-  ---Default: `false`
-  --- ---
-  enable_autochdir = false, ---@type boolean
-  ---Make hidden files visible when using any picker.
-  --- ---
-  ---Default: `false`
-  --- ---
-  show_hidden = false, ---@type boolean
-  ---Don't calculate root dir on specific directories,
-  ---e.g. `{ '~/.cargo/*', ... }`.
-  ---
-  ---For more info see `:h project-nvim.pattern-matching`.
-  --- ---
-  ---Default: `{}`
-  --- ---
-  exclude_dirs = {}, ---@type string[]
-  ---If `false`, you'll get a _notification_ every time
-  ---`project.nvim` changes directory.
-  ---
-  ---This is useful for debugging, or for players that
-  ---enjoy verbose operations.
-  --- ---
-  ---Default: `true`
-  --- ---
-  silent_chdir = true, ---@type boolean
-  ---Determines the scope for changing the directory.
-  ---
-  ---Valid options are:
-  --- - `'global'`: All your nvim `cwd` will sync to your current buffer's project
-  --- - `'tab'`: _Per-tab_ `cwd` sync to the current buffer's project
-  --- - `'win'`: _Per-window_ `cwd` sync to the current buffer's project
-  --- ---
-  ---Default: `'global'`
-  --- ---
-  scope_chdir = 'global', ---@type 'global'|'tab'|'win'
-  ---Determines in what filetypes/buftypes the plugin won't execute.
-  ---It's a table with two fields:
-  ---
-  --- - `ft`: A string array of filetypes to exclude
-  --- - `bt`: A string array of buftypes to exclude
-  ---
-  ---CREDITS TO [@Zeioth](https://github.com/Zeioth)!:
-  ---[`Zeioth/project.nvim`](https://github.com/Zeioth/project.nvim/commit/95f56b8454f3285b819340d7d769e67242d59b53)
-  --- ---
-  ---The default value for this one can be found in the project's `README.md`.
-  --- ---
-  ---@class Project.Config.DisableOn
-  ---@field ft? string[]
-  ---@field bt? string[]
+  allow_different_owners = false,
+  enable_autochdir = false,
+  show_hidden = false,
+  exclude_dirs = {},
+  silent_chdir = true,
+  scope_chdir = 'global',
   disable_on = {
     ft = {
       '',
@@ -192,96 +291,14 @@ local DEFAULTS = {
     },
     bt = { 'help', 'nofile', 'nowrite', 'terminal' },
   },
-  ---The path where `project.nvim` will store the project history directory,
-  ---containing the project history in it.
-  ---
-  ---For more info, run `:lua vim.print(require('project').get_history_paths())`
-  --- ---
-  ---Default: `vim.fn.stdpath('data')`
-  --- ---
-  datapath = vim.fn.stdpath('data'), ---@type string
-  ---The history size. (by `@acristoffers`)
-  ---
-  ---This will indicate how many entries will be
-  ---written to the history file.
-  ---Set to `0` for no limit.
-  --- ---
-  ---Default: `100`
-  --- ---
-  historysize = 100, ---@type integer
-  ---Table of options used for `fzf-lua` integration
-  --- ---
-  ---@class Project.Config.FzfLua
-  fzf_lua = {
-    ---Determines whether the `fzf-lua` integration is enabled.
-    ---
-    ---If `fzf-lua` is not installed, this won't make a difference.
-    --- ---
-    ---Default: `false`
-    --- ---
-    enabled = false, ---@type boolean
-  },
-  ---Options for logging utility.
-  --- ---
-  ---@class Project.Config.Logging
-  log = {
-    ---If `true`, it enables logging in the same directory in which your
-    ---history file is stored.
-    --- ---
-    ---Default: `false`
-    --- ---
-    enabled = false, ---@type boolean
-    ---The maximum logfile size (in megabytes).
-    --- ---
-    ---Default: `1.1`
-    --- ---
-    max_size = 1.1, ---@type number
-    ---Path in which the log file will be saved.
-    --- ---
-    ---Default: `vim.fn.stdpath('state')`
-    --- ---
-    logpath = vim.fn.stdpath('state'), ---@type string
-  },
-  ---Table of options used for the telescope picker.
-  --- ---
-  ---@class Project.Config.Telescope
+  datapath = vim.fn.stdpath('data'),
+  historysize = 100,
+  fzf_lua = { enabled = false },
+  log = { enabled = false, max_size = 1.1, logpath = vim.fn.stdpath('state') },
   telescope = {
-    ---Determines whether the newest projects come first in the
-    ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
-    --- ---
-    ---Default: `'newest'`
-    --- ---
     sort = 'newest', ---@type 'newest'|'oldest'
-    ---If you have `telescope-file-browser.nvim` installed, you can enable this
-    ---so that the Telescope picker uses it instead of the `find_files` builtin.
-    ---
-    ---If `true`, use `telescope-file-browser.nvim` instead of builtins.
-    ---In case it is not available, it'll fall back to `find_files`.
-    --- ---
-    ---Default: `false`
-    --- ---
     prefer_file_browser = false, ---@type boolean
-    ---Set this to `true` if you don't want the file picker to appear
-    ---after you've selected a project.
-    ---
-    ---CREDITS: [UNKNOWN](https://github.com/ahmedkhalf/project.nvim/issues/157#issuecomment-2226419783)
-    --- ---
-    ---Default: `false`
-    --- ---
     disable_file_picker = false, ---@type boolean
-    ---Table of mappings for the Telescope picker.
-    ---
-    ---Only supports Normal and Insert modes.
-    --- ---
-    ---Default: check the README
-    --- ---
-    ---@class Project.Telescope.Mappings
-    ---Normal mode mappings.
-    --- ---
-    ---@field i? table<string, Project.Telescope.ActionNames>
-    ---Insert mode mappings.
-    --- ---
-    ---@field n? table<string, Project.Telescope.ActionNames>
     mappings = {
       n = {
         b = 'browse_project_files',
@@ -330,7 +347,7 @@ end
 function DEFAULTS:verify_scope_chdir()
   Util.validate({ scope_chdir = { self.scope_chdir, { 'string', 'nil' }, true } })
 
-  if self.scope_chdir and in_list({ 'global', 'tab', 'win' }, self.scope_chdir) then
+  if self.scope_chdir and vim.list_contains({ 'global', 'tab', 'win' }, self.scope_chdir) then
     return
   end
 
@@ -377,12 +394,14 @@ function DEFAULTS:verify_logging()
     vim.notify(('`options.logging` is deprecated, use `options.log.enabled`!'):format(MODSTR), WARN)
   end
 
+  ---@diagnostic disable:need-check-nil
   if not (Util.is_type('string', log.logpath) and Path.exists(log.logpath)) then
     self.log.logpath = DEFAULTS.log.logpath
   end
   if not (Util.is_type('number', log.max_size) and log.max_size > 0) then
     self.log.max_size = DEFAULTS.log.max_size
   end
+  ---@diagnostic enable:need-check-nil
 end
 
 function DEFAULTS:expand_excluded()
@@ -425,7 +444,7 @@ end
 function DEFAULTS:verify()
   local keys = vim.tbl_keys(DEFAULTS) ---@type string[]
   for k, _ in pairs(self) do
-    if not in_list(keys, k) then
+    if not vim.list_contains(keys, k) then
       self[k] = nil
     end
   end
@@ -446,13 +465,13 @@ function DEFAULTS:verify()
   )
 end
 
----@param opts Project.Config.Options
----@return Project.Config.Options
----@overload fun(): Project.Config.Options
+---@param opts Project.Config.Defaults|Project.Config.Options
+---@return Project.Config.Defaults
+---@overload fun(): Project.Config.Defaults
 function DEFAULTS:new(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  ---@type Project.Config.Options
+  ---@type Project.Config.Defaults
   local obj = setmetatable(vim.tbl_deep_extend('keep', opts or {}, DEFAULTS), {
     __index = DEFAULTS,
   })

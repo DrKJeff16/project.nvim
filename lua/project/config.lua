@@ -10,13 +10,13 @@ local Config = {}
 
 ---Get the default options for configuring `project`.
 --- ---
----@return Project.Config.Options defaults
+---@return Project.Config.Defaults defaults
 ---@nodiscard
 function Config.get_defaults()
   return require('project.config.defaults')
 end
 
-Config.options = setmetatable({}, { __index = Config.get_defaults() }) ---@type Project.Config.Options
+Config.options = setmetatable({}, { __index = Config.get_defaults() }) ---@type Project.Config.Defaults
 
 ---The function called when running `require('project').setup()`.
 --- ---
