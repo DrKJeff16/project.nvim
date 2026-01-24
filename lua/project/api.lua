@@ -195,7 +195,7 @@ function Api.gen_lsp_autocmd(group)
     group = group,
     nested = true,
     callback = function(ev)
-      Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
+      Api.on_buf_enter(ev.buf)
     end,
   })
   vim.g.project_lspattach = 1
@@ -365,17 +365,12 @@ function Api.get_current_project(bufnr)
   return curr, method, last
 end
 
----@param verbose boolean
 ---@param bufnr integer
 ---@overload fun()
----@overload fun(verbose: boolean)
----@overload fun(verbose: boolean|nil, bufnr: integer)
-function Api.on_buf_enter(verbose, bufnr)
+function Api.on_buf_enter(bufnr)
   Util.validate({
-    verbose = { verbose, { 'boolean', 'nil' }, true },
     bufnr = { bufnr, { 'number', 'nil' }, true },
   })
-  verbose = verbose ~= nil and verbose or false
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
   if not Api.valid_bt(bufnr) then
     return
@@ -416,7 +411,7 @@ function Api.init()
         group = group,
         nested = true,
         callback = function(ev)
-          Api.on_buf_enter(not Config.options.silent_chdir, ev.buf)
+          Api.on_buf_enter(ev.buf)
         end,
       })
     end

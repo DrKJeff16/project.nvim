@@ -332,7 +332,10 @@ function Commands.create_user_commands()
     {
       name = 'ProjectRoot',
       callback = function(ctx)
-        Api.on_buf_enter(ctx.bang ~= nil and ctx.bang or false)
+        Api.on_buf_enter()
+        if ctx and ctx.bang then
+          vim.notify(vim.fn.getcwd(0, 0))
+        end
       end,
       desc = 'Sets the current project root to the current CWD',
       bang = true,
