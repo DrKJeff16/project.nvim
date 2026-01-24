@@ -5,7 +5,7 @@ local Util = require('project.util')
 ---@class Project.ConfigLoc: Project.HistoryLoc
 
 ---@class Project.Config
----@field conf_loc? Project.ConfigLoc
+---@field float? Project.ConfigLoc
 local Config = {}
 
 ---Get the default options for configuring `project`.
@@ -88,7 +88,7 @@ function Config.get_config()
 end
 
 function Config.open_win()
-  if Config.conf_loc then
+  if Config.float then
     return
   end
 
@@ -132,22 +132,22 @@ function Config.open_win()
   vim.keymap.set('n', 'q', Config.close_win, { buffer = bufnr })
   vim.keymap.set('n', '<Esc>', Config.close_win, { buffer = bufnr })
 
-  Config.conf_loc = { bufnr = bufnr, win = win }
+  Config.float = { bufnr = bufnr, win = win }
 end
 
 function Config.close_win()
-  if not Config.conf_loc then
+  if not Config.float then
     return
   end
 
-  pcall(vim.api.nvim_buf_delete, Config.conf_loc.bufnr, { force = true })
-  pcall(vim.api.nvim_win_close, Config.conf_loc.win, true)
+  pcall(vim.api.nvim_buf_delete, Config.float.bufnr, { force = true })
+  pcall(vim.api.nvim_win_close, Config.float.win, true)
 
-  Config.conf_loc = nil
+  Config.float = nil
 end
 
 function Config.toggle_win()
-  if not Config.conf_loc then
+  if not Config.float then
     Config.open_win()
     return
   end
