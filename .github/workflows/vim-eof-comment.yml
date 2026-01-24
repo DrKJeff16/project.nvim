@@ -17,6 +17,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: true
+          token: ${{ secrets.PAT }}
       - name: Set up Python
         uses: actions/setup-python@v6.1.0
         with:
@@ -27,7 +31,7 @@ jobs:
           pip install -U vim-eof-comment
       - name: Run vim-eof-comment
         run: |
-          vim-eof-comment -e lua,Makefile,yaml,toml -i lua:2:Y -v .
+          vim-eof-comment -e lua,Makefile,yaml,yml,toml -i lua:2:Y -v .
           vim-eof-comment -e md -nv .
       - name: Auto Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v7.1.0
