@@ -51,10 +51,10 @@ function History.open_history(mode)
 end
 
 ---@param path string
----@param ind integer|string
+---@param ind integer|string|nil
 ---@param force_name boolean
 ---@overload fun(path: string)
----@overload fun(path: string, ind: integer|string)
+---@overload fun(path: string, ind: integer|string|nil)
 function History.export_history_json(path, ind, force_name)
   Util.validate({
     path = { path, { 'string' } },
