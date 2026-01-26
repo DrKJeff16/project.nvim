@@ -13,7 +13,9 @@ install-deps:
 	@$(LUAROCKS_CMD) nlua
 
 test:
+	@echo -e "Running tests...\n"
 	@busted spec
+	@echo
 
 helptags:
 	@echo -e "Generating helptags...\n"
@@ -26,7 +28,7 @@ lint:
 	@echo
 
 check:
-	@echo -e "Running selene..."
+	@echo -e "Running selene...\n"
 	@selene lua
 	@echo
 
