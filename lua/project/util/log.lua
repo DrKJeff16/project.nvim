@@ -139,7 +139,7 @@ function Log.create_commands()
           Log.toggle_win()
           return
         end
-        if ctx.fargs ~= 'clear' then
+        if ctx.fargs[1] ~= 'clear' then
           vim.notify('Usage - `:ProjectLog [clear]`', INFO)
           return
         end
