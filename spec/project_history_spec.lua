@@ -10,6 +10,18 @@ describe('project.nvim', function()
   end)
 
   describe('history', function()
+    describe('opening', function()
+      it('should throw error with wrong flag', function()
+        local ok = pcall(history.open_history, '')
+        assert.is_false(ok)
+      end)
+      for _, t in ipairs({ function() end, true }) do
+        it(('should throw error with flag of type %s'):format(type(t)), function()
+          local ok = pcall(history.open_history, t)
+          assert.is_false(ok)
+        end)
+      end
+    end)
     describe('writing', function()
       it('should write to non-existant file in valid directory', function()
         local ok = pcall(history.write_history, './test.json')

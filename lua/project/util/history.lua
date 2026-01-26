@@ -32,6 +32,31 @@ History.session_projects = {} ---@type string[]
 function History.open_history(mode)
   Util.validate({ mode = { mode, { 'string', 'number' } } })
 
+  local allowed_flags = {
+    'a',
+    'a+',
+    'ax',
+    'ax+',
+    'r',
+    'r+',
+    'rs',
+    'rs+',
+    'sr',
+    'sr+',
+    'w',
+    'w+',
+    'wx',
+    'wx+',
+    'xa',
+    'xa+',
+    'xw',
+    'xw+',
+  }
+  if Util.is_type('string', mode) and not vim.list_contains(allowed_flags, mode) then
+    Log.error(('(%s.open_history): Invalid flag `%s`!'):format(MODSTR, mode))
+    error(('(%s.open_history): Invalid flag `%s`!'):format(MODSTR, mode))
+  end
+
   Path.create_path()
 
   local dir_stat = uv.fs_stat(Path.projectpath)
