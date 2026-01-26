@@ -393,11 +393,29 @@ end
 
 ---Write projects to history file.
 --- ---
-function History.write_history()
+---@param path string
+---@overload fun()
+function History.write_history(path)
+  Util.validate({ path = { path, { 'string', 'nil' }, true } })
+  path = path or Path.historyfile
+  path = Util.rstrip('/', vim.fn.fnamemodify(path, ':p'))
+
+  if not Path.exists(path) then
+    if vim.fn.writefile({ '[', ']' }, path) == -1 then
+      Log.error(('(%s.write_history): History file unavailable!'):format(MODSTR))
+      error(('(%s.write_history): History file unavailable!'):format(MODSTR), ERROR)
+    end
+  end
+
   History.historysize = require('project.config').options.historysize or 100
 
   local file_history = {} ---@type string[]
-  local fd, stat = History.open_history('r')
+  local fd, stat
+  if path == Path.historyfile then
+    fd, stat = History.open_history('r')
+  else
+    fd, stat = Path.open_file(path, 'r')
+  end
   if fd and stat then
     local data = uv.fs_read(fd, stat.size)
     uv.fs_close(fd)
@@ -426,7 +444,11 @@ function History.write_history()
     return
   end
 
-  fd = History.open_history('w')
+  if path == Path.historyfile then
+    fd = History.open_history('w')
+  else
+    fd = Path.open_file(path, 'w')
+  end
   if not fd then
     Log.error(('(%s.write_history): File restricted!'):format(MODSTR))
     error(('(%s.write_history): File restricted!'):format(MODSTR), ERROR)
