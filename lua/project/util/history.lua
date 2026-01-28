@@ -9,9 +9,10 @@ local Util = require('project.util')
 local Path = require('project.util.path')
 local Log = require('project.util.log')
 
----@class Project.HistoryLoc
+---@class Project.HistoryWin
 ---@field bufnr integer
 ---@field win integer
+---@field tab integer
 
 ---@class Project.Util.History
 ---Projects from previous neovim sessions.
@@ -19,7 +20,7 @@ local Log = require('project.util.log')
 ---@field recent_projects? string[]
 ---@field has_watch_setup? boolean
 ---@field historysize? integer
----@field hist_loc? Project.HistoryLoc
+---@field window? Project.HistoryWin
 local History = {}
 
 ---Projects from current neovim session.
@@ -501,7 +502,7 @@ function History.open_win()
     Log.error(('(%s.open_win): Bad historyfile path!'):format(MODSTR))
     error(('(%s.open_win): Bad historyfile path!'):format(MODSTR), ERROR)
   end
-  if History.hist_loc then
+  if History.window then
     return
   end
 
@@ -527,29 +528,30 @@ function History.open_win()
 
   vim.cmd.tabnew()
   vim.schedule(function()
-    History.hist_loc = {
+    History.window = {
       bufnr = vim.api.nvim_get_current_buf(),
       win = vim.api.nvim_get_current_win(),
+      tab = vim.api.nvim_get_current_tabpage(),
     }
 
-    vim.api.nvim_buf_set_lines(History.hist_loc.bufnr, 0, 1, true, Util.reverse(data))
-    vim.api.nvim_buf_set_name(History.hist_loc.bufnr, 'Project History')
+    vim.api.nvim_buf_set_lines(History.window.bufnr, 0, 1, true, Util.reverse(data))
+    vim.api.nvim_buf_set_name(History.window.bufnr, 'Project History')
 
-    local win_opts = { win = History.hist_loc.win } ---@type vim.api.keyset.option
+    local win_opts = { win = History.window.win } ---@type vim.api.keyset.option
     vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
     vim.api.nvim_set_option_value('list', false, win_opts)
     vim.api.nvim_set_option_value('number', false, win_opts)
     vim.api.nvim_set_option_value('wrap', false, win_opts)
     vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
 
-    local buf_opts = { buf = History.hist_loc.bufnr } ---@type vim.api.keyset.option
+    local buf_opts = { buf = History.window.bufnr } ---@type vim.api.keyset.option
     vim.api.nvim_set_option_value('filetype', '', buf_opts)
     vim.api.nvim_set_option_value('fileencoding', 'utf-8', buf_opts)
     vim.api.nvim_set_option_value('buftype', 'nowrite', buf_opts)
     vim.api.nvim_set_option_value('modifiable', false, buf_opts)
 
     vim.keymap.set('n', 'q', History.close_win, {
-      buffer = History.hist_loc.bufnr,
+      buffer = History.window.bufnr,
       noremap = true,
       silent = true,
     })
@@ -557,17 +559,17 @@ function History.open_win()
 end
 
 function History.close_win()
-  if not History.hist_loc then
+  if not History.window then
     return
   end
 
-  pcall(vim.api.nvim_buf_delete, History.hist_loc.bufnr, { force = true })
-  pcall(vim.cmd.tabclose)
-  History.hist_loc = nil
+  pcall(vim.api.nvim_buf_delete, History.window.bufnr, { force = true })
+  pcall(vim.api.nvim_cmd, { cmd = 'tabclose', range = { History.window.tab } }, { output = false })
+  History.window = nil
 end
 
 function History.toggle_win()
-  if not History.hist_loc then
+  if not History.window then
     History.open_win()
     return
   end

@@ -8,14 +8,14 @@ local WARN   =  vim.log.levels.WARN   -- `3`
 local ERROR  =  vim.log.levels.ERROR  -- `4`
 -- stylua: ignore end
 
----@class Project.LogLoc: Project.HistoryLoc
+---@class Project.LogWin: Project.HistoryWin
 
 local Util = require('project.util')
 local Config = require('project.config')
 
 ---@class Project.Log
 ---@field logfile? string
----@field log_loc? Project.LogLoc
+---@field window? Project.LogWin
 local Log = {}
 
 ---@param lvl vim.log.levels
@@ -144,7 +144,7 @@ function Log.create_commands()
           return
         end
 
-        if Log.log_loc then
+        if Log.window then
           Log.close_win()
         end
         Log.clear_log()
@@ -162,8 +162,9 @@ function Log.create_commands()
   })
 end
 
----@param mode OpenMode
+---@param mode uv.fs_open.flags
 ---@return integer|nil fd
+---@return uv.fs_stat.result|nil stat
 function Log.open(mode)
   require('project.util.path').create_path(Log.logpath)
   local dir_stat = uv.fs_stat(Log.logpath)
@@ -171,8 +172,9 @@ function Log.open(mode)
     error(('(%s.open): Projectpath stat is not valid!'):format(MODSTR), ERROR)
   end
 
+  local stat = uv.fs_stat(Log.logfile)
   local fd = uv.fs_open(Log.logfile, mode, tonumber('644', 8))
-  return fd
+  return fd, stat
 end
 
 function Log.init()
@@ -224,7 +226,7 @@ function Log.open_win()
     error(('(%s.open_win): Bad logfile path!'):format(MODSTR), ERROR)
   end
 
-  if Log.log_loc then -- Log window appears to be open
+  if Log.window then -- Log window appears to be open
     return
   end
 
@@ -271,23 +273,23 @@ function Log.open_win()
 
     vim.keymap.set('n', 'q', Log.close_win, { buffer = bufnr })
 
-    Log.log_loc = { win = win, bufnr = bufnr }
+    Log.window = { win = win, bufnr = bufnr, tab = vim.api.nvim_get_current_tabpage() }
   end)
 end
 
 function Log.close_win()
-  if not Log.log_loc then
+  if not Log.window then
     return
   end
 
-  pcall(vim.api.nvim_buf_delete, Log.log_loc.bufnr, { force = true })
-  pcall(vim.cmd.tabclose)
+  pcall(vim.api.nvim_buf_delete, Log.window.bufnr, { force = true })
+  pcall(vim.api.nvim_cmd, { cmd = 'tabclose', range = { Log.window.tab } }, { output = false })
 
-  Log.log_loc = nil
+  Log.window = nil
 end
 
 function Log.toggle_win()
-  if not Log.log_loc then
+  if not Log.window then
     Log.open_win()
     return
   end
