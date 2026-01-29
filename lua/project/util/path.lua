@@ -1,4 +1,5 @@
 local MODSTR = 'project.util.path'
+local ERROR = vim.log.levels.ERROR
 local uv = vim.uv or vim.loop
 local Util = require('project.util')
 local Config = require('project.config')
@@ -39,6 +40,31 @@ function Path.open_file(path, flags, mode)
   local stat = uv.fs_stat(path)
   local fd = uv.fs_open(path, flags, mode)
   return fd, stat
+end
+
+---Check if given directory is owned by the user running Nvim.
+---
+---If running under Windows, this will return `true` regardless.
+--- ---
+---@param dir string
+---@return boolean verified
+---@nodiscard
+function Path.verify_owner(dir)
+  Util.validate({ dir = { dir, { 'string' } } })
+
+  local Log = require('project.util.log')
+  if Util.is_windows() then
+    Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
+    return true
+  end
+
+  local stat = uv.fs_stat(dir)
+  if not stat then
+    Log.error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR))
+    vim.notify(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
+    return false
+  end
+  return stat.uid == uv.getuid()
 end
 
 ---@param dir string

@@ -3,23 +3,16 @@
 ---to avoid any confusions with naming,
 ---e.g. `require('project_nvim.project')`.
 
----@class HistoryPath
----@field datapath string
----@field projectpath string
----@field historyfile string
+---@alias HistoryPath table<'datapath'|'projectpath'|'historyfile', string>
 
 ---@class ProjectRootSwitch
----@field lsp fun(bufnr?: integer): boolean, string|nil, string|nil
----@field pattern fun(bufnr?: integer): boolean, string|nil, string|nil
+---@field lsp fun(bufnr?: integer): true, string|nil, string|nil
+---@field pattern fun(bufnr?: integer): true, string|nil, string|nil
 
 local MODSTR = 'project.api'
 local ERROR = vim.log.levels.ERROR
-local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
-local in_list = vim.list_contains
-local current_buf = vim.api.nvim_get_current_buf
-
 local Config = require('project.config')
 local Path = require('project.util.path')
 local Util = require('project.util')
@@ -34,22 +27,36 @@ local Log = require('project.util.log')
 ---@field current_method? string
 local Api = {}
 
-local SWITCH = { ---@type ProjectRootSwitch
-  lsp = function(bufnr)
-    local root, lsp_name = Api.find_lsp_root(bufnr or current_buf())
-    if root then
-      return true, root, ('"%s" lsp'):format(lsp_name)
-    end
-    return false
-  end,
-  pattern = function(bufnr)
-    local root, method = Api.find_pattern_root(bufnr or current_buf())
-    if root then
-      return true, root, method
-    end
-    return false
-  end,
-}
+---@class ProjectRootSwitch
+local SWITCH = {}
+
+---@param bufnr? integer
+---@return boolean success
+---@return string|nil root
+---@return string|nil method
+---@overload fun(): success: boolean, root: string|nil, method: string|nil
+---@nodiscard
+function SWITCH.lsp(bufnr)
+  local root, lsp_name = Api.find_lsp_root(bufnr or vim.api.nvim_get_current_buf())
+  if root then
+    return true, root, ('"%s" lsp'):format(lsp_name)
+  end
+  return false
+end
+
+---@param bufnr? integer
+---@return boolean success
+---@return string|nil root
+---@return string|nil method
+---@overload fun(): success: boolean, root: string|nil, method: string|nil
+---@nodiscard
+function SWITCH.pattern(bufnr)
+  local root, method = Api.find_pattern_root(bufnr or vim.api.nvim_get_current_buf())
+  if root then
+    return true, root, method
+  end
+  return false
+end
 
 ---@return string|nil last
 ---@nodiscard
@@ -63,23 +70,20 @@ function Api.get_last_project()
   return #History.session_projects <= 1 and recent[2] or recent[1]
 end
 
----@param path? 'datapath'|'projectpath'|'historyfile'
----@return string|HistoryPath
 ---@overload fun(): history_path: string
 ---@overload fun(path: 'datapath'|'projectpath'|'historyfile'): history_paths: HistoryPath
 ---@nodiscard
 function Api.get_history_paths(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
 
-  local res = { ---@type HistoryPath|string
+  local res = { ---@type HistoryPath
     datapath = Path.datapath,
     projectpath = Path.projectpath,
     historyfile = Path.historyfile,
   }
-  if path and in_list(vim.tbl_keys(res), path) then
-    res = Path[path] ---@type string
+  if path and vim.list_contains(vim.tbl_keys(res), path) then
+    return Path[path]
   end
-  ---@cast res HistoryPath
   return res
 end
 
@@ -95,7 +99,7 @@ end
 ---@nodiscard
 function Api.find_lsp_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
   local clients = vim.lsp.get_clients({ bufnr = bufnr })
   if vim.tbl_isempty(clients) then
@@ -109,9 +113,9 @@ function Api.find_lsp_root(bufnr)
     local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
     local valid = (
       Util.is_type('table', filetypes)
-      and in_list(filetypes, ft)
+      and vim.list_contains(filetypes, ft)
       and not vim.tbl_isempty(filetypes)
-      and not in_list(ignore_lsp, client.name)
+      and not vim.list_contains(ignore_lsp, client.name)
       and client.config.root_dir
     )
     if valid then
@@ -126,30 +130,6 @@ function Api.find_lsp_root(bufnr)
   end
 end
 
----Check if given directory is owned by the user running Nvim.
----
----If running under Windows, this will return `true` regardless.
---- ---
----@param dir string
----@return boolean verified
----@nodiscard
-function Api.verify_owner(dir)
-  Util.validate({ dir = { dir, { 'string' } } })
-
-  if Util.is_windows() then
-    Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
-    return true
-  end
-
-  local stat = uv.fs_stat(dir)
-  if not stat then
-    Log.error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR))
-    vim.notify(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
-    return false
-  end
-  return stat.uid == uv.getuid()
-end
-
 ---@param bufnr integer
 ---@return string|nil dir_res
 ---@return string|nil method
@@ -157,7 +137,7 @@ end
 ---@nodiscard
 function Api.find_pattern_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
   local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
   dir = Util.is_windows() and dir:gsub('\\', '/') or dir
@@ -170,10 +150,10 @@ end
 ---@nodiscard
 function Api.valid_bt(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
   local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
-  return not in_list(Config.options.disable_on.bt, bt)
+  return not vim.list_contains(Config.options.disable_on.bt, bt)
 end
 
 ---Generates the autocommand for the `LspAttach` event.
@@ -211,9 +191,9 @@ function Api.set_pwd(dir, method)
   })
   dir = vim.fn.expand(dir)
 
-  if not (Config.options.allow_different_owners or Api.verify_owner(dir)) then
+  if not (Config.options.allow_different_owners or Path.verify_owner(dir)) then
     Log.warn(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))
-    vim.notify(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR), WARN)
+    vim.notify(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR), ERROR)
     return false
   end
 
@@ -221,7 +201,7 @@ function Api.set_pwd(dir, method)
   if vim.tbl_isempty(History.session_projects) then
     History.session_projects = { dir }
     modified = true
-  elseif not in_list(History.session_projects, dir) then
+  elseif not vim.list_contains(History.session_projects, dir) then
     table.insert(History.session_projects, dir)
     modified = true
   end
@@ -254,7 +234,7 @@ function Api.set_pwd(dir, method)
 
   local scope_chdir = Config.options.scope_chdir
   local msg = ('(%s.set_pwd):'):format(MODSTR)
-  if not in_list({ 'global', 'tab', 'win' }, scope_chdir) then
+  if not vim.list_contains({ 'global', 'tab', 'win' }, scope_chdir) then
     Log.error(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)))
     vim.notify(
       ('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)),
@@ -312,17 +292,17 @@ end
 ---@nodiscard
 function Api.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
   if vim.tbl_isempty(Config.detection_methods) then
     return
   end
   local roots = {} ---@type { root: string, method_msg: string, method: 'lsp'|'pattern' }[]
   local root, lsp_method = nil, nil
-  local ops = vim.tbl_keys(SWITCH) ---@type string[]
+  local ops = vim.tbl_keys(SWITCH) ---@type ('lsp'|'pattern')[]
   local success = false
   for _, method in ipairs(Config.detection_methods) do
-    if in_list(ops, method) then
+    if vim.list_contains(ops, method) then
       success, root, lsp_method = SWITCH[method](bufnr)
       if success then
         ---@cast root string
@@ -356,9 +336,10 @@ end
 ---@return string|nil method
 ---@return string|nil last
 ---@overload fun(): curr: string|nil, method: string|nil, last: string|nil
+---@nodiscard
 function Api.get_current_project(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
   local curr, method = Api.get_project_root(bufnr)
   local last = Api.get_last_project()
@@ -368,10 +349,8 @@ end
 ---@param bufnr integer
 ---@overload fun()
 function Api.on_buf_enter(bufnr)
-  Util.validate({
-    bufnr = { bufnr, { 'number', 'nil' }, true },
-  })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or current_buf()
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
   if not Api.valid_bt(bufnr) then
     return
   end
@@ -383,7 +362,7 @@ function Api.on_buf_enter(bufnr)
   end
 
   local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
-  if in_list(Config.options.disable_on.ft, ft) then
+  if vim.list_contains(Config.options.disable_on.ft, ft) then
     return
   end
 
@@ -406,7 +385,7 @@ function Api.init()
     end,
   })
   if not Config.options.manual_mode then
-    if in_list(Config.detection_methods, 'pattern') then
+    if vim.list_contains(Config.detection_methods, 'pattern') then
       vim.api.nvim_create_autocmd('BufEnter', {
         group = group,
         nested = true,
@@ -415,7 +394,7 @@ function Api.init()
         end,
       })
     end
-    if in_list(Config.detection_methods, 'lsp') then
+    if vim.list_contains(Config.detection_methods, 'lsp') then
       Api.gen_lsp_autocmd(group)
     end
   end
