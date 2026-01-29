@@ -668,20 +668,22 @@ Table of Contents                                             *project-nvim.toc*
                             just as |vim.ui| is
 
 
-`:ProjectLog [clear]`                                    *ProjectLog*  *:ProjectLog*
+`:ProjectLog clear|close|open|toggle`                    *ProjectLog*  *:ProjectLog*
 
                             IMPORTANT ~
                             This command will not be available unless ~
                             you set `log.enabled = true` in your `setup()` ~
 
-                            If called without arguments, the `:ProjectLog`
-                            command will toggle the `project.nvim` log file
-                            in a new tab, which can be exited
-                            by pressing `q` in Normal Mode.
-                            The only valid argument is `clear`, which will
-                            close any existing log windows
-                            and then clean up the log file.
+                            The `:ProjectLog` command handles
+                            the `project.nvim` log file.
 
+                            The valid arguments are:
+>vim
+                            :ProjectLog clear     " Clears the log file
+                            :ProjectLog close     " Closes the Log Window
+                            :ProjectLog open      " Opens the Log Window
+                            :ProjectLog toggle    " Toggles the Log Window
+<
                             Useful for debugging
 
 

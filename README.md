@@ -551,14 +551,15 @@ See [_`history.lua`_](./lua/project/util/history.lua) for more info.
 > This command will not be available unless you set `log.enabled = true`
 > in your `setup()`.
 
-If called with no args, the `:ProjectLog` command toggles the `project.nvim` log file in a new tab,
-which can be exited by pressing `q` in Normal Mode.
+The `:ProjectLog` command handles the `project.nvim` log file.
 
-The only valid argument is `clear`, which will clear the log file:
+The valid arguments are:
 
 ```vim
-:ProjectLog " Opens the Log Window
-:ProjectLog clear " Closes the log window (if opened) and clears the current log file
+:ProjectLog clear     " Clears the current log file, will close any opened log window
+:ProjectLog close     " Closes the Log Window
+:ProjectLog open      " Opens the Log Window
+:ProjectLog toggle    " Toggles the Log Window
 ```
 
 See [_`log.lua`_](./lua/project/util/log.lua) for more info.
