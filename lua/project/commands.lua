@@ -107,7 +107,7 @@ function Commands.new(specs)
       __index = function(_, k) ---@param k string
         return T[k]
       end,
-      __tostring = function(_)
+      __tostring = function()
         return T.desc
       end,
       __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args

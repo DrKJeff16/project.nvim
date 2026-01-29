@@ -81,7 +81,7 @@ local function open_node(proj, only_cd, ran_cd)
     if not node then
       break
     end
-    node = proj .. '/' .. node
+    node = vim.fs.joinpath(proj, node)
     if uv.fs_stat(node) then
       local hid = Util.is_hidden(node)
       if (hidden and hid) or hidden_avail(node, hidden) then
@@ -319,7 +319,7 @@ M.recents_menu = M.select.new({
   choices = function()
     local choices = {} ---@type table<string, function>
     for _, s in ipairs(M.recents_menu.choices_list()) do
-      choices[s] = s ~= 'Exit' and open_node or function(_, _, _) end
+      choices[s] = s ~= 'Exit' and open_node or function() end
     end
     return choices
   end,
@@ -368,8 +368,8 @@ M.open_menu = M.select.new({
       ['Delete A Project'] = M.delete_menu,
       ['Show Config'] = require('project.commands').cmds.ProjectConfig,
       ['Open History'] = vim.cmd.ProjectHistory,
-      ['Export History (JSON)'] = M.gen_export_prompt,
-      ['Import History (JSON)'] = M.gen_import_prompt,
+      ['Export History'] = M.gen_export_prompt,
+      ['Import History'] = M.gen_import_prompt,
       ['Help'] = function()
         vim.cmd.help('project-nvim')
       end,
@@ -388,8 +388,13 @@ M.open_menu = M.select.new({
       res['Open Fzf-Lua Picker'] = require('project.extensions.fzf-lua').run_fzf_lua
     end
     if Config.options.log.enabled then
-      res['Open Log'] = require('project.util.log').open_win
-      res['Clear Log'] = require('project.util.log').clear_log
+      local Log = require('project.util.log')
+      if not Log.window then
+        res['Open Log'] = Log.open_win
+      else
+        res['Close Log'] = Log.close_win
+      end
+      res['Clear Log'] = Log.clear_log
     end
     return res
   end,
@@ -403,8 +408,8 @@ M.open_menu = M.select.new({
       'Run Checkhealth',
       'Show Config',
       'Open History',
-      'Export History (JSON)',
-      'Import History (JSON)',
+      'Export History',
+      'Import History',
       'Help',
       'Go To Source Code',
       'Exit',
@@ -416,7 +421,8 @@ M.open_menu = M.select.new({
       table.insert(res_list, #res_list - 5, 'Open Fzf-Lua Picker')
     end
     if Config.options.log.enabled then
-      table.insert(res_list, #res_list - 5, 'Open Log')
+      local Log = require('project.util.log')
+      table.insert(res_list, #res_list - 5, Log.window and 'Close Log' or 'Open Log')
       table.insert(res_list, #res_list - 5, 'Clear Log')
     end
     return res_list
@@ -435,7 +441,7 @@ M.session_menu = M.select.new({
     vim.ui.select(choices_list, {
       prompt = 'Select a project from your session:',
       format_item = function(item) ---@param item string
-        return vim.fn.isdirectory(item) == 1 and (item .. '/') or item
+        return item .. (vim.fn.isdirectory(item) == 1 and '/' or '')
       end,
     }, function(item)
       if not item then
@@ -456,7 +462,7 @@ M.session_menu = M.select.new({
   end,
   choices = function()
     local sessions = require('project.util.history').session_projects
-    local choices = { Exit = function(_, _, _) end }
+    local choices = { Exit = function() end }
     if vim.tbl_isempty(sessions) then
       return choices
     end
