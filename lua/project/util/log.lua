@@ -136,25 +136,37 @@ function Log.create_commands()
       name = 'ProjectLog',
       callback = function(ctx)
         if vim.tbl_isempty(ctx.fargs) then
-          Log.toggle_win()
-          return
-        end
-        if ctx.fargs[1] ~= 'clear' then
-          vim.notify('Usage - `:ProjectLog [clear]`', INFO)
+          vim.notify('Usage - `:ProjectLog clear|close|oppen|toggle`', INFO)
           return
         end
 
-        if Log.window then
-          Log.close_win()
+        local arg = ctx.fargs[1] ---@type 'clear'|'close'|'open'|'toggle'
+        if not vim.list_contains({ 'clear', 'close', 'open', 'toggle' }, arg) then
+          vim.notify('Usage - `:ProjectLog clear|close|oppen|toggle`', INFO)
+          return
         end
-        Log.clear_log()
+
+        if arg == 'clear' then
+          Log.clear_log()
+          return
+        end
+        if arg == 'close' then
+          Log.close_win()
+          return
+        end
+        if arg == 'open' then
+          Log.open_win()
+          return
+        end
+
+        Log.toggle_win()
       end,
       desc = 'Either opens the `project.nvim` log or clears the log file if `clear` is passed',
-      nargs = '?',
+      nargs = 1,
       complete = function(_, line)
         local args = vim.split(line, '%s+', { trimempty = false })
         if #args == 2 then
-          return { 'clear' }
+          return { 'clear', 'close', 'open', 'toggle' }
         end
         return {}
       end,
