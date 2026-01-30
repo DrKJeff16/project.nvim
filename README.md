@@ -11,8 +11,7 @@
 - [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions)
   - [**Announcements**](https://github.com/DrKJeff16/project.nvim/discussions/1)
 
-[![project_nvim-showcase](https://github.com/user-attachments/assets/aa2b130d-9ebd-489c-b001-4529d1b463b0)](#project)
-[![project_nvim_session](https://github.com/user-attachments/assets/4d537c1c-a01f-4362-a898-921111219cee)](#projectsession)
+https://github.com/user-attachments/assets/73446cb9-2889-471d-bfb0-d495ccd50a2d
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that,
 under configurable conditions, automatically sets the user's `cwd` to the current project root
