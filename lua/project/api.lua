@@ -32,6 +32,9 @@ local SWITCH = {}
 ---@return string|nil method
 ---@nodiscard
 function SWITCH.lsp(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+
   local root, lsp_name = Api.find_lsp_root(bufnr or vim.api.nvim_get_current_buf())
   if root then
     return true, root, ('"%s" lsp'):format(lsp_name)
@@ -45,11 +48,24 @@ end
 ---@return string|nil method
 ---@nodiscard
 function SWITCH.pattern(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+
   local root, method = Api.find_pattern_root(bufnr or vim.api.nvim_get_current_buf())
   if root then
     return true, root, method
   end
   return false
+end
+
+---@param bufnr integer
+---@return boolean valid
+function Api.buffer_valid(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number' } } })
+
+  return vim.api.nvim_buf_is_valid(bufnr)
+    and vim.api.nvim_buf_is_loaded(bufnr)
+    and vim.fn.buflisted(bufnr) == 1
 end
 
 ---@return string|nil last
@@ -141,9 +157,9 @@ end
 ---@nodiscard
 function Api.valid_bt(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
-  if not (vim.api.nvim_buf_is_valid(bufnr) or vim.api.nvim_buf_is_loaded(bufnr)) then
+  if not Api.buffer_valid(bufnr) then
     return false
   end
 
@@ -286,9 +302,9 @@ end
 ---@nodiscard
 function Api.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
-  if not (vim.api.nvim_buf_is_valid(bufnr) or vim.api.nvim_buf_is_loaded(bufnr)) then
+  if not Api.buffer_valid(bufnr) then
     return
   end
   if vim.tbl_isempty(Config.detection_methods) then
@@ -335,9 +351,9 @@ end
 ---@nodiscard
 function Api.get_current_project(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
-  if not (vim.api.nvim_buf_is_valid(bufnr) or vim.api.nvim_buf_is_loaded(bufnr)) then
+  if not Api.buffer_valid(bufnr) then
     return
   end
 
@@ -349,11 +365,8 @@ end
 ---@param bufnr? integer
 function Api.on_buf_enter(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
-  if not (vim.api.nvim_buf_is_valid(bufnr) or vim.api.nvim_buf_is_loaded(bufnr)) then
-    return
-  end
-  if not Api.valid_bt(bufnr) then
+  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  if not (Api.buffer_valid(bufnr) and Api.valid_bt(bufnr)) then
     return
   end
 
