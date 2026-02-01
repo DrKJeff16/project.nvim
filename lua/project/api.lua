@@ -5,10 +5,6 @@
 
 ---@alias HistoryPath table<'datapath'|'projectpath'|'historyfile', string>
 
----@class ProjectRootSwitch
----@field lsp fun(bufnr?: integer): true, string|nil, string|nil
----@field pattern fun(bufnr?: integer): true, string|nil, string|nil
-
 local MODSTR = 'project.api'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
@@ -34,7 +30,6 @@ local SWITCH = {}
 ---@return boolean success
 ---@return string|nil root
 ---@return string|nil method
----@overload fun(): success: boolean, root: string|nil, method: string|nil
 ---@nodiscard
 function SWITCH.lsp(bufnr)
   local root, lsp_name = Api.find_lsp_root(bufnr or vim.api.nvim_get_current_buf())
@@ -48,7 +43,6 @@ end
 ---@return boolean success
 ---@return string|nil root
 ---@return string|nil method
----@overload fun(): success: boolean, root: string|nil, method: string|nil
 ---@nodiscard
 function SWITCH.pattern(bufnr)
   local root, method = Api.find_pattern_root(bufnr or vim.api.nvim_get_current_buf())
@@ -92,10 +86,9 @@ end
 ---If successful, returns a tuple of two `string` results.
 ---Otherwise, nothing is returned.
 --- ---
----@param bufnr integer
+---@param bufnr? integer
 ---@return string|nil dir
 ---@return string|nil name
----@overload fun(): dir: string|nil, name: string|nil
 ---@nodiscard
 function Api.find_lsp_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -130,10 +123,9 @@ function Api.find_lsp_root(bufnr)
   end
 end
 
----@param bufnr integer
+---@param bufnr? integer
 ---@return string|nil dir_res
 ---@return string|nil method
----@overload fun(): dir_res: string|nil, method: string|nil
 ---@nodiscard
 function Api.find_pattern_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -144,9 +136,8 @@ function Api.find_pattern_root(bufnr)
   return Path.root_included(dir)
 end
 
----@param bufnr integer
+---@param bufnr? integer
 ---@return boolean valid
----@overload fun(): valid: boolean
 ---@nodiscard
 function Api.valid_bt(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -285,10 +276,9 @@ end
 ---
 ---If no project root is found, nothing will be returned.
 --- ---
----@param bufnr integer
+---@param bufnr? integer
 ---@return string|nil root
 ---@return string|nil method
----@overload fun(): root: string|nil, method: string|nil
 ---@nodiscard
 function Api.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -331,11 +321,10 @@ end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
----@param bufnr integer
+---@param bufnr? integer
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
----@overload fun(): curr: string|nil, method: string|nil, last: string|nil
 ---@nodiscard
 function Api.get_current_project(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -346,8 +335,7 @@ function Api.get_current_project(bufnr)
   return curr, method, last
 end
 
----@param bufnr integer
----@overload fun()
+---@param bufnr? integer
 function Api.on_buf_enter(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()

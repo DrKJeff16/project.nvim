@@ -465,9 +465,8 @@ function DEFAULTS:verify()
   )
 end
 
----@param opts Project.Config.Defaults|Project.Config.Options
----@return Project.Config.Defaults
----@overload fun(): Project.Config.Defaults
+---@param opts? Project.Config.Defaults|Project.Config.Options
+---@return Project.Config.Defaults defaults
 function DEFAULTS:new(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 

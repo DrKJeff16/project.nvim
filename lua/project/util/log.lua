@@ -8,7 +8,10 @@ local WARN   =  vim.log.levels.WARN   -- `3`
 local ERROR  =  vim.log.levels.ERROR  -- `4`
 -- stylua: ignore end
 
----@class Project.LogWin: Project.HistoryWin
+---@class Project.LogWin
+---@field bufnr integer
+---@field win integer
+---@field tab integer
 
 local Util = require('project.util')
 local Config = require('project.config')

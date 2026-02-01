@@ -24,11 +24,10 @@ M.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
----@param refresh boolean|nil
+---@param refresh? boolean|nil
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
----@overload fun(): curr: string|nil, method: string|nil, last: string|nil
 ---@nodiscard
 function M.current_project(refresh)
   require('project.util').validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })

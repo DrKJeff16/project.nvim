@@ -2,7 +2,9 @@ local MODSTR = 'project.config'
 local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
 
----@class Project.ConfigLoc: Project.HistoryLoc
+---@class Project.ConfigLoc
+---@field bufnr integer
+---@field win integer
 
 ---@class Project.Config
 ---@field float? Project.ConfigLoc
@@ -20,8 +22,7 @@ Config.options = setmetatable({}, { __index = Config.get_defaults() }) ---@type 
 
 ---The function called when running `require('project').setup()`.
 --- ---
----@param options Project.Config.Options the `project.nvim` config options
----@overload fun()
+---@param options? Project.Config.Options the `project.nvim` config options
 function Config.setup(options)
   Util.validate({ options = { options, { 'table', 'nil' }, true } })
 

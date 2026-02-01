@@ -63,12 +63,9 @@ function M.dir_exists(dir)
 end
 
 ---@param str string
----@param use_dot boolean
----@param triggers string[]
+---@param use_dot? boolean
+---@param triggers? string[]
 ---@return string new_str
----@overload fun(str: string): new_str: string
----@overload fun(str: string, use_dot: boolean): new_str: string
----@overload fun(str: string, use_dot?: boolean, triggers: string[]): new_str: string
 ---@nodiscard
 function M.capitalize(str, use_dot, triggers)
   M.validate({
@@ -493,14 +490,11 @@ end
 
 ---@param t type
 ---@param data nil|number|string|boolean|table|function
----@param sep string
----@param constraints string[]
+---@param sep? string
+---@param constraints? string[]
 ---@return string
 ---@return boolean|nil
----@overload fun(t: type, data: nil|number|string|boolean|table|function): string, boolean|nil
----@overload fun(t: type, data: nil|number|string|boolean|table|function, sep: string): string, boolean|nil
----@overload fun(t: type, data: nil|number|string|boolean|table|function, sep: string, constraints: string[]): string, boolean|nil
----@overload fun(t: type, data: nil|number|string|boolean|table|function, sep?: string, constraints: string[]): string, boolean|nil
+---@nodiscard
 function M.format_per_type(t, data, sep, constraints)
   M.validate({
     t = { t, { 'string' } },

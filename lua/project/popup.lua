@@ -129,8 +129,7 @@ local M = {}
 ---@class Project.Popup.Select
 M.select = {}
 
----@param bang boolean
----@overload fun()
+---@param bang? boolean
 function M.gen_import_prompt(bang)
   Util.validate({ bang = { bang, { 'boolean', 'nil' }, true } })
   bang = bang ~= nil and bang or false
@@ -144,8 +143,7 @@ function M.gen_import_prompt(bang)
   end)
 end
 
----@param bang boolean
----@overload fun()
+---@param bang? boolean
 function M.gen_export_prompt(bang)
   Util.validate({ bang = { bang, { 'boolean', 'nil' }, true } })
   bang = bang ~= nil and bang or false
@@ -202,8 +200,7 @@ function M.select.new(opts)
   return T
 end
 
----@param input string
----@overload fun()
+---@param input? string
 function M.prompt_project(input)
   Util.validate({ input = { input, { 'string', 'nil' }, true } })
   if not input or input == '' then

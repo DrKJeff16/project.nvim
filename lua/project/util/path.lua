@@ -22,10 +22,9 @@ Path.exists = Util.path_exists
 
 ---@param path string
 ---@param flags uv.fs_open.flags
----@param mode integer
+---@param mode? integer
 ---@return integer|nil fd
 ---@return uv.fs_stat.result|nil stat
----@overload fun(path: string, flags: uv.fs_open.flags): fd: integer|nil, stat: uv.fs_stat.result|nil
 function Path.open_file(path, flags, mode)
   Util.validate({
     path = { path, { 'string' } },
@@ -200,8 +199,7 @@ function Path.match(dir, pattern)
   return Path.has(dir, pattern)
 end
 
----@param path string
----@overload fun()
+---@param path? string
 function Path.create_path(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
   path = path or Path.projectpath
