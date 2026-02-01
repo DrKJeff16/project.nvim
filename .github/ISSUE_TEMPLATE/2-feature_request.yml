@@ -1,7 +1,9 @@
 name: Feature Request
 description: Suggest an idea for this project
 title: "[FEAT] <TITLE>"
-labels: ["enhancement", "feature-request"]
+labels:
+  - enhancement
+  - feature-request
 assignees:
   - DrKJeff16
 body:
@@ -16,42 +18,28 @@ body:
           required: true
   - type: input
     attributes:
-      label: "Operating System and, if possible, what version?"
+      label: Operating System and, if possible, what version?
       placeholder: Linux 6.15.6-arch1-1
     validations:
       required: true
   - type: textarea
     attributes:
       label: What would you like integrated?
-      description: Write down, as detailed as you can, what is it that you'd like integrated
+      description: Write down, as detailed as you can, what is it that you'd like integrated.
     validations:
       required: true
   - type: textarea
     attributes:
       label: How would this plugin improve?
-      description: Describe clearly how would this plugin benefit from your suggestion, and what kinds of users, if applicable
+      description: |
+        Describe clearly how would this plugin benefit from your suggestion
+        and what kinds of users, if applicable.
     validations:
       required: true
   - type: textarea
     attributes:
-      label: Have you considered alternative solutions?
-      description: Please describe any alternative solutions you have considered, if applicable
-    validations:
-      required: false
-  - type: textarea
-    attributes:
-      label: Is there any code implementation you'd suggest?
-      description: If you can, please include your solution in Lua code
-      value: |
-        -- LEAVE THIS UNCHANGED IF THERE IS NO CODE YOU CAN INCLUDE
-        require('project.foo').bar()
-      render: lua
-    validations:
-      required: false
-  - type: textarea
-    attributes:
       label: Are there any bug issues this new feature could fix?
-      description: If applicable, please link any issue that your suggestion could fix
+      description: If applicable, please link any issue that your suggestion could fix.
       placeholder: |
         - #1
         - #2
@@ -60,8 +48,24 @@ body:
       required: false
   - type: textarea
     attributes:
+      label: Have you considered alternative solutions?
+      description: Please describe any alternative solutions you have considered, if applicable.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Is there any code implementation you'd suggest?
+      description: If you can, please include your solution in Lua code.
+      value: |
+        -- LEAVE THIS UNCHANGED IF THERE IS NO CODE YOU CAN INCLUDE
+        require('project.foo').bar()
+      render: lua
+    validations:
+      required: false
+  - type: textarea
+    attributes:
       label: Additional Context
-      description: If there's more info you could tell, please do. Screenshots too, if applicable
+      description: If there's more info you could tell, please do. Screenshots too, if applicable.
     validations:
       required: false
 # vim: set ts=2 sts=2 sw=2 et ai si sta:
