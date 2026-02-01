@@ -143,6 +143,10 @@ function Api.valid_bt(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
+  if not (vim.api.nvim_buf_is_valid(bufnr) or vim.api.nvim_buf_is_loaded(bufnr)) then
+    return false
+  end
+
   local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
   return not vim.list_contains(Config.options.disable_on.bt, bt)
 end
@@ -284,6 +288,9 @@ function Api.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
+  if not (vim.api.nvim_buf_is_valid(bufnr) or vim.api.nvim_buf_is_loaded(bufnr)) then
+    return
+  end
   if vim.tbl_isempty(Config.detection_methods) then
     return
   end
@@ -330,6 +337,10 @@ function Api.get_current_project(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
 
+  if not (vim.api.nvim_buf_is_valid(bufnr) or vim.api.nvim_buf_is_loaded(bufnr)) then
+    return
+  end
+
   local curr, method = Api.get_project_root(bufnr)
   local last = Api.get_last_project()
   return curr, method, last
@@ -339,6 +350,9 @@ end
 function Api.on_buf_enter(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  if not (vim.api.nvim_buf_is_valid(bufnr) or vim.api.nvim_buf_is_loaded(bufnr)) then
+    return
+  end
   if not Api.valid_bt(bufnr) then
     return
   end
