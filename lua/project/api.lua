@@ -65,7 +65,6 @@ function Api.buffer_valid(bufnr)
 
   return vim.api.nvim_buf_is_valid(bufnr)
     and vim.api.nvim_buf_is_loaded(bufnr)
-    and vim.fn.buflisted(bufnr) == 1
 end
 
 ---@return string|nil last
