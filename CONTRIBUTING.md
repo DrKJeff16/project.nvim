@@ -1,8 +1,7 @@
-<div align="center">
+# Contributing
 
-# CONTRIBUTING
-
-</div>
+Thank you for your contributions!
+Here you will find some tips, guidelines and other resources for contributing to `project.nvim`.
 
 ---
 
@@ -10,11 +9,11 @@
 
 - [Note For Co-Maintainers](#note-for-co-maintainers)
 - [Guidelines](#guidelines)
-    - [What I Will Not Accept](#what-i-will-not-accept)
+  - [What I Will Not Accept](#what-i-will-not-accept)
 - [Recommendations](#recommendations)
-    - [StyLua](#stylua)
-    - [`pre-commit`](#pre-commit)
-    - [`selene`](#selene)
+  - [StyLua](#stylua)
+  - [`pre-commit`](#pre-commit)
+  - [`selene`](#selene)
 - [Code Annotations](#code-annotations)
 
 ---
@@ -55,7 +54,7 @@ you may open a blank issue.
     And set this in your nvim config (recommended):
     ```lua
     -- init.lua, for instance
-    vim.o.fileformat = 'unix'
+    vim.o.fileformat = 'unix' -- AVOID USING `vim.opt`
     ```
     or
     ```vim
@@ -69,49 +68,41 @@ you may open a blank issue.
 
 ### StyLua
 
-> [!IMPORTANT]
-> **This one is a requirement.**
-
-This will format any Lua file that needs it.
+This will format any Lua file that needs it. **I WILL NOT ACCEPT ANY CHANGES TO** `.stylua.toml`,
+create an issue instead.
 
 You can install StyLua through your package manager or by following
 [these instructions](https://github.com/JohnnyMorganz/StyLua#installation).
 
-> [!TIP]
-> To run it, you must be **in the root of the repository**.
-> Simply run the following command:
->
-> ```sh
-> stylua .
-> ```
+To run it, you must be **in the root of the repository**.
+Simply run the following command:
 
-> [!WARNING]
-> **I WILL NOT ACCEPT ANY CHANGES TO** `.stylua.toml`. Create an issue instead.
+```bash
+stylua lua/
+```
 
 ### `pre-commit`
+
+**Make sure to be in the root of the repository.**
 
 I encourage you to use `pre-commit` to run the hooks contained in [`.pre-commit-config.yaml`](./.pre-commit-config.yaml).
 
 To install it, follow [these instructions](https://pre-commit.com/#install) in the `pre-commit` website.
 After that, run the following command in your terminal:
 
-> [!IMPORTANT]
-> Make sure to be in the root of the repository.
-
-```sh
+```bash
 pre-commit install
 ```
 
 Now every time you run `git commit` the hooks contained in `.pre-commit-config.yaml` will run.
 
-> [!TIP]
-> It is recommended for you to update the hooks if required to:
->
-> ```sh
-> pre-commit autoupdate
-> ```
->
-> You must then commit the changes to `.pre-commit-config.yaml`.
+It is recommended for you to update the hooks if required to:
+
+```bash
+pre-commit autoupdate
+```
+
+You must then commit the changes to `.pre-commit-config.yaml`.
 
 ### selene
 
@@ -119,21 +110,17 @@ Now every time you run `git commit` the hooks contained in `.pre-commit-config.y
 
 The configuration is already set, you only need to install it through `cargo`:
 
-```sh
+```bash
 cargo install selene
 ```
 
 or your package manager of preference.
 
-> [!TIP]
-> To use it, just run it **from the root of the repository**:
->
-> ```sh
-> selene .
-> ```
+To use it, just run it **from the root of the repository**:
 
-> [!WARNING]
-> I will not accept any changes to `selene.toml` or `vim.yml`.
+```bash
+selene lua/
+```
 
 ---
 
@@ -143,8 +130,7 @@ or your package manager of preference.
 > **Undocumented code will be either asked for corrections or,
 > if not willing to document, _rejected_.**
 
-> [!IMPORTANT]
-> Please refer to LuaLS' code annotations to understand the syntax.[^1]
+Please refer to LuaLS' code annotations to understand the syntax.[^1]
 
 Let's say you create a new submodule `lua/project/foo.lua`. If said module returns a table
 with fields, the optimal way to document is to do it **in the same file**, and following this format:
@@ -193,23 +179,20 @@ end
 return Foo
 ```
 
-> [!IMPORTANT]
-> **BEAR IN MIND THAT ANY FIELD THAT'S NOT EXPLICITLY DEFINED
-> SHOULD GO UNDER THE** `---@class` **ANNOTATION**.
-> e.g. `Foo.things` from above.
+Bear in mind that any field that's not explicitly defined should go under the**
+`---@class` annotation, e.g. `Foo.things` from above.
 
-> [!WARNING]
-> Any instance of wrapping already existing data types will be cause for rejection.
->
-> ```lua
-> ---NOT ALLOWED
-> ---@alias StringType string
->
-> ---ALLOWED
-> ---@alias StringDict table<string, any>
-> ```
+Any instance of wrapping already existing data types will be rejected.
 
----
+```lua
+---NOT ALLOWED
+---@alias StringType string
+---@alias Int integer
+
+---ALLOWED
+---@alias StringDict table<string, any>
+---@alias IntList integer[]
+```
 
 [^1]: https://luals.github.io/wiki/annotations/
 [^2]: https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
