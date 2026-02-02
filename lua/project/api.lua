@@ -63,8 +63,7 @@ end
 function Api.buffer_valid(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number' } } })
 
-  return vim.api.nvim_buf_is_valid(bufnr)
-    and vim.api.nvim_buf_is_loaded(bufnr)
+  return vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr)
 end
 
 ---@return string|nil last
