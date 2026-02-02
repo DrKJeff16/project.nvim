@@ -867,12 +867,21 @@ If you lack the required permissions for that directory, you can either:
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/perrin4869">
+                    <img src="https://avatars.githubusercontent.com/u/5774716?v=4" width="100;" alt="perrin4869"/>
+                    <br />
+                    <sub><b>Julian Grinblat</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/chuwy">
                     <img src="https://avatars.githubusercontent.com/u/681171?v=4" width="100;" alt="chuwy"/>
                     <br />
                     <sub><b>Anton Parkhomenko</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/pandar00">
                     <img src="https://avatars.githubusercontent.com/u/4407710?v=4" width="100;" alt="pandar00"/>
@@ -880,8 +889,6 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Harry Cho</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/acristoffers">
                     <img src="https://avatars.githubusercontent.com/u/2191364?v=4" width="100;" alt="acristoffers"/>
@@ -917,6 +924,8 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Will Adams</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/tkappedev">
                     <img src="https://avatars.githubusercontent.com/u/9612541?v=4" width="100;" alt="tkappedev"/>
@@ -924,20 +933,11 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Tobias Kappe</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/ckybonist">
                     <img src="https://avatars.githubusercontent.com/u/3832925?v=4" width="100;" alt="ckybonist"/>
                     <br />
                     <sub><b>KuanYu Chu</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/perrin4869">
-                    <img src="https://avatars.githubusercontent.com/u/5774716?v=4" width="100;" alt="perrin4869"/>
-                    <br />
-                    <sub><b>Julian Grinblat</b></sub>
                 </a>
             </td>
             <td align="center">
