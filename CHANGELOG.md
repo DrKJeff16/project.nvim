@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.6.0-1](https://github.com/DrKJeff16/project.nvim/tree/v0.6.0-1) (2026-02-02)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v0.5.7-1...v0.6.0-1)
+
+**Fixed bugs:**
+
+- fix: remove buflisted guard [\#45](https://github.com/DrKJeff16/project.nvim/pull/45) ([perrin4869](https://github.com/perrin4869))
+
+**Merged pull requests:**
+
+- docs\(contributor\): contributors readme action update [\#46](https://github.com/DrKJeff16/project.nvim/pull/46) ([github-actions[bot]](https://github.com/apps/github-actions))
+
 ## [v0.5.7-1](https://github.com/DrKJeff16/project.nvim/tree/v0.5.7-1) (2026-02-01)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v0.5.6-1...v0.5.7-1)
