@@ -373,9 +373,8 @@ function History.read_history()
   History.deserialize_history(data_str)
 end
 
----@param tilde boolean
+---@param tilde? boolean
 ---@return string[] recents
----@overload fun(): recents: string[]
 function History.get_recent_projects(tilde)
   Util.validate({ tilde = { tilde, { 'boolean', 'nil' }, true } })
   tilde = tilde ~= nil and tilde or false
@@ -416,15 +415,13 @@ end
 
 ---Write projects to history file.
 --- ---
----@param path string
----@overload fun()
+---@param path? string
 function History.write_history(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
-  path = path or Path.historyfile
-  path = Util.rstrip('/', vim.fn.fnamemodify(path, ':p'))
+  path = Util.rstrip('/', vim.fn.fnamemodify(path or Path.historyfile, ':p'))
 
   if not Path.exists(path) then
-    if vim.fn.writefile({ '[', ']' }, path) == -1 then
+    if vim.fn.writefile({ '[', ']' }, path) ~= 0 then
       Log.error(('(%s.write_history): History file unavailable!'):format(MODSTR))
       error(('(%s.write_history): History file unavailable!'):format(MODSTR), ERROR)
     end
@@ -433,7 +430,7 @@ function History.write_history(path)
   History.historysize = require('project.config').options.historysize or 100
 
   local file_history = {} ---@type string[]
-  local fd, stat
+  local fd, stat ---@type integer|nil, uv.fs_stat.result|nil
   if path == Path.historyfile then
     fd, stat = History.open_history('r')
   else

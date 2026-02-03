@@ -182,8 +182,8 @@ end
 function M.is_int(nums)
   M.validate({ nums = { nums, { 'number', 'table' } } })
 
-  ---@cast nums number
   if M.is_type('number', nums) then
+    ---@cast nums number
     return nums == math.floor(nums) and nums == math.ceil(nums)
   end
 
@@ -303,8 +303,8 @@ end
 function M.executable(exe)
   M.validate({ exe = { exe, { 'string', 'table' } } })
 
-  ---@cast exe string
   if M.is_type('string', exe) then
+    ---@cast exe string
     return vim.fn.executable(exe) == 1
   end
 
@@ -359,15 +359,17 @@ function M.lstrip(char, str)
     char = { char, { 'string', 'table' } },
     str = { str, { 'string' } },
   })
-
   if str == '' or not vim.startswith(str, char) then
     return str
   end
 
-  ---@cast char string[]
   if M.is_type('table', char) then
+    ---@cast char string[]
     if not vim.tbl_isempty(char) then
       for _, c in ipairs(char) do
+        if c:len() > str:len() then
+          return str
+        end
         str = M.lstrip(c, str)
       end
     end
@@ -400,15 +402,17 @@ function M.rstrip(char, str)
     char = { char, { 'string', 'table' } },
     str = { str, { 'string' } },
   })
-
   if str == '' then
     return str
   end
 
-  ---@cast char string[]
   if M.is_type('table', char) then
+    ---@cast char string[]
     if not vim.tbl_isempty(char) then
       for _, c in ipairs(char) do
+        if c:len() > str:len() then
+          return str
+        end
         str = M.rstrip(c, str)
       end
     end
@@ -435,15 +439,17 @@ function M.strip(char, str)
     char = { char, { 'string', 'table' } },
     str = { str, { 'string' } },
   })
-
   if str == '' then
     return str
   end
 
-  ---@cast char string[]
   if M.is_type('table', char) then
+    ---@cast char string[]
     if not vim.tbl_isempty(char) then
       for _, c in ipairs(char) do
+        if c:len() > str:len() then
+          return str
+        end
         str = M.strip(c, str)
       end
     end
@@ -536,11 +542,8 @@ function M.format_per_type(t, data, sep, constraints)
   for k, v in pairs(data) do
     k = M.is_type('number', k) and ('[%s]'):format(tostring(k)) or k
     msg = ('%s\n%s`%s`: '):format(msg, sep, k)
-    if not M.is_type('string', v) then
-      msg = ('%s%s'):format(msg, M.format_per_type(type(v), v, sep))
-    else
-      msg = ('%s`"%s"`'):format(msg, v)
-    end
+    msg = M.is_type('string', v) and ('%s`"%s"`'):format(msg, v)
+      or ('%s%s'):format(msg, M.format_per_type(type(v), v, sep))
   end
   return msg
 end

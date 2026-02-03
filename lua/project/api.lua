@@ -78,8 +78,8 @@ function Api.get_last_project()
   return #History.session_projects <= 1 and recent[2] or recent[1]
 end
 
----@overload fun(): history_path: string
----@overload fun(path: 'datapath'|'projectpath'|'historyfile'): history_paths: HistoryPath
+---@param path? 'datapath'|'projectpath'|'historyfile'
+---@return string|HistoryPath history_paths
 ---@nodiscard
 function Api.get_history_paths(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
