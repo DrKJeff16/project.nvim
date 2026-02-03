@@ -32,9 +32,10 @@ Table of Contents                                             *project-nvim.toc*
 3. project-nvim.setup                                       |project-nvim.setup|
     3.1. `Project.Config.Options`                         |Project.Config.Options|
     3.2. `Project.Config.LSP`                                 |Project.Config.LSP|
-    3.3. `Project.Config.Telescope`                     |Project.Config.Telescope|
-    3.4. `Project.Config.FzfLua`                           |Project.Config.FzfLua|
-    3.5. `Project.Config.Logging`                         |Project.Config.Logging|
+    3.3. `Project.Config.DifferentOwners`         |Project.Config.DifferentOwners|
+    3.4. `Project.Config.Telescope`                     |Project.Config.Telescope|
+    3.5. `Project.Config.FzfLua`                           |Project.Config.FzfLua|
+    3.6. `Project.Config.Logging`                         |Project.Config.Logging|
 4. Pattern Matching                              |project-nvim.pattern-matching|
 5. Nvim Tree                                            |project-nvim.nvim-tree|
 6. Neo Tree                                              |project-nvim.neo-tree|
@@ -194,7 +195,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ------------------------------------------------------------------------------
-3.1 `Project.Config.Options`                              *Project.Config.Options*
+3.1. `Project.Config.Options`                             *Project.Config.Options*
                                                     *project-nvim.setup-options*
 
 
@@ -237,16 +238,10 @@ Table of Contents                                             *project-nvim.toc*
                                 keep this empty!
 
 
-    * {allow_different_owners}  (boolean)
-                                Determines whether a project will be
-                                added if its project root is owned
-                                by a different user.
-                                If `true`, it will add the project
-                                to the history even if its root
-                                is not owned by the current nvim `UID`
-                                (UNIX only) ~
-
-                                Default: `true` ~
+    * {different_owners}        (|Project.Config.DifferentOwners|)
+                                Table of options used for control for
+                                detecting projects not owned
+                                by the current user.
 
 
     * {enable_autochdir}        (boolean)
@@ -367,7 +362,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-3.2 `Project.Config.LSP`                                    *Project.Config.LSP*
+3.2. `Project.Config.LSP`                                     *Project.Config.LSP*
                                                        *project-nvim.lsp-config*
 
 
@@ -419,7 +414,31 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-3.3 `Project.Config.Telescope`                          *Project.Config.Telescope*
+3.3. `Project.Config.DifferentOwners`             *Project.Config.DifferentOwners*
+                                                 *project-nvim.different-owners*
+
+
+    * {allow}                   (boolean)
+                                Determines whether a project will be
+                                added if its project root is owned
+                                by a different user.
+                                If `true`, it will add the project
+                                to the history even if its root
+                                is not owned by the current nvim `UID`
+                                (UNIX only) ~
+
+                                Default: `false` ~
+
+    * {notify}                  (boolean)
+                                If `true`, notify the user when a new project
+                                has a different UID
+                                (UNIX only) ~
+
+                                Default: `true` ~
+
+
+------------------------------------------------------------------------------
+3.4. `Project.Config.Telescope`                         *Project.Config.Telescope*
                                                  *project-nvim.telescope-config*
 
 
@@ -460,7 +479,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-3.4 `Project.Config.FzfLua`                                *Project.Config.FzfLua*
+3.5. `Project.Config.FzfLua`                               *Project.Config.FzfLua*
                                                    *project-nvim.fzf-lua-config*
 
 
@@ -474,7 +493,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-3.5 `Project.Config.Logging`                              *Project.Config.Logging*
+3.6. `Project.Config.Logging`                             *Project.Config.Logging*
                                                    *project-nvim.logging-config*
 
 

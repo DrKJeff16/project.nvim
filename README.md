@@ -270,7 +270,10 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
     '.sln',
     '.nvim.lua',
   },
-  allow_different_owners = false,
+  different_owners = {
+    allow = false, -- Allow adding projects with a different owner to the project session
+    notify = true, -- Notify the user when a project with a different owner is found
+  },
   enable_autochdir = false,
   show_hidden = false,
   exclude_dirs = {}, ---@type string[]

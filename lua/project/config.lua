@@ -27,7 +27,7 @@ function Config.setup(options)
   Util.validate({ options = { options, { 'table', 'nil' }, true } })
 
   local pattern_exclude = require('project.util.globtopattern').pattern_exclude
-  Config.options = Config.get_defaults():new(options or {})
+  Config.options = Config.get_defaults().new(options or {})
 
   Config.detection_methods = Config.options:gen_methods()
 

@@ -7,6 +7,25 @@
 ---|'recent_project_files'
 ---|'search_in_project_files'
 
+---Table of options used for control for detecting projects not owned by the current user.
+--- ---
+---@class Project.Config.DifferentOwners
+---Determines whether a project will be added
+---if its project root is owned by a different user.
+---
+---If `true`, it will add a project to the history even if its root
+---is not owned by the current nvim `UID` **(UNIX only)**.
+--- ---
+---Default: `false`
+--- ---
+---@field allow? boolean
+---If `true`, notify the user when a new project has a different UID **(UNIX only)**.
+---
+--- ---
+---Default: `true`
+--- ---
+---@field notify? boolean
+
 ---Table of options used for the telescope picker.
 --- ---
 ---@class Project.Config.Telescope
@@ -113,13 +132,12 @@
 --- ---
 ---@field use_pattern_matching? boolean
 
-local MODSTR = 'project.config.defaults'
-local WARN = vim.log.levels.WARN
-local Util = require('project.util')
-
 ---The options available for in `require('project').setup()`.
 --- ---
 ---@class Project.Config.Options
+---Table of options used for control for detecting projects not owned by the current user.
+--- ---
+---@field different_owners? Project.Config.DifferentOwners
 ---Table containing all the LSP-adjacent options.
 --- ---
 ---@field lsp? Project.Config.LSP
@@ -158,15 +176,6 @@ local Util = require('project.util')
 ---Default: `function(dir, method) end`
 --- ---
 ---@field on_attach? fun(dir: string, method: string)
----Determines whether a project will be added
----if its project root is owned by a different user.
----
----If `true`, it will add a project to the history even if its root
----is not owned by the current nvim `UID` **(UNIX only)**.
---- ---
----Default: `false`
---- ---
----@field allow_different_owners? boolean
 ---If enabled, set `vim.o.autochdir` to `true`.
 ---
 ---This is disabled by default because the plugin implicitly disables `autochdir`.
@@ -245,8 +254,28 @@ local Util = require('project.util')
 --- ---
 ---@field telescope? Project.Config.Telescope
 
+local MODSTR = 'project.config.defaults'
+local WARN = vim.log.levels.WARN
+local Util = require('project.util')
+
 ---@class Project.Config.Defaults: Project.Config.Options
-local DEFAULTS = {
+---@field new fun(opts?: Project.Config.Options): defaults: Project.Config.Defaults
+---@field verify_histsize fun(self: Project.Config.Defaults)
+---@field verify_scope_chdir fun(self: Project.Config.Defaults)
+---@field verify_datapath fun(self: Project.Config.Defaults)
+---@field gen_methods fun(self: Project.Config.Defaults): methods: { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
+---@field verify_logging fun(self: Project.Config.Defaults)
+---@field expand_excluded fun(self: Project.Config.Defaults)
+---@field verify_lsp fun(self: Project.Config.Defaults)
+---@field verify_owners fun(self: Project.Config.Defaults)
+---@field verify fun(self: Project.Config.Defaults)
+
+---@diagnostic disable-next-line:missing-fields
+local DEFAULTS = { ---@type Project.Config.Defaults
+  different_owners = {
+    allow = false,
+    notify = true,
+  },
   lsp = { enabled = true, ignore = {}, no_fallback = false, use_pattern_matching = false },
   manual_mode = false,
   patterns = {
@@ -266,7 +295,6 @@ local DEFAULTS = {
   },
   before_attach = function(target_dir, method) end, ---@diagnostic disable-line:unused-local
   on_attach = function(dir, method) end, ---@diagnostic disable-line:unused-local
-  allow_different_owners = false,
   enable_autochdir = false,
   show_hidden = false,
   exclude_dirs = {},
@@ -390,7 +418,7 @@ function DEFAULTS:verify_logging()
   end
   if self.logging ~= nil and type(self.logging) == 'boolean' then
     self.log.enabled = self.logging
-    self.logging = nil
+    self.logging = nil ---@diagnostic disable-line:inject-field
     vim.notify(('`options.logging` is deprecated, use `options.log.enabled`!'):format(MODSTR), WARN)
   end
 
@@ -422,7 +450,7 @@ function DEFAULTS:verify_lsp()
   if self.use_lsp ~= nil then
     vim.notify('`use_lsp` is deprecated! Use `lsp.enabled` instead.', WARN)
     self.lsp.enabled = self.use_lsp
-    self.use_lsp = nil
+    self.use_lsp = nil ---@diagnostic disable-line:inject-field
   end
   if self.allow_patterns_for_lsp ~= nil then
     vim.notify(
@@ -430,12 +458,30 @@ function DEFAULTS:verify_lsp()
       WARN
     )
     self.lsp.use_pattern_matching = self.allow_patterns_for_lsp
-    self.allow_patterns_for_lsp = nil
+    self.allow_patterns_for_lsp = nil ---@diagnostic disable-line:inject-field
   end
   if self.ignore_lsp and type(self.ignore_lsp) == 'table' then
     vim.notify('`ignore_lsp` is deprecated! Use `lsp.ignore` instead.', WARN)
     self.lsp.ignore = vim.deepcopy(self.ignore_lsp)
-    self.ignore_lsp = nil
+    self.ignore_lsp = nil ---@diagnostic disable-line:inject-field
+  end
+end
+
+function DEFAULTS:verify_owners()
+  self.different_owners = self.different_owners or {}
+  if self.allow_different_owners ~= nil and type(self.allow_different_owners) == 'boolean' then
+    vim.notify(
+      '`allow_different_owners` is deprecated! Use `different_owners.allow` instead.',
+      WARN
+    )
+    self.different_owners.allow = self.allow_different_owners
+    self.allow_different_owners = nil ---@diagnostic disable-line:inject-field
+  end
+  if self.different_owners.allow == nil then
+    self.different_owners.allow = false
+  end
+  if self.different_owners.notify == nil then
+    self.different_owners.notify = true
   end
 end
 
@@ -454,6 +500,7 @@ function DEFAULTS:verify()
   self:verify_histsize()
   self:verify_scope_chdir()
   self:verify_logging()
+  self:verify_owners()
 
   if not self.detection_methods then ---@diagnostic disable-line:undefined-field
     return
@@ -465,9 +512,7 @@ function DEFAULTS:verify()
   )
 end
 
----@param opts? Project.Config.Defaults|Project.Config.Options
----@return Project.Config.Defaults defaults
-function DEFAULTS:new(opts)
+function DEFAULTS.new(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   ---@type Project.Config.Defaults

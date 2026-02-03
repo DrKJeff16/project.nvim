@@ -200,10 +200,14 @@ function Api.set_pwd(dir, method)
   })
   dir = vim.fn.expand(dir)
 
-  if not (Config.options.allow_different_owners or Path.verify_owner(dir)) then
+  if not Path.verify_owner(dir) then
     Log.warn(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))
-    vim.notify(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR), ERROR)
-    return false
+    if Config.options.different_owners.notify then
+      vim.notify(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR), ERROR)
+    end
+    if not Config.options.different_owners.allow then
+      return false
+    end
   end
 
   local modified = false
