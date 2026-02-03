@@ -33,9 +33,9 @@ function M.setup_check()
     split_opts
   )[2]
   if Util.vim_has('nvim-0.11') then
-    vim.health.ok(('nvim version is at least `v0.11` (`%s`)'):format(version))
+    vim.health.ok(('Neovim version is at least `v0.11` (`%s`)'):format(version))
   else
-    vim.health.warn(('nvim version is lower than `v0.11`! (`%s`)'):format(version))
+    vim.health.warn(('Neovim version is lower than `v0.11`! (`%s`)'):format(version))
   end
 
   if not (Util.executable('fd') or Util.executable('fdfind')) then
@@ -45,16 +45,14 @@ function M.setup_check()
   end
 
   if Util.is_windows() and vim.g.project_disable_win32_warning ~= 1 then
-    vim.health.warn([[
-`DISCLAIMER`
+    vim.health.warn([[DISCLAIMER
 
 You're running on Windows. Issues are more likely to occur,
 bear that in mind.
 
 Please report any issues to the maintainers.
 
-If you wish to disable this warning, set `g:project_disable_win32_warning` to `1`.
-            ]])
+If you wish to disable this warning, set `g:project_disable_win32_warning` to `1`.]])
   end
   return true
 end
@@ -165,11 +163,9 @@ end
 function M.fzf_lua_check()
   vim.health.start('Fzf-Lua')
   if not Config.options.fzf_lua.enabled then
-    vim.health.warn([[
-`fzf-lua` integration is disabled.
+    vim.health.warn([[`fzf-lua` integration is disabled.
 
-This doesn't represent an issue necessarily!
-            ]])
+This doesn't represent an issue necessarily!]])
     return
   end
 
@@ -185,21 +181,19 @@ function M.recent_proj_check()
   vim.health.start('Recent Projects')
   local recents = History.get_recent_projects()
   if vim.tbl_isempty(recents) then
-    vim.health.warn([[
-`No projects found in history!`
+    vim.health.warn([[No projects found in history!
 
 If this is your first time using this plugin,
 or you just set a different `historypath` for your plugin,
 then you can ignore this.
 
 If this keeps appearing, though, check your config
-and submit an issue if pertinent.
-            ]])
+and submit an issue if pertinent.]])
     return
   end
   recents = Util.reverse(recents) ---@type string[]
   for i, project in ipairs(recents) do
-    vim.health.info(('`%s`. `%s`'):format(i, project))
+    vim.health.info(('%d. `%s`'):format(i, project))
   end
 end
 
