@@ -78,6 +78,7 @@ function M.options_check()
     'verify_histsize',
     'verify_logging',
     'verify_lsp',
+    'verify_owners',
     'verify_scope_chdir',
   }
   for k, v in pairs(Options) do

@@ -77,6 +77,7 @@ function Config.get_config()
     'verify_logging',
     'verify_lsp',
     'verify_methods',
+    'verify_owners',
     'verify_scope_chdir',
   }
   local opts = {} ---@type Project.Config.Options
