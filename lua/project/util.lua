@@ -535,7 +535,7 @@ function M.format_per_type(t, data, sep, constraints)
   sep = ('%s '):format(sep)
   for k, v in pairs(data) do
     k = M.is_type('number', k) and ('[%s]'):format(tostring(k)) or k
-    msg = ('%s\n%s%s: '):format(msg, sep, k)
+    msg = ('%s\n%s`%s`: '):format(msg, sep, k)
     if not M.is_type('string', v) then
       msg = ('%s%s'):format(msg, M.format_per_type(type(v), v, sep))
     else

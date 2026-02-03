@@ -88,12 +88,8 @@ function M.options_check()
       end
 
       local str, warning = Util.format_per_type(type(v), v, nil, constraints)
-      str = (' - %s: %s'):format(k, str)
-      if Util.is_type('boolean', warning) and warning then
-        vim.health.warn(str)
-      else
-        vim.health.ok(str)
-      end
+      local func = (warning ~= nil and warning) and vim.health.warn or vim.health.ok
+      func((' - `%s`: %s'):format(k, str))
     end
   end
 end
@@ -149,6 +145,22 @@ function M.project_check()
   end
 end
 
+function M.logging_check()
+  vim.health.start('Log')
+
+  if not Config.options.log.enabled then
+    vim.health.ok('Logging disabled!')
+    return
+  end
+
+  vim.health.ok('Logging enabled!')
+  if not (vim.cmd.ProjectLog and vim.is_callable(vim.cmd.ProjectLog)) then
+    vim.health.warn('`:ProjectLog` user command is not loaded!')
+  else
+    vim.health.ok('`:ProjectLog` user command loaded!')
+  end
+end
+
 function M.fzf_lua_check()
   vim.health.start('Fzf-Lua')
   if not Config.options.fzf_lua.enabled then
@@ -198,6 +210,7 @@ function M.check()
   end
   M.project_check()
   M.history_check()
+  M.logging_check()
   M.fzf_lua_check()
   M.options_check()
   M.recent_proj_check()
