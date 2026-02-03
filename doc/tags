@@ -11,6 +11,7 @@
 :ProjectRoot	project-nvim.txt	/*:ProjectRoot*
 :ProjectSession	project-nvim.txt	/*:ProjectSession*
 :ProjectTelescope	project-nvim.txt	/*:ProjectTelescope*
+Project.Config.DifferentOwners	project-nvim.txt	/*Project.Config.DifferentOwners*
 Project.Config.FzfLua	project-nvim.txt	/*Project.Config.FzfLua*
 Project.Config.LSP	project-nvim.txt	/*Project.Config.LSP*
 Project.Config.Logging	project-nvim.txt	/*Project.Config.Logging*
@@ -32,6 +33,7 @@ project-nvim	project-nvim.txt	/*project-nvim*
 project-nvim.api	project-nvim.txt	/*project-nvim.api*
 project-nvim.commands	project-nvim.txt	/*project-nvim.commands*
 project-nvim.config	project-nvim.txt	/*project-nvim.config*
+project-nvim.different-owners	project-nvim.txt	/*project-nvim.different-owners*
 project-nvim.features	project-nvim.txt	/*project-nvim.features*
 project-nvim.fzf-lua-config	project-nvim.txt	/*project-nvim.fzf-lua-config*
 project-nvim.get_config()	project-nvim.txt	/*project-nvim.get_config()*
