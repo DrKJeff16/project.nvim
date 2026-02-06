@@ -34,6 +34,9 @@ M.source = {
       ['<C-d>'] = function(entry) ---@param entry PickerItem
         require('project.util.history').delete_project(entry.value)
       end,
+      ['<C-w>'] = function(entry) ---@param entry PickerItem
+        require('project.api').set_pwd(entry.value, 'picker.nvim')
+      end,
     }
   end,
   default_action = function(entry)
@@ -48,7 +51,8 @@ M.source = {
 
 function M.setup()
   if not Util.mod_exists('picker') then
-    error('picker.nvim is not installed!', vim.log.levels.ERROR)
+    vim.notify('picker.nvim is not installed!', vim.log.levels.ERROR)
+    return
   end
 
   Commands.new({

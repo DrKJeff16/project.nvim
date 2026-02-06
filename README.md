@@ -44,6 +44,7 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
   - [Telescope](#telescope)
     - [Telescope Mappings](#telescope-mappings)
   - [`mini.starter`](#ministarter)
+  - [`picker.nvim`](#pickernvim)
 - [Commands](#commands)
   - [`:Project`](#project)
   - [`:ProjectFzf`](#projectfzf)
@@ -87,6 +88,7 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
 - [`nvim-tree` Integration](#nvim-tree)
 - [`neo-tree` Integration](#neo-tree)
 - [`mini.starter` Integration](#ministarter)
+- **(NEW)** [`picker.nvim` Integration](#pickernvim)
 
 ---
 
@@ -154,9 +156,9 @@ If you wish to lazy-load this plugin:
     'ProjectRoot',
     'ProjectSession',
   },
-  dependencies = { -- OPTIONAL
-    'nvim-lua/plenary.nvim',
-    'nvim-telescope/telescope.nvim',
+  dependencies = { -- OPTIONAL. Choose any of the following
+    { 'nvim-telescope/telescope.nvim', dependencies = { 'nvim-lua/plenary.nvim' } },
+    'wsdjeg/picker.nvim',
     'ibhagwan/fzf-lua',
   },
   opts = {},
@@ -170,9 +172,10 @@ if vim.fn.has('nvim-0.11') == 1 then
   require('pckr').add({
     {
       'DrKJeff16/project.nvim',
-      requires = { -- OPTIONAL
+      requires = { -- OPTIONAL. Choose any of the following
         'nvim-lua/plenary.nvim',
         'nvim-telescope/telescope.nvim',
+        'wsdjeg/picker.nvim',
         'ibhagwan/fzf-lua',
       },
       config = function()
@@ -191,9 +194,11 @@ local paq = require('paq')
 paq({
   'DrKJeff16/project.nvim',
 
-  'nvim-lua/plenary.nvim', -- OPTIONAL
-  'nvim-telescope/telescope.nvim', -- OPTIONAL
-  'ibhagwan/fzf-lua', -- OPTIONAL
+   -- OPTIONAL. Choose any of the following
+  'nvim-lua/plenary.nvim',
+  'nvim-telescope/telescope.nvim',
+  'wsdjeg/picker.nvim',
+  'ibhagwan/fzf-lua',
 })
 
 require('project.nvim').setup()
@@ -221,7 +226,7 @@ require('project').setup()
 
 ### Defaults
 
-You can find these in [`project/config/defaults.lua`](./lua/project/config/defaults.lua)
+You can find these in [`config/defaults.lua`](./lua/project/config/defaults.lua)
 
 > [!NOTE]
 > The `Project.Telescope.ActionNames` type is an alias for:
@@ -247,15 +252,14 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
   ---@param dir string
   ---@param method string
   on_attach = function(dir, method) end,
-  lsp = { ---@type Project.Config.LSP
-    enabled = true, ---@type boolean
-    ignore = {}, ---@type string[]
-    use_pattern_matching = false, ---@type boolean
-    -- WARNING: USE AT YOUR OWN DISCRETION!!!!
-    no_fallback = false, ---@type boolean
+  lsp = {
+    enabled = true,
+    ignore = {},
+    use_pattern_matching = false,
+    no_fallback = false, -- WARNING: USE AT YOUR OWN DISCRETION!!!!
   },
   manual_mode = false,
-  patterns = { ---@type string[]
+  patterns = {
     '.git',
     '.github',
     '_darcs',
@@ -276,20 +280,23 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
   },
   enable_autochdir = false,
   show_hidden = false,
-  exclude_dirs = {}, ---@type string[]
+  exclude_dirs = {},
   silent_chdir = true,
-  scope_chdir = 'global', ---@type 'global'|'tab'|'win'
+  scope_chdir = 'global',
   datapath = vim.fn.stdpath('data'),
   historysize = 100,
-  log = { ---@type Project.Config.Logging
+  log = {
     enabled = false,
     max_size = 1.1,
     logpath = vim.fn.stdpath('state'),
   },
-  fzf_lua = { enabled = false }, ---@type Project.Config.FzfLua
-  picker = { enabled = false, sort = 'newest' }, ---@type Project.Config.Picker
+  fzf_lua = { enabled = false },
+  picker = {
+    enabled = false,
+    sort = 'newest', ---@type 'newest'|'oldest'
+  },
   disable_on = {
-    ft = { -- `filetype`
+    ft = {
       '',
       'NvimTree',
       'TelescopePrompt',
@@ -307,7 +314,7 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
     },
     bt = { 'help', 'nofile', 'nowrite', 'terminal' },
   },
-  telescope = { ---@type Project.Config.Telescope
+  telescope = {
     sort = 'newest', ---@type 'oldest'|'newest'
     prefer_file_browser = false,
     disable_file_picker = false,
@@ -427,17 +434,13 @@ vim.keymap.set('n', '<YOUR-FLOAT-MAP>', ':Neotree filesystem float reveal_force_
 -- ... and so on
 ```
 
-> [!NOTE]
-> Not 100% certain whether the `reveal_force_cwd` flag is necessary,
-> but better safe than sorry!
-
 ### Telescope
 
 To enable [`telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) integration use the following
 code in your config:
 
 ```lua
-require('telescope').setup(...)
+require('telescope').setup()
 require('telescope').load_extension('projects')
 ```
 
@@ -471,14 +474,14 @@ require('telescope').setup({
 
 `project.nvim` comes with the following mappings for Telescope:
 
-| Normal mode   | Insert mode   | Action                       |
-|---------------|---------------|------------------------------|
-| `f`           |   `<C-f>`     |   `find_project_files`       |
-| `b`           |   `<C-b>`     |   `browse_project_files`     |
-| `d`           |   `<C-d>`     |   `delete_project`           |
-| `s`           |   `<C-s>`     |   `search_in_project_files`  |
-| `r`           |   `<C-r>`     |   `recent_project_files`     |
-| `w`           |   `<C-w>`     |   `change_working_directory` |
+| Normal Mode | Insert Mode | Action                     |
+|-------------|-------------|----------------------------|
+| `f`         | `<C-f>`     | `find_project_files`       |
+| `b`         | `<C-b>`     | `browse_project_files`     |
+| `d`         | `<C-d>`     | `delete_project`           |
+| `s`         | `<C-s>`     | `search_in_project_files`  |
+| `r`         | `<C-r>`     | `recent_project_files`     |
+| `w`         | `<C-w>`     | `change_working_directory` |
 
 _You can find the Actions in [`telescope/_extensions/projects/actions.lua`](./lua/telescope/_extensions/projects/actions.lua)_.
 
@@ -500,6 +503,34 @@ require('mini.starter').setup({
 })
 ```
 
+### `picker.nvim`
+
+This plugin has a custom integration with [@wsdjeg](https://github.com/wsdjeg)'s
+[`picker.nvim`](https://github.com/wsdjeg/picker.nvim).
+If enabled, the `:ProjectPicker` command will be available to you.
+
+To enable it you'll need the plugin installed, then in your setup:
+
+```lua
+require('project').setup({
+  picker = {
+    enabled = true,
+    sort = 'newest', -- 'newest' or 'oldest'
+  }
+})
+```
+
+Mappings:
+
+| Normal Mode | Description                             |
+|-------------|-----------------------------------------|
+| `<C-d>`     | Delete the selected project             |
+| `<C-w>`     | Changes the cwd to the selected project |
+
+
+You can find the integration in
+[_`extensions/picker.lua`_](./lua/project/extensions/picker.lua).
+
 ---
 
 ## Commands
@@ -513,14 +544,32 @@ this plugin can provide. This one is subject to change, just as `vim.ui` is.
 
 See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 
+### `:ProjectPicker`
+
+> [!IMPORTANT]
+> **This command works ONLY if you have `picker.nvim` installed
+> and `picker.enabled` set to `true`.**
+
+The `:ProjectPicker` command is a dynamically enabled user command that opens a `picker.nvim` picker
+for `project.nvim`.
+
+See [_`picker.nvim` Integration_](#pickernvim) for more info.
+
 ### `:ProjectFzf`
 
 > [!IMPORTANT]
-> **This command works ONLY if you have `fzf-lua` installed and loaded**
+> **This command works ONLY if you have `fzf-lua` installed and loaded
+> and `fzf_lua.enabled` set to `true`.**
 
-The `:ProjectFzf` command is a dynamicly enabled User Command that runs
-`project.nvim` through `fzf-lua`.
+The `:ProjectFzf` command is a dynamically enabled user command that opens a `fzf-lua` picker
+for `project.nvim`.
 For now it just executes `require('project').run_fzf_lua()`.
+
+Mappings:
+
+| Mapping | Description                 |
+|---------|-----------------------------|
+| `<C-d>` | Delete the selected project |
 
 See [_`extensions/fzf-lua.lua`_](./lua/project/extensions/fzf-lua.lua) for more info.
 
