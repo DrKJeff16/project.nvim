@@ -44,7 +44,7 @@ M.source = {
       require('project.api').set_pwd(entry.value, 'picker.nvim')
       local files = vim.deepcopy(require('picker.sources.files'))
       files.preview_win = false
-      require('picker.windows').open(files, {})
+      require('picker').open({ 'files' }, { buf = vim.api.nvim_get_current_buf() })
     end
   end,
 }
