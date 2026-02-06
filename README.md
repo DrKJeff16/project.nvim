@@ -47,6 +47,7 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
   - [`picker.nvim`](#pickernvim)
 - [Commands](#commands)
   - [`:Project`](#project)
+  - [`:ProjectPicker`](#projectpicker)
   - [`:ProjectFzf`](#projectfzf)
   - [`:ProjectTelescope`](#projecttelescope)
   - [`:ProjectHealth`](#projecthealth)

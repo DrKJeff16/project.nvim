@@ -8,6 +8,7 @@
 :ProjectHistory	project-nvim.txt	/*:ProjectHistory*
 :ProjectImportJSON	project-nvim.txt	/*:ProjectImportJSON*
 :ProjectLog	project-nvim.txt	/*:ProjectLog*
+:ProjectPicker	project-nvim.txt	/*:ProjectPicker*
 :ProjectRoot	project-nvim.txt	/*:ProjectRoot*
 :ProjectSession	project-nvim.txt	/*:ProjectSession*
 :ProjectTelescope	project-nvim.txt	/*:ProjectTelescope*
@@ -16,6 +17,7 @@ Project.Config.FzfLua	project-nvim.txt	/*Project.Config.FzfLua*
 Project.Config.LSP	project-nvim.txt	/*Project.Config.LSP*
 Project.Config.Logging	project-nvim.txt	/*Project.Config.Logging*
 Project.Config.Options	project-nvim.txt	/*Project.Config.Options*
+Project.Config.Picker	project-nvim.txt	/*Project.Config.Picker*
 Project.Config.Telescope	project-nvim.txt	/*Project.Config.Telescope*
 ProjectAdd	project-nvim.txt	/*ProjectAdd*
 ProjectConfig	project-nvim.txt	/*ProjectConfig*
@@ -26,6 +28,7 @@ ProjectHealth	project-nvim.txt	/*ProjectHealth*
 ProjectHistory	project-nvim.txt	/*ProjectHistory*
 ProjectImportJSON	project-nvim.txt	/*ProjectImportJSON*
 ProjectLog	project-nvim.txt	/*ProjectLog*
+ProjectPicker	project-nvim.txt	/*ProjectPicker*
 ProjectRoot	project-nvim.txt	/*ProjectRoot*
 ProjectSession	project-nvim.txt	/*ProjectSession*
 ProjectTelescope	project-nvim.txt	/*ProjectTelescope*
@@ -51,6 +54,7 @@ project-nvim.lsp-config	project-nvim.txt	/*project-nvim.lsp-config*
 project-nvim.neo-tree	project-nvim.txt	/*project-nvim.neo-tree*
 project-nvim.nvim-tree	project-nvim.txt	/*project-nvim.nvim-tree*
 project-nvim.pattern-matching	project-nvim.txt	/*project-nvim.pattern-matching*
+project-nvim.picker-config	project-nvim.txt	/*project-nvim.picker-config*
 project-nvim.setup	project-nvim.txt	/*project-nvim.setup*
 project-nvim.setup-options	project-nvim.txt	/*project-nvim.setup-options*
 project-nvim.telescope	project-nvim.txt	/*project-nvim.telescope*

@@ -48,14 +48,15 @@ Table of Contents                                             *project-nvim.toc*
     8.3. `:ProjectHealth`                                         |:ProjectHealth|
     8.4. `:ProjectHistory`                                       |:ProjectHistory|
     8.5. `:ProjectFzf`                                               |:ProjectFzf|
-    8.6. `:ProjectTelescope`                                   |:ProjectTelescope|
-    8.7. `:ProjectAdd`                                               |:ProjectAdd|
-    8.8. `:ProjectRoot`                                             |:ProjectRoot|
-    8.9. `:ProjectConfig`                                         |:ProjectConfig|
-    8.10. `:ProjectDelete`                                        |:ProjectDelete|
-    8.11. `:ProjectSession`                                      |:ProjectSession|
-    8.12. `:ProjectExportJSON`                                |:ProjectExportJSON|
-    8.13. `:ProjectImportJSON`                                |:ProjectImportJSON|
+    8.6. `:ProjectPicker`                                         |:ProjectPicker|
+    8.7. `:ProjectTelescope`                                   |:ProjectTelescope|
+    8.8. `:ProjectAdd`                                               |:ProjectAdd|
+    8.9. `:ProjectRoot`                                             |:ProjectRoot|
+    8.10. `:ProjectConfig`                                         |:ProjectConfig|
+    8.11. `:ProjectDelete`                                        |:ProjectDelete|
+    8.12. `:ProjectSession`                                      |:ProjectSession|
+    8.13. `:ProjectExportJSON`                                |:ProjectExportJSON|
+    8.14. `:ProjectImportJSON`                                |:ProjectImportJSON|
 9. API                                                        |project-nvim.api|
     9.1. `get_project_root()`                    |project-nvim.get_project_root()|
     9.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
@@ -82,6 +83,7 @@ Table of Contents                                             *project-nvim.toc*
 - `nvim-tree` Integration
 - `neo-tree` Integration
 - `mini.starter` Integration
+- `picker.nvim` Integration (|:ProjectPicker|)
 
 
 ==============================================================================
@@ -756,10 +758,20 @@ Table of Contents                                             *project-nvim.toc*
                             `fzf-lua` installed and loaded ~
 
                             The `:ProjectFzf` command is a
-                            dynamicly enabled User Command that runs
+                            dynamically enabled user command that runs
                             `project.nvim` through `fzf-lua`.
                             For now it just executes
                             `require('project.extensions.fzf-lua').run_fzf_lua()`
+
+
+`:ProjectPicker`                                   *ProjectPicker*  *:ProjectPicker*
+
+                            This command works ONLY if you have ~
+                            `picker.nvim` installed and loaded ~
+
+                            The `:ProjectPicker` command is a
+                            dynamically enabled user command that runs
+                            `project.nvim` through `picker.nvim`.
 
 
 `:ProjectTelescope`                          *ProjectTelescope*  *:ProjectTelescope*
