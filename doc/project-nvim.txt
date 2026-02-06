@@ -764,7 +764,7 @@ Table of Contents                                             *project-nvim.toc*
                             `require('project.extensions.fzf-lua').run_fzf_lua()`
 
 
-`:ProjectPicker`                                   *ProjectPicker*  *:ProjectPicker*
+`:ProjectPicker[!]`                                *ProjectPicker*  *:ProjectPicker*
 
                             This command works ONLY if you have ~
                             `picker.nvim` installed and loaded ~
@@ -772,6 +772,12 @@ Table of Contents                                             *project-nvim.toc*
                             The `:ProjectPicker` command is a
                             dynamically enabled user command that runs
                             `project.nvim` through `picker.nvim`.
+                            If a bang `!` is passed and you don't
+                            already have `picker.hidden` set to `true`,
+                            then a selected project will show
+                            hidden files.
+
+                            This is an alias for `:Picker project`.
 
 
 `:ProjectTelescope`                          *ProjectTelescope*  *:ProjectTelescope*

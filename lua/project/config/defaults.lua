@@ -85,11 +85,18 @@
 ---@class Project.Config.Picker
 ---Determines whether the `picker.nvim` integration is enabled.
 ---
----If `fzf-lua` is not installed, this won't make a difference.
+---If `picker.nvim` is not installed, this won't make a difference.
 --- ---
 ---Default: `false`
 --- ---
 ---@field enabled? boolean
+---Determines whether the picker called after selecting a project
+---should list hidden files aswell or not.
+---
+--- ---
+---Default: `false`
+--- ---
+---@field hidden? boolean
 ---Determines whether the newest projects come first (`'newest'`),
 ---or the oldest (`'oldest'`).
 --- ---
@@ -296,7 +303,7 @@ local DEFAULTS = { ---@type Project.Config.Defaults
     allow = false,
     notify = true,
   },
-  picker = { enabled = false, sort = 'newest' },
+  picker = { enabled = false, sort = 'newest', hidden = false },
   lsp = { enabled = true, ignore = {}, no_fallback = false, use_pattern_matching = false },
   manual_mode = false,
   patterns = {

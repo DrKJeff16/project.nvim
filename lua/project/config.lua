@@ -52,12 +52,15 @@ function Config.setup(options)
     vim.g.project_setup = 1
     Log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
   end
+  Log.debug(('(%s.setup): User commands created.'):format(MODSTR))
   require('project.commands').create_user_commands()
 
   if Config.options.fzf_lua.enabled then
+    Log.debug(('(%s.setup): fzf-lua integration enabled.'):format(MODSTR))
     require('project.extensions.fzf-lua').setup_commands()
   end
   if Config.options.picker.enabled then
+    Log.debug(('(%s.setup): picker.nvim integration enabled.'):format(MODSTR))
     require('project.extensions.picker').setup()
   end
 end

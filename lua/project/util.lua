@@ -19,6 +19,20 @@ function M.is_windows()
   return M.vim_has('win32')
 end
 
+---@param num number
+---@return integer n_digits
+function M.digits(num)
+  M.validate({ num = { num, { 'number' } } })
+
+  local n_digits = num >= 1 and 1 or 0
+  while num / 10 >= 1 do
+    n_digits = n_digits + 1
+    num = num / 10
+  end
+
+  return n_digits
+end
+
 ---@param feature string
 ---@return boolean has
 ---@nodiscard

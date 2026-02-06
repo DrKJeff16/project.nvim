@@ -294,6 +294,7 @@ You can find these in [`config/defaults.lua`](./lua/project/config/defaults.lua)
   fzf_lua = { enabled = false },
   picker = {
     enabled = false,
+    hidden = false, -- Show hidden files
     sort = 'newest', ---@type 'newest'|'oldest'
   },
   disable_on = {
@@ -517,6 +518,7 @@ require('project').setup({
   picker = {
     enabled = true,
     sort = 'newest', -- 'newest' or 'oldest'
+    hidden = false, -- Show hidden files
   }
 })
 ```
@@ -530,7 +532,8 @@ Mappings:
 
 
 You can find the integration in
-[_`extensions/picker.lua`_](./lua/project/extensions/picker.lua).
+[_`extensions/picker.lua`_](./lua/project/extensions/picker.lua)
+and [`sources/project.lua`](./lua/picker/sources/project.lua).
 
 ---
 
@@ -551,8 +554,13 @@ See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 > **This command works ONLY if you have `picker.nvim` installed
 > and `picker.enabled` set to `true`.**
 
-The `:ProjectPicker` command is a dynamically enabled user command that opens a `picker.nvim` picker
-for `project.nvim`.
+The `:ProjectPicker` command is a dynamically enabled user command that runs
+`project.nvim` through `picker.nvim`.
+
+If a bang is passed (`:ProjectPicker!`) and you don't already have `picker.hidden` set to `true`,
+then a selected project will show hidden files.
+
+This is an alias for `:Picker project`.
 
 See [_`picker.nvim` Integration_](#pickernvim) for more info.
 
