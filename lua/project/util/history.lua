@@ -226,16 +226,16 @@ function History.remove_session(session, found)
     found = { found, { 'boolean' } },
   })
 
-  local new_tbl = {} ---@type string[]
-  for _, v in ipairs(History.session_projects) do
-    if v ~= session then
-      table.insert(new_tbl, v)
-    else
+  local i = 1
+  while i < #History.session_projects do
+    if History.session_projects[i] == session then
+      table.remove(History.session_projects, i)
       found = true
+      i = i - 1
+    else
+      i = i + 1
     end
   end
-  History.session_projects = vim.deepcopy(new_tbl)
-
   return found
 end
 
@@ -246,16 +246,16 @@ end
 function History.remove_recent(project)
   Util.validate({ project = { project, { 'string' } } })
 
-  local new_tbl, found = {}, false ---@type string[], boolean
-  for _, v in ipairs(History.recent_projects) do
-    if v ~= project then
-      table.insert(new_tbl, v)
-    else
+  local found, i = false, 1 ---@type boolean, integer
+  while i <= #History.recent_projects do
+    if History.recent_projects[i] == project then
+      table.remove(History.recent_projects, i)
       found = true
+      i = i - 1
+    else
+      i = i + 1
     end
   end
-  History.recent_projects = vim.deepcopy(new_tbl)
-
   return found
 end
 
@@ -390,7 +390,7 @@ function History.get_recent_projects(tilde)
 
   local i, removed = 1, false
   while i <= #tbl do
-    local v = tbl[i]
+    local v = Util.rstrip('/', tbl[i])
     if not Path.exists(v) or Path.is_excluded(v) then
       table.remove(tbl, i)
       removed = true
@@ -445,13 +445,25 @@ function History.write_history(path)
   end
 
   local res = History.get_recent_projects()
-  for _, proj in ipairs(file_history) do
-    if not vim.list_contains(res, proj) then
-      table.insert(res, proj)
+  local i = 1
+  while i < #file_history do
+    local proj = file_history[i]
+    if vim.list_contains(file_history, proj) and not vim.list_contains(res, proj) then
+      table.remove(file_history, i)
+      i = i > 1 and i - 1 or i
+    else
+      i = i + 1
     end
   end
+  while i < #res do
+    local proj = res[i]
+    if not vim.list_contains(file_history, proj) then
+      table.insert(file_history, i)
+    end
+    i = i + 1
+  end
 
-  local tbl_out = vim.deepcopy(res)
+  local tbl_out = vim.deepcopy(file_history)
   if History.historysize and History.historysize > 0 then
     tbl_out = #res > History.historysize and vim.list_slice(res, #res - History.historysize, #res)
       or res
