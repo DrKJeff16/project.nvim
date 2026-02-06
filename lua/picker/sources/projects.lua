@@ -31,7 +31,7 @@ local function gen_items(source)
   return items
 end
 
----@class Picker.Sources.Project
+---@class Picker.Sources.Projects
 local M = {}
 
 function M.get()

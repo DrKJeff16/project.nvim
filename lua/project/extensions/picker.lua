@@ -4,7 +4,7 @@ local Commands = require('project.commands')
 ---@class Project.Extensions.Picker
 local M = {}
 
-M.source = require('picker.sources.project')
+M.source = require('picker.sources.projects')
 
 function M.setup()
   if not Util.mod_exists('picker') then
