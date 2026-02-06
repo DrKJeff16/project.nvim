@@ -35,7 +35,8 @@ Table of Contents                                             *project-nvim.toc*
     3.3. `Project.Config.DifferentOwners`         |Project.Config.DifferentOwners|
     3.4. `Project.Config.Telescope`                     |Project.Config.Telescope|
     3.5. `Project.Config.FzfLua`                           |Project.Config.FzfLua|
-    3.6. `Project.Config.Logging`                         |Project.Config.Logging|
+    3.6. `Project.Config.Picker`                           |Project.Config.Picker|
+    3.7. `Project.Config.Logging`                         |Project.Config.Logging|
 4. Pattern Matching                              |project-nvim.pattern-matching|
 5. Nvim Tree                                            |project-nvim.nvim-tree|
 6. Neo Tree                                              |project-nvim.neo-tree|
@@ -294,6 +295,14 @@ Table of Contents                                             *project-nvim.toc*
                                 details
 
 
+    * {picker}                  (|Project.Config.Picker|)
+                                Table of options used for
+                                `picker.nvim` integration.
+
+                                See |Project.Config.Picker| for more
+                                details
+
+
     * {log}                     (|Project.Options.Logging|)
                                 Options for logging.
 
@@ -493,7 +502,29 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-3.6. `Project.Config.Logging`                             *Project.Config.Logging*
+3.6. `Project.Config.Picker`                               *Project.Config.Picker*
+                                                    *project-nvim.picker-config*
+
+
+    * {enabled}                 (boolean)
+                                Determines whether the `picker.nvim`
+                                integration is enabled.
+                                If `picker.nvim` is not installed
+                                this won't make a difference.
+
+                                Default: `false` ~
+
+
+    * {sort}                    (`'newest'|'oldest'`)
+                                Determines whether the newest projects
+                                come first (`'newest'`), or
+                                the oldest (`'oldest'`).
+
+                                Default: `'newest'` ~
+
+
+------------------------------------------------------------------------------
+3.7. `Project.Config.Logging`                             *Project.Config.Logging*
                                                    *project-nvim.logging-config*
 
 

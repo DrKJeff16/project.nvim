@@ -57,6 +57,9 @@ function Config.setup(options)
   if Config.options.fzf_lua.enabled then
     require('project.extensions.fzf-lua').setup_commands()
   end
+  if Config.options.picker.enabled then
+    require('project.extensions.picker').setup()
+  end
 end
 
 ---@return string config

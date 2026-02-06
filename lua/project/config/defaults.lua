@@ -80,6 +80,23 @@
 --- ---
 ---@field logpath? string
 
+---Table of options used for `picker.nvim` integration
+--- ---
+---@class Project.Config.Picker
+---Determines whether the `picker.nvim` integration is enabled.
+---
+---If `fzf-lua` is not installed, this won't make a difference.
+--- ---
+---Default: `false`
+--- ---
+---@field enabled? boolean
+---Determines whether the newest projects come first (`'newest'`),
+---or the oldest (`'oldest'`).
+--- ---
+---Default: `'newest'`
+--- ---
+---@field sort? 'newest'|'oldest'
+
 ---Table of options used for `fzf-lua` integration
 --- ---
 ---@class Project.Config.FzfLua
@@ -247,6 +264,9 @@
 ---Table of options used for `fzf-lua` integration
 --- ---
 ---@field fzf_lua? Project.Config.FzfLua
+---Table of options used for `picker.nvim` integration
+--- ---
+---@field picker? Project.Config.Picker
 ---Options for logging utility.
 --- ---
 ---@field log? Project.Config.Logging
@@ -276,6 +296,7 @@ local DEFAULTS = { ---@type Project.Config.Defaults
     allow = false,
     notify = true,
   },
+  picker = { enabled = false, sort = 'newest' },
   lsp = { enabled = true, ignore = {}, no_fallback = false, use_pattern_matching = false },
   manual_mode = false,
   patterns = {

@@ -287,6 +287,7 @@ You can find these in [`project/config/defaults.lua`](./lua/project/config/defau
     logpath = vim.fn.stdpath('state'),
   },
   fzf_lua = { enabled = false }, ---@type Project.Config.FzfLua
+  picker = { enabled = false, sort = 'newest' }, ---@type Project.Config.Picker
   disable_on = {
     ft = { -- `filetype`
       '',
