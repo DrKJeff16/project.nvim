@@ -48,18 +48,18 @@ function M.validate(T)
     while #spec > max do
       table.remove(spec, #spec)
     end
-
     T[name] = spec
   end
 
-  for name, spec in pairs(T) do
-    if M.vim_has('nvim-0.11') then
+  if M.vim_has('nvim-0.11') then
+    for name, spec in pairs(T) do
       table.insert(spec, 1, name)
       vim.validate(unpack(spec))
-    else
-      vim.validate(spec)
     end
+    return
   end
+
+  vim.validate(T)
 end
 
 ---Checks whether a given path is a directory or not.
