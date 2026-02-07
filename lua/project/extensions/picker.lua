@@ -12,6 +12,8 @@ function M.setup()
     return
   end
 
+  vim.g.project_picker_loaded = 1
+
   Commands.new({
     {
       name = 'ProjectPicker',

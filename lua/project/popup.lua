@@ -378,6 +378,9 @@ M.open_menu = M.select.new({
       end,
       Exit = function() end,
     }
+    if vim.g.project_picker_loaded == 1 and vim.cmd.ProjectPicker then
+      res['Open Picker'] = vim.cmd.ProjectPicker
+    end
     if vim.g.project_telescope_loaded == 1 then
       res['Open Telescope Picker'] = require('telescope._extensions.projects').projects
     end
@@ -411,6 +414,9 @@ M.open_menu = M.select.new({
       'Go To Source Code',
       'Exit',
     }
+    if vim.g.project_picker_loaded == 1 then
+      table.insert(res_list, #res_list - 5, 'Open Picker')
+    end
     if vim.g.project_telescope_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'Open Telescope Picker')
     end
@@ -418,8 +424,11 @@ M.open_menu = M.select.new({
       table.insert(res_list, #res_list - 5, 'Open Fzf-Lua Picker')
     end
     if Config.options.log.enabled then
-      local Log = require('project.util.log')
-      table.insert(res_list, #res_list - 5, Log.window and 'Close Log' or 'Open Log')
+      table.insert(
+        res_list,
+        #res_list - 5,
+        require('project.util.log').window and 'Close Log' or 'Open Log'
+      )
       table.insert(res_list, #res_list - 5, 'Clear Log')
     end
     return res_list
