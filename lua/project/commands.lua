@@ -125,20 +125,23 @@ function Commands.create_user_commands()
       desc = 'Run the main project.nvim UI',
       bang = true,
       nargs = '*',
-      complete = function(_, line)
-        local args = vim.split(line, '%s+', { trimempty = false })
+      complete = function(_, lead)
+        if lead:sub(-1) == '!' then
+          return {}
+        end
+        local args = vim.split(lead, '%s+', { trimempty = false })
         if #args == 2 then
-          ---@type string[]
-          local list = vim.tbl_map(function(value) ---@param value string
-            return ('"%s"'):format(value)
-          end, Popup.open_menu.choices_list())
-          for i, v in ipairs(list) do
-            if v == '"Exit"' then
-              table.remove(list, i)
-              break
+          if args[2] == '' then
+            return Popup.open_menu.choices_list(false)
+          end
+
+          local res = {}
+          for _, choice in ipairs(Popup.open_menu.choices_list(false)) do
+            if vim.startswith(choice, args[2]) then
+              table.insert(res, choice)
             end
           end
-          return list
+          return res
         end
         return {}
       end,
@@ -195,17 +198,34 @@ function Commands.create_user_commands()
 
         local args = vim.split(lead, '%s+', { trimempty = false })
         if #args == 2 then
+          if args[2] == '' then
+            return vim.fn.getcompletion(args[2], 'file', true)
+          end
           -- Thanks to @TheLeoP for the advice!
           -- https://www.reddit.com/r/neovim/comments/1pvl1tb/comment/nvwzvvu/
-          return vim.fn.getcompletion(args[2], 'file', true)
+          local res = {} ---@type string[]
+          for _, comp in ipairs(vim.fn.getcompletion(args[2], 'file', true)) do
+            if vim.startswith(comp, args[2]) then
+              table.insert(res, comp)
+            end
+          end
+          return res
         end
         if #args == 3 then
           ---@type string[]
-          local res = vim.tbl_map(function(value) ---@param value integer
+          local nums = vim.tbl_map(function(value) ---@param value integer
             return tostring(value)
           end, Util.range(0, 32))
-          table.sort(res)
+          if args[3] == '' then
+            return nums
+          end
 
+          local res = {} ---@type string[]
+          for _, num in ipairs(nums) do
+            if vim.startswith(num, args[3]) then
+              table.insert(res, num)
+            end
+          end
           return res
         end
 
@@ -270,7 +290,19 @@ function Commands.create_user_commands()
         if lead:sub(-1) == '!' then
           return {}
         end
-        return History.get_recent_projects(true)
+        local args = vim.split(lead, '%s+', { trimempty = false })
+        local recents = Util.reverse(History.get_recent_projects(true)) ---@type string[]
+        if args[#args] == '' then
+          return recents
+        end
+
+        local res = {} ---@type string[]
+        for _, proj in ipairs(recents) do
+          if vim.startswith(proj, args[#args]) then
+            table.insert(res, proj)
+          end
+        end
+        return res
       end,
       callback = function(ctx)
         if not ctx or vim.tbl_isempty(ctx.fargs) then

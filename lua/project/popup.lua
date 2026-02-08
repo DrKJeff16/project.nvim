@@ -1,6 +1,6 @@
 ---@class Project.Popup.SelectChoices
 ---@field choices fun(): choices_dict: table<string, function>
----@field choices_list fun(): choices: string[]
+---@field choices_list fun(exit?: boolean): choices: string[]
 
 ---@class Project.Popup.SelectSpec: Project.Popup.SelectChoices
 ---@field callback ProjectCmdFun
@@ -325,17 +325,12 @@ M.recents_menu = M.select.new({
 M.open_menu = M.select.new({
   callback = function(ctx)
     if ctx and ctx.fargs and not vim.tbl_isempty(ctx.fargs) then
-      local fargs = table.concat(
-        vim.tbl_map(function(value) ---@param value string
-          return Util.strip({ "'", '"' }, value)
-        end, ctx.fargs),
-        ' '
-      )
+      local arg = ctx.fargs[1]
       local choices = M.open_menu.choices()
-      if not vim.list_contains(vim.tbl_keys(choices), fargs) then
+      if not vim.list_contains(vim.tbl_keys(choices), arg) then
         return
       end
-      choices[fargs](ctx)
+      choices[arg](ctx)
       return
     end
     local choices_list = M.open_menu.choices_list()
@@ -359,77 +354,70 @@ M.open_menu = M.select.new({
   choices = function()
     local Config = require('project.config')
     local res = { ---@type table<string, ProjectCmdFun>
-      ['Project Session'] = M.session_menu,
-      ['New Project'] = require('project.commands').cmds.ProjectAdd,
-      ['Open Recent Project'] = M.recents_menu,
-      ['Delete A Project'] = M.delete_menu,
-      ['Show Config'] = require('project.commands').cmds.ProjectConfig,
-      ['Open History'] = vim.cmd.ProjectHistory,
-      ['Export History'] = M.gen_export_prompt,
-      ['Import History'] = M.gen_import_prompt,
-      ['Help'] = function()
+      Session = M.session_menu,
+      New = require('project.commands').cmds.ProjectAdd,
+      Recents = M.recents_menu,
+      Delete = M.delete_menu,
+      Config = require('project.commands').cmds.ProjectConfig,
+      Historyfile = vim.cmd.ProjectHistory,
+      Export = M.gen_export_prompt,
+      Import = M.gen_import_prompt,
+      Help = function()
         vim.cmd.help('project-nvim')
       end,
-      ['Run Checkhealth'] = vim.cmd.ProjectHealth or function()
+      Checkhealth = vim.cmd.ProjectHealth or function()
         vim.cmd.checkhealth('project')
-      end,
-      ['Go To Source Code'] = function()
-        vim.ui.open('https://github.com/DrKJeff16/project.nvim')
       end,
       Exit = function() end,
     }
     if vim.g.project_picker_loaded == 1 and vim.cmd.ProjectPicker then
-      res['Open Picker'] = vim.cmd.ProjectPicker
+      res.Picker = function()
+        vim.cmd.ProjectPicker()
+      end
     end
     if vim.g.project_telescope_loaded == 1 then
-      res['Open Telescope Picker'] = require('telescope._extensions.projects').projects
+      res.Telescope = require('telescope._extensions.projects').projects
     end
     if Config.options.fzf_lua.enabled then
-      res['Open Fzf-Lua Picker'] = require('project.extensions.fzf-lua').run_fzf_lua
+      res.FzfLua = require('project.extensions.fzf-lua').run_fzf_lua
     end
     if Config.options.log.enabled then
       local Log = require('project.util.log')
-      if not Log.window then
-        res['Open Log'] = Log.open_win
-      else
-        res['Close Log'] = Log.close_win
-      end
-      res['Clear Log'] = Log.clear_log
+      res.Log = not Log.window and Log.open_win or Log.close_win
     end
     return res
   end,
-  choices_list = function()
+  choices_list = function(exit)
+    Util.validate({ exit = { exit, { 'boolean', 'nil' }, true } })
+    exit = exit ~= nil and exit or true
+
     local Config = require('project.config')
     local res_list = {
-      'Project Session',
-      'New Project',
-      'Open Recent Project',
-      'Delete A Project',
-      'Run Checkhealth',
-      'Show Config',
-      'Open History',
-      'Export History',
-      'Import History',
+      'Session',
+      'New',
+      'Recents',
+      'Delete',
+      'Checkhealth',
+      'Config',
+      'Historyfile',
+      'Export',
+      'Import',
       'Help',
-      'Go To Source Code',
-      'Exit',
     }
     if vim.g.project_picker_loaded == 1 then
-      table.insert(res_list, #res_list - 5, 'Open Picker')
+      table.insert(res_list, #res_list - 5, 'Picker')
     end
     if vim.g.project_telescope_loaded == 1 then
-      table.insert(res_list, #res_list - 5, 'Open Telescope Picker')
+      table.insert(res_list, #res_list - 5, 'Telescope')
     end
     if Config.options.fzf_lua.enabled then
-      table.insert(res_list, #res_list - 5, 'Open Fzf-Lua Picker')
+      table.insert(res_list, #res_list - 5, 'FzfLua')
     end
     if Config.options.log.enabled then
-      table.insert(
-        res_list,
-        #res_list - 5,
-        require('project.util.log').window and 'Close Log' or 'Open Log'
-      )
-      table.insert(res_list, #res_list - 5, 'Clear Log')
+      table.insert(res_list, #res_list - 5, 'Log')
+    end
+    if exit then
+      table.insert(res_list, 'Exit')
     end
     return res_list
   end,
