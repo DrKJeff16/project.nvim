@@ -193,7 +193,7 @@ function Log.open(mode)
 end
 
 function Log.init()
-  local log_cfg = Config.options.log
+  local log_cfg = Config.options.log or {}
   if not log_cfg.enabled then
     return
   end
