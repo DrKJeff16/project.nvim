@@ -227,37 +227,19 @@ require('project').setup()
 
 ### Defaults
 
-You can find these in [`config/defaults.lua`](./lua/project/config/defaults.lua)
+You can find these in [`config/defaults.lua`](./lua/project/config/defaults.lua).
 
-> [!NOTE]
-> The `Project.Telescope.ActionNames` type is an alias for:
->
-> ```lua
-> ---@alias Project.Telescope.ActionNames
-> ---|'browse_project_files'
-> ---|'change_working_directory'
-> ---|'delete_project'
-> ---|'find_project_files'
-> ---|'help_mappings'
-> ---|'recent_project_files'
-> ---|'search_in_project_files'
-> ```
-
-`setup()` comes with these defaults:
+By default, `setup()` loads with the following options:
 
 ```lua
 {
-  ---@param target_dir string
-  ---@param method string
-  before_attach = function(target_dir, method) end,
-  ---@param dir string
-  ---@param method string
-  on_attach = function(dir, method) end,
+  before_attach = nil, ---@type nil|fun(target_dir: string, method: string)
+  on_attach = nil, ---@type nil|fun(target_dir: string, method: string)
   lsp = {
     enabled = true,
     ignore = {},
     use_pattern_matching = false,
-    no_fallback = false, -- WARNING: USE AT YOUR OWN DISCRETION!!!!
+    no_fallback = false, -- WARNING: ENABLE AT YOUR OWN DISCRETION!!!!
   },
   manual_mode = false,
   patterns = {
@@ -274,6 +256,8 @@ You can find these in [`config/defaults.lua`](./lua/project/config/defaults.lua)
     '.csproj',
     '.sln',
     '.nvim.lua',
+    '.neoconf.json',
+    'neoconf.json',
   },
   different_owners = {
     allow = false, -- Allow adding projects with a different owner to the project session
@@ -320,7 +304,7 @@ You can find these in [`config/defaults.lua`](./lua/project/config/defaults.lua)
     sort = 'newest', ---@type 'oldest'|'newest'
     prefer_file_browser = false,
     disable_file_picker = false,
-    mappings = { ---@type table<'n'|'i', table<string, Project.Telescope.ActionNames>>
+    mappings = {
       n = {
         b = 'browse_project_files',
         d = 'delete_project',

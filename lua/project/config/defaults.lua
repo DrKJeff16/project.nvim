@@ -184,22 +184,26 @@
 ---It recieves `target_dir` and, optionally,
 ---the `method` used to change directory.
 ---
+---Set to `nil` to disable.
+---
 ---CREDITS: @danilevy1212
 --- ---
----Default: `function(target_dir, method) end`
+---Default: `nil`
 --- ---
----@field before_attach? fun(target_dir: string, method: string)
+---@field before_attach? nil|fun(target_dir: string, method: string)
 ---Hook to run after attaching to a new project.
 ---**_This only runs if the directory changes successfully._**
 ---
 ---It recieves `dir` and, optionally,
 ---the `method` used to change directory.
 ---
+---Set to `nil` to disable.
+---
 ---CREDITS: @danilevy1212
 --- ---
----Default: `function(dir, method) end`
+---Default: `nil`
 --- ---
----@field on_attach? fun(dir: string, method: string)
+---@field on_attach? nil|fun(dir: string, method: string)
 ---If enabled, set `vim.o.autochdir` to `true`.
 ---
 ---This is disabled by default because the plugin implicitly disables `autochdir`.
@@ -320,9 +324,11 @@ local DEFAULTS = { ---@type Project.Config.Defaults
     '.csproj',
     '.sln',
     '.nvim.lua',
+    '.neoconf.json',
+    'neoconf.json',
   },
-  before_attach = function(target_dir, method) end, ---@diagnostic disable-line:unused-local
-  on_attach = function(dir, method) end, ---@diagnostic disable-line:unused-local
+  before_attach = nil,
+  on_attach = nil,
   enable_autochdir = false,
   show_hidden = false,
   exclude_dirs = {},

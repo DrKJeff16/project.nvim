@@ -343,32 +343,31 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `'global'` ~
 
 
-    * {before_attach}           (`fun(target_dir: string, method: string)`)
+    * {before_attach}           (`nil|fun(target_dir: string, method: string)`)
                                 Hook to run before attaching to a new project.
                                 It optionally recieves `target_dir` and
-                                the `method` used to change directory
+                                the `method` used to change directory.
 
-                                Default: empty function ~
+                                Set to `nil` to disable
+
+                                Default: `nil` ~
 
 
-    * {on_attach}               (`fun(dir: string, method: string)`)
+    * {on_attach}               (`nil|fun(dir: string, method: string)`)
                                 Hook to run after attaching to a new project.
                                 It optionally recieves `dir` and
                                 the `method` used to change directory.
-                                Only runs on successful chdir! ~
+                                Only runs on successful chdir.
 
-                                Default: empty function ~
+                                Set to `nil` to disable
+
+                                Default: `nil` ~
 
 
     * {datapath}                (string)
                                 The path where `project/project_history`
                                 will be stored in.
 
-                                For more info, you can run the following code
-                                in your command line:
->vim
-                                :lua vim.print(require('project').get_history_paths())
-<
                                 Default: `vim.fn.stdpath('data')` ~
 
 
