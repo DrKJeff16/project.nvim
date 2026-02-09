@@ -9,18 +9,18 @@ local Popup = require('project.popup')
 ---@class Project
 local M = {}
 
-M.setup = Config.setup
-M.get_config = Config.get_config
-M.get_recent_projects = History.get_recent_projects
+M.delete_menu = Popup.delete_menu
 M.delete_project = History.delete_project
-M.get_project_root = Api.get_project_root
+M.get_config = Config.get_config
 M.get_history_paths = Api.get_history_paths
 M.get_last_project = Api.get_last_project
+M.get_project_root = Api.get_project_root
+M.get_recent_projects = History.get_recent_projects
 M.open_menu = Popup.open_menu
-M.delete_menu = Popup.delete_menu
 M.recents_menu = Popup.recents_menu
-M.session_menu = Popup.session_menu
 M.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
+M.session_menu = Popup.session_menu
+M.setup = Config.setup
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
