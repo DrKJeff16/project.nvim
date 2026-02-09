@@ -33,7 +33,7 @@ local SWITCH = {}
 ---@nodiscard
 function SWITCH.lsp(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   local root, lsp_name = Api.find_lsp_root(bufnr or vim.api.nvim_get_current_buf())
   if root then
@@ -49,7 +49,7 @@ end
 ---@nodiscard
 function SWITCH.pattern(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   local root, method = Api.find_pattern_root(bufnr or vim.api.nvim_get_current_buf())
   if root then
@@ -106,7 +106,7 @@ end
 ---@nodiscard
 function Api.find_lsp_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   local clients = vim.lsp.get_clients({ bufnr = bufnr })
   if vim.tbl_isempty(clients) then
@@ -143,7 +143,7 @@ end
 ---@nodiscard
 function Api.find_pattern_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
   dir = Util.is_windows() and dir:gsub('\\', '/') or dir
@@ -155,7 +155,7 @@ end
 ---@nodiscard
 function Api.valid_bt(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   if not Api.buffer_valid(bufnr) then
     return false
@@ -304,7 +304,7 @@ end
 ---@nodiscard
 function Api.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   if not Api.buffer_valid(bufnr) then
     return
@@ -353,7 +353,7 @@ end
 ---@nodiscard
 function Api.get_current_project(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   if not Api.buffer_valid(bufnr) then
     return
@@ -367,7 +367,7 @@ end
 ---@param bufnr? integer
 function Api.on_buf_enter(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and bufnr > 0 and Util.is_int(bufnr)) and bufnr or vim.api.nvim_get_current_buf()
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
   if not (Api.buffer_valid(bufnr) and Api.valid_bt(bufnr)) then
     return
   end

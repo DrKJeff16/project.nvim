@@ -191,14 +191,19 @@ function M.mod_exists(mod)
 end
 
 ---@param nums number[]|number
+---@param cond? boolean
 ---@return boolean int
 ---@nodiscard
-function M.is_int(nums)
-  M.validate({ nums = { nums, { 'number', 'table' } } })
+function M.is_int(nums, cond)
+  M.validate({
+    nums = { nums, { 'number', 'table' } },
+    cond = { cond, { 'boolean', 'nil' }, true },
+  })
+  cond = cond ~= nil and cond or true
 
   if M.is_type('number', nums) then
     ---@cast nums number
-    return nums == math.floor(nums) and nums == math.ceil(nums)
+    return nums == math.floor(nums) and nums == math.ceil(nums) and cond
   end
 
   ---@cast nums number[]
@@ -207,7 +212,7 @@ function M.is_int(nums)
       return false
     end
   end
-  return true
+  return true and cond
 end
 
 ---Emulates the behaviour of Python's builtin `range()` function.
