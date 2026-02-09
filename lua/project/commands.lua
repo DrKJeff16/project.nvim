@@ -50,7 +50,7 @@
 ---@field callback ProjectCmdFun
 ---@field name string
 ---@field desc string
----@field complete? (CompletorFun)|CompleteTypes
+---@field complete? CompleteTypes|CompletorFun
 ---@field bang? boolean
 ---@field nargs? string|integer
 
@@ -132,15 +132,25 @@ function Commands.create_user_commands()
         end
         if #args == 2 then
           if args[2] == '' then
-            return Popup.open_menu.choices_list(false)
+            local res = Popup.open_menu.choices_list(false)
+            for i, v in ipairs(res) do
+              if v == 'Exit' then
+                table.remove(res, i)
+                break
+              end
+            end
+            table.sort(res)
+            return res
           end
 
           local res = {}
           for _, choice in ipairs(Popup.open_menu.choices_list(false)) do
-            if vim.startswith(choice, args[2]) then
+            if vim.startswith(choice, args[2]) and choice ~= 'Exit' then
               table.insert(res, choice)
             end
           end
+          table.sort(res)
+
           return res
         end
         return {}

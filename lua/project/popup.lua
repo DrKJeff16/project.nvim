@@ -416,9 +416,11 @@ M.open_menu = M.select.new({
     if Config.options.log.enabled then
       table.insert(res_list, #res_list - 5, 'Log')
     end
-    if exit then
-      table.insert(res_list, 'Exit')
+    if not exit then
+      return res_list
     end
+
+    table.insert(res_list, 'Exit')
     return res_list
   end,
 })
