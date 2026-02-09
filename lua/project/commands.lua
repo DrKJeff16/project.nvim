@@ -126,10 +126,10 @@ function Commands.create_user_commands()
       bang = true,
       nargs = '*',
       complete = function(_, lead)
-        if lead:sub(-1) == '!' then
+        local args = vim.split(lead, '%s+', { trimempty = false })
+        if args[1]:sub(-1) == '!' and #args == 1 then
           return {}
         end
-        local args = vim.split(lead, '%s+', { trimempty = false })
         if #args == 2 then
           if args[2] == '' then
             return Popup.open_menu.choices_list(false)
@@ -192,11 +192,11 @@ function Commands.create_user_commands()
       bang = true,
       nargs = '*',
       complete = function(_, lead) ---@param lead string
-        if lead:sub(-1) == '!' then
+        local args = vim.split(lead, '%s+', { trimempty = false })
+        if args[1]:sub(-1) == '!' and #args == 1 then
           return {}
         end
 
-        local args = vim.split(lead, '%s+', { trimempty = false })
         if #args == 2 then
           if args[2] == '' then
             return vim.fn.getcompletion(args[2], 'file', true)
@@ -287,10 +287,11 @@ function Commands.create_user_commands()
       bang = true,
       nargs = '*',
       complete = function(_, lead)
-        if lead:sub(-1) == '!' then
+        local args = vim.split(lead, '%s+', { trimempty = false })
+        if args[1]:sub(-1) == '!' and #args == 1 then
           return {}
         end
-        local args = vim.split(lead, '%s+', { trimempty = false })
+
         local recents = Util.reverse(History.get_recent_projects(true)) ---@type string[]
         if args[#args] == '' then
           return recents
