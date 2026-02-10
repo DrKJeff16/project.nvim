@@ -26,10 +26,10 @@ local Projects = require('telescope').register_extension({
 require('project.commands').new({
   {
     name = 'ProjectTelescope',
+    desc = 'Telescope shortcut for `projects` picker',
     callback = function()
       Projects.projects()
     end,
-    desc = 'Telescope shortcut for `projects` picker',
   },
 })
 
