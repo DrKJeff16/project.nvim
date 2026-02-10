@@ -131,9 +131,12 @@ endif
 ```lua
 {
   'DrKJeff16/project.nvim',
-  dependencies = { -- OPTIONAL
-    'nvim-lua/plenary.nvim',
-    'nvim-telescope/telescope.nvim',
+  dependencies = { -- OPTIONAL. Choose any of the following
+    {
+      'nvim-telescope/telescope.nvim',
+      dependencies = { 'nvim-lua/plenary.nvim' },
+    },
+    'wsdjeg/picker.nvim',
     'ibhagwan/fzf-lua',
   },
   opts = {},
@@ -198,6 +201,7 @@ require('plug').add({
     depends = { -- OPTIONAL
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope.nvim',
+      'wsdjeg/picker.nvim',
       'ibhagwan/fzf-lua',
     },
     config = function()
@@ -211,7 +215,6 @@ require('plug').add({
 
 ```lua
 local paq = require('paq')
-
 paq({
   'DrKJeff16/project.nvim',
 
@@ -221,8 +224,6 @@ paq({
   'wsdjeg/picker.nvim',
   'ibhagwan/fzf-lua',
 })
-
-require('project.nvim').setup()
 ```
 
 ### LuaRocks
@@ -231,7 +232,6 @@ The package can be found [in the LuaRocks webpage](https://luarocks.org/modules/
 
 ```bash
 luarocks install project.nvim # Global install
-
 luarocks install --local project.nvim # Local install
 ```
 
@@ -535,9 +535,10 @@ Mappings:
 | `<C-w>`     | Changes the cwd to the selected project |
 
 
-You can find the integration in
-[_`extensions/picker.lua`_](./lua/project/extensions/picker.lua)
-and [`sources/project.lua`](./lua/picker/sources/project.lua).
+You can find the integration in:
+
+- [_`extensions/picker.lua`_](./lua/project/extensions/picker.lua)
+- [_`picker/sources/project.lua`_](./lua/picker/sources/project.lua).
 
 ---
 
@@ -621,7 +622,8 @@ The `:ProjectLog` command handles the `project.nvim` log file.
 The valid arguments are:
 
 ```vim
-:ProjectLog clear     " Clears the current log file, will close any opened log window
+:ProjectLog           " Toggles the window
+:ProjectLog clear     " Clears the current log file. Will close any opened log window
 :ProjectLog close     " Closes the Log Window
 :ProjectLog open      " Opens the Log Window
 :ProjectLog toggle    " Toggles the Log Window
@@ -686,8 +688,9 @@ Usage:
 :ProjectDelete[!] [/path/to/first [/path/to/second [...]]]
 ```
 
-- See _`:h :ProjectDelete`_ for more info.
-- See [_`commands.lua`_](./lua/project/commands.lua) for more info.
+For more info, see:
+- _`:h :ProjectDelete`_
+- [_`commands.lua`_](./lua/project/commands.lua)
 
 ### `:ProjectSession`
 
@@ -763,7 +766,7 @@ The API can be found in [_`api.lua`_](./lua/project/api.lua).
 about the current project's root, if any:
 
 ```lua
----@type string?, string?
+---@type string|nil, string|nil
 local root, lsp_or_method = require('project').get_project_root()
 ```
 
@@ -825,18 +828,16 @@ vim.print(get_history_paths('historyfile'))
 ## Utils
 
 A set of utilities that get repeated across the board.
-
 You can import them as shown below:
 
 ```lua
 local ProjUtil = require('project.util')
 ```
 
-_See [`util.lua`](./lua/project/util.lua) for further reference_.
+_These utilities are in part inspired by my own utilities found in my Neovim config,
+[**`Jnvim`**](https://github.com/DrKJeff16/nvim)_.
 
-_These utilities are in part inspired by my own utilities found in [**`Jnvim`**](https://github.com/DrKJeff16/Jnvim),_
-my own Nvim configuration; particularly the [**`User API`**](https://github.com/DrKJeff16/Jnvim/tree/main/lua/user_api)_
-**(WIP)**.
+See [`util.lua`](./lua/project/util.lua) for further reference.
 
 ---
 
@@ -848,7 +849,7 @@ If you're in a UNIX environment, make sure you have _**read, write and access pe
 (`rwx`) for the `projectpath` directory.
 
 > [!IMPORTANT]
-> The **default** value is `vim.fn.stdpath('data')/project_nvim`.
+> The **default** value is `vim.fn.stdpath('data')/project_nvim.json`.
 > See `:h stdpath()` for more info.
 
 You can get the value of `projectpath` by running the following in the cmdline:
@@ -860,7 +861,7 @@ You can get the value of `projectpath` by running the following in the cmdline:
 If you lack the required permissions for that directory, you can either:
 
 - Delete that directory **(RECOMMENDED)**
-- Run `chmod 755 <project/path>` **(NOT SURE IF THIS WILL FIX IT)**
+- Run `chmod 755 <project/path>` (`755` ==> `rwxr-xr-x` for UNIX users)
 
 ---
 
