@@ -26,6 +26,18 @@
 --- ---
 ---@field notify? boolean
 
+---Table of options used for the snacks picker.
+--- ---
+---@class Project.Config.Snacks
+---Determines whether the `snacks.nvim` integration is enabled.
+---
+---If `snacks.nvim` is not installed, this won't make a difference.
+--- ---
+---Default: `false`
+--- ---
+---@field enabled? boolean
+---@field opts? ProjectSnacksConfig
+
 ---Table of options used for the telescope picker.
 --- ---
 ---@class Project.Config.Telescope
@@ -278,6 +290,9 @@
 ---Table of options used for `picker.nvim` integration
 --- ---
 ---@field picker? Project.Config.Picker
+---Table of options used for the snacks picker.
+--- ---
+---@field snacks? Project.Config.Snacks
 ---Options for logging utility.
 --- ---
 ---@field log? Project.Config.Logging
@@ -303,11 +318,19 @@ local Util = require('project.util')
 
 ---@diagnostic disable-next-line:missing-fields
 local DEFAULTS = { ---@type Project.Config.Defaults
-  different_owners = {
-    allow = false,
-    notify = true,
-  },
+  different_owners = { allow = false, notify = true },
   picker = { enabled = false, sort = 'newest', hidden = false },
+  snacks = {
+    enabled = false,
+    opts = {
+      sort = 'newest',
+      hidden = false,
+      prompt = 'Select Project: ',
+      layout = 'select',
+      -- icon = {},
+      -- path_icons = {},
+    },
+  },
   lsp = { enabled = true, ignore = {}, no_fallback = false, use_pattern_matching = false },
   manual_mode = false,
   patterns = {

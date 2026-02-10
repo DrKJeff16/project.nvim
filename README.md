@@ -46,6 +46,7 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
     - [Telescope Mappings](#telescope-mappings)
   - [`mini.starter`](#ministarter)
   - [`picker.nvim`](#pickernvim)
+  - [`snacks.nvim`](#snacksnvim)
 - [Commands](#commands)
   - [`:Project`](#project)
   - [`:ProjectPicker`](#projectpicker)
@@ -90,7 +91,8 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
 - [`nvim-tree` Integration](#nvim-tree)
 - [`neo-tree` Integration](#neo-tree)
 - [`mini.starter` Integration](#ministarter)
-- **(NEW)** [`picker.nvim` Integration](#pickernvim)
+- [`picker.nvim` Integration](#pickernvim)
+- **(NEW)** [`snacks.nvim` Integration](#snacksnvim)
 
 ---
 
@@ -137,6 +139,7 @@ endif
       dependencies = { 'nvim-lua/plenary.nvim' },
     },
     'wsdjeg/picker.nvim',
+    'folke/snacks.nvim',
     'ibhagwan/fzf-lua',
   },
   opts = {},
@@ -167,6 +170,7 @@ If you wish to lazy-load this plugin:
       dependencies = { 'nvim-lua/plenary.nvim' },
     },
     'wsdjeg/picker.nvim',
+    'folke/snacks.nvim',
     'ibhagwan/fzf-lua',
   },
   opts = {},
@@ -183,6 +187,7 @@ require('pckr').add({
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope.nvim',
       'wsdjeg/picker.nvim',
+      'folke/snacks.nvim',
       'ibhagwan/fzf-lua',
     },
     config = function()
@@ -202,6 +207,7 @@ require('plug').add({
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope.nvim',
       'wsdjeg/picker.nvim',
+      'folke/snacks.nvim',
       'ibhagwan/fzf-lua',
     },
     config = function()
@@ -222,6 +228,7 @@ paq({
   'nvim-lua/plenary.nvim',
   'nvim-telescope/telescope.nvim',
   'wsdjeg/picker.nvim',
+  'folke/snacks.nvim',
   'ibhagwan/fzf-lua',
 })
 ```
@@ -294,6 +301,17 @@ By default, `setup()` loads with the following options:
     enabled = false,
     max_size = 1.1,
     logpath = vim.fn.stdpath('state'),
+  },
+  snacks = {
+    enabled = false,
+    opts = {
+      hidden = false,
+      sort = 'newest',
+      prompt = 'Select Project: ',
+      layout = 'select',
+      -- icon = {},
+      -- path_icons = {},
+    },
   },
   fzf_lua = { enabled = false },
   picker = {
@@ -513,7 +531,7 @@ require('mini.starter').setup({
 
 This plugin has a custom integration with [@wsdjeg](https://github.com/wsdjeg)'s
 [`picker.nvim`](https://github.com/wsdjeg/picker.nvim).
-If enabled, the `:ProjectPicker` command will be available to you.
+If enabled, the [`:ProjectPicker`](#projectpicker) command will be available to you.
 
 To enable it you'll need the plugin installed, then in your setup:
 
@@ -539,6 +557,43 @@ You can find the integration in:
 
 - [_`extensions/picker.lua`_](./lua/project/extensions/picker.lua)
 - [_`picker/sources/project.lua`_](./lua/picker/sources/project.lua).
+
+### `snacks.nvim`
+
+This plugin has a custom integration with [`snacks.nvim`](https://github.com/folke/snacks.nvim).
+If enabled, the [`:ProjectSnacks`](#projectsnacks) command will be available to you.
+
+```lua
+require('project.extensions.snacks').pick()
+```
+
+To enable and configure it you'll need the plugin installed, then in your setup:
+
+```lua
+require('project').setup({
+  snacks = {
+    enabled = true, -- Will enable the `:ProjectSnacks` command
+    opts = {
+      sort = 'newest',
+      hidden = false,
+      prompt = 'Select Project: ',
+      layout = 'select',
+      -- icon = {},
+      -- path_icons = {},
+    },
+  },
+})
+```
+
+Mappings:
+
+| Normal Mode | Description                             |
+|-------------|-----------------------------------------|
+| `<C-d>`     | Delete the selected project             |
+| `<C-w>`     | Changes the cwd to the selected project |
+
+
+You can find the integration in [_`extensions/snacks.lua`_](./lua/project/extensions/snacks.lua).
 
 ---
 
@@ -568,6 +623,23 @@ then a selected project will show hidden files.
 This is an alias for `:Picker project`.
 
 See [_`picker.nvim` Integration_](#pickernvim) for more info.
+
+### `:ProjectSnacks`
+
+> [!IMPORTANT]
+> **This command works ONLY if you have `snacks.nvim` installed
+> and `snacks.enabled` set to `true`.**
+
+The `:ProjectSnacks` command is a dynamically enabled user command that runs
+`project.nvim` through `snacks.nvim`.
+
+This is an alias for:
+
+```lua
+require('project.extensions.snacks').pick()
+```
+
+See [_`snacks.nvim` Integration_](#snacksnvim) for more info.
 
 ### `:ProjectFzf`
 

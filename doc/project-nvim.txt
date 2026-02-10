@@ -30,7 +30,8 @@ Table of Contents                                             *project-nvim.toc*
     2.4. `Project.Config.Telescope`                     |Project.Config.Telescope|
     2.5. `Project.Config.FzfLua`                           |Project.Config.FzfLua|
     2.6. `Project.Config.Picker`                           |Project.Config.Picker|
-    2.7. `Project.Config.Logging`                         |Project.Config.Logging|
+    2.7. `Project.Config.Snacks`                           |Project.Config.Snacks|
+    2.8. `Project.Config.Logging`                         |Project.Config.Logging|
 3. Pattern Matching                              |project-nvim.pattern-matching|
 4. Nvim Tree                                            |project-nvim.nvim-tree|
 5. Neo Tree                                              |project-nvim.neo-tree|
@@ -43,14 +44,15 @@ Table of Contents                                             *project-nvim.toc*
     7.4. `:ProjectHistory`                                       |:ProjectHistory|
     7.5. `:ProjectFzf`                                               |:ProjectFzf|
     7.6. `:ProjectPicker`                                         |:ProjectPicker|
-    7.7. `:ProjectTelescope`                                   |:ProjectTelescope|
-    7.8. `:ProjectAdd`                                               |:ProjectAdd|
-    7.9. `:ProjectRoot`                                             |:ProjectRoot|
-    7.10. `:ProjectConfig`                                        |:ProjectConfig|
-    7.11. `:ProjectDelete`                                        |:ProjectDelete|
-    7.12. `:ProjectSession`                                      |:ProjectSession|
-    7.13. `:ProjectExportJSON`                                |:ProjectExportJSON|
-    7.14. `:ProjectImportJSON`                                |:ProjectImportJSON|
+    7.7. `:ProjectSnacks`                                         |:ProjectSnacks|
+    7.8. `:ProjectTelescope`                                   |:ProjectTelescope|
+    7.9. `:ProjectAdd`                                               |:ProjectAdd|
+    7.10. `:ProjectRoot`                                            |:ProjectRoot|
+    7.11. `:ProjectConfig`                                        |:ProjectConfig|
+    7.12. `:ProjectDelete`                                        |:ProjectDelete|
+    7.13. `:ProjectSession`                                      |:ProjectSession|
+    7.14. `:ProjectExportJSON`                                |:ProjectExportJSON|
+    7.15. `:ProjectImportJSON`                                |:ProjectImportJSON|
 8. API                                                        |project-nvim.api|
     8.1. `get_project_root()`                    |project-nvim.get_project_root()|
     8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
@@ -78,6 +80,7 @@ Table of Contents                                             *project-nvim.toc*
 - `neo-tree` Integration
 - `mini.starter` Integration
 - `picker.nvim` Integration (|:ProjectPicker|)
+- `snacks.nvim` Integration (|:ProjectSnacks|)
 
 
 ==============================================================================
@@ -199,6 +202,14 @@ Table of Contents                                             *project-nvim.toc*
                                 `fzf-lua` integration.
 
                                 See |Project.Config.FzfLua| for more
+                                details
+
+
+    * {snacks}                  (|Project.Config.Snacks|)
+                                Table of options used for
+                                `snacks.nvim` integration.
+
+                                See |Project.Config.Snacks| for more
                                 details
 
 
@@ -430,7 +441,25 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-2.7. `Project.Config.Logging`                             *Project.Config.Logging*
+2.7. `Project.Config.Snacks`                               *Project.Config.Snacks*
+                                                    *project-nvim.snacks-config*
+
+
+    * {enabled}                 (boolean)
+                                Determines whether the `snacks.nvim`
+                                integration is enabled. If `true` then
+                                the |:ProjectSnacks| command will be created
+
+                                Default: `false` ~
+
+
+    * {opts}                    (table)
+                                Stores the setup options for
+                                the `snacks.nvim` picker
+
+
+------------------------------------------------------------------------------
+2.8. `Project.Config.Logging`                             *Project.Config.Logging*
                                                    *project-nvim.logging-config*
 
 
@@ -634,12 +663,12 @@ Table of Contents                                             *project-nvim.toc*
                             the `project.nvim` log file.
 
                             The valid arguments are:
->vim
-                            :ProjectLog clear     " Clears the log file
-                            :ProjectLog close     " Closes the Log Window
-                            :ProjectLog open      " Opens the Log Window
-                            :ProjectLog toggle    " Toggles the Log Window
-<
+
+                            - `clear`: Clears the log file
+                            - `close`: Closes the Log Window
+                            - `open`: Opens the Log Window
+                            - `toggle`: Toggles the Log Window
+
                             Useful for debugging
 
 
@@ -682,6 +711,21 @@ Table of Contents                                             *project-nvim.toc*
                             hidden files.
 
                             This is an alias for `:Picker project`.
+
+
+`:ProjectSnacks`                                   *ProjectSnacks*  *:ProjectSnacks*
+
+                            This command works ONLY if you have ~
+                            `snacks.nvim` installed and loaded ~
+
+                            The `:ProjectSnacks` command is a
+                            dynamically enabled user command that runs
+                            `project.nvim` through `snacks.nvim`.
+
+                            This is an alias for:
+>vim
+                    :lua require('project.extensions.snacks').pick()
+<
 
 
 `:ProjectTelescope`                          *ProjectTelescope*  *:ProjectTelescope*
@@ -761,7 +805,7 @@ Table of Contents                                             *project-nvim.toc*
                             The command does essentially the following
                             in the command line:
 >vim
-                            :lua require('project.api').on_buf_enter()
+                    :lua require('project.api').on_buf_enter()
 <
                             This is particularly useful if you enabled
                             {manual_mode} in `setup()`
@@ -822,19 +866,19 @@ Table of Contents                                             *project-nvim.toc*
 
                             The `:ProjectImportJSON` allows the user
                             to retrieve their saved project history
-                            in a JSON format.
+                            in a JSON format
 >vim
 
-                            " Will open a prompt
-                            :ProjectImportJSON
+    " Will open a prompt
+    :ProjectImportJSON
 
-                            " Will be treated as `a.json`
-                            :ProjectExportJSON a
-                            :ProjectImportJSON a
+    " Will be treated as `a.json`
+    :ProjectExportJSON a
+    :ProjectImportJSON a
 
-                            " Will be treated as `b`
-                            :ProjectExportJSON! b
-                            :ProjectImportJSON! b
+    " Will be treated as `b`
+    :ProjectExportJSON! b
+    :ProjectImportJSON! b
 <
 
 ==============================================================================
@@ -889,10 +933,11 @@ Table of Contents                                             *project-nvim.toc*
 
     Example ~
 >lua
-        local config = require('project').get_config()
+    -- Lua
+    local config = require('project').get_config()
 
-        vim.notify(vim.inspect(config)) -- Using `vim.notify()`
-        vim.print(config) -- Using `vim.print()`
+    vim.notify(vim.inspect(config)) -- Using `vim.notify()`
+    vim.print(config) -- Using `vim.print()`
 <
 
 ------------------------------------------------------------------------------
@@ -902,6 +947,7 @@ Table of Contents                                             *project-nvim.toc*
     If no valid args are passed to this function
     it will return the following dictionary:
 >lua
+    -- Lua
     local get_history_paths = require('project').get_history_paths
 
     -- A dictionary table containing all return values below
@@ -933,6 +979,7 @@ Table of Contents                                             *project-nvim.toc*
     A set of utilities that get repeated across the board.
     You can import the utilities in Lua:
 >lua
+    -- Lua
     local Util = require('project.util')
 <
 
