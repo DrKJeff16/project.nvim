@@ -51,11 +51,11 @@ function M.actions()
           ('Delete project? (`%s`)'):format(vim.fn.fnamemodify(entry.value, ':~')),
           '&Yes\n&No',
           2
-        ) ~= 1
+        ) == 1
       then
-        return
+        require('project.util.history').delete_project(entry.value)
       end
-      require('project.util.history').delete_project(entry.value)
+      require('picker.windows').open(M)
     end,
     ['<C-w>'] = function(entry)
       if
@@ -65,9 +65,9 @@ function M.actions()
           2
         ) ~= 1
       then
-        return
+        require('project.api').set_pwd(entry.value, 'picker.nvim')
       end
-      require('project.api').set_pwd(entry.value, 'picker.nvim')
+      require('picker.windows').open(M)
     end,
   }
 end
