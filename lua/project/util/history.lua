@@ -3,8 +3,6 @@ local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
-local floor = math.floor
-local ceil = math.ceil
 local Util = require('project.util')
 local Path = require('project.util.path')
 local Log = require('project.util.log')
@@ -86,7 +84,7 @@ function History.export_history_json(path, ind, force_name)
     force_name = { force_name, { 'boolean', 'nil' }, true },
   })
   ind = ind or 2
-  ind = floor(tonumber(ind))
+  ind = math.floor(tonumber(ind))
   force_name = force_name ~= nil and force_name or false
   if vim.g.project_setup ~= 1 then
     return
@@ -94,7 +92,9 @@ function History.export_history_json(path, ind, force_name)
 
   local spc = nil ---@type string|nil
   if ind >= 1 then
-    spc = (' '):rep(not vim.list_contains({ floor(ind), ceil(ind) }, ind) and floor(ind) or ind)
+    spc = (' '):rep(
+      not vim.list_contains({ math.floor(ind), math.ceil(ind) }, ind) and math.floor(ind) or ind
+    )
   end
 
   path = Util.strip(' ', path)
