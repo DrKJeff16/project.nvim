@@ -34,6 +34,7 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
   - [`vim-plug`](#vim-plug)
   - [`lazy.nvim`](#lazynvim)
   - [`pckr.nvim`](#pckrnvim)
+  - [`nvim-plug`](#nvim-plug)
   - [`paq-nvim`](#paq-nvim)
   - [LuaRocks](#luarocks)
 - [Configuration](#configuration)
@@ -158,7 +159,10 @@ If you wish to lazy-load this plugin:
     'ProjectSession',
   },
   dependencies = { -- OPTIONAL. Choose any of the following
-    { 'nvim-telescope/telescope.nvim', dependencies = { 'nvim-lua/plenary.nvim' } },
+    {
+      'nvim-telescope/telescope.nvim',
+      dependencies = { 'nvim-lua/plenary.nvim' },
+    },
     'wsdjeg/picker.nvim',
     'ibhagwan/fzf-lua',
   },
@@ -169,22 +173,38 @@ If you wish to lazy-load this plugin:
 ### `pckr.nvim`
 
 ```lua
-if vim.fn.has('nvim-0.11') == 1 then
-  require('pckr').add({
-    {
-      'DrKJeff16/project.nvim',
-      requires = { -- OPTIONAL. Choose any of the following
-        'nvim-lua/plenary.nvim',
-        'nvim-telescope/telescope.nvim',
-        'wsdjeg/picker.nvim',
-        'ibhagwan/fzf-lua',
-      },
-      config = function()
-        require('project').setup()
-      end,
-    };
-  })
-end
+require('pckr').add({
+  {
+    'DrKJeff16/project.nvim',
+    requires = { -- OPTIONAL. Choose any of the following
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim',
+      'wsdjeg/picker.nvim',
+      'ibhagwan/fzf-lua',
+    },
+    config = function()
+      require('project').setup()
+    end,
+  }
+})
+```
+
+### `nvim-plug`
+
+```lua
+require('plug').add({
+  {
+    'DrKJeff16/project.nvim',
+    depends = { -- OPTIONAL
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim',
+      'ibhagwan/fzf-lua',
+    },
+    config = function()
+      require('project').setup()
+    end,
+  },
+})
 ```
 
 ### `paq-nvim`
