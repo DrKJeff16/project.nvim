@@ -197,7 +197,7 @@ function Commands.create_user_commands()
       end,
     },
     {
-      name = 'ProjectExportJSON',
+      name = 'ProjectExport',
       desc = 'Export project.nvim history to JSON file',
       bang = true,
       nargs = '*',
@@ -243,7 +243,7 @@ function Commands.create_user_commands()
       end,
       callback = function(ctx)
         if not ctx or #ctx.fargs > 2 then
-          vim.notify('Usage\n  :ProjectExportJSON </path/to/file[.json]> [<INDENT>]', INFO)
+          vim.notify('Usage\n  :ProjectExport </path/to/file[.json]> [<INDENT>]', INFO)
           return
         end
         if vim.tbl_isempty(ctx.fargs) then
@@ -259,14 +259,14 @@ function Commands.create_user_commands()
       end,
     },
     {
-      name = 'ProjectImportJSON',
+      name = 'ProjectImport',
       desc = 'Import project history from JSON file',
       bang = true,
       nargs = '?',
       complete = 'file',
       callback = function(ctx)
         if not (ctx and #ctx.fargs <= 1) then
-          vim.notify('Usage\n  :ProjectImportJSON </path/to/file[.json]>', INFO)
+          vim.notify('Usage\n  :ProjectImport </path/to/file[.json]>', INFO)
           return
         end
 

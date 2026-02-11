@@ -60,8 +60,8 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
   - [`:ProjectConfig`](#projectconfig)
   - [`:ProjectDelete`](#projectdelete)
   - [`:ProjectSession`](#projectsession)
-  - [`:ProjectExportJSON`](#projectexportjson)
-  - [`:ProjectImportJSON`](#projectimportjson)
+  - [`:ProjectExport`](#projectexport)
+  - [`:ProjectImport`](#projectimport)
 - [API](#api)
   - [`get_project_root()`](#get_project_root)
   - [`get_recent_projects()`](#get_recent_projects)
@@ -156,8 +156,8 @@ If you wish to lazy-load this plugin:
     'ProjectAdd',
     'ProjectConfig',
     'ProjectDelete',
-    'ProjectExportJSON',
-    'ProjectImportJSON',
+    'ProjectExport',
+    'ProjectImport',
     'ProjectHealth',
     'ProjectHistory',
     'ProjectRecents',
@@ -787,12 +787,12 @@ Selecting a directory will open another UI picker with its contents, and so on.
 
 See [_`popup.lua`_](./lua/project/popup.lua) for more info.
 
-### `:ProjectExportJSON`
+### `:ProjectExport`
 
 > [!WARNING]
 > **_Use this script with caution, as you may overwrite your files if doing something reckless!_**
 
-The `:ProjectExportJSON` allows the user to save their project history in a JSON format,
+The `:ProjectExport` allows the user to save their project history in a JSON format,
 allowing a custom indent level if desired.
 
 If the target file already exists and is not empty then a confirmation prompt
@@ -802,35 +802,35 @@ Example usage:
 
 ```vim
 " Will open a prompt
-:ProjectExportJSON
+:ProjectExport
 
 " The output file will be `a.json`
-:ProjectExportJSON a
+:ProjectExport a
 
 " The output file will be `b`, with a tab size of 12
-:ProjectExportJSON! b 12
+:ProjectExport! b 12
 
 " The output file will be `~/.c.json` (bang here is irrelevant)
-:ProjectExportJSON! ~/.c.json
+:ProjectExport! ~/.c.json
 ```
 
-### `:ProjectImportJSON`
+### `:ProjectImport`
 
-The `:ProjectImportJSON` allows the user to retrieved their saved project history in a JSON format.
+The `:ProjectImport` allows the user to retrieved their saved project history in a JSON format.
 
 Example usage:
 
 ```vim
 " Will open a prompt
-:ProjectImportJSON
+:ProjectImport
 
 " Will be treated as `a.json`
-:ProjectExportJSON a
-:ProjectImportJSON a
+:ProjectExport a
+:ProjectImport a
 
 " Will be treated as `b`
-:ProjectExportJSON! b
-:ProjectImportJSON! b
+:ProjectExport! b
+:ProjectImport! b
 ```
 
 ---
