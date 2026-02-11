@@ -25,11 +25,27 @@ Ever since I've decided to extend it and address issues.
 
 You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
 
+## Features
+
+- Automatically sets the `cwd` to the project root directory using pattern matching (LSP optionally)
+- Users can control whether to run this or not by filetype/buftype
+- Functional `checkhealth` hook `:checkhealth project`
+- Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
+- Logging capabilities `:ProjectLog`
+- Natively supports `.nvim.lua` files
+- `vim.ui` menu support
+- [Telescope Integration](#telescope) `:Telescope projects`
+- [`fzf-lua` Integration](#projectfzf)
+- [`nvim-tree` Integration](#nvim-tree)
+- [`neo-tree` Integration](#neo-tree)
+- [`mini.starter` Integration](#ministarter)
+- [`picker.nvim` Integration](#pickernvim)
+- **(NEW)** [`snacks.nvim` Integration](#snacksnvim)
+
 ---
 
 ## Table of Contents
 
-- [Features](#features)
 - [Installation](#installation)
   - [`vim-plug`](#vim-plug)
   - [`lazy.nvim`](#lazynvim)
@@ -74,25 +90,6 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
 - [Contributors](#contributors)
 - [Alternatives](#alternatives)
 - [License](#license)
-
----
-
-## Features
-
-- Automatically sets the `cwd` to the project root directory using pattern matching (LSP optionally)
-- Users can control whether to run this or not by filetype/buftype
-- Functional `checkhealth` hook `:checkhealth project`
-- Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
-- Logging capabilities `:ProjectLog`
-- Natively supports `.nvim.lua` files
-- `vim.ui` menu support
-- [Telescope Integration](#telescope) `:Telescope projects`
-- [`fzf-lua` Integration](#projectfzf)
-- [`nvim-tree` Integration](#nvim-tree)
-- [`neo-tree` Integration](#neo-tree)
-- [`mini.starter` Integration](#ministarter)
-- [`picker.nvim` Integration](#pickernvim)
-- **(NEW)** [`snacks.nvim` Integration](#snacksnvim)
 
 ---
 
