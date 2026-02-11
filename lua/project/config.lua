@@ -63,6 +63,10 @@ function Config.setup(options)
     Log.debug(('(%s.setup): picker.nvim integration enabled.'):format(MODSTR))
     require('project.extensions.picker').setup()
   end
+  if Config.options.snacks.enabled then
+    Log.debug(('(%s.setup): snacks.nvim integration enabled.'):format(MODSTR))
+    require('project.extensions.snacks').setup(Config.options.snacks.opts or {})
+  end
 end
 
 ---@return string config

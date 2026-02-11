@@ -305,7 +305,7 @@ local WARN = vim.log.levels.WARN
 local Util = require('project.util')
 
 ---@class Project.Config.Defaults: Project.Config.Options
----@field new fun(opts?: Project.Config.Options): defaults: Project.Config.Defaults
+---@field new fun(opts?: Project.Config.Options): defaults: Project.Config.Defaults|Project.Config.Options
 ---@field verify_histsize fun(self: Project.Config.Defaults)
 ---@field verify_scope_chdir fun(self: Project.Config.Defaults)
 ---@field verify_datapath fun(self: Project.Config.Defaults)
