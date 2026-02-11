@@ -107,10 +107,10 @@ function History.export_history_json(path, ind, force_name)
     error(('(%s.export_history_json): Target is a directory! `%s`'):format(MODSTR, path), ERROR)
   end
 
+  path = vim.fn.fnamemodify(path, ':p')
   if path:sub(-5) ~= '.json' and not force_name then
     path = ('%s.json'):format(path)
   end
-  path = vim.fn.fnamemodify(path, ':p')
 
   local stat = uv.fs_stat(path)
   if stat then
@@ -138,6 +138,15 @@ function History.export_history_json(path, ind, force_name)
   end
 
   History.write_history()
+
+  if not Path.exists(path) then
+    if Util.dir_exists(path) then
+      return
+    end
+    if vim.fn.writefile({}, path) ~= 0 then
+      error('File restricted!', ERROR)
+    end
+  end
 
   local fd = Path.open_file(path, 'w')
   if not fd then
