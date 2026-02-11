@@ -678,11 +678,21 @@ Table of Contents                                             *project-nvim.toc*
                             `:checkhealth project` in a single command.
 
 
-`:ProjectHistory`                                *ProjectHistory*  *:ProjectHistory*
+`:ProjectHistory[!] [clear]`                     *ProjectHistory*  *:ProjectHistory*
 
-                            The `:ProjectHistory` command toggles
-                            the `project.nvim` history file in a new tab,
-                            which can be exited by pressing `q` in Normal Mode
+                            The `:ProjectHistory` handles the project history.
+
+                            If the command is called without any arguments,
+                            it'll toggle the `project.nvim` history file
+                            in a new tab, which can be exited
+                            by pressing `q` in Normal Mode.
+
+                            DANGER ZONE! ~
+                            If called with the `clear` argument
+                            your project history will be cleared.
+                            If you want to avoid a "Yes/No" prompt
+                            you can call the command with a bang (`!`)
+                            to force it
 
 
 `:ProjectFzf`                                            *ProjectFzf*  *:ProjectFzf*

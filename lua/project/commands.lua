@@ -357,10 +357,34 @@ function Commands.create_user_commands()
     },
     {
       name = 'ProjectHistory',
-      desc = 'Run project.nvim through Fzf-Lua (assuming you have it installed)',
+      desc = 'Manage project history',
       bang = true,
-      callback = function()
-        History.toggle_win()
+      nargs = '?',
+      complete = function(_, lead)
+        local args = vim.split(lead, '%s+', { trimempty = false })
+        if (args[1]:sub(-1) == '!' and #args == 1) or #args > 2 then
+          return {}
+        end
+
+        local res = {}
+        for _, choice in ipairs({ 'clear' }) do
+          if vim.startswith(choice, args[2]) then
+            table.insert(res, choice)
+          end
+        end
+        return res
+      end,
+      callback = function(ctx)
+        if vim.tbl_isempty(ctx.fargs) then
+          History.toggle_win()
+          return
+        end
+
+        if ctx.fargs[1] ~= 'clear' then
+          vim.notify([[Usage: :ProjectHistory[!] [clear]\]], INFO)
+          return
+        end
+        History.clear_historyfile(ctx.bang)
       end,
     },
     {

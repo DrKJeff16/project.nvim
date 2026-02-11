@@ -25,6 +25,47 @@ local History = {}
 --- ---
 History.session_projects = {} ---@type string[]
 
+---@param force? boolean
+function History.clear_historyfile(force)
+  Util.validate({ force = { force, { 'boolean', 'nil' }, true } })
+  force = force ~= nil and force or false
+
+  if vim.g.project_historyfile_cleared == 1 then
+    Log.info(('(%s.clear_historyfile): Already cleared. Aborting.'):format(MODSTR))
+    return
+  end
+  if not force then
+    if
+      vim.fn.confirm('Are you sure you want to clear the project history?', '&Yes\n&No', 2) ~= 1
+    then
+      Log.info(('(%s.clear_historyfile): Aborting.'):format(MODSTR))
+      return
+    end
+  end
+
+  local fd = Path.open_file(Path.historyfile, 'w', tonumber('644', 8))
+  if not fd then
+    Log.error(('(%s.clear_historyfile): Unable to clear history file!'):format(MODSTR))
+    vim.notify('(project.nvim): Unable to clear history file!', ERROR)
+    return
+  end
+
+  local success = uv.fs_write(fd, { '[', ']' })
+  uv.fs_close(fd)
+  if not success then
+    Log.error(('(%s.clear_historyfile): Unable to clear history file!'):format(MODSTR))
+    vim.notify('(project.nvim): Unable to clear history file!', ERROR)
+    return
+  end
+
+  Log.warn(('(%s.clear_historyfile): History file cleared successfully.'):format(MODSTR))
+  vim.notify('(project.nvim): History file cleared successfully', WARN)
+
+  History.recent_projects = {}
+  History.session_projects = {}
+  vim.g.project_historyfile_cleared = 1
+end
+
 ---@param mode uv.fs_open.flags
 ---@return integer|nil fd
 ---@return uv.fs_stat.result|nil stat

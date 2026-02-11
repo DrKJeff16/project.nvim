@@ -678,10 +678,17 @@ See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 
 ### `:ProjectHistory`
 
-The `:ProjectHistory` command toggles the `project.nvim` history file in a new tab,
-which can be exited by pressing `q` in Normal Mode.
+The `:ProjectHistory` handles the project history.
 
-See [_`history.lua`_](./lua/project/util/history.lua) for more info.
+If the command is called without any arguments it'll toggle the `project.nvim` history file
+in a new tab, which can be exited by pressing `q` in Normal Mode.
+
+**(DANGER ZONE)**
+If called with the `clear` argument (`:ProjectHistory[!] clear`) your project history
+will be cleared. If you want to avoid a "Yes/No" prompt you can call the command
+with a bang (`!`) to force it.
+
+See [_`commands.lua`_](./lua/project/commands.lua) for more info.
 
 ### `:ProjectLog`
 
