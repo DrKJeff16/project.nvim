@@ -1137,13 +1137,6 @@ If you lack the required permissions for that directory, you can either:
                     <sub><b>Axel Dahlberg</b></sub>
                 </a>
             </td>
-            <td align="center">
-                <a href="https://github.com/8LWXpg">
-                    <img src="https://avatars.githubusercontent.com/u/105704427?v=4" width="100;" alt="8LWXpg"/>
-                    <br />
-                    <sub><b>8LWXpg</b></sub>
-                </a>
-            </td>
 		</tr>
 	<tbody>
 </table>
