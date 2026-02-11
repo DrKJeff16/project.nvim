@@ -125,8 +125,8 @@ function Commands.create_user_commands()
       desc = 'Run the main project.nvim UI',
       bang = true,
       nargs = '*',
-      complete = function(_, lead)
-        local args = vim.split(lead, '%s+', { trimempty = false })
+      complete = function(_, line)
+        local args = vim.split(line, '%s+', { trimempty = false })
         if args[1]:sub(-1) == '!' and #args == 1 then
           return {}
         end
@@ -201,25 +201,16 @@ function Commands.create_user_commands()
       desc = 'Export project.nvim history to JSON file',
       bang = true,
       nargs = '*',
-      complete = function(_, lead) ---@param lead string
-        local args = vim.split(lead, '%s+', { trimempty = false })
+      complete = function(_, line)
+        local args = vim.split(line, '%s+', { trimempty = false })
         if args[1]:sub(-1) == '!' and #args == 1 then
           return {}
         end
 
         if #args == 2 then
-          if args[2] == '' then
-            return vim.fn.getcompletion(args[2], 'file', true)
-          end
           -- Thanks to @TheLeoP for the advice!
           -- https://www.reddit.com/r/neovim/comments/1pvl1tb/comment/nvwzvvu/
-          local res = {} ---@type string[]
-          for _, comp in ipairs(vim.fn.getcompletion(args[2], 'file', true)) do
-            if vim.startswith(comp, args[2]) then
-              table.insert(res, comp)
-            end
-          end
-          return res
+          return vim.fn.getcompletion(args[2], 'file', true)
         end
         if #args == 3 then
           ---@type string[]
@@ -243,7 +234,12 @@ function Commands.create_user_commands()
       end,
       callback = function(ctx)
         if not ctx or #ctx.fargs > 2 then
-          vim.notify('Usage\n  :ProjectExport </path/to/file[.json]> [<INDENT>]', INFO)
+          vim.notify(
+            [[Usage
+
+    :ProjectExport[!] </path/to/file[.json]> [<INDENT>]\]],
+            INFO
+          )
           return
         end
         if vim.tbl_isempty(ctx.fargs) then
@@ -266,7 +262,12 @@ function Commands.create_user_commands()
       complete = 'file',
       callback = function(ctx)
         if not (ctx and #ctx.fargs <= 1) then
-          vim.notify('Usage\n  :ProjectImport </path/to/file[.json]>', INFO)
+          vim.notify(
+            [[Usage:
+
+    :ProjectImport[!] </path/to/file[.json]>]],
+            INFO
+          )
           return
         end
 
@@ -296,8 +297,8 @@ function Commands.create_user_commands()
       desc = 'Deletes the projects given as args, assuming they are valid. No args open a popup',
       bang = true,
       nargs = '*',
-      complete = function(_, lead)
-        local args = vim.split(lead, '%s+', { trimempty = false })
+      complete = function(_, line)
+        local args = vim.split(line, '%s+', { trimempty = false })
         if args[1]:sub(-1) == '!' and #args == 1 then
           return {}
         end
@@ -360,8 +361,8 @@ function Commands.create_user_commands()
       desc = 'Manage project history',
       bang = true,
       nargs = '?',
-      complete = function(_, lead)
-        local args = vim.split(lead, '%s+', { trimempty = false })
+      complete = function(_, line)
+        local args = vim.split(line, '%s+', { trimempty = false })
         if (args[1]:sub(-1) == '!' and #args == 1) or #args > 2 then
           return {}
         end
@@ -381,7 +382,12 @@ function Commands.create_user_commands()
         end
 
         if ctx.fargs[1] ~= 'clear' then
-          vim.notify([[Usage: :ProjectHistory[!] [clear]\]], INFO)
+          vim.notify(
+            [[Usage:
+
+    :ProjectHistory[!] [clear]\]],
+            INFO
+          )
           return
         end
         History.clear_historyfile(ctx.bang)
