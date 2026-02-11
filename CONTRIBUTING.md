@@ -1,20 +1,7 @@
 # Contributing
 
-Thank you for your contributions!
+Thank you for your contribution!
 Here you will find some tips, guidelines and other resources for contributing to `project.nvim`.
-
----
-
-## Table of Contents
-
-- [Note For Co-Maintainers](#note-for-co-maintainers)
-- [Guidelines](#guidelines)
-  - [What I Will Not Accept](#what-i-will-not-accept)
-- [Recommendations](#recommendations)
-  - [StyLua](#stylua)
-  - [`pre-commit`](#pre-commit)
-  - [`selene`](#selene)
-- [Code Annotations](#code-annotations)
 
 ---
 
@@ -29,6 +16,18 @@ you may open a blank issue.
 
 ---
 
+## Table of Contents
+
+- [Guidelines](#guidelines)
+  - [What I Will Not Accept](#what-i-will-not-accept)
+- [Recommendations](#recommendations)
+  - [StyLua](#stylua)
+  - [`pre-commit`](#pre-commit)
+  - [`selene`](#selene)
+- [Code Annotations](#code-annotations)
+
+---
+
 ## Guidelines
 
 ### What I Will Not Accept
@@ -38,11 +37,12 @@ you may open a blank issue.
 - **AI-GENERATED CODE**. The code here must be up to date and made with effort
 - **MISSING LUA ANNOTATIONS**. See [Code Annotations](#code-annotations)
 - **MERGE COMMITS**. Favour `git rebase` instead
-- **UNSIGNED COMMITS**. Read the guide on signing your commits[^2]. All unsigned commits will be rejected
+- **UNSIGNED COMMITS**. Read [this guide](https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key) to sign your commits. Unsigned commits will be squashed,
+  manually rebased by the author or rejected altogether if the occasion warrants it.
 - **UNTESTED CHANGES** _(if warranted)_. Make sure to test your changes before making a Pull Request
 - **UNFORMATTED CODE**. See the [StyLua](#stylua) section
 - **NON-UNIX LINE ENDINGS**. Make sure to set your config in your CLI:
-    ```sh
+    ```bash
     # If you want to enforce this only in this repository
     git config --local core.autocrlf false
     git config --local core.eol lf
@@ -51,15 +51,11 @@ you may open a blank issue.
     git config --global core.autocrlf false
     git config --global core.eol lf
     ```
-    And set this in your nvim config (recommended):
+    And set this in your Neovim config (recommended):
     ```lua
-    -- init.lua, for instance
-    vim.o.fileformat = 'unix' -- AVOID USING `vim.opt`
-    ```
-    or
-    ```vim
-    " init.vim, for instance
-    set fileformat=unix
+    -- init.lua
+    vim.opt.fileformat = 'unix' -- WRONG
+    vim.o.fileformat = 'unix' -- CORRECT
     ```
 
 ---
@@ -78,7 +74,7 @@ To run it, you must be **in the root of the repository**.
 Simply run the following command:
 
 ```bash
-stylua lua/
+stylua .
 ```
 
 ### `pre-commit`
@@ -108,7 +104,8 @@ You must then commit the changes to `.pre-commit-config.yaml`.
 
 [`selene`](https://github.com/Kampfkarren/selene) is used for linting Lua code.
 
-The configuration is already set, you only need to install it through `cargo`:
+The configuration is already set in [`vim.yml`](./vim.yml) and [`selene.toml`](./selene.toml).
+You only need to install it through `cargo`:
 
 ```bash
 cargo install selene
@@ -130,7 +127,8 @@ selene lua/
 > **Undocumented code will be either asked for corrections or,
 > if not willing to document, _rejected_.**
 
-Please refer to LuaLS' code annotations to understand the syntax.[^1]
+Please refer to LuaLS' [code annotations](https://luals.github.io/wiki/annotations/)
+to understand the syntax.
 
 Let's say you create a new submodule `lua/project/foo.lua`. If said module returns a table
 with fields, the optimal way to document is to do it **in the same file**, and following this format:
@@ -193,8 +191,5 @@ Any instance of wrapping already existing data types will be rejected.
 ---@alias StringDict table<string, any>
 ---@alias IntList integer[]
 ```
-
-[^1]: https://luals.github.io/wiki/annotations/
-[^2]: https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
 
 <!-- vim: set ts=2 sts=2 sw=2 et ai si sta: -->
