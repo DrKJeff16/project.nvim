@@ -7,13 +7,13 @@ local Log = require('project.util.log')
 local M = {}
 
 ---@class ProjectSnacksConfig
----@field prompt? string
+---@field title? string
 ---@field layout? 'default'|'select'|'vscode'
 ---@field icon? { icon: string, highlight: string }
 ---@field path_icons? { match: string, icon: string, highlight: string }[]
 ---@field sort? 'newest'|'oldest'
 M.config = {
-  prompt = 'Select Project: ',
+  title = 'Select Project: ',
   layout = 'select',
   icon = { icon = ' ', highlight = 'Directory' },
   path_icons = {},
@@ -61,7 +61,7 @@ end
 
 function M.pick()
   return require('snacks').picker.pick({
-    title = M.config.prompt,
+    title = M.config.title,
     layout = M.config.layout,
     items = M.gen_items(),
     preview = function()
@@ -104,7 +104,6 @@ function M.pick()
         },
       },
     },
-    prompt = M.config.prompt,
     show_empty = false,
     enter = true,
   })
