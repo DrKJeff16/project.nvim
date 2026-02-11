@@ -1,5 +1,14 @@
 # Changelog
 
+## [v1.0.2-1](https://github.com/DrKJeff16/project.nvim/tree/v1.0.2-1) (2026-02-11)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v1.0.1-1...v1.0.2-1)
+
+**Merged pull requests:**
+
+- docs\(contributor\): contributors readme action update [\#49](https://github.com/DrKJeff16/project.nvim/pull/49) ([github-actions[bot]](https://github.com/apps/github-actions))
+- feat\(snacks\): keep default prompt [\#48](https://github.com/DrKJeff16/project.nvim/pull/48) ([8LWXpg](https://github.com/8LWXpg))
+
 ## [v1.0.1-1](https://github.com/DrKJeff16/project.nvim/tree/v1.0.1-1) (2026-02-11)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v1.0.0-1...v1.0.1-1)
