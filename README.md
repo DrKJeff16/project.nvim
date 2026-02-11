@@ -307,7 +307,7 @@ By default, `setup()` loads with the following options:
     opts = {
       hidden = false,
       sort = 'newest',
-      title = 'Select Project: ',
+      title = 'Select Project',
       layout = 'select',
       -- icon = {},
       -- path_icons = {},
@@ -576,7 +576,7 @@ require('project').setup({
     opts = {
       sort = 'newest',
       hidden = false,
-      title = 'Select Project: ',
+      title = 'Select Project',
       layout = 'select',
       -- icon = {},
       -- path_icons = {},

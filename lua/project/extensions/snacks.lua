@@ -13,7 +13,7 @@ local M = {}
 ---@field path_icons? { match: string, icon: string, highlight: string }[]
 ---@field sort? 'newest'|'oldest'
 M.config = {
-  title = 'Select Project: ',
+  title = 'Select Project',
   layout = 'select',
   icon = { icon = ' ', highlight = 'Directory' },
   path_icons = {},
