@@ -40,21 +40,25 @@
 ---|'user'
 ---|'var'
 
----@alias ProjectCmdFun fun()|fun(ctx: vim.api.keyset.create_user_command.command_args)
----@alias CompletorFun fun(a: string, l: string, p: integer): string[]
+---@alias ProjectCmdFun fun(ctx?: vim.api.keyset.create_user_command.command_args)
+---@alias CompletorFuncs
+---|fun(lead: string, line: string, pos: integer): completions: string[]
+---|fun(lead: string): completions: string[]
+---|fun(_: string, line: string): completions: string[]
+---|fun(lead: string, _: string, pos: integer): completions: string[]
+
 ---@alias Project.CMD
----|{ desc: string, name: string, bang: boolean, complete?: (CompletorFun)|CompleteTypes, nargs?: string|integer }
+---|{ desc: string, name: string, bang: boolean, complete?: (CompletorFuncs)|CompleteTypes, nargs?: string|integer }
 ---|ProjectCmdFun
 
 ---@class Project.Commands.Spec
 ---@field callback ProjectCmdFun
 ---@field name string
 ---@field desc string
----@field complete? CompleteTypes|CompletorFun
+---@field complete? CompleteTypes|CompletorFuncs
 ---@field bang? boolean
 ---@field nargs? string|integer
 
-local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
@@ -234,12 +238,7 @@ function Commands.create_user_commands()
       end,
       callback = function(ctx)
         if not ctx or #ctx.fargs > 2 then
-          vim.notify(
-            [[Usage
-
-    :ProjectExport[!] </path/to/file[.json]> [<INDENT>]\]],
-            INFO
-          )
+          vim.notify('Usage:  `:ProjectExport[!] </path/to/file[.json]> [<INDENT>]`', WARN)
           return
         end
         if vim.tbl_isempty(ctx.fargs) then
@@ -258,25 +257,20 @@ function Commands.create_user_commands()
       name = 'ProjectImport',
       desc = 'Import project history from JSON file',
       bang = true,
-      nargs = '?',
+      nargs = '*',
       complete = 'file',
       callback = function(ctx)
-        if not (ctx and #ctx.fargs <= 1) then
-          vim.notify(
-            [[Usage:
-
-    :ProjectImport[!] </path/to/file[.json]>]],
-            INFO
-          )
-          return
-        end
-
         if vim.tbl_isempty(ctx.fargs) then
           Popup.gen_import_prompt()
           return
         end
+        vim.print(ctx.fargs)
 
-        History.import_history_json(ctx.fargs[1], ctx.bang)
+        if #ctx.fargs == 1 then
+          History.import_history_json(ctx.fargs[1], ctx.bang)
+        end
+
+        vim.notify('Usage:  `:ProjectImport[!] </path/to/file[.json]>`', WARN)
       end,
     },
     {
@@ -360,7 +354,7 @@ function Commands.create_user_commands()
       name = 'ProjectHistory',
       desc = 'Manage project history',
       bang = true,
-      nargs = '?',
+      nargs = '*',
       complete = function(_, line)
         local args = vim.split(line, '%s+', { trimempty = false })
         if (args[1]:sub(-1) == '!' and #args == 1) or #args > 2 then
@@ -381,13 +375,8 @@ function Commands.create_user_commands()
           return
         end
 
-        if ctx.fargs[1] ~= 'clear' then
-          vim.notify(
-            [[Usage:
-
-    :ProjectHistory[!] [clear]\]],
-            INFO
-          )
+        if ctx.fargs[1] ~= 'clear' or #ctx.fargs > 1 then
+          vim.notify('Usage:  `:ProjectHistory[!] [clear]`', WARN)
           return
         end
         History.clear_historyfile(ctx.bang)
