@@ -99,7 +99,7 @@ local function open_node(proj, only_cd, ran_cd)
       end
 
       item = Util.rstrip('/', vim.fn.fnamemodify(item, ':~'))
-      return vim.fnamemodify(item, ':~') .. (vim.fn.isdirectory(item) == 1 and '/' or '')
+      return vim.fn.fnamemodify(item, ':~') .. (vim.fn.isdirectory(item) == 1 and '/' or '')
     end,
   }, function(item) ---@param item string
     if not item or vim.list_contains({ '', 'Exit' }, item) then
@@ -296,6 +296,8 @@ M.recents_menu = M.select.new({
       if not item then
         return
       end
+
+      item = Util.rstrip('/', vim.fn.fnamemodify(item, ':p'))
       if not vim.list_contains(choices_list, item) then
         vim.notify('Bad selection!', ERROR)
         return
@@ -451,6 +453,8 @@ M.session_menu = M.select.new({
       if not item then
         return
       end
+
+      item = Util.rstrip('/', vim.fn.fnamemodify(item, ':p'))
       if not vim.list_contains(choices_list, item) then
         vim.notify('Bad selection!', ERROR)
         return
