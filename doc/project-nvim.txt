@@ -51,8 +51,8 @@ Table of Contents                                             *project-nvim.toc*
     7.11. `:ProjectConfig`                                        |:ProjectConfig|
     7.12. `:ProjectDelete`                                        |:ProjectDelete|
     7.13. `:ProjectSession`                                      |:ProjectSession|
-    7.14. `:ProjectExportJSON`                                |:ProjectExportJSON|
-    7.15. `:ProjectImportJSON`                                |:ProjectImportJSON|
+    7.14. `:ProjectExport`                                        |:ProjectExport|
+    7.15. `:ProjectImport`                                        |:ProjectImport|
 8. API                                                        |project-nvim.api|
     8.1. `get_project_root()`                    |project-nvim.get_project_root()|
     8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
@@ -703,9 +703,10 @@ Table of Contents                                             *project-nvim.toc*
                             The `:ProjectFzf` command is a
                             dynamically enabled user command that runs
                             `project.nvim` through `fzf-lua`.
-                            For now it just executes
-                            `require('project.extensions.fzf-lua').run_fzf_lua()`
-
+                            For now it just executes:
+>lua
+                require('project.extensions.fzf-lua').run_fzf_lua()
+<
 
 `:ProjectPicker[!]`                                *ProjectPicker*  *:ProjectPicker*
 
@@ -844,15 +845,15 @@ Table of Contents                                             *project-nvim.toc*
                             UI picker with its contents, and so on...
 
 
-`:ProjectExportJSON[!] [</path/to/file[.json]> [<INDENT>]]`   *:ProjectExportJSON*
-                                                             *ProjectExportJSON*
+`:ProjectExport[!] [</path/to/file[.json]> [<INDENT>]]`           *:ProjectExport*
+                                                                 *ProjectExport*
 
                             WARNING ~
                             Use this script with caution! ~
                             You may overwrite important files ~
                             if doing something reckless! ~
 
-                            The `:ProjectExportJSON` user command
+                            The `:ProjectExport` user command
                             allows the user to save their project history
                             in a JSON format, allowing a custom indent level
                             if desired.
@@ -861,34 +862,34 @@ Table of Contents                                             *project-nvim.toc*
                             and is not empty then a confirmation prompt
                             will appear.
 >vim
-        :ProjectExportJSON " Will open a prompt
+        :ProjectExport " Will open a prompt
 
-        :ProjectExportJSON a " Output file is `a.json`
+        :ProjectExport a " Output file is `a.json`
 
-        :ProjectExportJSON! b 12 " Output file is `b`, with a tab size of 12
+        :ProjectExport! b 12 " Output file is `b`, with a tab size of 12
 
         " The output file will be `~/.c.json` (bang here is irrelevant)
-        :ProjectExportJSON! ~/.c.json
+        :ProjectExport! ~/.c.json
 <
 
-`:ProjectImportJSON[!] [</path/to/file[.json]>]`              *:ProjectImportJSON*
-                                                             *ProjectImportJSON*
+`:ProjectImport[!] [</path/to/file[.json]>]`                      *:ProjectImport*
+                                                                 *ProjectImport*
 
-                            The `:ProjectImportJSON` allows the user
+                            The `:ProjectImport` allows the user
                             to retrieve their saved project history
                             in a JSON format
 >vim
 
     " Will open a prompt
-    :ProjectImportJSON
+    :ProjectImport
 
     " Will be treated as `a.json`
-    :ProjectExportJSON a
-    :ProjectImportJSON a
+    :ProjectExport a
+    :ProjectImport a
 
     " Will be treated as `b`
-    :ProjectExportJSON! b
-    :ProjectImportJSON! b
+    :ProjectExport! b
+    :ProjectImport! b
 <
 
 ==============================================================================
