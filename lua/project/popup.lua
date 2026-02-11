@@ -98,8 +98,8 @@ local function open_node(proj, only_cd, ran_cd)
         return item
       end
 
-      item = Util.rstrip('/', vim.fn.fnamemodify(item, ':p'))
-      return vim.fn.isdirectory(item) == 1 and (item .. '/') or item
+      item = Util.rstrip('/', vim.fn.fnamemodify(item, ':~'))
+      return vim.fnamemodify(item, ':~') .. (vim.fn.isdirectory(item) == 1 and '/' or '')
     end,
   }, function(item) ---@param item string
     if not item or vim.list_contains({ '', 'Exit' }, item) then
@@ -284,8 +284,13 @@ M.recents_menu = M.select.new({
     vim.ui.select(choices_list, {
       prompt = 'Select a project:',
       format_item = function(item) ---@param item string
+        if item == 'Exit' then
+          return item
+        end
+
         local curr = require('project.api').current_project or ''
-        return item == curr and '* ' .. item or item
+        return item == curr and '* ' .. vim.fn.fnamemodify(item, ':~')
+          or vim.fn.fnamemodify(item, ':~')
       end,
     }, function(item)
       if not item then
@@ -437,7 +442,10 @@ M.session_menu = M.select.new({
     vim.ui.select(choices_list, {
       prompt = 'Select a project from your session:',
       format_item = function(item) ---@param item string
-        return item .. (vim.fn.isdirectory(item) == 1 and '/' or '')
+        if item == 'Exit' then
+          return item
+        end
+        return vim.fn.fnamemodify(item, ':~') .. (vim.fn.isdirectory(item) == 1 and '/' or '')
       end,
     }, function(item)
       if not item then
