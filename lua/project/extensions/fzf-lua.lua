@@ -7,23 +7,30 @@ local Config = require('project.config')
 ---@class Project.Extensions.FzfLua
 local M = {}
 
----@param selected string[]
-function M.default(selected)
-  local Opts = Config.options
+---@param items string[]
+function M.default(items)
+  if vim.tbl_isempty(items) then
+    return
+  end
+
   Log.debug(('(%s.default): Running default fzf-lua action.'):format(MODSTR))
   require('fzf-lua').files({
-    cwd = selected[1],
-    silent = Opts.silent_chdir,
-    hidden = Opts.show_hidden,
+    cwd = items[1],
+    cwd_only = true,
+    silent = Config.options.silent_chdir,
+    hidden = Config.options.show_hidden,
   })
 end
 
----@param selected string[]
-function M.delete_project(selected)
-  require('project.util.log').debug(
-    ('(%s.delete_project): Deleting project `%s`'):format(MODSTR, selected[1])
-  )
-  require('project.util.history').delete_project(selected[1])
+---@param items string[]
+function M.delete_project(items)
+  if vim.tbl_isempty(items) then
+    return
+  end
+
+  for _, item in ipairs(items) do
+    require('project.util.history').delete_project(item, true)
+  end
 end
 
 ---@param cb fun(entry?: string|number, cb?: function)
@@ -71,7 +78,22 @@ function M.run_fzf_lua()
   Fzf.fzf_exec(M.exec, {
     actions = {
       default = { M.default },
-      ['ctrl-d'] = { M.delete_project, Fzf.actions.resume },
+      ['ctrl-d'] = {
+        function(items)
+          M.delete_project(items)
+        end,
+        Fzf.actions.resume,
+      },
+      ['ctrl-w'] = {
+        function(items)
+          if vim.tbl_isempty(items) then
+            return
+          end
+
+          require('project.api').set_pwd(items[1], 'fzf-lua')
+        end,
+        Fzf.actions.resume,
+      },
     },
   })
 end

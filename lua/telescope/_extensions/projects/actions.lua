@@ -44,14 +44,7 @@ function M.delete_project(prompt_bufnr)
     return
   end
 
-  local choice =
-    vim.fn.confirm(("Delete '%s' from project list?"):format(active_entry.value), '&Yes\n&No', 2)
-  if choice ~= 1 then
-    Log.info('(%s.delete_project): Aborting project deletion.')
-    return
-  end
-
-  History.delete_project(active_entry.value)
+  History.delete_project(active_entry.value, true)
   Log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
   State.get_current_picker(prompt_bufnr):refresh(
     (function()
@@ -99,7 +92,6 @@ function M.change_working_directory(prompt_bufnr)
   else
     Log.error(('(%s.change_working_directory): Failed to change directory!'):format(MODSTR))
   end
-
   return selected_entry.value, cd_successful
 end
 
@@ -109,23 +101,19 @@ function M.find_project_files(prompt_bufnr)
   if not cd_successful then
     return
   end
-  local hidden = Config.options.show_hidden
-  local prefer_file_browser = Config.options.telescope.prefer_file_browser
   local opts = {
     path = project_path,
     cwd = project_path,
     cwd_to_path = true,
-    hidden = hidden,
+    hidden = Config.options.show_hidden,
     hide_parent_dir = true,
     mode = 'insert',
   }
-
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
-  if prefer_file_browser and Telescope.extensions.file_browser then
+  if Config.options.telescope.prefer_file_browser and Telescope.extensions.file_browser then
     Telescope.extensions.file_browser.file_browser(opts)
     return
   end
-
   Builtin.find_files(opts)
 end
 
@@ -135,20 +123,16 @@ function M.browse_project_files(prompt_bufnr)
   if not cd_successful then
     return
   end
-
-  local hidden = Config.options.show_hidden
-  local prefer_file_browser = Config.options.telescope.prefer_file_browser
   local opts = {
     path = project_path,
     cwd = project_path,
     cwd_to_path = true,
-    hidden = hidden,
+    hidden = Config.options.show_hidden,
     hide_parent_dir = true,
     mode = 'insert',
   }
-
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
-  if prefer_file_browser and Telescope.extensions.file_browser then
+  if Config.options.telescope.prefer_file_browser and Telescope.extensions.file_browser then
     Telescope.extensions.file_browser.file_browser(opts)
     return
   end
@@ -161,7 +145,6 @@ function M.search_in_project_files(prompt_bufnr)
   if not cd_successful then
     return
   end
-
   Builtin.live_grep({ cwd = project_path, hidden = Config.options.show_hidden, mode = 'insert' })
 end
 
@@ -171,9 +154,7 @@ function M.recent_project_files(prompt_bufnr)
   if not cd_successful then
     return
   end
-
-  local hidden = Config.options.show_hidden
-  Builtin.oldfiles({ cwd_only = true, hidden = hidden })
+  Builtin.oldfiles({ cwd_only = true, hidden = Config.options.show_hidden })
 end
 
 local T_Actions = setmetatable(M, { ---@type Project.Telescope.Actions

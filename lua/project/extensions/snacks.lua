@@ -1,5 +1,7 @@
 local uv = vim.uv or vim.loop
+local MODSTR = 'project.extensions.snacks'
 local Util = require('project.util')
+local Log = require('project.util.log')
 
 ---@class Project.Extensions.Snacks
 local M = {}
@@ -69,9 +71,11 @@ function M.pick()
     confirm = function(self, item)
       self:close()
       if require('project.api').set_pwd(vim.fn.expand(item.value), 'snacks') then
+        Log.debug(('(%s.pick): Opening Snacks picker'):format(MODSTR))
         require('snacks').picker.files({
           cwd = uv.cwd(),
           show_empty = true,
+          hidden = M.config.hidden,
           finder = 'files',
           format = 'file',
           supports_live = true,
@@ -83,7 +87,7 @@ function M.pick()
     end,
     actions = {
       delete_project = function(self, item)
-        require('project.util.history').delete_project(vim.fn.expand(item.value))
+        require('project.util.history').delete_project(vim.fn.expand(item.value), true)
         self:close()
         M.pick()
       end,

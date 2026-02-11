@@ -166,12 +166,13 @@ function History.export_history_json(path, ind, force_name)
     end
 
     if stat.size ~= 0 then
-      local choice = vim.fn.confirm(
-        ('File exists! Do you really want to export to it?'):format(path),
-        '&Yes\n&No',
-        2
-      )
-      if choice ~= 1 then
+      if
+        vim.fn.confirm(
+          ('File exists! Do you really want to export to it?'):format(path),
+          '&Yes\n&No',
+          2
+        ) ~= 1
+      then
         Log.info('(%s.delete_project): Aborting project export.')
         return
       end
@@ -312,8 +313,13 @@ end
 ---Deletes a project string, or a Telescope Entry type.
 --- ---
 ---@param project string|Project.ActionEntry
-function History.delete_project(project)
-  Util.validate({ project = { project, { 'string', 'table' } } })
+---@param prompt? boolean
+function History.delete_project(project, prompt)
+  Util.validate({
+    project = { project, { 'string', 'table' } },
+    prompt = { prompt, { 'boolean', 'nil' }, true },
+  })
+  prompt = prompt ~= nil and prompt or false
 
   ---@cast project Project.ActionEntry
   if Util.is_type('table', project) then
@@ -328,8 +334,14 @@ function History.delete_project(project)
 
   ---@cast project string|Project.ActionEntry
   local proj = type(project) == 'string' and project or project.value
-  local found = false
-  found = History.remove_recent(proj)
+  if prompt then
+    if vim.fn.confirm(("Delete '%s' from project list?"):format(proj), '&Yes\n&No', 2) ~= 1 then
+      Log.info(('(%s.delete_project): Aborting project deletion.'):format(MODSTR))
+      return
+    end
+  end
+
+  local found = History.remove_recent(proj)
   found = History.remove_session(proj, found)
 
   if found then
