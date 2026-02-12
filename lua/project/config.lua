@@ -84,6 +84,7 @@ function Config.get_config()
     'verify',
     'verify_datapath',
     'verify_histsize',
+    'verify_lists',
     'verify_logging',
     'verify_lsp',
     'verify_methods',

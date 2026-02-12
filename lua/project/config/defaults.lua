@@ -311,6 +311,7 @@ local Util = require('project.util')
 ---@field verify_datapath fun(self: Project.Config.Defaults)
 ---@field gen_methods fun(self: Project.Config.Defaults): methods: { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
 ---@field verify_logging fun(self: Project.Config.Defaults)
+---@field verify_lists fun(self: Project.Config.Defaults)
 ---@field expand_excluded fun(self: Project.Config.Defaults)
 ---@field verify_lsp fun(self: Project.Config.Defaults)
 ---@field verify_owners fun(self: Project.Config.Defaults)
@@ -542,6 +543,56 @@ function DEFAULTS:verify_owners()
   end
 end
 
+function DEFAULTS:verify_lists()
+  local i, found = 1, {} ---@type integer, string[]
+  while i <= #self.patterns and i > 0 do
+    if
+      not Util.is_type('string', self.patterns[i])
+      or self.patterns[i] == ''
+      or vim.list_contains(found, self.exclude_dirs[i])
+    then
+      table.remove(self.patterns, i)
+      i = i - 1
+    else
+      table.insert(found, self.patterns[i])
+      i = i + 1
+    end
+  end
+  if vim.tbl_isempty(self.patterns) then
+    self.patterns = vim.deepcopy(DEFAULTS.patterns)
+  end
+
+  i, found = 1, {}
+  while i <= #self.exclude_dirs and i > 0 do
+    if
+      not Util.is_type('string', self.exclude_dirs[i])
+      or self.exclude_dirs[i] == ''
+      or vim.list_contains(found, self.exclude_dirs[i])
+    then
+      table.remove(self.exclude_dirs, i)
+      i = i - 1
+    else
+      table.insert(found, self.exclude_dirs[i])
+      i = i + 1
+    end
+  end
+
+  i, found = 1, {}
+  while i <= #self.lsp.ignore and i > 0 do
+    if
+      not Util.is_type('string', self.lsp.ignore[i])
+      or self.lsp.ignore[i] == ''
+      or vim.list_contains(found, self.exclude_dirs[i])
+    then
+      table.remove(self.lsp.ignore, i)
+      i = i - 1
+    else
+      table.insert(found, self.lsp.ignore[i])
+      i = i + 1
+    end
+  end
+end
+
 ---Verify config integrity.
 --- ---
 function DEFAULTS:verify()
@@ -558,6 +609,7 @@ function DEFAULTS:verify()
   self:verify_scope_chdir()
   self:verify_logging()
   self:verify_owners()
+  self:verify_lists()
 
   if not self.detection_methods then ---@diagnostic disable-line:undefined-field
     return
