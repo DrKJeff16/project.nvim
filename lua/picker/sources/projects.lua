@@ -8,8 +8,7 @@ local function gen_items(source)
   local curr = require('project.api').get_current_project() or ''
   for i, v in ipairs(source) do
     local is_curr = v == curr
-    local n_digits = Util.digits(i)
-    local max_n_digits = Util.digits(Config.options.historysize)
+    local n_digits, max_n_digits = Util.digits(i), Util.digits(Config.options.historysize)
     local path = ('%d. %s %s'):format(
       i,
       (is_curr and '*' or '') .. (' '):rep(max_n_digits - n_digits - (is_curr and 1 or 0)),

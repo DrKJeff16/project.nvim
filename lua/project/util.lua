@@ -23,6 +23,7 @@ end
 ---@return integer n_digits
 function M.digits(num)
   M.validate({ num = { num, { 'number' } } })
+  num = num < 0 and (num * -1) or num
 
   local n_digits = num >= 1 and 1 or 0
   while num / 10 >= 1 do
@@ -37,13 +38,15 @@ end
 ---@return boolean has
 ---@nodiscard
 function M.vim_has(feature)
+  M.validate({ feature = { feature, { 'string' } } })
+
   return vim.fn.has(feature) == 1
 end
 
 ---Dynamic `vim.validate()` wrapper. Covers both legacy and newer implementations
 ---@param T table<string, vim.validate.Spec|ValidateSpec>
 function M.validate(T)
-  local max = M.vim_has('nvim-0.11') and 3 or 4
+  local max = vim.fn.has('nvim-0.11') == 1 and 3 or 4
   for name, spec in pairs(T) do
     while #spec > max do
       table.remove(spec, #spec)
@@ -51,7 +54,7 @@ function M.validate(T)
     T[name] = spec
   end
 
-  if M.vim_has('nvim-0.11') then
+  if vim.fn.has('nvim-0.11') == 1 then
     for name, spec in pairs(T) do
       table.insert(spec, 1, name)
       vim.validate(unpack(spec))
