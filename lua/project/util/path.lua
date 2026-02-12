@@ -235,6 +235,11 @@ function Path.root_included(dir)
     if not parent or parent == dir then
       return
     end
+
+    --- CREDITS: @pidgeon777 (https://github.com/ahmedkhalf/project.nvim/issues/187)
+    if Util.is_windows() and parent:match('^%a:$') then
+      return
+    end
     dir = parent
   end
 end
