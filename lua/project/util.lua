@@ -11,6 +11,14 @@ local ERROR = vim.log.levels.ERROR
 ---@class Project.Util
 local M = {}
 
+---@param fmt string
+---@return boolean confirmation
+function M.yes_no(fmt, ...)
+  M.validate({ fmt = { fmt, { 'string' } } })
+
+  return vim.fn.confirm(fmt:format(...), '&Yes\n&No', 2) == 1
+end
+
 ---Checks whether nvim is running on Windows.
 --- ---
 ---@return boolean win32
