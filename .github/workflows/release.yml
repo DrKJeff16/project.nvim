@@ -23,9 +23,9 @@ jobs:
           zip -r -9 project.nvim.zip project.nvim
           tar cvJf project.nvim.tar.xz project.nvim
           tar cvzf project.nvim.tar.gz project.nvim
-          sha512sum project.nvim.zip project.nvim.tar.xz project.nvim.tar.gz >| sha512sums.txt
-          md5sum project.nvim.zip project.nvim.tar.xz project.nvim.tar.gz >| md5sums.txt
-          rm -rfv project.nvim
+          7z a -mx9 -mmt -sdel project.nvim.7z project.nvim
+          sha512sum project.nvim.7z project.nvim.zip project.nvim.tar.xz project.nvim.7z project.nvim.tar.gz >| sha512sums.txt
+          md5sum project.nvim.7z project.nvim.zip project.nvim.tar.xz project.nvim.7z project.nvim.tar.gz >| md5sums.txt
       - name: Get Release
         uses: joutvhu/get-release@v1.0.3
         with:
@@ -46,10 +46,11 @@ jobs:
         with:
           files: |
             Release.txt
+            md5sums.txt
+            sha512sums.txt
+            project.nvim.7z
             project.nvim.tar.gz
             project.nvim.tar.xz
             project.nvim.zip
-            md5sums.txt
-            sha512sums.txt
           token: ${{ secrets.GITHUB_TOKEN }}
 # vim: set ts=2 sts=2 sw=2 et ai si sta:
