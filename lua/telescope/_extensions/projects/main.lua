@@ -91,6 +91,7 @@ end
 ---@param opts? table
 function M.projects(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  opts = opts or {}
 
   if vim.g.project_telescope_loaded ~= 1 then
     Log.error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
@@ -99,7 +100,7 @@ function M.projects(opts)
 
   local Options = Config.options
   local scope = Options.scope_chdir == 'win' and 'window' or Options.scope_chdir
-  Pickers.new(vim.tbl_deep_extend('keep', opts or {}, M.default_opts), {
+  Pickers.new(vim.tbl_deep_extend('keep', opts, M.default_opts), {
     prompt_title = ('Select Your Project (%s)'):format(Util.capitalize(scope)),
     results_title = 'Projects',
     finder = _Util.create_finder(),

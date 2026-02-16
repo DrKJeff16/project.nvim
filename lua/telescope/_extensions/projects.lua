@@ -1,11 +1,11 @@
 local MODSTR = 'telescope._extensions.projects'
 local ERROR = vim.log.levels.ERROR
 if vim.g.project_setup ~= 1 then
-  error(('(%s): `project.nvim` is not loaded!'):format(MODSTR), ERROR)
+  error('project.nvim` is not loaded!', ERROR)
 end
 if not require('project.util').mod_exists('telescope') then
   require('project.util.log').error(('(%s): Telescope is not installed!'):format(MODSTR))
-  error(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
+  error('Telescope is not installed!', ERROR)
 end
 
 local setup = require('telescope._extensions.projects.main').setup
@@ -27,8 +27,9 @@ require('project.commands').new({
   {
     name = 'ProjectTelescope',
     desc = 'Telescope shortcut for `projects` picker',
-    callback = function()
-      Projects.projects()
+    nargs = '*',
+    callback = function(ctx)
+      Projects.projects(ctx.fargs)
     end,
   },
 })
