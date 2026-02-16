@@ -137,8 +137,9 @@ end
 ---
 ---If `data` is `nil`, the function will always return `false`.
 --- ---
+---@generic T
 ---@param t type Any return value the `type()` function would return
----@param data any The data to be type-checked
+---@param data T The data to be type-checked
 ---@return boolean correct_type
 ---@nodiscard
 function M.is_type(t, data)
@@ -152,8 +153,9 @@ end
 ---If the data passed to the function is not a table,
 ---an error will be raised.
 --- ---
----@param T any[]
----@return any[] T
+---@generic T
+---@param T T[]
+---@return T[] T
 ---@nodiscard
 function M.reverse(T)
   M.validate({ T = { T, { 'table' } } })
@@ -180,7 +182,7 @@ function M.get_dict_size(T)
     return len
   end
 
-  for _, _ in pairs(T) do
+  for _ in pairs(T) do
     len = len + 1
   end
   return len
@@ -527,8 +529,9 @@ function M.dedup(T)
   return NT
 end
 
+---@generic T: any
 ---@param t type
----@param data nil|number|string|boolean|table|function
+---@param data T
 ---@param sep? string
 ---@param constraints? string[]
 ---@return string

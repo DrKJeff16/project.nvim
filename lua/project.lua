@@ -24,7 +24,7 @@ M.setup = Config.setup
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
----@param refresh? boolean|nil
+---@param refresh? boolean
 ---@return string|nil curr
 ---@return string|nil method
 ---@return string|nil last
