@@ -3,6 +3,7 @@ local assert = require('luassert') ---@type Luassert
 describe('project.nvim setup', function()
   local project ---@type Project
   local defaults ---@type Project.Config.Options
+  local ok ---@type boolean
 
   before_each(function()
     package.loaded['project'] = nil
@@ -11,29 +12,29 @@ describe('project.nvim setup', function()
   end)
 
   it('should set default configuration', function()
-    local ok = pcall(project.setup)
+    ok = pcall(project.setup)
     assert.is_true(ok)
   end)
 
   it('should merge user configuration with defaults', function()
-    local ok = pcall(project.setup, {})
+    ok = pcall(project.setup, {})
     assert.is_true(ok)
   end)
 
   it('should handle nil options', function()
-    local ok = pcall(project.setup, nil)
+    ok = pcall(project.setup, nil)
     assert.is_true(ok)
   end)
 
   for _, param in ipairs({ 1, false, '', function() end }) do
     it(('should throw error when called with param of type %s'):format(type(param)), function()
-      local ok = pcall(project.setup, param)
+      ok = pcall(project.setup, param)
       assert.is_false(ok)
     end)
   end
 
   it('should erase any option not in the defaults', function()
-    local ok = pcall(project.setup, { 1, foo = 'bar' })
+    ok = pcall(project.setup, { 1, foo = 'bar' })
     assert.is_true(ok)
 
     local options = require('project.config').options
