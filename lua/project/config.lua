@@ -116,6 +116,11 @@ function Config.open_win()
     Config.get_config()
   )
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, vim.split(current_config, '\n', { plain = true }))
+
+  if vim.fn.mode() ~= 'n' then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'i', false)
+  end
+
   local win = vim.api.nvim_open_win(bufnr, true, {
     focusable = true,
     border = 'single',
