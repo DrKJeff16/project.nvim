@@ -79,6 +79,7 @@ function Config.get_config()
     error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR), ERROR)
   end
   local exceptions = {
+    'expand_excluded',
     'gen_methods',
     'new',
     'verify',

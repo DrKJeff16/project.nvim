@@ -1,11 +1,13 @@
----@alias Project.Telescope.ActionNames
----|'browse_project_files'
----|'change_working_directory'
----|'delete_project'
----|'find_project_files'
----|'help_mappings'
----|'recent_project_files'
----|'search_in_project_files'
+---@enum (key) Project.Telescope.ActionNames
+local action_names = { ---@diagnostic disable-line:unused-local
+  browse_project_files = 1,
+  change_working_directory = 1,
+  delete_project = 1,
+  find_project_files = 1,
+  help_mappings = 1,
+  recent_project_files = 1,
+  search_in_project_files = 1,
+}
 
 ---Table of options used for control for detecting projects not owned by the current user.
 --- ---
@@ -305,17 +307,17 @@ local WARN = vim.log.levels.WARN
 local Util = require('project.util')
 
 ---@class Project.Config.Defaults: Project.Config.Options
----@field new fun(opts?: Project.Config.Options): defaults: Project.Config.Defaults|Project.Config.Options
----@field verify_histsize fun(self: Project.Config.Defaults)
----@field verify_scope_chdir fun(self: Project.Config.Defaults)
----@field verify_datapath fun(self: Project.Config.Defaults)
----@field gen_methods fun(self: Project.Config.Defaults): methods: { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
----@field verify_logging fun(self: Project.Config.Defaults)
----@field verify_lists fun(self: Project.Config.Defaults)
 ---@field expand_excluded fun(self: Project.Config.Defaults)
+---@field gen_methods fun(self: Project.Config.Defaults): methods: { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
+---@field new fun(opts?: Project.Config.Options): defaults: Project.Config.Defaults|Project.Config.Options
+---@field verify fun(self: Project.Config.Defaults)
+---@field verify_datapath fun(self: Project.Config.Defaults)
+---@field verify_histsize fun(self: Project.Config.Defaults)
+---@field verify_lists fun(self: Project.Config.Defaults)
+---@field verify_logging fun(self: Project.Config.Defaults)
 ---@field verify_lsp fun(self: Project.Config.Defaults)
 ---@field verify_owners fun(self: Project.Config.Defaults)
----@field verify fun(self: Project.Config.Defaults)
+---@field verify_scope_chdir fun(self: Project.Config.Defaults)
 
 ---@diagnostic disable-next-line:missing-fields
 local DEFAULTS = { ---@type Project.Config.Defaults
@@ -602,6 +604,28 @@ function DEFAULTS:verify()
       self[k] = nil
     end
   end
+
+  Util.validate({
+    before_attach = { self.before_attach, { 'function', 'nil' }, true },
+    datapath = { self.datapath, { 'string', 'nil' }, true },
+    different_owners = { self.different_owners, { 'table', 'nil' }, true },
+    disable_on = { self.disable_on, { 'table', 'nil' }, true },
+    enable_autochdir = { self.enable_autochdir, { 'boolean', 'nil' }, true },
+    exclude_dirs = { self.exclude_dirs, { 'table', 'nil' }, true },
+    fzf_lua = { self.fzf_lua, { 'table', 'nil' }, true },
+    historysize = { self.historysize, { 'number', 'nil' }, true },
+    log = { self.log, { 'table', 'nil' }, true },
+    lsp = { self.lsp, { 'table', 'nil' }, true },
+    manual_mode = { self.manual_mode, { 'boolean', 'nil' }, true },
+    on_attach = { self.on_attach, { 'function', 'nil' }, true },
+    patterns = { self.patterns, { 'table', 'nil' }, true },
+    picker = { self.picker, { 'table', 'nil' }, true },
+    scope_chdir = { self.scope_chdir, { 'string', 'nil' }, true },
+    show_hidden = { self.show_hidden, { 'boolean', 'nil' }, true },
+    silent_chdir = { self.silent_chdir, { 'boolean', 'nil' }, true },
+    snacks = { self.snacks, { 'table', 'nil' }, true },
+    telescope = { self.telescope, { 'table', 'nil' }, true },
+  })
 
   self:verify_datapath()
   self:verify_lsp()
