@@ -33,6 +33,7 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
 - Logging capabilities `:ProjectLog`
 - Natively supports `.nvim.lua` files
 - `vim.ui` menu support
+- `oil.nvim` support
 - [Telescope Integration](#telescope) `:Telescope projects`
 - [`fzf-lua` Integration](#projectfzf)
 - [`nvim-tree` Integration](#nvim-tree)
