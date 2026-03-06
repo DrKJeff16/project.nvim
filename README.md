@@ -7,7 +7,6 @@
 - [**Wiki**](https://github.com/DrKJeff16/project.nvim/wiki)
 - [**Contributing**](https://github.com/DrKJeff16/project.nvim/blob/main/CONTRIBUTING.md)
 - [**Credits**](https://github.com/DrKJeff16/project.nvim/blob/main/CREDITS.md)
-- [**Roadmap**](https://github.com/DrKJeff16/project.nvim/blob/main/TODO.md)
 - [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions)
   - [**Announcements**](https://github.com/DrKJeff16/project.nvim/discussions/1)
 
