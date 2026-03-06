@@ -225,7 +225,8 @@ function M.is_int(nums, cond)
       return false
     end
   end
-  return true and cond
+
+  return cond
 end
 
 ---Emulates the behaviour of Python's builtin `range()` function.
