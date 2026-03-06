@@ -66,6 +66,31 @@ function Api.buffer_valid(bufnr)
   return vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr)
 end
 
+---@param bufnr? integer
+---@return string|nil dir
+---@nodiscard
+function Api.check_oil(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+
+  local bufname = vim.api.nvim_buf_get_name(bufnr)
+  local ok, oil = pcall(require, 'oil')
+  local dir ---@type string|nil
+
+  ---SOURCE: https://github.com/cosmicbuffalo/root_swapper.nvim/blob/main/lua/root_swapper.lua
+  if ok and oil and oil.get_current_dir and vim.is_callable(oil.get_current_dir) then
+    dir = oil.get_current_dir(bufnr) --[[@as string|nil]]
+  else
+    ---Fallback: parse the `oil://` URL directly
+    dir = bufname:gsub('^oil://', '')
+  end
+
+  if dir then
+    dir = Util.rstrip('/', dir)
+  end
+  return dir
+end
+
 ---@return string|nil last
 ---@nodiscard
 function Api.get_last_project()
@@ -145,7 +170,10 @@ function Api.find_pattern_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
-  local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
+  local bufname = vim.api.nvim_buf_get_name(bufnr)
+  local dir = Api.check_oil(bufnr) or '' ---@type string
+
+  dir = dir == '' and vim.fn.fnamemodify(bufname, ':p:h') or dir
   dir = Util.is_windows() and dir:gsub('\\', '/') or dir
   return Path.root_included(dir)
 end
@@ -305,24 +333,21 @@ end
 function Api.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+  if not Api.buffer_valid(bufnr) or vim.tbl_isempty(Config.detection_methods) then
+    return
+  end
 
-  if not Api.buffer_valid(bufnr) then
-    return
-  end
-  if vim.tbl_isempty(Config.detection_methods) then
-    return
-  end
   local roots = {} ---@type { root: string, method_msg: string, method: 'lsp'|'pattern' }[]
-  local root, lsp_method = nil, nil
+  local root, method = nil, nil
   local ops = vim.tbl_keys(SWITCH) ---@type ('lsp'|'pattern')[]
   local success = false
-  for _, method in ipairs(Config.detection_methods) do
-    if vim.list_contains(ops, method) then
-      success, root, lsp_method = SWITCH[method](bufnr)
+  for _, m in ipairs(Config.detection_methods) do
+    if vim.list_contains(ops, m) then
+      success, root, method = SWITCH[m](bufnr)
       if success then
         ---@cast root string
-        ---@cast lsp_method string
-        table.insert(roots, { root = root, method_msg = lsp_method, method = method })
+        ---@cast method string
+        table.insert(roots, { root = root, method_msg = method, method = m })
       end
     end
   end
@@ -372,7 +397,13 @@ function Api.on_buf_enter(bufnr)
     return
   end
 
-  local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':p:h')
+  local bufname = vim.api.nvim_buf_get_name(bufnr)
+  local dir = Api.check_oil(bufnr) or ''
+
+  dir = Util.rstrip(
+    '/',
+    dir == '' and vim.fn.fnamemodify(bufname, ':p:h') or vim.fn.fnamemodify(dir, ':p')
+  )
   dir = Util.is_windows() and dir:gsub('\\', '/') or dir
   if not (Path.exists(dir) and Path.root_included(dir)) or Path.is_excluded(dir) then
     return
