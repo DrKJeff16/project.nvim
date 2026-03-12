@@ -8,8 +8,8 @@
 local MODSTR = 'project.popup'
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
-local Util = require('project.util')
 local uv = vim.uv or vim.loop
+local Util = require('project.util')
 
 ---@param path string
 ---@param hidden boolean
@@ -238,10 +238,9 @@ M.delete_menu = M.select.new({
     vim.ui.select(choices_list, {
       prompt = 'Select a project to delete:',
       format_item = function(item) ---@param item string
-        if vim.list_contains(require('project.util.history').session_projects, item) then
-          return '* ' .. item
-        end
-        return item
+        return (
+          vim.list_contains(require('project.util.history').session_projects, item) and '* ' or ''
+        ) .. item
       end,
     }, function(item)
       if not item then
@@ -332,12 +331,10 @@ M.recents_menu = M.select.new({
 M.open_menu = M.select.new({
   callback = function(ctx)
     if ctx and ctx.fargs and not vim.tbl_isempty(ctx.fargs) then
-      local arg = ctx.fargs[1]
-      local choices = M.open_menu.choices()
-      if not vim.list_contains(vim.tbl_keys(choices), arg) then
+      if not vim.list_contains(vim.tbl_keys(M.open_menu.choices()), ctx.fargs[1]) then
         return
       end
-      choices[arg](ctx)
+      M.open_menu.choices()[ctx.fargs[1]](ctx)
       return
     end
     local choices_list = M.open_menu.choices_list()

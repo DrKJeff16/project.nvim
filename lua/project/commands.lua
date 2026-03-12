@@ -1,62 +1,59 @@
----@alias CompleteTypes
----|'arglist'
----|'breakpoint'
----|'buffer'
----|'color'
----|'command'
----|'compiler'
----|'diff_buffer'
----|'dir'
----|'dir_in_path'
----|'environment'
----|'event'
----|'expression'
----|'file'
----|'file_in_path'
----|'filetype'
----|'function'
----|'help'
----|'highlight'
----|'history'
----|'keymap'
----|'locale'
----|'lua'
----|'mapclear'
----|'mapping'
----|'menu'
----|'messages'
----|'option'
----|'packadd'
----|'retab'
----|'runtime'
----|'scriptnames'
----|'shellcmd'
----|'shellcmdline'
----|'sign'
----|'syntax'
----|'syntime'
----|'tag'
----|'tag_listfiles'
----|'user'
----|'var'
+---@enum (key) CompleteTypes
+local complete_types = { ---@diagnostic disable-line:unused-local
+  arglist = 1,
+  breakpoint = 1,
+  buffer = 1,
+  color = 1,
+  command = 1,
+  compiler = 1,
+  diff_buffer = 1,
+  dir = 1,
+  dir_in_path = 1,
+  environment = 1,
+  event = 1,
+  expression = 1,
+  file = 1,
+  file_in_path = 1,
+  filetype = 1,
+  ['function'] = 1,
+  help = 1,
+  highlight = 1,
+  history = 1,
+  keymap = 1,
+  locale = 1,
+  lua = 1,
+  mapclear = 1,
+  mapping = 1,
+  menu = 1,
+  messages = 1,
+  option = 1,
+  packadd = 1,
+  retab = 1,
+  runtime = 1,
+  scriptnames = 1,
+  shellcmd = 1,
+  shellcmdline = 1,
+  sign = 1,
+  syntax = 1,
+  syntime = 1,
+  tag = 1,
+  tag_listfiles = 1,
+  user = 1,
+  var = 1,
+}
 
 ---@alias ProjectCmdFun fun(ctx?: vim.api.keyset.create_user_command.command_args)
----@alias CompletorFuncs
----|fun(lead: string, line: string, pos: integer): completions: string[]
----|fun(lead: string): completions: string[]
----|fun(_: string, line: string): completions: string[]
----|fun(lead: string, _: string, pos: integer): completions: string[]
-
+---@alias CompletorFunc fun(lead: string, line: string, pos: integer): completions: string[]
 ---@alias Project.CMD
----|{ desc: string, name: string, bang: boolean, complete?: (CompletorFuncs)|CompleteTypes, nargs?: string|integer }
+---|{ desc: string, name: string, bang: boolean, complete?: (CompletorFunc)|CompleteTypes, nargs?: string|integer }
 ---|ProjectCmdFun
 
 ---@class Project.Commands.Spec
----@field callback ProjectCmdFun
----@field name string
----@field desc string
----@field complete? CompleteTypes|CompletorFuncs
 ---@field bang? boolean
+---@field callback ProjectCmdFun
+---@field complete? CompleteTypes|CompletorFunc
+---@field desc string
+---@field name string
 ---@field nargs? string|integer
 
 local WARN = vim.log.levels.WARN
@@ -201,79 +198,6 @@ function Commands.create_user_commands()
       end,
     },
     {
-      name = 'ProjectExport',
-      desc = 'Export project.nvim history to JSON file',
-      bang = true,
-      nargs = '*',
-      complete = function(_, line)
-        local args = vim.split(line, '%s+', { trimempty = false })
-        if args[1]:sub(-1) == '!' and #args == 1 then
-          return {}
-        end
-
-        if #args == 2 then
-          -- Thanks to @TheLeoP for the advice!
-          -- https://www.reddit.com/r/neovim/comments/1pvl1tb/comment/nvwzvvu/
-          return vim.fn.getcompletion(args[2], 'file', true)
-        end
-        if #args == 3 then
-          ---@type string[]
-          local nums = vim.tbl_map(function(value) ---@param value integer
-            return tostring(value)
-          end, Util.range(0, 32))
-          if args[3] == '' then
-            return nums
-          end
-
-          local res = {} ---@type string[]
-          for _, num in ipairs(nums) do
-            if vim.startswith(num, args[3]) then
-              table.insert(res, num)
-            end
-          end
-          return res
-        end
-
-        return {}
-      end,
-      callback = function(ctx)
-        if not ctx or #ctx.fargs > 2 then
-          vim.notify('Usage:  `:ProjectExport[!] </path/to/file[.json]> [<INDENT>]`', WARN)
-          return
-        end
-        if vim.tbl_isempty(ctx.fargs) then
-          Popup.gen_export_prompt()
-          return
-        end
-
-        History.export_history_json(
-          ctx.fargs[1],
-          #ctx.fargs == 2 and tonumber(ctx.fargs[2]) or nil,
-          ctx.bang
-        )
-      end,
-    },
-    {
-      name = 'ProjectImport',
-      desc = 'Import project history from JSON file',
-      bang = true,
-      nargs = '*',
-      complete = 'file',
-      callback = function(ctx)
-        if vim.tbl_isempty(ctx.fargs) then
-          Popup.gen_import_prompt()
-          return
-        end
-        vim.print(ctx.fargs)
-
-        if #ctx.fargs == 1 then
-          History.import_history_json(ctx.fargs[1], ctx.bang)
-        end
-
-        vim.notify('Usage:  `:ProjectImport[!] </path/to/file[.json]>`', WARN)
-      end,
-    },
-    {
       name = 'ProjectConfig',
       desc = 'Prints out the current configuratiion for `project.nvim`',
       bang = true,
@@ -344,6 +268,59 @@ function Commands.create_user_commands()
       end,
     },
     {
+      name = 'ProjectExport',
+      desc = 'Export project.nvim history to JSON file',
+      bang = true,
+      nargs = '*',
+      complete = function(_, line)
+        local args = vim.split(line, '%s+', { trimempty = false })
+        if args[1]:sub(-1) == '!' and #args == 1 then
+          return {}
+        end
+
+        if #args == 2 then
+          -- Thanks to @TheLeoP for the advice!
+          -- https://www.reddit.com/r/neovim/comments/1pvl1tb/comment/nvwzvvu/
+          return vim.fn.getcompletion(args[2], 'file', true)
+        end
+        if #args == 3 then
+          ---@type string[]
+          local nums = vim.tbl_map(function(value) ---@param value integer
+            return tostring(value)
+          end, Util.range(0, 32))
+          if args[3] == '' then
+            return nums
+          end
+
+          local res = {} ---@type string[]
+          for _, num in ipairs(nums) do
+            if vim.startswith(num, args[3]) then
+              table.insert(res, num)
+            end
+          end
+          return res
+        end
+
+        return {}
+      end,
+      callback = function(ctx)
+        if not ctx or #ctx.fargs > 2 then
+          vim.notify('Usage:  `:ProjectExport[!] </path/to/file[.json]> [<INDENT>]`', WARN)
+          return
+        end
+        if vim.tbl_isempty(ctx.fargs) then
+          Popup.gen_export_prompt()
+          return
+        end
+
+        History.export_history_json(
+          ctx.fargs[1],
+          #ctx.fargs == 2 and tonumber(ctx.fargs[2]) or nil,
+          ctx.bang
+        )
+      end,
+    },
+    {
       name = 'ProjectHealth',
       desc = 'Run checkhealth for project.nvim',
       callback = function()
@@ -380,6 +357,26 @@ function Commands.create_user_commands()
           return
         end
         History.clear_historyfile(ctx.bang)
+      end,
+    },
+    {
+      name = 'ProjectImport',
+      desc = 'Import project history from JSON file',
+      bang = true,
+      nargs = '*',
+      complete = 'file',
+      callback = function(ctx)
+        if vim.tbl_isempty(ctx.fargs) then
+          Popup.gen_import_prompt()
+          return
+        end
+        vim.print(ctx.fargs)
+
+        if #ctx.fargs == 1 then
+          History.import_history_json(ctx.fargs[1], ctx.bang)
+        end
+
+        vim.notify('Usage:  `:ProjectImport[!] </path/to/file[.json]>`', WARN)
       end,
     },
     {
