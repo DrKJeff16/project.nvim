@@ -3,7 +3,17 @@
 ---to avoid any confusions with naming,
 ---e.g. `require('project_nvim.project')`.
 
----@alias HistoryPath table<'datapath'|'projectpath'|'historyfile', string>
+---@enum (key) ProjectPaths
+local project_paths = { ---@diagnostic disable-line:unused-local
+  datapath = 1,
+  historyfile = 1,
+  projectpath = 1,
+}
+
+---@class HistoryPath
+---@field datapath string
+---@field projectpath string
+---@field historyfile string
 
 local MODSTR = 'project.api'
 local ERROR = vim.log.levels.ERROR
@@ -60,6 +70,7 @@ end
 
 ---@param bufnr integer
 ---@return boolean valid
+---@nodiscard
 function Api.buffer_valid(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number' } } })
 
@@ -78,12 +89,8 @@ function Api.check_oil(bufnr)
   local dir ---@type string|nil
 
   ---SOURCE: https://github.com/cosmicbuffalo/root_swapper.nvim/blob/main/lua/root_swapper.lua
-  if ok and oil and oil.get_current_dir and vim.is_callable(oil.get_current_dir) then
-    dir = oil.get_current_dir(bufnr) --[[@as string|nil]]
-  else
-    ---Fallback: parse the `oil://` URL directly
-    dir = bufname:gsub('^oil://', '')
-  end
+  dir = (ok and oil and oil.get_current_dir) and oil.get_current_dir(bufnr)
+    or bufname:gsub('^oil://', '')
 
   if dir then
     dir = Util.rstrip('/', dir)
@@ -99,11 +106,11 @@ function Api.get_last_project()
     return
   end
 
-  recent = Util.reverse(recent) ---@type string[]
+  recent = Util.reverse(recent) --[[@as string[]\]]
   return #History.session_projects <= 1 and recent[2] or recent[1]
 end
 
----@param path? 'datapath'|'projectpath'|'historyfile'
+---@param path? ProjectPaths
 ---@return string|HistoryPath history_paths
 ---@nodiscard
 function Api.get_history_paths(path)
@@ -141,23 +148,21 @@ function Api.find_lsp_root(bufnr)
   local ignore_lsp = Config.options.lsp.ignore
   local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
   for _, client in ipairs(clients) do
-    ---@type string[]
-    local filetypes = client.config.filetypes ---@diagnostic disable-line:undefined-field
+    local filetypes = client.config.filetypes --[[@as string[]\]]
     local valid = (
       Util.is_type('table', filetypes)
       and vim.list_contains(filetypes, ft)
-      and not vim.tbl_isempty(filetypes)
       and not vim.list_contains(ignore_lsp, client.name)
       and client.config.root_dir
     )
     if valid then
-      local dir, name = client.config.root_dir, client.name
-      if Config.options.lsp.use_pattern_matching then
-        if Path.root_included(dir) == nil then
-          return
-        end
+      if
+        Config.options.lsp.use_pattern_matching
+        and Path.root_included(client.config.root_dir) == nil
+      then
+        return
       end
-      return dir, name
+      return client.config.root_dir, client.name
     end
   end
 end
@@ -343,10 +348,9 @@ function Api.get_project_root(bufnr)
   local success = false
   for _, m in ipairs(Config.detection_methods) do
     if vim.list_contains(ops, m) then
+      ---@type boolean, string|nil, string|nil
       success, root, method = SWITCH[m](bufnr)
       if success then
-        ---@cast root string
-        ---@cast method string
         table.insert(roots, { root = root, method_msg = method, method = m })
       end
     end
@@ -415,7 +419,7 @@ function Api.on_buf_enter(bufnr)
   end
 
   Api.current_project, Api.current_method = Api.get_current_project(bufnr)
-  local change = Api.current_project ~= vim.fn.getcwd(0, 0)
+  local change = Api.current_project ~= (uv.cwd() or vim.fn.getcwd())
   Api.set_pwd(Api.current_project, Api.current_method)
 
   if change then
