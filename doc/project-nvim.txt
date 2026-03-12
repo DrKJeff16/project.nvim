@@ -1,5 +1,6 @@
 ==============================================================================
-*project-nvim*                  A dynamic project management solution for neovim
+*project-nvim.txt*              A dynamic project management solution for Neovim
+                                                                  *project-nvim*
 
 
     `project.nvim` is a Neovim plugin written in Lua that,
@@ -72,9 +73,9 @@ Table of Contents                                             *project-nvim.toc*
 
     • `{options}`  (Type: |Project.Config.Options|) The options table
 
-    The `{options}` parameter is not required,
-    but if you're interested in the default config options,
-    see |Project.Config.Options| for all the defaults.
+    The `{options}` parameter is not required, but if you're interested in
+    the default config options, see |Project.Config.Options| for all
+    the defaults.
 
     Example ~
 
@@ -153,57 +154,50 @@ Table of Contents                                             *project-nvim.toc*
 
     * {show_hidden}             (boolean)
                                 Make hidden files visible when using
-                                any picker (including `fzf-lua` and
-                                `telescope`)
+                                any picker
 
                                 Default: `false` ~
 
 
     * {lsp}                     (|Project.Config.LSP|)
-                                Table containing all the
-                                LSP-adjacent options.
+                                Table containing all the LSP-adjacent options.
 
-                                See |Project.Config.LSP| for more
-                                details
+                                See |Project.Config.LSP| for more details
 
 
     * {telescope}               (|Project.Config.Telescope|)
-                                Table of options used for
-                                the telescope picker.
+                                Table of options used for the telescope
+                                picker.
 
                                 See |Project.Config.Telescope| for more
                                 details
 
 
     * {fzf_lua}                 (|Project.Config.FzfLua|)
-                                Table of options used for
-                                `fzf-lua` integration.
+                                Table of options used for the `fzf-lua`
+                                integration.
 
-                                See |Project.Config.FzfLua| for more
-                                details
+                                See |Project.Config.FzfLua| for more details
 
 
     * {snacks}                  (|Project.Config.Snacks|)
-                                Table of options used for
-                                `snacks.nvim` integration.
+                                Table of options used for the `snacks.nvim`
+                                integration.
 
-                                See |Project.Config.Snacks| for more
-                                details
+                                See |Project.Config.Snacks| for more details
 
 
     * {picker}                  (|Project.Config.Picker|)
-                                Table of options used for
-                                `picker.nvim` integration.
+                                Table of options used for the `picker.nvim`
+                                integration.
 
-                                See |Project.Config.Picker| for more
-                                details
+                                See |Project.Config.Picker| for more details
 
 
     * {log}                     (|Project.Options.Logging|)
                                 Options for logging.
 
-                                See |Project.Config.Logging| for more
-                                details
+                                See |Project.Config.Logging| for more details
 
 
     * {exclude_dirs}            (`string[]`)
@@ -215,9 +209,8 @@ Table of Contents                                             *project-nvim.toc*
 
     * {silent_chdir}            (boolean)
                                 If `false`, you'll get notified every time
-                                the plugin changes directory.
-                                This is useful for debugging,
-                                or for users that enjoy verbose
+                                the plugin changes directory. This is useful
+                                for debugging, or for users that enjoy verbose
                                 operations
 
                                 Default: `true` ~
@@ -227,12 +220,12 @@ Table of Contents                                             *project-nvim.toc*
                                 Determines the scope for dir change.
                                 Valid options are:
                                 - `'global'`: The global nvim `cwd`
-                                    will sync to your current
-                                    buffer's project
+                                            will sync to your current
+                                            buffer's project
                                 - `'tab'`: Per-tab `cwd` sync to the
-                                     current buffer's project
+                                         current buffer's project
                                 - `'win'`: Per-window `cwd` sync to the
-                                     current buffer's project
+                                         current buffer's project
 
                                 Default: `'global'` ~
 
@@ -249,9 +242,9 @@ Table of Contents                                             *project-nvim.toc*
 
     * {on_attach}               (`nil|fun(dir: string, method: string)`)
                                 Hook to run after attaching to a new project.
-                                It optionally recieves `dir` and
-                                the `method` used to change directory.
-                                Only runs on successful chdir.
+                                It optionally recieves `dir` and the `method`
+                                used to change directory. Only runs if chdir
+                                is successful.
 
                                 Set to `nil` to disable
 
@@ -271,11 +264,12 @@ Table of Contents                                             *project-nvim.toc*
 
 
     * {enabled}                 (boolean)
-                                If `true` then LSP-based method detection
-                                will take precedence over traditional
-                                pattern matching.
-                                See |project-nvim.pattern-matching|
-                                for more info
+                                If `true` then LSP-based method detection will
+                                take precedence over traditional pattern
+                                matching.
+
+                                See |project-nvim.pattern-matching| for
+                                more information
 
                                 Default: `true` ~
 
@@ -323,12 +317,11 @@ Table of Contents                                             *project-nvim.toc*
 
 
     * {allow}                   (boolean)
-                                Determines whether a project will be
-                                added if its project root is owned
-                                by a different user.
-                                If `true`, it will add the project
-                                to the history even if its root
-                                is not owned by the current nvim `UID`
+                                Determines whether a project will be added if
+                                its project root is owned by a different user.
+                                If `true`, it will add the project to
+                                the history regardless of whether its root
+                                is not owned by the current Neovim `UID`
                                 (UNIX only) ~
 
                                 Default: `false` ~
@@ -366,18 +359,17 @@ Table of Contents                                             *project-nvim.toc*
     * {prefer_file_browser}     (boolean)
                                 Toggles `telescope-file-browser.nvim` for the
                                 telescope picker instead of the `find_files`
-                                builtin.
-                                In case it is not available, it'll fall back
-                                to the `find_files` builtin
+                                builtin. In case it is not available it will
+                                fall back to the `find_files` builtin
 
                                 Default: `false` ~
 
 
     * {disable_file_picker}     (boolean)
                                 CREDITS: UNKNOWN ~
-                                Set this to `false` if you don't want
-                                the file picker to appear
-                                after you've selected a project
+                                Set this to `false` if you don't want the
+                                file picker to appear after you've selected
+                                a project
 
                                 Default: `false` ~
 
@@ -388,9 +380,8 @@ Table of Contents                                             *project-nvim.toc*
 
 
     * {enabled}                 (boolean)
-                                Determines whether the `fzf-lua`
-                                integration is enabled.
-                                If `fzf-lua` is not installed
+                                Determines whether the `fzf-lua` integration
+                                is enabled. If `fzf-lua` is not installed
                                 this won't make a difference.
 
                                 Default: `false` ~
@@ -403,17 +394,16 @@ Table of Contents                                             *project-nvim.toc*
 
     * {enabled}                 (boolean)
                                 Determines whether the `picker.nvim`
-                                integration is enabled.
-                                If `picker.nvim` is not installed
-                                this won't make a difference.
+                                integration is enabled. If `picker.nvim`
+                                is not installed this won't make a difference.
 
                                 Default: `false` ~
 
 
     * {sort}                    (`'newest'|'oldest'`)
                                 Determines whether the newest projects
-                                come first (`'newest'`), or
-                                the oldest (`'oldest'`).
+                                come first (`'newest'`), or the oldest
+                                (`'oldest'`).
 
                                 Default: `'newest'` ~
 
@@ -432,8 +422,8 @@ Table of Contents                                             *project-nvim.toc*
 
 
     * {opts}                    (table)
-                                Stores the setup options for
-                                the `snacks.nvim` picker
+                                Stores the setup options for the `snacks.nvim`
+                                picker
 
 
 ------------------------------------------------------------------------------
@@ -442,21 +432,20 @@ Table of Contents                                             *project-nvim.toc*
 
 
     * {enabled}                 (boolean)
-                                If `true`, it enables logging
-                                in the same directory in which your
-                                history file is stored.
+                                If `true`, it enables logging in the same
+                                directory in which your history file is stored
 
                                 Default: `false` ~
 
 
     * {max_size}                (number)
-                                The maximum logfile size (in megabytes).
+                                The maximum logfile size (in megabytes)
 
                                 Default: `1.0` ~
 
 
     * {logpath}                 (string)
-                                Path in which the log file will be saved.
+                                Path to which the log file will be saved.
 
                                 Default: `vim.fn.stdpath('state')` ~
 
@@ -472,33 +461,37 @@ Table of Contents                                             *project-nvim.toc*
 
     To specify the root is a certain directory, prefix it with `=`
 >lua
-        patterns = { '=src' }
+    patterns = { '=src' }
 <
-    To specify the root has a certain directory or file
-      (which may be a glob), just add it to the pattern list
+
+    To specify the root has a certain directory or file (which may be a glob),
+    just add it to the pattern list
 >lua
-        patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
+    patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
 <
+
     To specify the root has a certain directory as an ancestor
-      (for excluding directories), prefix it with `^`
+    (for excluding directories), prefix it with `^`
 >lua
-        patterns = { '^fixtures' }
+    patterns = { '^fixtures' }
 <
-    To specify the root has a certain directory as its direct
-    ancestor / parent (for putting working projects in a
-    common directory), prefix it with `>`
+
+    To specify the root has a certain directory as its direct ancestor/parent
+    (for putting working projects in a common directory), prefix it with `>`
 >lua
-        patterns = { '>Latex' }
+    patterns = { '>Latex' }
 <
+
     To exclude a pattern, prefix it with `!`
 >lua
-        patterns = {
-            '!.git/worktrees',
-            '!=extras',
-            '!^fixtures',
-            '!build/env.sh',
-        }
+    patterns = {
+      '!.git/worktrees',
+      '!=extras',
+      '!^fixtures',
+      '!build/env.sh',
+    }
 <
+
             NOTE: Make sure to put your pattern exclusions first, ~
                   and then the patterns you DO want included ~
 
@@ -513,10 +506,7 @@ Table of Contents                                             *project-nvim.toc*
     require('nvim-tree').setup({
         sync_root_with_cwd = true,
         respect_buf_cwd = true,
-        update_focused_file = {
-            enable = true,
-            update_root = true,
-        },
+        update_focused_file = { enable = true, update_root = true },
     })
 <
 
@@ -547,31 +537,18 @@ Table of Contents                                             *project-nvim.toc*
     )
     -- ... and so on
 <
-    NOTE ~
-    Not 100% certain whether the `reveal_force_cwd` flag is necessary,
-    but better safe than sorry!
-
 
 ==============================================================================
 5. Telescope                                            *project-nvim.telescope*
 
 
-    To enable `telescope.nvim` integration use the following
-    code in your config:
+    To enable `telescope.nvim` integration use the following code
+    in your config:
 >lua
     -- Lua
     require('telescope').setup(...)
     require('telescope').load_extension('projects')
 <
-    Also you can configure the picker when calling
-    `require('telescope').setup({ telescope = { enabled = true } })`
-    (see |Project.Config.Telescope| for more options).
-    This will run:
->lua
-    -- Lua
-    require('telescope').load_extension('projects')
-<
-    from within the init process.
 
     Example ~
 >lua
@@ -601,17 +578,16 @@ Table of Contents                                             *project-nvim.toc*
 5.1. Telescope Mappings                        *project-nvim.telescope.mappings*
 
 
-    `project.nvim` comes with the following mappings for the
-    Telescope picker:
+    `project.nvim` comes with the following mappings for the Telescope picker:
 
         Normal Mode   Insert Mode   Action
-        -----------   -----------   ------
-        `f`             `<C-f>`         `find_project_files()`
-        `b`             `<C-b>`         `browse_project_files()`
-        `d`             `<C-d>`         `delete_project()`
-        `s`             `<C-s>`         `search_in_project_files()`
-        `r`             `<C-r>`         `recent_project_files()`
-        `w`             `<C-w>`         `change_working_directory()`
+        -----------   -----------   --------------------------------
+             f           <C-f>      find_project_files()
+             b           <C-b>      browse_project_files()
+             d           <C-d>      delete_project()
+             s           <C-s>      search_in_project_files()
+             r           <C-r>      recent_project_files()
+             w           <C-w>      change_working_directory()
 
 
 ==============================================================================
@@ -622,252 +598,214 @@ Table of Contents                                             *project-nvim.toc*
 
     NOTE: Some of these might be incomplete and/or reworked in the future. ~
 
-`:Project`                                                              *:Project*
 
-                            The `:Project` command will open a UI window
-                            pointing to all the useful operations
-                            this plugin can provide.
-                            This one is subject to change,
-                            just as |vim.ui| is
+`:Project`                                                      *Project* *:Project*
+
+                    The `:Project` command will open a UI window pointing to
+                    all the useful operations this plugin can provide.
+
+                    This one is subject to change, just as |vim.ui| is
 
 
 `:ProjectLog clear|close|open|toggle`                    *ProjectLog*  *:ProjectLog*
 
-                            IMPORTANT ~
-                            This command will not be available unless ~
-                            you set `log.enabled = true` in your `setup()` ~
+                    IMPORTANT ~
+                    This command will not be available unless you set
+                    `log.enabled = true` in your setup.
 
-                            The `:ProjectLog` command handles
-                            the `project.nvim` log file.
+                    The `:ProjectLog` command handles the `project.nvim`
+                    log file.
 
-                            The valid arguments are:
+                    The valid arguments are:
 
-                            - `clear`: Clears the log file
-                            - `close`: Closes the Log Window
-                            - `open`: Opens the Log Window
-                            - `toggle`: Toggles the Log Window
+                    - `clear`: Clears the log file
+                    - `close`: Closes the Log Window
+                    - `open`: Opens the Log Window
+                    - `toggle`: Toggles the Log Window
 
-                            Useful for debugging
+                    Useful for debugging
 
 
 `:ProjectHealth`                                   *ProjectHealth*  *:ProjectHealth*
 
-                            The `:ProjectHealth` command essentially runs
-                            `:checkhealth project` in a single command.
+                    The `:ProjectHealth` command essentially runs
+                    `:checkhealth project` in a single command
 
 
 `:ProjectHistory[!] [clear]`                     *ProjectHistory*  *:ProjectHistory*
 
-                            The `:ProjectHistory` handles the project history.
+                    The `:ProjectHistory` handles the project history.
 
-                            If the command is called without any arguments,
-                            it'll toggle the `project.nvim` history file
-                            in a new tab, which can be exited
-                            by pressing `q` in Normal Mode.
+                    If the command is called without any arguments, it will
+                    toggle the `project.nvim` history file in a new tab, which
+                    can be exited by pressing `q` in Normal Mode.
 
-                            DANGER ZONE! ~
-                            If called with the `clear` argument
-                            your project history will be cleared.
-                            If you want to avoid a "Yes/No" prompt
-                            you can call the command with a bang (`!`)
-                            to force it
+                    DANGER ZONE! ~
+                    If called with the `clear` argument your project history
+                    will be cleared. If you want to avoid a "Yes/No" prompt
+                    you can call the command with a bang (`!`) to force it
 
 
 `:ProjectFzf`                                            *ProjectFzf*  *:ProjectFzf*
 
-                            This command works ONLY if you have ~
-                            `fzf-lua` installed and loaded ~
+                    This command works ONLY if you have `fzf-lua` installed
+                    and loaded.
 
-                            The `:ProjectFzf` command is a
-                            dynamically enabled user command that runs
-                            `project.nvim` through `fzf-lua`.
-                            For now it just executes:
+                    The `:ProjectFzf` command is a dynamically enabled
+                    user command that runs `project.nvim` through `fzf-lua`.
+                    For now it just executes:
 >lua
-                require('project.extensions.fzf-lua').run_fzf_lua()
+                    require('project.extensions.fzf-lua').run_fzf_lua()
 <
 
 `:ProjectPicker[!]`                                *ProjectPicker*  *:ProjectPicker*
 
-                            This command works ONLY if you have ~
-                            `picker.nvim` installed and loaded ~
+                    This command works ONLY if you have `picker.nvim`
+                    installed and loaded.
 
-                            The `:ProjectPicker` command is a
-                            dynamically enabled user command that runs
-                            `project.nvim` through `picker.nvim`.
-                            If a bang `!` is passed and you don't
-                            already have `picker.hidden` set to `true`,
-                            then a selected project will show
-                            hidden files.
+                    The `:ProjectPicker` command is a dynamically enabled
+                    user command that runs `project.nvim` through `picker.nvim`.
+                    If a bang `!` is passed and you don't already have
+                    `picker.hidden` set to `true`, then a selected project
+                    will show hidden files.
 
-                            This is an alias for `:Picker project`.
+                    This is an alias for `:Picker project`.
 
 
 `:ProjectSnacks`                                   *ProjectSnacks*  *:ProjectSnacks*
 
-                            This command works ONLY if you have ~
-                            `snacks.nvim` installed and loaded ~
+                    This command works ONLY if you have `snacks.nvim`
+                    installed and loaded.
 
-                            The `:ProjectSnacks` command is a
-                            dynamically enabled user command that runs
-                            `project.nvim` through `snacks.nvim`.
+                    The `:ProjectSnacks` command is a dynamically enabled
+                    user command that runs `project.nvim` through `snacks.nvim`.
 
-                            This is an alias for:
->vim
-                    :lua require('project.extensions.snacks').pick()
+                    This is an alias for:
+>lua
+                    require('project.extensions.snacks').pick()
 <
 
 
 `:ProjectTelescope`                          *ProjectTelescope*  *:ProjectTelescope*
 
-                            This command works ONLY if you have ~
-                            `telescope.nvim` installed and loaded ~
+                    This command works ONLY if you have `telescope.nvim`
+                    installed and loaded.
 
-                            The `:ProjectTelescope` command is a
-                            dynamicly enabled User Command
-                            that runs the Telescope `projects` picker.
-                            A shortcut, to be honest
+                    The `:ProjectTelescope` command is a dynamicly enabled
+                    user command that runs the Telescope `projects` picker
 
 
 `:ProjectAdd[!] [</path/to/dir>[ ...]]`                  *ProjectAdd*  *:ProjectAdd*
 
-                            The `:ProjectAdd` command is a manual hook
-                            that opens a prompt to input any directory
-                            through a UI prompt, to be saved
-                            to your project history.
-                            If your prompt is valid your `cwd`
-                            will be switched to said directory.
-                            Adding a [!] will set the prompt to your cwd.
-                            This is particularly useful if you've
-                            enabled {manual_mode} in `setup()`.
+                    The `:ProjectAdd` command is a manual hook that opens
+                    a prompt to input any directory through a UI prompt,
+                    to be saved to your project history. If your prompt is
+                    valid, your `cwd` will be switched to said directory.
+                    Adding a [`!`] will set the prompt to your cwd.
+                    This is particularly useful if you've enabled
+                    {manual_mode} in `setup()`.
 
-                            See |project-nvim.setup-options|
+                    See |project-nvim.setup-options|
 
 
 `:ProjectConfig[!]`                                *ProjectConfig*  *:ProjectConfig*
 
-                            The `:ProjectConfig` command will toggle
-                            your current config in a floating window,
-                            making it easier to access.
-                            To exit the window you can either
-                            press `q` in normal mode or
-                            by runnning `:ProjectConfig` again.
-                            If called with a bang `!` then the output
-                            will instead be printed as a message
-                            (`:h :messages`)
+                    The `:ProjectConfig` command will toggle your
+                    current config in a floating window, making it easier to
+                    access. To exit the window you can either press `q`
+                    in normal mode or by runnning `:ProjectConfig` again.
+                    If called with a bang `!` then the output will instead
+                    be printed as a message (`:h :messages`).
 
-                            Useful for debugging
+                    Useful for debugging
 
 
 `:ProjectDelete[!] [/path/to/first [/path/to/second [...]]]`      *:ProjectDelete*
                                                                  *ProjectDelete*
 
-                            The `:ProjectDelete` command is a utility
-                            to delete your projects.
-                            If no arguments are given
-                            a popup with a list of your current projects
-                            will be opened.
-                            If one or more arguments are passed
-                            it will expect directories separated by a space.
-                            The arguments have to be directories that are
-                            returned by `get_recent_projects()`
-                            (see |project-nvim.get_recent_projects()|).
-                            The arguments can be relative,
-                            absolute or un-expanded (`~/path/to/project`).
-                            The command will attemptto parse the args and,
-                            unless a `!` is passed to the command
-                            (`:ProjectDelete!`). In that case
-                            invalid args will be ignored.
-                            If there's a successful deletion
-                            you'll recieve a notification denoting success.
+                    The `:ProjectDelete` command is a utility to delete
+                    your projects. If no arguments are given, a popup with
+                    a list of your current projects will be opened.
+                    If one or more arguments are passed it will expect
+                    directories separated by a space. The arguments have to be
+                    directories that are returned by `get_recent_projects()`
+                    (see |project-nvim.get_recent_projects()|).
+
+                    The arguments can be relative, absolute or un-expanded
+                    (`~/path/to/project`). The command will attemptto parse
+                    the arguments and, unless a `!` is passed to the command,
+                    arguments will be verified. If passing a `!` then
+                    invalid arguments will be ignored. If there is
+                    a successful deletion you'll recieve a notification
+                    denoting success.
 
 
 `:ProjectRoot[!]`                                      *ProjectRoot*  *:ProjectRoot*
 
-                            The `:ProjectRoot` command is a manual hook
-                            to set the current working directory
-                            to the current file's root, attempting to use
-                            any of the detection methods
-                            set by the user
-                            (|Project.Config.Options.detection_methods|).
-                            Adding a [!] will make this command verbose.
+                    The `:ProjectRoot` command is a manual hook to set
+                    the current working directory to the current file's root,
+                    attempting to use any of the detection methods set
+                    by the user (|Project.Config.Options.detection_methods|).
+                    Adding a [`!`] will make this command verbose.
 
-                            The command does essentially the following
-                            in the command line:
->vim
-                    :lua require('project.api').on_buf_enter()
-<
-                            This is particularly useful if you enabled
-                            {manual_mode} in `setup()`
-                            (see |project-nvim.setup-options|).
+                    This is particularly useful if you enabled {manual_mode}
+                    in your `setup()` (see |project-nvim.setup-options|)
 
 
 `:ProjectSession`                                *ProjectSession*  *:ProjectSession*
 
-                            IMPORTANT ~
-                            This command requires `fd` to be installed ~
-                            for it to work! ~
+                    IMPORTANT ~
+                    This command requires `fd` to be installed for it to work!
 
-                            The `:ProjectSession` command opens a
-                            custom picker (using |vim.ui|) with a selection of
-                            your current session projects
-                            (stored in `History.session_projects`).
-                            Bear in mind this table gets filled on runtime. ~
+                    The `:ProjectSession` command opens a custom picker
+                    (using |vim.ui|) with a selection of your current
+                    session projects (stored in `History.session_projects`).
+                    Bear in mind this table gets filled on runtime. ~
 
-                            If you select a session project your `cwd`
-                            will be changed to what you selected.
-                            If the command is called with [!]
-                            (`:ProjectSession!`) the UI will close.
-                            Otherwise, another custom UI picker will appear
-                            for you to select the containing files/dirs.
-                            Selecting a directory will open another
-                            UI picker with its contents, and so on...
+                    If you select a session project your `cwd` will be changed
+                    to what you selected. If the command is called with [`!`]
+                    (`:ProjectSession!`) then the UI will close.
+                    Otherwise, another custom UI picker will appear for you
+                    to select the containing files/dirs. Selecting a directory
+                    will open another UI picker with its contents, and so on
 
 
 `:ProjectExport[!] [</path/to/file[.json]> [<INDENT>]]`           *:ProjectExport*
                                                                  *ProjectExport*
 
-                            WARNING ~
-                            Use this script with caution! ~
-                            You may overwrite important files ~
-                            if doing something reckless! ~
+                    WARNING ~
+                    Use this script with caution!
+                    You may overwrite important files if using recklessly!
 
-                            The `:ProjectExport` user command
-                            allows the user to save their project history
-                            in a JSON format, allowing a custom indent level
-                            if desired.
+                    The `:ProjectExport` user command allows the user to save
+                    their project history in a JSON format, allowing for
+                    a custom indent level if desired.
 
-                            If the target file already exists
-                            and is not empty then a confirmation prompt
-                            will appear.
+                    If the target file already exists and is not empty then
+                    a confirmation prompt will appear.
 >vim
-        :ProjectExport " Will open a prompt
+                    :ProjectExport " Will open a prompt
+                    :ProjectExport a " Output file is `a.json`
+                    :ProjectExport! b 12 " Output file is `b`, with a tab size of 12
 
-        :ProjectExport a " Output file is `a.json`
-
-        :ProjectExport! b 12 " Output file is `b`, with a tab size of 12
-
-        " The output file will be `~/.c.json` (bang here is irrelevant)
-        :ProjectExport! ~/.c.json
+                    :ProjectExport! ~/.c.json " The output file will be `~/.c.json`
 <
 
 `:ProjectImport[!] [</path/to/file[.json]>]`                      *:ProjectImport*
                                                                  *ProjectImport*
 
-                            The `:ProjectImport` allows the user
-                            to retrieve their saved project history
-                            in a JSON format
+                    The `:ProjectImport` allows the user to retrieve
+                    their saved project history in a JSON format
 >vim
+                    :ProjectImport " Will open a prompt
 
-    " Will open a prompt
-    :ProjectImport
+                    " Will be treated as `a.json`
+                    :ProjectExport a
+                    :ProjectImport a
 
-    " Will be treated as `a.json`
-    :ProjectExport a
-    :ProjectImport a
-
-    " Will be treated as `b`
-    :ProjectExport! b
-    :ProjectImport! b
+                    " Will be treated as `b`
+                    :ProjectExport! b
+                    :ProjectImport! b
 <
 
 ==============================================================================
@@ -882,8 +820,8 @@ Table of Contents                                             *project-nvim.toc*
 7.1. `get_project_root()`                        *project-nvim.get_project_root()*
 
 
-    An internal method for the API to determine
-    both the project root and the method/LSP used
+    An internal method for the API to determine both the project root
+    and the method/LSP used.
 
     Example ~
 >lua
@@ -895,9 +833,8 @@ Table of Contents                                             *project-nvim.toc*
 7.2. `get_recent_procjects()`                *project-nvim.get_recent_procjects()*
 
 
-    This utility returns either an empty table `{}`
-    or a string array `{ '/path/to/project1', ... }`
-    containing your recent projects.
+    This utility returns either an empty table `{}` or a string array
+    `{ '/path/to/project1', ... }` containing your recent projects.
 
     Example ~
 
@@ -916,9 +853,8 @@ Table of Contents                                             *project-nvim.toc*
 7.3. `get_config()`                                    *project-nvim.get_config()*
 
 
-    If `setup()` (|project-nvim.setup|) has been called, it returns
-    a table containing the currently set options.
-    Otherwise it will return `nil`.
+    If `setup()` (|project-nvim.setup|) has been called, it returns a table
+    containing the currently set options. Otherwise it will return `nil`.
 
     Example ~
 >lua
@@ -933,8 +869,8 @@ Table of Contents                                             *project-nvim.toc*
 7.4 `get_history_paths()`                       *project-nvim.get_history_paths()*
 
 
-    If no valid args are passed to this function
-    it will return the following dictionary:
+    If no valid args are passed to this function then it will return
+    the following dictionary:
 >lua
     -- Lua
     local get_history_paths = require('project').get_history_paths
@@ -947,9 +883,8 @@ Table of Contents                                             *project-nvim.toc*
     ---     historyfile = <historyfile>,
     --- }
 <
-    Otherwise, if either `'datapath'`, `'projectpath'
-    or `'historyfile'` are passed, it will return
-    the string value of said arg:
+    Otherwise, if either `'datapath'`, `'projectpath'` or `'historyfile'`
+    are passed, it will return the string value of said parameter:
 >lua
     -- The directory where `project` sets its `datapath`
     vim.print(get_history_paths('datapath'))
@@ -980,9 +915,8 @@ Table of Contents                                             *project-nvim.toc*
 9.1. History File Not Created
 
 
-    If you're in a UNIX environment make sure you have
-    `read`, `write` and `access` permissions (`rwx`)
-    for the `projectpath` directory.
+    If you're in a UNIX environment make sure you have `read`, `write`
+    and `access` permissions (`rwx`) for the `projectpath` directory.
 
     - The default value is `$XDG_DATA_HOME/nvim/project_nvim`
     - See |stdpath()| for more info
@@ -992,10 +926,11 @@ Table of Contents                                             *project-nvim.toc*
     :lua vim.print(require('project').get_history_paths('projectpath'))
 <
     If you lack the required permissions for that directory,
-    you can either:
-
-    - Delete that directory (RECOMMENDED)
-    - Run `chmod 755 <project/path>` (NOT SURE IF THIS WILL FIX IT)
+    you could delete the directory (RECOMMENDED).
+    Alternatively, you can change the directory permissions in your shell:
+>bash
+    chmod 755 <project/path>
+<
 
 
  vim: set tw=78 ts=4 sw=4 sts=4 et ai si sta ft=help norl:
