@@ -34,13 +34,14 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
 - Natively supports `.nvim.lua` files
 - `vim.ui` menu support
 - `oil.nvim` support
+- **(NEW)** [Lualine Integration](#lualine)
 - [Telescope Integration](#telescope) `:Telescope projects`
 - [`fzf-lua` Integration](#projectfzf)
 - [`nvim-tree` Integration](#nvim-tree)
 - [`neo-tree` Integration](#neo-tree)
 - [`mini.starter` Integration](#ministarter)
 - [`picker.nvim` Integration](#pickernvim)
-- **(NEW)** [`snacks.nvim` Integration](#snacksnvim)
+- [`snacks.nvim` Integration](#snacksnvim)
 
 ---
 
@@ -430,6 +431,38 @@ patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
 > Make sure to put your pattern exclusions first, and then the patterns you DO want included.
 >
 > Also if you have `allow_patterns_for_lsp` enabled, it will also work somewhat for your LSP clients.
+
+### Lualine
+
+You can add the `project.nvim` component to your statusline using `lualine.nvim`:
+
+```lua
+lualine_b = {
+  {
+    "project",
+
+    -- Can be:
+    -- - `'short'`         - Only shows the basename of the project root directory (default)
+    -- - `'full'`          - Shows the full path but without expanding the home directory
+    -- - `'full_expanded'` - Shows the full, expanded path
+    format = 'short',
+
+    -- Text to display when no project root is found (set to `nil` or empty string to disable)
+    no_project = 'N/A',
+
+    -- The separator
+    separator = " ",
+
+    -- Optional table of two strings set as enclosing characters.
+    -- Set to `nil` to disable it
+    --
+    -- e.g. `enclose_pair = { '(', ')' }` ==> `(<YOUR_PROJECT>)`
+    --      `enclose_pair = { '<', ']' }` ==> `<<YOUR_PROJECT>]`
+    --      `enclose_pair = { nil, 'a' }` ==> `<YOUR_PROJECT>a`
+    enclose_pair = nil,
+  }
+}
+```
 
 ### Nvim Tree
 

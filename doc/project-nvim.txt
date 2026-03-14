@@ -33,33 +33,34 @@ Table of Contents                                             *project-nvim.toc*
     1.7. `Project.Config.Snacks`                           |Project.Config.Snacks|
     1.8. `Project.Config.Logging`                         |Project.Config.Logging|
 2. Pattern Matching                              |project-nvim.pattern-matching|
-3. Nvim Tree                                            |project-nvim.nvim-tree|
-4. Neo Tree                                              |project-nvim.neo-tree|
-5. Telescope                                            |project-nvim.telescope|
-    5.1. Telescope Mappings                        |project-nvim.telescope.maps|
-6. Commands                                              |project-nvim.commands|
-    6.1. `:Project`                                                     |:Project|
-    6.2. `:ProjectLog`                                               |:ProjectLog|
-    6.3. `:ProjectHealth`                                         |:ProjectHealth|
-    6.4. `:ProjectHistory`                                       |:ProjectHistory|
-    6.5. `:ProjectFzf`                                               |:ProjectFzf|
-    6.6. `:ProjectPicker`                                         |:ProjectPicker|
-    6.7. `:ProjectSnacks`                                         |:ProjectSnacks|
-    6.8. `:ProjectTelescope`                                   |:ProjectTelescope|
-    6.9. `:ProjectAdd`                                               |:ProjectAdd|
-    6.10. `:ProjectRoot`                                            |:ProjectRoot|
-    6.11. `:ProjectConfig`                                        |:ProjectConfig|
-    6.12. `:ProjectDelete`                                        |:ProjectDelete|
-    6.13. `:ProjectSession`                                      |:ProjectSession|
-    6.14. `:ProjectExport`                                        |:ProjectExport|
-    6.15. `:ProjectImport`                                        |:ProjectImport|
-7. API                                                        |project-nvim.api|
-    7.1. `get_project_root()`                    |project-nvim.get_project_root()|
-    7.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
-    7.3. `get_config()`                                |project-nvim.get_config()|
-    7.4. `get_history_paths()`                  |project-nvim.get_history_paths()|
-8. Util                                                      |project-nvim.util|
-9. Troubleshooting                                |project-nvim.troubleshooting|
+3. Lualine                                                |project-nvim.lualine|
+4. Nvim Tree                                            |project-nvim.nvim-tree|
+5. Neo Tree                                              |project-nvim.neo-tree|
+6. Telescope                                            |project-nvim.telescope|
+    6.1. Telescope Mappings                        |project-nvim.telescope.maps|
+7. Commands                                              |project-nvim.commands|
+    7.1. `:Project`                                                     |:Project|
+    7.2. `:ProjectLog`                                               |:ProjectLog|
+    7.3. `:ProjectHealth`                                         |:ProjectHealth|
+    7.4. `:ProjectHistory`                                       |:ProjectHistory|
+    7.5. `:ProjectFzf`                                               |:ProjectFzf|
+    7.6. `:ProjectPicker`                                         |:ProjectPicker|
+    7.7. `:ProjectSnacks`                                         |:ProjectSnacks|
+    7.8. `:ProjectTelescope`                                   |:ProjectTelescope|
+    7.9. `:ProjectAdd`                                               |:ProjectAdd|
+    7.10. `:ProjectRoot`                                            |:ProjectRoot|
+    7.11. `:ProjectConfig`                                        |:ProjectConfig|
+    7.12. `:ProjectDelete`                                        |:ProjectDelete|
+    7.13. `:ProjectSession`                                      |:ProjectSession|
+    7.14. `:ProjectExport`                                        |:ProjectExport|
+    7.15. `:ProjectImport`                                        |:ProjectImport|
+8. API                                                        |project-nvim.api|
+    8.1. `get_project_root()`                    |project-nvim.get_project_root()|
+    8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
+    8.3. `get_config()`                                |project-nvim.get_config()|
+    8.4. `get_history_paths()`                  |project-nvim.get_history_paths()|
+9. Util                                                      |project-nvim.util|
+10. Troubleshooting                               |project-nvim.troubleshooting|
 
 
 ==============================================================================
@@ -497,7 +498,42 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ==============================================================================
-3. Nvim Tree                                            *project-nvim.nvim-tree*
+3. Lualine                                                *project-nvim.lualine*
+
+
+    You can add the `project.nvim` component to your statusline
+    using `lualine.nvim`:
+
+>lua
+    lualine_b = {
+      {
+        "project",
+
+        -- - `'short'` Only shows the basename of the project root directory (default)
+        -- - `'full'` Shows the full path but without expanding the home directory
+        -- - `'full_expanded'` Shows the full, expanded path
+        format = 'short',
+
+        -- Text to display when no project root is found
+        -- (set to `nil` or empty string to disable)
+        no_project = 'N/A',
+
+        -- The separator
+        separator = " ",
+
+        -- Optional table of two strings set as enclosing characters.
+        -- Set to `nil` to disable it
+        --
+        -- e.g. `enclose_pair = { '(', ')' }` ==> `(<YOUR_PROJECT>)`
+        --      `enclose_pair = { '<', ']' }` ==> `<<YOUR_PROJECT>]`
+        --      `enclose_pair = { nil, 'a' }` ==> `<YOUR_PROJECT>a`
+        enclose_pair = nil,
+      }
+    }
+<
+
+==============================================================================
+4. Nvim Tree                                            *project-nvim.nvim-tree*
 
 
     Make sure these flags are enabled to support `nvim-tree`:
@@ -511,7 +547,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-4. Neo Tree                                              *project-nvim.neo-tree*
+5. Neo Tree                                              *project-nvim.neo-tree*
 
 
     You can use `:Neotree filesystem ...` when changing a project.
@@ -539,7 +575,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-5. Telescope                                            *project-nvim.telescope*
+6. Telescope                                            *project-nvim.telescope*
 
 
     To enable `telescope.nvim` integration use the following code
@@ -575,7 +611,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ------------------------------------------------------------------------------
-5.1. Telescope Mappings                        *project-nvim.telescope.mappings*
+6.1. Telescope Mappings                        *project-nvim.telescope.mappings*
 
 
     `project.nvim` comes with the following mappings for the Telescope picker:
@@ -591,7 +627,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ==============================================================================
-6. Commands                                              *project-nvim.commands*
+7. Commands                                              *project-nvim.commands*
 
 
     There are a bunch of user commands you can call from the cmdline.
@@ -809,7 +845,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-7. API                                                        *project-nvim.api*
+8. API                                                        *project-nvim.api*
 
 
     This is a set of both internal utilities and tools for the user
@@ -817,7 +853,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-7.1. `get_project_root()`                        *project-nvim.get_project_root()*
+8.1. `get_project_root()`                        *project-nvim.get_project_root()*
 
 
     An internal method for the API to determine both the project root
@@ -830,7 +866,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ------------------------------------------------------------------------------
-7.2. `get_recent_procjects()`                *project-nvim.get_recent_procjects()*
+8.2. `get_recent_procjects()`                *project-nvim.get_recent_procjects()*
 
 
     This utility returns either an empty table `{}` or a string array
@@ -850,7 +886,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ------------------------------------------------------------------------------
-7.3. `get_config()`                                    *project-nvim.get_config()*
+8.3. `get_config()`                                    *project-nvim.get_config()*
 
 
     If `setup()` (|project-nvim.setup|) has been called, it returns a table
@@ -866,7 +902,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ------------------------------------------------------------------------------
-7.4 `get_history_paths()`                       *project-nvim.get_history_paths()*
+8.4 `get_history_paths()`                       *project-nvim.get_history_paths()*
 
 
     If no valid args are passed to this function then it will return
@@ -897,7 +933,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-8. Util                                                      *project-nvim.util*
+9. Util                                                      *project-nvim.util*
 
 
     A set of utilities that get repeated across the board.
@@ -908,11 +944,11 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-9. Troubleshooting                                *project-nvim.troubleshooting*
+10. Troubleshooting                               *project-nvim.troubleshooting*
 
 
 ------------------------------------------------------------------------------
-9.1. History File Not Created
+10.1. History File Not Created
 
 
     If you're in a UNIX environment make sure you have `read`, `write`
