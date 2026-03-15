@@ -198,10 +198,8 @@ function History.export_history_json(path, ind, force_name)
 
   local data = vim.json.encode(Util.reverse(History.get_recent_projects()), { indent = spc })
 
-  Log.debug(('(%s.export_history_json): Writing to file `%s`...'):format(MODSTR, path))
   uv.fs_write(fd, data)
   uv.fs_close(fd)
-  Log.debug(('(%s.export_history_json): File descriptor closed'):format(MODSTR))
 
   vim.notify(('Exported history to `%s`'):format(vim.fn.fnamemodify(path, ':~')), INFO, {
     title = 'project.nvim',
@@ -556,10 +554,8 @@ function History.write_history(path)
     error(('(%s.write_history): Unable to encode JSON data!'):format(MODSTR), ERROR)
   end
 
-  Log.debug(('(%s.write_history): Writing to `%s`'):format(MODSTR, Path.historyfile))
   uv.fs_write(fd, out)
   uv.fs_close(fd)
-  Log.debug(('(%s.write_history): File descriptor closed!'):format(MODSTR))
 end
 
 function History.open_win()

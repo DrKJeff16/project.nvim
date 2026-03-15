@@ -56,6 +56,13 @@ function M:init(options)
     'project_active',
     self.options
   )
+
+  if vim.g.project_lualine_logged ~= 1 then
+    require('project.util.log').debug(
+      '(lualine.components.project:init): lualine.nvim integration enabled.'
+    )
+  end
+  vim.g.project_lualine_logged = 1
 end
 
 function M:update_status()

@@ -8,6 +8,9 @@ local Util = require('project.util')
 
 ---@class Project.Config
 ---@field float? Project.ConfigLoc
+---@field before_attach? integer
+---@field on_attach? integer
+---@field attach_augroup integer
 local Config = {}
 
 ---Get the default options for configuring `project`.
@@ -46,14 +49,15 @@ function Config.setup(options)
     Log.init()
   end
 
-  require('project.api').init()
-
   if vim.g.project_setup ~= 1 then
     vim.g.project_setup = 1
     Log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
   end
+
   Log.debug(('(%s.setup): User commands created.'):format(MODSTR))
   require('project.commands').create_user_commands()
+
+  require('project.api').init()
 
   if Config.options.fzf_lua.enabled then
     Log.debug(('(%s.setup): fzf-lua integration enabled.'):format(MODSTR))

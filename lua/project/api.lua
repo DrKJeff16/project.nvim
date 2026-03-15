@@ -244,12 +244,11 @@ function Api.set_pwd(dir, method)
   end
 
   local modified = false
-  if vim.tbl_isempty(History.session_projects) then
-    History.session_projects = { dir }
-    modified = true
-  elseif not vim.list_contains(History.session_projects, dir) then
+  local unexpand_dir = Util.rstrip('/', vim.fn.fnamemodify(dir, ':p:~'))
+  if not (History.session_projects and vim.list_contains(History.session_projects, dir)) then
     table.insert(History.session_projects, dir)
     modified = true
+    Log.debug(('Added project %s to the top of session list'):format(unexpand_dir))
   end
   if not modified and #History.session_projects > 1 then
     local old_pos ---@type integer
@@ -259,12 +258,22 @@ function Api.set_pwd(dir, method)
         break
       end
     end
-    table.remove(History.session_projects, old_pos)
-    table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
+    if old_pos ~= 1 then
+      table.remove(History.session_projects, old_pos)
+      table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
+      Log.debug(
+        ('Moved project %s from %d to the top of session list'):format(unexpand_dir, old_pos)
+      )
+    end
+  end
+
+  if Config.options.before_attach then
+    Config.options.before_attach(dir, method)
+    Log.debug('Ran `before_attach` hook successfully.')
   end
 
   local cwd = uv.cwd() or vim.fn.getcwd()
-  if dir == cwd then
+  if dir == Util.rstrip('/', cwd) then
     Api.current_project = dir
     Api.current_method = method
     if vim.g.project_cwd_log ~= 1 then
@@ -272,10 +281,6 @@ function Api.set_pwd(dir, method)
     end
     vim.g.project_cwd_log = 1
     return true
-  end
-  if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
-    Config.options.before_attach(dir, method)
-    Log.debug(('(%s.set_pwd): Ran `before_attach` hook successfully.'):format(MODSTR))
   end
 
   local scope_chdir = Config.options.scope_chdir
@@ -306,9 +311,9 @@ function Api.set_pwd(dir, method)
     Api.current_method = method
 
     Log.info(msg)
-    if Config.options.on_attach and vim.is_callable(Config.options.on_attach) then
+    if Config.options.on_attach then
       Config.options.on_attach(dir, method)
-      Log.debug(('(%s.set_pwd): Ran `on_attach` hook successfully.'):format(MODSTR))
+      Log.debug('Ran `on_attach` hook successfully.')
     end
   else
     Log.error(msg)

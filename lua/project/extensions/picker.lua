@@ -27,6 +27,8 @@ function M.setup()
         end
         require('picker.sources.files').set({ cmd = cmd })
         require('picker.windows').open(M.source)
+
+        require('project.util.log').debug('(:ProectPicker): Opening `picker.nvim` picker.')
       end,
       bang = true,
     },
