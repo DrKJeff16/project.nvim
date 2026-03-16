@@ -1,5 +1,26 @@
 # Changelog
 
+## [v2.0.0-1](https://github.com/DrKJeff16/project.nvim/tree/v2.0.0-1) (2026-03-15)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v1.1.0-1...v2.0.0-1)
+
+**Implemented enhancements:**
+
+- feat\(lualine\): add custom lualine component [\#56](https://github.com/DrKJeff16/project.nvim/pull/56) ([DrKJeff16](https://github.com/DrKJeff16))
+
+**Closed issues:**
+
+- Update the readme to add picker commands   inside `cmd` when lazy loading [\#55](https://github.com/DrKJeff16/project.nvim/issues/55)
+
+## [v1.1.0-1](https://github.com/DrKJeff16/project.nvim/tree/v1.1.0-1) (2026-03-06)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v1.0.5-1...v1.1.0-1)
+
+**Implemented enhancements:**
+
+- \[FEAT\] Add support for oil.nvim buffers [\#53](https://github.com/DrKJeff16/project.nvim/issues/53)
+- feat\(api\): add initial `oil.nvim` support \(closes \#53\) [\#54](https://github.com/DrKJeff16/project.nvim/pull/54) ([DrKJeff16](https://github.com/DrKJeff16))
+
 ## [v1.0.5-1](https://github.com/DrKJeff16/project.nvim/tree/v1.0.5-1) (2026-03-06)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v1.0.4-1...v1.0.5-1)
