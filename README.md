@@ -1,6 +1,6 @@
 # project.nvim [![Mentioned in Awesome Neovim](https://awesome.re/mentioned-badge.svg)](https://github.com/rockerBOO/awesome-neovim)
 
-[![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/DrKJeff16)[![Last Commit](https://img.shields.io/github/last-commit/DrKJeff16/project.nvim.svg)](https://github.com/DrKJeff16/project.nvim/commits/main/)[![LICENSE](https://img.shields.io/github/license/DrKJeff16/project.nvim)](./LICENSE)[![Issues](https://img.shields.io/github/issues/DrKJeff16/project.nvim)](https://github.com/DrKJeff16/project.nvim/issues)[![GitHub Release](https://img.shields.io/github/v/release/DrKJeff16/project.nvim?sort=date&display_name=release)](https://github.com/DrKJeff16/project.nvim/releases/latest)
+[![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/DrKJeff16)[![Last Commit](https://img.shields.io/github/last-commit/DrKJeff16/project.nvim.svg)](https://github.com/DrKJeff16/project.nvim/commits/main/)[![LICENSE](https://img.shields.io/github/license/DrKJeff16/project.nvim)](https://github.com/DrKJeff16/project.nvim/blob/main/LICENSE)[![Issues](https://img.shields.io/github/issues/DrKJeff16/project.nvim)](https://github.com/DrKJeff16/project.nvim/issues)[![GitHub Release](https://img.shields.io/github/v/release/DrKJeff16/project.nvim?sort=date&display_name=release)](https://github.com/DrKJeff16/project.nvim/releases/latest)
 
 - [**Breaking Changes**](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes)
 - [**LuaRocks Page**](https://luarocks.org/modules/drkjeff16/project.nvim)
@@ -20,18 +20,18 @@ according to your needs.
 This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim/pull/158).
 Ever since I've decided to extend it and address issues.
 
-You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
+You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16/project.nvim/blob/main/EXAMPLES.md).
 
 ## Features
 
 - Automatically sets the `cwd` to the project root directory using pattern matching (LSP optionally)
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook `:checkhealth project`
-- Vim help documentation [`:h project-nvim`](./doc/project-nvim.txt)
-- Logging capabilities `:ProjectLog`
+- Vim help documentation [`:h project-nvim`](https://github.com/DrKJeff16/project.nvim/blob/main/doc/project-nvim.txt)
+- Logging capabilities [`:ProjectLog`](#projectlog)
 - Natively supports `.nvim.lua` files
 - `vim.ui` menu support
-- `oil.nvim` support
+- [`oil.nvim`](https://github.com/stevearc/oil.nvim) support
 - **(NEW)** [Lualine Integration](#lualine)
 - [Telescope Integration](#telescope) `:Telescope projects`
 - [`fzf-lua` Integration](#projectfzf)
@@ -250,7 +250,7 @@ require('project').setup()
 
 ### Defaults
 
-You can find these in [`config/defaults.lua`](./lua/project/config/defaults.lua).
+You can find these in [`config/defaults.lua`](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/config/defaults.lua).
 
 By default, `setup()` loads with the following options:
 
@@ -535,7 +535,7 @@ require('telescope').setup({
 | `r`         | `<C-r>`     | `recent_project_files`     |
 | `w`         | `<C-w>`     | `change_working_directory` |
 
-_You can find the Actions in [`telescope/_extensions/projects/actions.lua`](./lua/telescope/_extensions/projects/actions.lua)_.
+_You can find the Actions in [`telescope/_extensions/projects/actions.lua`](https://github.com/DrKJeff16/project.nvim/blob/main/lua/telescope/_extensions/projects/actions.lua)_.
 
 ---
 
@@ -582,8 +582,8 @@ Mappings:
 
 You can find the integration in:
 
-- [_`extensions/picker.lua`_](./lua/project/extensions/picker.lua)
-- [_`picker/sources/project.lua`_](./lua/picker/sources/project.lua).
+- [_`extensions/picker.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/picker.lua)
+- [_`picker/sources/project.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/picker/sources/project.lua).
 
 ### `snacks.nvim`
 
@@ -619,7 +619,7 @@ Mappings:
 | `<C-d>`     | Delete the selected project             |
 | `<C-w>`     | Changes the cwd to the selected project |
 
-You can find the integration in [_`extensions/snacks.lua`_](./lua/project/extensions/snacks.lua).
+You can find the integration in [_`extensions/snacks.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/snacks.lua).
 
 ---
 
@@ -632,7 +632,7 @@ These are the user commands you can call from the cmdline:
 The `:Project` command will open a UI window pointing to all the useful operations
 this plugin can provide. This one is subject to change, just as `vim.ui` is.
 
-See [_`commands.lua`_](./lua/project/commands.lua) for more info.
+See [_`commands.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/commands.lua) for more info.
 
 ### `:ProjectPicker`
 
@@ -683,7 +683,8 @@ Mappings:
 |---------|-----------------------------|
 | `<C-d>` | Delete the selected project |
 
-See [_`extensions/fzf-lua.lua`_](./lua/project/extensions/fzf-lua.lua) for more info.
+See [_`extensions/fzf-lua.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/fzf-lua.lua)
+for more info.
 
 ### `:ProjectTelescope`
 
@@ -694,13 +695,14 @@ The `:ProjectTelescope` command is a dynamicly enabled User Command that runs
 the Telescope `projects` picker.
 A shortcut, to be honest.
 
-See [_`telescope/_extensions/projects.lua`_](./lua/telescope/_extensions/projects.lua) for more info.
+See [_`telescope/_extensions/projects.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/telescope/_extensions/projects.lua)
+for more info.
 
 ### `:ProjectHealth`
 
 The `:ProjectHealth` command runs `:checkhealth project` in a single command.
 
-See [_`commands.lua`_](./lua/project/commands.lua) for more info.
+See [_`commands.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/commands.lua) for more info.
 
 ### `:ProjectHistory`
 
@@ -714,7 +716,7 @@ If called with the `clear` argument (`:ProjectHistory[!] clear`) your project hi
 will be cleared. If you want to avoid a "Yes/No" prompt you can call the command
 with a bang (`!`) to force it.
 
-See [_`commands.lua`_](./lua/project/commands.lua) for more info.
+See [_`commands.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/commands.lua) for more info.
 
 ### `:ProjectLog`
 
@@ -734,7 +736,7 @@ The valid arguments are:
 :ProjectLog toggle    " Toggles the Log Window
 ```
 
-See [_`log.lua`_](./lua/project/util/log.lua) for more info.
+See [_`log.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/util/log.lua) for more info.
 
 ### `:ProjectAdd`
 
@@ -746,7 +748,7 @@ Adding a [!] will set the prompt to your cwd.
 
 **This is particularly useful if you've enabled `manual_mode` in `setup()`.**
 
-See [_`commands.lua`_](./lua/project/commands.lua) for more info.
+See [_`commands.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/commands.lua) for more info.
 
 ### `:ProjectRoot`
 
@@ -760,7 +762,7 @@ The command is like doing the following in the cmdline:
 :lua require('project.api').on_buf_enter()
 ```
 
-See [_`commands.lua`_](./lua/project/commands.lua) for more info.
+See [_`commands.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/commands.lua) for more info.
 
 ### `:ProjectConfig`
 
@@ -770,7 +772,7 @@ or by runnning `:ProjectConfig` again.
 
 You can also print the output instead by running `:ProjectConfig!`.
 
-See [_`commands.lua`_](./lua/project/commands.lua) for more info.
+See [_`commands.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/commands.lua) for more info.
 
 ### `:ProjectDelete`
 
@@ -796,7 +798,7 @@ Usage:
 For more info, see:
 
 - _`:h :ProjectDelete`_
-- [_`commands.lua`_](./lua/project/commands.lua)
+- [_`commands.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/commands.lua)
 
 ### `:ProjectSession`
 
@@ -812,7 +814,7 @@ If the command is called with a `!` (`:ProjectSession!`) the UI will close.
 Otherwise, another custom UI picker will appear for you to select the files/dirs.
 Selecting a directory will open another UI picker with its contents, and so on.
 
-See [_`popup.lua`_](./lua/project/popup.lua) for more info.
+See [_`popup.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/popup.lua) for more info.
 
 ### `:ProjectExport`
 
@@ -864,12 +866,12 @@ Example usage:
 
 ## API
 
-The API can be found in [_`api.lua`_](./lua/project/api.lua).
+The API can be found in [_`api.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/api.lua).
 
 ### `get_project_root()`
 
-`get_project_root()` is an [API](./lua/project/api.lua) utility for finding out
-about the current project's root, if any:
+`get_project_root()` is an [API](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/api.lua) utility
+for finding out about the current project's root, if any:
 
 ```lua
 ---@type string|nil, string|nil
@@ -943,7 +945,7 @@ local ProjUtil = require('project.util')
 _These utilities are in part inspired by my own utilities found in my Neovim config,
 [**`Jnvim`**](https://github.com/DrKJeff16/nvim)_.
 
-See [`util.lua`](./lua/project/util.lua) for further reference.
+See [`util.lua`](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/util.lua) for further reference.
 
 ---
 
@@ -985,6 +987,6 @@ Show these much love!
 
 ## License
 
-[Apache-2.0](./LICENSE)
+[Apache-2.0](https://github.com/DrKJeff16/project.nvim/blob/main/LICENSE)
 
 <!-- vim: set ts=2 sts=2 sw=2 et ai si sta: -->
