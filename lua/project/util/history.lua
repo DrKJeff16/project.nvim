@@ -601,18 +601,15 @@ function History.open_win()
     vim.api.nvim_buf_set_lines(History.window.bufnr, 0, 1, true, Util.reverse(data))
     vim.api.nvim_buf_set_name(History.window.bufnr, 'Project History')
 
-    local win_opts = { win = History.window.win } ---@type vim.api.keyset.option
-    vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
-    vim.api.nvim_set_option_value('list', false, win_opts)
-    vim.api.nvim_set_option_value('number', false, win_opts)
-    vim.api.nvim_set_option_value('wrap', false, win_opts)
-    vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
-
-    local buf_opts = { buf = History.window.bufnr } ---@type vim.api.keyset.option
-    vim.api.nvim_set_option_value('filetype', '', buf_opts)
-    vim.api.nvim_set_option_value('fileencoding', 'utf-8', buf_opts)
-    vim.api.nvim_set_option_value('buftype', 'nowrite', buf_opts)
-    vim.api.nvim_set_option_value('modifiable', false, buf_opts)
+    Util.optset('signcolumn', 'no', 'win', History.window.win)
+    Util.optset('list', false, 'win', History.window.win)
+    Util.optset('number', false, 'win', History.window.win)
+    Util.optset('wrap', false, 'win', History.window.win)
+    Util.optset('colorcolumn', '', 'win', History.window.win)
+    Util.optset('filetype', '', 'buf', History.window.bufnr)
+    Util.optset('fileencoding', 'utf-8', 'buf', History.window.bufnr)
+    Util.optset('buftype', 'nowrite', 'buf', History.window.bufnr)
+    Util.optset('modifiable', false, 'buf', History.window.bufnr)
 
     vim.keymap.set('n', 'q', History.close_win, {
       buffer = History.window.bufnr,

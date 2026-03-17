@@ -146,7 +146,7 @@ function Api.find_lsp_root(bufnr)
   end
 
   local ignore_lsp = Config.options.lsp.ignore
-  local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
+  local ft = Util.optget('filetype', 'buf', bufnr)
   for _, client in ipairs(clients) do
     local filetypes = client.config.filetypes --[[@as string[]\]]
     local valid = (
@@ -194,7 +194,7 @@ function Api.valid_bt(bufnr)
     return false
   end
 
-  local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
+  local bt = Util.optget('buftype', 'buf', bufnr)
   return not vim.list_contains(Config.options.disable_on.bt, bt)
 end
 
@@ -418,7 +418,7 @@ function Api.on_buf_enter(bufnr)
     return
   end
 
-  local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
+  local ft = Util.optget('filetype', 'buf', bufnr)
   if vim.list_contains(Config.options.disable_on.ft, ft) then
     return
   end

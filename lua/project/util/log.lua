@@ -282,17 +282,15 @@ function Log.open_win()
       vim.split(data, '\n', { plain = true, trimempty = false })
     )
 
-    ---@type vim.api.keyset.option, vim.api.keyset.option
-    local win_opts, buf_opts = { win = win }, { buf = bufnr }
-    vim.api.nvim_set_option_value('signcolumn', 'no', win_opts)
-    vim.api.nvim_set_option_value('list', false, win_opts)
-    vim.api.nvim_set_option_value('number', false, win_opts)
-    vim.api.nvim_set_option_value('wrap', false, win_opts)
-    vim.api.nvim_set_option_value('colorcolumn', '', win_opts)
-    vim.api.nvim_set_option_value('filetype', 'log', buf_opts)
-    vim.api.nvim_set_option_value('fileencoding', 'utf-8', buf_opts)
-    vim.api.nvim_set_option_value('buftype', 'nowrite', buf_opts)
-    vim.api.nvim_set_option_value('modifiable', false, buf_opts)
+    Util.optset('signcolumn', 'no', 'win', win)
+    Util.optset('list', false, 'win', win)
+    Util.optset('number', false, 'win', win)
+    Util.optset('wrap', false, 'win', win)
+    Util.optset('colorcolumn', '', 'win', win)
+    Util.optset('filetype', 'log', 'buf', bufnr)
+    Util.optset('fileencoding', 'utf-8', 'buf', bufnr)
+    Util.optset('buftype', 'nowrite', 'buf', bufnr)
+    Util.optset('modifiable', false, 'buf', bufnr)
 
     vim.keymap.set('n', 'q', Log.close_win, { buffer = bufnr })
 

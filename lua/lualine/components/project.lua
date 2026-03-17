@@ -1,3 +1,4 @@
+local in_list = vim.list_contains
 local Highlight = require('lualine.highlight')
 local Config = require('project.config')
 local Util = require('project.util')
@@ -24,11 +25,21 @@ local Util = require('project.util')
 ---@field private super { extend: function,init: function, new: function }
 ---@field update_status function
 
+---@class ColorActiveHl
+---@field name string
+---@field fn? function
+---@field no_mode boolean
+---@field link boolean
+---@field section string
+---@field options table
+---@field no_default boolean
+
 -- local M = require('lualine_require').require('lualine.component'):extend()
 ---@class Project.LuaLine
 ---@field private __is_lualine_component boolean
 ---@field protected super LuaLine.Super
 ---@field options Project.LuaLineOpts
+---@field color_active_hl ColorActiveHl
 local M = require('lualine.component'):extend()
 
 ---@class Project.LuaLineOpts
@@ -61,8 +72,8 @@ function M:init(options)
     require('project.util.log').debug(
       '(lualine.components.project:init): lualine.nvim integration enabled.'
     )
+    vim.g.project_lualine_logged = 1
   end
-  vim.g.project_lualine_logged = 1
 end
 
 function M:update_status()
@@ -75,21 +86,19 @@ end
 
 ---@return string component
 function M:project_root()
-  local format = self.options.format or 'short'
   local bufnr = vim.api.nvim_get_current_buf()
-  local ft = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
-  local bt = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
+  local ft = Util.optget('filetype', 'buf', bufnr)
+  local bt = Util.optget('buftype', 'buf', bufnr)
+  local msg = ''
+  if in_list(Config.options.disable_on.ft, ft) or in_list(Config.options.disable_on.bt, bt) then
+    return msg
+  end
+
+  local format = self.options.format or 'short'
   local curr = require('project.api').get_current_project(bufnr)
   local root = require('project.api').get_project_root(bufnr)
-  local msg = ''
   if
-    vim.list_contains(Config.options.disable_on.ft, ft)
-    or vim.list_contains(Config.options.disable_on.bt, bt)
-  then
-    return ''
-  end
-  if
-    not vim.list_contains({ 'short', 'full', 'full_expanded' }, format)
+    not in_list({ 'short', 'full', 'full_expanded' }, format)
     or not (curr and root)
     or curr ~= root
   then
@@ -103,12 +112,9 @@ function M:project_root()
   end
 
   if self.options.enclose_pair then
-    if self.options.enclose_pair[1] then
-      msg = self.options.enclose_pair[1] .. msg
-    end
-    if self.options.enclose_pair[2] then
-      msg = msg .. self.options.enclose_pair[2]
-    end
+    msg = (self.options.enclose_pair[1] and self.options.enclose_pair[1] or '')
+      .. msg
+      .. (self.options.enclose_pair[2] and self.options.enclose_pair[2] or '')
   end
 
   return msg
