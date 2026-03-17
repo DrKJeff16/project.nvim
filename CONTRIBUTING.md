@@ -37,26 +37,28 @@ you may open a blank issue.
 - **AI-GENERATED CODE**. The code here must be up to date and made with effort
 - **MISSING LUA ANNOTATIONS**. See [Code Annotations](#code-annotations)
 - **MERGE COMMITS**. Favour `git rebase` instead
-- **UNSIGNED COMMITS**. Read [this guide](https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key) to sign your commits. Unsigned commits will be squashed,
-  manually rebased by the author or rejected altogether if the occasion warrants it.
+- **UNSIGNED COMMITS**. Read [this guide][sign_guide] to sign your commits.
 - **UNTESTED CHANGES** _(if warranted)_. Make sure to test your changes before making a Pull Request
 - **UNFORMATTED CODE**. See the [StyLua](#stylua) section
 - **NON-UNIX LINE ENDINGS**. Make sure to set your config in your CLI:
-    ```bash
-    # If you want to enforce this only in this repository
-    git config --local core.autocrlf false
-    git config --local core.eol lf
 
-    # If you want to enforce this in your global settings
-    git config --global core.autocrlf false
-    git config --global core.eol lf
-    ```
-    And set this in your Neovim config (recommended):
-    ```lua
-    -- init.lua
-    vim.opt.fileformat = 'unix' -- WRONG
-    vim.o.fileformat = 'unix' -- CORRECT
-    ```
+```bash
+# If you want to enforce this only in this repository
+git config --local core.autocrlf false
+git config --local core.eol lf
+
+# If you want to enforce this in your global settings
+git config --global core.autocrlf false
+git config --global core.eol lf
+```
+
+And set this in your Neovim config (recommended):
+
+```lua
+-- init.lua
+vim.opt.fileformat = 'unix' -- WRONG
+vim.o.fileformat = 'unix' -- CORRECT
+```
 
 ---
 
@@ -191,5 +193,7 @@ Any instance of wrapping already existing data types will be rejected.
 ---@alias StringDict table<string, any>
 ---@alias IntList integer[]
 ```
+
+[sign_guide]: https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
 
 <!-- vim: set ts=2 sts=2 sw=2 et ai si sta: -->

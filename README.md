@@ -5,10 +5,8 @@
 - [**Breaking Changes**](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes)
 - [**LuaRocks Page**](https://luarocks.org/modules/drkjeff16/project.nvim)
 - [**Wiki**](https://github.com/DrKJeff16/project.nvim/wiki)
-- [**Contributing**](https://github.com/DrKJeff16/project.nvim/blob/main/CONTRIBUTING.md)
 - [**Credits**](https://github.com/DrKJeff16/project.nvim/blob/main/CREDITS.md)
 - [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions)
-  - [**Announcements**](https://github.com/DrKJeff16/project.nvim/discussions/1)
 
 https://github.com/user-attachments/assets/73446cb9-2889-471d-bfb0-d495ccd50a2d
 
@@ -87,8 +85,6 @@ You can check some sample videos in [`EXAMPLES.md`](./EXAMPLES.md).
 - [Utils](#utils)
 - [Troubleshooting](#troubleshooting)
   - [History File Not Created](#history-file-not-created)
-- [Collaborators](#collaborators)
-- [Contributors](#contributors)
 - [Alternatives](#alternatives)
 - [License](#license)
 
@@ -584,7 +580,6 @@ Mappings:
 | `<C-d>`     | Delete the selected project             |
 | `<C-w>`     | Changes the cwd to the selected project |
 
-
 You can find the integration in:
 
 - [_`extensions/picker.lua`_](./lua/project/extensions/picker.lua)
@@ -623,7 +618,6 @@ Mappings:
 |-------------|-----------------------------------------|
 | `<C-d>`     | Delete the selected project             |
 | `<C-w>`     | Changes the cwd to the selected project |
-
 
 You can find the integration in [_`extensions/snacks.lua`_](./lua/project/extensions/snacks.lua).
 
@@ -800,6 +794,7 @@ Usage:
 ```
 
 For more info, see:
+
 - _`:h :ProjectDelete`_
 - [_`commands.lua`_](./lua/project/commands.lua)
 
