@@ -1,14 +1,11 @@
 local Util = require('project.util')
 local Config = require('project.config')
 
----@class ProjectPickerItem.Hl
----@field [1] integer
----@field [2] integer
----@field [3] string
+---@alias ProjectPickerItem.Hl { [1]: integer, [2]: integer, [3]: string }
 
 ---@class ProjectPickerItem: PickerItem
----@field value string
 ---@field highlight? ProjectPickerItem.Hl[]
+---@field value string
 
 ---@param source string[]
 ---@return ProjectPickerItem[] items
@@ -21,7 +18,7 @@ local function gen_items(source)
     local path = ('%d. %s %s'):format(
       i,
       (is_curr and '*' or '') .. (' '):rep(max_n_digits - n_digits - (is_curr and 1 or 0)),
-      vim.fn.fnamemodify(v, ':~')
+      Util.rstrip('/', vim.fn.fnamemodify(v, ':~'))
     )
     local hl = { { 0, n_digits + 1, 'Number' } } ---@type ProjectPickerItem.Hl[]
     if is_curr then
@@ -31,8 +28,11 @@ local function gen_items(source)
       table.insert(hl, { n_digits + 2, path:len(), 'String' })
     end
 
-    local item = { value = v, str = path, highlight = hl } ---@type ProjectPickerItem
-    table.insert(items, item)
+    table.insert(items, {
+      value = Util.rstrip('/', vim.fn.fnamemodify(v, ':p')),
+      str = path,
+      highlight = hl,
+    })
   end
   return items
 end
