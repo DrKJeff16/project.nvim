@@ -286,13 +286,13 @@ local action_names = { ---@diagnostic disable-line:unused-local
 ---Default: `100`
 --- ---
 ---@field historysize? integer
----Table of options used for `fzf-lua` integration
+---Table of options used for the `fzf-lua` integration
 --- ---
 ---@field fzf_lua? Project.Config.FzfLua
----Table of options used for `picker.nvim` integration
+---Table of options used for the `picker.nvim` integration
 --- ---
 ---@field picker? Project.Config.Picker
----Table of options used for the snacks picker.
+---Table of options used for the `snacks.nvim` picker.
 --- ---
 ---@field snacks? Project.Config.Snacks
 ---Options for logging utility.
