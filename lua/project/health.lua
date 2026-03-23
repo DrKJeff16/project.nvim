@@ -141,7 +141,8 @@ function M.project_check()
     vim.health.warn('No active session projects!')
     return
   end
-  for k, v in ipairs(Util.dedup(projects)) do
+  History.is_legacy(projects)
+  for k, v in ipairs(Util.dedup(projects, History.legacy and nil or 'name')) do
     vim.health.info(('%s. `%s`'):format(k, v))
   end
 end
