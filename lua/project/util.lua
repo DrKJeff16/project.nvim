@@ -452,27 +452,29 @@ function M.executable(exe)
   return res
 end
 
----@param tbl string[]
----@return string[] res
+---@param tbl string[]|ProjectHistoryEntry[]
+---@return string[]|ProjectHistoryEntry[] res
 ---@nodiscard
 function M.delete_duplicates(tbl)
   M.validate({ tbl = { tbl, { 'table' } } })
 
   local cache_dict = {} ---@type table<string, integer>
+  require('project.util.history').is_legacy(tbl)
+  local legacy = require('project.util.history').legacy
   for _, v in ipairs(tbl) do
-    local normalised_path = M.normalise_path(v)
-    if cache_dict[normalised_path] == nil then
+    local normalised_path = M.normalise_path(legacy and v or v.path)
+    if not cache_dict[normalised_path] then
       cache_dict[normalised_path] = 1
     else
       cache_dict[normalised_path] = cache_dict[normalised_path] + 1
     end
   end
 
-  local res = {} ---@type string[]
+  local res = {} ---@type string[]|ProjectHistoryEntry[]
   for _, v in ipairs(tbl) do
-    local normalised_path = M.normalise_path(v)
+    local normalised_path = M.normalise_path(legacy and v or v.path)
     if cache_dict[normalised_path] == 1 then
-      table.insert(res, normalised_path)
+      table.insert(res, legacy and normalised_path or { path = normalised_path, name = v.name })
     else
       cache_dict[normalised_path] = cache_dict[normalised_path] - 1
     end
@@ -603,22 +605,34 @@ end
 ---an error will be raised.
 --- ---
 ---@param T table
+---@param key? string
 ---@return table NT
 ---@nodiscard
-function M.dedup(T)
-  M.validate({ T = { T, { 'table' } } })
-
+function M.dedup(T, key)
+  M.validate({
+    T = { T, { 'table' } },
+    key = { key, { 'string', 'nil' }, true },
+  })
+  key = (key and key ~= '') and key or nil
   if vim.tbl_isempty(T) then
     return T
   end
 
   local NT = {}
+  local names = {} ---@type any[]
   for _, v in pairs(T) do
     local not_dup = false
     if M.is_type('table', v) then
-      not_dup = not vim.tbl_contains(NT, function(val)
-        return vim.deep_equal(val, v)
-      end, { predicate = true })
+      if not key then
+        not_dup = not vim.tbl_contains(NT, function(val)
+          return vim.deep_equal(val, v)
+        end, { predicate = true })
+      else
+        not_dup = not vim.list_contains(names, v[key])
+        if not_dup then
+          table.insert(names, v[key])
+        end
+      end
     else
       not_dup = not vim.list_contains(NT, v)
     end
