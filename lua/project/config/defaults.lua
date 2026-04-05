@@ -128,6 +128,12 @@ local action_names = { ---@diagnostic disable-line:unused-local
 ---Default: `false`
 --- ---
 ---@field enabled? boolean
+---Determines whether the newest projects come first (`'newest'`),
+---or the oldest (`'oldest'`).
+--- ---
+---Default: `'newest'`
+--- ---
+---@field sort? 'newest'|'oldest'
 
 ---Table containing all the LSP-adjacent options.
 --- ---
@@ -312,6 +318,7 @@ local Util = require('project.util')
 ---@field new fun(opts?: Project.Config.Options): defaults: Project.Config.Defaults|Project.Config.Options
 ---@field verify fun(self: Project.Config.Defaults)
 ---@field verify_datapath fun(self: Project.Config.Defaults)
+---@field verify_fzf_lua fun(self: Project.Config.Defaults)
 ---@field verify_histsize fun(self: Project.Config.Defaults)
 ---@field verify_lists fun(self: Project.Config.Defaults)
 ---@field verify_logging fun(self: Project.Config.Defaults)
@@ -381,12 +388,12 @@ local DEFAULTS = { ---@type Project.Config.Defaults
   },
   datapath = vim.fn.stdpath('data'),
   historysize = 100,
-  fzf_lua = { enabled = false },
+  fzf_lua = { enabled = false, sort = 'newest' },
   log = { enabled = false, max_size = 1.1, logpath = vim.fn.stdpath('state') },
   telescope = {
-    sort = 'newest', ---@type 'newest'|'oldest'
-    prefer_file_browser = false, ---@type boolean
-    disable_file_picker = false, ---@type boolean
+    sort = 'newest',
+    prefer_file_browser = false,
+    disable_file_picker = false,
     mappings = {
       n = {
         b = 'browse_project_files',
@@ -595,6 +602,29 @@ function DEFAULTS:verify_lists()
   end
 end
 
+function DEFAULTS:verify_fzf_lua()
+  Util.validate({ fzf_lua = { self.fzf_lua, { 'table', 'nil' }, true } })
+  self.fzf_lua = self.fzf_lua or {}
+
+  Util.validate({
+    ['fzf_lua.enabled'] = { self.fzf_lua.enabled, { 'boolean', 'nil' }, true },
+    ['fzf_lua.sort'] = { self.fzf_lua.sort, { 'string', 'nil' }, true },
+  })
+  self.fzf_lua.sort = self.fzf_lua.sort or 'newest'
+  if self.fzf_lua.enabled == nil then
+    self.fzf_lua.enabled = false
+  end
+
+  if vim.list_contains({ 'newest', 'oldest' }, self.fzf_lua.sort) then
+    return
+  end
+  vim.notify(
+    ('`fzf_lua.sort` is not a valid value! (`%s`)\nResetting to default'):format(self.fzf_lua.sort),
+    vim.log.levels.ERROR
+  )
+  self.fzf_lua.sort = 'newest'
+end
+
 ---Verify config integrity.
 --- ---
 function DEFAULTS:verify()
@@ -634,6 +664,7 @@ function DEFAULTS:verify()
   self:verify_logging()
   self:verify_owners()
   self:verify_lists()
+  self:verify_fzf_lua()
 
   if not self.detection_methods then ---@diagnostic disable-line:undefined-field
     return

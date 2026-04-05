@@ -302,14 +302,17 @@ By default, `setup()` loads with the following options:
     enabled = false,
     opts = {
       hidden = false,
-      sort = 'newest',
+      sort = 'newest', ---@type 'newest'|'oldest'
       title = 'Select Project',
       layout = 'select',
       -- icon = {},
       -- path_icons = {},
     },
   },
-  fzf_lua = { enabled = false },
+  fzf_lua = {
+    enabled = false,
+    sort = 'newest', ---@type 'newest'|'oldest'
+  },
   picker = {
     enabled = false,
     hidden = false, -- Show hidden files

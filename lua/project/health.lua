@@ -73,6 +73,7 @@ function M.options_check()
     'telescope',
     'verify',
     'verify_datapath',
+    'verify_fzf_lua',
     'verify_histsize',
     'verify_lists',
     'verify_logging',

@@ -388,6 +388,14 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `false` ~
 
 
+    * {sort}                    (`'newest'|'oldest'`)
+                                Determines whether the newest projects
+                                come first (`'newest'`), or the oldest
+                                (`'oldest'`).
+
+                                Default: `'newest'` ~
+
+
 ------------------------------------------------------------------------------
 1.6. `Project.Config.Picker`                               *Project.Config.Picker*
                                                     *project-nvim.picker-config*

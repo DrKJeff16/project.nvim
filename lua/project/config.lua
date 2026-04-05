@@ -88,11 +88,11 @@ function Config.get_config()
     'new',
     'verify',
     'verify_datapath',
+    'verify_fzf_lua',
     'verify_histsize',
     'verify_lists',
     'verify_logging',
     'verify_lsp',
-    'verify_methods',
     'verify_owners',
     'verify_scope_chdir',
   }
