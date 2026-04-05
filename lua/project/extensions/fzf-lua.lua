@@ -36,6 +36,9 @@ end
 ---@param cb fun(entry?: string|number, cb?: function)
 function M.exec(cb)
   local results = Util.reverse(require('project.util.history').get_recent_projects()) ---@type string[]
+  if Config.options.fzf_lua.sort == 'oldest' then
+    results = Util.reverse(results)
+  end
   for _, entry in ipairs(results) do
     cb(entry)
   end
