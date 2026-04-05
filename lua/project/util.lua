@@ -440,9 +440,8 @@ function M.executable(exe)
     return vim.fn.executable(exe) == 1
   end
 
-  local res = false
-
   ---@cast exe string[]
+  local res = false
   for _, v in ipairs(exe) do
     res = M.executable(v)
     if not res then
