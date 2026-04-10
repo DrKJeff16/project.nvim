@@ -98,16 +98,31 @@ function Api.check_oil(bufnr)
   return dir
 end
 
----@return string|ProjectHistoryEntry|nil last
+---@overload fun(): last: string|nil
+---@overload fun(entry: false): last: string|nil
+---@overload fun(entry: true): last: ProjectHistoryEntry|nil
 ---@nodiscard
-function Api.get_last_project()
+function Api.get_last_project(entry)
+  Util.validate({ entry = { entry, { 'boolean', 'nil' }, true } })
+  if entry == nil then
+    entry = false
+  end
+
   local recent = History.get_recent_projects()
   if vim.tbl_isempty(recent) or #recent == 1 then
     return
   end
 
   recent = Util.reverse(recent)
-  return #History.session_projects <= 1 and recent[2] or recent[1]
+
+  local res = #History.session_projects <= 1 and recent[2] or recent[1]
+  if Util.is_type('string', res) then
+    ---@cast res string
+    return res
+  end
+
+  ---@cast res ProjectHistoryEntry
+  return entry and res or res.path
 end
 
 ---@param path? ProjectPaths
