@@ -646,7 +646,7 @@ function M.dedup(T, key)
   return NT
 end
 
----@generic T: any
+---@generic T
 ---@param t type
 ---@param data T
 ---@param sep? string
