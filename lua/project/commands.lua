@@ -221,7 +221,7 @@ function Commands.create_user_commands()
           return {}
         end
 
-        local recents = Util.reverse(History.get_recent_projects(true)) ---@type string[]
+        local recents = Util.reverse(History.get_recent_projects(true))
         if args[#args] == '' then
           return recents
         end

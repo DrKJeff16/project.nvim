@@ -261,7 +261,7 @@ M.delete_menu = M.select.new({
     end)
   end,
   choices_list = function()
-    local recents = Util.reverse(require('project.util.history').get_recent_projects()) ---@type string[]
+    local recents = Util.reverse(require('project.util.history').get_recent_projects())
     table.insert(recents, 'Exit')
     return recents
   end,

@@ -26,7 +26,7 @@ function M.gen_items()
   local items = {} ---@type snacks.picker.finder.Item[]
   local recents = require('project').get_recent_projects()
   if M.config.sort and M.config.sort == 'newest' then
-    recents = Util.reverse(recents) --[[@as string[]\]]
+    recents = Util.reverse(recents)
   end
   for i, proj in ipairs(recents) do
     local item = { ---@type snacks.picker.finder.Item

@@ -193,7 +193,7 @@ If this keeps appearing, though, check your config
 and submit an issue if pertinent.]])
     return
   end
-  recents = Util.reverse(recents) ---@type string[]
+  recents = Util.reverse(recents)
   for i, project in ipairs(recents) do
     vim.health.info(('%d. `%s`'):format(i, project))
   end

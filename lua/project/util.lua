@@ -253,8 +253,8 @@ end
 ---an error will be raised.
 --- ---
 ---@generic T
----@param T T[]
----@return T[] T
+---@param T T
+---@return T T
 ---@nodiscard
 function M.reverse(T)
   M.validate({ T = { T, { 'table' } } })

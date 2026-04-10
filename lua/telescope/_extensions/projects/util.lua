@@ -36,7 +36,7 @@ function M.create_finder()
 
   local results = require('project.util.history').get_recent_projects()
   if sort == 'newest' then
-    results = Util.reverse(results) ---@type string[]
+    results = Util.reverse(results)
   end
 
   Log.debug(('(%s.create_finder): Returning new Finder table.'):format(MODSTR))

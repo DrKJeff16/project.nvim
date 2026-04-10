@@ -106,7 +106,7 @@ function Api.get_last_project()
     return
   end
 
-  recent = Util.reverse(recent) --[[@as string[]\]]
+  recent = Util.reverse(recent)
   return #History.session_projects <= 1 and recent[2] or recent[1]
 end
 
