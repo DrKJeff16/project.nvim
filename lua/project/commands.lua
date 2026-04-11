@@ -42,15 +42,14 @@ local complete_types = { ---@diagnostic disable-line:unused-local
   var = 1,
 }
 
----@alias ProjectCmdFun fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@alias CompletorFunc fun(lead: string, line: string, pos: integer): completions: string[]
 ---@alias Project.CMD
 ---|{ desc: string, name: string, bang: boolean, complete?: (CompletorFunc)|CompleteTypes, nargs?: string|integer }
----|ProjectCmdFun
+---|fun(ctx?: vim.api.keyset.create_user_command.command_args)
 
 ---@class Project.Commands.Spec
 ---@field bang? boolean
----@field callback ProjectCmdFun
+---@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@field complete? CompleteTypes|CompletorFunc
 ---@field desc string
 ---@field name string
@@ -183,7 +182,12 @@ function Commands.create_user_commands()
         for _, input in ipairs(ctx.fargs) do
           input = Util.rstrip('/', (vim.fn.fnamemodify(input, ':p')))
           if Util.dir_exists(input) then
-            if Api.current_project ~= input and not vim.list_contains(session, input) then
+            if
+              Api.current_project ~= input
+              and not vim.tbl_contains(session, function(val)
+                return vim.deep_equal(val, input)
+              end, { predicate = true })
+            then
               Api.set_pwd(input, 'command')
               History.write_history()
             else
@@ -222,14 +226,22 @@ function Commands.create_user_commands()
         end
 
         local recents = Util.reverse(History.get_recent_projects(true))
+        local recent_paths = History.legacy and recents or {} ---@type string[]
+        if not History.legacy then
+          ---@cast recents ProjectHistoryEntry[]
+          for _, v in ipairs(recents) do
+            table.insert(recent_paths, v.path)
+          end
+        end
         if args[#args] == '' then
-          return recents
+          return recent_paths
         end
 
         local res = {} ---@type string[]
         for _, proj in ipairs(recents) do
-          if vim.startswith(proj, args[#args]) then
-            table.insert(res, proj)
+          local project = History.legacy and proj or proj.path ---@type string
+          if vim.startswith(project, args[#args]) then
+            table.insert(res, project)
           end
         end
         return res
@@ -255,13 +267,25 @@ function Commands.create_user_commands()
           if path:sub(-1) == '/' then
             path = path:sub(1, path:len() - 1)
           end
-          if not (force or vim.list_contains(recent, path) or path ~= '') then
+          if
+            not (
+              force
+              or vim.tbl_contains(recent, function(val)
+                return vim.deep_equal(val, path)
+              end, { predicate = true })
+              or path ~= ''
+            )
+          then
             msg = ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path)
             Log.error(msg)
             vim.notify(msg, ERROR)
             return
           end
-          if vim.list_contains(recent, path) then
+          if
+            vim.tbl_contains(recent, function(val)
+              return vim.deep_equal(val, path)
+            end, { predicate = true })
+          then
             History.delete_project(path)
           end
         end

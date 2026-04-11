@@ -3,7 +3,7 @@
 ---@field choices_list fun(exit?: boolean): choices: string[]
 
 ---@class Project.Popup.SelectSpec: Project.Popup.SelectChoices
----@field callback ProjectCmdFun
+---@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
 
 local MODSTR = 'project.popup'
 local ERROR = vim.log.levels.ERROR
@@ -166,7 +166,7 @@ function M.gen_export_prompt(bang)
 end
 
 ---@param opts Project.Popup.SelectSpec
----@return Project.Popup.SelectChoices|ProjectCmdFun selector
+---@return Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args) selector
 ---@nodiscard
 function M.select.new(opts)
   Util.validate({
@@ -180,23 +180,26 @@ function M.select.new(opts)
     error(('(%s.select.new): Empty args for constructor!'):format(MODSTR), ERROR)
   end
 
-  local T = setmetatable({ ---@type Project.Popup.SelectChoices|ProjectCmdFun
-    choices = opts.choices,
-    choices_list = opts.choices_list,
-  }, {
-    ---@param t Project.Popup.SelectChoices|ProjectCmdFun
-    ---@param k string
-    __index = function(t, k)
-      return rawget(t, k)
-    end,
-    __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args
-      if not ctx then
-        opts.callback()
-        return
-      end
-      opts.callback(ctx)
-    end,
-  })
+  local T = setmetatable(
+    { ---@type Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)
+      choices = opts.choices,
+      choices_list = opts.choices_list,
+    },
+    {
+      ---@param t Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)
+      ---@param k string
+      __index = function(t, k)
+        return rawget(t, k)
+      end,
+      __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args
+        if not ctx then
+          opts.callback()
+          return
+        end
+        opts.callback(ctx)
+      end,
+    }
+  )
   return T
 end
 
@@ -357,7 +360,7 @@ M.open_menu = M.select.new({
   end,
   choices = function()
     local Config = require('project.config')
-    local res = { ---@type table<string, ProjectCmdFun>
+    local res = { ---@type table<string, fun(ctx?: vim.api.keyset.create_user_command.command_args)>
       Session = M.session_menu,
       New = require('project.commands').cmds.ProjectAdd,
       Recents = M.recents_menu,

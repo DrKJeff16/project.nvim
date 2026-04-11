@@ -98,16 +98,31 @@ function Api.check_oil(bufnr)
   return dir
 end
 
----@return string|nil last
+---@overload fun(): last: string|nil
+---@overload fun(entry: false): last: string|nil
+---@overload fun(entry: true): last: ProjectHistoryEntry|nil
 ---@nodiscard
-function Api.get_last_project()
+function Api.get_last_project(entry)
+  Util.validate({ entry = { entry, { 'boolean', 'nil' }, true } })
+  if entry == nil then
+    entry = false
+  end
+
   local recent = History.get_recent_projects()
   if vim.tbl_isempty(recent) or #recent == 1 then
     return
   end
 
   recent = Util.reverse(recent)
-  return #History.session_projects <= 1 and recent[2] or recent[1]
+
+  local res = #History.session_projects <= 1 and recent[2] or recent[1]
+  if Util.is_type('string', res) then
+    ---@cast res string
+    return res
+  end
+
+  ---@cast res ProjectHistoryEntry
+  return entry and res or res.path
 end
 
 ---@param path? ProjectPaths
@@ -245,7 +260,14 @@ function Api.set_pwd(dir, method)
 
   local modified = false
   local unexpand_dir = Util.rstrip('/', vim.fn.fnamemodify(dir, ':p:~'))
-  if not (History.session_projects and vim.list_contains(History.session_projects, dir)) then
+  if not History.session_projects then
+    History.session_projects = {}
+  end
+  if
+    vim.tbl_contains(History.session_projects, function(val)
+      return vim.deep_equal(val, dir)
+    end, { predicate = true })
+  then
     table.insert(History.session_projects, dir)
     modified = true
     Log.debug(('Added project %s to the top of session list'):format(unexpand_dir))
@@ -253,14 +275,19 @@ function Api.set_pwd(dir, method)
   if not modified and #History.session_projects > 1 then
     local old_pos ---@type integer
     for k, v in ipairs(History.session_projects) do
-      if v == dir then
+      local v_dir = History.legacy and v or v.path
+      if v_dir == dir then
         old_pos = k
         break
       end
     end
     if old_pos ~= 1 then
       table.remove(History.session_projects, old_pos)
-      table.insert(History.session_projects, 1, dir) -- HACK: Move project to start of table
+      table.insert(
+        History.session_projects,
+        1,
+        History.legacy and dir or { path = dir, name = vim.fn.fnamemodify(dir, ':p:h:t') }
+      )
       Log.debug(
         ('Moved project %s from %d to the top of session list'):format(unexpand_dir, old_pos)
       )
