@@ -90,7 +90,7 @@ function Api.check_oil(bufnr)
 
   ---SOURCE: https://github.com/cosmicbuffalo/root_swapper.nvim/blob/main/lua/root_swapper.lua
   dir = (ok and oil and oil.get_current_dir) and oil.get_current_dir(bufnr)
-      or bufname:gsub('^oil://', '')
+    or bufname:gsub('^oil://', '')
 
   if dir then
     dir = Util.rstrip('/', dir)
@@ -172,8 +172,8 @@ function Api.find_lsp_root(bufnr)
     )
     if valid then
       if
-          Config.options.lsp.use_pattern_matching
-          and Path.root_included(client.config.root_dir) == nil
+        Config.options.lsp.use_pattern_matching
+        and Path.root_included(client.config.root_dir) == nil
       then
         return
       end
@@ -264,9 +264,9 @@ function Api.set_pwd(dir, method)
     History.session_projects = {}
   end
   if
-      vim.tbl_contains(History.session_projects, function(val)
-        return vim.deep_equal(val, dir)
-      end, { predicate = true })
+    vim.tbl_contains(History.session_projects, function(val)
+      return vim.deep_equal(val, dir)
+    end, { predicate = true })
   then
     table.insert(History.session_projects, dir)
     modified = true

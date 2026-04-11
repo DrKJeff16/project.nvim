@@ -183,10 +183,10 @@ function Commands.create_user_commands()
           input = Util.rstrip('/', (vim.fn.fnamemodify(input, ':p')))
           if Util.dir_exists(input) then
             if
-                Api.current_project ~= input
-                and not vim.tbl_contains(session, function(val)
-                  return vim.deep_equal(val, input)
-                end, { predicate = true })
+              Api.current_project ~= input
+              and not vim.tbl_contains(session, function(val)
+                return vim.deep_equal(val, input)
+              end, { predicate = true })
             then
               Api.set_pwd(input, 'command')
               History.write_history()
@@ -268,13 +268,13 @@ function Commands.create_user_commands()
             path = path:sub(1, path:len() - 1)
           end
           if
-              not (
-                force
-                or vim.tbl_contains(recent, function(val)
-                  return vim.deep_equal(val, path)
-                end, { predicate = true })
-                or path ~= ''
-              )
+            not (
+              force
+              or vim.tbl_contains(recent, function(val)
+                return vim.deep_equal(val, path)
+              end, { predicate = true })
+              or path ~= ''
+            )
           then
             msg = ('(:ProjectDelete): Could not delete `%s`, aborting'):format(path)
             Log.error(msg)
@@ -282,9 +282,9 @@ function Commands.create_user_commands()
             return
           end
           if
-              vim.tbl_contains(recent, function(val)
-                return vim.deep_equal(val, path)
-              end, { predicate = true })
+            vim.tbl_contains(recent, function(val)
+              return vim.deep_equal(val, path)
+            end, { predicate = true })
           then
             History.delete_project(path)
           end
