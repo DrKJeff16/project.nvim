@@ -9,6 +9,12 @@ local action_names = { ---@diagnostic disable-line:unused-local
   search_in_project_files = 1,
 }
 
+---@enum (key) Project.Config.Sort
+local sort = { ---@diagnostic disable-line:unused-local
+  newest = 1,
+  oldest = 1,
+}
+
 ---Table of options used for control for detecting projects not owned by the current user.
 --- ---
 ---@class Project.Config.DifferentOwners
@@ -48,7 +54,7 @@ local action_names = { ---@diagnostic disable-line:unused-local
 --- ---
 ---Default: `'newest'`
 --- ---
----@field sort? 'newest'|'oldest'
+---@field sort? Project.Config.Sort
 ---If you have `telescope-file-browser.nvim` installed, you can enable this
 ---so that the Telescope picker uses it instead of the `find_files` builtin.
 ---
@@ -116,7 +122,7 @@ local action_names = { ---@diagnostic disable-line:unused-local
 --- ---
 ---Default: `'newest'`
 --- ---
----@field sort? 'newest'|'oldest'
+---@field sort? Project.Config.Sort
 
 ---Table of options used for `fzf-lua` integration
 --- ---
@@ -133,7 +139,7 @@ local action_names = { ---@diagnostic disable-line:unused-local
 --- ---
 ---Default: `'newest'`
 --- ---
----@field sort? 'newest'|'oldest'
+---@field sort? Project.Config.Sort
 
 ---Table containing all the LSP-adjacent options.
 --- ---

@@ -7,10 +7,10 @@ local Util = require('project.util')
 ---@field win integer
 
 ---@class Project.Config
----@field float? Project.ConfigLoc
----@field before_attach? integer
----@field on_attach? integer
 ---@field attach_augroup integer
+---@field before_attach? integer
+---@field float? Project.ConfigLoc
+---@field on_attach? integer
 local Config = {}
 
 ---Get the default options for configuring `project`.
@@ -128,7 +128,7 @@ function Config.open_win()
 
   local win = vim.api.nvim_open_win(bufnr, true, {
     focusable = true,
-    border = 'single',
+    border = 'rounded',
     col = math.floor((vim.o.columns - width) / 2) - 1,
     row = math.floor((vim.o.lines - height) / 2) - 1,
     relative = 'editor',
