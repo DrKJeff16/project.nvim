@@ -273,7 +273,7 @@ function Commands.create_user_commands()
           if
             not (
               ctx.bang
-              or vim.tbl_contains(recent, function(val)
+              or not vim.tbl_contains(recent, function(val)
                 return vim.deep_equal(val, path)
               end, { predicate = true })
               or path ~= ''

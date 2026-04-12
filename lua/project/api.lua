@@ -276,15 +276,15 @@ function Api.set_pwd(dir, method)
     Log.debug(('Added project %s to the top of session list'):format(unexpand_dir))
   end
   if not modified and #History.session_projects > 1 then
-    local old_pos ---@type integer
+    local old_pos = nil ---@type integer|nil
     for k, v in ipairs(History.session_projects) do
       local v_dir = History.legacy and v or v.path
       if v_dir == dir then
-        old_pos = k
+        old_pos = k --[[@as integer]]
         break
       end
     end
-    if old_pos ~= 1 then
+    if old_pos and old_pos ~= 1 then
       table.remove(History.session_projects, old_pos)
       table.insert(
         History.session_projects,
