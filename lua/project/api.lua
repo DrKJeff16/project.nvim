@@ -264,11 +264,14 @@ function Api.set_pwd(dir, method)
     History.session_projects = {}
   end
   if
-    vim.tbl_contains(History.session_projects, function(val)
+    not vim.tbl_contains(History.session_projects, function(val)
       return vim.deep_equal(val, dir)
     end, { predicate = true })
   then
-    table.insert(History.session_projects, dir)
+    table.insert(History.session_projects, History.legacy and dir or {
+      path = dir,
+      name = vim.fn.fnamemodify(dir, ':p:h:h:t') .. '/' .. vim.fn.fnamemodify(dir, ':p:h:t'),
+    })
     modified = true
     Log.debug(('Added project %s to the top of session list'):format(unexpand_dir))
   end
