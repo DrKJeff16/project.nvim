@@ -1,3 +1,5 @@
+---@module 'picker'
+
 local Util = require('project.util')
 local Config = require('project.config')
 

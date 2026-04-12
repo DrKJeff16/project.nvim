@@ -17,18 +17,67 @@ local Log = require('project.util.log')
 ---@field tab integer
 
 ---@class Project.Util.History
+---@field has_watch_setup? boolean
+---@field historysize? integer
+---@field legacy? boolean
 ---Projects from previous neovim sessions.
 --- ---
 ---@field recent_projects? string[]|ProjectHistoryEntry[]
----@field has_watch_setup? boolean
----@field historysize? integer
----@field window? Project.HistoryWin
----@field legacy? boolean
-local History = {}
-
 ---Projects from current neovim session.
 --- ---
-History.session_projects = {} ---@type string[]|ProjectHistoryEntry[]
+---@field session_projects string[]|ProjectHistoryEntry[]
+---@field window? Project.HistoryWin
+local History = {}
+
+History.session_projects = {}
+
+---@param project string
+---@param name string
+function History.rename_project(project, name)
+  if History.legacy then
+    return
+  end
+
+  Util.validate({
+    project = { project, { 'string' } },
+    name = { name, { 'string' } },
+  })
+
+  local renamed = false
+  local recent_i = 0
+  for i, proj in ipairs(History.recent_projects) do
+    ---@cast proj ProjectHistoryEntry
+    if proj.path == project then
+      recent_i = i
+      break
+    end
+  end
+  if recent_i ~= 0 then
+    History.recent_projects[recent_i].name = name
+    renamed = true
+  end
+
+  local session_i = 0
+  for i, proj in ipairs(History.session_projects) do
+    ---@cast proj ProjectHistoryEntry
+    if proj.path == project then
+      session_i = i
+      break
+    end
+  end
+  if session_i ~= 0 then
+    History.session_projects[session_i].name = name
+    renamed = true
+  end
+
+  if renamed then
+    -- TODO: Include old name and/or more information
+    vim.notify(('(%s.rename_project): Changed name successfully!'):format(MODSTR), INFO)
+    Log.debug(('(%s.rename_project): Changed name successfully!'):format(MODSTR))
+
+    History.write_history()
+  end
+end
 
 ---@param force? boolean
 function History.clear_historyfile(force)
@@ -482,12 +531,19 @@ function History.read_history()
   History.deserialize_history(data_str, name_list)
 end
 
+---@param paths_only? boolean
 ---@param tilde? boolean
 ---@return string[]|ProjectHistoryEntry[] recents
-function History.get_recent_projects(tilde)
-  Util.validate({ tilde = { tilde, { 'boolean', 'nil' }, true } })
+function History.get_recent_projects(paths_only, tilde)
+  Util.validate({
+    paths_only = { paths_only, { 'boolean', 'nil' }, true },
+    tilde = { tilde, { 'boolean', 'nil' }, true },
+  })
   if tilde == nil then
     tilde = false
+  end
+  if paths_only == nil then
+    paths_only = false
   end
 
   local tbl = {} ---@type string[]|ProjectHistoryEntry[]
@@ -520,7 +576,10 @@ function History.get_recent_projects(tilde)
     local dir = History.legacy and v or v.path
     if Util.dir_exists(dir) then
       dir = tilde and vim.fn.fnamemodify(dir, ':~') or dir
-      table.insert(recents, History.legacy and dir or { path = dir, name = tbl[i].name })
+      table.insert(
+        recents,
+        (History.legacy or paths_only) and dir or { path = dir, name = tbl[i].name }
+      )
     end
   end
   return Util.dedup(recents, History.legacy and nil or 'name')

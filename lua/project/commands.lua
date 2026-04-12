@@ -64,10 +64,41 @@ local Api = require('project.api')
 local Log = require('project.util.log')
 local Config = require('project.config')
 
+---@param line string
+---@return string[] items
+local function complete_items(_, line)
+  local args = vim.split(line, '%s+', { trimempty = false })
+  if args[1]:sub(-1) == '!' and #args == 1 then
+    return {}
+  end
+
+  local recents = Util.reverse(History.get_recent_projects(true, true))
+  local recent_paths = History.legacy and recents or {} ---@type string[]
+  if not History.legacy then
+    ---@cast recents ProjectHistoryEntry[]
+    for _, v in ipairs(recents) do
+      table.insert(recent_paths, v.path)
+    end
+  end
+  if args[#args] == '' then
+    return recent_paths
+  end
+
+  local res = {} ---@type string[]
+  for _, proj in ipairs(recents) do
+    local project = History.legacy and proj or proj.path ---@type string
+    if vim.startswith(project, args[#args]) then
+      table.insert(res, project)
+    end
+  end
+  return res
+end
+
 ---@class Project.Commands
+---@field cmds table<string, Project.CMD>
 local Commands = {}
 
-Commands.cmds = {} ---@type table<string, Project.CMD>
+Commands.cmds = {}
 
 ---@param specs Project.Commands.Spec[]
 function Commands.new(specs)
@@ -223,33 +254,7 @@ function Commands.create_user_commands()
       desc = 'Deletes the projects given as args, assuming they are valid. No args open a popup',
       bang = true,
       nargs = '*',
-      complete = function(_, line)
-        local args = vim.split(line, '%s+', { trimempty = false })
-        if args[1]:sub(-1) == '!' and #args == 1 then
-          return {}
-        end
-
-        local recents = Util.reverse(History.get_recent_projects(true))
-        local recent_paths = History.legacy and recents or {} ---@type string[]
-        if not History.legacy then
-          ---@cast recents ProjectHistoryEntry[]
-          for _, v in ipairs(recents) do
-            table.insert(recent_paths, v.path)
-          end
-        end
-        if args[#args] == '' then
-          return recent_paths
-        end
-
-        local res = {} ---@type string[]
-        for _, proj in ipairs(recents) do
-          local project = History.legacy and proj or proj.path ---@type string
-          if vim.startswith(project, args[#args]) then
-            table.insert(res, project)
-          end
-        end
-        return res
-      end,
+      complete = complete_items,
       callback = function(ctx)
         if not ctx or vim.tbl_isempty(ctx.fargs) then
           Popup.delete_menu()
@@ -411,6 +416,24 @@ function Commands.create_user_commands()
       desc = 'Opens a menu to select a project from your history',
       callback = function()
         Popup.recents_menu()
+      end,
+    },
+    {
+      name = 'ProjectRename',
+      desc = 'Rename a project from your history',
+      nargs = '?',
+      complete = complete_items,
+      callback = function(ctx)
+        if History.legacy then
+          return
+        end
+
+        ctx.fargs[1] = ctx.fargs[1] or ''
+        if ctx.fargs[1] == '' then
+          Popup.rename_menu()
+          return
+        end
+        Popup.rename_input(Util.rstrip('/', vim.fn.fnamemodify(ctx.fargs[1], ':p')))
       end,
     },
     {
