@@ -270,7 +270,8 @@ function Api.set_pwd(dir, method)
   then
     table.insert(History.session_projects, History.legacy and dir or {
       path = dir,
-      name = vim.fn.fnamemodify(dir, ':p:h:h:t') .. '/' .. vim.fn.fnamemodify(dir, ':p:h:t'),
+      name = History.find_entry('recent', dir, 'name')
+        or vim.fn.fnamemodify(dir, ':p:h:h:t') .. '/' .. vim.fn.fnamemodify(dir, ':p:h:t'),
     })
     modified = true
     Log.debug(('Added project %s to the top of session list'):format(unexpand_dir))
@@ -430,6 +431,21 @@ function Api.get_current_project(bufnr)
   local curr, method = Api.get_project_root(bufnr)
   local last = Api.get_last_project()
   return curr, method, last
+end
+
+---@param bufnr? integer
+---@return string|nil name
+---@nodiscard
+function Api.get_current_project_name(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+
+  if not Api.buffer_valid(bufnr) then
+    return
+  end
+
+  local curr = Api.get_project_root(bufnr)
+  return History.find_entry('recent', curr, 'name')
 end
 
 ---@param bufnr? integer

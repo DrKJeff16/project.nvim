@@ -751,13 +751,12 @@ function M.find_entry(search, project, field)
   if not vim.list_contains({ 'recent', 'session' }, search) then
     return
   end
-  if not (vim.list_contains({ 'path', 'name' }, field) and M.legacy) then
+  if not (vim.list_contains({ 'path', 'name' }, field) and not M.legacy) then
     return
   end
 
-  local tbl = vim.deepcopy(search == 'session' and M.session_projects or M.recent_projects) --[[@as ProjectHistoryEntry[]\]]
+  local tbl = search == 'session' and M.session_projects or M.recent_projects --[[@as ProjectHistoryEntry[]\]]
   for _, v in ipairs(tbl) do
-    ---@cast v ProjectHistoryEntry
     if v.path == Util.rstrip('/', vim.fn.fnamemodify(project, ':p')) or v.name == project then
       return v[field]
     end
