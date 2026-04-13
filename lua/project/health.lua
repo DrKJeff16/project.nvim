@@ -143,7 +143,14 @@ function M.project_check()
   end
   History.is_legacy(projects)
   for k, v in ipairs(Util.dedup(projects, History.legacy and nil or 'name')) do
-    vim.health.info(('%s. `%s`'):format(k, v))
+    if History.legacy then
+      vim.health.info(('%s. `%s`'):format(k, v))
+    else
+      local index = tostring(k)
+      vim.health.info(
+        ('%d. `%s`\n   %spath: `%s`'):format(index, v.name, (' '):rep(index:len() - 1), v.path)
+      )
+    end
   end
 end
 
@@ -182,7 +189,7 @@ end
 
 function M.recent_proj_check()
   vim.health.start('Recent Projects')
-  local recents = History.get_recent_projects()
+  local recents = History.get_recent_projects(false)
   if vim.tbl_isempty(recents) then
     vim.health.warn([[No projects found in history!
 
@@ -194,9 +201,22 @@ If this keeps appearing, though, check your config
 and submit an issue if pertinent.]])
     return
   end
+
   recents = Util.reverse(recents)
   for i, project in ipairs(recents) do
-    vim.health.info(('%d. `%s`'):format(i, project))
+    if History.legacy then
+      vim.health.info(('%d. `%s`'):format(i, project))
+    else
+      local index = tostring(i)
+      vim.health.info(
+        ('%d. `%s`\n   %spath: `%s`'):format(
+          index,
+          project.name,
+          (' '):rep(index:len() - 1),
+          project.path
+        )
+      )
+    end
   end
 end
 

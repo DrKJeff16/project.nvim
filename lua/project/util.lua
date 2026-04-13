@@ -639,9 +639,10 @@ end
 ---If the data passed to the function is not a table,
 ---an error will be raised.
 --- ---
----@param T table
----@param key? string
----@return table NT
+---@generic T
+---@param T T
+---@param key? string|integer
+---@return T NT
 ---@nodiscard
 function M.dedup(T, key)
   M.validate({

@@ -552,9 +552,9 @@ function M.read_history()
   M.deserialize_history(data_str, name_list)
 end
 
----@param paths_only? boolean
----@param tilde? boolean
----@return string[]|ProjectHistoryEntry[] recents
+---@overload fun(): recents: ProjectHistoryEntry[]
+---@overload fun(paths_only?: false, tilde?: boolean): recents: ProjectHistoryEntry[]
+---@overload fun(paths_only: true, tilde?: boolean): recents: string[]
 function M.get_recent_projects(paths_only, tilde)
   Util.validate({
     paths_only = { paths_only, { 'boolean', 'nil' }, true },
