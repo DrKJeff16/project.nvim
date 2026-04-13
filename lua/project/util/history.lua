@@ -618,7 +618,7 @@ function M.write_history(path)
     end
   end
 
-  local historysize = require('project.config').options.historysize or 100
+  local historysize = require('project.config').options.history.size or 100
   M.historysize = historysize > 0 and historysize or 100
 
   local file_history = {} ---@type string[]|ProjectHistoryEntry[]

@@ -9,6 +9,12 @@ local action_names = { ---@diagnostic disable-line:unused-local
   search_in_project_files = 1,
 }
 
+---@enum (key) ProjectOpts.Show
+local show = { ---@diagnostic disable-line:unused-local
+  names = 1,
+  paths = 1,
+}
+
 ---@enum (key) ProjectOpts.ScopeChdir
 local scope_chdir = { ---@diagnostic disable-line:unused-local
   global = 1,
@@ -65,6 +71,40 @@ local sort = { ---@diagnostic disable-line:unused-local
 ---@field allow boolean
 ---@field notify boolean
 
+---Table of options used for history management.
+--- ---
+---@class ProjectOpts.History
+---The directory in which `project.nvim` will store the project history.
+---
+---For more info, run `:lua vim.print(require('project').get_history_paths())`
+--- ---
+---Default: `vim.fn.stdpath('data')`
+--- ---
+---@field save_dir? string
+---The history file name for `project.nvim`..
+---
+---If it doesn't end with `.json`, the file extension will be appended.
+---
+---If the string containes invalid chars (e.g. `/`, `\\`, `!`, `?`, etc.) an error will be raised,
+--- ---
+---Default: `'project_history.json'`
+--- ---
+---@field save_file? string
+---The history file size. (by `@acristoffers`)
+---
+---This will indicate how many entries will be written to the history file.
+---
+---Set to `0` for no limit.
+--- ---
+---Default: `100`
+--- ---
+---@field size? integer
+
+---@class ProjectDefaults.History: ProjectOpts.History
+---@field save_dir string
+---@field save_file string
+---@field size integer
+
 ---Table of options used for the snacks picker.
 --- ---
 ---@class ProjectOpts.Snacks
@@ -76,10 +116,12 @@ local sort = { ---@diagnostic disable-line:unused-local
 --- ---
 ---@field enabled? boolean
 ---@field opts? ProjectSnacksConfig
+---@field show? ProjectOpts.Show
 
 ---@class ProjectDefaults.Snacks: ProjectOpts.Snacks
 ---@field enabled boolean
 ---@field opts ProjectSnacksConfig
+---@field show ProjectOpts.Show
 
 ---Table of options used for the telescope picker.
 --- ---
@@ -108,6 +150,7 @@ local sort = { ---@diagnostic disable-line:unused-local
 ---Default: `false`
 --- ---
 ---@field prefer_file_browser? boolean
+---@field show? ProjectOpts.Show
 ---Determines whether the newest projects come first in the
 ---telescope picker (`'newest'`), or the oldest (`'oldest'`).
 --- ---
@@ -119,6 +162,7 @@ local sort = { ---@diagnostic disable-line:unused-local
 ---@field disable_file_picker boolean
 ---@field mappings Project.Telescope.DefaultMappings
 ---@field prefer_file_browser boolean
+---@field show ProjectOpts.Show
 ---@field sort ProjectOpts.Sort
 
 ---Options for logging utility.
@@ -163,6 +207,7 @@ local sort = { ---@diagnostic disable-line:unused-local
 ---Default: `false`
 --- ---
 ---@field hidden? boolean
+---@field show? ProjectOpts.Show
 ---Determines whether the newest projects come first (`'newest'`),
 ---or the oldest (`'oldest'`).
 --- ---
@@ -173,6 +218,7 @@ local sort = { ---@diagnostic disable-line:unused-local
 ---@class ProjectDefaults.Picker: ProjectOpts.Picker
 ---@field enabled boolean
 ---@field hidden boolean
+---@field show ProjectOpts.Show
 ---@field sort ProjectOpts.Sort
 
 ---Table of options used for `fzf-lua` integration
@@ -185,6 +231,7 @@ local sort = { ---@diagnostic disable-line:unused-local
 ---Default: `false`
 --- ---
 ---@field enabled? boolean
+---@field show? ProjectOpts.Show
 ---Determines whether the newest projects come first (`'newest'`),
 ---or the oldest (`'oldest'`).
 --- ---
@@ -194,6 +241,7 @@ local sort = { ---@diagnostic disable-line:unused-local
 
 ---@class ProjectDefaults.FzfLua: ProjectOpts.FzfLua
 ---@field enabled boolean
+---@field show ProjectOpts.Show
 ---@field sort ProjectOpts.Sort
 
 ---Table containing all the LSP-adjacent options.
@@ -258,14 +306,6 @@ local sort = { ---@diagnostic disable-line:unused-local
 ---Default: `nil`
 --- ---
 ---@field before_attach? nil|fun(target_dir: string, method: string)
----The path where `project.nvim` will store the project history directory,
----containing the project history in it.
----
----For more info, run `:lua vim.print(require('project').get_history_paths())`
---- ---
----Default: `vim.fn.stdpath('data')`
---- ---
----@field datapath? string
 ---Table of options used for control for detecting projects not owned by the current user.
 --- ---
 ---@field different_owners? ProjectOpts.DifferentOwners
@@ -299,15 +339,7 @@ local sort = { ---@diagnostic disable-line:unused-local
 ---Table of options used for the `fzf-lua` integration
 --- ---
 ---@field fzf_lua? ProjectOpts.FzfLua
----The history size. (by `@acristoffers`)
----
----This will indicate how many entries will be
----written to the history file.
----Set to `0` for no limit.
---- ---
----Default: `100`
---- ---
----@field historysize? integer
+---@field history? ProjectOpts.History
 ---Options for logging utility.
 --- ---
 ---@field log? ProjectOpts.Logging
@@ -377,11 +409,11 @@ local sort = { ---@diagnostic disable-line:unused-local
 
 local MODSTR = 'project.config.defaults'
 local WARN = vim.log.levels.WARN
+local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
 
 ---@class ProjectDefaults: ProjectOpts
 ---@field before_attach nil|fun(target_dir: string, method: string)
----@field datapath string
 ---@field different_owners ProjectDefaults.DifferentOwners
 ---@field disable_on ProjectDefaults.DisableOn
 ---@field enable_autochdir boolean
@@ -389,7 +421,7 @@ local Util = require('project.util')
 ---@field expand_excluded fun(self: ProjectDefaults)
 ---@field fzf_lua ProjectDefaults.FzfLua
 ---@field gen_methods fun(self: ProjectDefaults): methods: { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
----@field historysize integer
+---@field history ProjectDefaults.History
 ---@field log ProjectDefaults.Logging
 ---@field lsp ProjectDefaults.LSP
 ---@field manual_mode boolean
@@ -405,7 +437,7 @@ local Util = require('project.util')
 ---@field verify fun(self: ProjectDefaults)
 ---@field verify_datapath fun(self: ProjectDefaults)
 ---@field verify_fzf_lua fun(self: ProjectDefaults)
----@field verify_histsize fun(self: ProjectDefaults)
+---@field verify_history fun(self: ProjectDefaults)
 ---@field verify_lists fun(self: ProjectDefaults)
 ---@field verify_logging fun(self: ProjectDefaults)
 ---@field verify_lsp fun(self: ProjectDefaults)
@@ -415,9 +447,10 @@ local Util = require('project.util')
 ---@diagnostic disable-next-line:missing-fields
 local DEFAULTS = { ---@type ProjectDefaults
   different_owners = { allow = false, notify = true },
-  picker = { enabled = false, sort = 'newest', hidden = false },
+  picker = { enabled = false, sort = 'newest', hidden = false, show = 'paths' },
   snacks = {
     enabled = false,
+    show = 'paths',
     opts = {
       sort = 'newest',
       hidden = false,
@@ -472,12 +505,12 @@ local DEFAULTS = { ---@type ProjectDefaults
     },
     bt = { 'help', 'nofile', 'nowrite', 'terminal' },
   },
-  datapath = vim.fn.stdpath('data'),
-  historysize = 100,
-  fzf_lua = { enabled = false, sort = 'newest' },
+  history = { save_dir = vim.fn.stdpath('data'), save_file = 'project_history.json', size = 100 },
+  fzf_lua = { enabled = false, sort = 'newest', show = 'paths' },
   log = { enabled = false, max_size = 1.1, logpath = vim.fn.stdpath('state') },
   telescope = {
     sort = 'newest',
+    show = 'paths',
     prefer_file_browser = false,
     disable_file_picker = false,
     mappings = {
@@ -506,18 +539,42 @@ local DEFAULTS = { ---@type ProjectDefaults
 ---If the option is not valid, a warning will be raised and
 ---the value will revert back to the default.
 --- ---
-function DEFAULTS:verify_histsize()
-  Util.validate({ historysize = { self.historysize, { 'number', 'nil' }, true } })
+function DEFAULTS:verify_history()
+  Util.validate({ history = { self.history, { 'table', 'nil' }, true } })
+  self.history = self.history or {}
 
-  if not self.historysize or type(self.historysize) ~= 'number' then
-    self.historysize = DEFAULTS.historysize
+  Util.validate({
+    ['history.save_dir'] = { self.history.save_dir, { 'string', 'nil' }, true },
+    ['history.save_file'] = { self.history.save_file, { 'string', 'nil' }, true },
+    ['history.size'] = { self.history.size, { 'number', 'nil' }, true },
+  })
+  self.history.save_dir =
+    Util.rstrip('/', vim.fn.fnamemodify(self.history.save_dir or DEFAULTS.history.save_dir, ':p'))
+
+  self.history.save_file = self.history.save_file or DEFAULTS.history.save_file
+  self.history.size = self.history.size or DEFAULTS.history.size
+  if not Util.is_int(self.history.size, self.history.size >= 0) then
+    self.history.size = DEFAULTS.history.size
   end
 
-  if self.historysize >= 0 or self.historysize == math.floor(self.historysize) then
-    return
+  if
+    not Util.only_has_chars(
+      self.history.save_file,
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_.',
+      { spaces = true }
+    )
+  then
+    error('(project.nvim): Invalid chars in `history.save_file` setup option!', ERROR)
   end
-  vim.notify('`historysize` option invalid. Reverting to default option.', WARN)
-  self.historysize = DEFAULTS.historysize
+
+  if self.historysize and Util.is_int(self.historysize, self.historysize >= 0) then
+    vim.notify(
+      ('`options.historysize` is deprecated, use `options.history.size`!'):format(MODSTR),
+      WARN
+    )
+    self.history.size = self.historysize
+    self.historysize = nil ---@diagnostic disable-line:inject-field
+  end
 end
 
 ---Checks the `scope_chdir` option.
@@ -540,9 +597,23 @@ function DEFAULTS:verify_scope_chdir()
 end
 
 function DEFAULTS:verify_datapath()
-  if not (self.datapath and require('project.util').dir_exists(self.datapath)) then
-    vim.notify(('Invalid datapath `%s`, reverting to default.'):format(self.datapath), WARN)
-    self.datapath = DEFAULTS.datapath
+  Util.validate({ history = { self.history, { 'table', 'nil' }, true } })
+  self.history = self.history or {}
+
+  Util.validate({ ['history.save_dir'] = { self.history.save_dir, { 'string', 'nil' }, true } })
+
+  if self.datapath and Util.is_type('string', self.datapath) then
+    vim.notify(
+      ('`options.datapath` is deprecated, use `options.history.save_dir`!'):format(MODSTR),
+      WARN
+    )
+    self.history.save_dir = self.datapath
+    self.datapath = nil ---@diagnostic disable-line:inject-field
+  end
+
+  if not (self.history.save_dir and require('project.util').dir_exists(self.history.save_dir)) then
+    vim.notify(('Invalid save_dir `%s`, reverting to default.'):format(self.history.save_dir), WARN)
+    self.history.save_dir = DEFAULTS.history.save_dir
   end
 end
 
@@ -723,13 +794,12 @@ function DEFAULTS:verify()
 
   Util.validate({
     before_attach = { self.before_attach, { 'function', 'nil' }, true },
-    datapath = { self.datapath, { 'string', 'nil' }, true },
     different_owners = { self.different_owners, { 'table', 'nil' }, true },
     disable_on = { self.disable_on, { 'table', 'nil' }, true },
     enable_autochdir = { self.enable_autochdir, { 'boolean', 'nil' }, true },
     exclude_dirs = { self.exclude_dirs, { 'table', 'nil' }, true },
     fzf_lua = { self.fzf_lua, { 'table', 'nil' }, true },
-    historysize = { self.historysize, { 'number', 'nil' }, true },
+    history = { self.history, { 'table', 'nil' }, true },
     log = { self.log, { 'table', 'nil' }, true },
     lsp = { self.lsp, { 'table', 'nil' }, true },
     manual_mode = { self.manual_mode, { 'boolean', 'nil' }, true },
@@ -743,9 +813,9 @@ function DEFAULTS:verify()
     telescope = { self.telescope, { 'table', 'nil' }, true },
   })
 
+  self:verify_history()
   self:verify_datapath()
   self:verify_lsp()
-  self:verify_histsize()
   self:verify_scope_chdir()
   self:verify_logging()
   self:verify_owners()

@@ -42,7 +42,11 @@ function Config.setup(options)
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
   vim.o.autochdir = Config.options.enable_autochdir
 
-  require('project.util.path').init(Config.options.datapath) -- WARN: THIS GOES FIRST!!!!
+  -- WARN: THIS GOES FIRST!!!!
+  require('project.util.path').init(
+    Config.options.history.save_dir,
+    Config.options.history.save_file
+  )
 
   local Log = require('project.util.log')
   if Config.options.log.enabled then
@@ -89,7 +93,7 @@ function Config.get_config()
     'verify',
     'verify_datapath',
     'verify_fzf_lua',
-    'verify_histsize',
+    'verify_history',
     'verify_lists',
     'verify_logging',
     'verify_lsp',

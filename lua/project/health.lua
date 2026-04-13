@@ -74,7 +74,7 @@ function M.options_check()
     'verify',
     'verify_datapath',
     'verify_fzf_lua',
-    'verify_histsize',
+    'verify_history',
     'verify_lists',
     'verify_logging',
     'verify_lsp',

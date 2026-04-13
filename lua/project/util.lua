@@ -11,6 +11,62 @@ local ERROR = vim.log.levels.ERROR
 ---@class Project.Util
 local M = {}
 
+---@param s string
+---@param chars string
+---@param extra_allowed? { spaces?: boolean, newlines?: boolean }
+---@return boolean result
+function M.only_has_chars(s, chars, extra_allowed)
+  M.validate({
+    s = { s, { 'string' } },
+    chars = { chars, { 'string' } },
+    extra_allowed = { extra_allowed, { 'table', 'nil' }, true },
+  })
+  extra_allowed = extra_allowed or {}
+
+  M.validate({
+    ['extra_allowed.spaces'] = { extra_allowed.spaces, { 'boolean', 'nil' }, true },
+    ['extra_allowed.newlines'] = { extra_allowed.newlines, { 'boolean', 'nil' }, true },
+  })
+  if extra_allowed.spaces == nil then
+    extra_allowed.spaces = false
+  end
+  if extra_allowed.newlines == nil then
+    extra_allowed.newlines = false
+  end
+
+  if s == '' or chars == '' then
+    return false
+  end
+
+  local chars_list = M.dedup(vim.split(chars, '', { trimempty = true }))
+  local i = 1
+  while i <= #chars_list do
+    if chars_list[i] == '\n' then
+      table.remove(chars_list, i)
+    else
+      i = i + 1
+    end
+  end
+  if vim.tbl_isempty(chars_list) then
+    return false
+  end
+
+  if extra_allowed.spaces then
+    table.insert(chars_list, ' ')
+  end
+  if extra_allowed.newlines then
+    table.insert(chars_list, '\n')
+  end
+
+  local str_list = vim.split(s, '', { trimempty = false })
+  for _, c in ipairs(str_list) do
+    if not vim.list_contains(chars_list, c) then
+      return false
+    end
+  end
+  return true
+end
+
 ---@param list any[]
 ---@param t? type
 ---@return boolean result
