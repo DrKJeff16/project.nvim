@@ -724,6 +724,18 @@ function M.is_legacy(data)
   end
 
   M.legacy = is_legacy
+
+  if is_legacy and vim.g.project_migration_notified ~= 1 then
+    vim.g.project_migration_notified = 1
+    vim.notify(
+      [[project.nvim - Your history needs to be migrated to the new spec!
+To migrate simply run `:ProjectHistory migrate` in your cmdline.
+
+If you encounter any bugs please raise an issue and it will be dealt with ASAP.]],
+      WARN
+    )
+  end
+
   return is_legacy
 end
 
