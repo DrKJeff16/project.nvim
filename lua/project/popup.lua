@@ -318,7 +318,7 @@ M.rename_menu = M.select.new({
           return
         end
 
-        local choice = M.delete_menu.choices()[item]
+        local choice = M.rename_menu.choices()[item]
         if not (choice and vim.is_callable(choice)) then
           vim.notify('Bad selection!', ERROR)
           return
@@ -439,6 +439,7 @@ M.open_menu = M.select.new({
       New = require('project.commands').cmds.ProjectAdd,
       Recents = M.recents_menu,
       Delete = M.delete_menu,
+      Rename = M.rename_menu,
       Config = require('project.commands').cmds.ProjectConfig,
       Historyfile = vim.cmd.ProjectHistory,
       Export = M.gen_export_prompt,
@@ -480,6 +481,7 @@ M.open_menu = M.select.new({
       'New',
       'Recents',
       'Delete',
+      'Rename',
       'Checkhealth',
       'Config',
       'Historyfile',
