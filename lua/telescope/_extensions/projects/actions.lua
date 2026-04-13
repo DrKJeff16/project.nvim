@@ -48,7 +48,7 @@ function M.delete_project(prompt_bufnr)
   Log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
   State.get_current_picker(prompt_bufnr):refresh(
     (function()
-      local results = History.get_recent_projects()
+      local results = History.get_recent_projects(true)
       if Config.options.telescope.sort == 'newest' then
         Log.debug(('(%s.create_finder): Sorting order to `newest`.'):format(MODSTR))
         results = Util.reverse(results)

@@ -17,18 +17,18 @@ local Finders = require('telescope.finders')
 local Entry_display = require('telescope.pickers.entry_display')
 
 ---@class Project.Telescope.Util
-local M = {
-  ---@param entry { name: string, value: string, display: function, index: integer, ordinal: string }
-  make_display = function(entry)
-    Log.debug(
-      ('(%s.make_display): Creating display. Entry values: %s'):format(MODSTR, vim.inspect(entry))
-    )
-    return Entry_display.create({
-      separator = ' ',
-      items = { { width = 30 }, { remaining = true } },
-    })({ entry.name, { entry.value, 'Comment' } })
-  end,
-}
+local M = {}
+
+---@param entry { name: string, value: string, display: function, index: integer, ordinal: string }
+function M.make_display(entry)
+  Log.debug(
+    ('(%s.make_display): Creating display. Entry values: %s'):format(MODSTR, vim.inspect(entry))
+  )
+  return Entry_display.create({
+    separator = ' ',
+    items = { { width = 30 }, { remaining = true } },
+  })({ entry.name, { entry.value, 'Comment' } })
+end
 
 function M.create_finder()
   local sort = require('project.config').options.telescope.sort
@@ -42,16 +42,21 @@ function M.create_finder()
   Log.debug(('(%s.create_finder): Returning new Finder table.'):format(MODSTR))
   return Finders.new_table({
     results = results,
-    entry_maker = function(entry) ---@param entry string
-      local name = ('%s/%s'):format(
-        vim.fn.fnamemodify(entry, ':h:t'),
-        vim.fn.fnamemodify(entry, ':t')
-      )
+    entry_maker = function(entry) ---@param entry string|ProjectHistoryEntry
+      local History = require('project.util.history')
+      local name ---@type string
+      if History.legacy then
+        ---@cast entry string
+        name = ('%s/%s'):format(vim.fn.fnamemodify(entry, ':h:t'), vim.fn.fnamemodify(entry, ':t'))
+      else
+        ---@cast entry ProjectHistoryEntry
+        name = entry.name
+      end
       return {
         display = M.make_display,
         name = name,
-        value = entry,
-        ordinal = ('%s %s'):format(name, entry),
+        value = History.legacy and entry or entry.path,
+        ordinal = ('%s %s'):format(name, History.legacy and entry or entry.path),
       }
     end,
   })
