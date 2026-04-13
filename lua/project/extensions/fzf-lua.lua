@@ -35,7 +35,7 @@ end
 
 ---@param cb fun(entry?: string|number, cb?: function)
 function M.exec(cb)
-  local results = Util.reverse(require('project.util.history').get_recent_projects())
+  local results = Util.reverse(require('project.util.history').get_recent_projects(true))
   if Config.options.fzf_lua.sort == 'oldest' then
     results = Util.reverse(results)
   end

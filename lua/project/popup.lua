@@ -527,7 +527,7 @@ M.session_menu = M.select.new({
         if item == 'Exit' then
           return item
         end
-        return vim.fn.fnamemodify(item, ':~') .. (vim.fn.isdirectory(item) == 1 and '/' or '')
+        return vim.fn.fnamemodify(item, ':~')
       end,
     }, function(item)
       if not item then
@@ -549,7 +549,17 @@ M.session_menu = M.select.new({
     end)
   end,
   choices = function()
-    local sessions = require('project.util.history').session_projects
+    local History = require('project.util.history')
+    local sessions = History.session_projects
+
+    if not History.legacy then
+      local session_paths = {} ---@type string[]
+      for _, v in ipairs(sessions) do
+        table.insert(session_paths, v.path)
+      end
+
+      sessions = vim.deepcopy(session_paths)
+    end
     local choices = { Exit = function() end }
     if vim.tbl_isempty(sessions) then
       return choices
@@ -560,7 +570,17 @@ M.session_menu = M.select.new({
     return choices
   end,
   choices_list = function()
-    local choices = vim.deepcopy(require('project.util.history').session_projects)
+    local History = require('project.util.history')
+    local choices = vim.deepcopy(History.session_projects)
+    if not History.legacy then
+      local session_paths = {} ---@type string[]
+      for _, v in ipairs(choices) do
+        table.insert(session_paths, v.path)
+      end
+
+      choices = vim.deepcopy(session_paths)
+    end
+
     table.insert(choices, 'Exit')
     return choices
   end,

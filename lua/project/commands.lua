@@ -73,22 +73,10 @@ local function complete_items(_, line)
   end
 
   local recents = Util.reverse(History.get_recent_projects(true, true))
-  local recent_paths = History.legacy and recents or {} ---@type string[]
-  if not History.legacy then
-    ---@cast recents ProjectHistoryEntry[]
-    for _, v in ipairs(recents) do
-      table.insert(recent_paths, v.path)
-    end
-  end
-  if args[#args] == '' then
-    return recent_paths
-  end
-
   local res = {} ---@type string[]
   for _, proj in ipairs(recents) do
-    local project = History.legacy and proj or proj.path ---@type string
-    if vim.startswith(project, args[#args]) then
-      table.insert(res, project)
+    if vim.startswith(proj, args[#args]) then
+      table.insert(res, proj)
     end
   end
   return res
@@ -261,7 +249,7 @@ function Commands.create_user_commands()
           return
         end
 
-        local recent = History.get_recent_projects()
+        local recent = History.get_recent_projects(true)
         if not recent then
           Log.error('(:ProjectDelete): No recent projects!')
           vim.notify('(:ProjectDelete): No recent projects!', ERROR)
@@ -363,7 +351,7 @@ function Commands.create_user_commands()
       name = 'ProjectHistory',
       desc = 'Manage project history',
       bang = true,
-      nargs = '*',
+      nargs = '?',
       complete = function(_, line)
         local args = vim.split(line, '%s+', { trimempty = false })
         if (args[1]:sub(-1) == '!' and #args == 1) or #args > 2 then
@@ -371,7 +359,7 @@ function Commands.create_user_commands()
         end
 
         local res = {}
-        for _, choice in ipairs({ 'clear' }) do
+        for _, choice in ipairs({ 'clear', 'migrate' }) do
           if vim.startswith(choice, args[2]) then
             table.insert(res, choice)
           end
@@ -379,16 +367,22 @@ function Commands.create_user_commands()
         return res
       end,
       callback = function(ctx)
-        if vim.tbl_isempty(ctx.fargs) then
+        ctx.fargs[1] = ctx.fargs[1] or ''
+        if ctx.fargs[1] == '' then
           History.toggle_win()
           return
         end
 
-        if ctx.fargs[1] ~= 'clear' or #ctx.fargs > 1 then
+        if not vim.list_contains({ 'clear', 'migrate' }, ctx.fargs[1]) or #ctx.fargs > 1 then
           vim.notify('Usage:  `:ProjectHistory[!] [clear]`', WARN)
           return
         end
-        History.clear_historyfile(ctx.bang)
+
+        if ctx.fargs[1] == 'clear' then
+          History.clear_historyfile(ctx.bang)
+        end
+
+        History.migrate()
       end,
     },
     {

@@ -265,7 +265,7 @@ function Api.set_pwd(dir, method)
   end
   if
     not vim.tbl_contains(History.session_projects, function(val)
-      return vim.deep_equal(val, dir)
+      return vim.deep_equal(History.legacy and val or val.path, dir)
     end, { predicate = true })
   then
     table.insert(History.session_projects, History.legacy and dir or {
@@ -276,11 +276,15 @@ function Api.set_pwd(dir, method)
     Log.debug(('Added project %s to the top of session list'):format(unexpand_dir))
   end
   if not modified and #History.session_projects > 1 then
+    local name = ''
     local old_pos = nil ---@type integer|nil
     for k, v in ipairs(History.session_projects) do
       local v_dir = History.legacy and v or v.path
       if v_dir == dir then
         old_pos = k --[[@as integer]]
+        if not History.legacy then
+          name = v.name
+        end
         break
       end
     end
@@ -289,7 +293,7 @@ function Api.set_pwd(dir, method)
       table.insert(
         History.session_projects,
         1,
-        History.legacy and dir or { path = dir, name = vim.fn.fnamemodify(dir, ':p:h:t') }
+        History.legacy and dir or { path = dir, name = name }
       )
       Log.debug(
         ('Moved project %s from %d to the top of session list'):format(unexpand_dir, old_pos)

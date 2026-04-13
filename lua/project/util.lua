@@ -11,6 +11,38 @@ local ERROR = vim.log.levels.ERROR
 ---@class Project.Util
 local M = {}
 
+---@param list any[]
+---@param t? type
+---@return boolean result
+function M.same_type_list(list, t)
+  M.validate({
+    list = { list, { 'table' } },
+    t = { t, { 'string', 'nil' }, true },
+  })
+  if
+    t
+    and not vim.list_contains(
+      { 'boolean', 'userdata', 'string', 'function', 'number', 'thread', 'table' },
+      t
+    )
+  then
+    error(('(%s.same_type_list): Invalid type `%s`'):format(t), ERROR)
+  end
+  if vim.tbl_isempty(list) or not vim.islist(list) then
+    return false
+  end
+
+  for _, v in ipairs(list) do
+    if not t then
+      t = type(v)
+    end
+    if not M.is_type(t, v) then
+      return false
+    end
+  end
+  return true
+end
+
 ---@overload fun(option: string|vim.wo|vim.bo): value: any
 ---@overload fun(option: string|vim.wo|vim.bo, param: 'scope', param_value: 'local'|'global'): value: any
 ---@overload fun(option: string|vim.wo|vim.bo, param: 'ft', param_value: string): value: any
