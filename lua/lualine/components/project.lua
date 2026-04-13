@@ -44,13 +44,13 @@ local M = require('lualine.component'):extend()
 
 ---@class Project.LuaLineOpts
 ---@field separator? string
----@field format? 'short'|'full'|'full_expanded'
+---@field format? 'short'|'full'|'full_expanded'|'name'
 ---@field no_project? string
 ---@field enclose_pair? { [1]: string|nil, [2]: string|nil }|nil
 local defaults = {
   separator = ' ',
   no_project = 'N/A',
-  format = 'short',
+  format = 'name',
   enclose_pair = nil,
 }
 
@@ -89,16 +89,17 @@ function M:project_root()
   local bufnr = vim.api.nvim_get_current_buf()
   local ft = Util.optget('filetype', 'buf', bufnr)
   local bt = Util.optget('buftype', 'buf', bufnr)
-  local msg = ''
+  local msg = '' ---@type string
   if in_list(Config.options.disable_on.ft, ft) or in_list(Config.options.disable_on.bt, bt) then
     return msg
   end
 
+  local History = require('project.util.history')
   local format = self.options.format or 'short'
   local curr = require('project.api').get_current_project(bufnr)
   local root = require('project.api').get_project_root(bufnr)
   if
-    not in_list({ 'short', 'full', 'full_expanded' }, format)
+    not in_list({ 'short', 'full', 'full_expanded', 'name' }, format)
     or not (curr and root)
     or curr ~= root
   then
@@ -107,7 +108,10 @@ function M:project_root()
     msg = Util.rstrip('/', vim.fn.fnamemodify(curr, ':p'))
   elseif format == 'full' then
     msg = vim.fn.fnamemodify(Util.rstrip('/', vim.fn.fnamemodify(curr, ':p')), ':~')
-  elseif format == 'short' then
+  elseif format == 'name' and not History.legacy then
+    msg = History.find_entry('recent', curr, 'name')
+  end
+  if format == 'short' or not msg then
     msg = vim.fn.fnamemodify(Util.rstrip('/', vim.fn.fnamemodify(curr, ':p')), ':p:h:t')
   end
 

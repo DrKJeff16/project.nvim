@@ -441,10 +441,12 @@ lualine_b = {
     "project",
 
     -- Can be:
-    -- - `'short'`         - Only shows the basename of the project root directory (default)
+    -- - `'short'`         - Only shows the basename of the project root directory
     -- - `'full'`          - Shows the full path but without expanding the home directory
     -- - `'full_expanded'` - Shows the full, expanded path
-    format = 'short',
+    -- - `'name'`          - (default) Will show the current project's name. ONLY WORKS IF HISTORY
+    --                       HAS BEEN MIGRATED, OTHERWISE `'short'` WILL BE USED
+    format = 'name',
 
     -- Text to display when no project root is found (set to `nil` or empty string to disable)
     no_project = 'N/A',

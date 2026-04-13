@@ -723,8 +723,6 @@ function M.is_legacy(data)
     end
   end
 
-  M.legacy = is_legacy
-
   if is_legacy and vim.g.project_migration_notified ~= 1 then
     vim.g.project_migration_notified = 1
     vim.notify(
@@ -736,7 +734,34 @@ If you encounter any bugs please raise an issue and it will be dealt with ASAP.]
     )
   end
 
+  M.legacy = is_legacy
   return is_legacy
+end
+
+---@param search 'session'|'recent'
+---@param project string
+---@param field 'path'|'name'
+---@return string|nil entry_field
+function M.find_entry(search, project, field)
+  Util.validate({
+    search = { search, { 'string' } },
+    project = { project, { 'string' } },
+    field = { field, { 'string' } },
+  })
+  if not vim.list_contains({ 'recent', 'session' }, search) then
+    return
+  end
+  if not (vim.list_contains({ 'path', 'name' }, field) and M.legacy) then
+    return
+  end
+
+  local tbl = vim.deepcopy(search == 'session' and M.session_projects or M.recent_projects) --[[@as ProjectHistoryEntry[]\]]
+  for _, v in ipairs(tbl) do
+    ---@cast v ProjectHistoryEntry
+    if v.path == Util.rstrip('/', vim.fn.fnamemodify(project, ':p')) or v.name == project then
+      return v[field]
+    end
+  end
 end
 
 function M.open_win()
