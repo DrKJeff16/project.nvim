@@ -413,14 +413,14 @@ end
 function M.remove_recent(project)
   Util.validate({ project = { project, { 'string' } } })
 
-  local found, i = false, 1 ---@type boolean, integer
   M.is_legacy(M.recent_projects)
+
+  local found, i = false, 1 ---@type boolean, integer
   while i <= #M.recent_projects do
     local recent = M.legacy and M.recent_projects[i] or M.recent_projects[i].path
     if recent == project then
       table.remove(M.recent_projects, i)
       found = true
-      i = i - 1
     else
       i = i + 1
     end
@@ -538,9 +538,8 @@ function M.read_history()
   end
 
   M.setup_watch()
-
-  if stat.size == 0 and M.session_projects then
-    M.write_history()
+  if stat.size == 0 and not vim.tbl_isempty(M.session_projects) then
+    vim.defer_fn(M.write_history, 10000)
     return
   end
 
@@ -647,17 +646,21 @@ function M.write_history(path)
   M.historysize = historysize > 0 and historysize or 100
 
   local file_history = {} ---@type string[]|ProjectHistoryEntry[]
-  local fd, stat ---@type integer|nil, uv.fs_stat.result|nil
+  local ok, fd, stat ---@type boolean, integer|nil, uv.fs_stat.result|nil
   if path == Path.historyfile then
-    fd, stat = M.open_history('r')
+    ok, fd, stat = pcall(M.open_history, 'r')
   else
-    fd, stat = Path.open_file(path, 'r')
+    ok, fd, stat = pcall(Path.open_file, path, 'r')
   end
-  if fd and stat then
+
+  if ok and fd and stat then
     local data = uv.fs_read(fd, stat.size)
     uv.fs_close(fd)
     if data then
-      file_history = vim.json.decode(data) --[[@as string[]|ProjectHistoryEntry[]\]]
+      ok, file_history = pcall(vim.json.decode, data) ---@type boolean, string[]|ProjectHistoryEntry[]
+      if not ok then
+        error(('(%s.write_history): Unable to decode JSON data!'):format(MODSTR), ERROR)
+      end
     end
   end
 
@@ -713,8 +716,8 @@ function M.write_history(path)
   end
 
   ---@type boolean, string|nil
-  local ok, out = pcall(vim.json.encode, tbl_out)
-  if not (ok and out) then
+  local success, out = pcall(vim.json.encode, tbl_out)
+  if not (success and out) then
     uv.fs_close(fd)
     Log.error(('(%s.write_history): Unable to encode JSON data!'):format(MODSTR))
     error(('(%s.write_history): Unable to encode JSON data!'):format(MODSTR), ERROR)
