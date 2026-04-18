@@ -275,7 +275,7 @@ function M.init(save_dir, save_file)
       error('(%s.init): Unable to create history file!', ERROR)
     end
 
-    uv.fs_write(fd, '')
+    uv.fs_write(fd, '[]')
     uv.fs_close(fd)
   end
 end
