@@ -1,5 +1,13 @@
 # Changelog
 
+## [v3.4.0-1](https://github.com/DrKJeff16/project.nvim/tree/v3.4.0-1) (2026-05-06)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.3.2-1...v3.4.0-1)
+
+**Merged pull requests:**
+
+- fix\(windows\): fix additional verify\_owner calls not early returning [\#64](https://github.com/DrKJeff16/project.nvim/pull/64) ([tkappedev](https://github.com/tkappedev))
+
 ## [v3.3.2-1](https://github.com/DrKJeff16/project.nvim/tree/v3.3.2-1) (2026-05-05)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.3.1-1...v3.3.2-1)
