@@ -494,15 +494,19 @@ local function setup_watch()
 
   local event = uv.new_fs_event()
   if not event then
+    Log.warn('Unable to create history file setup watch!')
     return
   end
+
   event:start(Path.projectpath, {}, function(err, _, events)
     if err or not events.change then
       return
     end
-    M.recent_projects = nil
+    M.recent_projects = {}
     M.read_history()
   end)
+
+  Log.debug('Started history file setup watch!')
   vim.g.project_history_has_watch_setup = 1
 end
 
@@ -520,7 +524,10 @@ function M.read_history()
     return
   end
 
-  setup_watch()
+  if vim.g.project_history_has_watch_setup ~= 1 then
+    setup_watch()
+  end
+
   if stat.size == 0 and not vim.tbl_isempty(M.session_projects) then
     Log.warn(('(%s.read_history): History file is empty. Defering call to `%s.write_history()`'):format(MODSTR))
     vim.defer_fn(M.write_history, 10000)
@@ -740,8 +747,6 @@ To migrate simply run `:ProjectHistory migrate` in your cmdline.
 If you encounter any bugs please raise an issue and it will be dealt with ASAP.]],
         WARN
       )
-    else
-      Log.info('History file is not legacy!')
     end
   end
 
@@ -784,11 +789,14 @@ end
 
 function M.open_win()
   if not Path.historyfile then
+    vim.notify(('(%s.open_win): History file not available!'):format(MODSTR), ERROR)
+    Log.error(('(%s.open_win): History file not available!'):format(MODSTR))
     return
   end
   if not Path.exists(Path.historyfile) then
     Log.error(('(%s.open_win): Bad historyfile path!'):format(MODSTR))
-    error(('(%s.open_win): Bad historyfile path!'):format(MODSTR), ERROR)
+    vim.notify(('(%s.open_win): Bad historyfile path!'):format(MODSTR), ERROR)
+    return
   end
   if M.window then
     return
@@ -809,8 +817,8 @@ function M.open_win()
 
   ---@type boolean, string[]|ProjectHistoryEntry[]|nil
   local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size))
+  uv.fs_close(fd)
   if not (ok and data) then
-    uv.fs_close(fd)
     return
   end
 
