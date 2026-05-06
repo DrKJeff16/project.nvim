@@ -13,10 +13,7 @@ local function get_defaults()
 end
 
 ---@class Project.Config
----@field attach_augroup integer
----@field before_attach? integer
----@field private float? Project.ConfigLoc
----@field on_attach? integer
+---@field float? Project.ConfigLoc
 local M = {}
 
 M.options = setmetatable({}, { __index = get_defaults() }) ---@type ProjectDefaults

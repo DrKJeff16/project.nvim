@@ -229,7 +229,12 @@ function M.set_pwd(dir, method)
         or Util.strip_slash(dir, ':p:h:h:t') .. '/' .. Util.strip_slash(dir, ':p:h:t'),
     })
     modified = true
-    Log.debug(('Added project %s to the top of session list'):format(unexpand_dir))
+    Log.info(
+      ('(%s.set_pwd): Added project `%s` to the top of session list'):format(
+        MODSTR,
+        Util.strip_slash(unexpand_dir, ':p:~')
+      )
+    )
   end
   if not modified and #History.session_projects > 1 then
     local old_pos, name = nil, '' ---@type integer|nil, string
@@ -245,13 +250,22 @@ function M.set_pwd(dir, method)
     if old_pos and old_pos ~= 1 then
       table.remove(History.session_projects, old_pos)
       table.insert(History.session_projects, 1, History.legacy and dir or { path = dir, name = name })
-      Log.debug(('Moved project %s from %d to the top of session list'):format(unexpand_dir, old_pos))
+      Log.debug(
+        ('(%s.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
+          MODSTR,
+          Util.strip_slash(unexpand_dir, ':p:~'),
+          old_pos
+        )
+      )
     end
   end
 
-  if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
-    Config.options.before_attach(dir, method)
-    Log.debug('Ran `before_attach` hook successfully.')
+  local before_attach = Config.options.before_attach
+  if before_attach and vim.is_callable(before_attach) then
+    local ok = pcall(before_attach, dir, method)
+    if ok then
+      Log.debug(('(%s.set_pwd): Ran `before_attach` hook successfully.'):format(MODSTR))
+    end
   end
 
   if dir == Util.strip_slash(uv.cwd() or vim.fn.getcwd()) then
@@ -285,26 +299,26 @@ function M.set_pwd(dir, method)
     M.current_method = method
 
     Log.info(msg)
-    local on_attach = function() end
-    if Config.options.on_attach then
-      on_attach = vim.schedule_wrap(function()
-        Config.options.on_attach(dir, method)
-      end)
-      Log.debug('Ran `on_attach` hook successfully.')
+    local on_attach = Config.options.on_attach
+    if on_attach and vim.is_callable(on_attach) then
+      on_attach(dir, method)
+      Log.debug(('(%s.set_pwd): Ran `on_attach` hook successfully.'):format(MODSTR))
     end
 
-    on_attach()
-
-    Log.debug(('Changed directory to `%s` using method `%s`'):format(dir, method))
+    Log.debug(
+      ('(%s.set_pwd): Changed directory to `%s` using method `%s`'):format(
+        MODSTR,
+        Util.strip_slash(dir, ':p:~'),
+        method
+      )
+    )
     History.write_history()
   else
     Log.error(msg)
   end
 
   if not Config.options.silent_chdir then
-    vim.schedule(function()
-      vim.notify(msg, (ok and INFO or ERROR))
-    end)
+    vim.notify(msg, (ok and INFO or ERROR))
   end
   return ok
 end
