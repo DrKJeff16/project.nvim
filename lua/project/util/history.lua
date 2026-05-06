@@ -84,6 +84,7 @@ function M.rename_project(path, name)
   )
   for _, c in ipairs(vim.split(name, '', { trimempty = false })) do
     if not vim.list_contains(valid_chars, c) then
+      Log.error(('(%s.rename_project): Invalid character `%s`!'):format(c))
       vim.notify(('(%s.rename_project): Invalid character `%s`!'):format(c), ERROR)
       return false
     end
@@ -237,6 +238,8 @@ function M.export_history_json(path, ind, force_name)
   end
 
   if vim.g.project_setup ~= 1 then
+    Log.error(('(%s.export_history_json): `project.nvim` has not been configured!'):format(MODSTR))
+    vim.notify(('(%s.export_history_json): `project.nvim` has not been configured!'):format(MODSTR), ERROR)
     return
   end
 
@@ -281,15 +284,18 @@ function M.export_history_json(path, ind, force_name)
     if Util.dir_exists(path) then
       return
     end
-    if vim.fn.writefile({}, path) ~= 0 then
-      error('File restricted!', ERROR)
+    if vim.fn.writefile({ '[]' }, path) ~= 0 then
+      Log.error(('(%s.export_history_json): File restricted!'):format(MODSTR))
+      vim.notify(('(%s.export_history_json): File restricted!'):format(MODSTR), ERROR)
+      return
     end
   end
 
   local fd = Path.open_file(path, 'w')
   if not fd then
     Log.error(('(%s.export_history_json): File restricted! `%s`'):format(MODSTR, path))
-    error(('(%s.export_history_json): File restricted! `%s`'):format(MODSTR, path), ERROR)
+    vim.notify(('(%s.export_history_json): File restricted! `%s`'):format(MODSTR, path), ERROR)
+    return
   end
 
   local data = vim.json.encode(Util.reverse(M.get_recent_projects()), { indent = spc })
@@ -297,9 +303,8 @@ function M.export_history_json(path, ind, force_name)
   uv.fs_write(fd, data)
   uv.fs_close(fd)
 
-  vim.notify(('Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')), INFO, {
-    title = 'project.nvim',
-  })
+  Log.debug(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')))
+  vim.notify(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
 end
 
 ---@param path string
@@ -314,17 +319,21 @@ function M.import_history_json(path, force_name)
   end
 
   if vim.g.project_setup ~= 1 then
+    Log.error(('(%s.import_history_json): `project.nvim` has not been configured!'):format(MODSTR))
+    vim.notify(('(%s.import_history_json): `project.nvim` has not been configured!'):format(MODSTR), ERROR)
     return
   end
 
   path = Util.strip(' ', path)
   if path == '' then
     Log.error(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path))
-    error(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
+    vim.notify(('(%s.import_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
+    return
   end
   if vim.fn.isdirectory(path) == 1 then
     Log.error(('(%s.import_history_json): Target is a directory! `%s`'):format(MODSTR, path))
-    error(('(%s.import_history_json): Target is a directory! `%s`'):format(MODSTR, path), ERROR)
+    vim.notify(('(%s.import_history_json): Target is a directory! `%s`'):format(MODSTR, path), ERROR)
+    return
   end
 
   if path:sub(-5) ~= '.json' and not force_name then
@@ -335,31 +344,34 @@ function M.import_history_json(path, force_name)
   local fd, stat = Path.open_file(path, 'r')
   if not fd then
     Log.error(('(%s.import_history_json): File restricted! `%s`'):format(MODSTR, path))
-    error(('(%s.import_history_json): File restricted! `%s`'):format(MODSTR, path), ERROR)
+    vim.notify(('(%s.import_history_json): File restricted! `%s`'):format(MODSTR, path), ERROR)
+    return
   end
   if not stat then
     Log.error(('(%s.import_history_json): File stat unavailable! `%s`'):format(MODSTR, path))
-    error(('(%s.import_history_json): File stat unavailable! `%s`'):format(MODSTR, path), ERROR)
+    vim.notify(('(%s.import_history_json): File stat unavailable! `%s`'):format(MODSTR, path), ERROR)
+    return
   end
 
   local data = uv.fs_read(fd, stat.size)
   if not data or data == '' then
     Log.error(('(%s.import_history_json): Data unavailable! `%s`'):format(MODSTR, path))
-    error(('(%s.import_history_json): Data unavailable! `%s`'):format(MODSTR, path), ERROR)
+    vim.notify(('(%s.import_history_json): Data unavailable! `%s`'):format(MODSTR, path), ERROR)
+    return
   end
 
-  local ok, hist = pcall(vim.json.decode, data, {}) ---@type boolean, string[]
+  local ok, hist = pcall(vim.json.decode, data, {}) ---@type boolean, string[]|ProjectHistoryEntry[]
   if not ok then
     Log.error(('(%s.import_history_json): JSON decoding failed! `%s`'):format(MODSTR, path))
-    error(('(%s.import_history_json): JSON decoding failed! `%s`'):format(MODSTR, path), ERROR)
+    vim.notify(('(%s.import_history_json): JSON decoding failed! `%s`'):format(MODSTR, path), ERROR)
+    return
   end
 
   M.recent_projects = Util.reverse(hist)
   M.write_history()
 
-  vim.notify(('Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')), INFO, {
-    title = 'project.nvim',
-  })
+  Log.debug(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')))
+  vim.notify(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
 end
 
 ---Remove a project from a session.
@@ -373,18 +385,18 @@ function M.remove_session(session, found)
     found = { found, { 'boolean' } },
   })
 
-  local i = 1
   M.is_legacy(M.session_projects)
-  while i < #M.session_projects do
-    local recent = M.legacy and M.session_projects[i] or M.session_projects[i].path
+  local new_sessions = {} ---@type string[]|ProjectHistoryEntry[]
+  for _, v in ipairs(M.session_projects) do
+    local recent = M.legacy and v or v.path --[[@as string]]
     if recent == session then
-      table.remove(M.session_projects, i)
       found = true
-      i = i - 1
     else
-      i = i + 1
+      table.insert(new_sessions, v)
     end
   end
+
+  M.session_projects = vim.deepcopy(new_sessions)
   return found
 end
 
@@ -397,16 +409,18 @@ function M.remove_recent(project)
 
   M.is_legacy(M.recent_projects)
 
-  local found, i = false, 1 ---@type boolean, integer
-  while i <= #M.recent_projects do
-    local recent = M.legacy and M.recent_projects[i] or M.recent_projects[i].path
+  local found = false
+  local new_recents = {} ---@type string[]|ProjectHistoryEntry[]
+  for _, v in ipairs(M.recent_projects) do
+    local recent = M.legacy and v or v.path --[[@as string]]
     if recent == project then
-      table.remove(M.recent_projects, i)
       found = true
     else
-      i = i + 1
+      table.insert(new_recents, v)
     end
   end
+
+  M.recent_projects = vim.deepcopy(new_recents)
   return found
 end
 
@@ -465,8 +479,7 @@ function M.deserialize_history(history_data, name_data)
   name_data = (name_data and not vim.tbl_isempty(name_data)) and name_data or nil
 
   local Config = require('project.config')
-  local projects = {} ---@type string[]|ProjectHistoryEntry[]
-  local i = 1
+  local projects, i = {}, 1 ---@type string[]|ProjectHistoryEntry[], integer
   for s in history_data:gmatch('[^\r\n]+') do
     local entry ---@type string|ProjectHistoryEntry
     if not Path.is_excluded(s) then
@@ -494,7 +507,7 @@ local function setup_watch()
 
   local event = uv.new_fs_event()
   if not event then
-    Log.warn('Unable to create history file setup watch!')
+    Log.warn('project.nvim - Unable to create history file setup watch!')
     return
   end
 
@@ -855,11 +868,7 @@ function M.open_win()
     Util.optset('buftype', 'nowrite', 'buf', M.window.bufnr)
     Util.optset('modifiable', false, 'buf', M.window.bufnr)
 
-    vim.keymap.set('n', 'q', M.close_win, {
-      buffer = M.window.bufnr,
-      noremap = true,
-      silent = true,
-    })
+    vim.keymap.set('n', 'q', M.close_win, { buffer = M.window.bufnr, noremap = true, silent = true })
   end)
 end
 
