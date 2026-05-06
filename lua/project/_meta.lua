@@ -83,16 +83,16 @@ local project_paths = { ---@diagnostic disable-line:unused-local
   projectpath = 1,
 }
 
----@class ProjectHistoryEntry
+---@class (exact) ProjectHistoryEntry
 ---@field name string
 ---@field path string
 
----@class Project.HistoryWin
+---@class (exact) Project.HistoryWin
 ---@field bufnr integer
 ---@field tab integer
 ---@field win integer
 
----@class HistoryPath
+---@class (exact) HistoryPath
 ---@field datapath string
 ---@field historyfile string
 ---@field projectpath string
@@ -102,7 +102,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---|{ desc: string, name: string, bang: boolean, complete?: (CompletorFunc)|CompleteTypes, nargs?: string|integer }
 ---|fun(ctx?: vim.api.keyset.create_user_command.command_args)
 
----@class Project.Commands.Spec
+---@class (exact) Project.Commands.Spec
 ---@field bang boolean|nil
 ---@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
 ---@field complete nil|CompleteTypes|CompletorFunc
@@ -110,15 +110,15 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field name string
 ---@field nargs string|integer|nil
 
----@class ProjectOpts.DisableOn
+---@class (exact) ProjectOpts.DisableOn
 ---@field ft? string[]
 ---@field bt? string[]
 
----@class ProjectDefaults.DisableOn: ProjectOpts.DisableOn
+---@class (exact) ProjectDefaults.DisableOn: ProjectOpts.DisableOn
 ---@field ft string[]
 ---@field bt string[]
 
----@class Project.Telescope.Mappings
+---@class (exact) Project.Telescope.Mappings
 ---Insert mode mappings.
 ---
 ---@field i? table<string, Project.Telescope.ActionNames>
@@ -126,13 +126,13 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---
 ---@field n? table<string, Project.Telescope.ActionNames>
 
----@class Project.Telescope.DefaultMappings: Project.Telescope.Mappings
+---@class (exact) Project.Telescope.DefaultMappings: Project.Telescope.Mappings
 ---@field i table<string, Project.Telescope.ActionNames>
 ---@field n table<string, Project.Telescope.ActionNames>
 
 ---Table of options used for control for detecting projects not owned by the current user.
 --- ---
----@class ProjectOpts.DifferentOwners
+---@class (exact) ProjectOpts.DifferentOwners
 ---Determines whether a project will be added
 ---if its project root is owned by a different user.
 ---
@@ -149,13 +149,13 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 --- ---
 ---@field notify? boolean
 
----@class ProjectDefaults.DifferentOwners: ProjectOpts.DifferentOwners
+---@class (exact) ProjectDefaults.DifferentOwners: ProjectOpts.DifferentOwners
 ---@field allow boolean
 ---@field notify boolean
 
 ---Table of options used for history management.
 --- ---
----@class ProjectOpts.History
+---@class (exact) ProjectOpts.History
 ---The directory in which `project.nvim` will store the project history.
 ---
 ---For more info, run `:lua vim.print(require('project').get_history_paths())`
@@ -182,14 +182,14 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 --- ---
 ---@field size? integer
 
----@class ProjectDefaults.History: ProjectOpts.History
+---@class (exact) ProjectDefaults.History: ProjectOpts.History
 ---@field save_dir string
 ---@field save_file string
 ---@field size integer
 
 ---Table of options used for the snacks picker.
 --- ---
----@class ProjectOpts.Snacks
+---@class (exact) ProjectOpts.Snacks
 ---Determines whether the `snacks.nvim` integration is enabled.
 ---
 ---If `snacks.nvim` is not installed, this won't make a difference.
@@ -201,7 +201,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field show? ProjectOpts.Show
 ---@field tilde? boolean
 
----@class ProjectDefaults.Snacks: ProjectOpts.Snacks
+---@class (exact) ProjectDefaults.Snacks: ProjectOpts.Snacks
 ---@field enabled boolean
 ---@field opts ProjectSnacksConfig
 ---@field show ProjectOpts.Show
@@ -209,7 +209,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 
 ---Table of options used for the telescope picker.
 --- ---
----@class ProjectOpts.Telescope
+---@class (exact) ProjectOpts.Telescope
 ---Set this to `true` if you don't want the file picker to appear
 ---after you've selected a project.
 ---
@@ -246,7 +246,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 --- ---
 ---@field tilde? boolean
 
----@class ProjectDefaults.Telescope: ProjectOpts.Telescope
+---@class (exact) ProjectDefaults.Telescope: ProjectOpts.Telescope
 ---@field disable_file_picker boolean
 ---@field mappings Project.Telescope.DefaultMappings
 ---@field prefer_file_browser boolean
@@ -255,7 +255,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 
 ---Options for logging utility.
 --- ---
----@class ProjectOpts.Logging
+---@class (exact) ProjectOpts.Logging
 ---If `true`, it enables logging in the same directory in which your
 ---history file is stored.
 --- ---
@@ -273,14 +273,14 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 --- ---
 ---@field max_size? number
 
----@class ProjectDefaults.Logging: ProjectOpts.Logging
+---@class (exact) ProjectDefaults.Logging: ProjectOpts.Logging
 ---@field enabled boolean
 ---@field logpath string
 ---@field max_size number
 
 ---Table of options used for `picker.nvim` integration
 --- ---
----@class ProjectOpts.Picker
+---@class (exact) ProjectOpts.Picker
 ---Determines whether the `picker.nvim` integration is enabled.
 ---
 ---If `picker.nvim` is not installed, this won't make a difference.
@@ -303,7 +303,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 --- ---
 ---@field sort? ProjectOpts.Sort
 
----@class ProjectDefaults.Picker: ProjectOpts.Picker
+---@class (exact) ProjectDefaults.Picker: ProjectOpts.Picker
 ---@field enabled boolean
 ---@field hidden boolean
 ---@field show ProjectOpts.Show
@@ -311,7 +311,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 
 ---Table of options used for `fzf-lua` integration
 --- ---
----@class ProjectOpts.FzfLua
+---@class (exact) ProjectOpts.FzfLua
 ---Determines whether the `fzf-lua` integration is enabled.
 ---
 ---If `fzf-lua` is not installed, this won't make a difference.
@@ -327,14 +327,14 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 --- ---
 ---@field sort? ProjectOpts.Sort
 
----@class ProjectDefaults.FzfLua: ProjectOpts.FzfLua
+---@class (exact) ProjectDefaults.FzfLua: ProjectOpts.FzfLua
 ---@field enabled boolean
 ---@field show ProjectOpts.Show
 ---@field sort ProjectOpts.Sort
 
 ---Table containing all the LSP-adjacent options.
 --- ---
----@class ProjectOpts.LSP
+---@class (exact) ProjectOpts.LSP
 ---If `true` then LSP-based method detection
 ---will take precedence over traditional pattern matching.
 ---
@@ -373,7 +373,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 --- ---
 ---@field use_pattern_matching? boolean
 
----@class ProjectDefaults.LSP: ProjectOpts.LSP
+---@class (exact) ProjectDefaults.LSP: ProjectOpts.LSP
 ---@field enabled boolean
 ---@field ignore string[]
 ---@field no_fallback boolean
@@ -381,7 +381,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 
 ---The options available for in `require('project').setup()`.
 --- ---
----@class ProjectOpts
+---@class (exact) ProjectOpts
 ---Hook to run before attaching to a new project.
 ---
 ---It recieves `target_dir` and, optionally,
@@ -509,7 +509,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 --- ---
 ---@field telescope? ProjectOpts.Telescope
 
----@class ProjectDefaults: ProjectOpts
+---@class (exact) ProjectDefaults: ProjectOpts
 ---@field before_attach nil|fun(target_dir: string, method: string)
 ---@field different_owners ProjectDefaults.DifferentOwners
 ---@field disable_on ProjectDefaults.DisableOn
@@ -552,11 +552,11 @@ function D:verify_lsp() end
 function D:verify_owners() end
 function D:verify_scope_chdir() end
 
----@class Project.ConfigLoc
+---@class (exact) Project.ConfigLoc
 ---@field bufnr integer
 ---@field win integer
 
----@class Project.HistoryPath
+---@class (exact) Project.HistoryPath
 ---@field name string
 ---@field path string
 ---@field type string
@@ -579,18 +579,18 @@ function S.callback(ctx) end
 
 ---Non-legacy validation spec (>=v0.11).
 --- ---
----@class ValidateSpec
+---@class (exact) ValidateSpec
 ---@field [1] any
 ---@field [2] vim.validate.Validator
 ---@field [3]? boolean
 ---@field [4]? string
 
----@class Project.LogWin
+---@class (exact) Project.LogWin
 ---@field bufnr integer
 ---@field tab integer
 ---@field win integer
 
----@class ProjectSnacksConfig
+---@class (exact) ProjectSnacksConfig
 ---@field hidden? boolean
 ---@field icon? { icon: string, highlight: string }
 ---@field layout? 'default'|'select'|'vscode'
