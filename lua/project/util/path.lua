@@ -76,8 +76,8 @@ function M.verify_owner(dir)
   if Util.is_windows() then
     if vim.g.project_verify_windows_logged ~= 1 then
       Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
+      vim.g.project_verify_windows_logged = 1
     end
-    vim.g.project_verify_windows_logged = 1
     return true
   end
 
