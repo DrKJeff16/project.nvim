@@ -73,8 +73,10 @@ function M.verify_owner(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
   local Log = require('project.util.log')
-  if Util.is_windows() and vim.g.project_verify_windows_logged ~= 1 then
-    Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
+  if Util.is_windows() then
+    if vim.g.project_verify_windows_logged ~= 1 then
+      Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
+    end
     vim.g.project_verify_windows_logged = 1
     return true
   end
