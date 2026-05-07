@@ -27,10 +27,7 @@ require('project.commands').new({
   {
     name = 'ProjectTelescope',
     desc = 'Telescope shortcut for `projects` picker',
-    nargs = '*',
-    callback = function(ctx)
-      Projects.projects(ctx.fargs)
-    end,
+    callback = Projects.projects,
   },
 })
 
