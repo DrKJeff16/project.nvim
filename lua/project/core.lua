@@ -13,7 +13,6 @@ local Path = require('project.util.path')
 local Util = require('project.util')
 local History = require('project.util.history')
 local Log = require('project.util.log')
-local in_list = vim.list_contains
 
 ---The `project.nvim` API module.
 --- ---
@@ -126,7 +125,7 @@ function M.get_history_paths(path)
     projectpath = Path.projectpath,
     historyfile = Path.historyfile,
   }
-  if path and in_list(vim.tbl_keys(res), path) then
+  if path and vim.list_contains(vim.tbl_keys(res), path) then
     return Path[path] --[[@as string]]
   end
   return res
@@ -156,8 +155,8 @@ function M.find_lsp_root(bufnr)
     local filetypes = client.config.filetypes --[[@as string[]\]]
     local valid = (
       Util.is_type('table', filetypes)
-      and in_list(filetypes, ft)
-      and not in_list(ignore_lsp, client.name)
+      and vim.list_contains(filetypes, ft)
+      and not vim.list_contains(ignore_lsp, client.name)
       and client.config.root_dir
     )
     if valid then
@@ -189,7 +188,8 @@ function M.valid_bt(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
-  return Util.buffer_valid(bufnr) and not in_list(Config.options.disable_on.bt, Util.optget('buftype', 'buf', bufnr))
+  return Util.buffer_valid(bufnr)
+    and not vim.list_contains(Config.options.disable_on.bt, Util.optget('buftype', 'buf', bufnr))
 end
 
 ---@param dir string
@@ -280,7 +280,7 @@ function M.set_pwd(dir, method)
 
   local scope_chdir = Config.options.scope_chdir
   local msg = ('(%s.set_pwd):'):format(MODSTR)
-  if not in_list({ 'global', 'tab', 'win' }, scope_chdir) then
+  if not vim.list_contains({ 'global', 'tab', 'win' }, scope_chdir) then
     Log.error(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)))
     vim.notify(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)), ERROR)
   end
@@ -343,7 +343,7 @@ function M.get_project_root(bufnr)
   local ops = vim.tbl_keys(SWITCH) ---@type ('lsp'|'pattern')[]
   local success = false
   for _, m in ipairs(Config.detection_methods) do
-    if in_list(ops, m) then
+    if vim.list_contains(ops, m) then
       ---@type boolean, string|nil, string|nil
       success, root, method = SWITCH[m](bufnr)
       if success then
@@ -423,7 +423,7 @@ function M.on_buf_enter(bufnr)
   end
 
   local ft = Util.optget('filetype', 'buf', bufnr)
-  if in_list(Config.options.disable_on.ft, ft) then
+  if vim.list_contains(Config.options.disable_on.ft, ft) then
     return
   end
 
@@ -527,20 +527,18 @@ function M.setup()
   })
 
   if not Config.options.manual_mode then
-    if in_list(Config.detection_methods, 'pattern') then
+    if vim.list_contains(Config.detection_methods, 'pattern') then
       vim.api.nvim_create_autocmd('BufEnter', {
         group = group,
-        nested = true,
         callback = function(ev)
           M.on_buf_enter(ev.buf)
         end,
       })
       vim.g.project_pattern_attach = 1
     end
-    if in_list(Config.detection_methods, 'lsp') then
+    if vim.list_contains(Config.detection_methods, 'lsp') then
       vim.api.nvim_create_autocmd('LspAttach', {
         group = group,
-        nested = true,
         callback = function(ev)
           M.on_buf_enter(ev.buf)
         end,

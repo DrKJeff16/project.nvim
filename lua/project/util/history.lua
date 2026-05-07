@@ -519,7 +519,7 @@ local function setup_watch()
     M.read_history()
   end)
 
-  Log.debug('Started history file setup watch!')
+  Log.debug(('(%s.setup_watch): Started history file setup watch!'):format(MODSTR))
   vim.g.project_history_has_watch_setup = 1
 end
 
