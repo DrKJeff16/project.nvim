@@ -14,7 +14,7 @@ repos:
         name: Run StyLua
         language: system
         entry: "make lint"
-        files: (lua|test)/.*lua$
+        files: (lua|test|spec)/.*lua$
         verbose: true
       - id: make_check
         name: Run Selene
