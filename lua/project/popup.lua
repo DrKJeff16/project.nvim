@@ -51,8 +51,7 @@ local function open_node(proj, only_cd, ran_cd)
       end
 
       item = Util.strip_slash(item, ':p:~')
-      return Util.strip_slash(item, ':p:~')
-        .. (vim.fn.isdirectory(item) == 1 and (Util.is_windows() and '\\' or '/') or '')
+      return item .. (vim.fn.isdirectory(vim.fn.expand(item)) == 1 and (Util.is_windows() and '\\' or '/') or '')
     end,
   }, function(item) ---@param item string
     if not item or vim.list_contains({ '', 'Exit' }, item) then
