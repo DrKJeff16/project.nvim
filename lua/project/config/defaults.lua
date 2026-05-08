@@ -382,7 +382,7 @@ function DEFAULTS:verify()
   vim.notify('(project.nvim): `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.', WARN)
 end
 
-function DEFAULTS.new(opts)
+function DEFAULTS:new(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   return setmetatable(opts or {}, DEFAULTS)

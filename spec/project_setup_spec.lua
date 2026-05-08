@@ -8,7 +8,8 @@ describe('project.nvim setup', function()
   before_each(function()
     package.loaded['project'] = nil
     project = require('project')
-    defaults = require('project.config.defaults')
+    local D = require('project.config.defaults')
+    defaults = D:new()
   end)
 
   it('should set default configuration', function()
