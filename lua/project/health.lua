@@ -42,16 +42,14 @@ function M.setup_check()
   end
 
   if Util.is_windows() and vim.g.project_disable_win32_warning ~= 1 then
-    vim.health.warn([[
-DISCLAIMER
+    vim.health.warn([[DISCLAIMER
 
 You're running on Windows. Issues are more likely to occur,
 bear that in mind.
 
 Please report any issues to the maintainers.
 
-If you wish to disable this warning, set `g:project_disable_win32_warning` to `1`.
-    ]])
+If you wish to disable this warning, set `g:project_disable_win32_warning` to `1`.]])
   end
 
   if History.legacy then
@@ -176,16 +174,14 @@ function M.recent_proj_check()
   vim.health.start('Recent Projects')
   local recents = Util.reverse(History.get_recent_projects(false))
   if vim.tbl_isempty(recents) then
-    vim.health.warn([[
-No projects found in history!
+    vim.health.warn([[No projects found in history!
 
 If this is your first time using this plugin,
 or you just set a different `historypath` for your plugin,
 then you can ignore this.
 
 If this keeps appearing, though, check your config
-and submit an issue if pertinent.
-    ]])
+and submit an issue if pertinent.]])
     return
   end
 
