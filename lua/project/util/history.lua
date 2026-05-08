@@ -5,9 +5,9 @@ local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
-local Util = require('project.util')
-local Path = require('project.util.path')
 local Log = require('project.util.log')
+local Path = require('project.util.path')
+local Util = require('project.util')
 
 ---@class Project.Util.History
 ---@field public historysize? integer

@@ -7,9 +7,9 @@ local DEBUG = vim.log.levels.DEBUG -- `1`
 local INFO = vim.log.levels.INFO -- `2`
 local WARN = vim.log.levels.WARN -- `3`
 local ERROR = vim.log.levels.ERROR -- `4`
-local Util = require('project.util')
 local Config = require('project.config')
 local Path = require('project.util.path')
+local Util = require('project.util')
 
 local timer = nil ---@type uv.uv_timer_t|nil
 

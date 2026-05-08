@@ -1,8 +1,7 @@
-local in_list = vim.list_contains
-local Highlight = require('lualine.highlight')
 local Config = require('project.config')
-local Util = require('project.util')
+local Highlight = require('lualine.highlight')
 local Log = require('project.util.log')
+local Util = require('project.util')
 
 ---@class LuaLine.Super
 ---@field private _reset_components function
@@ -23,31 +22,31 @@ local Log = require('project.util.log')
 ---@field set_separator function
 ---@field status string
 ---@field strip_separator function
----@field private super { extend: function,init: function, new: function }
+---@field private super { extend: function, init: function, new: function }
 ---@field update_status function
 
 ---@class ColorActiveHl
----@field name string
 ---@field fn? function
----@field no_mode boolean
 ---@field link boolean
----@field section string
----@field options table
+---@field name string
 ---@field no_default boolean
+---@field no_mode boolean
+---@field options table
+---@field section string
 
 -- local M = require('lualine_require').require('lualine.component'):extend()
 ---@class Project.LuaLine
 ---@field private __is_lualine_component boolean
----@field protected super LuaLine.Super
----@field options Project.LuaLineOpts
 ---@field color_active_hl ColorActiveHl
+---@field options Project.LuaLineOpts
+---@field protected super LuaLine.Super
 local M = require('lualine.component'):extend()
 
 ---@class Project.LuaLineOpts
----@field separator? string
+---@field enclose_pair? { [1]?: string, [2]?: string }
 ---@field format? 'short'|'full'|'full_expanded'|'name'
 ---@field no_project? string
----@field enclose_pair? { [1]: string|nil, [2]: string|nil }|nil
+---@field separator? string
 local defaults = {
   separator = ' ',
   no_project = '',
@@ -87,10 +86,10 @@ end
 ---@return string component
 function M:project_root()
   local bufnr = vim.api.nvim_get_current_buf()
-  local ft = Util.optget('filetype', 'buf', bufnr)
-  local bt = Util.optget('buftype', 'buf', bufnr)
+  local ft = Util.optget('filetype', 'buf', bufnr) --[[@as string]]
+  local bt = Util.optget('buftype', 'buf', bufnr) --[[@as string]]
   local msg = '' ---@type string
-  if in_list(Config.options.disable_on.ft, ft) or in_list(Config.options.disable_on.bt, bt) then
+  if vim.list_contains(Config.options.disable_on.ft, ft) or vim.list_contains(Config.options.disable_on.bt, bt) then
     return msg
   end
 
@@ -107,14 +106,18 @@ function M:project_root()
     return self.options.no_project
   end
 
-  if not in_list({ 'short', 'full', 'full_expanded', 'name' }, format) or not (curr and root) or curr ~= root then
+  if
+    not vim.list_contains({ 'short', 'full', 'full_expanded', 'name' }, format)
+    or not (curr and root)
+    or curr ~= root
+  then
     msg = self.options.no_project --[[@as string]]
   elseif format == 'full_expanded' then
     msg = Util.strip_slash(curr)
   elseif format == 'full' then
     msg = Util.strip_slash(curr, ':p:~')
   elseif format == 'name' and not History.legacy then
-    msg = History.find_entry('recent', curr, 'name')
+    msg = History.find_entry('recent', curr, 'name') or self.options.no_project --[[@as string]]
   end
   if format == 'short' or not msg and msg ~= self.options.no_project then
     msg = Util.strip_slash(curr, ':p:h:t')

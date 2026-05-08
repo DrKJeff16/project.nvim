@@ -1,18 +1,13 @@
+---@module 'project._meta'
 ---@module 'picker'
 
-local Util = require('project.util')
 local Config = require('project.config')
-
----@alias ProjectPickerItem.Hl { [1]: integer, [2]: integer, [3]: string }
-
----@class ProjectPickerItem: PickerItem
----@field highlight? ProjectPickerItem.Hl[]
----@field value string
+local History = require('project.util.history')
+local Util = require('project.util')
 
 ---@param source string[]|ProjectHistoryEntry[]
 ---@return ProjectPickerItem[] items
 local function gen_items(source)
-  local History = require('project.util.history')
   local items = {} ---@type ProjectPickerItem[]
   local curr = require('project.core').get_current_project() or ''
   for i, v in ipairs(source) do
@@ -70,7 +65,7 @@ end
 function M.actions()
   return { ---@type table<string, fun(entry: ProjectPickerItem)>
     ['<C-d>'] = function(entry)
-      require('project.util.history').delete_project(entry.value, true)
+      History.delete_project(entry.value, true)
       require('picker.windows').open(M)
     end,
     ['<C-r>'] = function(entry)

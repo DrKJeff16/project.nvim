@@ -83,6 +83,11 @@ local project_paths = { ---@diagnostic disable-line:unused-local
   projectpath = 1,
 }
 
+---@class (exact) ProjectPickerItem.Hl
+---@field [1] integer
+---@field [2] integer
+---@field [3] string
+
 ---@class (exact) ProjectHistoryEntry
 ---@field name string
 ---@field path string
@@ -598,5 +603,9 @@ function S.callback(ctx) end
 ---@field show? ProjectOpts.Show
 ---@field sort? ProjectOpts.Sort
 ---@field title? string
+
+---@class ProjectPickerItem: PickerItem
+---@field highlight? ProjectPickerItem.Hl[]
+---@field value string
 
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:
