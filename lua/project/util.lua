@@ -219,7 +219,7 @@ end
 
 ---Dynamic `vim.validate()` wrapper. Covers both legacy and newer implementations.
 --- ---
----@param T table<string, vim.validate.Spec|ValidateSpec>
+---@param T table<string, vim.validate.Spec|Project.ValidateSpec>
 function M.validate(T)
   local max = vim.fn.has('nvim-0.11') == 1 and 3 or 4
   for name, spec in pairs(T) do
@@ -229,7 +229,8 @@ function M.validate(T)
     T[name] = spec
   end
 
-  if vim.fn.has('nvim-0.11') == 1 then
+  if max == 3 then
+    ---@cast T Project.ValidateSpec
     for name, spec in pairs(T) do
       table.insert(spec, 1, name)
       vim.validate(unpack(spec))
@@ -237,6 +238,7 @@ function M.validate(T)
     return
   end
 
+  ---@cast T vim.validate.Spec
   vim.validate(T)
 end
 

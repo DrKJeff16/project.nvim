@@ -579,7 +579,7 @@ function S.callback(ctx) end
 
 ---Non-legacy validation spec (>=v0.11).
 --- ---
----@class (exact) ValidateSpec
+---@class (exact) Project.ValidateSpec
 ---@field [1] any
 ---@field [2] vim.validate.Validator
 ---@field [3]? boolean
