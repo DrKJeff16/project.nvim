@@ -368,18 +368,20 @@ function DEFAULTS:verify()
   self:verify_lists()
   self:verify_fzf_lua()
 
-  -- local keys = vim.tbl_keys(DEFAULTS) --[[@as string[]\]]
-  -- for k, _ in pairs(self) do
-  --   if not vim.list_contains(keys, k) then
-  --     self[k] = nil
-  --   end
-  -- end
+  local keys = vim.tbl_keys(DEFAULTS) --[[@as string[]\]]
+  table.insert(keys, 'on_attach')
+  table.insert(keys, 'before_attach')
+  keys = Util.dedup(keys)
 
-  if not self.detection_methods then ---@diagnostic disable-line:undefined-field
-    return
+  for k in pairs(self) do
+    if not vim.list_contains(keys, k) then
+      self[k] = nil
+    end
   end
 
-  vim.notify('(project.nvim): `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.', WARN)
+  if self.detection_methods then ---@diagnostic disable-line:undefined-field
+    vim.notify('(project.nvim): `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.', WARN)
+  end
 end
 
 function DEFAULTS:new(opts)
