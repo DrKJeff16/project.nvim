@@ -1,3 +1,4 @@
+local MODSTR = 'project.extensions.picker'
 local Commands = require('project.commands')
 local Log = require('project.util.log')
 local Util = require('project.util')
@@ -9,8 +10,8 @@ M.source = require('picker.sources.projects')
 
 function M.setup()
   if not Util.mod_exists('picker') then
-    Log.error('picker.nvim is not installed!')
-    vim.notify('picker.nvim is not installed!', vim.log.levels.ERROR)
+    Log.error(('(%s.setup): picker.nvim is not installed!'):format(MODSTR))
+    vim.notify(('(%s.setup): picker.nvim is not installed!'):format(MODSTR), vim.log.levels.ERROR)
     return
   end
 

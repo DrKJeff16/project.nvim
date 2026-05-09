@@ -53,13 +53,8 @@ function M.exec(cb)
   end
 
   for _, entry in ipairs(projects) do
-    if History.legacy then
-      cb(entry)
-    else
-      cb(Config.options.fzf_lua.show == 'names' and entry.name or entry.path)
-    end
+    cb(History.legacy and entry or (Config.options.fzf_lua.show == 'names' and entry.name or entry.path))
   end
-
   cb()
 end
 

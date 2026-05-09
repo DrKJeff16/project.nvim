@@ -54,6 +54,8 @@ local function normal_attach(prompt_bufnr, map)
   end
 
   for mode, group in pairs(Keys) do
+    ---@cast group table<string, Project.Telescope.ActionNames>
+    ---@cast mode 'i'|'n'
     if vim.list_contains({ 'n', 'i' }, mode) and group and not vim.tbl_isempty(group) then
       group[mode == 'n' and '?' or '<C-?>'] = 'help_mappings'
       for lhs, act in pairs(group) do
