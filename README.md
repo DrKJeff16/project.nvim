@@ -25,7 +25,8 @@ You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16
 ## Features
 
 - Automatically sets the `cwd` to the project root directory using pattern matching (LSP optionally)
-- **(NEW)** Projects can be assigned a name (`:ProjectHistory rename [...]`)
+- Projects can be assigned a name (`:ProjectHistory rename [...]`)
+- **(NEW)** Users can define custom project roots, see [Custom Projects](#custom-projects)
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook (`:checkhealth project`)
 - Vim help documentation ([`:h project-nvim`](https://github.com/DrKJeff16/project.nvim/blob/main/doc/project-nvim.txt))
@@ -93,6 +94,7 @@ Requirements:
 - Neovim >= `v0.11`
 - [`fd`](https://github.com/sharkdp/fd) **(REQUIRED FOR SESSION MANAGEMENT)**
 - [`ibhagwan/fzf-lua`](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
+  - [`wsdjeg/picker.nvim`](https://github.com/wsdjeg/picker.nvim) **(OPTIONAL, RECOMMENDED)**
 - [`nvim-telescope/telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
   - [`nvim-lua/plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
   - [`nvim-telescope/telescope-file-browser.nvim`](https://github.com/nvim-telescope/telescope-file-browser.nvim)
@@ -111,6 +113,7 @@ if has('nvim-0.11')
 
   " OPTIONAL
   Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-lua/plenary.nvim'
+  Plug 'wsdjeg/picker.nvim'
   Plug 'ibhagwan/fzf-lua'
 
   lua << EOF
@@ -283,6 +286,7 @@ By default, `setup()` loads with the following options:
     use_pattern_matching = false,
     no_fallback = false, -- WARNING: ENABLE AT YOUR OWN DISCRETION!!!!
   },
+  custom_projects = {}, -- Read the `Custom Projects` section below
   manual_mode = false,
   patterns = {
     '.git',
@@ -392,7 +396,25 @@ By default, `setup()` loads with the following options:
 }
 ```
 
----
+### Custom Projects
+
+You can pre-define custom project roots in your setup. This is particularly useful for directories
+that don't have `.git` or any other patterns in them.
+
+> [!IMPORTANT]
+> The `path` field has to be an absolute path!
+
+For example:
+
+```lua
+local expand = require('project.util').strip_slash -- WRAPPER FOR `vim.fn.fnamemodify()`, EXPANDS PATHS
+require('project').setup({
+  custom_projects = {
+    { path = expand('~/Projects') }, -- The `name` field is optional
+    { path = expand('~/Documents'), name = 'Documents' },
+  },
+})
+```
 
 ### Pattern Matching
 
