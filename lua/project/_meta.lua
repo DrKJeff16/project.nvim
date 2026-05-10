@@ -92,6 +92,9 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field name string
 ---@field path string
 
+---@class (exact) ProjectConfigHistoryEntry: ProjectHistoryEntry
+---@field name? string
+
 ---@class (exact) Project.HistoryWin
 ---@field bufnr integer
 ---@field tab integer
@@ -399,6 +402,14 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---Default: `nil`
 --- ---
 ---@field before_attach? nil|fun(target_dir: string, method: string)
+---A list of project entries, each one having the following fields:
+---
+--- - `path`: The project path (absolute path)
+--- - `name`: The name of the project
+--- ---
+---Default: `{}`
+--- ---
+---@field custom_projects? ProjectConfigHistoryEntry[]
 ---Table of options used for control for detecting projects not owned by the current user.
 --- ---
 ---@field different_owners? ProjectOpts.DifferentOwners
@@ -514,8 +525,9 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 --- ---
 ---@field telescope? ProjectOpts.Telescope
 
----@class (exact) ProjectDefaults: ProjectOpts
+---@class (exact) ProjectConfigDefaults: ProjectOpts
 ---@field before_attach nil|fun(target_dir: string, method: string)
+---@field custom_projects ProjectConfigHistoryEntry[]
 ---@field different_owners ProjectDefaults.DifferentOwners
 ---@field disable_on ProjectDefaults.DisableOn
 ---@field enable_autochdir boolean
@@ -535,6 +547,8 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field silent_chdir boolean
 ---@field snacks ProjectDefaults.Snacks
 ---@field telescope ProjectDefaults.Telescope
+
+---@class (exact) ProjectDefaults: ProjectConfigDefaults
 ---@field __index ProjectDefaults
 local D = {}
 

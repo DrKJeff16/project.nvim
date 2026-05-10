@@ -5,8 +5,8 @@ local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
 
----@diagnostic disable-next-line:missing-fields
-local DEFAULTS = { ---@type ProjectDefaults
+local DEFAULTS = { ---@type ProjectConfigDefaults
+  custom_projects = {},
   different_owners = { allow = false, notify = true },
   picker = { enabled = false, sort = 'newest', hidden = false, show = 'paths' },
   snacks = {
@@ -101,14 +101,17 @@ local DEFAULTS = { ---@type ProjectDefaults
   },
 }
 
-DEFAULTS.__index = DEFAULTS
+---@diagnostic disable-next-line:missing-fields
+local D = {} ---@type ProjectDefaults
+
+D.__index = D
 
 ---Checks the `historysize` option.
 ---
 ---If the option is not valid, a warning will be raised and
 ---the value will revert back to the default.
 --- ---
-function DEFAULTS:verify_history()
+function D:verify_history()
   Util.validate({ history = { self.history, { 'table', 'nil' }, true } })
   self.history = self.history or {}
 
@@ -146,7 +149,7 @@ end
 ---If the option is not valid, a warning will be raised and
 ---the value will revert back to the default.
 --- ---
-function DEFAULTS:verify_scope_chdir()
+function D:verify_scope_chdir()
   Util.validate({ scope_chdir = { self.scope_chdir, { 'string', 'nil' }, true } })
 
   if self.scope_chdir and vim.list_contains({ 'global', 'tab', 'win' }, self.scope_chdir) then
@@ -157,7 +160,7 @@ function DEFAULTS:verify_scope_chdir()
   self.scope_chdir = DEFAULTS.scope_chdir
 end
 
-function DEFAULTS:verify_datapath()
+function D:verify_datapath()
   Util.validate({ history = { self.history, { 'table', 'nil' }, true } })
   self.history = self.history or {}
 
@@ -177,7 +180,7 @@ end
 
 ---@return { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' } methods
 ---@nodiscard
-function DEFAULTS:gen_methods()
+function D:gen_methods()
   self:verify_lsp()
   local methods = { 'pattern' } ---@type { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
   if self.lsp.enabled then
@@ -192,7 +195,7 @@ function DEFAULTS:gen_methods()
   })
 end
 
-function DEFAULTS:verify_logging()
+function D:verify_logging()
   local Path = require('project.util.path')
   local log = self.log
   if not log or type(log) ~= 'table' then
@@ -214,7 +217,7 @@ function DEFAULTS:verify_logging()
   ---@diagnostic enable:need-check-nil
 end
 
-function DEFAULTS:expand_excluded()
+function D:expand_excluded()
   if not self.exclude_dirs or type(self.exclude_dirs) ~= 'table' then
     self.exclude_dirs = {}
   end
@@ -227,7 +230,7 @@ function DEFAULTS:expand_excluded()
   end
 end
 
-function DEFAULTS:verify_lsp()
+function D:verify_lsp()
   self.lsp = self.lsp and vim.tbl_deep_extend('keep', self.lsp, DEFAULTS.lsp) or DEFAULTS.lsp
   if self.use_lsp ~= nil then
     vim.notify('`use_lsp` is deprecated! Use `lsp.enabled` instead.', WARN)
@@ -246,7 +249,7 @@ function DEFAULTS:verify_lsp()
   end
 end
 
-function DEFAULTS:verify_owners()
+function D:verify_owners()
   self.different_owners = self.different_owners or {}
   if self.allow_different_owners ~= nil and type(self.allow_different_owners) == 'boolean' then
     vim.notify('`allow_different_owners` is deprecated! Use `different_owners.allow` instead.', WARN)
@@ -261,7 +264,7 @@ function DEFAULTS:verify_owners()
   end
 end
 
-function DEFAULTS:verify_lists()
+function D:verify_lists()
   local i, found = 1, {} ---@type integer, string[]
   while i <= #self.patterns and i > 0 do
     if
@@ -311,7 +314,7 @@ function DEFAULTS:verify_lists()
   end
 end
 
-function DEFAULTS:verify_fzf_lua()
+function D:verify_fzf_lua()
   Util.validate({ fzf_lua = { self.fzf_lua, { 'table', 'nil' }, true } })
   self.fzf_lua = self.fzf_lua or {}
 
@@ -336,9 +339,10 @@ end
 
 ---Verify config integrity.
 --- ---
-function DEFAULTS:verify()
+function D:verify()
   Util.validate({
     before_attach = { self.before_attach, { 'function', 'nil' }, true },
+    custom_projects = { self.custom_projects, { 'table', 'nil' }, true },
     different_owners = { self.different_owners, { 'table', 'nil' }, true },
     disable_on = { self.disable_on, { 'table', 'nil' }, true },
     enable_autochdir = { self.enable_autochdir, { 'boolean', 'nil' }, true },
@@ -379,16 +383,39 @@ function DEFAULTS:verify()
     end
   end
 
+  if self.custom_projects and not vim.tbl_isempty(self.custom_projects) then
+    if not vim.islist(self.custom_projects) then
+      error(('`custom_projects` is not list-like:\n`%s`'):format(vim.inspect(self.custom_projects)), ERROR)
+    end
+
+    local custom_projects = {} ---@type ProjectConfigHistoryEntry[]
+    for k, v in ipairs(self.custom_projects) do
+      Util.validate({
+        [('custom_projects[%d].path'):format(k)] = { v.path, { 'string' } },
+        [('custom_projects[%d].name'):format(k)] = { v.name, { 'string', 'nil' }, true },
+      })
+
+      if Util.path_exists(Util.strip_slash(v.path)) then
+        table.insert(custom_projects, {
+          path = Util.strip_slash(v.path),
+          name = v.name or (Util.strip_slash(v.path, ':p:h:h:t') .. '/' .. Util.strip_slash(v.path, ':p:h:t')),
+        })
+      end
+    end
+
+    self.custom_projects = vim.deepcopy(custom_projects)
+  end
+
   if self.detection_methods then ---@diagnostic disable-line:undefined-field
     vim.notify('(project.nvim): `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.', WARN)
   end
 end
 
-function DEFAULTS:new(opts)
+function D:new(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  return setmetatable(opts or {}, DEFAULTS)
+  return setmetatable(vim.tbl_deep_extend('keep', opts or {}, DEFAULTS), D)
 end
 
-return DEFAULTS
+return D
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:
