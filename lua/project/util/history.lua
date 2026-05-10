@@ -488,7 +488,11 @@ function M.deserialize_history(history_data, name_data)
       else
         entry = { path = s, name = name_data[i] } --[[@as ProjectHistoryEntry]]
       end
-      if (Config.options.remove_missing_dirs and Path.exists(s)) or not Config.options.remove_missing_dirs then
+      if
+        Config.options
+        and Config.options
+        and ((Config.options.remove_missing_dirs and Path.exists(s)) or not Config.options.remove_missing_dirs)
+      then
         table.insert(projects, entry)
       end
     end
@@ -641,7 +645,11 @@ function M.write_history(path)
     end
   end
 
-  local historysize = require('project.config').options.history.size or 100
+  local Config = require('project.config')
+  local historysize = 100
+  if Config.options and Config.options.history and Config.options.history.size then
+    historysize = Config.options.history.size
+  end
   M.historysize = historysize > 0 and historysize or 100
 
   local file_history = {} ---@type string[]|ProjectHistoryEntry[]

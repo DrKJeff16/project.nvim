@@ -15,9 +15,10 @@ end
 ---@class Project.Config
 ---@field custom_projects ProjectConfigHistoryEntry[]
 ---@field float? Project.ConfigLoc
+---@field options ProjectDefaults
 local M = {}
 
-M.options = setmetatable({}, { __index = get_defaults() }) ---@type ProjectDefaults
+M.config = get_defaults():new()
 
 ---The function called when running `require('project').setup()`.
 --- ---
