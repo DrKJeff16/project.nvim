@@ -166,7 +166,7 @@ function M.create_user_commands()
                 return (History.legacy and val or val.path) == input
               end, { predicate = true })
             then
-              Core.set_pwd(input, 'command')
+              Core.set_pwd(input, 'manual')
               History.write_history()
             else
               msg = ('%s%sAlready added `%s`!'):format(msg, msg == '' and '' or '\n', input)
