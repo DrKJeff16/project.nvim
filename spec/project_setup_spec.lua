@@ -9,22 +9,31 @@ describe('project.nvim setup', function()
     package.loaded['project'] = nil
     project = require('project')
     local D = require('project.config.defaults')
-    defaults = D:new()
+    defaults = D:new():_get_no_mt()
   end)
 
   it('should set default configuration', function()
     ok = pcall(project.setup)
     assert.is_true(ok)
+
+    local options = require('project.config').options:_get_no_mt()
+    assert.are_same(defaults, options)
   end)
 
   it('should merge user configuration with defaults', function()
     ok = pcall(project.setup, {})
     assert.is_true(ok)
+
+    local options = require('project.config').options:_get_no_mt()
+    assert.are_same(defaults, options)
   end)
 
   it('should handle nil options', function()
     ok = pcall(project.setup, nil)
     assert.is_true(ok)
+
+    local options = require('project.config').options:_get_no_mt()
+    assert.are_same(defaults, options)
   end)
 
   for _, param in ipairs({ 1, false, '', function() end }) do
@@ -38,7 +47,7 @@ describe('project.nvim setup', function()
     ok = pcall(project.setup, { 1, foo = 'bar' })
     assert.is_true(ok)
 
-    local options = require('project.config').options
+    local options = require('project.config').options:_get_no_mt()
     assert.are_same(defaults, options)
   end)
 end)
