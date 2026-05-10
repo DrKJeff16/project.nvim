@@ -50,6 +50,7 @@ You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16
 - [Installation](#installation)
 - [Configuration](#configuration)
   - [Defaults](#defaults)
+  - [Custom Projects](#custom-projects)
   - [Pattern Matching](#pattern-matching)
   - [Nvim Tree](#nvim-tree)
   - [Neo Tree](#neo-tree)
