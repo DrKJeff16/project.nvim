@@ -70,10 +70,10 @@ end
 function M.remove_root_patterns(patterns)
   Util.validate({ patterns = { patterns, { 'string', 'table' } } })
   if vim.g.project_setup ~= 1 then
-    error(('(%s.remove_root_patterns): `project.nvim` is not setup!'):format(MODSTR), ERROR)
+    error(('(%s.remove_root_patterns): `project.nvim` is not setup!'):format(MODSTR))
   end
   if not (Config.options and Config.options.patterns and Util.is_type('table', Config.options.patterns)) then
-    error(('(%s.remove_root_patterns): Config values are unaccessible!'):format(MODSTR), ERROR)
+    error(('(%s.remove_root_patterns): Config values are unaccessible!'):format(MODSTR))
   end
 
   if Util.is_type('table', patterns) then
@@ -117,11 +117,11 @@ end
 function M.add_root_patterns(patterns)
   Util.validate({ patterns = { patterns, { 'string', 'table' } } })
   if vim.g.project_setup ~= 1 then
-    error(('(%s.add_root_patterns): `project.nvim` is not setup!'):format(MODSTR), ERROR)
+    error(('(%s.add_root_patterns): `project.nvim` is not setup!'):format(MODSTR))
   end
   if not (Config.options and Config.options.patterns and Util.is_type('table', Config.options.patterns)) then
     Log.error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
-    error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR), ERROR)
+    error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
   end
 
   if Util.is_type('string', patterns) then

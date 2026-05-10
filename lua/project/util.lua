@@ -88,7 +88,7 @@ function M.same_type_list(list, t)
     t = { t, { 'string', 'nil' }, true },
   })
   if t and not vim.list_contains({ 'boolean', 'userdata', 'string', 'function', 'number', 'thread', 'table' }, t) then
-    error(('(%s.same_type_list): Invalid type `%s`'):format(t), ERROR)
+    error(('(%s.same_type_list): Invalid type `%s`'):format(t))
   end
   if vim.tbl_isempty(list) or not vim.islist(list) then
     return false
@@ -114,22 +114,22 @@ function M.optget(option, param, param_value)
     param_value = { param_value, { 'string', 'number', 'nil' }, true },
   })
   if not vim.list_contains({ 'scope', 'ft', 'buf', 'win' }, param) then
-    error(('Bad parameter: `%s`\nCan only accept `scope`, `ft`, `buf` or `win`!'):format(vim.inspect(param)), ERROR)
+    error(('Bad parameter: `%s`\nCan only accept `scope`, `ft`, `buf` or `win`!'):format(vim.inspect(param)))
   end
   if param == 'scope' then
     param_value = param_value or 'local'
     if not vim.list_contains({ 'global', 'local' }, param_value) then
-      error(('Bad param value `%s`\nCan only accept `global` or `local`!'):format(vim.inspect(param_value)), ERROR)
+      error(('Bad param value `%s`\nCan only accept `global` or `local`!'):format(vim.inspect(param_value)))
     end
   end
   if param == 'ft' and (not param_value or type(param_value) ~= 'string') then
-    error('Missing/bad value for `ft` parameter!', ERROR)
+    error('Missing/bad value for `ft` parameter!')
   end
   if
     vim.list_contains({ 'win', 'buf' }, param)
     and not (param_value and type(param_value) == 'number' and M.is_int(param_value, param_value >= 0))
   then
-    error('Missing/bad value for `win`/`buf` parameter!', ERROR)
+    error('Missing/bad value for `win`/`buf` parameter!')
   end
 
   return vim.api.nvim_get_option_value(option, { [param] = param_value })
@@ -145,26 +145,26 @@ function M.optset(option, value, param, param_value)
     param_value = { param_value, { 'string', 'number', 'nil' }, true },
   })
   if value == nil then
-    error('Empty option value is unacceptable!', ERROR)
+    error('Empty option value is unacceptable!')
   end
   if not vim.list_contains({ 'scope', 'ft', 'buf', 'win' }, param) then
-    error(('Bad parameter: `%s`\nCan only accept `scope`, `ft`, `buf` or `win`!'):format(vim.inspect(param)), ERROR)
+    error(('Bad parameter: `%s`\nCan only accept `scope`, `ft`, `buf` or `win`!'):format(vim.inspect(param)))
   end
 
   if param == 'scope' then
     param_value = param_value or 'local'
     if not vim.list_contains({ 'global', 'local' }, param_value) then
-      error(('Bad param value `%s`\nCan only accept `global` or `local`!'):format(vim.inspect(param_value)), ERROR)
+      error(('Bad param value `%s`\nCan only accept `global` or `local`!'):format(vim.inspect(param_value)))
     end
   end
   if param == 'ft' and (not param_value or type(param_value) ~= 'string') then
-    error('Missing/bad value for `ft` parameter!', ERROR)
+    error('Missing/bad value for `ft` parameter!')
   end
   if
     vim.list_contains({ 'win', 'buf' }, param)
     and not (param_value and type(param_value) == 'number' and M.is_int(param_value, param_value >= 0))
   then
-    error('Missing/bad value for `win`/`buf` parameter!', ERROR)
+    error('Missing/bad value for `win`/`buf` parameter!')
   end
 
   vim.api.nvim_set_option_value(option, value, { [param] = param_value })
@@ -405,7 +405,7 @@ function M.range(x, y, step)
   })
 
   if not M.is_int(x) then
-    error(('(%s.range): Argument `x` is not an integer: `%s`'):format(MODSTR, x), ERROR)
+    error(('(%s.range): Argument `x` is not an integer: `%s`'):format(MODSTR, x))
   end
 
   local range_list = {} ---@type integer[]
@@ -420,7 +420,7 @@ function M.range(x, y, step)
     end
   elseif y and not step then
     if not M.is_int(y) then
-      error(('(%s.range): Argument `y` is not an integer: `%s`'):format(MODSTR, y), ERROR)
+      error(('(%s.range): Argument `y` is not an integer: `%s`'):format(MODSTR, y))
     end
     step = x <= y and 1 or -1
 
@@ -430,13 +430,13 @@ function M.range(x, y, step)
     end
   elseif y and step then
     if not M.is_int({ y, step }) then
-      error(('(%s.range): Arguments `y` and/or `step` are not an integer!'):format(MODSTR), ERROR)
+      error(('(%s.range): Arguments `y` and/or `step` are not an integer!'):format(MODSTR))
     end
     if step == 0 then
-      error(('(%s.range): Argument `step` cannot be `0`!'):format(MODSTR), ERROR)
+      error(('(%s.range): Argument `step` cannot be `0`!'):format(MODSTR))
     end
     if x > y and step >= 1 then
-      error(('(%s.range): Index out of bounds!'):format(MODSTR), ERROR)
+      error(('(%s.range): Index out of bounds!'):format(MODSTR))
     end
     if x > y and step <= -1 then
       local p = x
@@ -450,7 +450,7 @@ function M.range(x, y, step)
       table.insert(range_list, v)
     end
   else
-    error(('(%s.range): Argument `y` is nil while `step` is not: `%s`'):format(MODSTR, step), ERROR)
+    error(('(%s.range): Argument `y` is nil while `step` is not: `%s`'):format(MODSTR, step))
   end
 
   table.sort(range_list)

@@ -98,7 +98,7 @@ function M.projects(opts)
 
   if vim.g.project_telescope_loaded ~= 1 then
     Log.error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
-    error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR), ERROR)
+    error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
   end
 
   local Options = Config.options

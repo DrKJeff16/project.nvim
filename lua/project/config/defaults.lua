@@ -2,7 +2,6 @@
 
 local MODSTR = 'project.config.defaults'
 local WARN = vim.log.levels.WARN
-local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
 
 local DEFAULTS = { ---@type ProjectConfigDefaults
@@ -134,7 +133,7 @@ function D:verify_history()
       { spaces = true }
     )
   then
-    error('(project.nvim): Invalid chars in `history.save_file` setup option!', ERROR)
+    error('(project.nvim): Invalid chars in `history.save_file` setup option!')
   end
 
   if self.historysize and Util.is_int(self.historysize, self.historysize >= 0) then
@@ -385,7 +384,7 @@ function D:verify()
 
   if self.custom_projects and not vim.tbl_isempty(self.custom_projects) then
     if not vim.islist(self.custom_projects) then
-      error(('`custom_projects` is not list-like:\n`%s`'):format(vim.inspect(self.custom_projects)), ERROR)
+      error(('`custom_projects` is not list-like:\n`%s`'):format(vim.inspect(self.custom_projects)))
     end
 
     local custom_projects = {} ---@type ProjectConfigHistoryEntry[]
@@ -409,6 +408,15 @@ function D:verify()
   if self.detection_methods then ---@diagnostic disable-line:undefined-field
     vim.notify('(project.nvim): `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.', WARN)
   end
+end
+
+function D:_get_no_mt()
+  ---@diagnostic disable-next-line:missing-fields
+  local opts = {} ---@type ProjectConfigDefaults
+  for _, k in pairs(vim.tbl_keys(self)) do
+    opts[k] = rawget(self, k)
+  end
+  return opts
 end
 
 function D:new(opts)

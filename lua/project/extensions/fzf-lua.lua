@@ -84,7 +84,7 @@ end
 function M.run_fzf_lua()
   if not Util.mod_exists('fzf-lua') then
     Log.error(('(%s.run_fzf_lua): `fzf-lua` is not installed!'):format(MODSTR))
-    error(('(%s.run_fzf_lua): `fzf-lua` is not installed!'):format(MODSTR), ERROR)
+    error(('(%s.run_fzf_lua): `fzf-lua` is not installed!'):format(MODSTR))
   end
   Log.info(('(%s.run_fzf_lua): Running `fzf_exec`.'):format(MODSTR))
 

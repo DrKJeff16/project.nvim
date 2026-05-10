@@ -1,7 +1,6 @@
 ---@module 'project._meta'
 
 local MODSTR = 'project.config'
-local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
 
 ---Get the default options for configuring `project`.
@@ -18,7 +17,7 @@ end
 ---@field options ProjectDefaults
 local M = {}
 
-M.config = get_defaults():new()
+M.options = get_defaults():new()
 
 ---The function called when running `require('project').setup()`.
 --- ---
@@ -78,7 +77,7 @@ end
 function M.get_config()
   if vim.g.project_setup ~= 1 then
     require('project.util.log').error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR))
-    error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR), ERROR)
+    error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR))
   end
   local exceptions = {
     'expand_excluded',

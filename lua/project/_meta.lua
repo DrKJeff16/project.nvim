@@ -552,6 +552,11 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field __index ProjectDefaults
 local D = {}
 
+---Get active setup options without a metatable associated.
+--- ---
+---@return ProjectConfigDefaults opts
+function D:_get_no_mt() end
+
 function D:expand_excluded() end
 
 ---@return { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' } methods

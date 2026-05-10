@@ -49,7 +49,7 @@ M.cmds = {}
 function M.new(specs)
   Util.validate({ specs = { specs, { 'table' } } })
   if vim.tbl_isempty(specs) or not vim.islist(specs) then
-    error('Invalid command spec!', ERROR)
+    error('Invalid command spec!')
   end
   for _, spec in ipairs(specs) do
     Util.validate({
@@ -91,6 +91,9 @@ function M.new(specs)
         spec.callback()
       end,
     })
+
+    pcall(vim.api.nvim_create_user_command, name)
+
     vim.api.nvim_create_user_command(name, function(ctx)
       M.cmds[name](ctx)
     end, opts)

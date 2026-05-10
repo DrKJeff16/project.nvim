@@ -149,7 +149,7 @@ function M.select.new(opts)
   })
 
   if vim.tbl_isempty(opts) then
-    error(('(%s.select.new): Empty args for constructor!'):format(MODSTR), ERROR)
+    error(('(%s.select.new): Empty args for constructor!'):format(MODSTR))
   end
 
   local T = setmetatable(

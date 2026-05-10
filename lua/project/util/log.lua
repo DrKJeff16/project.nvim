@@ -235,7 +235,7 @@ function M.open(mode)
   Path.create_path(M.logpath)
   local dir_stat = uv.fs_stat(M.logpath)
   if not dir_stat or dir_stat.type ~= 'directory' then
-    error(('(%s.open): Projectpath stat is not valid!'):format(MODSTR), ERROR)
+    error(('(%s.open): Projectpath stat is not valid!'):format(MODSTR))
   end
 
   local stat = uv.fs_stat(M.logfile)
@@ -279,7 +279,7 @@ function M.open_win()
     return
   end
   if not Path.exists(M.logfile) then
-    error(('(%s.open_win): Bad logfile path!'):format(MODSTR), ERROR)
+    error(('(%s.open_win): Bad logfile path!'):format(MODSTR))
   end
 
   if M.window then -- Log window appears to be open

@@ -480,10 +480,10 @@ function M.root_files(scan_what, path, prefix)
       'visible_files',
     }, scan_what)
   then
-    error(('(%s.root_files): Invalid parameter `%s`!'):format(MODSTR, scan_what), ERROR)
+    error(('(%s.root_files): Invalid parameter `%s`!'):format(MODSTR, scan_what))
   end
   if not Path.exists(path) or vim.fn.isdirectory(path) ~= 1 then
-    error(('(%s.root_files): Invalid path `%s`!'):format(MODSTR, path), ERROR)
+    error(('(%s.root_files): Invalid path `%s`!'):format(MODSTR, path))
   end
 
   local dir = uv.fs_scandir(path)

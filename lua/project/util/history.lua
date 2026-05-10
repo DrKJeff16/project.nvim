@@ -206,13 +206,13 @@ function M.open_history(mode)
   local dir_stat = uv.fs_stat(Path.projectpath)
   if not dir_stat then
     Log.error(('(%s.open_history): History directory unavailable!'):format(MODSTR))
-    error(('(%s.open_history): History directory unavailable!'):format(MODSTR), ERROR)
+    error(('(%s.open_history): History directory unavailable!'):format(MODSTR))
   end
 
   if not Path.exists(Path.historyfile) then
     if vim.fn.writefile({ '[', ']' }, Path.historyfile) == -1 then
       Log.error(('(%s.open_history): History file unavailable!'):format(MODSTR))
-      error(('(%s.open_history): History file unavailable!'):format(MODSTR), ERROR)
+      error(('(%s.open_history): History file unavailable!'):format(MODSTR))
     end
   end
 
@@ -251,11 +251,11 @@ function M.export_history_json(path, ind, force_name)
   path = Util.strip(' ', path)
   if path == '' then
     Log.error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path))
-    error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path), ERROR)
+    error(('(%s.export_history_json): File does not exist! `%s`'):format(MODSTR, path))
   end
   if vim.fn.isdirectory(path) == 1 then
     Log.error(('(%s.export_history_json): Target is a directory! `%s`'):format(MODSTR, path))
-    error(('(%s.export_history_json): Target is a directory! `%s`'):format(MODSTR, path), ERROR)
+    error(('(%s.export_history_json): Target is a directory! `%s`'):format(MODSTR, path))
   end
 
   path = Util.strip_slash(path)
@@ -267,7 +267,7 @@ function M.export_history_json(path, ind, force_name)
   if stat then
     if stat.type ~= 'file' then
       Log.error(('(%s.export_history_json): Target exists and is not a file! `%s`'):format(MODSTR, path))
-      error(('(%s.export_history_json): Target exists and is not a file! `%s`'):format(MODSTR, path), ERROR)
+      error(('(%s.export_history_json): Target exists and is not a file! `%s`'):format(MODSTR, path))
     end
 
     if stat.size ~= 0 then
@@ -641,7 +641,7 @@ function M.write_history(path)
     local write_res = vim.fn.writefile({ '[', ']' }, path)
     if write_res ~= 0 then
       Log.error(('(%s.write_history): History file unavailable!'):format(MODSTR))
-      error(('(%s.write_history): History file unavailable!'):format(MODSTR), ERROR)
+      error(('(%s.write_history): History file unavailable!'):format(MODSTR))
     end
   end
 
@@ -667,7 +667,7 @@ function M.write_history(path)
       ok, file_history = pcall(vim.json.decode, data) ---@type boolean, string[]|ProjectHistoryEntry[]
       if not ok then
         Log.error(('(%s.write_history): Unable to decode JSON data!'):format(MODSTR))
-        error(('(%s.write_history): Unable to decode JSON data!'):format(MODSTR), ERROR)
+        error(('(%s.write_history): Unable to decode JSON data!'):format(MODSTR))
       end
     end
   end
@@ -720,7 +720,7 @@ function M.write_history(path)
   end
   if not fd then
     Log.error(('(%s.write_history): File restricted!'):format(MODSTR))
-    error(('(%s.write_history): File restricted!'):format(MODSTR), ERROR)
+    error(('(%s.write_history): File restricted!'):format(MODSTR))
   end
 
   ---@type boolean, string|nil
@@ -728,7 +728,7 @@ function M.write_history(path)
   if not (success and out) then
     uv.fs_close(fd)
     Log.error(('(%s.write_history): Unable to encode JSON data!'):format(MODSTR))
-    error(('(%s.write_history): Unable to encode JSON data!'):format(MODSTR), ERROR)
+    error(('(%s.write_history): Unable to encode JSON data!'):format(MODSTR))
   end
 
   uv.fs_write(fd, out)
