@@ -100,6 +100,16 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `nil` ~
 
 
+    • {custom_projects}         (`{ path: string, name?: string }[]`)
+                                List of predefined projects.
+                                Useful for defining projects that
+                                don't have any useful root markers in them
+                                without having to use |ProjectAdd|.
+                                The {name} field is optional
+
+                                Default: `{}` ~
+
+
     • {different_owners}        (|ProjectOpts.DifferentOwners|)
                                 Table of options used for control for
                                 detecting projects not owned
