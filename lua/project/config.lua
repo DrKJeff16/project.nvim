@@ -13,6 +13,7 @@ local function get_defaults()
 end
 
 ---@class Project.Config
+---@field custom_projects ProjectConfigHistoryEntry[]
 ---@field float? Project.ConfigLoc
 local M = {}
 
@@ -67,6 +68,8 @@ function M.setup(options)
     Log.debug(('(%s.setup): snacks.nvim integration enabled.'):format(MODSTR))
     require('project.extensions.snacks').setup(M.options.snacks.opts or {})
   end
+
+  M.custom_projects = vim.deepcopy(M.options.custom_projects or {})
 end
 
 ---@return string config

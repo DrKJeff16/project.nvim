@@ -246,6 +246,11 @@ function M.root_included(dir)
       if pattern:sub(1, 1) == '!' then
         excluded, pattern = true, pattern:sub(2)
       end
+      for _, custom in ipairs(Config.custom_projects) do
+        if dir == custom.path then
+          return dir, 'custom'
+        end
+      end
       if M.match(dir, pattern) then
         if not excluded then
           return dir, ('pattern %s'):format(pattern)

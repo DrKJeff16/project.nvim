@@ -9,10 +9,10 @@ local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
 local Config = require('project.config')
-local Path = require('project.util.path')
-local Util = require('project.util')
 local History = require('project.util.history')
 local Log = require('project.util.log')
+local Path = require('project.util.path')
+local Util = require('project.util')
 
 ---The `project.nvim` API module.
 --- ---
@@ -217,6 +217,13 @@ function M.set_pwd(dir, method)
 
   History.session_projects = History.session_projects or {}
 
+  local custom_name = nil ---@type string|nil
+  for _, v in ipairs(Config.custom_projects) do
+    if Util.strip_slash(v.path) == dir then
+      custom_name = v.name
+    end
+  end
+
   local unexpand_dir, modified = Util.strip_slash(dir, ':p:~'), false
   if
     not vim.tbl_contains(History.session_projects, function(val)
@@ -225,8 +232,9 @@ function M.set_pwd(dir, method)
   then
     table.insert(History.session_projects, History.legacy and dir or {
       path = dir,
-      name = History.find_entry('recent', dir, 'name')
-        or Util.strip_slash(dir, ':p:h:h:t') .. '/' .. Util.strip_slash(dir, ':p:h:t'),
+      name = custom_name
+        or History.find_entry('recent', dir, 'name')
+        or (Util.strip_slash(dir, ':p:h:h:t') .. '/' .. Util.strip_slash(dir, ':p:h:t')),
     })
     modified = true
     Log.info(
@@ -380,7 +388,6 @@ end
 function M.get_current_project(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
-
   if not Util.buffer_valid(bufnr) then
     return
   end
