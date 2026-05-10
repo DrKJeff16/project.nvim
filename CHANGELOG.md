@@ -1,5 +1,18 @@
 # Changelog
 
+## [v3.5.0-1](https://github.com/DrKJeff16/project.nvim/tree/v3.5.0-1) (2026-05-10)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.4.0-1...v3.5.0-1)
+
+**Implemented enhancements:**
+
+- dummy project entry in setup patterns options [\#66](https://github.com/DrKJeff16/project.nvim/issues/66)
+- feat!: new `custom_projects` option \(closes \#66\) [\#67](https://github.com/DrKJeff16/project.nvim/pull/67) ([DrKJeff16](https://github.com/DrKJeff16))
+
+**Fixed bugs:**
+
+- Null ctx variable in commands.lua line 161 [\#65](https://github.com/DrKJeff16/project.nvim/issues/65)
+
 ## [v3.4.0-1](https://github.com/DrKJeff16/project.nvim/tree/v3.4.0-1) (2026-05-06)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.3.2-1...v3.4.0-1)
