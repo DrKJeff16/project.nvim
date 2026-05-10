@@ -207,12 +207,10 @@ function M.set_pwd(dir, method)
 
   if not Path.verify_owner(dir) then
     Log.warn(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))
-    if Config.options.different_owners.notify then
+    if Config.options.different_owners.notify or not Config.options.different_owners.allow then
       vim.notify(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR), ERROR)
     end
-    if not Config.options.different_owners.allow then
-      return false
-    end
+    return Config.options.different_owners.allow
   end
 
   History.session_projects = History.session_projects or {}

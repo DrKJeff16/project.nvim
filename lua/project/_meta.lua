@@ -549,7 +549,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field telescope ProjectDefaults.Telescope
 
 ---@class (exact) ProjectDefaults: ProjectConfigDefaults
----@field __index ProjectDefaults
+---@field __index ProjectDefaults|fun(self: ProjectDefaults, key: string|integer): value: any
 local D = {}
 
 ---Get active setup options without a metatable associated.

@@ -103,7 +103,12 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
 ---@diagnostic disable-next-line:missing-fields
 local D = {} ---@type ProjectDefaults
 
-D.__index = D
+D.__index = function(self, k)
+  if not rawget(self, k) then
+    return getmetatable(self)[k]
+  end
+  return rawget(self, k)
+end
 
 ---Checks the `historysize` option.
 ---
@@ -414,6 +419,7 @@ function D:_get_no_mt()
   ---@diagnostic disable-next-line:missing-fields
   local opts = {} ---@type ProjectConfigDefaults
   for _, k in pairs(vim.tbl_keys(self)) do
+    ---@cast k string
     opts[k] = rawget(self, k)
   end
   return opts
