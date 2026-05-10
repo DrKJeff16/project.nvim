@@ -1,11 +1,11 @@
 local MODSTR = 'project'
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
-local Core = require('project.core')
 local Config = require('project.config')
+local Core = require('project.core')
 local History = require('project.util.history')
-local Popup = require('project.popup')
 local Log = require('project.util.log')
+local Popup = require('project.popup')
 local Util = require('project.util')
 
 ---The `project.nvim` module.

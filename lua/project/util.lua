@@ -95,9 +95,7 @@ function M.same_type_list(list, t)
   end
 
   for _, v in ipairs(list) do
-    if not t then
-      t = type(v)
-    end
+    t = t or type(v)
     if not M.is_type(t, v) then
       return false
     end
@@ -105,7 +103,6 @@ function M.same_type_list(list, t)
   return true
 end
 
----@overload fun(option: string|vim.wo|vim.bo): value: any
 ---@overload fun(option: string|vim.wo|vim.bo, param: 'scope', param_value: 'local'|'global'): value: any
 ---@overload fun(option: string|vim.wo|vim.bo, param: 'ft', param_value: string): value: any
 ---@overload fun(option: string|vim.wo|vim.bo, param: 'buf'|'win', param_value: integer): value: any
@@ -113,10 +110,9 @@ end
 function M.optget(option, param, param_value)
   M.validate({
     option = { option, { 'string' } },
-    param = { param, { 'string', 'nil' }, true },
+    param = { param, { 'string' } },
     param_value = { param_value, { 'string', 'number', 'nil' }, true },
   })
-  param = param or 'buf'
   if not vim.list_contains({ 'scope', 'ft', 'buf', 'win' }, param) then
     error(('Bad parameter: `%s`\nCan only accept `scope`, `ft`, `buf` or `win`!'):format(vim.inspect(param)), ERROR)
   end
@@ -139,21 +135,18 @@ function M.optget(option, param, param_value)
   return vim.api.nvim_get_option_value(option, { [param] = param_value })
 end
 
----@overload fun(option: string|vim.wo|vim.bo, value: any)
 ---@overload fun(option: string|vim.wo|vim.bo, value: any, param: 'scope', param_value: 'local'|'global')
 ---@overload fun(option: string|vim.wo|vim.bo, value: any, param: 'ft', param_value: string)
 ---@overload fun(option: string|vim.wo|vim.bo, value: any, param: 'buf'|'win', param_value: integer)
 function M.optset(option, value, param, param_value)
   M.validate({
     option = { option, { 'string' } },
-    param = { param, { 'string', 'nil' }, true },
+    param = { param, { 'string' } },
     param_value = { param_value, { 'string', 'number', 'nil' }, true },
   })
   if value == nil then
     error('Empty option value is unacceptable!', ERROR)
   end
-  param = param or 'buf'
-
   if not vim.list_contains({ 'scope', 'ft', 'buf', 'win' }, param) then
     error(('Bad parameter: `%s`\nCan only accept `scope`, `ft`, `buf` or `win`!'):format(vim.inspect(param)), ERROR)
   end
@@ -548,7 +541,7 @@ function M.lstrip(char, str)
     if not vim.tbl_isempty(char) then
       for _, c in ipairs(char) do
         if c:len() > str:len() then
-          return str
+          break
         end
         str = M.lstrip(c, str)
       end
@@ -595,7 +588,7 @@ function M.rstrip(char, str)
     if not vim.tbl_isempty(char) then
       for _, c in ipairs(char) do
         if c:len() > str:len() then
-          return str
+          break
         end
         str = M.rstrip(c, str)
       end
@@ -631,7 +624,7 @@ function M.strip(char, str)
   if not vim.tbl_isempty(char) then
     for _, c in ipairs(char) do
       if c:len() > str:len() then
-        return str
+        break
       end
       str = M.strip(c, str)
     end

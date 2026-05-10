@@ -5,10 +5,10 @@ local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local uv = vim.uv or vim.loop
 local Config = require('project.config')
-local History = require('project.util.history')
-local Util = require('project.util')
-local Path = require('project.util.path')
 local Core = require('project.core')
+local History = require('project.util.history')
+local Path = require('project.util.path')
+local Util = require('project.util')
 
 ---@param proj string
 ---@param only_cd boolean

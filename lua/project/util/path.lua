@@ -1,8 +1,8 @@
 local MODSTR = 'project.util.path'
 local ERROR = vim.log.levels.ERROR
 local uv = vim.uv or vim.loop
-local Util = require('project.util')
 local Config = require('project.config')
+local Util = require('project.util')
 
 ---@class Project.Util.Path
 ---@field private curr_dir_cache string[]
