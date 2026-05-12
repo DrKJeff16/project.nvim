@@ -458,13 +458,10 @@ function M.root_files(scan_what, path, prefix)
   if not scan_what then
     scan_what = Config.options.show_hidden and 'all' or 'all_visible'
   end
-  if not path or path == '' then
-    path = M.get_current_project() or M.get_project_root()
-    if not path then
-      return
-    end
+  path = (not path or path == '') and (M.get_current_project() or M.get_project_root()) or path
+  if not path then
+    return
   end
-
   if
     not vim.list_contains({
       'all',
@@ -513,7 +510,7 @@ function M.root_files(scan_what, path, prefix)
     elseif scan_what == 'all' then
       is_type = vim.list_contains({ 'file', 'directory' }, ftype)
     end
-    if is_type then
+    if is_type and next ~= '.git' then
       table.insert(files, prefix and vim.fs.joinpath(prefix, next) or next)
     end
     next, ftype = uv.fs_scandir_next(dir)

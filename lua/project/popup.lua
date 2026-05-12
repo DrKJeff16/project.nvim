@@ -34,12 +34,6 @@ local function open_node(proj, only_cd, ran_cd)
     vim.g.project_nvim_cwd = proj
   end
 
-  local dir = uv.fs_scandir(proj)
-  if not dir then
-    vim.notify(('(%s.open_node): NO DIR `%s`!'):format(MODSTR, proj), ERROR)
-    return
-  end
-
   local ls = Core.root_files(Config.options.show_hidden and 'all' or 'all_visible', proj, ran_cd and proj or nil)
   table.insert(ls, 'Exit')
 
@@ -76,9 +70,6 @@ end
 
 ---@class Project.Popup
 local M = {}
-
----@class Project.Popup.Select
-M.select = {}
 
 ---@param project string
 ---@return boolean success
@@ -140,7 +131,7 @@ end
 ---@param opts Project.Popup.SelectSpec
 ---@return Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args) selector
 ---@nodiscard
-function M.select.new(opts)
+function M.new(opts)
   Util.validate({
     opts = { opts, { 'table' } },
     opts_choices = { opts.choices, { 'function' } },
@@ -204,7 +195,7 @@ function M.prompt_project(input)
   History.write_history()
 end
 
-M.delete_menu = M.select.new({
+M.delete_menu = M.new({
   callback = function()
     local choices_list = M.delete_menu.choices_list()
     vim.ui.select(choices_list, {
@@ -275,7 +266,7 @@ M.delete_menu = M.select.new({
   end,
 })
 
-M.rename_menu = M.select.new({
+M.rename_menu = M.new({
   callback = function()
     local choices_list = M.rename_menu.choices_list()
     vim.ui.select(choices_list, { prompt = 'Select a project to rename:' }, function(item) ---@param item string
@@ -338,7 +329,7 @@ M.rename_menu = M.select.new({
   end,
 })
 
-M.recents_menu = M.select.new({
+M.recents_menu = M.new({
   callback = function()
     local choices_list = M.recents_menu.choices_list()
     vim.ui.select(choices_list, {
@@ -399,7 +390,7 @@ M.recents_menu = M.select.new({
   end,
 })
 
-M.open_menu = M.select.new({
+M.open_menu = M.new({
   callback = function(ctx)
     if ctx and ctx.fargs and not vim.tbl_isempty(ctx.fargs) then
       if not vim.list_contains(vim.tbl_keys(M.open_menu.choices()), ctx.fargs[1]) then
@@ -510,7 +501,7 @@ M.open_menu = M.select.new({
   end,
 })
 
-M.session_menu = M.select.new({
+M.session_menu = M.new({
   callback = function(ctx)
     local only_cd = false
     if ctx then
