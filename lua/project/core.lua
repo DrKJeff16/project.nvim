@@ -14,6 +14,8 @@ local Log = require('project.util.log')
 local Path = require('project.util.path')
 local Util = require('project.util')
 
+local per_project_bufs = {} ---@type table<string, integer[]>
+
 ---The `project.nvim` API module.
 --- ---
 ---@class Project.Core
@@ -21,6 +23,11 @@ local Util = require('project.util')
 ---@field public current_project string|nil
 ---@field public last_project string|nil
 local M = {}
+
+---@return table<string, integer[]> per_project_bufs
+function M._get_project_bufs()
+  return per_project_bufs
+end
 
 ---@class ProjectRootSwitch
 local SWITCH = {}
@@ -192,13 +199,39 @@ function M.valid_bt(bufnr)
     and not vim.list_contains(Config.options.disable_on.bt, Util.optget('buftype', 'buf', bufnr))
 end
 
+function M.refresh_project_bufs()
+  for dir, bufs in pairs(per_project_bufs) do
+    local bufnrs = {} ---@type integer[]
+    for _, buf in ipairs(bufs) do
+      if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+        table.insert(bufnrs, buf)
+      end
+    end
+
+    per_project_bufs[dir] = not vim.tbl_isempty(bufnrs) and vim.deepcopy(bufnrs) or nil
+  end
+
+  History.write_history()
+
+  local sessions = {} ---@type string[]|ProjectHistoryEntry[]
+  for _, session in ipairs(History.session_projects) do
+    if per_project_bufs[History.legacy and session or session.path] then
+      table.insert(sessions, session)
+    end
+  end
+
+  History.session_projects = vim.deepcopy(sessions)
+end
+
 ---@param dir string
 ---@param method string
+---@param bufnr? integer
 ---@return boolean success
-function M.set_pwd(dir, method)
+function M.set_pwd(dir, method, bufnr)
   Util.validate({
     dir = { dir, { 'string' } },
     method = { method, { 'string' } },
+    bufnr = { bufnr, { 'number', 'nil' }, true },
   })
   dir = Util.strip_slash(dir)
   if not Path.exists(dir) then
@@ -242,6 +275,17 @@ function M.set_pwd(dir, method)
       )
     )
   end
+
+  if bufnr then
+    if not per_project_bufs[dir] then
+      per_project_bufs[dir] = { bufnr }
+    elseif not vim.list_contains(per_project_bufs[dir], bufnr) then
+      table.insert(per_project_bufs[dir], bufnr)
+    end
+
+    M.refresh_project_bufs()
+  end
+
   if not modified and #History.session_projects > 1 then
     local old_pos, name = nil, '' ---@type integer|nil, string
     for k, v in ipairs(History.session_projects) do
@@ -266,9 +310,8 @@ function M.set_pwd(dir, method)
     end
   end
 
-  local before_attach = Config.options.before_attach
-  if before_attach and vim.is_callable(before_attach) then
-    local ok = pcall(before_attach, dir, method)
+  if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
+    local ok = pcall(Config.options.before_attach, dir, method)
     if ok then
       Log.debug(('(%s.set_pwd): Ran `before_attach` hook successfully.'):format(MODSTR))
     end
@@ -434,7 +477,7 @@ function M.on_buf_enter(bufnr)
 
   M.current_project, M.current_method = M.get_current_project(bufnr)
   local change = M.current_project ~= (uv.cwd() or vim.fn.getcwd())
-  M.set_pwd(M.current_project, M.current_method)
+  M.set_pwd(M.current_project, M.current_method, bufnr)
 
   if change then
     M.last_project = M.get_last_project()
@@ -525,6 +568,12 @@ function M.setup()
     group = group,
     callback = function()
       History.write_history()
+    end,
+  })
+  vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
+    group = group,
+    callback = function()
+      M.refresh_project_bufs()
     end,
   })
 
