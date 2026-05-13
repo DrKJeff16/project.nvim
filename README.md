@@ -8,7 +8,7 @@
 - [**Credits**](https://github.com/DrKJeff16/project.nvim/blob/main/CREDITS.md)
 - [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions)
 
-https://github.com/user-attachments/assets/73446cb9-2889-471d-bfb0-d495ccd50a2d
+https://github.com/user-attachments/assets/0e10c4e8-f930-47a0-9058-956622e8f547
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that,
 under configurable conditions, automatically sets the user's `cwd` to the current project root
