@@ -1,5 +1,26 @@
 # Changelog
 
+## [v4.0.0-1](https://github.com/DrKJeff16/project.nvim/tree/v4.0.0-1) (2026-05-13)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.5.1-1...v4.0.0-1)
+
+**Implemented enhancements:**
+
+- dummy project entry in setup patterns options [\#66](https://github.com/DrKJeff16/project.nvim/issues/66)
+- fix\(core\)!: only store session projects with opened buffers [\#68](https://github.com/DrKJeff16/project.nvim/pull/68) ([DrKJeff16](https://github.com/DrKJeff16))
+- feat!: new `custom_projects` option \(closes \#66\) [\#67](https://github.com/DrKJeff16/project.nvim/pull/67) ([DrKJeff16](https://github.com/DrKJeff16))
+
+**Fixed bugs:**
+
+- Null ctx variable in commands.lua line 161 [\#65](https://github.com/DrKJeff16/project.nvim/issues/65)
+- \[BUG\] Util.dedup causes null entries in historyfile [\#62](https://github.com/DrKJeff16/project.nvim/issues/62)
+- \[BUG\]: nil `recent_projects` in `find_entry()` triggers errors [\#60](https://github.com/DrKJeff16/project.nvim/issues/60)
+- \[BUG\] Race condition when multiple session open [\#58](https://github.com/DrKJeff16/project.nvim/issues/58)
+
+**Merged pull requests:**
+
+- fix\(windows\): fix additional verify\_owner calls not early returning [\#64](https://github.com/DrKJeff16/project.nvim/pull/64) ([tkappedev](https://github.com/tkappedev))
+
 ## [v3.5.1-1](https://github.com/DrKJeff16/project.nvim/tree/v3.5.1-1) (2026-05-13)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.5.0-1...v3.5.1-1)
