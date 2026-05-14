@@ -420,30 +420,36 @@ M.open_menu = M.new({
   choices = function()
     local res = { ---@type table<string, fun(ctx?: vim.api.keyset.create_user_command.command_args)>
       Session = M.session_menu,
-      New = vim.cmd.ProjectAdd,
+      New = function()
+        vim.cmd.Project('add')
+      end,
       Recents = M.recents_menu,
       Delete = M.delete_menu,
       Rename = M.rename_menu,
-      Config = require('project.commands').cmds.ProjectConfig,
-      Historyfile = vim.cmd.ProjectHistory,
+      Config = function()
+        vim.cmd.Project('config')
+      end,
+      Historyfile = function()
+        vim.cmd.Project('history')
+      end,
       Export = M.gen_export_prompt,
       Import = M.gen_import_prompt,
       Help = function()
         vim.cmd.help('project-nvim')
       end,
-      Checkhealth = vim.cmd.ProjectHealth or function()
-        vim.cmd.checkhealth('project')
+      Checkhealth = function()
+        vim.cmd.Project('health')
       end,
       Exit = function() end,
     }
-    if vim.g.project_picker_loaded == 1 and vim.cmd.ProjectPicker then
+    if vim.g.project_picker_loaded == 1 then
       res.Picker = function()
-        vim.cmd.ProjectPicker()
+        vim.cmd.Project('picker')
       end
     end
-    if vim.g.project_snacks_loaded == 1 and vim.cmd.ProjectSnacks then
+    if vim.g.project_snacks_loaded == 1 then
       res.Snacks = function()
-        vim.cmd.ProjectSnacks()
+        vim.cmd.Project('snacks')
       end
     end
     if vim.g.project_telescope_loaded == 1 then
@@ -453,8 +459,9 @@ M.open_menu = M.new({
       res.FzfLua = require('project.extensions.fzf-lua').run_fzf_lua
     end
     if Config.options.log.enabled then
-      local Log = require('project.util.log')
-      res.Log = not Log.window and Log.open_win or Log.close_win
+      res.Log = function()
+        vim.cmd.Project({ args = { 'log', 'toggle' } })
+      end
     end
     return res
   end,
@@ -477,10 +484,10 @@ M.open_menu = M.new({
       'Import',
       'Help',
     }
-    if vim.g.project_snacks_loaded == 1 and vim.cmd.ProjectSnacks then
+    if vim.g.project_snacks_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'Snacks')
     end
-    if vim.g.project_picker_loaded == 1 and vim.cmd.ProjectPicker then
+    if vim.g.project_picker_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'Picker')
     end
     if vim.g.project_telescope_loaded == 1 then

@@ -138,18 +138,9 @@ function M.setup(opts)
     vim.notify('snacks.nvim is not installed! Aborting.', vim.log.levels.ERROR)
     return
   end
-
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   M.config = vim.tbl_deep_extend('force', M.config, opts or {})
-
-  require('project.commands').new({
-    {
-      name = 'ProjectSnacks',
-      desc = 'Project picker using snacks.nvim',
-      callback = M.pick,
-    },
-  })
 
   vim.g.project_snacks_loaded = 1
 end

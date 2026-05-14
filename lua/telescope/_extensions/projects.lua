@@ -15,20 +15,12 @@ local projects = require('telescope._extensions.projects.main').projects
 ---@field projects fun(opts?: table)
 ---@field health function
 ---@field setup fun(opts?: table)
-local Projects = require('telescope').register_extension({
+local M = require('telescope').register_extension({
   setup = setup,
   health = require('telescope._extensions.projects.healthcheck'),
   exports = { projects = projects },
   projects = projects,
 })
 
-require('project.commands').new({
-  {
-    name = 'ProjectTelescope',
-    desc = 'Telescope shortcut for `projects` picker',
-    callback = Projects.projects,
-  },
-})
-
-return Projects
+return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

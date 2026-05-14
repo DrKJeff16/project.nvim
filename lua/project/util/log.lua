@@ -176,58 +176,6 @@ function M.write(data, lvl)
   return msg
 end
 
-function M.create_commands()
-  require('project.commands').new({
-    {
-      name = 'ProjectLog',
-      callback = function(ctx)
-        if vim.tbl_isempty(ctx.fargs) then
-          M.toggle_win()
-          return
-        end
-
-        local arg = ctx.fargs[1] ---@type 'clear'|'close'|'open'|'toggle'
-        if not vim.list_contains({ 'clear', 'close', 'open', 'toggle' }, arg) then
-          vim.notify('Usage - `:ProjectLog [clear|close|oppen|toggle]`', INFO)
-          return
-        end
-
-        if arg == 'clear' then
-          M.clear_log()
-          return
-        end
-        if arg == 'close' then
-          M.close_win()
-          return
-        end
-        if arg == 'open' then
-          M.open_win()
-          return
-        end
-
-        M.toggle_win()
-      end,
-      desc = 'Either opens the `project.nvim` log or clears the log file if `clear` is passed',
-      nargs = '?',
-      complete = function(_, line)
-        local args = vim.split(line, '%s+', { trimempty = false })
-        if (args[1]:sub(-1) == '!' and #args == 1) or #args > 2 then
-          return {}
-        end
-        local res = {}
-        for _, comp in ipairs({ 'clear', 'close', 'open', 'toggle' }) do
-          if vim.startswith(comp, args[2]) then
-            table.insert(res, comp)
-          end
-        end
-        table.sort(res)
-
-        return res
-      end,
-    },
-  })
-end
-
 ---@param mode uv.fs_open.flags
 ---@return integer|nil fd
 ---@return uv.fs_stat.result|nil stat
@@ -266,7 +214,8 @@ function M.setup()
   uv.fs_write(fd, (stat.size >= 1 and '\n' or '') .. os.date(('%s    %s    %s\n'):format(head, '%x  (%H:%M:%S)', head)))
 
   setup_watch()
-  M.create_commands()
+
+  vim.g.project_log_loaded = 1
 end
 
 function M.open_win()
