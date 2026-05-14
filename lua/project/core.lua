@@ -14,7 +14,7 @@ local Log = require('project.util.log')
 local Path = require('project.util.path')
 local Util = require('project.util')
 
-local per_project_bufs = {} ---@type table<string, integer[]>
+local per_project_bufs = {} ---@type table<string, table<string, integer[]>>
 
 ---The `project.nvim` API module.
 --- ---
@@ -24,7 +24,7 @@ local per_project_bufs = {} ---@type table<string, integer[]>
 ---@field public last_project string|nil
 local M = {}
 
----@return table<string, integer[]> per_project_bufs
+---@return table<string, table<string, integer[]>> per_project_bufs
 function M._get_project_bufs()
   return per_project_bufs
 end
@@ -201,11 +201,16 @@ end
 
 function M.refresh_project_bufs()
   for dir, bufs in pairs(per_project_bufs) do
-    local bufnrs = {} ---@type integer[]
-    for _, buf in ipairs(bufs) do
-      if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
-        table.insert(bufnrs, buf)
+    local bufnrs = {} ---@type table<string, integer[]>
+    for name, buf in pairs(bufs) do
+      bufnrs[name] = bufnrs[name] or {}
+      for _, v in ipairs(buf) do
+        if vim.api.nvim_buf_is_valid(v) and vim.api.nvim_buf_is_loaded(v) then
+          table.insert(bufnrs[name], v)
+        end
       end
+
+      bufnrs[name] = not vim.tbl_isempty(bufnrs[name]) and bufnrs[name] or nil
     end
 
     per_project_bufs[dir] = not vim.tbl_isempty(bufnrs) and vim.deepcopy(bufnrs) or nil
@@ -215,7 +220,8 @@ function M.refresh_project_bufs()
 
   local sessions = {} ---@type string[]|ProjectHistoryEntry[]
   for _, session in ipairs(History.session_projects) do
-    if per_project_bufs[History.legacy and session or session.path] then
+    local proj_buf_name = History.legacy and session or session.path --[[@as string]]
+    if per_project_bufs[proj_buf_name] and not vim.tbl_isempty(per_project_bufs[proj_buf_name]) then
       table.insert(sessions, session)
     end
   end
@@ -277,10 +283,13 @@ function M.set_pwd(dir, method, bufnr)
   end
 
   if bufnr then
+    local buf_name = Util.strip_slash(vim.api.nvim_buf_get_name(bufnr))
     if not per_project_bufs[dir] then
-      per_project_bufs[dir] = { bufnr }
-    elseif not vim.list_contains(per_project_bufs[dir], bufnr) then
-      table.insert(per_project_bufs[dir], bufnr)
+      per_project_bufs[dir] = { [buf_name] = { bufnr } }
+    elseif not per_project_bufs[dir][buf_name] then
+      per_project_bufs[dir][buf_name] = { bufnr }
+    elseif not vim.tbl_contains(per_project_bufs[dir][buf_name], bufnr) then
+      table.insert(per_project_bufs[dir][buf_name], bufnr)
     end
 
     M.refresh_project_bufs()
