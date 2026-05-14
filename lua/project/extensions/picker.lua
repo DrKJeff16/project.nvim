@@ -1,5 +1,4 @@
 local MODSTR = 'project.extensions.picker'
-local Commands = require('project.commands')
 local Log = require('project.util.log')
 local Util = require('project.util')
 
@@ -16,26 +15,6 @@ function M.setup()
   end
 
   vim.g.project_picker_loaded = 1
-
-  Commands.new({
-    {
-      name = 'ProjectPicker',
-      desc = 'Open the picker.nvim picker for project.nvim',
-      callback = function(ctx)
-        local cmd = { 'rg', '--files', '--ignore', '--text', '--glob', '!.git/' }
-        if ctx.bang or require('project.config').options.picker.hidden then
-          table.insert(cmd, '--hidden')
-        end
-        require('picker.sources.files').set({ cmd = cmd })
-        require('picker.windows').open(M.source)
-
-        Log.debug('(:ProectPicker): Opening `picker.nvim` picker.')
-      end,
-      bang = true,
-    },
-  })
-
-  Commands.create_user_commands()
 end
 
 return M

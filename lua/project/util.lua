@@ -1,7 +1,6 @@
 ---@module 'project._meta'
 
 local MODSTR = 'project.util'
-local ERROR = vim.log.levels.ERROR
 
 ---@class Project.Util
 local M = {}
