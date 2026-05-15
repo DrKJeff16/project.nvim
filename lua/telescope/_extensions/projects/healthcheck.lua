@@ -1,5 +1,5 @@
 local MODSTR = 'project.health'
-local Util = require('project.util')
+local Project = require('project')
 
 local function setup_check()
   local setup_called = vim.g.project_setup == 1
@@ -16,7 +16,7 @@ local function setup_check()
     ' ',
     split_opts
   )[2]
-  if Util.vim_has('nvim-0.11') then
+  if Project.util.vim_has('nvim-0.11') then
     vim.health.ok(('nvim version is at least `v0.11` (`%s`)'):format(version))
   else
     vim.health.warn(('nvim version is lower than `v0.11`! (`%s`)'):format(version))
@@ -25,7 +25,7 @@ local function setup_check()
 end
 
 local function telescope_check()
-  if not Util.mod_exists('telescope') then
+  if not Project.util.mod_exists('telescope') then
     vim.health.error('`telescope.nvim` is not installed!')
     return
   end
@@ -35,16 +35,16 @@ local function telescope_check()
   end
   vim.health.ok('`projects` picker extension loaded')
 
-  local opts_telescope = require('project.config').options.telescope
-  if not Util.is_type('table', opts_telescope) then
+  local opts_telescope = Project.config.options.telescope
+  if not Project.util.is_type('table', opts_telescope) then
     vim.health.warn('`projects` does not have telescope options set up')
     return
   end
 
   for k, v in pairs(opts_telescope) do
-    local str, warning = Util.format_per_type(type(v), v)
+    local str, warning = Project.util.format_per_type(type(v), v)
     str = ('`%s`: %s'):format(k, str)
-    if Util.is_type('boolean', warning) and warning then
+    if Project.util.is_type('boolean', warning) and warning then
       vim.health.warn(str)
     else
       vim.health.ok(str)
@@ -60,6 +60,6 @@ return function()
   end
 
   telescope_check()
-  require('project.util.log').debug(('(%s): `checkhealth` successfully called.'):format(MODSTR))
+  Project.util.log.debug(('(%s): `checkhealth` successfully called.'):format(MODSTR))
 end
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

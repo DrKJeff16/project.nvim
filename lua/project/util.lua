@@ -3,6 +3,10 @@
 local MODSTR = 'project.util'
 
 ---@class Project.Util
+---@field globtopattern Project.Util.Glob
+---@field history Project.Util.History
+---@field log Project.Log
+---@field path Project.Util.Path
 local M = {}
 
 ---@param bufnr integer
@@ -759,5 +763,14 @@ function M.normalise_path(path)
   return M.is_windows() and (normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)) or normalised_path
 end
 
-return M
+local Util = setmetatable(M, { ---@type Project.Util
+  __index = function(self, k)
+    if M.mod_exists('project.util.' .. k) then
+      return require('project.util.' .. k)
+    end
+    return rawget(self, k) or nil
+  end,
+})
+
+return Util
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

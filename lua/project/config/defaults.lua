@@ -176,7 +176,7 @@ function D:verify_datapath()
     self.datapath = nil ---@diagnostic disable-line:inject-field
   end
 
-  if not (self.history.save_dir and require('project.util').dir_exists(self.history.save_dir)) then
+  if not (self.history.save_dir and Util.dir_exists(self.history.save_dir)) then
     vim.notify(('Invalid save_dir `%s`, reverting to default.'):format(self.history.save_dir), WARN)
     self.history.save_dir = DEFAULTS.history.save_dir
   end
@@ -200,7 +200,6 @@ function D:gen_methods()
 end
 
 function D:verify_logging()
-  local Path = require('project.util.path')
   local log = self.log
   if not log or type(log) ~= 'table' then
     self.log = vim.deepcopy(DEFAULTS.log)
@@ -212,7 +211,7 @@ function D:verify_logging()
   end
 
   ---@diagnostic disable:need-check-nil
-  if not (Util.is_type('string', log.logpath) and Path.exists(log.logpath)) then
+  if not (Util.is_type('string', log.logpath) and Util.path.exists(log.logpath)) then
     self.log.logpath = DEFAULTS.log.logpath
   end
   if not (Util.is_type('number', log.max_size) and log.max_size > 0) then

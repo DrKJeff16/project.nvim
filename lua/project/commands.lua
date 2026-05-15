@@ -6,8 +6,7 @@ local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
 local Config = require('project.config')
 local Core = require('project.core')
-local History = require('project.util.history')
-local Log = require('project.util.log')
+local Extensions = require('project.extensions')
 local Popup = require('project.popup')
 local Util = require('project.util')
 
@@ -20,7 +19,7 @@ local function complete_items(_, line)
   end
 
   local recents = {} ---@type ProjectHistoryEntry[]|string[]
-  for _, v in ipairs(Util.reverse(History.get_recent_projects(true, true))) do
+  for _, v in ipairs(Util.reverse(Util.history.get_recent_projects(true, true))) do
     if not vim.list_contains(args, v) then
       table.insert(recents, v)
     end
@@ -195,7 +194,7 @@ function M.create_user_commands()
           end
           if args[2] == 'history' and #args == 3 then
             local options = { 'clear' } ---@type string[]
-            table.insert(options, History.legacy and 'migrate' or 'rename')
+            table.insert(options, Util.history.legacy and 'migrate' or 'rename')
 
             for _, choice in ipairs(options) do
               if vim.startswith(choice, args[3]) then
@@ -323,15 +322,15 @@ function M.create_user_commands()
               if
                 Core.current_project ~= input
                 and not vim.tbl_contains(
-                  History.session_projects,
+                  Util.history.session_projects,
                   function(val) ---@param val string|ProjectHistoryEntry
-                    return (History.legacy and val or val.path) == input
+                    return (Util.history.legacy and val or val.path) == input
                   end,
                   { predicate = true }
                 )
               then
                 Core.set_pwd(input, 'manual')
-                History.write_history()
+                Util.history.write_history()
               else
                 msg = ('%s%sAlready added `%s`!'):format(msg, msg == '' and '' or '\n', input)
               end
@@ -357,9 +356,9 @@ function M.create_user_commands()
             return
           end
 
-          local recent = History.get_recent_projects()
+          local recent = Util.history.get_recent_projects()
           if not recent then
-            Log.error('(:Project delete): No recent projects!')
+            Util.log.error('(:Project delete): No recent projects!')
             vim.notify('(:Project delete): No recent projects!', ERROR)
             return
           end
@@ -370,34 +369,34 @@ function M.create_user_commands()
               not (
                 ctx.bang
                 or vim.tbl_contains(recent, function(val) ---@param val string|ProjectHistoryEntry
-                  Log.debug(
+                  Util.log.debug(
                     ('`%s` =? `%s` ==> %s'):format(
                       path,
-                      History.legacy and val or val.path,
-                      vim.inspect((History.legacy and val or val.path) == path)
+                      Util.history.legacy and val or val.path,
+                      vim.inspect((Util.history.legacy and val or val.path) == path)
                     )
                   )
-                  return (History.legacy and val or val.path) == path
+                  return (Util.history.legacy and val or val.path) == path
                 end, { predicate = true })
               ) or path == ''
             then
-              Log.error(('(:Project delete): Could not delete `%s`, aborting'):format(path))
+              Util.log.error(('(:Project delete): Could not delete `%s`, aborting'):format(path))
               vim.notify(('(:Project delete): Could not delete `%s`, aborting'):format(path), ERROR)
               return
             end
             if
               vim.tbl_contains(recent, function(val) ---@param val string|ProjectHistoryEntry
-                Log.debug(
+                Util.log.debug(
                   ('`%s` =? `%s` ==> %s'):format(
                     path,
-                    History.legacy and val or val.path,
-                    vim.inspect((History.legacy and val or val.path) == path)
+                    Util.history.legacy and val or val.path,
+                    vim.inspect((Util.history.legacy and val or val.path) == path)
                   )
                 )
-                return (History.legacy and val or val.path) == path
+                return (Util.history.legacy and val or val.path) == path
               end, { predicate = true })
             then
-              History.delete_project(path)
+              Util.history.delete_project(path)
             end
           end
           return
@@ -408,11 +407,11 @@ function M.create_user_commands()
             return
           end
 
-          History.export_history_json(fargs[1], #fargs == 2 and tonumber(fargs[2]) or nil, ctx.bang)
+          Util.history.export_history_json(fargs[1], #fargs == 2 and tonumber(fargs[2]) or nil, ctx.bang)
           return
         end
         if vim.g.project_fzf_lua_loaded == 1 and ctx.fargs[1] == 'fzf-lua' and vim.tbl_isempty(fargs) then
-          require('project.extensions.fzf-lua').run_fzf_lua()
+          Extensions['fzf-lua'].run_fzf_lua()
           return
         end
         if ctx.fargs[1] == 'health' and vim.tbl_isempty(fargs) then
@@ -421,28 +420,28 @@ function M.create_user_commands()
         end
         if ctx.fargs[1] == 'history' then
           if vim.tbl_isempty(fargs) then
-            History.toggle_win()
+            Util.history.toggle_win()
             return
           end
 
           local options = { 'clear', 'migrate' } ---@type string[]
-          if not History.legacy then
+          if not Util.history.legacy then
             table.insert(options, 'rename')
           end
 
           if vim.list_contains(options, fargs[1]) then
             if fargs[1] == 'clear' then
-              History.clear_historyfile(ctx.bang)
+              Util.history.clear_historyfile(ctx.bang)
               return
             end
 
             if fargs[1] == 'migrate' then
-              if not History.legacy then
+              if not Util.history.legacy then
                 vim.notify('Your project history has already been migrated!', WARN)
                 return
               end
 
-              History.migrate()
+              Util.history.migrate()
               return
             end
 
@@ -471,30 +470,30 @@ function M.create_user_commands()
             return
           end
 
-          History.import_history_json(fargs[1], ctx.bang)
+          Util.history.import_history_json(fargs[1], ctx.bang)
           return
         end
         if vim.g.project_log_loaded == 1 and ctx.fargs[1] == 'log' then
           if vim.tbl_isempty(fargs) then
-            Log.toggle_win()
+            Util.log.toggle_win()
             return
           end
 
           local arg = fargs[1] ---@type 'clear'|'close'|'open'|'toggle'
           if arg == 'clear' then
-            Log.clear_log()
+            Util.log.clear_log()
             return
           end
           if arg == 'close' then
-            Log.close_win()
+            Util.log.close_win()
             return
           end
           if arg == 'open' then
-            Log.open_win()
+            Util.log.open_win()
             return
           end
           if arg == 'toggle' then
-            Log.toggle_win()
+            Util.log.toggle_win()
             return
           end
         end
@@ -504,9 +503,9 @@ function M.create_user_commands()
             table.insert(cmd, '--hidden')
           end
           require('picker.sources.files').set({ cmd = cmd })
-          require('picker.windows').open(require('project.extensions.picker').source)
+          require('picker.windows').open(Extensions.picker.source)
 
-          Log.debug('(:Project picker): Opening `picker.nvim` picker.')
+          Util.log.debug('(:Project picker): Opening `picker.nvim` picker.')
           return
         end
         if ctx.fargs[1] == 'recents' and vim.tbl_isempty(fargs) then
@@ -532,7 +531,7 @@ function M.create_user_commands()
           return
         end
         if vim.g.project_snacks_loaded == 1 and ctx.fargs[1] == 'snacks' and vim.tbl_isempty(fargs) then
-          require('project.extensions.snacks').pick()
+          Extensions.snacks.pick()
           return
         end
         if vim.g.project_telescope_loaded == 1 and ctx.fargs[1] == 'telescope' and vim.tbl_isempty(fargs) then

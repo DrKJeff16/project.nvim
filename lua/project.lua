@@ -3,25 +3,31 @@ local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
 local Config = require('project.config')
 local Core = require('project.core')
-local History = require('project.util.history')
-local Log = require('project.util.log')
+local Extensions = require('project.extensions')
 local Popup = require('project.popup')
 local Util = require('project.util')
 
 ---The `project.nvim` module.
 --- ---
 ---@class Project
+---@field commands Project.Commands
+---@field config Project.Config
+---@field core Project.Core
+---@field extensions Project.Extensions
+---@field health Project.Health
+---@field popup Project.Popup
+---@field util Project.Util
 local M = {}
 
-M.delete_project = History.delete_project
+M.delete_project = Util.history.delete_project
 M.get_config = Config.get_config
 M.get_history_paths = Core.get_history_paths
 M.get_last_project = Core.get_last_project
 M.get_project_root = Core.get_project_root
-M.get_recent_projects = History.get_recent_projects
-M.rename_project = History.rename_project
+M.get_recent_projects = Util.history.get_recent_projects
+M.rename_project = Util.history.rename_project
 M.root_files = Core.root_files
-M.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
+M.run_fzf_lua = Extensions['fzf-lua'].run_fzf_lua
 M.setup = Config.setup
 
 function M.delete_menu()
@@ -54,11 +60,11 @@ function M.current_project(refresh)
   end
 
   if refresh then
-    Log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
+    Util.log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
     return Core.get_current_project()
   end
 
-  Log.debug(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
+  Util.log.debug(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
   return Core.current_project, Core.current_method, Core.last_project
 end
 
@@ -120,7 +126,7 @@ function M.add_root_patterns(patterns)
     error(('(%s.add_root_patterns): `project.nvim` is not setup!'):format(MODSTR))
   end
   if not (Config.options and Config.options.patterns and Util.is_type('table', Config.options.patterns)) then
-    Log.error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
+    Util.log.error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
     error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
   end
 
@@ -128,7 +134,7 @@ function M.add_root_patterns(patterns)
     ---@cast patterns string
     if patterns == '' or vim.list_contains(Config.options.patterns, patterns) then
       local msg = ('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns)
-      Log.warn(msg)
+      Util.log.warn(msg)
       vim.notify(msg, WARN)
     else
       table.insert(Config.options.patterns, patterns)
@@ -139,7 +145,7 @@ function M.add_root_patterns(patterns)
   ---@cast patterns string[]
   if vim.tbl_isempty(patterns) then
     vim.notify(('(%s.add_root_patterns): Patterns table is empty!'):format(MODSTR), ERROR)
-    Log.error(('(%s.add_root_patterns): Patterns table is empty!'):format(MODSTR))
+    Util.log.error(('(%s.add_root_patterns): Patterns table is empty!'):format(MODSTR))
     return
   end
 
@@ -150,5 +156,14 @@ function M.add_root_patterns(patterns)
   end
 end
 
-return M
+local Project = setmetatable(M, { ---@type Project
+  __index = function(self, k)
+    if Util.mod_exists('project.' .. k) then
+      return require('project.' .. k)
+    end
+    return rawget(self, k) or nil
+  end,
+})
+
+return Project
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

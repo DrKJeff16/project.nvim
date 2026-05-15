@@ -1,7 +1,10 @@
 ---@module 'project._meta'
 
 local MODSTR = 'project.config'
+local Extensions = require('project.extensions')
 local Util = require('project.util')
+
+local float = nil ---@type nil|Project.ConfigLoc
 
 ---Get the default options for configuring `project`.
 --- ---
@@ -13,7 +16,7 @@ end
 
 ---@class Project.Config
 ---@field custom_projects ProjectConfigHistoryEntry[]
----@field float? Project.ConfigLoc
+---@field defaults ProjectDefaults
 ---@field options ProjectDefaults
 local M = {}
 
@@ -25,7 +28,7 @@ M.options = get_defaults():new()
 function M.setup(options)
   Util.validate({ options = { options, { 'table', 'nil' }, true } })
 
-  local pattern_exclude = require('project.util.globtopattern').pattern_exclude
+  local pattern_exclude = Util.globtopattern.pattern_exclude
   M.options = get_defaults():new(options or {})
 
   M.detection_methods = M.options:gen_methods()
@@ -38,35 +41,34 @@ function M.setup(options)
   vim.o.autochdir = M.options.enable_autochdir
 
   -- WARN: THIS GOES FIRST!!!!
-  require('project.util.path').setup(M.options.history.save_dir, M.options.history.save_file)
+  Util.path.setup(M.options.history.save_dir, M.options.history.save_file)
 
-  local Log = require('project.util.log')
   if M.options.log.enabled then
-    Log.setup()
-    Log.debug(('(%s.setup): Initialized logging.'):format(MODSTR))
+    Util.log.setup()
+    Util.log.debug(('(%s.setup): Initialized logging.'):format(MODSTR))
   end
 
   if vim.g.project_setup ~= 1 then
     vim.g.project_setup = 1
-    Log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
+    Util.log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
   end
 
   require('project.commands').create_user_commands()
-  Log.debug(('(%s.setup): User commands created.'):format(MODSTR))
+  Util.log.debug(('(%s.setup): User commands created.'):format(MODSTR))
 
   require('project.core').setup()
 
   if M.options.fzf_lua.enabled then
-    Log.debug(('(%s.setup): fzf-lua integration enabled.'):format(MODSTR))
-    require('project.extensions.fzf-lua').setup()
+    Util.log.debug(('(%s.setup): fzf-lua integration enabled.'):format(MODSTR))
+    Extensions['fzf-lua'].setup()
   end
   if M.options.picker.enabled then
-    Log.debug(('(%s.setup): picker.nvim integration enabled.'):format(MODSTR))
-    require('project.extensions.picker').setup()
+    Util.log.debug(('(%s.setup): picker.nvim integration enabled.'):format(MODSTR))
+    Extensions.picker.setup()
   end
   if M.options.snacks.enabled then
-    Log.debug(('(%s.setup): snacks.nvim integration enabled.'):format(MODSTR))
-    require('project.extensions.snacks').setup(M.options.snacks.opts or {})
+    Util.log.debug(('(%s.setup): snacks.nvim integration enabled.'):format(MODSTR))
+    Extensions.snacks.setup(M.options.snacks.opts or {})
   end
 
   M.custom_projects = vim.deepcopy(M.options.custom_projects or {})
@@ -76,7 +78,7 @@ end
 ---@nodiscard
 function M.get_config()
   if vim.g.project_setup ~= 1 then
-    require('project.util.log').error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR))
+    Util.log.error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR))
     error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR))
   end
   local exceptions = {
@@ -103,7 +105,7 @@ function M.get_config()
 end
 
 function M.open_win()
-  if M.float then
+  if float then
     return
   end
 
@@ -150,22 +152,22 @@ function M.open_win()
   vim.keymap.set('n', 'q', M.close_win, { buffer = bufnr })
   vim.keymap.set('n', '<Esc>', M.close_win, { buffer = bufnr })
 
-  M.float = { bufnr = bufnr, win = win }
+  float = { bufnr = bufnr, win = win }
 end
 
 function M.close_win()
-  if not M.float then
+  if not float then
     return
   end
 
-  pcall(vim.api.nvim_buf_delete, M.float.bufnr, { force = true })
-  pcall(vim.api.nvim_win_close, M.float.win, true)
+  pcall(vim.api.nvim_buf_delete, float.bufnr, { force = true })
+  pcall(vim.api.nvim_win_close, float.win, true)
 
-  M.float = nil
+  float = nil
 end
 
 function M.toggle_win()
-  if not M.float then
+  if not float then
     M.open_win()
     return
   end
@@ -173,5 +175,14 @@ function M.toggle_win()
   M.close_win()
 end
 
-return M
+local Config = setmetatable(M, { ---@type Project.Config
+  __index = function(self, k)
+    if Util.mod_exists('project.config.' .. k) then
+      return require('project.config.' .. k)
+    end
+    return rawget(self, k) or nil
+  end,
+})
+
+return Config
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:
