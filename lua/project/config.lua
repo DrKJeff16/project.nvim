@@ -53,7 +53,7 @@ function M.setup(options)
     Util.log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
   end
 
-  require('project.commands').create_user_commands()
+  require('project.commands').setup()
   Util.log.debug(('(%s.setup): User commands created.'):format(MODSTR))
 
   require('project.core').setup()
