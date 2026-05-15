@@ -271,15 +271,10 @@ function M.set_pwd(dir, method, bufnr)
       path = dir,
       name = custom_name
         or History.find_entry('recent', dir, 'name')
-        or (Util.strip_slash(dir, ':p:h:h:t') .. '/' .. Util.strip_slash(dir, ':p:h:t')),
+        or vim.fs.joinpath(Util.strip_slash(dir, ':p:h:h:t'), Util.strip_slash(dir, ':p:h:t')),
     })
     modified = true
-    Log.info(
-      ('(%s.set_pwd): Added project `%s` to the top of session list'):format(
-        MODSTR,
-        Util.strip_slash(unexpand_dir, ':p:~')
-      )
-    )
+    Log.info(('(%s.set_pwd): Added project `%s` to the top of session list'):format(MODSTR, unexpand_dir))
   end
 
   if bufnr then
