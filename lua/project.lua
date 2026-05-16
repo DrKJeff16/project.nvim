@@ -25,7 +25,7 @@ local Util = require('project.util')
 ---@field popup Project.Popup
 ---@field recents_menu function
 ---@field rename_project fun(path: string, name: string): success: boolean
----@field root_files fun(scan_what?: 'all'|'all_directories'|'all_files'|'all_hidden'|'all_visible'|'hidden_directories'|'hidden_files'|'visible_directories'|'visible_files', path?: string, prefix?: string): files_list: string[]|nil
+---@field root_files fun(scan_what?: Project.Core.ScanRoot, path?: string, prefix?: string): files_list: string[]|nil
 ---@field run_fzf_lua function
 ---@field session_menu function
 ---@field setup fun(options?: ProjectOpts)
@@ -120,9 +120,8 @@ function M.add_root_patterns(patterns)
   if Util.is_type('string', patterns) then
     ---@cast patterns string
     if patterns == '' or vim.list_contains(Config.options.patterns, patterns) then
-      local msg = ('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns)
-      Util.log.warn(msg)
-      vim.notify(msg, WARN)
+      Util.log.warn(('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns))
+      vim.notify(('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns), WARN)
     else
       table.insert(Config.options.patterns, patterns)
     end
@@ -130,10 +129,9 @@ function M.add_root_patterns(patterns)
   end
 
   ---@cast patterns string[]
-  if vim.tbl_isempty(patterns) then
-    vim.notify(('(%s.add_root_patterns): Patterns table is empty!'):format(MODSTR), ERROR)
-    Util.log.error(('(%s.add_root_patterns): Patterns table is empty!'):format(MODSTR))
-    return
+  if vim.tbl_isempty(patterns) or not vim.islist(patterns) then
+    Util.log.error(('(%s.add_root_patterns): Patterns table is empty or not a list!'):format(MODSTR))
+    error(('(%s.add_root_patterns): Patterns table is empty or not a list!'):format(MODSTR))
   end
 
   for _, pat in ipairs(patterns) do

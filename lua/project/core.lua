@@ -486,7 +486,7 @@ function M.on_buf_enter(bufnr)
   end
 end
 
----@param scan_what? 'visible_files'|'visible_directories'|'all_visible'|'all_files'|'all_directories'|'all'|'hidden_files'|'hidden_directories'|'all_hidden'
+---@param scan_what? Project.Core.ScanRoot
 ---@param path? string
 ---@param prefix? string
 ---@return string[]|nil files_list

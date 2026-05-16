@@ -1,6 +1,19 @@
 ---@meta
 ---@diagnostic disable:unused-local
 
+---@enum (Key) Project.Core.ScanRoot
+local scan_what = {
+  all = 1,
+  all_directories = 1,
+  all_files = 1,
+  all_hidden = 1,
+  all_visible = 1,
+  hidden_directories = 1,
+  hidden_files = 1,
+  visible_directories = 1,
+  visible_files = 1,
+}
+
 ---@enum (key) Project.Telescope.ActionNames
 local action_names = {
   browse_project_files = 1,
