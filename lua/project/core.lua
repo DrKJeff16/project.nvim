@@ -226,16 +226,20 @@ function M.refresh_project_bufs()
   Util.history.session_projects = vim.deepcopy(sessions)
 end
 
----@param dir string
----@param method string
+---@param dir? string
+---@param method? string
 ---@param bufnr? integer
 ---@return boolean success
 function M.set_pwd(dir, method, bufnr)
   Util.validate({
-    dir = { dir, { 'string' } },
-    method = { method, { 'string' } },
+    dir = { dir, { 'string', 'nil' }, true },
+    method = { method, { 'string', 'nil' }, true },
     bufnr = { bufnr, { 'number', 'nil' }, true },
   })
+  if not (dir and method) then
+    return false
+  end
+
   dir = Util.strip_slash(dir)
   if not Util.path.exists(dir) then
     return false
@@ -467,23 +471,19 @@ function M.on_buf_enter(bufnr)
 
   dir = dir == '' and Util.strip_slash(bufname, ':p:h') or Util.strip_slash(dir)
   dir = Util.is_windows() and dir:gsub('\\', '/') or dir
-  if not (Util.path.exists(dir) and Util.path.root_included(dir)) or Util.path.is_excluded(dir) then
-    return
-  end
-
-  local ft = Util.optget('filetype', 'buf', bufnr)
-  if vim.list_contains(Config.options.disable_on.ft, ft) then
+  if
+    not (Util.path.exists(dir) and Util.path.root_included(dir))
+    or Util.path.is_excluded(dir)
+    or vim.list_contains(Config.options.disable_on.ft, Util.optget('filetype', 'buf', bufnr))
+  then
     return
   end
 
   M.current_project, M.current_method = M.get_current_project(bufnr)
-  local change = M.current_project ~= (uv.cwd() or vim.fn.getcwd())
-  M.set_pwd(M.current_project, M.current_method, bufnr)
-
-  if change then
-    M.last_project = M.get_last_project()
+  if M.set_pwd(M.current_project, M.current_method, bufnr) then
+    M.current_project, M.current_method, M.last_project = M.get_current_project(bufnr)
+    Util.history.write_history()
   end
-  Util.history.write_history()
 end
 
 ---@param scan_what? 'visible_files'|'visible_directories'|'all_visible'|'all_files'|'all_directories'|'all'|'hidden_files'|'hidden_directories'|'all_hidden'
