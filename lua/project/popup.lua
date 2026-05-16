@@ -199,18 +199,11 @@ M.delete_menu = M.new({
     vim.ui.select(choices_list, {
       prompt = 'Select a project to delete:',
       format_item = function(item) ---@param item string
-        if Config.options.show_by_name and not Util.history.legacy then
-          local path = Util.history.find_entry('recent', item, 'path')
-          for _, v in ipairs(Util.history.session_projects) do
-            ---@cast v ProjectHistoryEntry
-            if v.path == path then
-              return '* ' .. item
-            end
-          end
-
+        if item == 'Exit' then
           return item
         end
-        return (vim.list_contains(Util.history.session_projects, item) and '* ' or '') .. item
+
+        return (Util.history.find_entry('session', item, 'path') and '* ' or '') .. item
       end,
     }, function(item)
       if not item then
@@ -339,9 +332,7 @@ M.recents_menu = M.new({
           return item
         end
 
-        local curr = Core.current_project or ''
-        local entry = Util.history.find_entry('recent', item, 'path')
-        return (entry == curr and '* ' or '') .. item
+        return (Util.history.find_entry('session', item, 'path') and '* ' or '') .. item
       end,
     }, function(item) ---@param item string
       if not item or item == '' then
