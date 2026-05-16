@@ -58,7 +58,7 @@ If you wish to disable this warning, set `g:project_disable_win32_warning` to `1
 end
 
 function M.options_check()
-  vim.health.start('Config')
+  vim.health.start('Configuration')
   local Options = vim.deepcopy(Config.options)
   if not Util.is_type('table', Options) then
     vim.health.error('The config table is missing!')
@@ -137,34 +137,24 @@ end
 function M.logging_check()
   vim.health.start('Log')
 
-  if not Config.options.log.enabled then
-    vim.health.ok('Logging disabled!')
+  if not Config.options.log.enabled or vim.g.project_log_loaded ~= 1 then
+    vim.health.ok('Logging disabled. This does not represent an issue necessarily!')
     return
   end
 
   vim.health.ok('Logging enabled!')
-  if not (vim.cmd.ProjectLog and vim.is_callable(vim.cmd.ProjectLog)) then
-    vim.health.warn('`:ProjectLog` user command is not loaded!')
-    return
-  end
-
-  vim.health.ok('`:ProjectLog` user command loaded!')
+  vim.health.ok('`:Project log` user command available!')
 end
 
 function M.fzf_lua_check()
   vim.health.start('`fzf-lua` Integration')
-  if not Config.options.fzf_lua.enabled then
+  if not Config.options.fzf_lua.enabled or vim.g.project_fzf_lua_loaded ~= 1 then
     vim.health.warn('`fzf-lua` integration is disabled. This does not represent an issue necessarily!')
     return
   end
 
   vim.health.ok('`fzf-lua` integration enabled!')
-  if not (vim.cmd.ProjectFzf and vim.is_callable(vim.cmd.ProjectFzf)) then
-    vim.health.warn('`:ProjectFzf` user command is not loaded!')
-    return
-  end
-
-  vim.health.ok('`:ProjectFzf` user command loaded!')
+  vim.health.ok('`:Project fzf-lua` user command available!')
 end
 
 function M.recent_proj_check()
@@ -202,10 +192,10 @@ function M.check()
   end
   M.project_check()
   M.history_check()
-  M.logging_check()
   M.options_check()
-  M.recent_proj_check()
+  M.logging_check()
   M.fzf_lua_check()
+  M.recent_proj_check()
 
   Util.log.debug(('(%s): `checkhealth` successfully called.'):format(MODSTR))
 end
