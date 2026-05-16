@@ -83,6 +83,22 @@ local project_paths = { ---@diagnostic disable-line:unused-local
   projectpath = 1,
 }
 
+---@alias Project.Core.GetHistoryPaths
+---|fun(): history_paths: HistoryPath
+---|fun(path:ProjectPaths): history_paths: string
+
+---@alias Project.Core.GetLastProject
+---|fun(): last: string|nil
+---|fun(full_entry: false): last: string|nil
+---|fun(full_entry: true): last: ProjectHistoryEntry|nil
+
+---@alias Project.Util.History.GetRecentProjects
+---|fun(): recents: ProjectHistoryEntry[]
+---|fun(paths_only: false): recents: ProjectHistoryEntry[]
+---|fun(paths_only?: false, tilde: boolean): recents: ProjectHistoryEntry[]
+---|fun(paths_only: true): recents: string[]
+---|fun(paths_only: true, tilde: boolean): recents: string[]
+
 ---@class (exact) ProjectPickerItem.Hl
 ---@field [1] integer
 ---@field [2] integer

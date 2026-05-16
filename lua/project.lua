@@ -1,10 +1,9 @@
+---@module 'project._meta'
+
 local MODSTR = 'project'
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
 local Config = require('project.config')
-local Core = require('project.core')
-local Extensions = require('project.extensions')
-local Popup = require('project.popup')
 local Util = require('project.util')
 
 ---The `project.nvim` module.
@@ -13,38 +12,25 @@ local Util = require('project.util')
 ---@field commands Project.Commands
 ---@field config Project.Config
 ---@field core Project.Core
+---@field delete_menu function
+---@field delete_project fun(project: string|Project.ActionEntry, prompt?: boolean)
 ---@field extensions Project.Extensions
+---@field get_config fun(): config: string
+---@field get_history_paths Project.Core.GetHistoryPaths
+---@field get_last_project Project.Core.GetLastProject
+---@field get_project_root fun(bufnr?: integer): root: string|nil, method: string|nil
+---@field get_recent_projects Project.Util.History.GetRecentProjects
 ---@field health Project.Health
+---@field open_menu function
 ---@field popup Project.Popup
+---@field recents_menu function
+---@field rename_project fun(path: string, name: string): success: boolean
+---@field root_files fun(scan_what?: 'all'|'all_directories'|'all_files'|'all_hidden'|'all_visible'|'hidden_directories'|'hidden_files'|'visible_directories'|'visible_files', path?: string, prefix?: string): files_list: string[]|nil
+---@field run_fzf_lua function
+---@field session_menu function
+---@field setup fun(options?: ProjectOpts)
 ---@field util Project.Util
 local M = {}
-
-M.delete_project = Util.history.delete_project
-M.get_config = Config.get_config
-M.get_history_paths = Core.get_history_paths
-M.get_last_project = Core.get_last_project
-M.get_project_root = Core.get_project_root
-M.get_recent_projects = Util.history.get_recent_projects
-M.rename_project = Util.history.rename_project
-M.root_files = Core.root_files
-M.run_fzf_lua = Extensions['fzf-lua'].run_fzf_lua
-M.setup = Config.setup
-
-function M.delete_menu()
-  Popup.delete_menu()
-end
-
-function M.open_menu()
-  Popup.open_menu()
-end
-
-function M.recents_menu()
-  Popup.recents_menu()
-end
-
-function M.session_menu()
-  Popup.session_menu()
-end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
@@ -59,6 +45,7 @@ function M.current_project(refresh)
     refresh = false
   end
 
+  local Core = require('project.core')
   if refresh then
     Util.log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
     return Core.get_current_project()
@@ -157,9 +144,46 @@ function M.add_root_patterns(patterns)
 end
 
 local Project = setmetatable(M, { ---@type Project
+  ---@param self Project
+  ---@param k string|integer
   __index = function(self, k)
     if Util.mod_exists('project.' .. k) then
       return require('project.' .. k)
+    end
+    if k == 'delete_project' then
+      return self.util.history.delete_project
+    end
+    if k == 'get_config' then
+      return self.config.get_config
+    end
+    if k == 'get_history_paths' then
+      return self.core.get_history_paths
+    end
+    if k == 'get_last_project' then
+      return self.core.get_last_project
+    end
+    if k == 'get_project_root' then
+      return self.core.get_project_root
+    end
+    if k == 'get_recent_projects' then
+      return self.util.history.get_recent_projects
+    end
+    if k == 'rename_project' then
+      return self.util.history.rename_project
+    end
+    if k == 'root_files' then
+      return self.core.root_files
+    end
+    if k == 'run_fzf_lua' then
+      return self.extensions['fzf-lua'].run_fzf_lua
+    end
+    if k == 'setup' then
+      return self.config.setup
+    end
+    if vim.list_contains({ 'delete_menu', 'open_menu', 'recents_menu', 'session_menu' }, k) then
+      return function()
+        self.popup[k]()
+      end
     end
     return rawget(self, k) or nil
   end,
