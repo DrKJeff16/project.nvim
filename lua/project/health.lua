@@ -50,7 +50,7 @@ If you wish to disable this warning, set `g:project_disable_win32_warning` to `1
   end
 
   if Util.history.legacy then
-    vim.health.warn('Your history has not been migrated yet! Please run `:ProjectHistory migrate` to migrate.')
+    vim.health.warn('Your history has not been migrated yet! Please run `:Project history migrate` to migrate.')
   else
     vim.health.ok('Your history was migrated successfully! You can set names for your projects.')
   end

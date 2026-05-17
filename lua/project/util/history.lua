@@ -765,7 +765,7 @@ function M.is_legacy(data)
       Log.warn('History file is legacy!')
       vim.notify(
         [[project.nvim - Your history needs to be migrated to the new spec!
-To migrate simply run `:ProjectHistory migrate` in your cmdline.
+To migrate simply run `:Project history migrate` in your cmdline.
 
 If you encounter any bugs please raise an issue and it will be dealt with ASAP.]],
         WARN

@@ -98,7 +98,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 
 ---@alias Project.Core.GetHistoryPaths
 ---|fun(): history_paths: HistoryPath
----|fun(path:ProjectPaths): history_paths: string
+---|fun(path: ProjectPaths): history_paths: string
 
 ---@alias Project.Core.GetLastProject
 ---|fun(): last: string|nil
@@ -481,7 +481,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field lsp? ProjectOpts.LSP
 ---If `true` your root directory won't be changed automatically,
 ---so you have the option to manually do so
----using the `:ProjectRoot` command.
+---using the `:Project root` command.
 --- ---
 ---Default: `false`
 --- ---

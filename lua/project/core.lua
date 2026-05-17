@@ -315,11 +315,8 @@ function M.set_pwd(dir, method, bufnr)
     end
   end
 
-  if Config.options.before_attach and vim.is_callable(Config.options.before_attach) then
-    local ok = pcall(Config.options.before_attach, dir, method)
-    if ok then
-      Util.log.debug(('(%s.set_pwd): Ran `before_attach` hook successfully.'):format(MODSTR))
-    end
+  if Config.options.before_attach and pcall(Config.options.before_attach, dir, method) then
+    Util.log.debug(('(%s.set_pwd): Ran `before_attach` hook successfully.'):format(MODSTR))
   end
 
   if dir == Util.strip_slash(uv.cwd() or vim.fn.getcwd()) then
@@ -392,7 +389,7 @@ function M.get_project_root(bufnr)
     return
   end
 
-  local roots = {} ---@type { root: string, method_msg: string, method: 'lsp'|'pattern' }[]
+  local roots = {} ---@type { root: string, method_msg: string, method: string }[]
   local root, method = nil, nil ---@type string|nil, string|nil
   local ops = vim.tbl_keys(SWITCH) ---@type ('lsp'|'pattern')[]
   local success = false
