@@ -72,6 +72,28 @@ function M.setup(options)
   end
 
   M.custom_projects = vim.deepcopy(M.options.custom_projects or {})
+
+  local group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = true })
+  if M.options.before_attach and vim.is_callable(M.options.before_attach) then
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'ProjectAttachPre',
+      group = group,
+      callback = function(ev)
+        M.options.before_attach(ev.data.dir, ev.data.method)
+        Util.log.debug(('(%s.setup): Ran `before_attach` hook successfully.'):format(MODSTR))
+      end,
+    })
+  end
+  if M.options.on_attach and vim.is_callable(M.options.on_attach) then
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'ProjectAttachPost',
+      group = group,
+      callback = function(ev)
+        M.options.on_attach(ev.data.dir, ev.data.method)
+        Util.log.debug(('(%s.setup): Ran `on_attach` hook successfully.'):format(MODSTR))
+      end,
+    })
+  end
 end
 
 ---@return string config

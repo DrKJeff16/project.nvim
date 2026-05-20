@@ -315,8 +315,18 @@ function M.set_pwd(dir, method, bufnr)
     end
   end
 
-  if Config.options.before_attach and pcall(Config.options.before_attach, dir, method) then
-    Util.log.debug(('(%s.set_pwd): Ran `before_attach` hook successfully.'):format(MODSTR))
+  if
+    not vim.tbl_isempty(vim.api.nvim_get_autocmds({
+      event = 'User',
+      group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
+      pattern = { 'ProjectAttachPre' },
+    }))
+  then
+    vim.api.nvim_exec_autocmds('User', {
+      group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
+      pattern = 'ProjectAttachPre',
+      data = { dir = dir, method = method },
+    })
   end
 
   if dir == Util.strip_slash(uv.cwd() or vim.fn.getcwd()) then
@@ -350,10 +360,19 @@ function M.set_pwd(dir, method, bufnr)
     M.current_method = method
 
     Util.log.info(msg)
-    local on_attach = Config.options.on_attach
-    if on_attach and vim.is_callable(on_attach) then
-      on_attach(dir, method)
-      Util.log.debug(('(%s.set_pwd): Ran `on_attach` hook successfully.'):format(MODSTR))
+
+    if
+      not vim.tbl_isempty(vim.api.nvim_get_autocmds({
+        event = 'User',
+        group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
+        pattern = { 'ProjectAttachPost' },
+      }))
+    then
+      vim.api.nvim_exec_autocmds('User', {
+        group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
+        pattern = 'ProjectAttachPost',
+        data = { dir = dir, method = method },
+      })
     end
 
     Util.log.debug(
@@ -497,7 +516,7 @@ function M.root_files(scan_what, path, prefix)
     prefix = { prefix, { 'string', 'nil' }, true },
   })
   if not scan_what then
-    scan_what = Config.options.show_hidden and 'all' or 'all_visible'
+    scan_what = Config.options.show_hidden and 'all' or 'all_visible' --[[@as Project.Core.ScanRoot]]
   end
   path = (not path or path == '') and (M.get_current_project() or M.get_project_root()) or path
   if not path then
