@@ -637,7 +637,12 @@ end
 ---@param path? string
 function M.write_history(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
-  path = Util.strip_slash(path or Path.historyfile)
+  local Config = require('project.config')
+  path = Util.strip_slash(
+    path
+      or Path.historyfile
+      or vim.fs.joinpath(Config.options.history.save_dir, 'project_nvim', Config.options.history.save_file)
+  )
 
   if not Path.exists(path) then
     local write_res = vim.fn.writefile({ '[', ']' }, path)
@@ -647,7 +652,6 @@ function M.write_history(path)
     end
   end
 
-  local Config = require('project.config')
   local historysize = 100
   if Config.options and Config.options.history and Config.options.history.size then
     historysize = Config.options.history.size

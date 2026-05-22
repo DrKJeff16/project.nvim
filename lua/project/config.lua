@@ -1,5 +1,6 @@
 ---@module 'project._meta'
 
+local uv = vim.uv or vim.loop
 local MODSTR = 'project.config'
 local Extensions = require('project.extensions')
 local Util = require('project.util')
@@ -41,7 +42,33 @@ function M.setup(options)
   vim.o.autochdir = M.options.enable_autochdir
 
   -- WARN: THIS GOES FIRST!!!!
-  Util.path.setup(M.options.history.save_dir, M.options.history.save_file)
+  if vim.fn.mkdir(M.options.history.save_dir, 'p') ~= 1 and not Util.path.exists(M.options.history.save_dir) then
+    M.options.history.save_dir = get_defaults():new():_get_no_mt().history.save_dir
+    if vim.fn.mkdir(M.options.history.save_dir, 'p') ~= 1 and not Util.path.exists(M.options.history.save_dir) then
+      error('(%s.setup): Unable to create history directory!')
+    end
+  end
+
+  Util.path.datapath = M.options.history.save_dir
+  Util.path.projectpath = Util.path.join(M.options.history.save_dir, 'project_nvim')
+  if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
+    error('(%s.setup): Unable to create history subdirectory!')
+  end
+
+  Util.path.historyfile = Util.path.join(Util.path.projectpath, M.options.history.save_file)
+  if not Util.path.exists(Util.path.historyfile) then
+    local fd = uv.fs_open(Util.path.historyfile, 'w', Util.path.open_mode('644'))
+    if not fd then
+      error('(%s.setup): Unable to create history file!')
+    end
+
+    uv.fs_write(fd, '[]')
+    uv.fs_close(fd)
+  end
+
+  if not (Util.path.datapath and Util.path.projectpath and Util.path.historyfile) then
+    error(('(%s.setup): Failed to store history path successfully!'):format(MODSTR))
+  end
 
   if M.options.log.enabled then
     Util.log.setup()
