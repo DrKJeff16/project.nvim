@@ -1,7 +1,7 @@
 ---@meta
 ---@diagnostic disable:unused-local
 
----@enum (Key) Project.Core.ScanRoot
+---@enum (key) Project.Core.ScanRoot
 local scan_what = {
   all = 1,
   all_directories = 1,

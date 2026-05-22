@@ -516,7 +516,7 @@ function M.root_files(scan_what, path, prefix)
     prefix = { prefix, { 'string', 'nil' }, true },
   })
   if not scan_what then
-    scan_what = Config.options.show_hidden and 'all' or 'all_visible' --[[@as Project.Core.ScanRoot]]
+    scan_what = Config.options.show_hidden and 'all' or 'all_visible'
   end
   path = (not path or path == '') and (M.get_current_project() or M.get_project_root()) or path
   if not path then
@@ -548,7 +548,7 @@ function M.root_files(scan_what, path, prefix)
 
   local files = {} ---@type string[]
   local next, ftype = uv.fs_scandir_next(dir)
-  while next ~= nil do
+  while next do
     local is_hidden = Util.path.is_hidden(next)
     local is_type ---@type boolean
     if scan_what == 'all_files' then
