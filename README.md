@@ -240,7 +240,7 @@ require('project').setup()
 ```
 
 <details>
-<summary><b>Click here to view the config defaults</b></summary>
+<summary><b><ins>Click here to view the config defaults</ins></b></summary>
 
 You can find these in [`config/defaults.lua`](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/config/defaults.lua).
 
