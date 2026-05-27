@@ -49,7 +49,6 @@ You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16
 
 - [Installation](#installation)
 - [Configuration](#configuration)
-  - [Defaults](#defaults)
   - [Custom Projects](#custom-projects)
   - [Pattern Matching](#pattern-matching)
   - [Nvim Tree](#nvim-tree)
@@ -213,7 +212,7 @@ paq({
 
 ```lua
 vim.pack.add({
-  { src = 'https://github.com/DrKJeff16/project.nvim', name = 'project.nvim' },
+  'https://github.com/DrKJeff16/project.nvim',
 })
 ```
 
@@ -240,7 +239,8 @@ To enable the plugin you must call `setup()`:
 require('project').setup()
 ```
 
-### Defaults
+<details>
+<summary><b>Click here to view the config defaults</b></summary>
 
 You can find these in [`config/defaults.lua`](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/config/defaults.lua).
 
@@ -365,6 +365,8 @@ By default, `setup()` loads with the following options:
   },
 }
 ```
+
+</details>
 
 ### Custom Projects
 
