@@ -325,7 +325,7 @@ function M.set_pwd(dir, method, bufnr)
     vim.api.nvim_exec_autocmds('User', {
       group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
       pattern = 'ProjectAttachPre',
-      data = { dir = dir, method = method },
+      data = { dir = dir, method = method, bufnr = bufnr },
     })
   end
 
@@ -371,7 +371,7 @@ function M.set_pwd(dir, method, bufnr)
       vim.api.nvim_exec_autocmds('User', {
         group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
         pattern = 'ProjectAttachPost',
-        data = { dir = dir, method = method },
+        data = { dir = dir, method = method, bufnr = bufnr },
       })
     end
 

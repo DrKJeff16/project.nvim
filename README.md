@@ -248,8 +248,8 @@ By default, `setup()` loads with the following options:
 
 ```lua
 {
-  before_attach = nil, ---@type nil|fun(target_dir: string, method: string)
-  on_attach = nil, ---@type nil|fun(target_dir: string, method: string)
+  before_attach = nil, ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
+  on_attach = nil, ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
   lsp = {
     enabled = true,
     ignore = {},

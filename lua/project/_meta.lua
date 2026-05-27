@@ -555,7 +555,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field telescope? ProjectOpts.Telescope
 
 ---@class (exact) ProjectConfigDefaults: ProjectOpts
----@field before_attach nil|fun(target_dir: string, method: string)
+---@field before_attach nil|fun(target_dir: string, method: string, bufnr?: integer)
 ---@field custom_projects ProjectConfigHistoryEntry[]
 ---@field different_owners ProjectDefaults.DifferentOwners
 ---@field disable_on ProjectDefaults.DisableOn
@@ -566,7 +566,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field log ProjectDefaults.Logging
 ---@field lsp ProjectDefaults.LSP
 ---@field manual_mode boolean
----@field on_attach nil|fun(dir: string, method: string)
+---@field on_attach nil|fun(dir: string, method: string, bufnr?: integer)
 ---@field patterns string[]
 ---@field picker ProjectDefaults.Picker
 ---@field remove_missing_dirs boolean

@@ -106,7 +106,7 @@ function M.setup(options)
       pattern = 'ProjectAttachPre',
       group = group,
       callback = function(ev)
-        M.options.before_attach(ev.data.dir, ev.data.method)
+        M.options.before_attach(ev.data.dir, ev.data.method, ev.data.bufnr)
         Util.log.debug(('(%s.setup): Ran `before_attach` hook successfully.'):format(MODSTR))
       end,
     })
@@ -116,7 +116,7 @@ function M.setup(options)
       pattern = 'ProjectAttachPost',
       group = group,
       callback = function(ev)
-        M.options.on_attach(ev.data.dir, ev.data.method)
+        M.options.on_attach(ev.data.dir, ev.data.method, ev.data.bufnr)
         Util.log.debug(('(%s.setup): Ran `on_attach` hook successfully.'):format(MODSTR))
       end,
     })

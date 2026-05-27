@@ -91,11 +91,12 @@ Table of Contents                                             *project-nvim.toc*
                                                     *project-nvim.setup-options*
 
 
-    • {before_attach}           (`nil|fun(dir: string, method: string)`)
+    • {before_attach}           (`nil|function`)
                                 Hook to run before attaching to a new project.
-                                It optionally recieves `dir` and the `method`
-                                used to change directory. Set to `nil`
-                                to disable
+                                It optionally recieves `dir`, the `method` used
+                                to change directory, and the associated `bufnr`
+                                (may be `nil` in certain cases).
+                                Set to `nil` to disable
 
                                 Default: `nil` ~
 
@@ -178,11 +179,12 @@ Table of Contents                                             *project-nvim.toc*
                                 Default: `false` ~
 
 
-    • {on_attach}               (`nil|fun(dir: string, method: string)`)
+    • {on_attach}               (`nil|function`)
                                 Hook to run after attaching to a new project.
-                                It optionally recieves `dir` and the `method`
-                                used to change directory. Only runs if chdir
-                                is successful. Set to `nil` to disable
+                                It optionally recieves `dir`, the `method` used
+                                to change directory, and the associated `bufnr`
+                                (may be `nil` in certain cases).
+                                Set to `nil` to disable
 
                                 Default: `nil` ~
 
