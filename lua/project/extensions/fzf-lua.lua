@@ -86,7 +86,6 @@ function M.run_fzf_lua()
       default = { M.default },
       ['ctrl-d'] = {
         function(items)
-          Fzf.hide()
           M.delete_project(items)
         end,
         Fzf.actions.resume,
@@ -94,20 +93,9 @@ function M.run_fzf_lua()
       ['ctrl-n'] = {
         function(items)
           Fzf.hide()
-
-          vim.api.nvim_feedkeys('i', 'n', false)
           M.rename_project(items)
+          vim.api.nvim_feedkeys('i', 'n', false)
         end,
-      },
-      ['ctrl-w'] = {
-        function(items)
-          if vim.tbl_isempty(items) then
-            return
-          end
-
-          require('project.core').set_pwd(items[1], 'fzf-lua')
-        end,
-        Fzf.actions.resume,
       },
     },
   })

@@ -559,6 +559,7 @@ require('telescope').setup({
 | `f`         | `<C-f>`     | `find_project_files`       |
 | `b`         | `<C-b>`     | `browse_project_files`     |
 | `d`         | `<C-d>`     | `delete_project`           |
+| `n`         | `<C-n>`     | `rename_project`           |
 | `s`         | `<C-s>`     | `search_in_project_files`  |
 | `r`         | `<C-r>`     | `recent_project_files`     |
 | `w`         | `<C-w>`     | `change_working_directory` |
@@ -605,6 +606,7 @@ Mappings:
 | Normal Mode | Description                             |
 |-------------|-----------------------------------------|
 | `<C-d>`     | Delete the selected project             |
+| `<C-r>`     | Rename the selected project             |
 | `<C-w>`     | Changes the cwd to the selected project |
 
 You can find the integration in:
@@ -644,6 +646,7 @@ Mappings:
 | Normal Mode | Description                             |
 |-------------|-----------------------------------------|
 | `<C-d>`     | Delete the selected project             |
+| `<C-r>`     | Rename the selected project             |
 | `<C-w>`     | Changes the cwd to the selected project |
 
 You can find the integration in [_`extensions/snacks.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/snacks.lua).
@@ -715,10 +718,10 @@ If the `fzf-lua` integration is enabled in your setup, it will open a `fzf-lua` 
 
 Mappings:
 
-| Mapping | Description                  |
-|---------|------------------------------|
-| `<C-d>` | Delete the selected project  |
-| `<C-r>` | Renames the selected project |
+| Mapping | Description                            |
+|---------|----------------------------------------|
+| `<C-d>` | Delete the selected project            |
+| `<C-r>` | Rename the selected project            |
 
 See [_`extensions/fzf-lua.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/fzf-lua.lua)
 for more info.
