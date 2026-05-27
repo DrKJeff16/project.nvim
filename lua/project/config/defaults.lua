@@ -440,7 +440,7 @@ function D:verify()
       if Util.path_exists(Util.strip_slash(v.path)) then
         table.insert(custom_projects, {
           path = Util.strip_slash(v.path),
-          name = v.name or (Util.strip_slash(v.path, ':p:h:h:t') .. '/' .. Util.strip_slash(v.path, ':p:h:t')),
+          name = v.name or Util.path.join(Util.strip_slash(v.path, ':p:h:h:t'), Util.strip_slash(v.path, ':p:h:t')),
         })
       end
     end
