@@ -714,8 +714,11 @@ function M.write_history(path)
 
   if vim.tbl_isempty(tbl_out) then
     uv.fs_close(fd)
-    Log.error(('(%s.write_history): No data available to write!'):format(MODSTR))
-    vim.notify(('(%s.write_history): No data available to write!'):format(MODSTR), WARN)
+    if vim.g.project_history_no_data_notified ~= 1 then
+      Log.error(('(%s.write_history): No data available to write!'):format(MODSTR))
+      vim.notify(('(%s.write_history): No data available to write!'):format(MODSTR), WARN)
+      vim.g.project_history_no_data_notified = 1
+    end
     return
   end
 
