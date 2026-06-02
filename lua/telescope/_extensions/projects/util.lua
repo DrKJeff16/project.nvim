@@ -47,20 +47,13 @@ function M.create_finder()
   Project.util.log.debug(('(%s.create_finder): Returning new Finder table.'):format(MODSTR))
   return Finders.new_table({
     results = results,
-    entry_maker = function(entry) ---@param entry string|ProjectHistoryEntry
-      local name ---@type string
-      if Project.util.history.legacy then
-        ---@cast entry string
-        name = ('%s/%s'):format(vim.fn.fnamemodify(entry, ':h:t'), vim.fn.fnamemodify(entry, ':t'))
-      else
-        ---@cast entry ProjectHistoryEntry
-        name = entry.name
-      end
+    entry_maker = function(entry) ---@param entry ProjectHistoryEntry
+      local name = entry.name
       return {
         display = M.make_display,
         name = name,
-        value = M.make_tilde(Project.util.history.legacy and entry or entry.path),
-        ordinal = ('%s %s'):format(name, M.make_tilde(Project.util.history.legacy and entry or entry.path)),
+        value = M.make_tilde(entry.path),
+        ordinal = ('%s %s'):format(name, M.make_tilde(entry.path)),
       }
     end,
   })

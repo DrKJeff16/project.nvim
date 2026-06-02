@@ -51,7 +51,7 @@ function M.exec(cb)
   end
 
   for _, entry in ipairs(projects) do
-    cb(Util.history.legacy and entry or (Config.options.fzf_lua.show == 'names' and entry.name or entry.path))
+    cb(Config.options.fzf_lua.show == 'names' and entry.name or entry.path)
   end
   cb()
 end

@@ -52,20 +52,13 @@ function M.delete_project(prompt_bufnr)
       end
       return Finders.new_table({
         results = results,
-        entry_maker = function(value) ---@param value string|ProjectHistoryEntry
-          local name ---@type string
-          if Project.util.history.legacy then
-            ---@cast value string
-            name = ('%s/%s'):format(vim.fn.fnamemodify(value, ':h:t'), vim.fn.fnamemodify(value, ':t'))
-          else
-            ---@cast value ProjectHistoryEntry
-            name = value.name
-          end
+        entry_maker = function(value) ---@param value ProjectHistoryEntry
+          local name = value.name
           local action_entry = { ---@class Project.ActionEntry
             display = make_display,
             name = name,
-            value = make_tilde(Project.util.history.legacy and value or value.path),
-            ordinal = ('%s %s'):format(name, make_tilde(Project.util.history.legacy and value or value.path)),
+            value = make_tilde(value.path),
+            ordinal = ('%s %s'):format(name, make_tilde(value.path)),
           }
           return action_entry
         end,

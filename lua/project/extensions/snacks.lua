@@ -30,23 +30,14 @@ function M.gen_items()
   end
 
   for i, proj in ipairs(recents) do
-    local text = '' ---@type string
-    if Util.history.legacy then
-      ---@cast proj string
-      text = Util.strip_slash(proj, Config.options.snacks.tilde and ':p:~' or nil)
-    elseif M.config.show == 'paths' then
-      ---@cast proj ProjectHistoryEntry
-      text = Util.strip_slash(proj.path, Config.options.snacks.tilde and ':p:~' or nil)
-    else
-      ---@cast proj ProjectHistoryEntry
-      text = proj.name
-    end
+    local text = M.config.show ~= 'paths' and proj.name
+      or Util.strip_slash(proj.path, Config.options.snacks.tilde and ':p:~' or nil)
 
     table.insert(items, {
       idx = i,
       score = i,
       text = text,
-      value = Util.strip_slash(Util.history.legacy and proj or proj.path, ':p:~'),
+      value = Util.strip_slash(proj.path, ':p:~'),
     })
   end
   return items
