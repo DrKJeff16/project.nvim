@@ -558,9 +558,6 @@ function M.read_history()
     Log.error(
       ('(%s.read_history): Could not decode JSON data from history file! (`stat.size = %s`)'):format(MODSTR, stat.size)
     )
-    vim.notify(
-      ('(%s.read_history): Could not decode JSON data from history file! (`stat.size = %s`)'):format(MODSTR, stat.size)
-    )
     return
   end
 
