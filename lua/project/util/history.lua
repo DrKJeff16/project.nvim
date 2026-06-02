@@ -514,7 +514,7 @@ local function setup_watch()
     return
   end
 
-  event:start(Path.projectpath, {}, function(err, _, events)
+  event:start(Path.historyfile, {}, function(err, _, events)
     if err or not events.change then
       return
     end
