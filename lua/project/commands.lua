@@ -14,7 +14,7 @@ local function complete_items(_, line)
     return {}
   end
 
-  local recents = {} ---@type ProjectHistoryEntry[]|string[]
+  local recents = {} ---@type string[]
   for _, v in ipairs(Util.reverse(Util.history.get_recent_projects(true, true))) do
     if not vim.list_contains(args, v) then
       table.insert(recents, v)
@@ -121,10 +121,7 @@ local function completion(_, line)
       return complete_items(_, table.concat(args, ' '))
     end
     if args[2] == 'history' and #args == 3 then
-      local options = { 'clear' } ---@type string[]
-      table.insert(options, Util.history.legacy and 'migrate' or 'rename')
-
-      for _, choice in ipairs(options) do
+      for _, choice in ipairs({ 'clear', 'rename' }) do
         if vim.startswith(choice, args[3]) then
           table.insert(res, choice)
         end
@@ -255,8 +252,8 @@ local function callback(ctx)
       if Util.dir_exists(input) then
         if
           Core.current_project ~= input
-          and not vim.tbl_contains(Util.history.session_projects, function(val) ---@param val string|ProjectHistoryEntry
-            return (Util.history.legacy and val or val.path) == input
+          and not vim.tbl_contains(Util.history.session_projects, function(val) ---@param val ProjectHistoryEntry
+            return val.path == input
           end, { predicate = true })
         then
           Core.set_pwd(input, 'manual')
@@ -298,15 +295,9 @@ local function callback(ctx)
       if
         not (
           ctx.bang
-          or vim.tbl_contains(recent, function(val) ---@param val string|ProjectHistoryEntry
-            Util.log.debug(
-              ('`%s` =? `%s` ==> %s'):format(
-                path,
-                Util.history.legacy and val or val.path,
-                vim.inspect((Util.history.legacy and val or val.path) == path)
-              )
-            )
-            return (Util.history.legacy and val or val.path) == path
+          or vim.tbl_contains(recent, function(val) ---@param val ProjectHistoryEntry
+            Util.log.debug(('`%s` =? `%s` ==> %s'):format(path, val.path, vim.inspect(val.path == path)))
+            return val.path == path
           end, { predicate = true })
         ) or path == ''
       then
@@ -315,15 +306,9 @@ local function callback(ctx)
         return
       end
       if
-        vim.tbl_contains(recent, function(val) ---@param val string|ProjectHistoryEntry
-          Util.log.debug(
-            ('`%s` =? `%s` ==> %s'):format(
-              path,
-              Util.history.legacy and val or val.path,
-              vim.inspect((Util.history.legacy and val or val.path) == path)
-            )
-          )
-          return (Util.history.legacy and val or val.path) == path
+        vim.tbl_contains(recent, function(val) ---@param val ProjectHistoryEntry
+          Util.log.debug(('`%s` =? `%s` ==> %s'):format(path, val.path, vim.inspect(val.path == path)))
+          return val.path == path
         end, { predicate = true })
       then
         Util.history.delete_project(path)
@@ -354,24 +339,9 @@ local function callback(ctx)
       return
     end
 
-    local options = { 'clear', 'migrate' } ---@type string[]
-    if not Util.history.legacy then
-      table.insert(options, 'rename')
-    end
-
-    if vim.list_contains(options, fargs[1]) then
+    if vim.list_contains({ 'clear', 'rename' }, fargs[1]) then
       if fargs[1] == 'clear' then
         Util.history.clear_historyfile(ctx.bang)
-        return
-      end
-
-      if fargs[1] == 'migrate' then
-        if not Util.history.legacy then
-          vim.notify('Your project history has already been migrated!', WARN)
-          return
-        end
-
-        Util.history.migrate()
         return
       end
 

@@ -225,10 +225,9 @@ M.delete_menu = M.new({
   end,
   choices_list = function()
     local recents ---@type string[]
-    if Config.options.show_by_name and Util.history.is_legacy then
-      recents = {}
+    if Config.options.show_by_name then
+      recents = {} ---@type string[]
       for _, v in ipairs(Util.reverse(Util.history.get_recent_projects())) do
-        ---@cast v ProjectHistoryEntry
         table.insert(recents, v.name)
       end
     else
@@ -243,13 +242,9 @@ M.delete_menu = M.new({
     for _, proj in ipairs(M.delete_menu.choices_list()) do
       if proj == 'Exit' then
         T[proj] = function() end
-      elseif Config.options.show_by_name and not Util.history.legacy then
+      elseif Config.options.show_by_name then
         T[proj] = function()
           Util.history.delete_project(Util.history.find_entry('recent', proj, 'path'))
-        end
-      else
-        T[proj] = function()
-          Util.history.delete_project(proj)
         end
       end
     end
@@ -289,10 +284,9 @@ M.rename_menu = M.new({
   end,
   choices_list = function()
     local recents ---@type string[]
-    if Config.options.show_by_name and Util.history.is_legacy then
+    if Config.options.show_by_name then
       recents = {}
       for _, v in ipairs(Util.reverse(Util.history.get_recent_projects())) do
-        ---@cast v ProjectHistoryEntry
         table.insert(recents, v.name)
       end
     else
@@ -310,9 +304,7 @@ M.rename_menu = M.new({
       else
         T[proj] = function(name)
           Util.history.rename_project(
-            (Config.options.show_by_name and not Util.history.legacy)
-                and Util.history.find_entry('recent', proj, 'path')
-              or proj,
+            Config.options.show_by_name and Util.history.find_entry('recent', proj, 'path') or proj,
             name
           )
         end
@@ -354,13 +346,8 @@ M.recents_menu = M.new({
   end,
   choices_list = function()
     local choices_list = {} ---@type string[]
-    if not Util.history.legacy then
-      for _, v in ipairs(Util.history.get_recent_projects(false, true)) do
-        ---@cast v ProjectHistoryEntry
-        table.insert(choices_list, Config.options.show_by_name and v.name or v.path)
-      end
-    else
-      choices_list = Util.history.get_recent_projects(true, true)
+    for _, v in ipairs(Util.history.get_recent_projects(false, true)) do
+      table.insert(choices_list, Config.options.show_by_name and v.name or v.path)
     end
 
     if Config.options.telescope.sort == 'newest' then
@@ -515,7 +502,7 @@ M.session_menu = M.new({
     vim.ui.select(choices_list, {
       prompt = 'Select a project from your session:',
       format_item = function(item) ---@param item string
-        if item == 'Exit' or (Config.options.show_by_name and not Util.history.legacy) then
+        if item == 'Exit' or Config.options.show_by_name then
           return item
         end
         return Util.strip_slash(item, ':p:~')
@@ -557,14 +544,12 @@ M.session_menu = M.new({
   end,
   choices_list = function()
     local choices = vim.deepcopy(Util.history.session_projects)
-    if not Util.history.legacy then
-      local session_paths = {} ---@type string[]
-      for _, v in ipairs(choices) do
-        table.insert(session_paths, Config.options.show_by_name and v.name or v.path)
-      end
-
-      choices = session_paths
+    local session_paths = {} ---@type string[]
+    for _, v in ipairs(choices) do
+      table.insert(session_paths, Config.options.show_by_name and v.name or v.path)
     end
+
+    choices = session_paths
 
     table.insert(choices, 'Exit')
     return choices

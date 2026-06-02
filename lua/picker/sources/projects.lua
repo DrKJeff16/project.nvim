@@ -3,24 +3,23 @@
 
 local Project = require('project')
 
----@param source string[]|ProjectHistoryEntry[]
+---@param source ProjectHistoryEntry[]
 ---@return ProjectPickerItem[] items
 local function gen_items(source)
   local items = {} ---@type ProjectPickerItem[]
   local curr = Project.core.get_current_project() or ''
   for i, v in ipairs(source) do
-    local is_curr = (Project.util.history.legacy and v or v.path) == curr
+    local is_curr = v.path == curr
     local n_digits, max_n_digits = Project.util.digits(i), Project.util.digits(Project.config.options.history.size)
     local path = ('%d. %s'):format(
       i,
       (is_curr and '*' or '') .. (' '):rep(max_n_digits - n_digits - (is_curr and 1 or 0))
     )
 
-    if Project.config.options.picker.show == 'names' and not Project.util.history.legacy then
-      ---@cast v ProjectHistoryEntry
+    if Project.config.options.picker.show == 'names' then
       path = ('%s %s'):format(path, v.name)
     else
-      path = ('%s %s'):format(path, Project.util.strip_slash(Project.util.history.legacy and v or v.path, ':p:~'))
+      path = ('%s %s'):format(path, Project.util.strip_slash(v.path, ':p:~'))
     end
     local hl = { { 0, n_digits + 1, 'Number' } } ---@type ProjectPickerItem.Hl[]
     if is_curr then
@@ -31,7 +30,7 @@ local function gen_items(source)
     end
 
     table.insert(items, {
-      value = Project.util.strip_slash(Project.util.history.legacy and v or v.path),
+      value = Project.util.strip_slash(v.path),
       str = path,
       highlight = hl,
     })

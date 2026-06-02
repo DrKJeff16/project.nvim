@@ -109,12 +109,6 @@ function M.get_last_project(full_entry)
   end
 
   local res = #Util.history.session_projects <= 1 and recent[2] or recent[1]
-  if Util.history.legacy then
-    ---@cast res string
-    return res
-  end
-
-  ---@cast res ProjectHistoryEntry
   return full_entry and res or res.path
 end
 
@@ -215,9 +209,9 @@ function M.refresh_project_bufs()
 
   Util.history.write_history()
 
-  local sessions = {} ---@type string[]|ProjectHistoryEntry[]
+  local sessions = {} ---@type ProjectHistoryEntry[]
   for _, session in ipairs(Util.history.session_projects) do
-    local proj_buf_name = Util.history.legacy and session or session.path --[[@as string]]
+    local proj_buf_name = session.path
     if per_project_bufs[proj_buf_name] and not vim.tbl_isempty(per_project_bufs[proj_buf_name]) then
       table.insert(sessions, session)
     end
@@ -265,10 +259,10 @@ function M.set_pwd(dir, method, bufnr)
   local unexpand_dir, modified = Util.strip_slash(dir, ':p:~'), false
   if
     not vim.tbl_contains(Util.history.session_projects, function(val)
-      return (Util.history.legacy and val or val.path) == dir
+      return val.path == dir
     end, { predicate = true })
   then
-    table.insert(Util.history.session_projects, Util.history.legacy and dir or {
+    table.insert(Util.history.session_projects, {
       path = dir,
       name = custom_name
         or Util.history.find_entry('recent', dir, 'name')
@@ -294,17 +288,15 @@ function M.set_pwd(dir, method, bufnr)
   if not modified and #Util.history.session_projects > 1 then
     local old_pos, name = nil, '' ---@type integer|nil, string
     for k, v in ipairs(Util.history.session_projects) do
-      if (Util.history.legacy and v or v.path) == dir then
+      if v.path == dir then
         old_pos = k
-        if not Util.history.legacy then
-          name = v.name
-        end
+        name = v.name
         break
       end
     end
     if old_pos and old_pos ~= 1 then
       table.remove(Util.history.session_projects, old_pos)
-      table.insert(Util.history.session_projects, 1, Util.history.legacy and dir or { path = dir, name = name })
+      table.insert(Util.history.session_projects, 1, { path = dir, name = name })
       Util.log.debug(
         ('(%s.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
           MODSTR,

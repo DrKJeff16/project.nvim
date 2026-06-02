@@ -114,7 +114,7 @@ function M:project_root()
     msg = Project.util.strip_slash(curr)
   elseif format == 'full' then
     msg = Project.util.strip_slash(curr, ':p:~')
-  elseif format == 'name' and not Project.util.history.legacy then
+  elseif format == 'name' then
     msg = Project.util.history.find_entry('recent', curr, 'name') or self.options.no_project --[[@as string]]
   end
   if format == 'short' or not msg and msg ~= self.options.no_project then

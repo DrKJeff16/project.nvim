@@ -49,11 +49,6 @@ Please report any issues to the maintainers.
 If you wish to disable this warning, set `g:project_disable_win32_warning` to `1`.]])
   end
 
-  if Util.history.legacy then
-    vim.health.warn('Your history has not been migrated yet! Please run `:Project history migrate` to migrate.')
-  else
-    vim.health.ok('Your history was migrated successfully! You can set names for your projects.')
-  end
   return true
 end
 
@@ -123,14 +118,9 @@ function M.project_check()
     vim.health.warn('No active session projects!')
     return
   end
-  Util.history.is_legacy(projects)
-  for k, v in ipairs(Util.dedup(projects, Util.history.legacy and nil or 'name')) do
-    if Util.history.legacy then
-      vim.health.info(('%s. `%s`'):format(k, v))
-    else
-      local index = tostring(k)
-      vim.health.info(('%d. `%s`\n   %spath: `%s`'):format(index, v.name, (' '):rep(index:len() - 1), v.path))
-    end
+  for k, v in ipairs(Util.dedup(projects, 'name')) do
+    local index = tostring(k)
+    vim.health.info(('%d. `%s`\n   %spath: `%s`'):format(index, v.name, (' '):rep(index:len() - 1), v.path))
   end
 end
 
@@ -173,14 +163,8 @@ and submit an issue if pertinent.]])
   end
 
   for i, project in ipairs(recents) do
-    if Util.history.legacy then
-      vim.health.info(('%d. `%s`'):format(i, project))
-    else
-      local index = tostring(i)
-      vim.health.info(
-        ('%d. `%s`\n   %spath: `%s`'):format(index, project.name, (' '):rep(index:len() - 1), project.path)
-      )
-    end
+    local index = tostring(i)
+    vim.health.info(('%d. `%s`\n   %spath: `%s`'):format(index, project.name, (' '):rep(index:len() - 1), project.path))
   end
 end
 

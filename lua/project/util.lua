@@ -501,10 +501,8 @@ function M.delete_duplicates(tbl)
   M.validate({ tbl = { tbl, { 'table' } } })
 
   local cache_dict = {} ---@type table<string, integer>
-  require('project.util.history').is_legacy(tbl)
-  local legacy = require('project.util.history').legacy
   for _, v in ipairs(tbl) do
-    local normalised_path = M.normalise_path(legacy and v or v.path)
+    local normalised_path = M.normalise_path(v.path)
     if not cache_dict[normalised_path] then
       cache_dict[normalised_path] = 1
     else
@@ -512,11 +510,11 @@ function M.delete_duplicates(tbl)
     end
   end
 
-  local res = {} ---@type string[]|ProjectHistoryEntry[]
+  local res = {} ---@type ProjectHistoryEntry[]
   for _, v in ipairs(tbl) do
-    local normalised_path = M.normalise_path(legacy and v or v.path)
+    local normalised_path = M.normalise_path(v.path)
     if cache_dict[normalised_path] == 1 then
-      table.insert(res, legacy and normalised_path or { path = normalised_path, name = v.name })
+      table.insert(res, { path = normalised_path, name = v.name })
     else
       cache_dict[normalised_path] = cache_dict[normalised_path] - 1
     end
