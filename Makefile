@@ -37,7 +37,7 @@ lint: ## Lint using StyLua
 	@stylua .
 	@echo
 
-test: ## Run tests with busted
+test: install-deps ## Run tests with busted
 	@echo -e "Running tests...\n"
 	@busted spec
 	@echo
