@@ -527,8 +527,6 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field scope_chdir? ProjectOpts.ScopeChdir
 ---If `true`, the native plugin UI will list projects using their names
 ---instead of their paths.
----
----Note that if you haven't migrated your history, this will be ignored.
 --- ---
 ---Default: `false`
 --- ---

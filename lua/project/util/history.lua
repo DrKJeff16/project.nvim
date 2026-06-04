@@ -23,10 +23,6 @@ local M = {}
 M.session_projects = {}
 M.recent_projects = {}
 
-function M.migrate()
-  vim.notify(('(%s.migrate): History has already been migrated!'):format(MODSTR), WARN)
-end
-
 ---@param path string
 ---@param name string
 ---@return boolean success
