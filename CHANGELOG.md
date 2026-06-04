@@ -1,5 +1,13 @@
 # Changelog
 
+## [v5.0.0-1](https://github.com/DrKJeff16/project.nvim/tree/v5.0.0-1) (2026-06-04)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v4.2.1-1...v5.0.0-1)
+
+**Implemented enhancements:**
+
+- refactor!: remove legacy history traces [\#73](https://github.com/DrKJeff16/project.nvim/pull/73) ([DrKJeff16](https://github.com/DrKJeff16))
+
 ## [v4.2.1-1](https://github.com/DrKJeff16/project.nvim/tree/v4.2.1-1) (2026-06-02)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v4.2.0-1...v4.2.1-1)
