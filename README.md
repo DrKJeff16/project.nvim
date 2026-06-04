@@ -8,15 +8,6 @@
 - [**Credits**](https://github.com/DrKJeff16/project.nvim/blob/main/CREDITS.md)
 - [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions)
 
-> [!WARNING]
-> For the upcoming release, only JSON format will be accepted for the history file.
-> This is to reduce the complexity of the code, as it's becoming harder to maintain.
->
-> If you haven't already migrated your history file (`:Project history migrate`), please do so.
->
-> AFTER THE UPCOMING RELEASE, I WILL NOT ACCEPT ANY ISSUES/DISCUSSIONS CONCERNING PROJECT HISTORY ISSUES
-> CAUSED BY MISSING MIGRATIONS!
-
 https://github.com/user-attachments/assets/0e10c4e8-f930-47a0-9058-956622e8f547
 
 `project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that automatically sets your `cwd`
@@ -765,11 +756,6 @@ Simply runs `:checkhealth project`.
 If the command is called without any extra arguments it'll toggle the `project.nvim` history file
 in a new tab, which can be exited by pressing `q` in Normal Mode.
 
-If you need to migrate your project history to the new spec, simply run `:Project history migrate`
-once and that's it! After migration this subcommand will not be available unless another migration is
-needed.
-
-**(MIGRATION REQUIRED)**
 If you wish to rename a project you can call `:Project history rename`, with or without
 any arguments passed to it.
 If no arguments are passed, a custom UI list will open, showing you your projects to be renamed.
@@ -784,7 +770,6 @@ Usage:
 ```vim
 :Project history
 :Project[!] history clear
-:Project history migrate                         " Will migrate your history to the newest spec
 :Project history rename [/path/to/project [...]] " (NEEDS MIGRATION) Will rename the specified projects
 ```
 
