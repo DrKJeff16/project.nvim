@@ -6,7 +6,7 @@ local Util = require('project.util')
 
 ---@class Project.Util.Path
 ---@field private curr_dir_cache string[]
----The directory where the project dir will be saved.
+---The directory where the project data will be saved at.
 --- ---
 ---@field datapath? string
 ---The project history file.

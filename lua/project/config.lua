@@ -41,16 +41,18 @@ function M.setup(options)
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
   vim.o.autochdir = M.options.enable_autochdir
 
+  Util.path.datapath = M.options.history.save_dir
+  Util.path.projectpath = Util.path.join(M.options.history.save_dir, 'project_nvim')
+
   -- WARN: THIS GOES FIRST!!!!
-  if vim.fn.mkdir(M.options.history.save_dir, 'p') ~= 1 and not Util.path.exists(M.options.history.save_dir) then
-    M.options.history.save_dir = get_defaults():new():_get_no_mt().history.save_dir
-    if vim.fn.mkdir(M.options.history.save_dir, 'p') ~= 1 and not Util.path.exists(M.options.history.save_dir) then
+  if vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 and not Util.path.exists(Util.path.projectpath) then
+    Util.path.datapath = get_defaults():new():_get_no_mt().history.save_dir
+    Util.path.projectpath = Util.path.join(Util.path.projectpath, 'project_nvim')
+    if vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 and not Util.path.exists(Util.path.projectpath) then
       error('(%s.setup): Unable to create history directory!')
     end
   end
 
-  Util.path.datapath = M.options.history.save_dir
-  Util.path.projectpath = Util.path.join(M.options.history.save_dir, 'project_nvim')
   if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
     error('(%s.setup): Unable to create history subdirectory!')
   end

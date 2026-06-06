@@ -35,8 +35,8 @@ local show = {
 ---@enum (key) ProjectOpts.ScopeChdir
 local scope_chdir = {
   global = 1,
-  win = 1,
   tab = 1,
+  win = 1,
 }
 
 ---@enum (key) ProjectOpts.Sort
