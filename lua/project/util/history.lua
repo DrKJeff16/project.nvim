@@ -498,7 +498,7 @@ function M.read_history()
   end
 
   if stat.size == 0 and not vim.tbl_isempty(M.session_projects) then
-    Log.warn(('(%s.read_history): History file is empty. Defering call to `%s.write_history()`'):format(MODSTR))
+    Log.warn(('(%s.read_history): History file is empty. Defering call to `%s.write_history()`'):format(MODSTR, MODSTR))
     vim.defer_fn(M.write_history, 10000)
     return
   end
