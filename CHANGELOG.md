@@ -1,5 +1,37 @@
 # Changelog
 
+## [v5.0.0-1](https://github.com/DrKJeff16/project.nvim/tree/v5.0.0-1) (2026-06-04)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v4.2.1-1...v5.0.0-1)
+
+**Implemented enhancements:**
+
+- refactor!: remove legacy history traces [\#73](https://github.com/DrKJeff16/project.nvim/pull/73) ([DrKJeff16](https://github.com/DrKJeff16))
+
+## [v4.2.1-1](https://github.com/DrKJeff16/project.nvim/tree/v4.2.1-1) (2026-06-02)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v4.2.0-1...v4.2.1-1)
+
+**Fixed bugs:**
+
+- \[BUG\] E5560: nvim\_echo must not be called in a fast event context [\#72](https://github.com/DrKJeff16/project.nvim/issues/72)
+
+## [v4.2.0-1](https://github.com/DrKJeff16/project.nvim/tree/v4.2.0-1) (2026-05-27)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v4.1.1-1...v4.2.0-1)
+
+## [v4.1.1-1](https://github.com/DrKJeff16/project.nvim/tree/v4.1.1-1) (2026-05-16)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v4.1.0-1...v4.1.1-1)
+
+## [v4.1.0-1](https://github.com/DrKJeff16/project.nvim/tree/v4.1.0-1) (2026-05-15)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v4.0.0-1...v4.1.0-1)
+
+**Implemented enhancements:**
+
+- refactor\(commands\)!: merge all user commands into `:Project` [\#69](https://github.com/DrKJeff16/project.nvim/pull/69) ([DrKJeff16](https://github.com/DrKJeff16))
+
 ## [v4.0.0-1](https://github.com/DrKJeff16/project.nvim/tree/v4.0.0-1) (2026-05-13)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.5.1-1...v4.0.0-1)
@@ -29,22 +61,9 @@
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.4.0-1...v3.5.0-1)
 
-**Implemented enhancements:**
-
-- dummy project entry in setup patterns options [\#66](https://github.com/DrKJeff16/project.nvim/issues/66)
-- feat!: new `custom_projects` option \(closes \#66\) [\#67](https://github.com/DrKJeff16/project.nvim/pull/67) ([DrKJeff16](https://github.com/DrKJeff16))
-
-**Fixed bugs:**
-
-- Null ctx variable in commands.lua line 161 [\#65](https://github.com/DrKJeff16/project.nvim/issues/65)
-
 ## [v3.4.0-1](https://github.com/DrKJeff16/project.nvim/tree/v3.4.0-1) (2026-05-06)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.3.2-1...v3.4.0-1)
-
-**Merged pull requests:**
-
-- fix\(windows\): fix additional verify\_owner calls not early returning [\#64](https://github.com/DrKJeff16/project.nvim/pull/64) ([tkappedev](https://github.com/tkappedev))
 
 ## [v3.3.2-1](https://github.com/DrKJeff16/project.nvim/tree/v3.3.2-1) (2026-05-05)
 
@@ -54,17 +73,9 @@
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.3.0-1...v3.3.1-1)
 
-**Fixed bugs:**
-
-- \[BUG\] Util.dedup causes null entries in historyfile [\#62](https://github.com/DrKJeff16/project.nvim/issues/62)
-
 ## [v3.3.0-1](https://github.com/DrKJeff16/project.nvim/tree/v3.3.0-1) (2026-04-28)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v3.2.2-1...v3.3.0-1)
-
-**Fixed bugs:**
-
-- \[BUG\]: nil `recent_projects` in `find_entry()` triggers errors [\#60](https://github.com/DrKJeff16/project.nvim/issues/60)
 
 ## [v3.2.2-1](https://github.com/DrKJeff16/project.nvim/tree/v3.2.2-1) (2026-04-24)
 
@@ -88,7 +99,6 @@
 
 **Fixed bugs:**
 
-- \[BUG\] Race condition when multiple session open [\#58](https://github.com/DrKJeff16/project.nvim/issues/58)
 - fix\(history\): attempt to fix race condition bug \(closes \#58\) [\#59](https://github.com/DrKJeff16/project.nvim/pull/59) ([DrKJeff16](https://github.com/DrKJeff16))
 
 ## [v3.0.1-1](https://github.com/DrKJeff16/project.nvim/tree/v3.0.1-1) (2026-04-15)

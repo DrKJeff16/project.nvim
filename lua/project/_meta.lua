@@ -1,6 +1,19 @@
 ---@meta
 ---@diagnostic disable:unused-local
 
+---@enum (key) Project.Core.ScanRoot
+local scan_what = {
+  all = 1,
+  all_directories = 1,
+  all_files = 1,
+  all_hidden = 1,
+  all_visible = 1,
+  hidden_directories = 1,
+  hidden_files = 1,
+  visible_directories = 1,
+  visible_files = 1,
+}
+
 ---@enum (key) Project.Telescope.ActionNames
 local action_names = {
   browse_project_files = 1,
@@ -22,8 +35,8 @@ local show = {
 ---@enum (key) ProjectOpts.ScopeChdir
 local scope_chdir = {
   global = 1,
-  win = 1,
   tab = 1,
+  win = 1,
 }
 
 ---@enum (key) ProjectOpts.Sort
@@ -82,6 +95,22 @@ local project_paths = { ---@diagnostic disable-line:unused-local
   historyfile = 1,
   projectpath = 1,
 }
+
+---@alias Project.Core.GetHistoryPaths
+---|fun(): history_paths: HistoryPath
+---|fun(path: ProjectPaths): history_paths: string
+
+---@alias Project.Core.GetLastProject
+---|fun(): last: string|nil
+---|fun(full_entry: false): last: string|nil
+---|fun(full_entry: true): last: ProjectHistoryEntry|nil
+
+---@alias Project.Util.History.GetRecentProjects
+---|fun(): recents: ProjectHistoryEntry[]
+---|fun(paths_only: false): recents: ProjectHistoryEntry[]
+---|fun(paths_only?: false, tilde: boolean): recents: ProjectHistoryEntry[]
+---|fun(paths_only: true): recents: string[]
+---|fun(paths_only: true, tilde: boolean): recents: string[]
 
 ---@class (exact) ProjectPickerItem.Hl
 ---@field [1] integer
@@ -452,7 +481,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field lsp? ProjectOpts.LSP
 ---If `true` your root directory won't be changed automatically,
 ---so you have the option to manually do so
----using the `:ProjectRoot` command.
+---using the `:Project root` command.
 --- ---
 ---Default: `false`
 --- ---
@@ -498,8 +527,6 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field scope_chdir? ProjectOpts.ScopeChdir
 ---If `true`, the native plugin UI will list projects using their names
 ---instead of their paths.
----
----Note that if you haven't migrated your history, this will be ignored.
 --- ---
 ---Default: `false`
 --- ---
@@ -526,7 +553,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field telescope? ProjectOpts.Telescope
 
 ---@class (exact) ProjectConfigDefaults: ProjectOpts
----@field before_attach nil|fun(target_dir: string, method: string)
+---@field before_attach nil|fun(target_dir: string, method: string, bufnr?: integer)
 ---@field custom_projects ProjectConfigHistoryEntry[]
 ---@field different_owners ProjectDefaults.DifferentOwners
 ---@field disable_on ProjectDefaults.DisableOn
@@ -537,7 +564,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field log ProjectDefaults.Logging
 ---@field lsp ProjectDefaults.LSP
 ---@field manual_mode boolean
----@field on_attach nil|fun(dir: string, method: string)
+---@field on_attach nil|fun(dir: string, method: string, bufnr?: integer)
 ---@field patterns string[]
 ---@field picker ProjectDefaults.Picker
 ---@field remove_missing_dirs boolean

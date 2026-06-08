@@ -1,7 +1,5 @@
-local Config = require('project.config')
 local Highlight = require('lualine.highlight')
-local Log = require('project.util.log')
-local Util = require('project.util')
+local Project = require('project')
 
 ---@class LuaLine.Super
 ---@field private _reset_components function
@@ -69,40 +67,40 @@ function M:init(options)
   )
 
   if vim.g.project_lualine_logged ~= 1 then
-    Log.debug('(lualine.components.project:init): lualine.nvim integration enabled.')
+    Project.util.log.debug('(lualine.components.project:init): lualine.nvim integration enabled.')
     vim.g.project_lualine_logged = 1
   end
 end
 
 function M:update_status()
-  local curr = require('project.core').current_project
-  if not (package.loaded['project'] and curr) then
+  if not package.loaded['project'] then
     return self.options.no_project
   end
 
-  return self:project_root()
+  return Project.core.current_project and self:project_root() or self.options.no_project
 end
 
 ---@return string component
 function M:project_root()
   local bufnr = vim.api.nvim_get_current_buf()
-  local ft = Util.optget('filetype', 'buf', bufnr) --[[@as string]]
-  local bt = Util.optget('buftype', 'buf', bufnr) --[[@as string]]
+  local ft = Project.util.optget('filetype', 'buf', bufnr) --[[@as string]]
+  local bt = Project.util.optget('buftype', 'buf', bufnr) --[[@as string]]
   local msg = '' ---@type string
-  if vim.list_contains(Config.options.disable_on.ft, ft) or vim.list_contains(Config.options.disable_on.bt, bt) then
+  if
+    vim.list_contains(Project.config.options.disable_on.ft, ft)
+    or vim.list_contains(Project.config.options.disable_on.bt, bt)
+  then
     return msg
   end
 
-  local Core = require('project.core')
-  local History = require('project.util.history')
-  local curr, root = Core.get_current_project(bufnr), Core.get_project_root(bufnr)
+  local curr, root = Project.core.get_current_project(bufnr), Project.core.get_project_root(bufnr)
   local format = (
     self.options.format and vim.list_contains({ 'short', 'full', 'full_expanded', 'name' }, self.options.format)
   )
       and self.options.format
     or 'short'
 
-  if not Core.get_project_root(vim.api.nvim_get_current_buf()) then
+  if not Project.core.get_project_root(vim.api.nvim_get_current_buf()) then
     return self.options.no_project
   end
 
@@ -113,14 +111,14 @@ function M:project_root()
   then
     msg = self.options.no_project --[[@as string]]
   elseif format == 'full_expanded' then
-    msg = Util.strip_slash(curr)
+    msg = Project.util.strip_slash(curr)
   elseif format == 'full' then
-    msg = Util.strip_slash(curr, ':p:~')
-  elseif format == 'name' and not History.legacy then
-    msg = History.find_entry('recent', curr, 'name') or self.options.no_project --[[@as string]]
+    msg = Project.util.strip_slash(curr, ':p:~')
+  elseif format == 'name' then
+    msg = Project.util.history.find_entry('recent', curr, 'name') or self.options.no_project --[[@as string]]
   end
   if format == 'short' or not msg and msg ~= self.options.no_project then
-    msg = Util.strip_slash(curr, ':p:h:t')
+    msg = Project.util.strip_slash(curr, ':p:h:t')
   end
 
   if self.options.enclose_pair then

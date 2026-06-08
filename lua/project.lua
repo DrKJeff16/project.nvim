@@ -1,44 +1,36 @@
+---@module 'project._meta'
+
 local MODSTR = 'project'
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
 local Config = require('project.config')
-local Core = require('project.core')
-local History = require('project.util.history')
-local Log = require('project.util.log')
-local Popup = require('project.popup')
 local Util = require('project.util')
 
 ---The `project.nvim` module.
 --- ---
 ---@class Project
+---@field commands Project.Commands
+---@field config Project.Config
+---@field core Project.Core
+---@field delete_menu function
+---@field delete_project fun(project: string|Project.ActionEntry, prompt?: boolean)
+---@field extensions Project.Extensions
+---@field get_config fun(): config: string
+---@field get_history_paths Project.Core.GetHistoryPaths
+---@field get_last_project Project.Core.GetLastProject
+---@field get_project_root fun(bufnr?: integer): root: string|nil, method: string|nil
+---@field get_recent_projects Project.Util.History.GetRecentProjects
+---@field health Project.Health
+---@field open_menu function
+---@field popup Project.Popup
+---@field recents_menu function
+---@field rename_project fun(path: string, name: string): success: boolean
+---@field root_files fun(scan_what?: Project.Core.ScanRoot, path?: string, prefix?: string): files_list: string[]|nil
+---@field run_fzf_lua function
+---@field session_menu function
+---@field setup fun(options?: ProjectOpts)
+---@field util Project.Util
 local M = {}
-
-M.delete_project = History.delete_project
-M.get_config = Config.get_config
-M.get_history_paths = Core.get_history_paths
-M.get_last_project = Core.get_last_project
-M.get_project_root = Core.get_project_root
-M.get_recent_projects = History.get_recent_projects
-M.rename_project = History.rename_project
-M.root_files = Core.root_files
-M.run_fzf_lua = require('project.extensions.fzf-lua').run_fzf_lua
-M.setup = Config.setup
-
-function M.delete_menu()
-  Popup.delete_menu()
-end
-
-function M.open_menu()
-  Popup.open_menu()
-end
-
-function M.recents_menu()
-  Popup.recents_menu()
-end
-
-function M.session_menu()
-  Popup.session_menu()
-end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
@@ -53,12 +45,13 @@ function M.current_project(refresh)
     refresh = false
   end
 
+  local Core = require('project.core')
   if refresh then
-    Log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
+    Util.log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
     return Core.get_current_project()
   end
 
-  Log.debug(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
+  Util.log.debug(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
   return Core.current_project, Core.current_method, Core.last_project
 end
 
@@ -120,16 +113,15 @@ function M.add_root_patterns(patterns)
     error(('(%s.add_root_patterns): `project.nvim` is not setup!'):format(MODSTR))
   end
   if not (Config.options and Config.options.patterns and Util.is_type('table', Config.options.patterns)) then
-    Log.error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
+    Util.log.error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
     error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
   end
 
   if Util.is_type('string', patterns) then
     ---@cast patterns string
     if patterns == '' or vim.list_contains(Config.options.patterns, patterns) then
-      local msg = ('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns)
-      Log.warn(msg)
-      vim.notify(msg, WARN)
+      Util.log.warn(('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns))
+      vim.notify(('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns), WARN)
     else
       table.insert(Config.options.patterns, patterns)
     end
@@ -137,10 +129,9 @@ function M.add_root_patterns(patterns)
   end
 
   ---@cast patterns string[]
-  if vim.tbl_isempty(patterns) then
-    vim.notify(('(%s.add_root_patterns): Patterns table is empty!'):format(MODSTR), ERROR)
-    Log.error(('(%s.add_root_patterns): Patterns table is empty!'):format(MODSTR))
-    return
+  if vim.tbl_isempty(patterns) or not vim.islist(patterns) then
+    Util.log.error(('(%s.add_root_patterns): Patterns table is empty or not a list!'):format(MODSTR))
+    error(('(%s.add_root_patterns): Patterns table is empty or not a list!'):format(MODSTR))
   end
 
   for _, pat in ipairs(patterns) do
@@ -150,5 +141,51 @@ function M.add_root_patterns(patterns)
   end
 end
 
-return M
+local Project = setmetatable(M, { ---@type Project
+  ---@param self Project
+  ---@param k string|integer
+  __index = function(self, k)
+    if Util.mod_exists('project.' .. k) then
+      return require('project.' .. k)
+    end
+    if k == 'delete_project' then
+      return self.util.history.delete_project
+    end
+    if k == 'get_config' then
+      return self.config.get_config
+    end
+    if k == 'get_history_paths' then
+      return self.core.get_history_paths
+    end
+    if k == 'get_last_project' then
+      return self.core.get_last_project
+    end
+    if k == 'get_project_root' then
+      return self.core.get_project_root
+    end
+    if k == 'get_recent_projects' then
+      return self.util.history.get_recent_projects
+    end
+    if k == 'rename_project' then
+      return self.util.history.rename_project
+    end
+    if k == 'root_files' then
+      return self.core.root_files
+    end
+    if k == 'run_fzf_lua' then
+      return self.extensions['fzf-lua'].run_fzf_lua
+    end
+    if k == 'setup' then
+      return self.config.setup
+    end
+    if vim.list_contains({ 'delete_menu', 'open_menu', 'recents_menu', 'session_menu' }, k) then
+      return function()
+        self.popup[k]()
+      end
+    end
+    return rawget(self, k) or nil
+  end,
+})
+
+return Project
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

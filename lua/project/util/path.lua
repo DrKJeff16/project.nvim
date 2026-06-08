@@ -6,7 +6,7 @@ local Util = require('project.util')
 
 ---@class Project.Util.Path
 ---@field private curr_dir_cache string[]
----The directory where the project dir will be saved.
+---The directory where the project data will be saved at.
 --- ---
 ---@field datapath? string
 ---The project history file.
@@ -285,16 +285,16 @@ function M.setup(save_dir, save_file)
     save_file = { save_file, { 'string' } },
   })
 
-  M.datapath = save_dir
-  if not (vim.fn.mkdir(M.datapath, 'p') == 1 or M.exists(M.datapath)) then
-    M.datapath = Defaults.history.save_dir
-    if not (vim.fn.mkdir(M.datapath, 'p') == 1 or M.exists(M.datapath)) then
+  if vim.fn.mkdir(save_dir, 'p') ~= 1 and not M.exists(save_dir) then
+    save_dir = Defaults:_get_no_mt().history.save_dir
+    if vim.fn.mkdir(save_dir, 'p') ~= 1 and not M.exists(save_dir) then
       error('(%s.setup): Unable to create history directory!')
     end
   end
 
-  M.projectpath = M.join(M.datapath, 'project_nvim')
-  if not (M.exists(M.projectpath) or vim.fn.mkdir(M.projectpath, 'p') == 1) then
+  M.datapath = save_dir
+  M.projectpath = M.join(save_dir, 'project_nvim')
+  if not M.exists(M.projectpath) and vim.fn.mkdir(M.projectpath, 'p') ~= 1 then
     error('(%s.setup): Unable to create history subdirectory!')
   end
 

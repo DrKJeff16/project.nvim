@@ -10,15 +10,15 @@
 
 https://github.com/user-attachments/assets/0e10c4e8-f930-47a0-9058-956622e8f547
 
-`project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that,
-under configurable conditions, automatically sets the user's `cwd` to the current project root
-and also allows users to manage, access and selectively include their projects in a history.
+`project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that automatically sets your `cwd`
+to the current project root, and also allows you to manage, access and selectively include
+your projects in a history file.
 
-This plugin allows you to navigate through projects, _"bookmark"_ and/or discard them,
+This plugin allows you to navigate through, rename, _"bookmark"_ and/or discard your projects,
 according to your needs.
 
-This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim/pull/158).
-Ever since I've decided to extend it and address issues.
+This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim/pull/158). Ever since I decided to
+extend it and address issues.
 
 You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16/project.nvim/blob/main/EXAMPLES.md).
 
@@ -26,14 +26,14 @@ You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16
 
 - Automatically sets the `cwd` to the project root directory using pattern matching (LSP optionally)
 - Projects can be assigned a name (`:Project history rename [...]`)
-- **(NEW)** Users can define custom project roots, see [Custom Projects](#custom-projects)
+- Users can define custom project roots, see [Custom Projects](#custom-projects)
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook (`:checkhealth project`)
 - Vim help documentation ([`:h project-nvim`](https://github.com/DrKJeff16/project.nvim/blob/main/doc/project-nvim.txt))
 - Logging capabilities
 - Natively supports `.nvim.lua` files
 - `vim.ui` menu support
-- [`oil.nvim`](https://github.com/stevearc/oil.nvim) support
+- Supports [`oil.nvim`](https://github.com/stevearc/oil.nvim) buffers
 - [Lualine Integration](#lualine)
 - [Telescope Integration](#telescope) `:Telescope projects`
 - [`fzf-lua` Integration](#projectfzf)
@@ -49,7 +49,6 @@ You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16
 
 - [Installation](#installation)
 - [Configuration](#configuration)
-  - [Defaults](#defaults)
   - [Custom Projects](#custom-projects)
   - [Pattern Matching](#pattern-matching)
   - [Nvim Tree](#nvim-tree)
@@ -213,7 +212,7 @@ paq({
 
 ```lua
 vim.pack.add({
-  { src = 'https://github.com/DrKJeff16/project.nvim', name = 'project.nvim' },
+  'https://github.com/DrKJeff16/project.nvim',
 })
 ```
 
@@ -240,24 +239,31 @@ To enable the plugin you must call `setup()`:
 require('project').setup()
 ```
 
-### Defaults
+<details>
+<summary><b><ins>Click here to view the setup defaults</ins></b></summary>
 
 You can find these in [`config/defaults.lua`](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/config/defaults.lua).
-
 By default, `setup()` loads with the following options:
 
 ```lua
 {
-  before_attach = nil, ---@type nil|fun(target_dir: string, method: string)
-  on_attach = nil, ---@type nil|fun(target_dir: string, method: string)
+  before_attach = nil, ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
+  on_attach = nil, ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
   lsp = {
     enabled = true,
-    ignore = {},
+    ignore = {}, -- LSP clients to ignore
+
+    -- If `true`, no pattern matching will be used as a backup.
+    -- WARNING: ENABLE AT YOUR OWN DISCRETION!!!!
+    no_fallback = false,
+
+    -- Whether to double-check the LSP root with the pattern matching method.
     use_pattern_matching = false,
-    no_fallback = false, -- WARNING: ENABLE AT YOUR OWN DISCRETION!!!!
   },
   custom_projects = {}, -- Read the `Custom Projects` section below
   manual_mode = false,
+
+  -- This list is permanent, and any new entries are appended. You can leave this empty
   patterns = {
     '.git',
     '.github',
@@ -279,46 +285,53 @@ By default, `setup()` loads with the following options:
     allow = false, -- Allow adding projects with a different owner to the project session
     notify = true, -- Notify the user when a project with a different owner is found
   },
-  enable_autochdir = false,
-  show_by_name = false,
-  show_hidden = false,
-  exclude_dirs = {},
+  enable_autochdir = false, -- Set this to `true` if you prefer having `vim.o.autochdir` set to `true`
+  show_by_name = false, -- Show projects by their name instead of their full path
+  show_hidden = false, -- Show hidden files (global)
+  exclude_dirs = {}, -- Add any directory to exclude (absolute path). Keep in mind that this is recursive
   silent_chdir = true,
   scope_chdir = 'global', ---@type 'global'|'tab'|'win'
   history = {
     save_dir = vim.fn.stdpath('data'),
     save_file = 'project_history.json',
-    size = 100,
+    size = 100, -- The maximum number of history entries to write in your history file
   },
   log = {
     enabled = false,
-    max_size = 1.1,
+    max_size = 1.1, -- This size is in Mebibytes (MiB), A.K.A. 1MiB -> 1024KiB
     logpath = vim.fn.stdpath('state'),
   },
   snacks = {
     enabled = false,
     opts = {
-      hidden = false,
-      -- icon = {},
-      layout = 'select',
       -- path_icons = {},
-      show = 'paths', ---@type 'paths'|'names'
+      -- icon = {},
+      hidden = false, -- Show hidden files
+      layout = 'select',
       sort = 'newest', ---@type 'newest'|'oldest'
       title = 'Select Project',
+
+      -- Show project entries either by their path (`'paths'`) or their custom name (`'names'`)
+      show = 'paths', ---@type 'paths'|'names'
     },
   },
   fzf_lua = {
     enabled = false,
-    show = 'paths', ---@type 'paths'|'names'
     sort = 'newest', ---@type 'newest'|'oldest'
+
+    -- Show project entries either by their path (`'paths'`) or their custom name (`'names'`)
+    show = 'paths', ---@type 'paths'|'names'
   },
   picker = {
     enabled = false,
     hidden = false, -- Show hidden files
-    show = 'paths', ---@type 'paths'|'names'
     sort = 'newest', ---@type 'newest'|'oldest'
+
+    -- Show project entries either by their path (`'paths'`) or their custom name (`'names'`)
+    show = 'paths', ---@type 'paths'|'names'
   },
   disable_on = {
+    -- This list is permanent, and any new entries are appended. You can leave this empty
     ft = {
       '',
       'NvimTree',
@@ -335,6 +348,8 @@ By default, `setup()` loads with the following options:
       'packer',
       'qf',
     },
+
+    -- This list is permanent, and any new entries are appended. You can leave this empty
     bt = { 'help', 'nofile', 'nowrite', 'terminal' },
   },
   telescope = {
@@ -361,17 +376,19 @@ By default, `setup()` loads with the following options:
     },
     prefer_file_browser = false,
     sort = 'newest', ---@type 'oldest'|'newest'
-    tilde = false,
+    tilde = false, -- If `true`, project paths like `'/home/foo/...'` will become `'~/...'`
   },
 }
 ```
+
+</details>
 
 ### Custom Projects
 
 You can pre-define custom project roots in your setup. This is particularly useful for directories
 that don't have `.git` or any other patterns in them.
 
-> [!IMPORTANT]
+> [!CAUTION]
 > The `path` field has to be an absolute path!
 
 For example:
@@ -393,6 +410,8 @@ to give you better handling of your projects.
 
 For your convenience here come some examples:
 
+<ul>
+<li>
 <details>
 <summary>To specify the root is a certain directory, prefix it with <code>=</code>:</summary>
 
@@ -401,7 +420,8 @@ patterns = { '=src' }
 ```
 
 </details>
-
+</li>
+<li>
 <details>
 <summary>
 To specify the root has a certain directory or file (which may be a glob), just
@@ -413,7 +433,8 @@ patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
 ```
 
 </details>
-
+</li>
+<li>
 <details>
 <summary>
 To specify the root has a certain directory as an ancestor (useful for excluding directories),
@@ -425,7 +446,8 @@ patterns = { '^fixtures' }
 ```
 
 </details>
-
+</li>
+<li>
 <details>
 <summary>
 To specify the root has a certain directory as its direct ancestor/parent
@@ -437,7 +459,8 @@ patterns = { '>Latex' }
 ```
 
 </details>
-
+</li>
+<li>
 <details>
 <summary>To exclude a pattern, prefix it with `!`</summary>
 
@@ -446,6 +469,8 @@ patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
 ```
 
 </details>
+</li>
+</ul>
 
 > [!IMPORTANT]
 > Make sure to put your pattern exclusions first, and then the patterns you DO want included.
@@ -528,8 +553,7 @@ After that you can now call it from the command line:
 :Telescope projects
 ```
 
-You can also configure the picker when calling `require('telescope').setup()`
-**CREDITS**: [@ldfwbebp](https://github.com/ahmedkhalf/project.nvim/pull/160)
+You can also configure the picker when calling `require('telescope').setup()`. **CREDITS**: [@ldfwbebp](https://github.com/ahmedkhalf/project.nvim/pull/160)
 
 ```lua
 require('telescope').setup({
@@ -554,11 +578,12 @@ require('telescope').setup({
 
 | Normal Mode | Insert Mode | Action                     |
 |-------------|-------------|----------------------------|
-| `f`         | `<C-f>`     | `find_project_files`       |
 | `b`         | `<C-b>`     | `browse_project_files`     |
 | `d`         | `<C-d>`     | `delete_project`           |
-| `s`         | `<C-s>`     | `search_in_project_files`  |
+| `f`         | `<C-f>`     | `find_project_files`       |
+| `n`         | `<C-n>`     | `rename_project`           |
 | `r`         | `<C-r>`     | `recent_project_files`     |
+| `s`         | `<C-s>`     | `search_in_project_files`  |
 | `w`         | `<C-w>`     | `change_working_directory` |
 
 _You can find the Actions in [`telescope/_extensions/projects/actions.lua`](https://github.com/DrKJeff16/project.nvim/blob/main/lua/telescope/_extensions/projects/actions.lua)_.
@@ -567,8 +592,7 @@ _You can find the Actions in [`telescope/_extensions/projects/actions.lua`](http
 
 ### `mini.starter`
 
-If you use [`nvim-mini/mini.starter`](https://github.com/nvim-mini/mini.starter) you can include the
-following snippet in your `MiniStarter` setup:
+If you use [`nvim-mini/mini.starter`](https://github.com/nvim-mini/mini.starter) you can include the following snippet in your `MiniStarter` setup:
 
 ```lua
 require('mini.starter').setup({
@@ -603,12 +627,13 @@ Mappings:
 | Normal Mode | Description                             |
 |-------------|-----------------------------------------|
 | `<C-d>`     | Delete the selected project             |
+| `<C-r>`     | Rename the selected project             |
 | `<C-w>`     | Changes the cwd to the selected project |
 
 You can find the integration in:
 
-- [_`extensions/picker.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/picker.lua)
 - [_`picker/sources/project.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/picker/sources/project.lua).
+- [_`extensions/picker.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/picker.lua)
 
 ### `snacks.nvim`
 
@@ -642,6 +667,7 @@ Mappings:
 | Normal Mode | Description                             |
 |-------------|-----------------------------------------|
 | `<C-d>`     | Delete the selected project             |
+| `<C-r>`     | Rename the selected project             |
 | `<C-w>`     | Changes the cwd to the selected project |
 
 You can find the integration in [_`extensions/snacks.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/snacks.lua).
@@ -713,10 +739,10 @@ If the `fzf-lua` integration is enabled in your setup, it will open a `fzf-lua` 
 
 Mappings:
 
-| Mapping | Description                  |
-|---------|------------------------------|
-| `<C-d>` | Delete the selected project  |
-| `<C-r>` | Renames the selected project |
+| Mapping | Description                            |
+|---------|----------------------------------------|
+| `<C-d>` | Delete the selected project            |
+| `<C-r>` | Rename the selected project            |
 
 See [_`extensions/fzf-lua.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/fzf-lua.lua)
 for more info.
@@ -730,26 +756,20 @@ Simply runs `:checkhealth project`.
 If the command is called without any extra arguments it'll toggle the `project.nvim` history file
 in a new tab, which can be exited by pressing `q` in Normal Mode.
 
-If you need to migrate your project history to the new spec, simply run `:Project history migrate`
-once and that's it! After migration this subcommand will not be available unless another migration is
-needed.
-
-**(MIGRATION REQUIRED)**
 If you wish to rename a project you can call `:Project history rename`, with or without
 any arguments passed to it.
 If no arguments are passed, a custom UI list will open, showing you your projects to be renamed.
 If one or more arguments are passed, these must be the paths to your projects (absolute or relative).
 
-**(DANGER ZONE)**
-If called with the `clear` argument (`:Project[!] history clear`) your project history will be cleared.
-If you want to avoid a "Yes/No" prompt you can call the command with a bang (`!`) to force it.
+> [!CAUTION]
+> If called with the `clear` argument (`:Project[!] history clear`) your project history will be cleared.
+> If you want to avoid a "Yes/No" prompt you can call the command with a bang (`!`) to force it.
 
 Usage:
 
 ```vim
 :Project history
 :Project[!] history clear
-:Project history migrate                         " Will migrate your history to the newest spec
 :Project history rename [/path/to/project [...]] " (NEEDS MIGRATION) Will rename the specified projects
 ```
 

@@ -4,8 +4,6 @@ local uv = vim.uv or vim.loop
 local MODSTR = 'project.extensions.snacks'
 local Config = require('project.config')
 local Core = require('project.core')
-local History = require('project.util.history')
-local Log = require('project.util.log')
 local Popup = require('project.popup')
 local Util = require('project.util')
 
@@ -32,23 +30,14 @@ function M.gen_items()
   end
 
   for i, proj in ipairs(recents) do
-    local text = '' ---@type string
-    if History.legacy then
-      ---@cast proj string
-      text = Util.strip_slash(proj, Config.options.snacks.tilde and ':p:~' or nil)
-    elseif M.config.show == 'paths' then
-      ---@cast proj ProjectHistoryEntry
-      text = Util.strip_slash(proj.path, Config.options.snacks.tilde and ':p:~' or nil)
-    else
-      ---@cast proj ProjectHistoryEntry
-      text = proj.name
-    end
+    local text = M.config.show ~= 'paths' and proj.name
+      or Util.strip_slash(proj.path, Config.options.snacks.tilde and ':p:~' or nil)
 
     table.insert(items, {
       idx = i,
       score = i,
       text = text,
-      value = Util.strip_slash(History.legacy and proj or proj.path, ':p:~'),
+      value = Util.strip_slash(proj.path, ':p:~'),
     })
   end
   return items
@@ -82,14 +71,14 @@ function M.pick()
       end,
       delete_project = function(self, item)
         self:close()
-        History.delete_project(vim.fn.expand(item.value), true)
+        Util.history.delete_project(vim.fn.expand(item.value), true)
         M.pick()
       end,
       rename_project = function(self, item)
         self:close()
         vim.api.nvim_feedkeys('i', 'n', false)
 
-        Popup.rename_input(vim.fn.expand(item.value), History.find_entry('recent', item.value, 'name'))
+        Popup.rename_input(vim.fn.expand(item.value), Util.history.find_entry('recent', item.value, 'name'))
       end,
     },
     confirm = function(self, item)
@@ -98,7 +87,7 @@ function M.pick()
         return
       end
 
-      Log.debug(('(%s.pick): Opening Snacks picker'):format(MODSTR))
+      Util.log.debug(('(%s.pick): Opening Snacks picker'):format(MODSTR))
       require('snacks').picker.files({
         cwd = uv.cwd() or vim.fn.getcwd(),
         show_empty = true,

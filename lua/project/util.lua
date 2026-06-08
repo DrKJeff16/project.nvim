@@ -3,6 +3,10 @@
 local MODSTR = 'project.util'
 
 ---@class Project.Util
+---@field globtopattern Project.Util.Glob
+---@field history Project.Util.History
+---@field log Project.Log
+---@field path Project.Util.Path
 local M = {}
 
 ---@param bufnr integer
@@ -497,10 +501,8 @@ function M.delete_duplicates(tbl)
   M.validate({ tbl = { tbl, { 'table' } } })
 
   local cache_dict = {} ---@type table<string, integer>
-  require('project.util.history').is_legacy(tbl)
-  local legacy = require('project.util.history').legacy
   for _, v in ipairs(tbl) do
-    local normalised_path = M.normalise_path(legacy and v or v.path)
+    local normalised_path = M.normalise_path(v.path)
     if not cache_dict[normalised_path] then
       cache_dict[normalised_path] = 1
     else
@@ -508,11 +510,11 @@ function M.delete_duplicates(tbl)
     end
   end
 
-  local res = {} ---@type string[]|ProjectHistoryEntry[]
+  local res = {} ---@type ProjectHistoryEntry[]
   for _, v in ipairs(tbl) do
-    local normalised_path = M.normalise_path(legacy and v or v.path)
+    local normalised_path = M.normalise_path(v.path)
     if cache_dict[normalised_path] == 1 then
-      table.insert(res, legacy and normalised_path or { path = normalised_path, name = v.name })
+      table.insert(res, { path = normalised_path, name = v.name })
     else
       cache_dict[normalised_path] = cache_dict[normalised_path] - 1
     end
@@ -759,5 +761,14 @@ function M.normalise_path(path)
   return M.is_windows() and (normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)) or normalised_path
 end
 
-return M
+local Util = setmetatable(M, { ---@type Project.Util
+  __index = function(self, k)
+    if M.mod_exists('project.util.' .. k) then
+      return require('project.util.' .. k)
+    end
+    return rawget(self, k) or nil
+  end,
+})
+
+return Util
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

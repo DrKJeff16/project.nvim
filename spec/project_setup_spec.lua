@@ -6,10 +6,7 @@ describe('project.nvim setup', function()
   local ok ---@type boolean
 
   before_each(function()
-    package.loaded['project'] = nil
     project = require('project')
-    local D = require('project.config.defaults')
-    defaults = D:new():_get_no_mt()
   end)
 
   it('should set default configuration', function()
@@ -17,6 +14,7 @@ describe('project.nvim setup', function()
     assert.is_true(ok)
 
     local options = require('project.config').options:_get_no_mt()
+    defaults = project.config.defaults:new():_get_no_mt()
     assert.are_same(defaults, options)
   end)
 
@@ -24,7 +22,8 @@ describe('project.nvim setup', function()
     ok = pcall(project.setup, {})
     assert.is_true(ok)
 
-    local options = require('project.config').options:_get_no_mt()
+    local options = project.config.options:_get_no_mt()
+    defaults = project.config.defaults:new():_get_no_mt()
     assert.are_same(defaults, options)
   end)
 

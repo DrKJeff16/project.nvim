@@ -11,54 +11,17 @@ local Util = require('project.util')
 
 ---@class Project.Util.History
 ---@field public historysize? integer
----@field public legacy? boolean
 ---Projects from previous neovim sessions.
 --- ---
----@field public recent_projects string[]|ProjectHistoryEntry[]
+---@field public recent_projects ProjectHistoryEntry[]
 ---Projects from current neovim session.
 --- ---
----@field public session_projects string[]|ProjectHistoryEntry[]
+---@field public session_projects ProjectHistoryEntry[]
 ---@field public window? Project.HistoryWin
 local M = {}
 
 M.session_projects = {}
 M.recent_projects = {}
-
-function M.migrate()
-  if not M.legacy then
-    vim.notify(('(%s.migrate): History has already been migrated!'):format(MODSTR), WARN)
-    return
-  end
-
-  M.read_history()
-
-  if Util.same_type_list(M.recent_projects, 'string') then
-    for i, v in ipairs(M.recent_projects) do
-      M.recent_projects[i] = {
-        path = v,
-        name = ('%s/%s'):format(Util.strip_slash(v, ':p:h:h:t'), Util.strip_slash(v, ':p:h:t')),
-      }
-    end
-
-    M.is_legacy(M.recent_projects)
-  end
-
-  if not vim.tbl_isempty(M.session_projects) and Util.same_type_list(M.session_projects, 'string') then
-    for i, v in ipairs(M.session_projects) do
-      M.session_projects[i] = {
-        path = v,
-        name = ('%s/%s'):format(Util.strip_slash(v, ':p:h:h:t'), Util.strip_slash(v, ':p:h:t')),
-      }
-    end
-
-    M.is_legacy(M.session_projects)
-  end
-
-  M.write_history()
-  M.read_history()
-
-  vim.notify(('(%s.migrate): Migration was successful!'):format(MODSTR), INFO)
-end
 
 ---@param path string
 ---@param name string
@@ -68,7 +31,7 @@ function M.rename_project(path, name)
     path = { path, { 'string' } },
     name = { name, { 'string' } },
   })
-  if M.legacy or vim.list_contains({ name, path }, '') then
+  if vim.list_contains({ name, path }, '') then
     return false
   end
 
@@ -94,7 +57,6 @@ function M.rename_project(path, name)
   local recent_i = 0
   local old_name = ''
   for i, proj in ipairs(M.recent_projects) do
-    ---@cast proj ProjectHistoryEntry
     if proj.path == path then
       recent_i = i
       break
@@ -108,7 +70,6 @@ function M.rename_project(path, name)
 
   local session_i = 0
   for i, proj in ipairs(M.session_projects) do
-    ---@cast proj ProjectHistoryEntry
     if proj.path == path then
       session_i = i
       break
@@ -360,7 +321,7 @@ function M.import_history_json(path, force_name)
     return
   end
 
-  local ok, hist = pcall(vim.json.decode, data, {}) ---@type boolean, string[]|ProjectHistoryEntry[]
+  local ok, hist = pcall(vim.json.decode, data, {}) ---@type boolean, ProjectHistoryEntry[]
   if not ok then
     Log.error(('(%s.import_history_json): JSON decoding failed! `%s`'):format(MODSTR, path))
     vim.notify(('(%s.import_history_json): JSON decoding failed! `%s`'):format(MODSTR, path), ERROR)
@@ -385,10 +346,9 @@ function M.remove_session(session, found)
     found = { found, { 'boolean' } },
   })
 
-  M.is_legacy(M.session_projects)
-  local new_sessions = {} ---@type string[]|ProjectHistoryEntry[]
+  local new_sessions = {} ---@type ProjectHistoryEntry[]
   for _, v in ipairs(M.session_projects) do
-    local recent = M.legacy and v or v.path --[[@as string]]
+    local recent = v.path
     if recent == session then
       found = true
     else
@@ -407,12 +367,10 @@ end
 function M.remove_recent(project)
   Util.validate({ project = { project, { 'string' } } })
 
-  M.is_legacy(M.recent_projects)
-
   local found = false
-  local new_recents = {} ---@type string[]|ProjectHistoryEntry[]
+  local new_recents = {} ---@type ProjectHistoryEntry[]
   for _, v in ipairs(M.recent_projects) do
-    local recent = M.legacy and v or v.path --[[@as string]]
+    local recent = v.path
     if recent == project then
       found = true
     else
@@ -470,24 +428,18 @@ end
 ---Splits data into table.
 --- ---
 ---@param history_data string
----@param name_data? string[]
+---@param name_data string[]
 function M.deserialize_history(history_data, name_data)
   Util.validate({
     history_data = { history_data, { 'string' } },
-    name_data = { name_data, { 'table', 'nil' }, true },
+    name_data = { name_data, { 'table' } },
   })
-  name_data = (name_data and not vim.tbl_isempty(name_data)) and name_data or nil
 
   local Config = require('project.config')
-  local projects, i = {}, 1 ---@type string[]|ProjectHistoryEntry[], integer
+  local projects, i = {}, 1 ---@type ProjectHistoryEntry[], integer
   for s in history_data:gmatch('[^\r\n]+') do
-    local entry ---@type string|ProjectHistoryEntry
     if not Path.is_excluded(s) then
-      if not name_data then
-        entry = s --[[@as string]]
-      else
-        entry = { path = s, name = name_data[i] } --[[@as ProjectHistoryEntry]]
-      end
+      local entry = { path = s, name = name_data[i] } --[[@as ProjectHistoryEntry]]
       if
         Config.options
         and Config.options
@@ -515,7 +467,7 @@ local function setup_watch()
     return
   end
 
-  event:start(Path.projectpath, {}, function(err, _, events)
+  event:start(Path.historyfile, {}, function(err, _, events)
     if err or not events.change then
       return
     end
@@ -551,36 +503,30 @@ function M.read_history()
     return
   end
 
-  ---@type boolean, string[]|ProjectHistoryEntry[]|nil
+  ---@type boolean, ProjectHistoryEntry[]|nil
   local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size))
   uv.fs_close(fd)
   if not (ok and data) then
     Log.error(
       ('(%s.read_history): Could not decode JSON data from history file! (`stat.size = %s`)'):format(MODSTR, stat.size)
     )
-    vim.notify(
-      ('(%s.read_history): Could not decode JSON data from history file! (`stat.size = %s`)'):format(MODSTR, stat.size)
-    )
     return
   end
 
   local data_str, name_list = '', {} ---@type string, string[]
-  M.is_legacy(data)
   for _, v in ipairs(data) do
-    data_str = ('%s%s%s'):format(data_str, data_str == '' and '' or '\n', M.legacy and v or v.path)
-
-    if not M.legacy then
-      ---@cast v ProjectHistoryEntry
-      table.insert(name_list, v.name)
-    end
+    data_str = ('%s%s%s'):format(data_str, data_str == '' and '' or '\n', v.path)
+    table.insert(name_list, v.name)
   end
 
   M.deserialize_history(data_str, name_list)
 end
 
----@param paths_only? boolean
----@param tilde? boolean
----@return string[]|ProjectHistoryEntry[] recents
+---@overload fun(): recents: ProjectHistoryEntry[]
+---@overload fun(paths_only: false): recents: ProjectHistoryEntry[]
+---@overload fun(paths_only?: false, tilde: boolean): recents: ProjectHistoryEntry[]
+---@overload fun(paths_only: true): recents: string[]
+---@overload fun(paths_only: true, tilde: boolean): recents: string[]
 function M.get_recent_projects(paths_only, tilde)
   Util.validate({
     paths_only = { paths_only, { 'boolean', 'nil' }, true },
@@ -593,7 +539,7 @@ function M.get_recent_projects(paths_only, tilde)
     paths_only = false
   end
 
-  local tbl = {} ---@type string[]|ProjectHistoryEntry[]
+  local tbl = {} ---@type ProjectHistoryEntry[]
   if M.recent_projects then
     vim.list_extend(tbl, M.recent_projects)
     vim.list_extend(tbl, M.session_projects)
@@ -603,9 +549,8 @@ function M.get_recent_projects(paths_only, tilde)
   tbl = Util.delete_duplicates(tbl)
 
   local idx, removed = 1, false
-  M.is_legacy(tbl)
   while idx <= #tbl do
-    local v = Util.strip_slash(M.legacy and tbl[idx] or tbl[idx].path)
+    local v = Util.strip_slash(tbl[idx].path)
     if not Path.exists(v) or Path.is_excluded(v) then
       table.remove(tbl, idx)
       removed = true
@@ -619,15 +564,15 @@ function M.get_recent_projects(paths_only, tilde)
     M.write_history()
   end
 
-  local recents = {} ---@type string[]|ProjectHistoryEntry[]
+  local recents = {} ---@type ProjectHistoryEntry[]
   for i, v in ipairs(tbl) do
-    local dir = M.legacy and v or v.path
+    local dir = v.path
     if Util.dir_exists(dir) then
       dir = Util.strip_slash(dir, tilde and ':p:~' or nil)
-      table.insert(recents, (M.legacy or paths_only) and dir or { path = dir, name = tbl[i].name })
+      table.insert(recents, paths_only and dir or { path = dir, name = tbl[i].name })
     end
   end
-  return Util.dedup(recents, M.legacy and nil or 'name')
+  return Util.dedup(recents, 'name')
 end
 
 ---Write projects to history file.
@@ -635,7 +580,12 @@ end
 ---@param path? string
 function M.write_history(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
-  path = Util.strip_slash(path or Path.historyfile)
+  local Config = require('project.config')
+  path = Util.strip_slash(
+    path
+      or Path.historyfile
+      or vim.fs.joinpath(Config.options.history.save_dir, 'project_nvim', Config.options.history.save_file)
+  )
 
   if not Path.exists(path) then
     local write_res = vim.fn.writefile({ '[', ']' }, path)
@@ -645,14 +595,13 @@ function M.write_history(path)
     end
   end
 
-  local Config = require('project.config')
   local historysize = 100
   if Config.options and Config.options.history and Config.options.history.size then
     historysize = Config.options.history.size
   end
   M.historysize = historysize > 0 and historysize or 100
 
-  local file_history = {} ---@type string[]|ProjectHistoryEntry[]
+  local file_history = {} ---@type ProjectHistoryEntry[]
   local ok, fd, stat ---@type boolean, integer|nil, uv.fs_stat.result|nil
   if path == Path.historyfile then
     ok, fd, stat = pcall(M.open_history, 'r')
@@ -664,7 +613,7 @@ function M.write_history(path)
     local data = uv.fs_read(fd, stat.size)
     uv.fs_close(fd)
     if data then
-      ok, file_history = pcall(vim.json.decode, data) ---@type boolean, string[]|ProjectHistoryEntry[]
+      ok, file_history = pcall(vim.json.decode, data) ---@type boolean, ProjectHistoryEntry[]
       if not ok then
         Log.error(('(%s.write_history): Unable to decode JSON data!'):format(MODSTR))
         error(('(%s.write_history): Unable to decode JSON data!'):format(MODSTR))
@@ -708,8 +657,11 @@ function M.write_history(path)
 
   if vim.tbl_isempty(tbl_out) then
     uv.fs_close(fd)
-    Log.error(('(%s.write_history): No data available to write!'):format(MODSTR))
-    vim.notify(('(%s.write_history): No data available to write!'):format(MODSTR), WARN)
+    if vim.g.project_history_no_data_notified ~= 1 then
+      Log.error(('(%s.write_history): No data available to write!'):format(MODSTR))
+      vim.notify(('(%s.write_history): No data available to write!'):format(MODSTR), WARN)
+      vim.g.project_history_no_data_notified = 1
+    end
     return
   end
 
@@ -735,46 +687,6 @@ function M.write_history(path)
   uv.fs_close(fd)
 end
 
----@param data string[]|ProjectHistoryEntry[]
----@return boolean legacy
-function M.is_legacy(data)
-  Util.validate({ data = { data, { 'table' } } })
-
-  local is_legacy = nil ---@type boolean|nil
-  for _, entry in ipairs(data) do
-    if is_legacy == nil then
-      is_legacy = Util.is_type('string', entry)
-    elseif is_legacy then
-      ---@cast entry string
-      Util.validate({ entry = { entry, { 'string' } } })
-    else
-      ---@cast entry ProjectHistoryEntry
-      Util.validate({
-        entry = { entry, { 'table' } },
-        ['entry.path'] = { entry.path, { 'string' } },
-        ['entry.name'] = { entry.name, { 'string' } },
-      })
-    end
-  end
-
-  if vim.g.project_migration_notified ~= 1 then
-    vim.g.project_migration_notified = 1
-    if is_legacy then
-      Log.warn('History file is legacy!')
-      vim.notify(
-        [[project.nvim - Your history needs to be migrated to the new spec!
-To migrate simply run `:ProjectHistory migrate` in your cmdline.
-
-If you encounter any bugs please raise an issue and it will be dealt with ASAP.]],
-        WARN
-      )
-    end
-  end
-
-  M.legacy = is_legacy
-  return is_legacy
-end
-
 ---@param search 'session'|'recent'
 ---@param value string
 ---@param key 'path'|'name'
@@ -785,12 +697,7 @@ function M.find_entry(search, value, key)
     value = { value, { 'string' } },
     key = { key, { 'string' } },
   })
-  if
-    not (
-      vim.list_contains({ 'recent', 'session' }, search)
-      and (vim.list_contains({ 'path', 'name' }, key) and not M.legacy)
-    )
-  then
+  if not (vim.list_contains({ 'recent', 'session' }, search) and vim.list_contains({ 'path', 'name' }, key)) then
     return
   end
 
@@ -799,9 +706,8 @@ function M.find_entry(search, value, key)
     return
   end
 
-  local tbl = search == 'session' and M.session_projects or M.recent_projects --[[@as ProjectHistoryEntry[]\]]
+  local tbl = search == 'session' and M.session_projects or M.recent_projects
   for _, v in ipairs(tbl) do
-    ---@cast v ProjectHistoryEntry
     if (v.path == Util.strip_slash(value) or v.name == value) and v[key] then
       return v[key]
     end
@@ -836,7 +742,7 @@ function M.open_win()
     return
   end
 
-  ---@type boolean, string[]|ProjectHistoryEntry[]|nil
+  ---@type boolean, ProjectHistoryEntry[]|nil
   local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size))
   uv.fs_close(fd)
   if not (ok and data) then
@@ -852,15 +758,8 @@ function M.open_win()
     }
 
     local lines = {} ---@type string[]
-    M.is_legacy(data)
-    if M.legacy then
-      ---@cast data string[]
-      lines = vim.deepcopy(data)
-    else
-      ---@cast data ProjectHistoryEntry[]
-      for _, entry in ipairs(data) do
-        table.insert(lines, ('(%s) - %s'):format(entry.name, entry.path))
-      end
+    for _, entry in ipairs(data) do
+      table.insert(lines, ('(%s) - %s'):format(entry.name, entry.path))
     end
 
     vim.api.nvim_buf_set_lines(M.window.bufnr, 0, 1, true, Util.reverse(lines))

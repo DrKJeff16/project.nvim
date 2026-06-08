@@ -4,9 +4,6 @@ local MODSTR = 'project.health'
 local uv = vim.uv or vim.loop
 local Config = require('project.config')
 local Core = require('project.core')
-local History = require('project.util.history')
-local Log = require('project.util.log')
-local Path = require('project.util.path')
 local Util = require('project.util')
 
 ---@class Project.Health
@@ -52,16 +49,11 @@ Please report any issues to the maintainers.
 If you wish to disable this warning, set `g:project_disable_win32_warning` to `1`.]])
   end
 
-  if History.legacy then
-    vim.health.warn('Your history has not been migrated yet! Please run `:ProjectHistory migrate` to migrate.')
-  else
-    vim.health.ok('Your history was migrated successfully! You can set names for your projects.')
-  end
   return true
 end
 
 function M.options_check()
-  vim.health.start('Config')
+  vim.health.start('Configuration')
   local Options = vim.deepcopy(Config.options)
   if not Util.is_type('table', Options) then
     vim.health.error('The config table is missing!')
@@ -83,9 +75,9 @@ end
 function M.history_check()
   vim.health.start('History')
   local P = { ---@type Project.HistoryPath[]
-    { name = 'datapath', type = 'directory', path = Path.datapath },
-    { name = 'projectpath', type = 'directory', path = Path.projectpath },
-    { name = 'historyfile', type = 'file', path = Path.historyfile },
+    { name = 'datapath', type = 'directory', path = Util.path.datapath },
+    { name = 'projectpath', type = 'directory', path = Util.path.projectpath },
+    { name = 'historyfile', type = 'file', path = Util.path.historyfile },
   }
   for _, v in ipairs(P) do
     local name, ptype, path = v.name, v.type, v.path
@@ -121,58 +113,43 @@ function M.project_check()
 
   vim.health.start('Active Sessions')
   local active = vim.g.project_history_has_watch_setup == 1
-  local projects = vim.deepcopy(History.session_projects)
+  local projects = vim.deepcopy(Util.history.session_projects)
   if not active or vim.tbl_isempty(projects) then
     vim.health.warn('No active session projects!')
     return
   end
-  History.is_legacy(projects)
-  for k, v in ipairs(Util.dedup(projects, History.legacy and nil or 'name')) do
-    if History.legacy then
-      vim.health.info(('%s. `%s`'):format(k, v))
-    else
-      local index = tostring(k)
-      vim.health.info(('%d. `%s`\n   %spath: `%s`'):format(index, v.name, (' '):rep(index:len() - 1), v.path))
-    end
+  for k, v in ipairs(Util.dedup(projects, 'name')) do
+    local index = tostring(k)
+    vim.health.info(('%d. `%s`\n   %spath: `%s`'):format(index, v.name, (' '):rep(index:len() - 1), v.path))
   end
 end
 
 function M.logging_check()
   vim.health.start('Log')
 
-  if not Config.options.log.enabled then
-    vim.health.ok('Logging disabled!')
+  if not Config.options.log.enabled or vim.g.project_log_loaded ~= 1 then
+    vim.health.ok('Logging disabled. This does not represent an issue necessarily!')
     return
   end
 
   vim.health.ok('Logging enabled!')
-  if not (vim.cmd.ProjectLog and vim.is_callable(vim.cmd.ProjectLog)) then
-    vim.health.warn('`:ProjectLog` user command is not loaded!')
-    return
-  end
-
-  vim.health.ok('`:ProjectLog` user command loaded!')
+  vim.health.ok('`:Project log` user command available!')
 end
 
 function M.fzf_lua_check()
   vim.health.start('`fzf-lua` Integration')
-  if not Config.options.fzf_lua.enabled then
+  if not Config.options.fzf_lua.enabled or vim.g.project_fzf_lua_loaded ~= 1 then
     vim.health.warn('`fzf-lua` integration is disabled. This does not represent an issue necessarily!')
     return
   end
 
   vim.health.ok('`fzf-lua` integration enabled!')
-  if not (vim.cmd.ProjectFzf and vim.is_callable(vim.cmd.ProjectFzf)) then
-    vim.health.warn('`:ProjectFzf` user command is not loaded!')
-    return
-  end
-
-  vim.health.ok('`:ProjectFzf` user command loaded!')
+  vim.health.ok('`:Project fzf-lua` user command available!')
 end
 
 function M.recent_proj_check()
   vim.health.start('Recent Projects')
-  local recents = Util.reverse(History.get_recent_projects(false))
+  local recents = Util.reverse(Util.history.get_recent_projects(false))
   if vim.tbl_isempty(recents) then
     vim.health.warn([[No projects found in history!
 
@@ -186,14 +163,8 @@ and submit an issue if pertinent.]])
   end
 
   for i, project in ipairs(recents) do
-    if History.legacy then
-      vim.health.info(('%d. `%s`'):format(i, project))
-    else
-      local index = tostring(i)
-      vim.health.info(
-        ('%d. `%s`\n   %spath: `%s`'):format(index, project.name, (' '):rep(index:len() - 1), project.path)
-      )
-    end
+    local index = tostring(i)
+    vim.health.info(('%d. `%s`\n   %spath: `%s`'):format(index, project.name, (' '):rep(index:len() - 1), project.path))
   end
 end
 
@@ -205,12 +176,12 @@ function M.check()
   end
   M.project_check()
   M.history_check()
-  M.logging_check()
   M.options_check()
-  M.recent_proj_check()
+  M.logging_check()
   M.fzf_lua_check()
+  M.recent_proj_check()
 
-  Log.debug(('(%s): `checkhealth` successfully called.'):format(MODSTR))
+  Util.log.debug(('(%s): `checkhealth` successfully called.'):format(MODSTR))
 end
 
 return M

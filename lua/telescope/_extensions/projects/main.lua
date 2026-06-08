@@ -5,12 +5,9 @@ if vim.g.project_setup ~= 1 then
   return
 end
 
-local Log = require('project.util.log')
-local Util = require('project.util')
-local Config = require('project.config')
-local Core = require('project.core')
-if not Util.mod_exists('telescope') then
-  Log.error(('(%s): Telescope is not installed!'):format(MODSTR))
+local Project = require('project')
+if not Project.util.mod_exists('telescope') then
+  Project.util.log.error(('(%s): Telescope is not installed!'):format(MODSTR))
   vim.notify(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
 end
 
@@ -42,14 +39,14 @@ local valid_acts = {
 ---@param map fun(mode: string, lhs: string, rhs: string|function)
 ---@return boolean
 local function normal_attach(prompt_bufnr, map)
-  Util.validate({
+  Project.util.validate({
     prompt_bufnr = { prompt_bufnr, { 'number' } },
     map = { map, { 'function' } },
   })
 
-  local Keys = vim.deepcopy(Config.options.telescope.mappings) or {}
+  local Keys = vim.deepcopy(Project.config.options.telescope.mappings) or {}
 
-  if not Util.is_type('table', Keys) or vim.tbl_isempty(Keys) then
+  if not Project.util.is_type('table', Keys) or vim.tbl_isempty(Keys) then
     Keys = vim.deepcopy(require('project.config.defaults').telescope.mappings)
   end
 
@@ -60,7 +57,7 @@ local function normal_attach(prompt_bufnr, map)
       group[mode == 'n' and '?' or '<C-?>'] = 'help_mappings'
       for lhs, act in pairs(group) do
         local rhs = vim.list_contains(valid_acts, act) and _Actions[act] or false ---@type function|false
-        if rhs and vim.is_callable(rhs) and Util.is_type('string', lhs) then
+        if rhs and vim.is_callable(rhs) and Project.util.is_type('string', lhs) then
           map(mode, lhs, rhs)
         end
       end
@@ -68,9 +65,9 @@ local function normal_attach(prompt_bufnr, map)
   end
 
   Actions.select_default:replace(function()
-    if Config.options.telescope.disable_file_picker then
+    if Project.config.options.telescope.disable_file_picker then
       local entry = State.get_selected_entry()
-      Core.set_pwd(entry.value, 'telescope')
+      Project.core.set_pwd(entry.value, 'telescope')
       return require('telescope.actions.set').select(prompt_bufnr, 'default')
     end
 
@@ -81,7 +78,7 @@ end
 
 ---@param opts? table
 function M.setup(opts)
-  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Project.util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   M.default_opts = vim.tbl_deep_extend('keep', opts or {}, M.default_opts)
   vim.g.project_telescope_loaded = 1
@@ -93,18 +90,18 @@ end
 --- ---
 ---@param opts? table
 function M.projects(opts)
-  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Project.util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
   if vim.g.project_telescope_loaded ~= 1 then
-    Log.error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
+    Project.util.log.error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
     error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
   end
 
-  local Options = Config.options
+  local Options = Project.config.options
   local scope = Options.scope_chdir == 'win' and 'window' or Options.scope_chdir --[[@as string]]
   Pickers.new(vim.tbl_deep_extend('keep', opts, M.default_opts), {
-    prompt_title = ('Select Your Project (%s)'):format(Util.capitalize(scope)),
+    prompt_title = ('Select Your Project (%s)'):format(Project.util.capitalize(scope)),
     results_title = 'Projects',
     finder = _Util.create_finder(),
     previewer = false,

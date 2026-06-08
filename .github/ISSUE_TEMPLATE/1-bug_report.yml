@@ -10,6 +10,18 @@ labels:
 assignees:
   - DrKJeff16
 body:
+  - type: checkboxes
+    attributes:
+      label: Issue Checks
+      description: |
+        Make sure to read every checkbox and answer truthfully.
+      options:
+        - label: I am running on the latest version of `project.nvim`
+          required: true
+        - label: I have checked for existing issues related to this one, whether open or closed
+          required: true
+        - label: I have read the pertinent documentation (`README.md`, `:h project-nvim`, etc.)
+          required: true
   - type: textarea
     attributes:
       label: Description
@@ -69,18 +81,6 @@ body:
         ---
   - type: checkboxes
     attributes:
-      label: Issue Checks
-      description: |
-        Make sure to read every checkbox and answer truthfully.
-      options:
-        - label: I am running on the latest version of `project.nvim`
-          required: true
-        - label: I have checked for existing issues related to this one, whether open or closed
-          required: true
-        - label: I have read the pertinent documentation (`README.md`, `:h project-nvim`, etc.)
-          required: true
-  - type: checkboxes
-    attributes:
       label: Issue Type
       description: |
         What does your issue relate to? Select one at least!
@@ -112,6 +112,8 @@ body:
       label: Operating System
       description: |
         Please indicate your OS. Add the version if applicable.
+
+        If you're using a UNIX system, try copying the output of `uname -rs`.
       placeholder: Linux 6.15.6-arch1-1
     validations:
       required: true
@@ -119,7 +121,8 @@ body:
     attributes:
       label: Neovim Version
       description: |
-        Paste the output of `nvim -v | head -n 1 | cut -d ' ' -f2-`.
+        If you're in a UNIX system, try pasting the output of
+        `nvim -v | head -n 1 | cut -d ' ' -f2-`.
       placeholder: v0.12.0-dev-839+ga08d6a8ac1
     validations:
       required: true

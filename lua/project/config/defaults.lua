@@ -176,7 +176,7 @@ function D:verify_datapath()
     self.datapath = nil ---@diagnostic disable-line:inject-field
   end
 
-  if not (self.history.save_dir and require('project.util').dir_exists(self.history.save_dir)) then
+  if not (self.history.save_dir and Util.dir_exists(self.history.save_dir)) then
     vim.notify(('Invalid save_dir `%s`, reverting to default.'):format(self.history.save_dir), WARN)
     self.history.save_dir = DEFAULTS.history.save_dir
   end
@@ -200,7 +200,6 @@ function D:gen_methods()
 end
 
 function D:verify_logging()
-  local Path = require('project.util.path')
   local log = self.log
   if not log or type(log) ~= 'table' then
     self.log = vim.deepcopy(DEFAULTS.log)
@@ -212,7 +211,7 @@ function D:verify_logging()
   end
 
   ---@diagnostic disable:need-check-nil
-  if not (Util.is_type('string', log.logpath) and Path.exists(log.logpath)) then
+  if not (Util.is_type('string', log.logpath) and Util.path.exists(log.logpath)) then
     self.log.logpath = DEFAULTS.log.logpath
   end
   if not (Util.is_type('number', log.max_size) and log.max_size > 0) then
@@ -270,11 +269,12 @@ end
 
 function D:verify_lists()
   local i, found = 1, {} ---@type integer, string[]
+  self.patterns = self.patterns or vim.deepcopy(DEFAULTS.patterns)
   while i <= #self.patterns and i > 0 do
     if
       not Util.is_type('string', self.patterns[i])
       or self.patterns[i] == ''
-      or vim.list_contains(found, self.exclude_dirs[i])
+      or vim.list_contains(found, self.patterns[i])
     then
       table.remove(self.patterns, i)
       i = i - 1
@@ -285,6 +285,44 @@ function D:verify_lists()
   end
   if vim.tbl_isempty(self.patterns) then
     self.patterns = vim.deepcopy(DEFAULTS.patterns)
+  else
+    self.patterns = Util.dedup(self.patterns)
+  end
+
+  self.disable_on = self.disable_on or vim.deepcopy(DEFAULTS.disable_on)
+
+  self.disable_on.ft = self.disable_on.ft or vim.deepcopy(DEFAULTS.disable_on.ft)
+  i, found = 1, {}
+  while i <= #self.disable_on.ft and i > 0 do
+    if not Util.is_type('string', self.disable_on.ft[i]) or self.disable_on.ft[i] == '' then
+      table.remove(self.disable_on.ft, i)
+      i = i - 1
+    else
+      table.insert(found, self.disable_on.ft[i])
+      i = i + 1
+    end
+  end
+  if vim.tbl_isempty(self.disable_on.ft) then
+    self.disable_on.ft = vim.deepcopy(DEFAULTS.disable_on.ft)
+  else
+    self.disable_on.ft = Util.dedup(self.disable_on.ft)
+  end
+
+  self.disable_on.bt = self.disable_on.bt or vim.deepcopy(DEFAULTS.disable_on.bt)
+  i, found = 1, {}
+  while i <= #self.disable_on.bt and i > 0 do
+    if not Util.is_type('string', self.disable_on.bt[i]) or self.disable_on.bt[i] == '' then
+      table.remove(self.disable_on.bt, i)
+      i = i - 1
+    else
+      table.insert(found, self.disable_on.bt[i])
+      i = i + 1
+    end
+  end
+  if vim.tbl_isempty(self.disable_on.bt) then
+    self.disable_on.bt = vim.deepcopy(DEFAULTS.disable_on.bt)
+  else
+    self.disable_on.bt = Util.dedup(self.disable_on.bt)
   end
 
   i, found = 1, {}
@@ -402,7 +440,7 @@ function D:verify()
       if Util.path_exists(Util.strip_slash(v.path)) then
         table.insert(custom_projects, {
           path = Util.strip_slash(v.path),
-          name = v.name or (Util.strip_slash(v.path, ':p:h:h:t') .. '/' .. Util.strip_slash(v.path, ':p:h:t')),
+          name = v.name or Util.path.join(Util.strip_slash(v.path, ':p:h:h:t'), Util.strip_slash(v.path, ':p:h:t')),
         })
       end
     end

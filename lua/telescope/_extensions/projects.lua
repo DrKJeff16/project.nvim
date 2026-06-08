@@ -3,7 +3,7 @@ if vim.g.project_setup ~= 1 then
   error('project.nvim` is not loaded!')
 end
 if not require('project.util').mod_exists('telescope') then
-  require('project.util.log').error(('(%s): Telescope is not installed!'):format(MODSTR))
+  require('project').util.log.error(('(%s): Telescope is not installed!'):format(MODSTR))
   error('Telescope is not installed!')
 end
 
