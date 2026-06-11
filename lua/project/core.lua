@@ -211,8 +211,8 @@ function M.refresh_project_bufs()
 
   local sessions = {} ---@type ProjectHistoryEntry[]
   for _, session in ipairs(Util.history.session_projects) do
-    local proj_buf_name = session.path
-    if per_project_bufs[proj_buf_name] and not vim.tbl_isempty(per_project_bufs[proj_buf_name]) then
+    local proj_buf_path = session.path
+    if per_project_bufs[proj_buf_path] and not vim.tbl_isempty(per_project_bufs[proj_buf_path]) then
       table.insert(sessions, session)
     end
   end
