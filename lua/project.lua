@@ -55,6 +55,15 @@ function M.current_project(refresh)
   return Core.current_project, Core.current_method, Core.last_project
 end
 
+---@param bufnr? integer
+---@return string|nil root
+function M.current_root(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+
+  local root = require('project.core').get_project_root(bufnr)
+  return root
+end
+
 ---Removes specific root patterns from `project.nvim`'s config.
 ---
 ---Invalid values will raise a warning!
