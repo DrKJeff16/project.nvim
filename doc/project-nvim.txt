@@ -39,22 +39,7 @@ Table of Contents                                             *project-nvim.toc*
 5. Neo Tree                                              |project-nvim.neo-tree|
 6. Telescope                                            |project-nvim.telescope|
     6.1. Telescope Mappings                        |project-nvim.telescope.maps|
-7. Commands                                              |project-nvim.commands|
-    7.1. `:Project`                                                     |:Project|
-    7.2. `:ProjectLog`                                               |:ProjectLog|
-    7.3. `:ProjectHealth`                                         |:ProjectHealth|
-    7.4. `:ProjectHistory`                                       |:ProjectHistory|
-    7.5. `:ProjectFzf`                                               |:ProjectFzf|
-    7.6. `:ProjectPicker`                                         |:ProjectPicker|
-    7.7. `:ProjectSnacks`                                         |:ProjectSnacks|
-    7.8. `:ProjectTelescope`                                   |:ProjectTelescope|
-    7.9. `:ProjectAdd`                                               |:ProjectAdd|
-    7.10. `:ProjectRoot`                                            |:ProjectRoot|
-    7.11. `:ProjectConfig`                                        |:ProjectConfig|
-    7.12. `:ProjectDelete`                                        |:ProjectDelete|
-    7.13. `:ProjectSession`                                      |:ProjectSession|
-    7.14. `:ProjectExport`                                        |:ProjectExport|
-    7.15. `:ProjectImport`                                        |:ProjectImport|
+7. The `:Project` command                                               |:Project|
 8. API                                                        |project-nvim.api|
     8.1. `get_project_root()`                    |project-nvim.get_project_root()|
     8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
@@ -174,7 +159,8 @@ Table of Contents                                             *project-nvim.toc*
     • {manual_mode}             (`boolean`)
                                 If `true` your root directory won't be changed
                                 automatically, so you have the option to
-                                manually do so by using |:ProjectRoot|
+                                manually do so by using `:Project root`
+                                (see |ProjectRoot|)
 
                                 Default: `false` ~
 
@@ -499,7 +485,8 @@ Table of Contents                                             *project-nvim.toc*
     • {enabled}                 (`boolean`)
                                 Determines whether the `snacks.nvim`
                                 integration is enabled. If `true` then
-                                the |:ProjectSnacks| command will be created
+                                the `:Project snacks` command will be created
+                                (see |ProjectSnacks|)
 
                                 Default: `false` ~
 
@@ -710,29 +697,24 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ==============================================================================
-7. Commands                                              *project-nvim.commands*
+7. The `:Project` Command                                               *:Project*
 
 
-    There are a bunch of user commands you can call from the cmdline.
+                    The `:Project` command, if run without any arguments,
+                    will open a UI window pointing to all the useful
+                    operations this plugin can provide.
 
-    NOTE: Some of these might be incomplete and/or reworked in the future. ~
-
-
-`:Project`                                                      *Project* *:Project*
-
-                    The `:Project` command will open a UI window pointing to
-                    all the useful operations this plugin can provide.
-
-                    This one is subject to change, just as |vim.ui| is
+                    Below is a list of all the supported subcommands, and how
+                    you can use them
 
 
-`:ProjectLog clear|close|open|toggle`                    *ProjectLog*  *:ProjectLog*
+`:Project log [clear|close|open|toggle]`                              *ProjectLog*
 
                     IMPORTANT ~
                     This command will not be available unless you set
                     `log.enabled = true` in your setup.
 
-                    The `:ProjectLog` command handles the `project.nvim`
+                    The `log` subcommand handles the `project.nvim`
                     log file.
 
                     The valid arguments are:
@@ -745,15 +727,15 @@ Table of Contents                                             *project-nvim.toc*
                     Useful for debugging
 
 
-`:ProjectHealth`                                   *ProjectHealth*  *:ProjectHealth*
+`:Project health`                                                  *ProjectHealth*
 
-                    The `:ProjectHealth` command essentially runs
+                    The `health` subcommand essentially runs
                     `:checkhealth project` in a single command
 
 
-`:ProjectHistory[!] [clear]`                     *ProjectHistory*  *:ProjectHistory*
+`:Project[!] history [clear]`                                     *ProjectHistory*
 
-                    The `:ProjectHistory` handles the project history.
+                    The `history` subcommand handles the project history.
 
                     If the command is called without any arguments, it will
                     toggle the `project.nvim` history file in a new tab, which
@@ -765,84 +747,73 @@ Table of Contents                                             *project-nvim.toc*
                     you can call the command with a bang (`!`) to force it
 
 
-`:ProjectFzf`                                            *ProjectFzf*  *:ProjectFzf*
+`:Project fzf`                                                        *ProjectFzf*
 
-                    This command works ONLY if you have `fzf-lua` installed
-                    and loaded.
+                    The `fzf` subcommand will ONLY be available if you have
+                    `fzf-lua` installed and loaded, and enabled its
+                    integration in your setup.
 
-                    The `:ProjectFzf` command is a dynamically enabled
-                    user command that runs `project.nvim` through `fzf-lua`.
-                    For now it just executes:
->lua
-                    require('project.extensions.fzf-lua').run_fzf_lua()
-<
 
-`:ProjectPicker[!]`                                *ProjectPicker*  *:ProjectPicker*
+`:Project[!] picker`                                               *ProjectPicker*
 
-                    This command works ONLY if you have `picker.nvim`
+                    This subcommand works ONLY if you have `picker.nvim`
                     installed and loaded.
 
-                    The `:ProjectPicker` command is a dynamically enabled
+                    The `picker` subcommand is a dynamically enabled
                     user command that runs `project.nvim` through `picker.nvim`.
                     If a bang `!` is passed and you don't already have
                     `picker.hidden` set to `true`, then a selected project
                     will show hidden files.
 
-                    This is an alias for `:Picker project`.
+                    This is an alias for `:Picker project`
 
 
-`:ProjectSnacks`                                   *ProjectSnacks*  *:ProjectSnacks*
+`:Project snacks`                                                  *ProjectSnacks*
 
-                    This command works ONLY if you have `snacks.nvim`
-                    installed and loaded.
-
-                    The `:ProjectSnacks` command is a dynamically enabled
-                    user command that runs `project.nvim` through `snacks.nvim`.
+                    The `snacks` subcommand will ONLY work if you have
+                    `snacks.nvim` installed and loaded, and enabled in your
+                    setup.
 
                     This is an alias for:
 >lua
                     require('project.extensions.snacks').pick()
 <
 
+`:Project telescope`                                            *ProjectTelescope*
 
-`:ProjectTelescope`                          *ProjectTelescope*  *:ProjectTelescope*
+                    The `telescope` subcommand will ONLY work if you have
+                    `telescope.nvim` installed and loaded.
 
-                    This command works ONLY if you have `telescope.nvim`
-                    installed and loaded.
-
-                    The `:ProjectTelescope` command is a dynamicly enabled
-                    user command that runs the Telescope `projects` picker
+                    This is an alias for `:Telescope projects`
 
 
-`:ProjectAdd[!] [</path/to/dir>[ ...]]`                  *ProjectAdd*  *:ProjectAdd*
+`:Project[!] add [</path/to/dir>[ ...]]`                              *ProjectAdd*
 
-                    The `:ProjectAdd` command is a manual hook that opens
-                    a prompt to input any directory through a UI prompt,
-                    to be saved to your project history. If your prompt is
-                    valid, your `cwd` will be switched to said directory.
-                    Adding a [`!`] will set the prompt to your cwd.
-                    This is particularly useful if you've enabled
-                    {manual_mode} in `setup()`.
+                    The `add` subcommand is a manual hook that prompts the user
+                    for any directory through a UI prompt to be saved to your
+                    project history. If your prompt is valid, your `cwd`
+                    will be switched to said directory. Adding a [`!`]
+                    will set the prompt to your cwd. This is particularly
+                    useful if you've enabled {manual_mode} in `setup()`.
 
                     See |project-nvim.setup-options|
 
 
-`:ProjectConfig[!]`                                *ProjectConfig*  *:ProjectConfig*
+`:Project[!] config`                                               *ProjectConfig*
 
-                    The `:ProjectConfig` command will toggle your
-                    current config in a floating window, making it easier to
-                    access. To exit the window you can either press `q`
-                    in normal mode or by runnning `:ProjectConfig` again.
-                    If called with a bang `!` then the output will instead
-                    be printed as a message (`:h :messages`).
+                    The `config` subcommand will toggle your current config
+                    in a floating window, making it easier to access.
+                    To exit the window you can either press `q` in normal mode
+                    or by runnning `:Project config` again. If called with
+                    a bang `!` then the output will instead be printed as a
+                    message (see |:messages|).
 
                     Useful for debugging
 
 
-`:ProjectDelete[!] [/path/to/first [/path/to/second [...]]]`      *:ProjectDelete*
-                                                                 *ProjectDelete*
+`:Project[!] delete [/path/to/first [/path/to/second [...]]]`      *ProjectDelete*
 
-                    The `:ProjectDelete` command is a utility to delete
+                    The `delete` subcommand is a utility to delete
                     your projects. If no arguments are given, a popup with
                     a list of your current projects will be opened.
                     If one or more arguments are passed it will expect
@@ -859,10 +830,10 @@ Table of Contents                                             *project-nvim.toc*
                     denoting success.
 
 
-`:ProjectRoot[!]`                                      *ProjectRoot*  *:ProjectRoot*
+`:Project[!] root`                                                   *ProjectRoot*
 
-                    The `:ProjectRoot` command is a manual hook to set
-                    the current working directory to the current file's root,
+                    The `root` subcommand is a manual hook to set the
+                    current working directory to the current file's root,
                     attempting to use any of the detection methods set
                     by the user (|ProjectOpts.detection_methods|).
                     Adding a [`!`] will make this command verbose.
@@ -871,60 +842,59 @@ Table of Contents                                             *project-nvim.toc*
                     in your `setup()` (see |project-nvim.setup-options|)
 
 
-`:ProjectSession`                                *ProjectSession*  *:ProjectSession*
+`:Project session`                                                *ProjectSession*
 
                     IMPORTANT ~
-                    This command requires `fd` to be installed for it to work!
+                    This subcommand requires `fd` to be installed ~
+                    for it to work! ~
 
-                    The `:ProjectSession` command opens a custom picker
-                    (using |vim.ui|) with a selection of your current
-                    session projects (stored in `History.session_projects`).
+                    The `session` subcommand opens a custom picker, using
+                    |vim.ui|, with a selection of your current session projects,
+                    stored in `History.session_projects`.
                     Bear in mind this table gets filled on runtime. ~
 
                     If you select a session project your `cwd` will be changed
                     to what you selected. If the command is called with [`!`]
-                    (`:ProjectSession!`) then the UI will close.
+                    (`:Project! session`) then the UI will close.
                     Otherwise, another custom UI picker will appear for you
                     to select the containing files/dirs. Selecting a directory
                     will open another UI picker with its contents, and so on
 
 
-`:ProjectExport[!] [</path/to/file[.json]> [<INDENT>]]`           *:ProjectExport*
-                                                                 *ProjectExport*
+`:Project[!] export [</path/to/file[.json]> [<INDENT>]]`           *ProjectExport*
 
                     WARNING ~
-                    Use this script with caution!
-                    You may overwrite important files if using recklessly!
+                    Use this script with caution! ~
+                    You may overwrite important files if using recklessly! ~
 
-                    The `:ProjectExport` user command allows the user to save
-                    their project history in a JSON format, allowing for
-                    a custom indent level if desired.
+                    The `export` subcommand allows the user to save their
+                    project history in a JSON format, allowing for a
+                    custom indent level if desired.
 
                     If the target file already exists and is not empty then
                     a confirmation prompt will appear.
 >vim
-                    :ProjectExport " Will open a prompt
-                    :ProjectExport a " Output file is `a.json`
-                    :ProjectExport! b 12 " Output file is `b`, with a tab size of 12
+                    :Project export " Will open a prompt
+                    :Project export a " Output file is `a.json`
+                    :Project! export b 12 " Output file is `b`, with a tab size of 12
 
-                    :ProjectExport! ~/.c.json " The output file will be `~/.c.json`
+                    :Project! export ~/.c.json " The output file will be `~/.c.json`
 <
 
-`:ProjectImport[!] [</path/to/file[.json]>]`                      *:ProjectImport*
-                                                                 *ProjectImport*
+`:Project[!] import [</path/to/file[.json]>]`                      *ProjectImport*
 
-                    The `:ProjectImport` allows the user to retrieve
-                    their saved project history in a JSON format
+                    The `import` subcommand allows the user to retrieve
+                    their saved project history in a JSON format:
 >vim
-                    :ProjectImport " Will open a prompt
+                    :Project import " Will open a prompt
 
                     " Will be treated as `a.json`
-                    :ProjectExport a
-                    :ProjectImport a
+                    :Project export a
+                    :Project import a
 
                     " Will be treated as `b`
-                    :ProjectExport! b
-                    :ProjectImport! b
+                    :Project! export b
+                    :Project! import b
 <
 
 ==============================================================================
