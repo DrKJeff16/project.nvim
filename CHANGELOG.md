@@ -1,5 +1,13 @@
 # Changelog
 
+## [v5.0.1-1](https://github.com/DrKJeff16/project.nvim/tree/v5.0.1-1) (2026-06-16)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v5.0.0-1...v5.0.1-1)
+
+**Merged pull requests:**
+
+- Fix error intermitent error message due to missing arguments [\#75](https://github.com/DrKJeff16/project.nvim/pull/75) ([bltavares](https://github.com/bltavares))
+
 ## [v5.0.0-1](https://github.com/DrKJeff16/project.nvim/tree/v5.0.0-1) (2026-06-04)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v4.2.1-1...v5.0.0-1)
