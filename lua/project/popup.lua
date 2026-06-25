@@ -3,7 +3,6 @@
 local MODSTR = 'project.popup'
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
-local uv = vim.uv or vim.loop
 local Config = require('project.config')
 local Core = require('project.core')
 local Util = require('project.util')
@@ -51,7 +50,7 @@ local function open_node(proj, only_cd, ran_cd)
     end
 
     item = Util.rstrip('\\', Util.strip_slash(item))
-    local stat = uv.fs_stat(item)
+    local stat = (vim.uv or vim.loop).fs_stat(item)
     if not stat then
       return
     end

@@ -2,9 +2,6 @@
 
 local uv = vim.uv or vim.loop
 local MODSTR = 'project.extensions.snacks'
-local Config = require('project.config')
-local Core = require('project.core')
-local Popup = require('project.popup')
 local Util = require('project.util')
 
 ---@class Project.Extensions.Snacks
@@ -31,7 +28,7 @@ function M.gen_items()
 
   for i, proj in ipairs(recents) do
     local text = M.config.show ~= 'paths' and proj.name
-      or Util.strip_slash(proj.path, Config.options.snacks.tilde and ':p:~' or nil)
+      or Util.strip_slash(proj.path, require('project.config').options.snacks.tilde and ':p:~' or nil)
 
     table.insert(items, {
       idx = i,
@@ -63,6 +60,7 @@ local function format_session_item(item)
 end
 
 function M.pick()
+  local Core = require('project.core')
   return require('snacks').picker.pick({
     actions = {
       chdir_only = function(self, item)
@@ -78,7 +76,10 @@ function M.pick()
         self:close()
         vim.api.nvim_feedkeys('i', 'n', false)
 
-        Popup.rename_input(vim.fn.expand(item.value), Util.history.find_entry('recent', item.value, 'name'))
+        require('project.popup').rename_input(
+          vim.fn.expand(item.value),
+          Util.history.find_entry('recent', item.value, 'name')
+        )
       end,
     },
     confirm = function(self, item)

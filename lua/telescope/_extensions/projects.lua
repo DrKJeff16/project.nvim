@@ -7,7 +7,6 @@ if not require('project.util').mod_exists('telescope') then
   error('Telescope is not installed!')
 end
 
-local setup = require('telescope._extensions.projects.main').setup
 local projects = require('telescope._extensions.projects.main').projects
 
 ---@class TelescopeProjects
@@ -16,7 +15,7 @@ local projects = require('telescope._extensions.projects.main').projects
 ---@field health function
 ---@field setup fun(opts?: table)
 local M = require('telescope').register_extension({
-  setup = setup,
+  setup = require('telescope._extensions.projects.main').setup,
   health = require('telescope._extensions.projects.healthcheck'),
   exports = { projects = projects },
   projects = projects,

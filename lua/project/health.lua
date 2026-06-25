@@ -1,7 +1,6 @@
 ---@module 'project._meta'
 
 local MODSTR = 'project.health'
-local uv = vim.uv or vim.loop
 local Config = require('project.config')
 local Core = require('project.core')
 local Util = require('project.util')
@@ -81,7 +80,7 @@ function M.history_check()
   }
   for _, v in ipairs(P) do
     local name, ptype, path = v.name, v.type, v.path
-    local stat = uv.fs_stat(path)
+    local stat = (vim.uv or vim.loop).fs_stat(path)
     if not stat then
       vim.health.error(('%s: `%s` is missing or not readable!'):format(name, path))
       return

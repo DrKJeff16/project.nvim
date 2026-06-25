@@ -3,7 +3,6 @@
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
-local uv = vim.uv or vim.loop
 local Util = require('project.util')
 
 ---@param line string
@@ -159,6 +158,7 @@ end
 
 ---@param ctx vim.api.keyset.create_user_command.command_args
 local function callback(ctx)
+  local uv = vim.uv or vim.loop
   local Popup = require('project.popup')
   if vim.tbl_isempty(ctx.fargs) and not ctx.bang then
     Popup.open_menu(ctx)
