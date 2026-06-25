@@ -636,7 +636,7 @@ function S.callback(ctx) end
 ---@field [3]? boolean
 ---@field [4]? string
 
----@class (exact) Project.LogWin
+---@class (exact) Project.Util.Log.Win
 ---@field bufnr integer
 ---@field tab integer
 ---@field win integer

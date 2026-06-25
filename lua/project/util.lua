@@ -5,7 +5,7 @@ local MODSTR = 'project.util'
 ---@class Project.Util
 ---@field globtopattern Project.Util.Glob
 ---@field history Project.Util.History
----@field log Project.Log
+---@field log Project.Util.Log
 ---@field path Project.Util.Path
 local M = {}
 

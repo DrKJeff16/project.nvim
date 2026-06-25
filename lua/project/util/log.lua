@@ -13,9 +13,9 @@ local Util = require('project.util')
 
 local timer = nil ---@type uv.uv_timer_t|nil
 
----@class Project.Log
+---@class Project.Util.Log
 ---@field public logfile? string
----@field public window? Project.LogWin
+---@field public window? Project.Util.Log.Win
 local M = {}
 
 ---@param lvl vim.log.levels
