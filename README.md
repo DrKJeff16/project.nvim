@@ -247,6 +247,7 @@ By default, `setup()` loads with the following options:
 
 ```lua
 {
+  -- Runs before right before changing the project directory
   ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
   before_attach = nil,
 
@@ -297,6 +298,7 @@ By default, `setup()` loads with the following options:
   end,
 
   lsp = {
+    -- Whether to enable LSP-based detection
     enabled = true,
 
     -- LSP clients to ignore
@@ -309,9 +311,17 @@ By default, `setup()` loads with the following options:
     -- Whether to double-check the LSP root with the pattern matching method.
     use_pattern_matching = false,
   },
-  custom_projects = {}, -- Read the `Custom Projects` section below
+
+  -- Read the `Custom Projects` section below
+  custom_projects = {},
+
+  -- If enabled, projects will ONLY change manually
   manual_mode = false,
 
+  -- Files and directories to look for to detect a root directory.
+  -- These patterns will not affect LSP-based detection unless `lsp.use_pattern_matching`
+  -- is set to `true`
+  --
   -- This list is permanent, and any new entries are appended. You can leave this empty
   patterns = {
     '.git',
@@ -330,56 +340,116 @@ By default, `setup()` loads with the following options:
     '.neoconf.json',
     'neoconf.json',
   },
+
   different_owners = {
-    allow = false, -- Allow adding projects with a different owner to the project session
-    notify = true, -- Notify the user when a project with a different owner is found
+    -- Allow adding projects with a different owner to the project session
+    allow = false,
+
+    -- Notify the user when a project with a different owner is found
+    notify = true,
   },
-  enable_autochdir = false, -- Set this to `true` if you prefer having `vim.o.autochdir` set to `true`
-  show_by_name = false, -- Show projects by their name instead of their full path
-  show_hidden = false, -- Show hidden files (global)
-  exclude_dirs = {}, -- Add any directory to exclude (absolute path). Keep in mind that this is recursive
+
+  -- Set this to `true` if you prefer having `vim.o.autochdir` set to `true`
+  enable_autochdir = false,
+
+  -- Show projects by their name instead of their full path
+  show_by_name = false,
+
+  -- Show hidden files (global)
+  show_hidden = false,
+
+  -- Add any directory to exclude (absolute path). Keep in mind that this is recursive
+  exclude_dirs = {},
+
+  -- If disabled, you'll be notified each time the project root directory is changed
   silent_chdir = true,
-  scope_chdir = 'global', ---@type 'global'|'tab'|'win'
+
+  -- Whether the CWD is changed globally (`'global'`), per-tab (`'tab'`) or per-window (`'win'`)
+  ---@type 'global'|'tab'|'win'
+  scope_chdir = 'global',
+
   history = {
+    -- The directory in which the history will be stored at.
+    -- NOTE: A subdirectory will be created called `project_nvim`, where the history file resides
     save_dir = vim.fn.stdpath('data'),
+
+    -- The file name for the JSON project history
     save_file = 'project_history.json',
-    size = 100, -- The maximum number of history entries to write in your history file
+
+    -- The maximum number of history entries to write in your history file
+    size = 100,
   },
+
   log = {
+    -- Whether to enable logging
     enabled = false,
-    max_size = 1.1, -- This size is in Mebibytes (MiB), A.K.A. 1MiB -> 1024KiB
+
+    -- The maximum file size allowed for the log file before it gets cleaned
+    -- This size is in Mebibytes (MiB), A.K.A. 1MiB -> 1024KiB
+    max_size = 1.1,
+
+    -- The directory where the log file will be written to
     logpath = vim.fn.stdpath('state'),
   },
+
   snacks = {
+    -- Enable snacks.nvim picker integration
     enabled = false,
+
+    -- Snacks project picker options
     opts = {
       -- path_icons = {},
       -- icon = {},
-      hidden = false, -- Show hidden files
+
+      -- Show hidden files
+      hidden = false,
+
       layout = 'select',
-      sort = 'newest', ---@type 'newest'|'oldest'
+
+      -- Sort directories by the newest or oldest
+      ---@type 'newest'|'oldest'
+      sort = 'newest',
+
+      -- Snacks picker title prompt
       title = 'Select Project',
 
       -- Show project entries either by their path (`'paths'`) or their custom name (`'names'`)
-      show = 'paths', ---@type 'paths'|'names'
+      ---@type 'paths'|'names'
+      show = 'paths',
     },
   },
+
   fzf_lua = {
+    -- Enables fzf-lua picker integration
     enabled = false,
-    sort = 'newest', ---@type 'newest'|'oldest'
+
+    -- Sort directories by the newest or oldest
+    ---@type 'newest'|'oldest'
+    sort = 'newest',
 
     -- Show project entries either by their path (`'paths'`) or their custom name (`'names'`)
-    show = 'paths', ---@type 'paths'|'names'
+    ---@type 'paths'|'names'
+    show = 'paths',
   },
+
   picker = {
+    -- Enables picker.nvim picker integration
     enabled = false,
-    hidden = false, -- Show hidden files
-    sort = 'newest', ---@type 'newest'|'oldest'
+
+    -- Show hidden files
+    hidden = false,
+
+    -- Sort directories by the newest or oldest
+    ---@type 'newest'|'oldest'
+    sort = 'newest',
 
     -- Show project entries either by their path (`'paths'`) or their custom name (`'names'`)
-    show = 'paths', ---@type 'paths'|'names'
+    ---@type 'paths'|'names'
+    show = 'paths',
   },
+
   disable_on = {
+    -- The filetypes that this plugin should ignore.
     -- This list is permanent, and any new entries are appended. You can leave this empty
     ft = {
       '',
@@ -398,12 +468,26 @@ By default, `setup()` loads with the following options:
       'qf',
     },
 
+    -- The buftypes that this plugin should ignore.
     -- This list is permanent, and any new entries are appended. You can leave this empty
     bt = { 'help', 'nofile', 'nowrite', 'terminal' },
   },
+
   telescope = {
+    -- Whether to disable the built-in Telescope file-picker
     disable_file_picker = false,
+
+    -- Telescope picker mappings.
+    -- The operations can be:
+    --   - `rename_project`
+    --   - `browse_project_files`
+    --   - `delete_project`
+    --   - `find_project_files`
+    --   - `recent_project_files`
+    --   - `search_in_project_files`
+    --   - `change_working_directory`
     mappings = {
+      -- Normal mode
       n = {
         R = 'rename_project',
         b = 'browse_project_files',
@@ -413,6 +497,8 @@ By default, `setup()` loads with the following options:
         s = 'search_in_project_files',
         w = 'change_working_directory',
       },
+
+      -- Insert mode
       i = {
         ['<C-b>'] = 'browse_project_files',
         ['<C-d>'] = 'delete_project',
@@ -423,9 +509,17 @@ By default, `setup()` loads with the following options:
         ['<C-w>'] = 'change_working_directory',
       },
     },
+
+    -- Whether to use `telescope-file-browser.nvim` instead
+    -- (if enabled, will set `disable_file_picker` to `false`)
     prefer_file_browser = false,
-    sort = 'newest', ---@type 'oldest'|'newest'
-    tilde = false, -- If `true`, project paths like `'/home/foo/...'` will become `'~/...'`
+
+    -- Sort directories by the newest or oldest
+    ---@type 'oldest'|'newest'
+    sort = 'newest',
+
+    -- If `true`, project paths like `'/home/foo/...'` will become `'~/...'`
+    tilde = false,
   },
 }
 ```
