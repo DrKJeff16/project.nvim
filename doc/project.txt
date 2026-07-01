@@ -1,6 +1,6 @@
 ==============================================================================
-*project-nvim.txt*              A dynamic project management solution for Neovim
-                                                                  *project-nvim*
+*project.txt*                   A dynamic project management solution for Neovim
+                                                          *project* *project-nvim*
 
 
     `project.nvim` is a Neovim plugin written in Lua that,
@@ -20,10 +20,10 @@
 
 
 ==============================================================================
-Table of Contents                                             *project-nvim.toc*
+Table of Contents                                                  *project.toc*
 
 
-1. Setup                                                    |project-nvim.setup|
+1. Setup                                                         |project.setup|
     1.1. `ProjectOpts`                                               |ProjectOpts|
     1.2. `ProjectOpts.LSP`                                       |ProjectOpts.LSP|
     1.3. `ProjectOpts.History`                               |ProjectOpts.History|
@@ -33,25 +33,25 @@ Table of Contents                                             *project-nvim.toc*
     1.7. `ProjectOpts.Picker`                                 |ProjectOpts.Picker|
     1.8. `ProjectOpts.Snacks`                                 |ProjectOpts.Snacks|
     1.9. `ProjectOpts.Logging`                               |ProjectOpts.Logging|
-2. Pattern Matching                              |project-nvim.pattern-matching|
-3. Lualine                                                |project-nvim.lualine|
-4. Nvim Tree                                            |project-nvim.nvim-tree|
-5. Neo Tree                                              |project-nvim.neo-tree|
-6. Telescope                                            |project-nvim.telescope|
-    6.1. Telescope Mappings                        |project-nvim.telescope.maps|
+2. Pattern Matching                                   |project.pattern-matching|
+3. Lualine                                                     |project.lualine|
+4. Nvim Tree                                                 |project.nvim-tree|
+5. Neo Tree                                                   |project.neo-tree|
+6. Telescope                                                 |project.telescope|
+    6.1. Telescope Mappings                             |project.telescope.maps|
 7. The `:Project` command                                               |:Project|
-8. API                                                        |project-nvim.api|
-    8.1. `get_project_root()`                    |project-nvim.get_project_root()|
-    8.2. `get_recent_projects()`              |project-nvim.get_recent_projects()|
-    8.3. `get_config()`                                |project-nvim.get_config()|
-    8.4. `get_history_paths()`                  |project-nvim.get_history_paths()|
-9. Util                                                      |project-nvim.util|
-10. Troubleshooting                               |project-nvim.troubleshooting|
+8. API                                                             |project.api|
+    8.1. `get_project_root()`                         |project.get_project_root()|
+    8.2. `get_recent_projects()`                   |project.get_recent_projects()|
+    8.3. `get_config()`                                     |project.get_config()|
+    8.4. `get_history_paths()`                       |project.get_history_paths()|
+9. Util                                                           |project.util|
+10. Troubleshooting                                    |project.troubleshooting|
 
 
 ==============================================================================
-1. project-nvim.setup                                       *project-nvim.setup*
-                                                           *project-nvim.config*
+1. project.setup                                                 *project.setup*
+                                                                *project.config*
 
 
     To enable the plugin you must call `setup()`.
@@ -73,7 +73,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 1.1. `ProjectOpts`                                                   *ProjectOpts*
-                                                    *project-nvim.setup-options*
+                                                         *project.setup-options*
 
 
     • {before_attach}           (`nil|function`)
@@ -169,16 +169,16 @@ Table of Contents                                             *project-nvim.toc*
                                 Hook to run after attaching to a new project.
                                 It optionally recieves `dir`, the `method` used
                                 to change directory, and the associated `bufnr`
-                                (may be `nil` in certain cases).
-                                Set to `nil` to disable
+                                (may be `nil` in certain cases). Set to `nil`
+                                to disable it
 
                                 Default: `nil` ~
 
 
     • {patterns}                (`string[]`)
                                 All the patterns used to detect the root dir.
-                                See |project-nvim.pattern-matching| for more
-                                info on pattern matching.
+                                See |project.pattern-matching| for more info
+                                on pattern matching.
 
                                 To see the default values, you have
                                 the `README.md` for this plugin, and
@@ -256,7 +256,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 1.2. `ProjectOpts.LSP`                                           *ProjectOpts.LSP*
-                                                       *project-nvim.lsp-config*
+                                                            *project.lsp-config*
 
 
     • {enabled}                 (`boolean`)
@@ -264,8 +264,8 @@ Table of Contents                                             *project-nvim.toc*
                                 take precedence over traditional pattern
                                 matching.
 
-                                See |project-nvim.pattern-matching| for
-                                more information
+                                See |project.pattern-matching| for more
+                                information
 
                                 Default: `true` ~
 
@@ -301,15 +301,15 @@ Table of Contents                                             *project-nvim.toc*
                                 assuming there is one and {lsp.enabled}
                                 is set to `true`.
 
-                                See |project-nvim.pattern-matching| for more
-                                info on pattern matching
+                                See |project.pattern-matching| for more info
+                                on pattern matching
 
                                 Default: `false` ~
 
 
 ------------------------------------------------------------------------------
 1.3. `ProjectOpts.History`                                   *ProjectOpts.History*
-                                                          *project-nvim.history*
+                                                               *project.history*
 
 
     • {file_dir}                (`string`)
@@ -344,7 +344,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 1.4. `ProjectOpts.DifferentOwners`                   *ProjectOpts.DifferentOwners*
-                                                 *project-nvim.different-owners*
+                                                      *project.different-owners*
 
 
     • {allow}                   (`boolean`)
@@ -369,7 +369,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 1.5. `ProjectOpts.Telescope`                               *ProjectOpts.Telescope*
-                                                 *project-nvim.telescope-config*
+                                                      *project.telescope-config*
 
 
     • {disable_file_picker}     (`boolean`)
@@ -416,7 +416,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 1.6. `ProjectOpts.FzfLua`                                     *ProjectOpts.FzfLua*
-                                                   *project-nvim.fzf-lua-config*
+                                                        *project.fzf-lua-config*
 
 
     • {enabled}                 (`boolean`)
@@ -447,7 +447,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 1.7. `ProjectOpts.Picker`                                     *ProjectOpts.Picker*
-                                                    *project-nvim.picker-config*
+                                                         *project.picker-config*
 
 
     • {enabled}                 (`boolean`)
@@ -479,7 +479,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 1.8. `ProjectOpts.Snacks`                                     *ProjectOpts.Snacks*
-                                                    *project-nvim.snacks-config*
+                                                         *project.snacks-config*
 
 
     • {enabled}                 (`boolean`)
@@ -498,7 +498,7 @@ Table of Contents                                             *project-nvim.toc*
 
 ------------------------------------------------------------------------------
 1.9. `ProjectOpts.Logging`                                   *ProjectOpts.Logging*
-                                                   *project-nvim.logging-config*
+                                                        *project.logging-config*
 
 
     • {enabled}                 (`boolean`)
@@ -522,7 +522,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ==============================================================================
-2. Pattern Matching                              *project-nvim.pattern-matching*
+2. Pattern Matching                                   *project.pattern-matching*
 
 
     `project.nvim` comes with a `vim-rooter`-inspired pattern matching
@@ -568,7 +568,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ==============================================================================
-3. Lualine                                                *project-nvim.lualine*
+3. Lualine                                                     *project.lualine*
 
 
     You can add the `project.nvim` component to your statusline
@@ -603,7 +603,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-4. Nvim Tree                                            *project-nvim.nvim-tree*
+4. Nvim Tree                                                 *project.nvim-tree*
 
 
     Make sure these flags are enabled to support `nvim-tree`:
@@ -617,7 +617,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-5. Neo Tree                                              *project-nvim.neo-tree*
+5. Neo Tree                                                   *project.neo-tree*
 
 
     You can use `:Neotree filesystem ...` when changing a project.
@@ -645,7 +645,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-6. Telescope                                            *project-nvim.telescope*
+6. Telescope                                                 *project.telescope*
 
 
     To enable `telescope.nvim` integration use the following code
@@ -681,7 +681,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ------------------------------------------------------------------------------
-6.1. Telescope Mappings                        *project-nvim.telescope.mappings*
+6.1. Telescope Mappings                             *project.telescope.mappings*
 
 
     `project.nvim` comes with the following mappings for the Telescope picker:
@@ -796,7 +796,7 @@ Table of Contents                                             *project-nvim.toc*
                     will set the prompt to your cwd. This is particularly
                     useful if you've enabled {manual_mode} in `setup()`.
 
-                    See |project-nvim.setup-options|
+                    See |project.setup-options|
 
 
 `:Project[!] config`                                               *ProjectConfig*
@@ -819,7 +819,7 @@ Table of Contents                                             *project-nvim.toc*
                     If one or more arguments are passed it will expect
                     directories separated by a space. The arguments have to be
                     directories that are returned by `get_recent_projects()`
-                    (see |project-nvim.get_recent_projects()|).
+                    (see |project.get_recent_projects()|).
 
                     The arguments can be relative, absolute or un-expanded
                     (`~/path/to/project`). The command will attemptto parse
@@ -839,7 +839,7 @@ Table of Contents                                             *project-nvim.toc*
                     Adding a [`!`] will make this command verbose.
 
                     This is particularly useful if you enabled {manual_mode}
-                    in your `setup()` (see |project-nvim.setup-options|)
+                    in your `setup()` (see |project.setup-options|)
 
 
 `:Project session`                                                *ProjectSession*
@@ -898,7 +898,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-8. API                                                        *project-nvim.api*
+8. API                                                             *project.api*
 
 
     This is a set of both internal utilities and tools for the user
@@ -906,7 +906,7 @@ Table of Contents                                             *project-nvim.toc*
 
 
 ------------------------------------------------------------------------------
-8.1. `get_project_root()`                        *project-nvim.get_project_root()*
+8.1. `get_project_root()`                             *project.get_project_root()*
 
 
     An internal method for the API to determine both the project root
@@ -919,7 +919,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ------------------------------------------------------------------------------
-8.2. `get_recent_procjects()`                *project-nvim.get_recent_procjects()*
+8.2. `get_recent_procjects()`                     *project.get_recent_procjects()*
 
 
     This utility returns either an empty table `{}` or a string array
@@ -939,10 +939,10 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ------------------------------------------------------------------------------
-8.3. `get_config()`                                    *project-nvim.get_config()*
+8.3. `get_config()`                                         *project.get_config()*
 
 
-    If `setup()` (|project-nvim.setup|) has been called, it returns a table
+    If `setup()` (|project.setup|) has been called, it returns a table
     containing the currently set options. Otherwise it will return `nil`.
 
     Example ~
@@ -955,7 +955,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ------------------------------------------------------------------------------
-8.4 `get_history_paths()`                       *project-nvim.get_history_paths()*
+8.4 `get_history_paths()`                            *project.get_history_paths()*
 
 
     If no valid args are passed to this function then it will return
@@ -986,7 +986,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-9. Util                                                      *project-nvim.util*
+9. Util                                                           *project.util*
 
 
     A set of utilities that get repeated across the board.
@@ -997,7 +997,7 @@ Table of Contents                                             *project-nvim.toc*
 <
 
 ==============================================================================
-10. Troubleshooting                               *project-nvim.troubleshooting*
+10. Troubleshooting                                    *project.troubleshooting*
 
 
 ------------------------------------------------------------------------------

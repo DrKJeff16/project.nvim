@@ -29,7 +29,7 @@ You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16
 - Users can define custom project roots, see [Custom Projects](#custom-projects)
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook (`:checkhealth project`)
-- Vim help documentation ([`:h project-nvim`](https://github.com/DrKJeff16/project.nvim/blob/main/doc/project-nvim.txt))
+- Vim help documentation ([`:h project.txt`](https://github.com/DrKJeff16/project.nvim/blob/main/doc/project.txt))
 - Logging capabilities
 - Natively supports `.nvim.lua` files
 - `vim.ui` menu support
