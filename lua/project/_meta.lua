@@ -1,6 +1,19 @@
 ---@meta
 ---@diagnostic disable:unused-local
 
+---@module 'snacks'
+
+---@alias ProjectAttachMapCb (fun(mode_or_maps: Modes, lhs: string, rhs: string|function, opts: vim.keymap.set.Opts)|fun(mode_or_maps: table<Modes, { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>))
+
+---@alias Modes
+---|'V'
+---|'i'
+---|'n'
+---|'o'
+---|'t'
+---|'v'
+---|'x'
+
 ---@enum (key) Project.Core.ScanRoot
 local scan_what = {
   all = 1,
@@ -13,6 +26,8 @@ local scan_what = {
   visible_directories = 1,
   visible_files = 1,
 }
+
+---@alias ProjectLog.Snacks.Style 'compact'|'fancy'|'minimal'
 
 ---@enum (key) Project.Telescope.ActionNames
 local action_names = {
@@ -27,23 +42,13 @@ local action_names = {
 }
 
 ---@enum (key) ProjectOpts.Show
-local show = {
-  names = 1,
-  paths = 1,
-}
+local show = { names = 1, paths = 1 }
 
 ---@enum (key) ProjectOpts.ScopeChdir
-local scope_chdir = {
-  global = 1,
-  tab = 1,
-  win = 1,
-}
+local scope_chdir = { global = 1, tab = 1, win = 1 }
 
 ---@enum (key) ProjectOpts.Sort
-local sort = {
-  newest = 1,
-  oldest = 1,
-}
+local sort = { newest = 1, oldest = 1 }
 
 ---@enum (key) CompleteTypes
 local complete_types = {
@@ -90,11 +95,7 @@ local complete_types = {
 }
 
 ---@enum (key) ProjectPaths
-local project_paths = { ---@diagnostic disable-line:unused-local
-  datapath = 1,
-  historyfile = 1,
-  projectpath = 1,
-}
+local project_paths = { datapath = 1, historyfile = 1, projectpath = 1 } ---@diagnostic disable-line:unused-local
 
 ---@alias Project.Core.GetHistoryPaths
 ---|fun(): history_paths: HistoryPath
@@ -290,6 +291,20 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field sort ProjectOpts.Sort
 ---@field tilde boolean
 
+---@class (exact) ProjectOpts.Logging.Snacks
+---If enabled, use snacks.nvim's backtrace.
+---
+---This requires snacks.nvim to be installed, or this will be ignored.
+--- ---
+---Default: `false`
+--- ---
+---@field enabled? boolean
+---@field style? ProjectLog.Snacks.Style
+
+---@class (exact) ProjectDefaults.Logging.Snacks
+---@field enabled boolean
+---@field style ProjectLog.Snacks.Style
+
 ---Options for logging utility.
 --- ---
 ---@class (exact) ProjectOpts.Logging
@@ -309,11 +324,17 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---Default: `1.1`
 --- ---
 ---@field max_size? number
+---Options for logging using snacks backtrace.
+--- ---
+---Default: `{ enabled = false, style = 'fancy' }`
+--- ---
+---@field snacks? ProjectOpts.Logging.Snacks
 
 ---@class (exact) ProjectDefaults.Logging: ProjectOpts.Logging
 ---@field enabled boolean
 ---@field logpath string
 ---@field max_size number
+---@field snacks ProjectDefaults.Logging.Snacks
 
 ---Table of options used for `picker.nvim` integration
 --- ---
@@ -505,7 +526,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 --- ---
 ---Default: `nil`
 --- ---
----@field on_attach? nil|fun(dir: string, method: string)
+---@field on_attach? nil|fun(dir: string, method: string, bufnr?: integer, map: ProjectAttachMapCb)
 ---Table of options used for the `picker.nvim` integration
 --- ---
 ---@field picker? ProjectOpts.Picker
@@ -564,7 +585,7 @@ local project_paths = { ---@diagnostic disable-line:unused-local
 ---@field log ProjectDefaults.Logging
 ---@field lsp ProjectDefaults.LSP
 ---@field manual_mode boolean
----@field on_attach nil|fun(dir: string, method: string, bufnr?: integer)
+---@field on_attach nil|fun(dir: string, method: string, bufnr?: integer, map: ProjectAttachMapCb)
 ---@field patterns string[]
 ---@field picker ProjectDefaults.Picker
 ---@field remove_missing_dirs boolean

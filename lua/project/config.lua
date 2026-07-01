@@ -73,7 +73,7 @@ function M.setup(options)
   end
 
   if M.options.log.enabled then
-    Util.log.setup()
+    Util.log.setup(M.options.log)
     Util.log.debug(('(%s.setup): Initialized logging.'):format(MODSTR))
   end
 
@@ -118,7 +118,7 @@ function M.setup(options)
     group = group,
     callback = function(ev)
       if M.options.on_attach and vim.is_callable(M.options.on_attach) then
-        M.options.on_attach(ev.data.dir, ev.data.method, ev.data.bufnr)
+        M.options.on_attach(ev.data.dir, ev.data.method, ev.data.bufnr, Util.map_attach)
         Util.log.debug(('(%s.setup): Ran `on_attach` hook successfully.'):format(MODSTR))
       end
     end,

@@ -7,16 +7,16 @@ local Util = require('project.util')
 local DEFAULTS = { ---@type ProjectConfigDefaults
   custom_projects = {},
   different_owners = { allow = false, notify = true },
-  picker = { enabled = false, sort = 'newest', hidden = false, show = 'paths' },
+  picker = { enabled = false, hidden = false, show = 'paths', sort = 'newest' },
   snacks = {
     enabled = false,
     opts = {
-      sort = 'newest',
       hidden = false,
-      prompt = 'Select Project: ',
-      layout = 'select',
       -- icon = {},
+      layout = 'select',
       -- path_icons = {},
+      prompt = 'Select Project: ',
+      sort = 'newest',
     },
     show = 'paths',
     tilde = false,
@@ -50,6 +50,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
   silent_chdir = true,
   scope_chdir = 'global',
   disable_on = {
+    bt = { 'help', 'nofile', 'nowrite', 'terminal' },
     ft = {
       '',
       'NvimTree',
@@ -66,24 +67,18 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
       'packer',
       'qf',
     },
-    bt = { 'help', 'nofile', 'nowrite', 'terminal' },
   },
   history = { save_dir = vim.fn.stdpath('data'), save_file = 'project_history.json', size = 100 },
-  fzf_lua = { enabled = false, sort = 'newest', show = 'paths' },
-  log = { enabled = false, max_size = 1.1, logpath = vim.fn.stdpath('state') },
+  fzf_lua = { enabled = false, show = 'paths', sort = 'newest' },
+  log = {
+    enabled = false,
+    logpath = vim.fn.stdpath('state'),
+    max_size = 1.1,
+    snacks = { enabled = false, style = 'fancy' },
+  },
   telescope = {
     disable_file_picker = false,
-    prefer_file_browser = false,
     mappings = {
-      n = {
-        R = 'rename_project',
-        b = 'browse_project_files',
-        d = 'delete_project',
-        f = 'find_project_files',
-        r = 'recent_project_files',
-        s = 'search_in_project_files',
-        w = 'change_working_directory',
-      },
       i = {
         ['<C-b>'] = 'browse_project_files',
         ['<C-d>'] = 'delete_project',
@@ -93,7 +88,17 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
         ['<C-s>'] = 'search_in_project_files',
         ['<C-w>'] = 'change_working_directory',
       },
+      n = {
+        R = 'rename_project',
+        b = 'browse_project_files',
+        d = 'delete_project',
+        f = 'find_project_files',
+        r = 'recent_project_files',
+        s = 'search_in_project_files',
+        w = 'change_working_directory',
+      },
     },
+    prefer_file_browser = false,
     show = 'paths',
     sort = 'newest',
     tilde = false,
@@ -126,10 +131,9 @@ function D:verify_history()
   })
   self.history.save_dir = Util.strip_slash(self.history.save_dir or DEFAULTS.history.save_dir)
   self.history.save_file = self.history.save_file or DEFAULTS.history.save_file
-  self.history.size = self.history.size or DEFAULTS.history.size
-  if not Util.is_int(self.history.size, self.history.size >= 0) then
-    self.history.size = DEFAULTS.history.size
-  end
+  self.history.size = (self.history.size and Util.is_int(self.history.size, self.history.size >= 0))
+      and self.history.size
+    or DEFAULTS.history.size
 
   if
     not Util.only_has_chars(
@@ -138,6 +142,7 @@ function D:verify_history()
       { spaces = true }
     )
   then
+    Util.log.error('(project.nvim): Invalid chars in `history.save_file` setup option!')
     error('(project.nvim): Invalid chars in `history.save_file` setup option!')
   end
 
@@ -155,11 +160,11 @@ end
 --- ---
 function D:verify_scope_chdir()
   Util.validate({ scope_chdir = { self.scope_chdir, { 'string', 'nil' }, true } })
-
   if self.scope_chdir and vim.list_contains({ 'global', 'tab', 'win' }, self.scope_chdir) then
     return
   end
 
+  Util.log.warn(('`scope_chdir` option invalid (`%s`). Reverting to default option.'):format(self.scope_chdir))
   vim.notify(('`scope_chdir` option invalid (`%s`). Reverting to default option.'):format(self.scope_chdir), WARN)
   self.scope_chdir = DEFAULTS.scope_chdir
 end
@@ -171,12 +176,14 @@ function D:verify_datapath()
   Util.validate({ ['history.save_dir'] = { self.history.save_dir, { 'string', 'nil' }, true } })
 
   if self.datapath and Util.is_type('string', self.datapath) then
+    Util.log.warn(('`options.datapath` is deprecated, use `options.history.save_dir`!'):format(MODSTR))
     vim.notify(('`options.datapath` is deprecated, use `options.history.save_dir`!'):format(MODSTR), WARN)
     self.history.save_dir = self.datapath
     self.datapath = nil ---@diagnostic disable-line:inject-field
   end
 
   if not (self.history.save_dir and Util.dir_exists(self.history.save_dir)) then
+    Util.log.warn(('Invalid save_dir `%s`, reverting to default.'):format(self.history.save_dir))
     vim.notify(('Invalid save_dir `%s`, reverting to default.'):format(self.history.save_dir), WARN)
     self.history.save_dir = DEFAULTS.history.save_dir
   end
@@ -268,7 +275,7 @@ function D:verify_owners()
 end
 
 function D:verify_lists()
-  local i, found = 1, {} ---@type integer, string[]
+  local i, found, n = 1, {}, 1 ---@type integer, string[], 1|-1
   self.patterns = self.patterns or vim.deepcopy(DEFAULTS.patterns)
   while i <= #self.patterns and i > 0 do
     if
@@ -277,11 +284,12 @@ function D:verify_lists()
       or vim.list_contains(found, self.patterns[i])
     then
       table.remove(self.patterns, i)
-      i = i - 1
+      n = -1
     else
       table.insert(found, self.patterns[i])
-      i = i + 1
+      n = 1
     end
+    i = i + n
   end
   if vim.tbl_isempty(self.patterns) then
     self.patterns = vim.deepcopy(DEFAULTS.patterns)
@@ -296,11 +304,12 @@ function D:verify_lists()
   while i <= #self.disable_on.ft and i > 0 do
     if not Util.is_type('string', self.disable_on.ft[i]) or self.disable_on.ft[i] == '' then
       table.remove(self.disable_on.ft, i)
-      i = i - 1
+      n = -1
     else
       table.insert(found, self.disable_on.ft[i])
-      i = i + 1
+      n = 1
     end
+    i = i + n
   end
   if vim.tbl_isempty(self.disable_on.ft) then
     self.disable_on.ft = vim.deepcopy(DEFAULTS.disable_on.ft)
@@ -313,11 +322,12 @@ function D:verify_lists()
   while i <= #self.disable_on.bt and i > 0 do
     if not Util.is_type('string', self.disable_on.bt[i]) or self.disable_on.bt[i] == '' then
       table.remove(self.disable_on.bt, i)
-      i = i - 1
+      n = -1
     else
       table.insert(found, self.disable_on.bt[i])
-      i = i + 1
+      n = 1
     end
+    i = i + n
   end
   if vim.tbl_isempty(self.disable_on.bt) then
     self.disable_on.bt = vim.deepcopy(DEFAULTS.disable_on.bt)
@@ -333,11 +343,12 @@ function D:verify_lists()
       or vim.list_contains(found, self.exclude_dirs[i])
     then
       table.remove(self.exclude_dirs, i)
-      i = i - 1
+      n = -1
     else
       table.insert(found, self.exclude_dirs[i])
-      i = i + 1
+      n = 1
     end
+    i = i + n
   end
 
   i, found = 1, {}
@@ -348,11 +359,12 @@ function D:verify_lists()
       or vim.list_contains(found, self.exclude_dirs[i])
     then
       table.remove(self.lsp.ignore, i)
-      i = i - 1
+      n = -1
     else
       table.insert(found, self.lsp.ignore[i])
-      i = i + 1
+      n = 1
     end
+    i = i + n
   end
 end
 

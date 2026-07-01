@@ -247,11 +247,60 @@ By default, `setup()` loads with the following options:
 
 ```lua
 {
-  before_attach = nil, ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
-  on_attach = nil, ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
+  ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
+  before_attach = nil,
+
+  on_attach = nil,
+  -- OR
+  ---@param dir string
+  ---@param method string
+  ---@param bufnr? integer
+  ---@param map
+  ---|fun(mode_or_maps: 'n'|'i'|'v'|'V'|'t'|'o'|'x', lhs: string, rhs: string|function, opts: vim.keymap.set.Opts)
+  ---|fun(mode_or_maps: table<'n'|'i'|'v'|'V'|'t'|'o'|'x', { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>)
+  on_attach = function(dir, method, bufnr, map)
+    -- You can map a single key (ALWAYS BUFFER LOCAL AUTOMATICALLY):
+    map(
+      'n',
+      '<leader>pS',
+      function()
+        vim.cmd.Project('session')
+      end,
+      { desc = 'Project Session' }
+    )
+
+    -- Or multiple keys, in multiple modes (ALWAYS BUFFER LOCAL AUTOMATICALLY):
+    map({
+      -- Normal mode
+      n = {
+        ['<leader>pR'] = {
+          function()
+            vim.cmd.Project('recents')
+          end,
+          { desc = 'Recent Projects' },
+        },
+        ['<leader>pS'] = {
+          function()
+            vim.cmd.Project('session')
+          end,
+          { desc = 'Project Session' },
+        },
+      },
+
+      -- Insert mode
+      i = {
+        ['<A-p>'] = { ':Project<CR>', { desc = 'Project UI' } },
+      }
+    })
+
+    -- ...
+  end,
+
   lsp = {
     enabled = true,
-    ignore = {}, -- LSP clients to ignore
+
+    -- LSP clients to ignore
+    ignore = {},
 
     -- If `true`, no pattern matching will be used as a backup.
     -- WARNING: ENABLE AT YOUR OWN DISCRETION!!!!

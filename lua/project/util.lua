@@ -9,6 +9,38 @@ local MODSTR = 'project.util'
 ---@field path Project.Util.Path
 local M = {}
 
+---@overload fun(mode_or_maps: Modes, lhs: string, rhs: string|function, opts: vim.keymap.set.Opts)
+---@overload fun(mode_or_maps: table<Modes, { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>)
+function M.map_attach(mode_or_maps, lhs, rhs, opts)
+  M.validate({
+    mode_or_maps = { mode_or_maps, { 'string', 'table' } },
+    lhs = { lhs, { 'string', 'nil' }, true },
+    rhs = { rhs, { 'string', 'function', 'nil' }, true },
+    opts = { opts, { 'table', 'nil' }, true },
+  })
+  if not (lhs or rhs or opts) and type(mode_or_maps) == 'table' then
+    for mode, specs in pairs(mode_or_maps) do
+      M.validate({ specs = { specs, { 'table' } } })
+      for _, spec in ipairs(specs) do
+        M.validate({
+          ['spec.lhs'] = { spec[1], { 'string' } },
+          ['spec.rhs'] = { spec[2], { 'string', 'function' } },
+          ['spec.opts'] = { spec[3], { 'table' } },
+        })
+
+        vim.keymap.set(
+          mode,
+          spec[1],
+          spec[2],
+          vim.tbl_deep_extend('force', spec[3], { buf = vim.api.nvim_get_current_buf() })
+        )
+      end
+    end
+  elseif lhs and rhs and opts and type(mode_or_maps) == 'string' then
+    vim.keymap.set(mode_or_maps, lhs, rhs, vim.tbl_deep_extend('force', opts, { buf = vim.api.nvim_get_current_buf() }))
+  end
+end
+
 ---@param bufnr integer
 ---@return boolean valid
 ---@nodiscard

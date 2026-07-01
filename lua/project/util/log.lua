@@ -1,4 +1,5 @@
 ---@module 'project._meta'
+---@module 'snacks'
 
 local uv = vim.uv or vim.loop
 local MODSTR = 'project.util.log'
@@ -12,32 +13,104 @@ local Path = require('project.util.path')
 local Util = require('project.util')
 
 local timer = nil ---@type uv.uv_timer_t|nil
+local snacks_enabled = false ---@type boolean
+local snacks_style = 'fancy' ---@type ProjectLog.Snacks.Style
+
+---@enum ProjectLog.Snacks.Levels
+local snacks_levels = { [DEBUG] = 'debug', [INFO] = 'info', [WARN] = 'warn', [ERROR] = 'error' }
+
+---@param msg string
+---@param sel any
+---@param space? boolean
+---@return string msg
+local function format_sel(msg, sel, space)
+  Util.validate({
+    msg = { msg, { 'string' } },
+    space = { space, { 'boolean', 'nil' }, true },
+  })
+  if space == nil then
+    space = true
+  end
+
+  if sel then
+    if type(sel) == 'number' or type(sel) == 'boolean' then
+      sel = tostring(sel)
+    elseif type(sel) ~= 'string' then
+      sel = vim.inspect(sel)
+    end
+    msg = ('%s%s%s'):format(msg, space and ' ' or '', sel)
+  end
+  return msg
+end
 
 ---@class Project.Util.Log
 ---@field public logfile? string
 ---@field public window? Project.Util.Log.Win
 local M = {}
 
+---@class Project.Util.Log.Backtrace
+---@field debug fun(...: any)
+---@field error fun(...: any)
+---@field info fun(...: any)
+---@field trace fun(...: any)
+---@field warn fun(...: any)
+---@overload fun(lvl: 0|1|2|3|4, ...: any)
+M.backtrace = setmetatable({}, {
+  ---@param self Project.Util.Log.Backtrace
+  ---@param lvl 0|1|2|3|4
+  __call = function(self, lvl, ...)
+    Util.validate({ lvl = { lvl, { 'number' } } })
+    lvl = vim.list_contains({ DEBUG, INFO, WARN, TRACE, ERROR }, lvl) and lvl or INFO
+
+    self[lvl](...)
+  end,
+})
+
+local function fallback_error(...)
+  local msg = ''
+  for i = 1, select('#', ...) do
+    msg = format_sel(msg, select(i, ...), i ~= 1)
+  end
+
+  error(msg)
+end
+
+M.backtrace.debug = fallback_error
+M.backtrace.error = fallback_error
+M.backtrace.info = fallback_error
+M.backtrace.trace = fallback_error
+M.backtrace.warn = fallback_error
+
+local function gen_snacks_backtrace()
+  if not (snacks_enabled and _G.Snacks) then
+    return
+  end
+
+  local opts = { history = true, style = snacks_style, title = 'project.nvim' } ---@type snacks.notify.Opts
+  for _, level in pairs(snacks_levels) do
+    opts.level = snacks_levels[level]
+    M.backtrace[level] = function(...)
+      local msg = ''
+      for i = 1, select('#', ...) do
+        msg = format_sel(msg, select(i, ...), i ~= 1)
+      end
+
+      pcall(_G.Snacks.debug.backtrace, msg, opts)
+      error(msg)
+    end
+  end
+end
+
 ---@param lvl vim.log.levels
 ---@return fun(...: any): output: string|nil
 local function gen_log(lvl)
-  ---@param ... any
-  ---@return string|nil output
-  return function(...)
+  return function(...) ---@return string|nil output
     if not Config.options.log.enabled then
       return
     end
     local msg = ''
     for i = 1, select('#', ...) do
-      local sel = select(i, ...)
-      if sel then
-        if type(sel) == 'number' or type(sel) == 'boolean' then
-          sel = tostring(sel)
-        elseif not type(sel) == 'string' then
-          sel = vim.inspect(sel)
-        end
-        msg = ('%s %s'):format(msg, sel)
-      end
+      msg = format_sel(msg, select(i, ...), i ~= 1)
     end
     return M.write(('%s\n'):format(msg), lvl)
   end
@@ -89,11 +162,11 @@ local function timer_cb()
   uv.fs_close(fd)
 
   if ok then
-    vim.notify(('(%s): `%s` has been cleared!'):format(MODSTR, Util.strip_slash(M.logfile, ':p:~')), INFO)
+    vim.notify(('(%s.timer_cb): `%s` has been cleared!'):format(MODSTR, Util.strip_slash(M.logfile, ':p:~')), INFO)
     return
   end
 
-  vim.notify(('(%s): `%s` could not be cleared!'):format(MODSTR, Util.strip_slash(M.logfile, ':p:~')), ERROR)
+  vim.notify(('(%s.timer_cb): `%s` could not be cleared!'):format(MODSTR, Util.strip_slash(M.logfile, ':p:~')), ERROR)
 end
 
 local function make_timer()
@@ -108,7 +181,7 @@ local function make_timer()
 
   timer:start(10000, 900000, vim.schedule_wrap(timer_cb))
 
-  local group = vim.api.nvim_create_augroup('project.nvim.log', { clear = false })
+  local group = vim.api.nvim_create_augroup('project.nvim.log', { clear = true })
   vim.api.nvim_create_autocmd({ 'VimLeavePre' }, {
     group = group,
     callback = function()
@@ -191,12 +264,14 @@ function M.open(mode)
   return fd, stat
 end
 
-function M.setup()
-  local log_cfg = Config.options.log or {}
-  if not log_cfg.enabled then
+---@param opts ProjectDefaults.Logging
+function M.setup(opts)
+  Util.validate({ opts = { opts, { 'table' } } })
+
+  if not opts.enabled then
     return
   end
-  M.logpath = log_cfg.logpath
+  M.logpath = opts.logpath
   M.logfile = vim.fs.joinpath(M.logpath, 'project.log')
   Path.create_path(M.logpath)
 
@@ -214,6 +289,11 @@ function M.setup()
   uv.fs_write(fd, (stat.size >= 1 and '\n' or '') .. os.date(('%s    %s    %s\n'):format(head, '%x  (%H:%M:%S)', head)))
 
   setup_watch()
+
+  if opts.snacks.enabled then
+    snacks_enabled = true
+    gen_snacks_backtrace()
+  end
 
   vim.g.project_log_loaded = 1
 end
