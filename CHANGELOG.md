@@ -1,5 +1,13 @@
 # Changelog
 
+## [v5.1.0-1](https://github.com/DrKJeff16/project.nvim/tree/v5.1.0-1) (2026-07-01)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v5.0.1-1...v5.1.0-1)
+
+**Fixed bugs:**
+
+- Snacks not installed.... [\#70](https://github.com/DrKJeff16/project.nvim/issues/70)
+
 ## [v5.0.1-1](https://github.com/DrKJeff16/project.nvim/tree/v5.0.1-1) (2026-06-16)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v5.0.0-1...v5.0.1-1)
