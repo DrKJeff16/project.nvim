@@ -33,24 +33,16 @@ local function complete_items(_, line)
   return res
 end
 
+---@param line string
+---@return string[] items
 local function completion(_, line)
   local args = vim.split(line, '%s+', { trimempty = false })
+  local items = {} ---@type string[]
   if args[1]:sub(-1) == '!' and #args == 1 then
-    return {}
+    return items
   end
 
-  local items = { ---@type string[]
-    'add',
-    'config',
-    'delete',
-    'export',
-    'health',
-    'history',
-    'import',
-    'recents',
-    'root',
-    'session',
-  }
+  items = { 'add', 'config', 'delete', 'export', 'health', 'history', 'import', 'recents', 'root', 'session' }
   if vim.g.project_fzf_lua_loaded == 1 then
     table.insert(items, 'fzf-lua')
   end
@@ -207,8 +199,7 @@ local function callback(ctx)
   :Project[!] history [clear|rename [/path/to/project [/path/to/project] [...]\]\]
   :Project[!] import [/path/to/file[.json]\]
   :Project[!] root
-  :Project[!] session
-  ]]
+  :Project[!] session]]
 
   if vim.g.project_log_loaded == 1 then
     err = ('%s\n  :Project log [clear|close|open|toggle]'):format(err)
@@ -326,11 +317,19 @@ local function callback(ctx)
     return
   end
   if vim.g.project_fzf_lua_loaded == 1 and ctx.fargs[1] == 'fzf-lua' and vim.tbl_isempty(fargs) then
-    Extensions['fzf-lua'].run_fzf_lua()
+    if ctx.bang then
+      vim.notify(('Usage:%s'):format(err_txt), WARN)
+    else
+      Extensions['fzf-lua'].run_fzf_lua()
+    end
     return
   end
   if ctx.fargs[1] == 'health' and vim.tbl_isempty(fargs) then
-    vim.cmd.checkhealth('project')
+    if ctx.bang then
+      vim.notify(('Usage:%s'):format(err_txt), WARN)
+    else
+      vim.cmd.checkhealth('project')
+    end
     return
   end
   if ctx.fargs[1] == 'history' then
@@ -372,6 +371,10 @@ local function callback(ctx)
     return
   end
   if vim.g.project_log_loaded == 1 and ctx.fargs[1] == 'log' then
+    if ctx.bang then
+      vim.notify(('Usage:%s'):format(err_txt), WARN)
+      return
+    end
     if vim.tbl_isempty(fargs) then
       Util.log.toggle_win()
       return
@@ -429,11 +432,19 @@ local function callback(ctx)
     return
   end
   if vim.g.project_snacks_loaded == 1 and ctx.fargs[1] == 'snacks' and vim.tbl_isempty(fargs) then
-    Extensions.snacks.pick()
+    if ctx.bang then
+      vim.notify(('Usage:%s'):format(err_txt), WARN)
+    else
+      Extensions.snacks.pick()
+    end
     return
   end
   if vim.g.project_telescope_loaded == 1 and ctx.fargs[1] == 'telescope' and vim.tbl_isempty(fargs) then
-    require('telescope._extensions.projects').projects()
+    if ctx.bang then
+      vim.notify(err_txt, WARN)
+    else
+      require('telescope._extensions.projects').projects()
+    end
     return
   end
 

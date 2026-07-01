@@ -14,88 +14,68 @@
 ---|'v'
 ---|'x'
 
----@enum (key) Project.Core.ScanRoot
-local scan_what = {
-  all = 1,
-  all_directories = 1,
-  all_files = 1,
-  all_hidden = 1,
-  all_visible = 1,
-  hidden_directories = 1,
-  hidden_files = 1,
-  visible_directories = 1,
-  visible_files = 1,
-}
+---@alias Project.Core.ScanRoot
+---|'all'
+---|'all_directories'
+---|'all_files'
+---|'all_hidden'
+---|'all_visible'
+---|'hidden_directories'
+---|'hidden_files'
+---|'visible_directories'
+---|'visible_files'
 
----@alias ProjectLog.Snacks.Style 'compact'|'fancy'|'minimal'
+---@alias Project.Telescope.ActionNames
+---|'browse_project_files'
+---|'change_working_directory'
+---|'delete_project'
+---|'find_project_files'
+---|'help_mappings'
+---|'recent_project_files'
+---|'rename_project'
+---|'search_in_project_files'
 
----@enum (key) Project.Telescope.ActionNames
-local action_names = {
-  browse_project_files = 1,
-  change_working_directory = 1,
-  delete_project = 1,
-  find_project_files = 1,
-  help_mappings = 1,
-  recent_project_files = 1,
-  rename_project = 1,
-  search_in_project_files = 1,
-}
-
----@enum (key) ProjectOpts.Show
-local show = { names = 1, paths = 1 }
-
----@enum (key) ProjectOpts.ScopeChdir
-local scope_chdir = { global = 1, tab = 1, win = 1 }
-
----@enum (key) ProjectOpts.Sort
-local sort = { newest = 1, oldest = 1 }
-
----@enum (key) CompleteTypes
-local complete_types = {
-  arglist = 1,
-  breakpoint = 1,
-  buffer = 1,
-  color = 1,
-  command = 1,
-  compiler = 1,
-  diff_buffer = 1,
-  dir = 1,
-  dir_in_path = 1,
-  environment = 1,
-  event = 1,
-  expression = 1,
-  file = 1,
-  file_in_path = 1,
-  filetype = 1,
-  ['function'] = 1,
-  help = 1,
-  highlight = 1,
-  history = 1,
-  keymap = 1,
-  locale = 1,
-  lua = 1,
-  mapclear = 1,
-  mapping = 1,
-  menu = 1,
-  messages = 1,
-  option = 1,
-  packadd = 1,
-  retab = 1,
-  runtime = 1,
-  scriptnames = 1,
-  shellcmd = 1,
-  shellcmdline = 1,
-  sign = 1,
-  syntax = 1,
-  syntime = 1,
-  tag = 1,
-  tag_listfiles = 1,
-  user = 1,
-  var = 1,
-}
-
----@enum (key) ProjectPaths
-local project_paths = { datapath = 1, historyfile = 1, projectpath = 1 } ---@diagnostic disable-line:unused-local
+---@alias CompleteTypes
+---|'arglist'
+---|'breakpoint'
+---|'buffer'
+---|'color'
+---|'command'
+---|'compiler'
+---|'diff_buffer'
+---|'dir'
+---|'dir_in_path'
+---|'environment'
+---|'event'
+---|'expression'
+---|'file'
+---|'file_in_path'
+---|'filetype'
+---|'function'
+---|'help'
+---|'highlight'
+---|'history'
+---|'keymap'
+---|'locale'
+---|'lua'
+---|'mapclear'
+---|'mapping'
+---|'menu'
+---|'messages'
+---|'option'
+---|'packadd'
+---|'retab'
+---|'runtime'
+---|'scriptnames'
+---|'shellcmd'
+---|'shellcmdline'
+---|'sign'
+---|'syntax'
+---|'syntime'
+---|'tag'
+---|'tag_listfiles'
+---|'user'
+---|'var'
 
 ---@alias Project.Core.GetHistoryPaths
 ---|fun(): history_paths: HistoryPath
@@ -112,6 +92,12 @@ local project_paths = { datapath = 1, historyfile = 1, projectpath = 1 } ---@dia
 ---|fun(paths_only?: false, tilde: boolean): recents: ProjectHistoryEntry[]
 ---|fun(paths_only: true): recents: string[]
 ---|fun(paths_only: true, tilde: boolean): recents: string[]
+
+---@alias ProjectLog.Snacks.Style 'compact'|'fancy'|'minimal'
+---@alias ProjectOpts.Show 'names'|'paths'
+---@alias ProjectOpts.ScopeChdir 'global'|'tab'|'win'
+---@alias ProjectOpts.Sort 'newest'|'oldest'
+---@alias ProjectPaths 'datapath'|'historyfile'|'projectpath'
 
 ---@class (exact) ProjectPickerItem.Hl
 ---@field [1] integer
@@ -134,19 +120,6 @@ local project_paths = { datapath = 1, historyfile = 1, projectpath = 1 } ---@dia
 ---@field datapath string
 ---@field historyfile string
 ---@field projectpath string
-
----@alias CompletorFunc fun(lead: string, line: string, pos: integer): completions: string[]
----@alias Project.CMD
----|{ desc: string, name: string, bang: boolean, complete?: (CompletorFunc)|CompleteTypes, nargs?: string|integer }
----|fun(ctx?: vim.api.keyset.create_user_command.command_args)
-
----@class (exact) Project.Commands.Spec
----@field bang boolean|nil
----@field callback fun(ctx?: vim.api.keyset.create_user_command.command_args)
----@field complete nil|CompleteTypes|CompletorFunc
----@field desc string
----@field name string
----@field nargs string|integer|nil
 
 ---@class (exact) ProjectOpts.DisableOn
 ---@field ft? string[]
