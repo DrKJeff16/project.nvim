@@ -57,6 +57,7 @@ end
 
 ---@param bufnr? integer
 ---@return string|nil root
+---@nodiscard
 function M.current_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
 
@@ -158,39 +159,40 @@ local Project = setmetatable(M, { ---@type Project
       return require('project.' .. k)
     end
     if k == 'delete_project' then
-      return self.util.history.delete_project
+      return Util.history.delete_project
     end
     if k == 'get_config' then
-      return self.config.get_config
+      return Config.get_config
     end
     if k == 'get_history_paths' then
-      return self.core.get_history_paths
+      return require('project.core').get_history_paths
     end
     if k == 'get_last_project' then
-      return self.core.get_last_project
+      return require('project.core').get_last_project
     end
     if k == 'get_project_root' then
-      return self.core.get_project_root
+      return require('project.core').get_project_root
     end
     if k == 'get_recent_projects' then
-      return self.util.history.get_recent_projects
+      return Util.history.get_recent_projects
     end
     if k == 'rename_project' then
-      return self.util.history.rename_project
+      return Util.history.rename_project
     end
     if k == 'root_files' then
-      return self.core.root_files
+      return require('project.core').root_files
     end
     if k == 'run_fzf_lua' then
-      return self.extensions['fzf-lua'].run_fzf_lua
+      return require('project.extensions')['fzf-lua'].run_fzf_lua
     end
     if k == 'setup' then
-      return self.config.setup
+      return Config.setup
     end
-    if vim.list_contains({ 'delete_menu', 'open_menu', 'recents_menu', 'session_menu' }, k) then
-      return function()
-        self.popup[k]()
-      end
+    if
+      vim.list_contains({ 'delete_menu', 'open_menu', 'recents_menu', 'session_menu' }, k)
+      and require('project.popup')[k]
+    then
+      return require('project.popup')[k]
     end
     return rawget(self, k) or nil
   end,
