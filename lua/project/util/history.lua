@@ -650,16 +650,15 @@ function M.write_history(path)
     i = i + 1
   end
 
-  local tbl_out = vim.deepcopy(file_history)
   if M.historysize and M.historysize > 0 then
-    tbl_out = #res > M.historysize and vim.list_slice(res, #res - M.historysize, #res) or res
+    file_history = #res > M.historysize and vim.list_slice(res, #res - M.historysize, #res) or res
   end
 
-  if vim.tbl_isempty(tbl_out) then
+  if vim.tbl_isempty(file_history) then
     uv.fs_close(fd)
+
     if vim.g.project_history_no_data_notified ~= 1 then
       Log.error(('(%s.write_history): No data available to write!'):format(MODSTR))
-      vim.notify(('(%s.write_history): No data available to write!'):format(MODSTR), WARN)
       vim.g.project_history_no_data_notified = 1
     end
     return
@@ -676,7 +675,7 @@ function M.write_history(path)
   end
 
   ---@type boolean, string|nil
-  local success, out = pcall(vim.json.encode, tbl_out)
+  local success, out = pcall(vim.json.encode, file_history)
   if not (success and out) then
     uv.fs_close(fd)
     Log.error(('(%s.write_history): Unable to encode JSON data!'):format(MODSTR))
