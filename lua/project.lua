@@ -72,10 +72,12 @@ end
 ---@param patterns string[]|string The string or list of strings containing the matching pattern(s).
 function M.remove_root_patterns(patterns)
   Util.validate({ patterns = { patterns, { 'string', 'table' } } })
+
+  local pats = Config.get().patterns
   if vim.g.project_setup ~= 1 then
     error(('(%s.remove_root_patterns): `project.nvim` is not setup!'):format(MODSTR))
   end
-  if not (Config.options and Config.options.patterns and Util.is_type('table', Config.options.patterns)) then
+  if not (pats and Util.is_type('table', pats)) then
     error(('(%s.remove_root_patterns): Config values are unaccessible!'):format(MODSTR))
   end
 
@@ -97,19 +99,21 @@ function M.remove_root_patterns(patterns)
     vim.notify(('(%s.remove_root_patterns): Skipping empty pattern: `%s`'):format(MODSTR, patterns), WARN)
     return
   end
-  if not vim.list_contains(Config.options.patterns, patterns) then
+  if not vim.list_contains(pats, patterns) then
     vim.notify(('(%s.remove_root_patterns): Skipping unavailable pattern: `%s`'):format(MODSTR, patterns), WARN)
     return
   end
 
   local pos = 1
-  for i, pat in ipairs(Config.options.patterns) do
+  for i, pat in ipairs(pats) do
     if pat == patterns then
       pos = i
       break
     end
   end
-  table.remove(Config.options.patterns, pos)
+  table.remove(pats, pos)
+
+  Config.set('patterns', pats)
 end
 
 ---Add new root patterns to `project.nvim`'s config.
@@ -122,18 +126,20 @@ function M.add_root_patterns(patterns)
   if vim.g.project_setup ~= 1 then
     error(('(%s.add_root_patterns): `project.nvim` is not setup!'):format(MODSTR))
   end
-  if not (Config.options and Config.options.patterns and Util.is_type('table', Config.options.patterns)) then
+  local pats = Config.get().patterns
+  if not (pats and Util.is_type('table', pats)) then
     Util.log.error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
     error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
   end
 
   if Util.is_type('string', patterns) then
     ---@cast patterns string
-    if patterns == '' or vim.list_contains(Config.options.patterns, patterns) then
+    if patterns == '' or vim.list_contains(pats, patterns) then
       Util.log.warn(('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns))
       vim.notify(('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns), WARN)
     else
-      table.insert(Config.options.patterns, patterns)
+      table.insert(pats, patterns)
+      Config.set('patterns', pats)
     end
     return
   end

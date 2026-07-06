@@ -44,7 +44,7 @@ local function normal_attach(prompt_bufnr, map)
     map = { map, { 'function' } },
   })
 
-  local Keys = vim.deepcopy(Project.config.options.telescope.mappings) or {}
+  local Keys = vim.deepcopy(Project.config.get().telescope.mappings) or {}
 
   if not Project.util.is_type('table', Keys) or vim.tbl_isempty(Keys) then
     Keys = vim.deepcopy(require('project.config.defaults').telescope.mappings)
@@ -65,7 +65,7 @@ local function normal_attach(prompt_bufnr, map)
   end
 
   Actions.select_default:replace(function()
-    if Project.config.options.telescope.disable_file_picker then
+    if Project.config.get().telescope.disable_file_picker then
       local entry = State.get_selected_entry()
       Project.core.set_pwd(entry.value, 'telescope')
       return require('telescope.actions.set').select(prompt_bufnr, 'default')
@@ -98,7 +98,7 @@ function M.projects(opts)
     error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
   end
 
-  local Options = Project.config.options
+  local Options = Project.config.get()
   local scope = Options.scope_chdir == 'win' and 'window' or Options.scope_chdir --[[@as string]]
   Pickers.new(vim.tbl_deep_extend('keep', opts, M.default_opts), {
     prompt_title = ('Select Your Project (%s)'):format(Project.util.capitalize(scope)),

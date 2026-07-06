@@ -28,7 +28,7 @@ function M.gen_items()
 
   for i, proj in ipairs(recents) do
     local text = M.config.show ~= 'paths' and proj.name
-      or Util.strip_slash(proj.path, require('project.config').options.snacks.tilde and ':p:~' or nil)
+      or Util.strip_slash(proj.path, require('project.config').get().snacks.tilde and ':p:~' or nil)
 
     table.insert(items, {
       idx = i,

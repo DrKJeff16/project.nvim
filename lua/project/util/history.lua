@@ -435,18 +435,14 @@ function M.deserialize_history(history_data, name_data)
     name_data = { name_data, { 'table' } },
   })
 
-  local Config = require('project.config')
+  local Config = require('project.config').get()
   local projects, i = {}, 1 ---@type ProjectHistoryEntry[], integer
   for s in history_data:gmatch('[^\r\n]+') do
-    if not Path.is_excluded(s) then
-      local entry = { path = s, name = name_data[i] } --[[@as ProjectHistoryEntry]]
-      if
-        Config.options
-        and Config.options
-        and ((Config.options.remove_missing_dirs and Path.exists(s)) or not Config.options.remove_missing_dirs)
-      then
-        table.insert(projects, entry)
-      end
+    if
+      not Path.is_excluded(s)
+      and ((Config.remove_missing_dirs and Path.exists(s)) or not Config.remove_missing_dirs)
+    then
+      table.insert(projects, { path = s, name = name_data[i] })
     end
 
     i = i + 1
@@ -580,11 +576,9 @@ end
 ---@param path? string
 function M.write_history(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
-  local Config = require('project.config')
+  local Config = require('project.config').get()
   path = Util.strip_slash(
-    path
-      or Path.historyfile
-      or vim.fs.joinpath(Config.options.history.save_dir, 'project_nvim', Config.options.history.save_file)
+    path or Path.historyfile or vim.fs.joinpath(Config.history.save_dir, 'project_nvim', Config.history.save_file)
   )
 
   if not Path.exists(path) then
@@ -596,8 +590,8 @@ function M.write_history(path)
   end
 
   local historysize = 100
-  if Config.options and Config.options.history and Config.options.history.size then
-    historysize = Config.options.history.size
+  if Config.history and Config.history.size then
+    historysize = Config.history.size
   end
   M.historysize = historysize > 0 and historysize or 100
 

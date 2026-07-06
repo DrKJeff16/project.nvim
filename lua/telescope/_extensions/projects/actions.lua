@@ -46,7 +46,7 @@ function M.delete_project(prompt_bufnr)
   State.get_current_picker(prompt_bufnr):refresh(
     (function()
       local results = Project.util.history.get_recent_projects()
-      if Project.config.options.telescope.sort == 'newest' then
+      if Project.config.get().telescope.sort == 'newest' then
         Project.util.log.debug(('(%s.delete_project): Sorting order to `newest`.'):format(MODSTR))
         results = Project.util.reverse(results)
       end
@@ -99,12 +99,12 @@ function M.find_project_files(prompt_bufnr)
     path = project_path,
     cwd = project_path,
     cwd_to_path = true,
-    hidden = Project.config.options.show_hidden,
+    hidden = Project.config.get().show_hidden,
     hide_parent_dir = true,
     mode = 'insert',
   }
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
-  if Project.config.options.telescope.prefer_file_browser and Telescope.extensions.file_browser then
+  if Project.config.get().telescope.prefer_file_browser and Telescope.extensions.file_browser then
     Telescope.extensions.file_browser.file_browser(opts)
     return
   end
@@ -121,12 +121,12 @@ function M.browse_project_files(prompt_bufnr)
     path = project_path,
     cwd = project_path,
     cwd_to_path = true,
-    hidden = Project.config.options.show_hidden,
+    hidden = Project.config.get().show_hidden,
     hide_parent_dir = true,
     mode = 'insert',
   }
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
-  if Project.config.options.telescope.prefer_file_browser and Telescope.extensions.file_browser then
+  if Project.config.get().telescope.prefer_file_browser and Telescope.extensions.file_browser then
     Telescope.extensions.file_browser.file_browser(opts)
     return
   end
@@ -139,7 +139,7 @@ function M.search_in_project_files(prompt_bufnr)
   if not cd_successful then
     return
   end
-  Builtin.live_grep({ cwd = project_path, hidden = Project.config.options.show_hidden, mode = 'insert' })
+  Builtin.live_grep({ cwd = project_path, hidden = Project.config.get().show_hidden, mode = 'insert' })
 end
 
 ---@param prompt_bufnr integer
@@ -157,7 +157,7 @@ function M.recent_project_files(prompt_bufnr)
   if not cd_successful then
     return
   end
-  Builtin.oldfiles({ cwd_only = true, hidden = Project.config.options.show_hidden })
+  Builtin.oldfiles({ cwd_only = true, hidden = Project.config.get().show_hidden })
 end
 
 return M

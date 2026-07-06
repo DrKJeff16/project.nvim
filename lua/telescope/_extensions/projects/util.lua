@@ -23,7 +23,7 @@ local M = {}
 function M.make_tilde(s)
   Project.util.validate({ s = { s, { 'string' } } })
 
-  return Project.util.rstrip('/', vim.fn.fnamemodify(s, Project.config.options.telescope.tilde and ':p:~' or ':p'))
+  return Project.util.rstrip('/', vim.fn.fnamemodify(s, Project.config.get().telescope.tilde and ':p:~' or ':p'))
 end
 
 ---@param entry { name: string, value: string, display: function, index: integer, ordinal: string }
@@ -36,7 +36,7 @@ function M.make_display(entry)
 end
 
 function M.create_finder()
-  local sort = Project.config.options.telescope.sort
+  local sort = Project.config.get().telescope.sort
   Project.util.log.info(('(%s.create_finder): Sorting by `%s`.'):format(MODSTR, sort))
 
   local results = Project.util.history.get_recent_projects()

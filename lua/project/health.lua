@@ -53,7 +53,7 @@ end
 
 function M.options_check()
   vim.health.start('Configuration')
-  local Options = vim.deepcopy(Config.options)
+  local Options = Config.get()
   if not Util.is_type('table', Options) then
     vim.health.error('The config table is missing!')
     return
@@ -126,7 +126,7 @@ end
 function M.logging_check()
   vim.health.start('Log')
 
-  if not Config.options.log.enabled or vim.g.project_log_loaded ~= 1 then
+  if not Config.get().log.enabled or vim.g.project_log_loaded ~= 1 then
     vim.health.ok('Logging disabled. This does not represent an issue necessarily!')
     return
   end
@@ -137,7 +137,7 @@ end
 
 function M.fzf_lua_check()
   vim.health.start('`fzf-lua` Integration')
-  if not Config.options.fzf_lua.enabled or vim.g.project_fzf_lua_loaded ~= 1 then
+  if not Config.get().fzf_lua.enabled or vim.g.project_fzf_lua_loaded ~= 1 then
     vim.health.warn('`fzf-lua` integration is disabled. This does not represent an issue necessarily!')
     return
   end

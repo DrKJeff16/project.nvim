@@ -147,7 +147,7 @@ function M.find_lsp_root(bufnr)
     return
   end
 
-  local ignore_lsp = Config.options.lsp.ignore
+  local ignore_lsp = Config.get().lsp.ignore
   local ft = Util.optget('filetype', 'buf', bufnr)
   for _, client in ipairs(clients) do
     local filetypes = client.config.filetypes --[[@as string[]\]]
@@ -158,7 +158,7 @@ function M.find_lsp_root(bufnr)
       and client.config.root_dir
     )
     if valid then
-      if Config.options.lsp.use_pattern_matching and Util.path.root_included(client.config.root_dir) == nil then
+      if Config.get().lsp.use_pattern_matching and Util.path.root_included(client.config.root_dir) == nil then
         return
       end
       return client.config.root_dir, client.name
@@ -187,7 +187,7 @@ function M.valid_bt(bufnr)
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   return Util.buffer_valid(bufnr)
-    and not vim.list_contains(Config.options.disable_on.bt, Util.optget('buftype', 'buf', bufnr))
+    and not vim.list_contains(Config.get().disable_on.bt, Util.optget('buftype', 'buf', bufnr))
 end
 
 function M.refresh_project_bufs()
@@ -241,10 +241,10 @@ function M.set_pwd(dir, method, bufnr)
 
   if not Util.path.verify_owner(dir) then
     Util.log.warn(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))
-    if Config.options.different_owners.notify or not Config.options.different_owners.allow then
+    if Config.get().different_owners.notify or not Config.get().different_owners.allow then
       vim.notify(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR), ERROR)
     end
-    return Config.options.different_owners.allow
+    return Config.get().different_owners.allow
   end
 
   Util.history.session_projects = Util.history.session_projects or {}
@@ -331,7 +331,7 @@ function M.set_pwd(dir, method, bufnr)
     return true
   end
 
-  local scope_chdir = Config.options.scope_chdir
+  local scope_chdir = Config.get().scope_chdir
   local msg = ('(%s.set_pwd):'):format(MODSTR)
   if not vim.list_contains({ 'global', 'tab', 'win' }, scope_chdir) then
     Util.log.error(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)))
@@ -379,7 +379,7 @@ function M.set_pwd(dir, method, bufnr)
     Util.log.error(msg)
   end
 
-  if not Config.options.silent_chdir then
+  if not Config.get().silent_chdir then
     vim.notify(msg, (ok and INFO or ERROR))
   end
   return ok
@@ -418,7 +418,7 @@ function M.get_project_root(bufnr)
     return
   end
 
-  if #roots == 1 or Config.options.lsp.no_fallback then
+  if #roots == 1 or Config.get().lsp.no_fallback then
     return roots[1].root, roots[1].method_msg
   end
   if roots[1].root == roots[2].root then
@@ -482,7 +482,8 @@ function M.on_buf_enter(bufnr)
   if
     not (Util.path.exists(dir) and Util.path.root_included(dir))
     or Util.path.is_excluded(dir)
-    or vim.list_contains(Config.options.disable_on.ft, Util.optget('filetype', 'buf', bufnr))
+    or vim.list_contains(Config.get().disable_on.ft, Util.optget('filetype', 'buf', bufnr))
+    or vim.list_contains(Config.get().disable_on.bt, Util.optget('buftype', 'buf', bufnr))
   then
     return
   end
@@ -508,7 +509,7 @@ function M.root_files(scan_what, path, prefix)
     prefix = { prefix, { 'string', 'nil' }, true },
   })
   if not scan_what then
-    scan_what = Config.options.show_hidden and 'all' or 'all_visible'
+    scan_what = Config.get().show_hidden and 'all' or 'all_visible'
   end
   path = (not path or path == '') and (M.get_current_project() or M.get_project_root()) or path
   if not path then
@@ -586,7 +587,7 @@ function M.setup()
     end,
   })
 
-  if not Config.options.manual_mode then
+  if not Config.get().manual_mode then
     if vim.list_contains(Config.detection_methods, 'pattern') then
       vim.api.nvim_create_autocmd('BufEnter', {
         group = group,

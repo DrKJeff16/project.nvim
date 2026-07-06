@@ -35,7 +35,7 @@ local function telescope_check()
   end
   vim.health.ok('`projects` picker extension loaded')
 
-  local opts_telescope = Project.config.options.telescope
+  local opts_telescope = Project.config.get().telescope
   if not Project.util.is_type('table', opts_telescope) then
     vim.health.warn('`projects` does not have telescope options set up')
     return

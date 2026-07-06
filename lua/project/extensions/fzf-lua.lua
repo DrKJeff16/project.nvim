@@ -16,8 +16,8 @@ function M.default(items)
   require('fzf-lua').files({
     cwd = Util.history.find_entry('recent', items[1], 'path'),
     cwd_only = true,
-    silent = Config.options.silent_chdir,
-    hidden = Config.options.show_hidden,
+    silent = Config.get().silent_chdir,
+    hidden = Config.get().show_hidden,
   })
 end
 
@@ -46,18 +46,18 @@ end
 ---@param cb fun(entry?: string|number, cb?: function)
 function M.exec(cb)
   local projects = Util.history.get_recent_projects()
-  if Config.options.fzf_lua.sort == 'newest' then
+  if Config.get().fzf_lua.sort == 'newest' then
     projects = Util.reverse(projects)
   end
 
   for _, entry in ipairs(projects) do
-    cb(Config.options.fzf_lua.show == 'names' and entry.name or entry.path)
+    cb(Config.get().fzf_lua.show == 'names' and entry.name or entry.path)
   end
   cb()
 end
 
 function M.setup()
-  if not Config.options.fzf_lua.enabled then
+  if not Config.get().fzf_lua.enabled then
     return
   end
   if not Util.mod_exists('fzf-lua') then

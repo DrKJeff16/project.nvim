@@ -18,31 +18,46 @@ end
 ---@class Project.Config
 ---@field custom_projects ProjectConfigHistoryEntry[]
 ---@field defaults ProjectDefaults
----@field options ProjectDefaults
 local M = {}
 
-M.options = get_defaults():new()
+local options = get_defaults():new()
+
+---@return ProjectDefaults options
+function M.get()
+  return options
+end
+
+---@param k string
+---@param v any
+function M.set(k, v)
+  Util.validate({ k = { k, { 'string' } } })
+  if not get_defaults():new()[k] then
+    return
+  end
+
+  options[k] = v
+end
 
 ---The function called when running `require('project').setup()`.
 --- ---
----@param options? ProjectOpts The `project.nvim` config options.
-function M.setup(options)
-  Util.validate({ options = { options, { 'table', 'nil' }, true } })
+---@param opts? ProjectOpts The `project.nvim` config options.
+function M.setup(opts)
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   local pattern_exclude = Util.globtopattern.pattern_exclude
-  M.options = get_defaults():new(options or {})
+  options = get_defaults():new(opts or {})
 
-  M.detection_methods = M.options:gen_methods()
-  M.options:expand_excluded()
-  M.options.exclude_dirs = vim.tbl_map(pattern_exclude, M.options.exclude_dirs)
+  M.detection_methods = options:gen_methods()
+  options:expand_excluded()
+  options.exclude_dirs = vim.tbl_map(pattern_exclude, options.exclude_dirs)
 
-  M.options:verify()
+  options:verify()
 
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
-  vim.o.autochdir = M.options.enable_autochdir
+  vim.o.autochdir = options.enable_autochdir
 
-  Util.path.datapath = M.options.history.save_dir
-  Util.path.projectpath = Util.path.join(M.options.history.save_dir, 'project_nvim')
+  Util.path.datapath = options.history.save_dir
+  Util.path.projectpath = Util.path.join(options.history.save_dir, 'project_nvim')
 
   -- WARN: THIS GOES FIRST!!!!
   if vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 and not Util.path.exists(Util.path.projectpath) then
@@ -57,7 +72,7 @@ function M.setup(options)
     error('(%s.setup): Unable to create history subdirectory!')
   end
 
-  Util.path.historyfile = Util.path.join(Util.path.projectpath, M.options.history.save_file)
+  Util.path.historyfile = Util.path.join(Util.path.projectpath, options.history.save_file)
   if not Util.path.exists(Util.path.historyfile) then
     local fd = uv.fs_open(Util.path.historyfile, 'w', Util.path.open_mode('644'))
     if not fd then
@@ -72,8 +87,8 @@ function M.setup(options)
     error(('(%s.setup): Failed to store history path successfully!'):format(MODSTR))
   end
 
-  if M.options.log.enabled then
-    Util.log.setup(M.options.log)
+  if options.log.enabled then
+    Util.log.setup(options.log)
     Util.log.debug(('(%s.setup): Initialized logging.'):format(MODSTR))
   end
 
@@ -87,28 +102,28 @@ function M.setup(options)
 
   require('project.core').setup()
 
-  if M.options.fzf_lua.enabled then
+  if options.fzf_lua.enabled then
     Util.log.debug(('(%s.setup): fzf-lua integration enabled.'):format(MODSTR))
     Extensions['fzf-lua'].setup()
   end
-  if M.options.picker.enabled then
+  if options.picker.enabled then
     Util.log.debug(('(%s.setup): picker.nvim integration enabled.'):format(MODSTR))
     Extensions.picker.setup()
   end
-  if M.options.snacks.enabled then
+  if options.snacks.enabled then
     Util.log.debug(('(%s.setup): snacks.nvim integration enabled.'):format(MODSTR))
-    Extensions.snacks.setup(M.options.snacks.opts or {})
+    Extensions.snacks.setup(options.snacks.opts or {})
   end
 
-  M.custom_projects = vim.deepcopy(M.options.custom_projects or {})
+  M.custom_projects = vim.deepcopy(options.custom_projects or {})
 
   local group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = true })
   vim.api.nvim_create_autocmd('User', {
     pattern = 'ProjectAttachPre',
     group = group,
     callback = function(ev)
-      if M.options.before_attach and vim.is_callable(M.options.before_attach) then
-        M.options.before_attach(ev.data.dir, ev.data.method, ev.data.bufnr)
+      if options.before_attach and vim.is_callable(options.before_attach) then
+        options.before_attach(ev.data.dir, ev.data.method, ev.data.bufnr)
         Util.log.debug(('(%s.setup): Ran `before_attach` hook successfully.'):format(MODSTR))
       end
     end,
@@ -117,8 +132,8 @@ function M.setup(options)
     pattern = 'ProjectAttachPost',
     group = group,
     callback = function(ev)
-      if M.options.on_attach and vim.is_callable(M.options.on_attach) then
-        M.options.on_attach(ev.data.dir, ev.data.method, ev.data.bufnr, Util.map_attach)
+      if options.on_attach and vim.is_callable(options.on_attach) then
+        options.on_attach(ev.data.dir, ev.data.method, ev.data.bufnr, Util.map_attach)
         Util.log.debug(('(%s.setup): Ran `on_attach` hook successfully.'):format(MODSTR))
       end
     end,
@@ -147,7 +162,7 @@ function M.get_config()
     'verify_scope_chdir',
   }
   local opts = {} ---@type ProjectOpts
-  for k, v in pairs(M.options) do
+  for k, v in pairs(options) do
     if not vim.list_contains(exceptions, k) then
       opts[k] = v
     end

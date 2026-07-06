@@ -400,7 +400,7 @@ local function callback(ctx)
   end
   if vim.g.project_picker_loaded == 1 and ctx.fargs[1] == 'picker' and vim.tbl_isempty(fargs) then
     local cmd = { 'rg', '--files', '--ignore', '--text', '--glob', '!.git/' }
-    if ctx.bang or Config.options.picker.hidden then
+    if ctx.bang or Config.get().picker.hidden then
       table.insert(cmd, '--hidden')
     end
     require('picker.sources.files').set({ cmd = cmd })

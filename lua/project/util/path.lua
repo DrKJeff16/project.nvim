@@ -95,7 +95,7 @@ end
 function M.is_excluded(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
-  local exclude_dirs = Config.options.exclude_dirs
+  local exclude_dirs = Config.get().exclude_dirs
   for _, excluded in ipairs(exclude_dirs) do
     if dir:match(excluded) then
       return true
@@ -241,7 +241,7 @@ function M.root_included(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
   while true do ---Breadth-First search
-    for _, pattern in ipairs(Config.options.patterns) do
+    for _, pattern in ipairs(Config.get().patterns) do
       local excluded = false
       if pattern:sub(1, 1) == '!' then
         excluded, pattern = true, pattern:sub(2)

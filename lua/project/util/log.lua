@@ -105,7 +105,7 @@ end
 ---@return fun(...: any): output: string|nil
 local function gen_log(lvl)
   return function(...) ---@return string|nil output
-    if not Config.options.log.enabled then
+    if not Config.get().log.enabled then
       return
     end
     local msg = ''
@@ -149,7 +149,7 @@ end
 
 local function timer_cb()
   local stat = uv.fs_stat(M.logfile)
-  if not stat or stat.size < math.floor(Config.options.log.max_size * 1024 * 1024) then
+  if not stat or stat.size < math.floor(Config.get().log.max_size * 1024 * 1024) then
     return
   end
 
@@ -221,7 +221,7 @@ end
 ---@param lvl vim.log.levels
 ---@return string|nil written_data
 function M.write(data, lvl)
-  if not Config.options.log.enabled or vim.g.project_log_cleared == 1 then
+  if not Config.get().log.enabled or vim.g.project_log_cleared == 1 then
     return
   end
 
@@ -299,7 +299,7 @@ function M.setup(opts)
 end
 
 function M.open_win()
-  local enabled = Config.options.log.enabled
+  local enabled = Config.get().log.enabled
   if not (M.logfile and enabled) then
     return
   end

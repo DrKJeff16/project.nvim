@@ -87,8 +87,8 @@ function M:project_root()
   local bt = Project.util.optget('buftype', 'buf', bufnr) --[[@as string]]
   local msg = '' ---@type string
   if
-    vim.list_contains(Project.config.options.disable_on.ft, ft)
-    or vim.list_contains(Project.config.options.disable_on.bt, bt)
+    vim.list_contains(Project.config.get().disable_on.ft, ft)
+    or vim.list_contains(Project.config.get().disable_on.bt, bt)
   then
     return msg
   end
