@@ -150,7 +150,6 @@ end
 
 ---@param ctx vim.api.keyset.create_user_command.command_args
 local function callback(ctx)
-  local uv = vim.uv or vim.loop
   local Popup = require('project.popup')
   if vim.tbl_isempty(ctx.fargs) and not ctx.bang then
     Popup.open_menu(ctx)
@@ -262,10 +261,9 @@ local function callback(ctx)
   if ctx.fargs[1] == 'config' then
     if ctx.bang then
       vim.print(Config.get_config(), INFO)
-      return
+    else
+      Config.toggle_win()
     end
-
-    Config.toggle_win()
     return
   end
   if ctx.fargs[1] == 'delete' then
@@ -310,10 +308,9 @@ local function callback(ctx)
   if ctx.fargs[1] == 'export' and #fargs <= 2 then
     if vim.tbl_isempty(fargs) then
       Popup.gen_export_prompt()
-      return
+    else
+      Util.history.export_history_json(fargs[1], #fargs == 2 and tonumber(fargs[2]) or nil, ctx.bang)
     end
-
-    Util.history.export_history_json(fargs[1], #fargs == 2 and tonumber(fargs[2]) or nil, ctx.bang)
     return
   end
   if vim.g.project_fzf_lua_loaded == 1 and ctx.fargs[1] == 'fzf-lua' and vim.tbl_isempty(fargs) then
@@ -343,7 +340,6 @@ local function callback(ctx)
         Util.history.clear_historyfile(ctx.bang)
         return
       end
-
       if #fargs == 1 then
         Popup.rename_menu()
         return
@@ -364,10 +360,9 @@ local function callback(ctx)
   if ctx.fargs[1] == 'import' then
     if vim.tbl_isempty(fargs) then
       Popup.gen_import_prompt()
-      return
+    else
+      Util.history.import_history_json(fargs[1], ctx.bang)
     end
-
-    Util.history.import_history_json(fargs[1], ctx.bang)
     return
   end
   if vim.g.project_log_loaded == 1 and ctx.fargs[1] == 'log' then
@@ -383,20 +378,14 @@ local function callback(ctx)
     local arg = fargs[1] ---@type 'clear'|'close'|'open'|'toggle'
     if arg == 'clear' then
       Util.log.clear_log()
-      return
-    end
-    if arg == 'close' then
+    elseif arg == 'close' then
       Util.log.close_win()
-      return
-    end
-    if arg == 'open' then
+    elseif arg == 'open' then
       Util.log.open_win()
-      return
-    end
-    if arg == 'toggle' then
+    elseif arg == 'toggle' then
       Util.log.toggle_win()
-      return
     end
+    return
   end
   if vim.g.project_picker_loaded == 1 and ctx.fargs[1] == 'picker' and vim.tbl_isempty(fargs) then
     local cmd = { 'rg', '--files', '--ignore', '--text', '--glob', '!.git/' }
@@ -404,7 +393,7 @@ local function callback(ctx)
       table.insert(cmd, '--hidden')
     end
     require('picker.sources.files').set({ cmd = cmd })
-    require('picker.windows').open(Extensions.picker.source)
+    require('picker').open({ 'projects' })
 
     Util.log.debug('(:Project picker): Opening `picker.nvim` picker.')
     return
@@ -414,15 +403,13 @@ local function callback(ctx)
     return
   end
   if ctx.fargs[1] == 'root' and vim.tbl_isempty(fargs) then
-    local old_cwd = uv.cwd() or vim.fn.getcwd()
-    Core.on_buf_enter()
+    local old_cwd = vim.uv.cwd() or vim.fn.getcwd()
+    Core.on_buf_enter(vim.api.nvim_get_current_buf())
 
-    if (uv.cwd() or vim.fn.getcwd()) == old_cwd and not ctx.bang then
+    if (vim.uv.cwd() or vim.fn.getcwd()) == old_cwd and not ctx.bang then
       vim.notify('(:Project root): Current project is already in history!', WARN)
-      return
-    end
-    if ctx.bang then
-      vim.notify(uv.cwd() or vim.fn.getcwd(), INFO)
+    elseif ctx.bang then
+      vim.notify(vim.uv.cwd() or vim.fn.getcwd(), INFO)
     end
     return
   end
