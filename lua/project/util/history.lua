@@ -304,27 +304,27 @@ function M.import_history_json(path, force_name)
 
   local fd, stat = Path.open_file(path, 'r')
   if not fd then
-    Log.error(('(%s.import_history_json): File restricted! `%s`'):format(MODSTR, path))
-    vim.notify(('(%s.import_history_json): File restricted! `%s`'):format(MODSTR, path), ERROR)
+    Log.error(('(%s.import_history_json): File is restricted: `%s`'):format(MODSTR, path))
+    vim.notify(('(%s.import_history_json): File is restricted: `%s`'):format(MODSTR, path), ERROR)
     return
   end
   if not stat then
-    Log.error(('(%s.import_history_json): File stat unavailable! `%s`'):format(MODSTR, path))
-    vim.notify(('(%s.import_history_json): File stat unavailable! `%s`'):format(MODSTR, path), ERROR)
+    Log.error(('(%s.import_history_json): File stat unavailable: `%s`'):format(MODSTR, path))
+    vim.notify(('(%s.import_history_json): File stat unavailable: `%s`'):format(MODSTR, path), ERROR)
     return
   end
 
   local data = uv.fs_read(fd, stat.size)
   if not data or data == '' then
-    Log.error(('(%s.import_history_json): Data unavailable! `%s`'):format(MODSTR, path))
-    vim.notify(('(%s.import_history_json): Data unavailable! `%s`'):format(MODSTR, path), ERROR)
+    Log.error(('(%s.import_history_json): Data unavailable: `%s`'):format(MODSTR, path))
+    vim.notify(('(%s.import_history_json): Data unavailable: `%s`'):format(MODSTR, path), ERROR)
     return
   end
 
   local ok, hist = pcall(vim.json.decode, data, {}) ---@type boolean, ProjectHistoryEntry[]
   if not ok then
-    Log.error(('(%s.import_history_json): JSON decoding failed! `%s`'):format(MODSTR, path))
-    vim.notify(('(%s.import_history_json): JSON decoding failed! `%s`'):format(MODSTR, path), ERROR)
+    Log.error(('(%s.import_history_json): JSON decoding failed: `%s`'):format(MODSTR, path))
+    vim.notify(('(%s.import_history_json): JSON decoding failed: `%s`'):format(MODSTR, path), ERROR)
     return
   end
 
@@ -401,8 +401,8 @@ function M.delete_project(project, prompt)
   end
 
   if not M.recent_projects then
-    Log.error(('(%s.delete_project): `recent_projects` is nil! Aborting.'):format(MODSTR))
-    vim.notify(('(%s.delete_project): `recent_projects` is nil! Aborting.'):format(MODSTR))
+    Log.error(('(%s.delete_project): `recent_projects` is `nil`, aborting.'):format(MODSTR))
+    vim.notify(('(%s.delete_project): `recent_projects` is `nil`, aborting.'):format(MODSTR))
     return
   end
 
@@ -503,9 +503,10 @@ function M.read_history()
   local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size))
   uv.fs_close(fd)
   if not (ok and data) then
-    Log.error(
-      ('(%s.read_history): Could not decode JSON data from history file! (`stat.size = %s`)'):format(MODSTR, stat.size)
-    )
+    Log.error(([[
+(%s.read_history): Could not decode JSON data from history file!
+(`stat.size = %s`)
+    ]]):format(MODSTR, stat.size))
     return
   end
 
