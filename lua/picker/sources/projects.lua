@@ -10,13 +10,13 @@ local function gen_items(source)
   local curr = Project.core.get_current_project() or ''
   for i, v in ipairs(source) do
     local is_curr = v.path == curr
-    local n_digits, max_n_digits = Project.util.digits(i), Project.util.digits(Project.config.options.history.size)
+    local n_digits, max_n_digits = Project.util.digits(i), Project.util.digits(Project.config.get().history.size)
     local path = ('%d. %s'):format(
       i,
       (is_curr and '*' or '') .. (' '):rep(max_n_digits - n_digits - (is_curr and 1 or 0))
     )
 
-    if Project.config.options.picker.show == 'names' then
+    if Project.config.get().picker.show == 'names' then
       path = ('%s %s'):format(path, v.name)
     else
       path = ('%s %s'):format(path, Project.util.strip_slash(v.path, ':p:~'))
@@ -44,7 +44,7 @@ local M = {}
 ---@return ProjectPickerItem[] items
 function M.get()
   local recents = Project.get_recent_projects()
-  if Project.config.options.picker.sort == 'newest' then
+  if Project.config.get().picker.sort == 'newest' then
     recents = Project.util.reverse(recents)
   end
   return gen_items(recents)
@@ -55,7 +55,7 @@ function M.actions()
   return { ---@type table<string, fun(entry: ProjectPickerItem)>
     ['<C-d>'] = function(entry)
       Project.util.history.delete_project(entry.value, true)
-      require('picker.windows').open(M)
+      vim.cmd.Picker('projects')
     end,
     ['<C-r>'] = function(entry)
       Project.popup.rename_input(entry.value)

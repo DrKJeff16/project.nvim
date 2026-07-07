@@ -1,0 +1,123 @@
+{
+    "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+    "addonManager": {
+        "enable": false
+    },
+    "codeLens": {
+        "enable": true
+    },
+    "completion": {
+        "autoRequire": false,
+        "callSnippet": "Replace",
+        "displayContext": 16,
+        "enable": true,
+        "keywordSnippet": "Replace",
+        "maxSuggestCount": 300,
+        "postfix": "@",
+        "requireSeparator": ".",
+        "showParams": true,
+        "showWord": "Enable",
+        "workspaceWord": true
+    },
+    "diagnostics": {
+        "disable": [
+            "assign-type-mismatch",
+            "missing-fields",
+            "param-type-mismatch",
+            "undefined-field"
+        ],
+        "enable": true,
+        "globals": [
+            "vim"
+        ],
+        "ignoredFiles": "Opened",
+        "libraryFiles": "Opened",
+        "workspaceDelay": 3000,
+        "workspaceEvent": "OnSave",
+        "workspaceRate": 100
+    },
+    "format": {
+        "enable": true
+    },
+    "hint": {
+        "arrayIndex": "Auto",
+        "await": true,
+        "awaitPropagate": true,
+        "enable": true,
+        "paramName": "Literal",
+        "paramType": true,
+        "semicolon": "Disable",
+        "setType": true
+    },
+    "hover": {
+        "enable": true,
+        "enumsLimit": 80,
+        "expandAlias": true,
+        "previewFields": 75,
+        "viewNumber": true,
+        "viewString": true,
+        "viewStringMax": 2000
+    },
+    "runtime": {
+        "version": "LuaJIT",
+        "fileEncoding": "utf8",
+        "pathStrict": true,
+        "unicodeName": false,
+        "path": [
+            "lua/?.lua",
+            "lua/?/init.lua"
+        ],
+        "builtin": {
+            "bit": "enable",
+            "coroutine": "enable",
+            "debug": "default",
+            "io": "enable",
+            "jit": "enable",
+            "jit.profile": "default",
+            "jit.util": "default",
+            "math": "enable",
+            "os": "enable",
+            "package": "enable",
+            "string": "enable",
+            "string.buffer": "default",
+            "table": "enable",
+            "table.clear": "default",
+            "table.new": "default"
+        }
+    },
+    "semantic": {
+        "annotation": true,
+        "enable": true,
+        "keyword": true,
+        "variable": true
+    },
+    "signatureHelp": {
+        "enable": true
+    },
+    "type": {
+        "castNumberToInteger": false,
+        "checkTableShape": true,
+        "inferParamType": true,
+        "inferTableSize": 50,
+        "weakNilCheck": true,
+        "weakUnionCheck": true
+    },
+    "window": {
+        "progressBar": true,
+        "statusBar": true
+    },
+    "workspace": {
+        "checkThirdParty": false,
+        "useGitIgnore": true,
+        "preloadFileSize": 10000,
+        "library": [
+            "$HOME/.local/share/nvim/lazy/fzf-lua",
+            "$HOME/.local/share/nvim/lazy/lualine.nvim",
+            "$HOME/.local/share/nvim/lazy/picker.nvim",
+            "$HOME/.local/share/nvim/lazy/snacks.nvim",
+            "$VIMRUNTIME",
+            "${3rd}/busted/library",
+            "${3rd}/luv/library"
+        ]
+    }
+}

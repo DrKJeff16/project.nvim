@@ -51,12 +51,6 @@ ISSUE.md
 *.pacnew
 *.pacsave
 
-# Dropped Files
-.luarc.json
-.luarc.jsonc
-luarc.json
-luarc.jsonc
-
 # LuaCov
 luacov*
 
