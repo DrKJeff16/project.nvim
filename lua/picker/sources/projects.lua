@@ -1,5 +1,5 @@
----@module 'project._meta'
 ---@module 'picker'
+---@module 'project'
 
 local Project = require('project')
 

@@ -154,7 +154,6 @@
 --- ---
 ---@field allow? boolean
 ---If `true`, notify the user when a new project has a different UID **(UNIX only)**.
----
 --- ---
 ---Default: `true`
 --- ---
