@@ -140,26 +140,24 @@ function M.new(opts)
     error(('(%s.select.new): Empty args for constructor!'):format(MODSTR))
   end
 
-  local T = setmetatable(
-    { ---@type Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)
-      choices = opts.choices,
-      choices_list = opts.choices_list,
-    },
-    {
-      ---@param t Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)
-      ---@param k string
-      __index = function(t, k)
-        return rawget(t, k)
-      end,
-      __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args
-        if not ctx then
-          opts.callback()
-          return
-        end
+  ---@type Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)
+  local T = setmetatable({
+    choices = opts.choices,
+    choices_list = opts.choices_list,
+  }, {
+    ---@param t Project.Popup.SelectChoices
+    ---@param k string
+    __index = function(t, k)
+      return rawget(t, k)
+    end,
+    __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args
+      if not ctx then
+        opts.callback()
+      else
         opts.callback(ctx)
-      end,
-    }
-  )
+      end
+    end,
+  })
   return T
 end
 
@@ -194,37 +192,27 @@ end
 
 M.delete_menu = M.new({
   callback = function()
-    local choices_list = M.delete_menu.choices_list()
+    local choices_list = M.delete_menu.choices_list(Config.get())
     vim.ui.select(choices_list, {
       prompt = 'Select a project to delete:',
       format_item = function(item) ---@param item string
-        if item == 'Exit' then
-          return item
-        end
-
-        return (Util.history.find_entry('session', item, 'path') and '* ' or '') .. item
+        return (item == 'Exit' and '' or (Util.history.find_entry('session', item, 'path') and '* ' or '')) .. item
       end,
     }, function(item)
       if not item then
         return
       end
-      if not vim.list_contains(choices_list, item) then
+      if not (vim.list_contains(choices_list, item) and M.delete_menu.choices(Config.get())[item]) then
         vim.notify('Bad selection!', ERROR)
         return
       end
 
-      local choice = M.delete_menu.choices()[item]
-      if not (choice and vim.is_callable(choice)) then
-        vim.notify('Bad selection!', ERROR)
-        return
-      end
-
-      choice()
+      M.delete_menu.choices(Config.get())[item]()
     end)
   end,
-  choices_list = function()
+  choices_list = function(opts) ---@param opts ProjectDefaults
     local recents ---@type string[]
-    if Config.get().show_by_name then
+    if opts.show_by_name then
       recents = {} ---@type string[]
       for _, v in ipairs(Util.reverse(Util.history.get_recent_projects())) do
         table.insert(recents, v.name)
@@ -236,16 +224,13 @@ M.delete_menu = M.new({
     table.insert(recents, 'Exit')
     return recents
   end,
-  choices = function()
+  choices = function(opts) ---@param opts ProjectDefaults
     local T = {} ---@type table<string, fun(name: string)>
-    for _, proj in ipairs(M.delete_menu.choices_list()) do
-      if proj == 'Exit' then
-        T[proj] = function() end
-      elseif Config.get().show_by_name then
-        T[proj] = function()
+    for _, proj in ipairs(M.delete_menu.choices_list(opts)) do
+      T[proj] = proj == 'Exit' and function() end
+        or function()
           Util.history.delete_project(Util.history.find_entry('recent', proj, 'path'))
         end
-      end
     end
     return T
   end,
@@ -253,18 +238,12 @@ M.delete_menu = M.new({
 
 M.rename_menu = M.new({
   callback = function()
-    local choices_list = M.rename_menu.choices_list()
+    local choices_list = M.rename_menu.choices_list(Config.get())
     vim.ui.select(choices_list, { prompt = 'Select a project to rename:' }, function(item) ---@param item string
       if not item or item == 'Exit' then
         return
       end
-      if not vim.list_contains(choices_list, item) then
-        vim.notify('Bad selection!', ERROR)
-        return
-      end
-
-      local choice = M.rename_menu.choices()[item]
-      if not (choice and vim.is_callable(choice)) then
+      if not (vim.list_contains(choices_list, item) and M.rename_menu.choices(Config.get(Config.get()))[item]) then
         vim.notify('Bad selection!', ERROR)
         return
       end
@@ -274,16 +253,15 @@ M.rename_menu = M.new({
           Config.get().show_by_name and item or Util.history.find_entry('recent', item, 'name')
         ),
       }, function(input)
-        if not input or input == '' then
-          return
+        if input and input ~= '' then
+          M.rename_menu.choices(Config.get())[item](input)
         end
-        choice(input)
       end)
     end)
   end,
-  choices_list = function()
+  choices_list = function(opts) ---@param opts ProjectDefaults
     local recents ---@type string[]
-    if Config.get().show_by_name then
+    if opts.show_by_name then
       recents = {}
       for _, v in ipairs(Util.reverse(Util.history.get_recent_projects())) do
         table.insert(recents, v.name)
@@ -295,19 +273,16 @@ M.rename_menu = M.new({
     table.insert(recents, 'Exit')
     return recents
   end,
-  choices = function()
+  choices = function(opts) ---@param opts ProjectDefaults
     local T = {} ---@type table<string, fun(name: string)>
-    for _, proj in ipairs(M.rename_menu.choices_list()) do
-      if proj == 'Exit' then
-        T[proj] = function() end
-      else
-        T[proj] = function(name)
+    for _, proj in ipairs(M.rename_menu.choices_list(opts)) do
+      T[proj] = proj == 'Exit' and function() end
+        or function(name)
           Util.history.rename_project(
-            Config.get().show_by_name and Util.history.find_entry('recent', proj, 'path') or proj,
+            opts.show_by_name and Util.history.find_entry('recent', proj, 'path') or proj,
             name
           )
         end
-      end
     end
     return T
   end,
@@ -315,50 +290,38 @@ M.rename_menu = M.new({
 
 M.recents_menu = M.new({
   callback = function()
-    local choices_list = M.recents_menu.choices_list()
+    local choices_list = M.recents_menu.choices_list(Config.get())
     vim.ui.select(choices_list, {
       prompt = 'Select a project:',
       format_item = function(item) ---@param item string
-        if item == 'Exit' then
-          return item
-        end
-
-        return (Util.history.find_entry('session', item, 'path') and '* ' or '') .. item
+        return (item == 'Exit' and '' or (Util.history.find_entry('session', item, 'path') and '* ' or '')) .. item
       end,
     }, function(item) ---@param item string
       if not item or item == '' then
         return
       end
-      if not vim.list_contains(choices_list, item) then
+      if not (vim.list_contains(choices_list, item) and M.recents_menu.choices(Config.get())[item]) then
         vim.notify('Bad selection!', ERROR)
         return
       end
 
-      local choice = M.recents_menu.choices()[item]
-      if not (choice and vim.is_callable(choice)) then
-        vim.notify('Bad selection!', ERROR)
-        return
-      end
-
-      choice(Util.history.find_entry('recent', item, 'path'), false, false)
+      M.recents_menu.choices(Config.get())[item](Util.history.find_entry('recent', item, 'path'), false, false)
     end)
   end,
-  choices_list = function()
+  choices_list = function(opts) ---@param opts ProjectDefaults
     local choices_list = {} ---@type string[]
     for _, v in ipairs(Util.history.get_recent_projects(false, true)) do
       table.insert(choices_list, Config.get().show_by_name and v.name or v.path)
     end
-
-    if Config.get().telescope.sort == 'newest' then
+    if opts.telescope.sort == 'newest' then
       choices_list = Util.reverse(choices_list)
     end
-
     table.insert(choices_list, 'Exit')
     return choices_list
   end,
-  choices = function()
+  choices = function(opts) ---@param opts ProjectDefaults
     local choices = {} ---@type table<string, fun(proj: string, only_cd: boolean, ran_cd: boolean)>
-    for _, s in ipairs(M.recents_menu.choices_list()) do
+    for _, s in ipairs(M.recents_menu.choices_list(opts)) do
       choices[s] = s ~= 'Exit' and open_node or function()
         vim.g.project_nvim_cwd = ''
       end
@@ -381,17 +344,12 @@ M.open_menu = M.new({
       if not item then
         return
       end
-      if not vim.list_contains(choices_list, item) then
-        vim.notify('Bad selection!', ERROR)
-        return
-      end
-      local choice = M.open_menu.choices()[item]
-      if not (choice and vim.is_callable(choice)) then
+      if not (vim.list_contains(choices_list, item) and M.open_menu.choices()[item]) then
         vim.notify('Bad selection!', ERROR)
         return
       end
 
-      choice()
+      M.open_menu.choices()[item]()
     end)
   end,
   choices = function()
@@ -454,10 +412,10 @@ M.open_menu = M.new({
     end
 
     local res_list = {
-      'Session',
-      'New',
       'Recents',
+      'New',
       'Delete',
+      'Session',
       'Rename',
       'Checkhealth',
       'Config',
@@ -475,10 +433,10 @@ M.open_menu = M.new({
     if vim.g.project_telescope_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'Telescope')
     end
-    if Config.get().fzf_lua.enabled then
+    if vim.g.project_fzf_lua_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'FzfLua')
     end
-    if Config.get().log.enabled then
+    if vim.g.project_log_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'Log')
     end
     if not exit then
@@ -497,7 +455,7 @@ M.session_menu = M.new({
       only_cd = ctx.bang
     end
 
-    local choices_list = M.session_menu.choices_list()
+    local choices_list = M.session_menu.choices_list(Config.get())
     if #choices_list == 1 then
       vim.notify('No sessions available!', WARN)
       return
@@ -515,24 +473,18 @@ M.session_menu = M.new({
       if not item or item == '' then
         return
       end
-
-      if not vim.list_contains(choices_list, item) then
-        vim.notify('Bad selection!', ERROR)
-        return
-      end
-      local choice = M.session_menu.choices()[item]
-      if not (choice and vim.is_callable(choice)) then
+      if not (vim.list_contains(choices_list, item) and M.session_menu.choices(Config.get())[item]) then
         vim.notify('Bad selection!', ERROR)
         return
       end
 
-      choice(Util.history.find_entry('session', item, 'path'), only_cd, false)
+      M.session_menu.choices(Config.get())[item](Util.history.find_entry('session', item, 'path'), only_cd, false)
     end)
   end,
-  choices = function()
-    local choices = { Exit = function() end }
+  choices = function(opts) ---@param opts ProjectDefaults
+    local choices = {} ---@type table<string, fun(...: any)>
     local sessions = {} ---@type string[]
-    for _, v in ipairs(M.session_menu.choices_list()) do
+    for _, v in ipairs(M.session_menu.choices_list(opts)) do
       table.insert(sessions, v)
     end
 
@@ -546,15 +498,15 @@ M.session_menu = M.new({
     end
     return choices
   end,
-  choices_list = function()
-    local choices = vim.deepcopy(Util.history.session_projects)
-    local session_paths = {} ---@type string[]
-    for _, v in ipairs(choices) do
-      table.insert(session_paths, Config.get().show_by_name and v.name or v.path)
+  choices_list = function(opts) ---@param opts ProjectDefaults
+    local choices = vim.deepcopy(Util.history.session_projects) ---@type string[]|ProjectHistoryEntry[]
+
+    ---@cast choices ProjectHistoryEntry[]
+    for i, v in ipairs(choices) do
+      choices[i] = opts.show_by_name and v.name or v.path
     end
 
-    choices = session_paths
-
+    ---@cast choices string[]
     table.insert(choices, 'Exit')
     return choices
   end,
