@@ -92,6 +92,7 @@ function M.remove_root_patterns(patterns)
         M.remove_root_patterns(pat)
       end
     end
+    return
   end
 
   ---@cast patterns string
