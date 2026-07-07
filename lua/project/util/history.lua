@@ -593,7 +593,7 @@ function M.write_history(path)
   if Config.history and Config.history.size then
     historysize = Config.history.size
   end
-  M.historysize = historysize > 0 and historysize or 100
+  M.historysize = historysize >= 0 and historysize or 100
 
   local file_history = {} ---@type ProjectHistoryEntry[]
   local ok, fd, stat ---@type boolean, integer|nil, uv.fs_stat.result|nil
