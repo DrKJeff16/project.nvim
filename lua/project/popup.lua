@@ -125,7 +125,7 @@ function M.gen_export_prompt(bang)
   end)
 end
 
----@param opts Project.Popup.SelectSpec
+---@param opts Project.Popup.SelectChoices
 ---@return Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args) selector
 ---@nodiscard
 function M.new(opts)
@@ -395,52 +395,57 @@ M.open_menu = M.new({
     end)
   end,
   choices = function()
-    local res = { ---@type table<string, fun(ctx?: vim.api.keyset.create_user_command.command_args)>
-      Session = M.session_menu,
+    return { ---@type table<string, fun(ctx?: vim.api.keyset.create_user_command.command_args)>
+      Session = function()
+        vim.cmd.Project('session')
+      end,
       New = function()
         vim.cmd.Project('add')
       end,
-      Recents = M.recents_menu,
-      Delete = M.delete_menu,
-      Rename = M.rename_menu,
+      Recents = function()
+        vim.cmd.Project('recents')
+      end,
+      Delete = function()
+        vim.cmd.Project('delete')
+      end,
+      Rename = function()
+        vim.cmd.Project({ args = { 'history', 'rename' } })
+      end,
       Config = function()
         vim.cmd.Project('config')
       end,
       Historyfile = function()
         vim.cmd.Project('history')
       end,
-      Export = M.gen_export_prompt,
-      Import = M.gen_import_prompt,
+      Export = function()
+        vim.cmd.Project('export')
+      end,
+      Import = function()
+        vim.cmd.Project('import')
+      end,
       Help = function()
-        vim.cmd.help('project-nvim')
+        vim.cmd.help('project.txt')
       end,
       Checkhealth = function()
         vim.cmd.Project('health')
       end,
+      Picker = vim.g.project_picker_loaded ~= 1 and nil or function()
+        vim.cmd.Project('picker')
+      end,
+      Snacks = vim.g.project_snacks_loaded ~= 1 and nil or function()
+        vim.cmd.Project('snacks')
+      end,
+      Telescope = vim.g.project_telescope_loaded ~= 1 and nil or function()
+        vim.cmd.Project('telescope')
+      end,
+      FzfLua = vim.g.project_fzf_lua_loaded ~= 1 and nil or function()
+        vim.cmd.Project('fzf-lua')
+      end,
+      Log = vim.g.project_log_loaded ~= 1 and nil or function()
+        vim.cmd.Project({ args = { 'log', 'toggle' } })
+      end,
       Exit = function() end,
     }
-    if vim.g.project_picker_loaded == 1 then
-      res.Picker = function()
-        vim.cmd.Project('picker')
-      end
-    end
-    if vim.g.project_snacks_loaded == 1 then
-      res.Snacks = function()
-        vim.cmd.Project('snacks')
-      end
-    end
-    if vim.g.project_telescope_loaded == 1 then
-      res.Telescope = require('telescope._extensions.projects').projects
-    end
-    if Config.get().fzf_lua.enabled then
-      res.FzfLua = require('project.extensions.fzf-lua').run_fzf_lua
-    end
-    if Config.get().log.enabled then
-      res.Log = function()
-        vim.cmd.Project({ args = { 'log', 'toggle' } })
-      end
-    end
-    return res
   end,
   choices_list = function(exit)
     Util.validate({ exit = { exit, { 'boolean', 'nil' }, true } })

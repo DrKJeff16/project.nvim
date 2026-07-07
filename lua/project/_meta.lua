@@ -605,21 +605,7 @@ function D:verify_scope_chdir() end
 ---@field path string
 ---@field type string
 
----@class Project.Popup.SelectChoices
-local C = {}
-
----@return table<string, fun(...?: any)> choices_dict
-function C.choices() end
-
----@param exit? boolean
----@return string[] choices
-function C.choices_list(exit) end
-
----@class Project.Popup.SelectSpec: Project.Popup.SelectChoices
-local S = {}
-
----@param ctx? vim.api.keyset.create_user_command.command_args
-function S.callback(ctx) end
+---@alias Project.Popup.SelectChoices { choices: (fun(exit?: boolean): choices_dict: table<string, fun(...?: any)>), callback: (fun(ctx?: vim.api.keyset.create_user_command.command_args)), choices_list: (fun(exit?: boolean): choices: string)[] }
 
 ---Non-legacy validation spec (>=v0.11).
 --- ---

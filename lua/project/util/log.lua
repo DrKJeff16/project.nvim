@@ -141,6 +141,9 @@ function M.read_log()
 end
 
 function M.clear_log()
+  if vim.g.project_log_loaded ~= 1 then
+    return
+  end
   if uv.fs_unlink(M.logfile) then
     vim.notify('(project.nvim): Log cleared successfully', INFO)
     vim.g.project_log_cleared = 1
@@ -299,20 +302,16 @@ function M.setup(opts)
 end
 
 function M.open_win()
-  local enabled = Config.get().log.enabled
-  if not (M.logfile and enabled) then
+  if vim.g.project_log_cleared == 1 then
+    vim.notify(('(%s.open_win): Log has been cleared, try restarting.'):format(MODSTR), WARN)
+    M.debug(('(%s.open_win): Log has been cleared, try restarting.'):format(MODSTR))
     return
   end
-  if vim.g.project_log_cleared == 1 then
-    vim.notify(('(%s.open_win): Log has been cleared. Try restarting.'):format(MODSTR), WARN)
+  if not (vim.g.project_log_loaded == 1 and M.logfile and Config.get().log.enabled) or M.window then
     return
   end
   if not Path.exists(M.logfile) then
     error(('(%s.open_win): Bad logfile path!'):format(MODSTR))
-  end
-
-  if M.window then -- Log window appears to be open
-    return
   end
 
   local stat = uv.fs_stat(M.logfile)
@@ -355,7 +354,7 @@ function M.open_win()
 end
 
 function M.close_win()
-  if not M.window then
+  if vim.g.project_log_loaded ~= 1 or not M.window then
     return
   end
 
@@ -366,6 +365,9 @@ function M.close_win()
 end
 
 function M.toggle_win()
+  if vim.g.project_log_loaded ~= 1 then
+    return
+  end
   if not M.window then
     M.open_win()
     return
