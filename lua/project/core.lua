@@ -390,8 +390,8 @@ end
 ---If no project root is found, nothing will be returned.
 --- ---
 ---@param bufnr? integer
----@return string|nil root
----@return string|nil method
+---@return string|? root
+---@return string|? method
 ---@nodiscard
 function M.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })

@@ -35,9 +35,9 @@ local M = {}
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
 ---@param refresh? boolean
----@return string|nil curr
----@return string|nil method
----@return string|nil last
+---@return string|? curr
+---@return string|? method
+---@return string|? last
 ---@nodiscard
 function M.current_project(refresh)
   Util.validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })

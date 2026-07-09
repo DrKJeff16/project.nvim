@@ -243,7 +243,7 @@ M.rename_menu = M.new({
       if not item or item == 'Exit' then
         return
       end
-      if not (vim.list_contains(choices_list, item) and M.rename_menu.choices(Config.get(Config.get()))[item]) then
+      if not (vim.list_contains(choices_list, item) and M.rename_menu.choices(Config.get())[item]) then
         vim.notify('Bad selection!', ERROR)
         return
       end
