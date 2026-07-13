@@ -66,7 +66,7 @@ function SWITCH.pattern(bufnr)
       vim.g.project_switch_root = root
     end
     if not vim.list_contains({ (uv.cwd() or vim.fn.getcwd()), vim.g.project_switch_root }, root) then
-      Util.log.debug(('(SWITCH.lsp): found `%s` root at `%s`.'):format(method, root))
+      Util.log.debug(('(SWITCH.pattern): found `%s` root at `%s`.'):format(method, root))
     end
     return true, root, method
   end
@@ -166,15 +166,22 @@ function M.find_lsp_root(bufnr)
   end
 end
 
----@param bufnr? integer
+---@param bufnr_or_dir? integer|string
 ---@return string|nil dir_res
 ---@return string|nil method
 ---@nodiscard
-function M.find_pattern_root(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+function M.find_pattern_root(bufnr_or_dir)
+  Util.validate({ bufnr_or_dir = { bufnr_or_dir, { 'number', 'string', 'nil' }, true } })
 
-  local dir = M.check_oil(bufnr) or vim.api.nvim_buf_get_name(bufnr)
+  local dir = '' ---@type string
+  if not bufnr_or_dir or type(bufnr_or_dir) == 'number' then
+    bufnr_or_dir = (bufnr_or_dir and Util.is_int(bufnr_or_dir, bufnr_or_dir >= 0)) and bufnr_or_dir
+      or vim.api.nvim_get_current_buf()
+
+    dir = M.check_oil(bufnr_or_dir) or vim.api.nvim_buf_get_name(bufnr_or_dir)
+  elseif type(bufnr_or_dir) == 'string' then
+    dir = bufnr_or_dir
+  end
   dir = vim.fn.isdirectory(dir) == 1 and dir or Util.strip_slash(dir, ':p:h') ---@type string
   return Util.path.root_included(Util.is_windows() and dir:gsub('\\', '/') or dir)
 end
