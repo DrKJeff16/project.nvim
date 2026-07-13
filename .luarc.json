@@ -111,12 +111,12 @@
         "useGitIgnore": true,
         "preloadFileSize": 10000,
         "library": [
+            "$VIMRUNTIME",
             "$XDG_DATA_HOME/nvim/lazy/fzf-lua",
             "$XDG_DATA_HOME/nvim/lazy/lualine.nvim",
             "$XDG_DATA_HOME/nvim/lazy/picker.nvim",
             "$XDG_DATA_HOME/nvim/lazy/snacks.nvim",
             "$HOME/Projects/nvim/plenary.nvim",
-            "$VIMRUNTIME",
             "${3rd}/busted/library",
             "${3rd}/luv/library"
         ]

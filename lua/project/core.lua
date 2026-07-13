@@ -16,9 +16,9 @@ local per_project_bufs = {} ---@type table<string, table<string, integer[]>>
 ---The `project.nvim` API module.
 --- ---
 ---@class Project.Core
----@field public current_method string|nil
----@field public current_project string|nil
----@field public last_project string|nil
+---@field public current_method string|nil|?
+---@field public current_project string|nil|?
+---@field public last_project string|nil|?
 local M = {}
 
 ---@return table<string, table<string, integer[]>> per_project_bufs
@@ -31,8 +31,8 @@ local SWITCH = {}
 
 ---@param bufnr? integer
 ---@return boolean success
----@return string|nil root
----@return string|nil method
+---@return string|nil|? root
+---@return string|nil|? method
 ---@nodiscard
 function SWITCH.lsp(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -53,8 +53,8 @@ end
 
 ---@param bufnr? integer
 ---@return boolean success
----@return string|nil root
----@return string|nil method
+---@return string|nil|? root
+---@return string|nil|? method
 ---@nodiscard
 function SWITCH.pattern(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -74,7 +74,7 @@ function SWITCH.pattern(bufnr)
 end
 
 ---@param bufnr? integer
----@return string|nil dir
+---@return string|nil|? dir
 ---@nodiscard
 function M.check_oil(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -82,7 +82,7 @@ function M.check_oil(bufnr)
 
   local bufname = vim.api.nvim_buf_get_name(bufnr)
   local ok, oil = pcall(require, 'oil')
-  local dir ---@type string|nil
+  local dir ---@type string|nil|?
 
   ---SOURCE: https://github.com/cosmicbuffalo/root_swapper.nvim/blob/main/lua/root_swapper.lua
   dir = (ok and oil and oil.get_current_dir) and oil.get_current_dir(bufnr) or bufname:gsub('^oil://', '')
@@ -93,9 +93,9 @@ function M.check_oil(bufnr)
   return dir
 end
 
----@overload fun(): last: string|nil
----@overload fun(full_entry: false): last: string|nil
----@overload fun(full_entry: true): last: ProjectHistoryEntry|nil
+---@overload fun(): last: string|nil|?
+---@overload fun(full_entry: false): last: string|nil|?
+---@overload fun(full_entry: true): last: ProjectHistoryEntry|nil|?
 ---@nodiscard
 function M.get_last_project(full_entry)
   Util.validate({ full_entry = { full_entry, { 'boolean', 'nil' }, true } })
@@ -135,8 +135,8 @@ end
 ---Otherwise, nothing is returned.
 --- ---
 ---@param bufnr? integer
----@return string|nil dir
----@return string|nil name
+---@return string|nil|? dir
+---@return string|nil|? name
 ---@nodiscard
 function M.find_lsp_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -167,8 +167,8 @@ function M.find_lsp_root(bufnr)
 end
 
 ---@param bufnr_or_dir? integer|string
----@return string|nil dir_res
----@return string|nil method
+---@return string|nil|? dir_res
+---@return string|nil|? method
 ---@nodiscard
 function M.find_pattern_root(bufnr_or_dir)
   Util.validate({ bufnr_or_dir = { bufnr_or_dir, { 'number', 'string', 'nil' }, true } })
@@ -256,7 +256,7 @@ function M.set_pwd(dir, method, bufnr)
 
   Util.history.session_projects = Util.history.session_projects or {}
 
-  local custom_name = nil ---@type string|nil
+  local custom_name = nil ---@type string|nil|?
   for _, v in ipairs(Config.custom_projects) do
     if Util.strip_slash(v.path) == dir then
       custom_name = v.name
@@ -293,7 +293,7 @@ function M.set_pwd(dir, method, bufnr)
   end
 
   if not modified and #Util.history.session_projects > 1 then
-    local old_pos, name = nil, '' ---@type integer|nil, string
+    local old_pos, name = nil, '' ---@type integer|nil|?, string
     for k, v in ipairs(Util.history.session_projects) do
       if v.path == dir then
         old_pos = k
@@ -408,12 +408,12 @@ function M.get_project_root(bufnr)
   end
 
   local roots = {} ---@type { root: string, method_msg: string, method: string }[]
-  local root, method = nil, nil ---@type string|nil, string|nil
+  local root, method = nil, nil ---@type string|nil|?, string|nil|?
   local ops = vim.tbl_keys(SWITCH) ---@type ('lsp'|'pattern')[]
   local success = false
   for _, m in ipairs(Config.detection_methods) do
     if vim.list_contains(ops, m) then
-      ---@type boolean, string|nil, string|nil
+      ---@type boolean, string|nil|?, string|nil|?
       success, root, method = SWITCH[m](bufnr)
       if success then
         table.insert(roots, { root = root, method_msg = method, method = m })
@@ -442,9 +442,9 @@ end
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
 ---@param bufnr? integer
----@return string|nil curr
----@return string|nil method
----@return string|nil last
+---@return string|nil|? curr
+---@return string|nil|? method
+---@return string|nil|? last
 ---@nodiscard
 function M.get_current_project(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -459,7 +459,7 @@ function M.get_current_project(bufnr)
 end
 
 ---@param bufnr? integer
----@return string|nil name
+---@return string|nil|? name
 ---@nodiscard
 function M.get_current_project_name(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -505,7 +505,7 @@ end
 ---@param scan_what? Project.Core.ScanRoot
 ---@param path? string
 ---@param prefix? string
----@return string[]|nil files_list
+---@return string[]|nil|? files_list
 function M.root_files(scan_what, path, prefix)
   if vim.g.project_setup ~= 1 then
     return

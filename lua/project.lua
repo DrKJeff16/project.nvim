@@ -18,14 +18,14 @@ local Util = require('project.util')
 ---@field get_config fun(): config: string
 ---@field get_history_paths Project.Core.GetHistoryPaths
 ---@field get_last_project Project.Core.GetLastProject
----@field get_project_root fun(bufnr?: integer): root: string|nil, method: string|nil
+---@field get_project_root fun(bufnr?: integer): root: string|nil|?, method: string|nil|?
 ---@field get_recent_projects Project.Util.History.GetRecentProjects
 ---@field health Project.Health
 ---@field open_menu function
 ---@field popup Project.Popup
 ---@field recents_menu function
 ---@field rename_project fun(path: string, name: string): success: boolean
----@field root_files fun(scan_what?: Project.Core.ScanRoot, path?: string, prefix?: string): files_list: string[]|nil
+---@field root_files fun(scan_what?: Project.Core.ScanRoot, path?: string, prefix?: string): files_list: string[]|nil|?
 ---@field run_fzf_lua function
 ---@field session_menu function
 ---@field setup fun(options?: ProjectOpts)
@@ -56,7 +56,7 @@ function M.current_project(refresh)
 end
 
 ---@param bufnr? integer
----@return string|nil root
+---@return string|nil|? root
 ---@nodiscard
 function M.current_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
