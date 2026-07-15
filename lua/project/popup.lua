@@ -353,7 +353,7 @@ M.open_menu = M.new({
     end)
   end,
   choices = function()
-    return { ---@type table<string, fun(ctx?: vim.api.keyset.create_user_command.command_args)>
+    return { ---@type table<string, function>
       Session = function()
         vim.cmd.Project('session')
       end,
@@ -405,6 +405,8 @@ M.open_menu = M.new({
       Exit = function() end,
     }
   end,
+  ---@param exit? boolean
+  ---@return string[] choices
   choices_list = function(exit)
     Util.validate({ exit = { exit, { 'boolean', 'nil' }, true } })
     if exit == nil then
@@ -464,10 +466,7 @@ M.session_menu = M.new({
     vim.ui.select(choices_list, {
       prompt = 'Select a project from your session:',
       format_item = function(item) ---@param item string
-        if item == 'Exit' or Config.get().show_by_name then
-          return item
-        end
-        return Util.strip_slash(item, ':p:~')
+        return (item == 'Exit' or Config.get().show_by_name) and item or Util.strip_slash(item, ':p:~')
       end,
     }, function(item) ---@param item string
       if not item or item == '' then
@@ -482,31 +481,28 @@ M.session_menu = M.new({
     end)
   end,
   choices = function(opts) ---@param opts ProjectDefaults
-    local choices = {} ---@type table<string, fun(...: any)>
-    local sessions = {} ---@type string[]
-    for _, v in ipairs(M.session_menu.choices_list(opts)) do
-      table.insert(sessions, v)
-    end
-
+    local choices = { ---@type table<string, fun(...: any)>
+      Exit = function()
+        vim.g.project_nvim_cwd = ''
+      end,
+    }
+    local sessions = M.session_menu.choices_list(opts)
     if vim.tbl_isempty(sessions) then
       return choices
     end
     for _, proj in ipairs(sessions) do
-      choices[proj] = proj ~= 'Exit' and open_node or function()
-        vim.g.project_nvim_cwd = ''
+      if proj ~= 'Exit' then
+        choices[proj] = open_node
       end
     end
     return choices
   end,
   choices_list = function(opts) ---@param opts ProjectDefaults
-    local choices = vim.deepcopy(Util.history.session_projects) ---@type string[]|ProjectHistoryEntry[]
-
-    ---@cast choices ProjectHistoryEntry[]
-    for i, v in ipairs(choices) do
+    local choices = {} ---@type string[]
+    for i, v in ipairs(Util.history.session_projects) do
       choices[i] = opts.show_by_name and v.name or v.path
     end
 
-    ---@cast choices string[]
     table.insert(choices, 'Exit')
     return choices
   end,

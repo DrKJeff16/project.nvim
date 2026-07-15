@@ -36,15 +36,21 @@ local Project = require('project')
 ---@class Project.LuaLine
 ---@field private __is_lualine_component boolean
 ---@field color_active_hl ColorActiveHl
----@field options Project.LuaLineOpts
+---@field options Project.LuaLineDefaults
 ---@field protected super LuaLine.Super
 local M = require('lualine.component'):extend()
 
 ---@class Project.LuaLineOpts
----@field enclose_pair? { [1]?: string, [2]?: string }
+---@field enclose_pair? { [1]?: string, [2]?: string }|nil
 ---@field format? 'short'|'full'|'full_expanded'|'name'
 ---@field no_project? string
 ---@field separator? string
+
+---@class Project.LuaLineDefaults: Project.LuaLineOpts
+---@field enclose_pair { [1]?: string, [2]?: string }|nil
+---@field format 'short'|'full'|'full_expanded'|'name'
+---@field no_project string
+---@field separator string
 local defaults = {
   separator = ' ',
   no_project = '',
@@ -55,7 +61,7 @@ local defaults = {
 ---@param options? Project.LuaLineOpts
 function M:init(options)
   M.super.init(self, options)
-  self.options = vim.tbl_deep_extend('keep', self.options or {}, defaults)
+  self.options = vim.tbl_deep_extend('force', defaults, self.options or {})
 
   local hl_info = vim.api.nvim_get_hl(0, { name = 'Keyword' })
   local fg = hl_info.fg or nil
