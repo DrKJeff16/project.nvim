@@ -5,7 +5,7 @@ local MODSTR = 'project.config'
 local Extensions = require('project.extensions')
 local Util = require('project.util')
 
-local float = nil ---@type nil|Project.ConfigLoc
+local float = nil ---@type Project.ConfigLoc|nil|?
 
 ---Get the default options for configuring `project`.
 --- ---

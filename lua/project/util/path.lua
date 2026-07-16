@@ -24,7 +24,7 @@ M.exists = Util.path_exists
 M.is_hidden = Util.is_hidden
 
 ---@param mode string
----@return integer|nil mode_num
+---@return integer|nil|? mode_num
 function M.open_mode(mode)
   Util.validate({ mode = { mode, { 'string' } } })
   if mode == '' or mode:len() ~= 3 then
@@ -32,7 +32,7 @@ function M.open_mode(mode)
   end
 
   for _, c in ipairs(vim.split(mode, '', { trimempty = false })) do
-    local ok, cnum = pcall(tonumber, c, 10) ---@type boolean, integer|nil
+    local ok, cnum = pcall(tonumber, c, 10) ---@type boolean, integer|nil|?
     if not (ok and cnum) or cnum < 0 or cnum > 7 then
       return
     end
@@ -44,8 +44,8 @@ end
 ---@param path string
 ---@param flags uv.fs_open.flags
 ---@param mode? integer
----@return integer|nil fd
----@return uv.fs_stat.result|nil stat
+---@return integer|nil|? fd
+---@return uv.fs_stat.result|nil|? stat
 function M.open_file(path, flags, mode)
   Util.validate({
     path = { path, { 'string' } },
@@ -53,13 +53,11 @@ function M.open_file(path, flags, mode)
     mode = { mode, { 'number', 'nil' }, true },
   })
   mode = (mode and Util.is_int(mode)) and mode or M.open_mode('644')
-  if not M.exists(path) then
-    return
+  if M.exists(path) then
+    local stat = uv.fs_stat(path)
+    local fd = uv.fs_open(path, flags, mode)
+    return fd, stat
   end
-
-  local stat = uv.fs_stat(path)
-  local fd = uv.fs_open(path, flags, mode)
-  return fd, stat
 end
 
 ---Check if given directory is owned by the user running Nvim.
@@ -132,15 +130,14 @@ function M.get_files(file_dir)
   M.last_dir_cache = file_dir
   M.curr_dir_cache = {}
   local dir = uv.fs_scandir(file_dir)
-  if not dir then
-    return
-  end
-  while true do
-    local file = uv.fs_scandir_next(dir)
-    if not file then
-      return
+  if dir then
+    while true do
+      local file = uv.fs_scandir_next(dir)
+      if not file then
+        return
+      end
+      table.insert(M.curr_dir_cache, file)
     end
-    table.insert(M.curr_dir_cache, file)
   end
 end
 
@@ -223,7 +220,7 @@ function M.match(dir, pattern)
   return M.has(dir, pattern)
 end
 
----@param path string|nil
+---@param path string|nil|?
 function M.create_path(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
   path = path or M.projectpath --[[@as string]]
@@ -235,8 +232,8 @@ function M.create_path(path)
 end
 
 ---@param dir string
----@return string|nil dir
----@return string|nil pattern
+---@return string|nil|? dir
+---@return string|nil|? pattern
 function M.root_included(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
@@ -305,7 +302,7 @@ function M.setup(save_dir, save_file)
       error('(%s.setup): Unable to create history file!')
     end
 
-    uv.fs_write(fd, '[]')
+    uv.fs_write(fd, { '[', ']' })
     uv.fs_close(fd)
   end
 end

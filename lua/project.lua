@@ -35,9 +35,9 @@ local M = {}
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
 ---@param refresh? boolean
----@return string|? curr
----@return string|? method
----@return string|? last
+---@return string|nil|? curr
+---@return string|nil|? method
+---@return string|nil|? last
 ---@nodiscard
 function M.current_project(refresh)
   Util.validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })
@@ -159,8 +159,6 @@ function M.add_root_patterns(patterns)
 end
 
 local Project = setmetatable(M, { ---@type Project
-  ---@param self Project
-  ---@param k string|integer
   __index = function(self, k)
     if Util.mod_exists('project.' .. k) then
       return require('project.' .. k)

@@ -413,9 +413,8 @@ function M.get_project_root(bufnr)
   local success = false
   for _, m in ipairs(Config.detection_methods) do
     if vim.list_contains(ops, m) then
-      ---@type boolean, string|nil|?, string|nil|?
-      success, root, method = SWITCH[m](bufnr)
-      if success then
+      success, root, method = SWITCH[m](bufnr) ---@type boolean, string|nil|?, string|nil|?
+      if success and root and method then
         table.insert(roots, { root = root, method_msg = method, method = m })
       end
     end
@@ -465,12 +464,10 @@ function M.get_current_project_name(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
-  if not Util.buffer_valid(bufnr) then
-    return
+  if Util.buffer_valid(bufnr) then
+    local curr = M.get_project_root(bufnr)
+    return Util.history.find_entry('recent', curr, 'name')
   end
-
-  local curr = M.get_project_root(bufnr)
-  return Util.history.find_entry('recent', curr, 'name')
 end
 
 ---@param bufnr? integer

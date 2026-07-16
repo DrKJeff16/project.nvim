@@ -132,8 +132,8 @@ function M.clear_historyfile(force)
 end
 
 ---@param mode uv.fs_open.flags
----@return integer|nil fd
----@return uv.fs_stat.result|nil stat
+---@return integer|nil|? fd
+---@return uv.fs_stat.result|nil|? stat
 function M.open_history(mode)
   Util.validate({ mode = { mode, { 'string', 'number' } } })
 
@@ -181,7 +181,7 @@ function M.open_history(mode)
 end
 
 ---@param path string
----@param ind? integer|string|nil
+---@param ind? integer|string
 ---@param force_name? boolean
 function M.export_history_json(path, ind, force_name)
   Util.validate({
@@ -204,7 +204,7 @@ function M.export_history_json(path, ind, force_name)
     return
   end
 
-  local spc = nil ---@type string|nil
+  local spc = nil ---@type string|nil|?
   if ind >= 1 then
     spc = (' '):rep(not vim.list_contains({ math.floor(ind), math.ceil(ind) }, ind) and math.floor(ind) or ind)
   end
@@ -499,7 +499,7 @@ function M.read_history()
     return
   end
 
-  ---@type boolean, ProjectHistoryEntry[]|nil
+  ---@type boolean, ProjectHistoryEntry[]|nil|?
   local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size))
   uv.fs_close(fd)
   if not (ok and data) then
@@ -597,7 +597,7 @@ function M.write_history(path)
   M.historysize = historysize >= 0 and historysize or 100
 
   local file_history = {} ---@type ProjectHistoryEntry[]
-  local ok, fd, stat ---@type boolean, integer|nil, uv.fs_stat.result|nil
+  local ok, fd, stat ---@type boolean, integer|nil|?, uv.fs_stat.result|nil|?
   if path == Path.historyfile then
     ok, fd, stat = pcall(M.open_history, 'r')
   else
@@ -669,8 +669,7 @@ function M.write_history(path)
     error(('(%s.write_history): File restricted!'):format(MODSTR))
   end
 
-  ---@type boolean, string|nil
-  local success, out = pcall(vim.json.encode, file_history)
+  local success, out = pcall(vim.json.encode, file_history) ---@type boolean, string|nil|?
   if not (success and out) then
     uv.fs_close(fd)
     Log.error(('(%s.write_history): Unable to encode JSON data!'):format(MODSTR))
@@ -684,7 +683,7 @@ end
 ---@param search 'session'|'recent'
 ---@param value string
 ---@param key 'path'|'name'
----@return string|nil entry_field
+---@return string|nil|? entry_field
 function M.find_entry(search, value, key)
   Util.validate({
     search = { search, { 'string' } },
@@ -736,8 +735,7 @@ function M.open_win()
     return
   end
 
-  ---@type boolean, ProjectHistoryEntry[]|nil
-  local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size))
+  local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size)) ---@type boolean, ProjectHistoryEntry[]|nil|?
   uv.fs_close(fd)
   if not (ok and data) then
     return

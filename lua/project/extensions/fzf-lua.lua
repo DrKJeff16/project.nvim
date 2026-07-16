@@ -8,24 +8,22 @@ local M = {}
 
 ---@param items string[]
 function M.default(items)
-  if vim.tbl_isempty(items) then
-    return
-  end
+  Util.validate({ items = { items, { 'table' } } })
 
-  Util.log.debug(('(%s.default): Running default fzf-lua action.'):format(MODSTR))
-  require('fzf-lua').files({
-    cwd = Util.history.find_entry('recent', items[1], 'path'),
-    cwd_only = true,
-    silent = Config.get().silent_chdir,
-    hidden = Config.get().show_hidden,
-  })
+  if not vim.tbl_isempty(items) then
+    Util.log.debug(('(%s.default): Running default fzf-lua action.'):format(MODSTR))
+    require('fzf-lua').files({
+      cwd = Util.history.find_entry('recent', items[1], 'path'),
+      cwd_only = true,
+      silent = Config.get().silent_chdir,
+      hidden = Config.get().show_hidden,
+    })
+  end
 end
 
 ---@param items string[]
 function M.delete_project(items)
-  if vim.tbl_isempty(items) then
-    return
-  end
+  Util.validate({ items = { items, { 'table' } } })
 
   for _, item in ipairs(items) do
     Util.history.delete_project(Util.history.find_entry('recent', item, 'path'), true)
@@ -34,9 +32,7 @@ end
 
 ---@param items string[]
 function M.rename_project(items)
-  if vim.tbl_isempty(items) then
-    return
-  end
+  Util.validate({ items = { items, { 'table' } } })
 
   for _, item in ipairs(items) do
     require('project.popup').rename_input(Util.history.find_entry('recent', item, 'path'))
@@ -49,7 +45,6 @@ function M.exec(cb)
   if Config.get().fzf_lua.sort == 'newest' then
     projects = Util.reverse(projects)
   end
-
   for _, entry in ipairs(projects) do
     cb(Config.get().fzf_lua.show == 'names' and entry.name or entry.path)
   end
@@ -84,12 +79,7 @@ function M.run_fzf_lua()
   Fzf.fzf_exec(M.exec, {
     actions = {
       default = { M.default },
-      ['ctrl-d'] = {
-        function(items)
-          M.delete_project(items)
-        end,
-        Fzf.actions.resume,
-      },
+      ['ctrl-d'] = { M.delete_project, Fzf.actions.resume },
       ['ctrl-n'] = {
         function(items)
           Fzf.hide()

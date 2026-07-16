@@ -4,7 +4,6 @@ local MODSTR = 'project.popup'
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local Config = require('project.config')
-local Core = require('project.core')
 local Util = require('project.util')
 
 ---@param proj string
@@ -19,6 +18,7 @@ local function open_node(proj, only_cd, ran_cd)
 
   proj = Util.strip_slash(proj)
 
+  local Core = require('project.core')
   if not ran_cd then
     if not Core.set_pwd(proj, 'prompt') then
       vim.notfy('(open_node): Unsucessful `set_pwd`!', ERROR)
@@ -182,6 +182,7 @@ function M.prompt_project(input)
     end
   end
 
+  local Core = require('project.core')
   if Core.current_project == input or vim.list_contains(Util.history.session_projects, input) then
     vim.notify('Already added that directory!', WARN)
     return

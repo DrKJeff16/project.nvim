@@ -2,7 +2,6 @@
 
 local MODSTR = 'project.health'
 local Config = require('project.config')
-local Core = require('project.core')
 local Util = require('project.util')
 
 ---@class Project.Health
@@ -60,7 +59,7 @@ function M.options_check()
   end
   table.sort(Options)
   for k, v in pairs(Options) do
-    local constraints = nil ---@type string[]|nil
+    local constraints = nil ---@type string[]|nil|?
     if k == 'scope_chdir' then
       constraints = { 'global', 'tab', 'win' }
     end
@@ -94,6 +93,8 @@ function M.history_check()
 end
 
 function M.project_check()
+  local Core = require('project.core')
+
   vim.health.start('Current Project')
   local curr, method, last = Core.current_project, Core.current_method, Core.last_project
   local msg = ('Current project: `%s`\n'):format(curr and curr or 'No Current Project')

@@ -3,17 +3,6 @@
 
 ---@module 'snacks'
 
----@alias ProjectAttachMapCb (fun(mode_or_maps: Modes, lhs: string, rhs: string|function, opts: vim.keymap.set.Opts)|fun(mode_or_maps: table<Modes, { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>))
-
----@alias Modes
----|'V'
----|'i'
----|'n'
----|'o'
----|'t'
----|'v'
----|'x'
-
 ---@alias Project.Core.ScanRoot
 ---|'all'
 ---|'all_directories'
@@ -82,9 +71,9 @@
 ---|fun(path: ProjectPaths): history_paths: string
 
 ---@alias Project.Core.GetLastProject
----|fun(): last: string|nil
----|fun(full_entry: false): last: string|nil
----|fun(full_entry: true): last: ProjectHistoryEntry|nil
+---|fun(): last: string|nil|?
+---|fun(full_entry: false): last: string|nil|?
+---|fun(full_entry: true): last: ProjectHistoryEntry|nil|?
 
 ---@alias Project.Util.History.GetRecentProjects
 ---|fun(): recents: ProjectHistoryEntry[]
@@ -93,16 +82,13 @@
 ---|fun(paths_only: true): recents: string[]
 ---|fun(paths_only: true, tilde: boolean): recents: string[]
 
+---@alias ProjectAttachMapCb (fun(mode_or_maps: Modes, lhs: string, rhs: string|function, opts: vim.keymap.set.Opts)|fun(mode_or_maps: table<Modes, { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>))
+---@alias Modes 'V'|'i'|'n'|'o'|'t'|'v'|'x'
 ---@alias ProjectLog.Snacks.Style 'compact'|'fancy'|'minimal'
 ---@alias ProjectOpts.Show 'names'|'paths'
 ---@alias ProjectOpts.ScopeChdir 'global'|'tab'|'win'
 ---@alias ProjectOpts.Sort 'newest'|'oldest'
 ---@alias ProjectPaths 'datapath'|'historyfile'|'projectpath'
-
----@class (exact) ProjectPickerItem.Hl
----@field [1] integer
----@field [2] integer
----@field [3] string
 
 ---@class (exact) ProjectHistoryEntry
 ---@field name string
@@ -320,7 +306,6 @@
 ---@field enabled? boolean
 ---Determines whether the picker called after selecting a project
 ---should list hidden files aswell or not.
----
 --- ---
 ---Default: `false`
 --- ---
@@ -641,6 +626,11 @@ function S.callback(ctx) end
 ---@field show? ProjectOpts.Show
 ---@field sort? ProjectOpts.Sort
 ---@field title? string
+
+---@class (exact) ProjectPickerItem.Hl
+---@field [1] integer
+---@field [2] integer
+---@field [3] string
 
 ---@class ProjectPickerItem: PickerItem
 ---@field highlight? ProjectPickerItem.Hl[]

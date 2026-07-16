@@ -223,7 +223,7 @@ local function callback(ctx)
   end
 
   local err_txt = table.concat(vim.split(err, '\n', { trimempty = false }), '\n')
-
+  local msg = ''
   local no_args_passed = {
     'add',
     'delete',
@@ -241,8 +241,6 @@ local function callback(ctx)
     'snacks',
     'telescope',
   }
-
-  local msg = ''
   if #ctx.fargs == 1 and vim.list_contains(no_args_passed, ctx.fargs[1]) then
     if ctx.fargs[1] == 'add' then
       vim.ui.input({
@@ -337,9 +335,7 @@ local function callback(ctx)
       then
         Util.log.error(('(:Project delete): Could not delete `%s`, aborting'):format(path))
         vim.notify(('(:Project delete): Could not delete `%s`, aborting'):format(path), ERROR)
-        return
-      end
-      if
+      elseif
         vim.tbl_contains(recent, function(val) ---@param val ProjectHistoryEntry
           Util.log.debug(('`%s` =? `%s` ==> %s'):format(path, val.path, vim.inspect(val.path == path)))
           return val.path == path

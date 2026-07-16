@@ -12,7 +12,7 @@ local Config = require('project.config')
 local Path = require('project.util.path')
 local Util = require('project.util')
 
-local timer = nil ---@type uv.uv_timer_t|nil
+local timer = nil ---@type uv.uv_timer_t|nil|?
 local snacks_enabled = false ---@type boolean
 local snacks_style = 'fancy' ---@type ProjectLog.Snacks.Style
 
@@ -102,9 +102,9 @@ local function gen_snacks_backtrace()
 end
 
 ---@param lvl vim.log.levels
----@return fun(...: any): output: string|nil
+---@return fun(...: any): output: string|nil|?
 local function gen_log(lvl)
-  return function(...) ---@return string|nil output
+  return function(...) ---@return string|nil|? output
     if not Config.get().log.enabled then
       return
     end
@@ -122,7 +122,7 @@ M.info = gen_log(INFO)
 M.trace = gen_log(TRACE)
 M.warn = gen_log(WARN)
 
----@return string|nil data
+---@return string|nil|? data
 function M.read_log()
   if not M.logfile then
     return
@@ -222,7 +222,7 @@ end
 
 ---@param data string
 ---@param lvl vim.log.levels
----@return string|nil written_data
+---@return string|nil|? written_data
 function M.write(data, lvl)
   if not Config.get().log.enabled or vim.g.project_log_cleared == 1 then
     return
@@ -253,8 +253,8 @@ function M.write(data, lvl)
 end
 
 ---@param mode uv.fs_open.flags
----@return integer|nil fd
----@return uv.fs_stat.result|nil stat
+---@return integer|nil|? fd
+---@return uv.fs_stat.result|nil|? stat
 function M.open(mode)
   Path.create_path(M.logpath)
   local dir_stat = uv.fs_stat(M.logpath)

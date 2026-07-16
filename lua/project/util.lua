@@ -727,7 +727,7 @@ end
 ---@param sep? string
 ---@param constraints? string[]
 ---@return string
----@return boolean|nil
+---@return boolean|nil|?
 ---@nodiscard
 function M.format_per_type(t, data, sep, constraints)
   M.validate({
