@@ -83,6 +83,7 @@ function M.run_fzf_lua()
 
   local Fzf = require('fzf-lua')
   Fzf.fzf_exec(M.exec, {
+    fzf_opts = { ['--multi'] = true },
     actions = {
       default = { M.default },
       ['ctrl-d'] = { M.delete_project, Fzf.actions.resume },
