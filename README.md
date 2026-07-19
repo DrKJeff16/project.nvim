@@ -594,7 +594,7 @@ patterns = { '^fixtures' }
 <details>
 <summary>
 To specify the root has a certain directory as its direct ancestor/parent
-(useful when you put working projects in a common directory), prefix it with <code>\></code>:
+(useful when you put working projects in a common directory), prefix it with <code>></code>:
 </summary>
 
 ```lua
@@ -605,7 +605,7 @@ patterns = { '>Latex' }
 </li>
 <li>
 <details>
-<summary>To exclude a pattern, prefix it with `!`</summary>
+<summary>To exclude a pattern, prefix it with <code>!</code>:</summary>
 
 ```lua
 patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
