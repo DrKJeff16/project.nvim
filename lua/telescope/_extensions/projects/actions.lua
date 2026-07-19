@@ -34,14 +34,24 @@ M.help_mappings = Generate.which_key({
 
 ---@param prompt_bufnr integer
 function M.delete_project(prompt_bufnr)
-  local active_entry = State.get_selected_entry() ---@type Project.ActionEntry|nil
-  if not active_entry then
+  local picker = State.get_current_picker(prompt_bufnr)
+  local multi = picker:get_multi_selection() ---@type Project.ActionEntry[]
+  local entries = #multi > 0 and multi or { State.get_selected_entry() }
+
+  if vim.tbl_isempty(entries) or not entries[1] then
     Actions.close(prompt_bufnr)
     Project.util.log.error(('(%s.delete_project): Entry not available!'):format(MODSTR, prompt_bufnr))
     return
   end
 
-  Project.util.history.delete_project(Project.util.rstrip('/', vim.fn.fnamemodify(active_entry.value, ':p')), true)
+  local paths = {} ---@type string[]
+  for _, entry in ipairs(entries) do
+    if entry then
+      table.insert(paths, Project.util.rstrip('/', vim.fn.fnamemodify(entry.value, ':p')))
+    end
+  end
+
+  Project.util.history.delete_projects(paths, true)
   Project.util.log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
   State.get_current_picker(prompt_bufnr):refresh(
     (function()

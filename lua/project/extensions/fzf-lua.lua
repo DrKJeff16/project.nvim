@@ -25,9 +25,15 @@ end
 function M.delete_project(items)
   Util.validate({ items = { items, { 'table' } } })
 
+  local paths = {} ---@type string[]
   for _, item in ipairs(items) do
-    Util.history.delete_project(Util.history.find_entry('recent', item, 'path'), true)
+    local path = Util.history.find_entry('recent', item, 'path')
+    if path then
+      table.insert(paths, path)
+    end
   end
+
+  Util.history.delete_projects(paths, true)
 end
 
 ---@param items string[]

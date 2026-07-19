@@ -425,6 +425,37 @@ function M.delete_project(project, prompt)
   end
 end
 
+---Deletes multiple projects with a single confirmation prompt.
+--- ---
+---@param projects string[] List of project paths to delete
+---@param prompt? boolean Whether to prompt before deletion (default false)
+---@return boolean deleted Whether any projects were deleted
+function M.delete_projects(projects, prompt)
+  Util.validate({
+    projects = { projects, { 'table' } },
+    prompt = { prompt, { 'boolean', 'nil' }, true },
+  })
+  if vim.tbl_isempty(projects) then
+    return false
+  end
+  if prompt == nil then
+    prompt = false
+  end
+
+  if prompt then
+    local msg = ('Delete %d project(s) from history?\n\n%s\n'):format(#projects, table.concat(projects, '\n'))
+    if vim.fn.confirm(msg, '&Yes\n&No', 2) ~= 1 then
+      Log.info(('(%s.delete_projects): Aborting project deletion.'):format(MODSTR))
+      return false
+    end
+  end
+
+  for _, path in ipairs(projects) do
+    M.delete_project(path, false)
+  end
+  return true
+end
+
 ---Splits data into table.
 --- ---
 ---@param history_data string
