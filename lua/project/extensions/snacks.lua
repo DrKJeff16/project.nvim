@@ -67,9 +67,13 @@ function M.pick()
         self:close()
         Core.set_pwd(item.value, 'snacks')
       end,
-      delete_project = function(self, item)
+      delete_project = function(self, _)
+        local selected = self:selected({ fallback = true })
+        local paths = vim.tbl_map(function(item)
+          return vim.fn.expand(item.value)
+        end, selected)
         self:close()
-        Util.history.delete_project(vim.fn.expand(item.value), true)
+        Util.history.delete_projects(paths, true)
         M.pick()
       end,
       rename_project = function(self, item)
@@ -113,7 +117,7 @@ function M.pick()
     win = {
       input = {
         keys = {
-          ['<C-d>'] = { 'delete_project', mode = { 'n', 'i' }, desc = 'Delete a project' },
+          ['<C-d>'] = { 'delete_project', mode = { 'n', 'i' }, desc = 'Delete project(s)' },
           ['<C-r>'] = { 'rename_project', mode = { 'n', 'i' }, desc = 'Rename a project' },
           ['<C-w>'] = { 'chdir_only', mode = { 'n', 'i' }, desc = 'Change working directory' },
         },
