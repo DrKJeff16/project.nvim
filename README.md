@@ -551,7 +551,7 @@ require('project').setup({
 `project.nvim` comes with a `vim-rooter`-inspired pattern matching expression engine
 to give you better handling of your projects.
 
-For your convenience here come some examples:
+For your convenience here come some use cases:
 
 <ul>
 <li>
@@ -566,10 +566,8 @@ patterns = { '=src' }
 </li>
 <li>
 <details>
-<summary>
-To specify the root has a certain directory or file (which may be a glob), just
-add it to the pattern list:
-</summary>
+<summary>To specify the root has a certain directory or file (which may be a glob), just
+add it to the pattern list:</summary>
 
 ```lua
 patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
@@ -579,10 +577,8 @@ patterns = { '.git', '.github', '*.sln', 'build/env.sh' }
 </li>
 <li>
 <details>
-<summary>
-To specify the root has a certain directory as an ancestor (useful for excluding directories),
-prefix it with <code>^</code>:
-</summary>
+<summary>To specify the root has a certain directory as an ancestor (useful for excluding directories),
+prefix it with <code>^</code>:</summary>
 
 ```lua
 patterns = { '^fixtures' }
@@ -592,10 +588,8 @@ patterns = { '^fixtures' }
 </li>
 <li>
 <details>
-<summary>
-To specify the root has a certain directory as its direct ancestor/parent
-(useful when you put working projects in a common directory), prefix it with <code>></code>:
-</summary>
+<summary>To specify the root has a certain directory as its direct ancestor/parent
+(useful when you put working projects in a common directory), prefix it with <code>></code>:</summary>
 
 ```lua
 patterns = { '>Latex' }
@@ -618,7 +612,7 @@ patterns = { '!.git/worktrees', '!=extras', '!^fixtures', '!build/env.sh' }
 > [!IMPORTANT]
 > Make sure to put your pattern exclusions first, and then the patterns you DO want included.
 >
-> Also if you have `allow_patterns_for_lsp` enabled, it will also work somewhat for your LSP clients.
+> Also if you have `lsp.use_pattern_matching` enabled, it will also work somewhat for your LSP clients.
 
 ### Lualine
 
