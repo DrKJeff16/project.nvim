@@ -737,7 +737,7 @@ require('mini.starter').setup({
   evaluate_single = true,
   items = {
     { name = 'Projects', action = 'Project', section = 'Projects' }, -- Runs `:Project`
-    { name = 'Recent Projects', action = 'ProjectRecents', section = 'Projects' }, -- `:Project recents`
+    { name = 'Recent Projects', action = 'Project recents', section = 'Projects' }, -- `:Project recents`
     -- Other items...
   },
 })
