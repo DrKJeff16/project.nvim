@@ -767,11 +767,11 @@ require('project').setup({
 
 Mappings:
 
-| Normal Mode | Description                             |
-|-------------|-----------------------------------------|
-| `<C-d>`     | Delete the selected project             |
-| `<C-r>`     | Rename the selected project             |
-| `<C-w>`     | Changes the cwd to the selected project |
+| Normal Mode | Description                                           |
+| ----------- | ----------------------------------------------------- |
+| `<C-d>`     | Delete selected project(s) (`<Tab>` to mark multiple) |
+| `<C-r>`     | Rename the selected project                           |
+| `<C-w>`     | Changes the cwd to the selected project               |
 
 You can find the integration in:
 
@@ -807,11 +807,11 @@ require('project').setup({
 
 Mappings:
 
-| Normal Mode | Description                             |
-|-------------|-----------------------------------------|
-| `<C-d>`     | Delete the selected project             |
-| `<C-r>`     | Rename the selected project             |
-| `<C-w>`     | Changes the cwd to the selected project |
+| Normal Mode | Description                                           |
+| ----------- | ----------------------------------------------------- |
+| `<C-d>`     | Delete selected project(s) (`<Tab>` to mark multiple) |
+| `<C-r>`     | Rename the selected project                           |
+| `<C-w>`     | Changes the cwd to the selected project               |
 
 You can find the integration in [_`extensions/snacks.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/snacks.lua).
 
@@ -882,10 +882,10 @@ If the `fzf-lua` integration is enabled in your setup, it will open a `fzf-lua` 
 
 Mappings:
 
-| Mapping | Description                            |
-|---------|----------------------------------------|
-| `<C-d>` | Delete the selected project            |
-| `<C-r>` | Rename the selected project            |
+| Mapping | Description                                           |
+| ------- | ----------------------------------------------------- |
+| `<C-d>` | Delete selected project(s) (`<Tab>` to mark multiple) |
+| `<C-r>` | Rename the selected project                           |
 
 See [_`extensions/fzf-lua.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/fzf-lua.lua)
 for more info.
