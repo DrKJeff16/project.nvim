@@ -51,6 +51,7 @@ You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16
 - [Configuration](#configuration)
   - [Custom Projects](#custom-projects)
   - [Pattern Matching](#pattern-matching)
+  - [Lualine](#lualine)
   - [Nvim Tree](#nvim-tree)
   - [Neo Tree](#neo-tree)
   - [Telescope](#telescope)
@@ -753,8 +754,12 @@ To enable it you'll need the plugin installed, then in your setup:
 require('project').setup({
   picker = {
     enabled = true,
-    sort = 'newest', -- 'newest' or 'oldest'
-    hidden = false, -- Show hidden files
+
+    -- 'newest' or 'oldest'
+    sort = 'newest',
+
+    -- Show hidden files
+    hidden = false,
   }
 })
 ```
@@ -786,7 +791,8 @@ To enable and configure it you'll need the plugin installed, then in your setup:
 ```lua
 require('project').setup({
   snacks = {
-    enabled = true, -- Will enable the `:Project snacks` command
+    -- Will enable the `:Project snacks` command
+    enabled = true,
     opts = {
       sort = 'newest',
       hidden = false,
