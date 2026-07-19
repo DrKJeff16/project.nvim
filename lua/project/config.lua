@@ -79,7 +79,7 @@ function M.setup(opts)
       error('(%s.setup): Unable to create history file!')
     end
 
-    uv.fs_write(fd, '[]')
+    uv.fs_write(fd, { '[', ']' })
     uv.fs_close(fd)
   end
 
@@ -222,23 +222,20 @@ function M.open_win()
 end
 
 function M.close_win()
-  if not float then
-    return
+  if float then
+    pcall(vim.api.nvim_buf_delete, float.bufnr, { force = true })
+    pcall(vim.api.nvim_win_close, float.win, true)
+
+    float = nil
   end
-
-  pcall(vim.api.nvim_buf_delete, float.bufnr, { force = true })
-  pcall(vim.api.nvim_win_close, float.win, true)
-
-  float = nil
 end
 
 function M.toggle_win()
   if not float then
     M.open_win()
-    return
+  else
+    M.close_win()
   end
-
-  M.close_win()
 end
 
 local Config = setmetatable(M, { ---@type Project.Config

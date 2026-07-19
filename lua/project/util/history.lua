@@ -9,6 +9,28 @@ local Log = require('project.util.log')
 local Path = require('project.util.path')
 local Util = require('project.util')
 
+local window = nil ---@type Project.HistoryWin|nil|?
+local allowed_flags = {
+  'a',
+  'a+',
+  'ax',
+  'ax+',
+  'r',
+  'r+',
+  'rs',
+  'rs+',
+  'sr',
+  'sr+',
+  'w',
+  'w+',
+  'wx',
+  'wx+',
+  'xa',
+  'xa+',
+  'xw',
+  'xw+',
+}
+
 ---@class Project.Util.History
 ---@field public historysize? integer
 ---Projects from previous neovim sessions.
@@ -17,7 +39,6 @@ local Util = require('project.util')
 ---Projects from current neovim session.
 --- ---
 ---@field public session_projects ProjectHistoryEntry[]
----@field public window? Project.HistoryWin
 local M = {}
 
 M.session_projects = {}
@@ -97,15 +118,13 @@ function M.clear_historyfile(force)
     force = false
   end
 
-  if vim.g.project_historyfile_cleared == 1 then
+  if vim.g.project_historyfile_cleared == 1 and not force then
     Log.info(('(%s.clear_historyfile): Already cleared. Aborting.'):format(MODSTR))
     return
   end
-  if not force then
-    if vim.fn.confirm('Are you sure you want to clear the project history?', '&Yes\n&No', 2) ~= 1 then
-      Log.info(('(%s.clear_historyfile): Aborting.'):format(MODSTR))
-      return
-    end
+  if not force and vim.fn.confirm('Are you sure you want to clear the project history?', '&Yes\n&No', 2) ~= 1 then
+    Log.info(('(%s.clear_historyfile): Aborting.'):format(MODSTR))
+    return
   end
 
   local fd = Path.open_file(Path.historyfile, 'w')
@@ -136,27 +155,6 @@ end
 ---@return uv.fs_stat.result|nil|? stat
 function M.open_history(mode)
   Util.validate({ mode = { mode, { 'string', 'number' } } })
-
-  local allowed_flags = {
-    'a',
-    'a+',
-    'ax',
-    'ax+',
-    'r',
-    'r+',
-    'rs',
-    'rs+',
-    'sr',
-    'sr+',
-    'w',
-    'w+',
-    'wx',
-    'wx+',
-    'xa',
-    'xa+',
-    'xw',
-    'xw+',
-  }
   if Util.is_type('string', mode) and not vim.list_contains(allowed_flags, mode) then
     Log.error(('(%s.open_history): Invalid flag `%s`!'):format(MODSTR, mode))
     error(('(%s.open_history): Invalid flag `%s`!'):format(MODSTR, mode))
@@ -169,12 +167,9 @@ function M.open_history(mode)
     Log.error(('(%s.open_history): History directory unavailable!'):format(MODSTR))
     error(('(%s.open_history): History directory unavailable!'):format(MODSTR))
   end
-
-  if not Path.exists(Path.historyfile) then
-    if vim.fn.writefile({ '[', ']' }, Path.historyfile) == -1 then
-      Log.error(('(%s.open_history): History file unavailable!'):format(MODSTR))
-      error(('(%s.open_history): History file unavailable!'):format(MODSTR))
-    end
+  if not Path.exists(Path.historyfile) and vim.fn.writefile({ '[', ']' }, Path.historyfile) == -1 then
+    Log.error(('(%s.open_history): History file unavailable!'):format(MODSTR))
+    error(('(%s.open_history): History file unavailable!'):format(MODSTR))
   end
 
   return Path.open_file(Path.historyfile, mode)
@@ -231,11 +226,12 @@ function M.export_history_json(path, ind, force_name)
       error(('(%s.export_history_json): Target exists and is not a file! `%s`'):format(MODSTR, path))
     end
 
-    if stat.size ~= 0 then
-      if vim.fn.confirm(('File exists! Do you really want to export to it?'):format(path), '&Yes\n&No', 2) ~= 1 then
-        Log.info('(%s.delete_project): Aborting project export.')
-        return
-      end
+    if
+      stat.size ~= 0
+      and vim.fn.confirm(('File exists! Do you really want to export to it?'):format(path), '&Yes\n&No', 2) ~= 1
+    then
+      Log.info('(%s.delete_project): Aborting project export.')
+      return
     end
   end
 
@@ -259,13 +255,14 @@ function M.export_history_json(path, ind, force_name)
     return
   end
 
-  local data = vim.json.encode(Util.reverse(M.get_recent_projects()), { indent = spc })
+  local ok, data = pcall(vim.json.encode, Util.reverse(M.get_recent_projects()), { indent = spc })
+  if ok and data then
+    uv.fs_write(fd, data)
 
-  uv.fs_write(fd, data)
+    Log.debug(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')))
+    vim.notify(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
+  end
   uv.fs_close(fd)
-
-  Log.debug(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')))
-  vim.notify(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
 end
 
 ---@param path string
@@ -321,8 +318,8 @@ function M.import_history_json(path, force_name)
     return
   end
 
-  local ok, hist = pcall(vim.json.decode, data, {}) ---@type boolean, ProjectHistoryEntry[]
-  if not ok then
+  local ok, hist = pcall(vim.json.decode, data, {}) ---@type boolean, ProjectHistoryEntry[]|nil|?
+  if not (ok and hist) then
     Log.error(('(%s.import_history_json): JSON decoding failed: `%s`'):format(MODSTR, path))
     vim.notify(('(%s.import_history_json): JSON decoding failed: `%s`'):format(MODSTR, path), ERROR)
     return
@@ -408,11 +405,9 @@ function M.delete_project(project, prompt)
 
   ---@cast project string|Project.ActionEntry
   local proj = type(project) == 'string' and project or project.value
-  if prompt then
-    if vim.fn.confirm(("Delete '%s' from project list?"):format(proj), '&Yes\n&No', 2) ~= 1 then
-      Log.info(('(%s.delete_project): Aborting project deletion.'):format(MODSTR))
-      return
-    end
+  if prompt and vim.fn.confirm(("Delete '%s' from project list?"):format(proj), '&Yes\n&No', 2) ~= 1 then
+    Log.info(('(%s.delete_project): Aborting project deletion.'):format(MODSTR))
+    return
   end
 
   local found = M.remove_recent(proj)
@@ -477,15 +472,13 @@ end
 
 function M.read_history()
   local fd, stat = M.open_history('r')
-  if not stat then
-    Log.error(('(%s.read_history): Stat for history file unavailable!'):format(MODSTR))
-    if fd then
-      uv.fs_close(fd)
-    end
-    return
-  end
   if not fd then
     Log.error(('(%s.read_history): File descriptor for history file unavailable!'):format(MODSTR))
+    return
+  end
+  if not stat then
+    Log.error(('(%s.read_history): Stat for history file unavailable!'):format(MODSTR))
+    uv.fs_close(fd)
     return
   end
 
@@ -582,12 +575,9 @@ function M.write_history(path)
     path or Path.historyfile or vim.fs.joinpath(Config.history.save_dir, 'project_nvim', Config.history.save_file)
   )
 
-  if not Path.exists(path) then
-    local write_res = vim.fn.writefile({ '[', ']' }, path)
-    if write_res ~= 0 then
-      Log.error(('(%s.write_history): History file unavailable!'):format(MODSTR))
-      error(('(%s.write_history): History file unavailable!'):format(MODSTR))
-    end
+  if not Path.exists(path) and vim.fn.writefile({ '[', ']' }, path) ~= 0 then
+    Log.error(('(%s.write_history): History file unavailable!'):format(MODSTR))
+    error(('(%s.write_history): History file unavailable!'):format(MODSTR))
   end
 
   local historysize = 100
@@ -699,8 +689,7 @@ function M.find_entry(search, value, key)
     return
   end
 
-  local tbl = search == 'session' and M.session_projects or M.recent_projects
-  for _, v in ipairs(tbl) do
+  for _, v in ipairs(search == 'session' and M.session_projects or M.recent_projects) do
     if (v.path == Util.strip_slash(value) or v.name == value) and v[key] then
       return v[key]
     end
@@ -708,6 +697,9 @@ function M.find_entry(search, value, key)
 end
 
 function M.open_win()
+  if window then
+    return
+  end
   if not Path.historyfile then
     vim.notify(('(%s.open_win): History file not available!'):format(MODSTR), ERROR)
     Log.error(('(%s.open_win): History file not available!'):format(MODSTR))
@@ -718,20 +710,15 @@ function M.open_win()
     vim.notify(('(%s.open_win): Bad historyfile path!'):format(MODSTR), ERROR)
     return
   end
-  if M.window then
-    return
-  end
 
   local fd, stat = M.open_history('r')
-  if not stat then
-    Log.error(('(%s.open_win): Stat for history file unavailable!'):format(MODSTR))
-    if fd then
-      uv.fs_close(fd)
-    end
-    return
-  end
   if not fd then
     Log.error(('(%s.open_win): File descriptor for history file unavailable!'):format(MODSTR))
+    return
+  end
+  if not stat then
+    Log.error(('(%s.open_win): Stat for history file unavailable!'):format(MODSTR))
+    uv.fs_close(fd)
     return
   end
 
@@ -741,53 +728,45 @@ function M.open_win()
     return
   end
 
-  vim.cmd.tabnew()
-  vim.schedule(function()
-    M.window = {
-      bufnr = vim.api.nvim_get_current_buf(),
-      win = vim.api.nvim_get_current_win(),
-      tab = vim.api.nvim_get_current_tabpage(),
-    }
+  local bufnr = vim.api.nvim_create_buf(true, true)
+  local tab = vim.api.nvim_open_tabpage(bufnr, true, { after = -1 })
+  window = { bufnr = bufnr, win = vim.api.nvim_get_current_win(), tab = tab }
 
-    local lines = {} ---@type string[]
-    for _, entry in ipairs(data) do
-      table.insert(lines, ('(%s) - %s'):format(entry.name, entry.path))
-    end
+  local lines = {} ---@type string[]
+  for _, entry in ipairs(data) do
+    table.insert(lines, ('(%s) - %s'):format(entry.name, entry.path))
+  end
 
-    vim.api.nvim_buf_set_lines(M.window.bufnr, 0, 1, true, Util.reverse(lines))
-    vim.api.nvim_buf_set_name(M.window.bufnr, 'Project History')
+  vim.api.nvim_buf_set_lines(window.bufnr, 0, 1, true, Util.reverse(lines))
+  vim.api.nvim_buf_set_name(window.bufnr, 'Project History')
 
-    Util.optset('signcolumn', 'no', 'win', M.window.win)
-    Util.optset('list', false, 'win', M.window.win)
-    Util.optset('number', false, 'win', M.window.win)
-    Util.optset('wrap', false, 'win', M.window.win)
-    Util.optset('colorcolumn', '', 'win', M.window.win)
-    Util.optset('filetype', '', 'buf', M.window.bufnr)
-    Util.optset('fileencoding', 'utf-8', 'buf', M.window.bufnr)
-    Util.optset('buftype', 'nowrite', 'buf', M.window.bufnr)
-    Util.optset('modifiable', false, 'buf', M.window.bufnr)
+  Util.optset('signcolumn', 'no', 'win', window.win)
+  Util.optset('list', false, 'win', window.win)
+  Util.optset('number', false, 'win', window.win)
+  Util.optset('wrap', false, 'win', window.win)
+  Util.optset('colorcolumn', '', 'win', window.win)
+  Util.optset('filetype', '', 'buf', window.bufnr)
+  Util.optset('fileencoding', 'utf-8', 'buf', window.bufnr)
+  Util.optset('buftype', 'nowrite', 'buf', window.bufnr)
+  Util.optset('modifiable', false, 'buf', window.bufnr)
 
-    vim.keymap.set('n', 'q', M.close_win, { buffer = M.window.bufnr, noremap = true, silent = true })
-  end)
+  vim.keymap.set('n', 'q', M.close_win, { buffer = window.bufnr, noremap = true, silent = true })
 end
 
 function M.close_win()
-  if not M.window then
-    return
+  if window then
+    pcall(vim.api.nvim_buf_delete, window.bufnr, { force = true })
+    pcall(vim.api.nvim_cmd, { cmd = 'tabclose', range = { window.tab } }, { output = false })
+    window = nil
   end
-
-  pcall(vim.api.nvim_buf_delete, M.window.bufnr, { force = true })
-  pcall(vim.api.nvim_cmd, { cmd = 'tabclose', range = { M.window.tab } }, { output = false })
-  M.window = nil
 end
 
 function M.toggle_win()
-  if not M.window then
+  if not window then
     M.open_win()
-    return
+  else
+    M.close_win()
   end
-
-  M.close_win()
 end
 
 return M

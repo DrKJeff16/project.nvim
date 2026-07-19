@@ -13,6 +13,8 @@ local Path = require('project.util.path')
 local Util = require('project.util')
 
 local timer = nil ---@type uv.uv_timer_t|nil|?
+local window = nil ---@type Project.Util.Log.Win|nil|?
+local logfile = nil ---@type string|nil|?
 local snacks_enabled = false ---@type boolean
 local snacks_style = 'fancy' ---@type ProjectLog.Snacks.Style
 
@@ -44,8 +46,6 @@ local function format_sel(msg, sel, space)
 end
 
 ---@class Project.Util.Log
----@field public logfile? string
----@field public window? Project.Util.Log.Win
 local M = {}
 
 ---@class Project.Util.Log.Backtrace
@@ -124,10 +124,10 @@ M.warn = gen_log(WARN)
 
 ---@return string|nil|? data
 function M.read_log()
-  if not M.logfile then
+  if not logfile then
     return
   end
-  local stat = uv.fs_stat(M.logfile)
+  local stat = uv.fs_stat(logfile)
   if not stat then
     return
   end
@@ -144,19 +144,19 @@ function M.clear_log()
   if vim.g.project_log_loaded ~= 1 then
     return
   end
-  if uv.fs_unlink(M.logfile) then
+  if uv.fs_unlink(logfile) then
     vim.notify('(project.nvim): Log cleared successfully', INFO)
     vim.g.project_log_cleared = 1
   end
 end
 
 local function timer_cb()
-  local stat = uv.fs_stat(M.logfile)
+  local stat = uv.fs_stat(logfile)
   if not stat or stat.size < math.floor(Config.get().log.max_size * 1024 * 1024) then
     return
   end
 
-  local fd = uv.fs_open(M.logfile, 'w', Path.open_mode('644'))
+  local fd = uv.fs_open(logfile, 'w', Path.open_mode('644'))
   if not fd then
     return
   end
@@ -165,11 +165,11 @@ local function timer_cb()
   uv.fs_close(fd)
 
   if ok then
-    vim.notify(('(%s.timer_cb): `%s` has been cleared!'):format(MODSTR, Util.strip_slash(M.logfile, ':p:~')), INFO)
+    vim.notify(('(%s.timer_cb): `%s` has been cleared!'):format(MODSTR, Util.strip_slash(logfile, ':p:~')), INFO)
     return
   end
 
-  vim.notify(('(%s.timer_cb): `%s` could not be cleared!'):format(MODSTR, Util.strip_slash(M.logfile, ':p:~')), ERROR)
+  vim.notify(('(%s.timer_cb): `%s` could not be cleared!'):format(MODSTR, Util.strip_slash(logfile, ':p:~')), ERROR)
 end
 
 local function make_timer()
@@ -262,8 +262,8 @@ function M.open(mode)
     error(('(%s.open): Projectpath stat is not valid!'):format(MODSTR))
   end
 
-  local stat = uv.fs_stat(M.logfile)
-  local fd = uv.fs_open(M.logfile, mode, Path.open_mode('644'))
+  local stat = uv.fs_stat(logfile)
+  local fd = uv.fs_open(logfile, mode, Path.open_mode('644'))
   return fd, stat
 end
 
@@ -275,17 +275,17 @@ function M.setup(opts)
     return
   end
   M.logpath = opts.logpath
-  M.logfile = vim.fs.joinpath(M.logpath, 'project.log')
+  logfile = vim.fs.joinpath(M.logpath, 'project.log')
   Path.create_path(M.logpath)
 
   local fd
-  local stat = uv.fs_stat(M.logfile)
+  local stat = uv.fs_stat(logfile)
   if not stat then
     fd = M.open('w')
     uv.fs_close(fd)
     fd = nil
   end
-  stat = uv.fs_stat(M.logfile) ---@type uv.fs_stat.result
+  stat = uv.fs_stat(logfile) ---@type uv.fs_stat.result
 
   fd = M.open('a')
   local head = ('='):rep(45)
@@ -302,78 +302,72 @@ function M.setup(opts)
 end
 
 function M.open_win()
+  if not (vim.g.project_log_loaded == 1 and logfile) or window then
+    return
+  end
   if vim.g.project_log_cleared == 1 then
     vim.notify(('(%s.open_win): Log has been cleared, try restarting.'):format(MODSTR), WARN)
     M.debug(('(%s.open_win): Log has been cleared, try restarting.'):format(MODSTR))
     return
   end
-  if not (vim.g.project_log_loaded == 1 and M.logfile and Config.get().log.enabled) or M.window then
-    return
-  end
-  if not Path.exists(M.logfile) then
+  if not Path.exists(logfile) then
     error(('(%s.open_win): Bad logfile path!'):format(MODSTR))
   end
 
-  local stat = uv.fs_stat(M.logfile)
+  local stat = uv.fs_stat(logfile)
   if not stat then
     return
   end
 
-  local fd = uv.fs_open(M.logfile, 'r', Path.open_mode('644'))
+  local fd = uv.fs_open(logfile, 'r', Path.open_mode('644'))
   if not fd then
     return
   end
 
   local data = uv.fs_read(fd, stat.size)
+  uv.fs_close(fd)
   if not data then
     return
   end
 
-  vim.cmd.tabnew()
-  vim.schedule(function()
-    local bufnr = vim.api.nvim_get_current_buf()
-    local win = vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_create_buf(true, true)
+  local tab = vim.api.nvim_open_tabpage(bufnr, true, { after = -1 })
+  local win = vim.api.nvim_get_current_win()
 
-    vim.api.nvim_buf_set_name(bufnr, 'Project Log')
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, vim.split(data, '\n', { plain = true, trimempty = false }))
+  window = { win = win, bufnr = bufnr, tab = tab }
 
-    Util.optset('signcolumn', 'no', 'win', win)
-    Util.optset('list', false, 'win', win)
-    Util.optset('number', false, 'win', win)
-    Util.optset('wrap', false, 'win', win)
-    Util.optset('colorcolumn', '', 'win', win)
-    Util.optset('filetype', 'log', 'buf', bufnr)
-    Util.optset('fileencoding', 'utf-8', 'buf', bufnr)
-    Util.optset('buftype', 'nowrite', 'buf', bufnr)
-    Util.optset('modifiable', false, 'buf', bufnr)
+  vim.api.nvim_buf_set_name(bufnr, 'Project Log')
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, vim.split(data, '\n', { plain = true, trimempty = false }))
 
-    vim.keymap.set('n', 'q', M.close_win, { buffer = bufnr })
+  Util.optset('signcolumn', 'no', 'win', win)
+  Util.optset('list', false, 'win', win)
+  Util.optset('number', false, 'win', win)
+  Util.optset('wrap', false, 'win', win)
+  Util.optset('colorcolumn', '', 'win', win)
+  Util.optset('filetype', 'log', 'buf', bufnr)
+  Util.optset('fileencoding', 'utf-8', 'buf', bufnr)
+  Util.optset('buftype', 'nowrite', 'buf', bufnr)
+  Util.optset('modifiable', false, 'buf', bufnr)
 
-    M.window = { win = win, bufnr = bufnr, tab = vim.api.nvim_get_current_tabpage() }
-  end)
+  vim.keymap.set('n', 'q', M.close_win, { buffer = bufnr })
 end
 
 function M.close_win()
-  if vim.g.project_log_loaded ~= 1 or not M.window then
-    return
+  if vim.g.project_log_loaded == 1 and window then
+    pcall(vim.api.nvim_buf_delete, window.bufnr, { force = true })
+    pcall(vim.api.nvim_cmd, { cmd = 'tabclose', range = { window.tab } }, { output = false })
+    window = nil
   end
-
-  pcall(vim.api.nvim_buf_delete, M.window.bufnr, { force = true })
-  pcall(vim.api.nvim_cmd, { cmd = 'tabclose', range = { M.window.tab } }, { output = false })
-
-  M.window = nil
 end
 
 function M.toggle_win()
-  if vim.g.project_log_loaded ~= 1 then
-    return
+  if vim.g.project_log_loaded == 1 then
+    if not window then
+      M.open_win()
+    else
+      M.close_win()
+    end
   end
-  if not M.window then
-    M.open_win()
-    return
-  end
-
-  M.close_win()
 end
 
 return M
