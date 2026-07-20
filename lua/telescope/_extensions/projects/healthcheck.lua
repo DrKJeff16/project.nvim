@@ -55,11 +55,9 @@ end
 ---This is called when running `:checkhealth telescope`.
 --- ---
 return function()
-  if not setup_check() then
-    return
+  if setup_check() then
+    telescope_check()
+    Project.util.log.debug(('(%s): `checkhealth` successfully called.'):format(MODSTR))
   end
-
-  telescope_check()
-  Project.util.log.debug(('(%s): `checkhealth` successfully called.'):format(MODSTR))
 end
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

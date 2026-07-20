@@ -8,7 +8,7 @@ end
 local Project = require('project')
 if not Project.util.mod_exists('telescope') then
   Project.util.log.error(('(%s): Telescope is not installed!'):format(MODSTR))
-  vim.notify(('(%s): Telescope is not installed!'):format(MODSTR))
+  vim.notify(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
   return
 end
 
@@ -102,7 +102,7 @@ end
 ---@param prompt_bufnr integer
 function M.find_project_files(prompt_bufnr)
   local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
-  if not cd_successful then
+  if not (project_path and cd_successful) then
     return
   end
   local opts = {
@@ -116,15 +116,15 @@ function M.find_project_files(prompt_bufnr)
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
   if Project.config.get().telescope.prefer_file_browser and Telescope.extensions.file_browser then
     Telescope.extensions.file_browser.file_browser(opts)
-    return
+  else
+    Builtin.find_files(opts)
   end
-  Builtin.find_files(opts)
 end
 
 ---@param prompt_bufnr integer
 function M.browse_project_files(prompt_bufnr)
   local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
-  if not cd_successful then
+  if not (project_path and cd_successful) then
     return
   end
   local opts = {
@@ -138,15 +138,15 @@ function M.browse_project_files(prompt_bufnr)
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/107
   if Project.config.get().telescope.prefer_file_browser and Telescope.extensions.file_browser then
     Telescope.extensions.file_browser.file_browser(opts)
-    return
+  else
+    Builtin.find_files(opts)
   end
-  Builtin.find_files(opts)
 end
 
 ---@param prompt_bufnr integer
 function M.search_in_project_files(prompt_bufnr)
   local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
-  if not cd_successful then
+  if not (project_path and cd_successful) then
     return
   end
   Builtin.live_grep({ cwd = project_path, hidden = Project.config.get().show_hidden, mode = 'insert' })
@@ -164,10 +164,9 @@ end
 ---@param prompt_bufnr integer
 function M.recent_project_files(prompt_bufnr)
   local _, cd_successful = M.change_working_directory(prompt_bufnr)
-  if not cd_successful then
-    return
+  if cd_successful then
+    Builtin.oldfiles({ cwd_only = true, hidden = Project.config.get().show_hidden })
   end
-  Builtin.oldfiles({ cwd_only = true, hidden = Project.config.get().show_hidden })
 end
 
 return M

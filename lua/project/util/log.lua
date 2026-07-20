@@ -13,6 +13,7 @@ local Path = require('project.util.path')
 local Util = require('project.util')
 
 local timer = nil ---@type uv.uv_timer_t|nil|?
+local event = nil ---@type uv.uv_fs_event_t|nil|?
 local window = nil ---@type Project.Util.Log.Win|nil|?
 local logfile = nil ---@type string|nil|?
 local snacks_enabled = false ---@type boolean
@@ -105,14 +106,13 @@ end
 ---@return fun(...: any): output: string|nil|?
 local function gen_log(lvl)
   return function(...) ---@return string|nil|? output
-    if not Config.get().log.enabled then
-      return
+    if Config.get().log.enabled then
+      local msg = ''
+      for i = 1, select('#', ...) do
+        msg = format_sel(msg, select(i, ...), i ~= 1)
+      end
+      return M.write(('%s\n'):format(msg), lvl)
     end
-    local msg = ''
-    for i = 1, select('#', ...) do
-      msg = format_sel(msg, select(i, ...), i ~= 1)
-    end
-    return M.write(('%s\n'):format(msg), lvl)
   end
 end
 
@@ -141,10 +141,7 @@ function M.read_log()
 end
 
 function M.clear_log()
-  if vim.g.project_log_loaded ~= 1 then
-    return
-  end
-  if uv.fs_unlink(logfile) then
+  if vim.g.project_log_loaded == 1 and uv.fs_unlink(logfile) then
     vim.notify('(project.nvim): Log cleared successfully', INFO)
     vim.g.project_log_cleared = 1
   end
@@ -201,23 +198,23 @@ end
 ---Only runs once.
 --- ---
 local function setup_watch()
-  if vim.g.project_log_has_watch_setup == 1 then
+  if vim.g.project_log_has_watch_setup == 1 and event then
     return
   end
-  local event = uv.new_fs_event()
-  if not event then
-    return
+
+  event = uv.new_fs_event()
+  if event then
+    event:start(M.logpath, {}, function(err, _, events)
+      if err or not events.change then
+        return
+      end
+
+      M.read_log()
+    end)
+
+    make_timer()
+    vim.g.project_log_has_watch_setup = 1
   end
-  event:start(M.logpath, {}, function(err, _, events)
-    if err or not events.change then
-      return
-    end
-
-    M.read_log()
-  end)
-
-  make_timer()
-  vim.g.project_log_has_watch_setup = 1
 end
 
 ---@param data string
@@ -270,10 +267,10 @@ end
 ---@param opts ProjectDefaults.Logging
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table' } } })
-
   if not opts.enabled then
     return
   end
+
   M.logpath = opts.logpath
   logfile = vim.fs.joinpath(M.logpath, 'project.log')
   Path.create_path(M.logpath)

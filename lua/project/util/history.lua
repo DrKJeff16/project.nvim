@@ -9,6 +9,7 @@ local Log = require('project.util.log')
 local Path = require('project.util.path')
 local Util = require('project.util')
 
+local event = nil ---@type uv.uv_fs_event_t|nil|?
 local window = nil ---@type Project.HistoryWin|nil|?
 local allowed_flags = {
   'a',
@@ -267,13 +268,18 @@ end
 
 ---@param path string
 ---@param force_name? boolean
-function M.import_history_json(path, force_name)
+---@param keep? boolean
+function M.import_history_json(path, force_name, keep)
   Util.validate({
     path = { path, { 'string' } },
     force_name = { force_name, { 'boolean', 'nil' }, true },
+    keep = { keep, { 'boolean', 'nil' }, true },
   })
   if force_name == nil then
     force_name = false
+  end
+  if keep == nil then
+    keep = true
   end
 
   if vim.g.project_setup ~= 1 then
@@ -330,6 +336,11 @@ function M.import_history_json(path, force_name)
 
   Log.debug(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')))
   vim.notify(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
+
+  if not keep and uv.fs_unlink(path) then
+    Log.debug(('project.nvim - Deleted imported history file `%s`'):format(Util.strip_slash(path, ':p:~')))
+    vim.notify(('project.nvim - Deleted imported history file `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
+  end
 end
 
 ---Remove a project from a session.
@@ -345,8 +356,7 @@ function M.remove_session(session, found)
 
   local new_sessions = {} ---@type ProjectHistoryEntry[]
   for _, v in ipairs(M.session_projects) do
-    local recent = v.path
-    if recent == session then
+    if v.path == session then
       found = true
     else
       table.insert(new_sessions, v)
@@ -367,8 +377,7 @@ function M.remove_recent(project)
   local found = false
   local new_recents = {} ---@type ProjectHistoryEntry[]
   for _, v in ipairs(M.recent_projects) do
-    local recent = v.path
-    if recent == project then
+    if v.path == project then
       found = true
     else
       table.insert(new_recents, v)
@@ -410,10 +419,7 @@ function M.delete_project(project, prompt)
     return
   end
 
-  local found = M.remove_recent(proj)
-  found = M.remove_session(proj, found)
-
-  if found then
+  if M.remove_session(proj, M.remove_recent(proj)) then
     Log.info(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj))
     vim.notify(('(%s.delete_project): Deleting project `%s`.'):format(MODSTR, proj), INFO)
     M.write_history()
@@ -479,22 +485,21 @@ end
 ---Only runs once.
 --- ---
 local function setup_watch()
-  if vim.g.project_history_has_watch_setup == 1 then
+  if vim.g.project_history_has_watch_setup == 1 and event then
     return
   end
 
-  local event = uv.new_fs_event()
+  event = uv.new_fs_event()
   if not event then
     Log.warn('project.nvim - Unable to create history file setup watch!')
     return
   end
 
   event:start(Path.historyfile, {}, function(err, _, events)
-    if err or not events.change then
-      return
+    if not err and events.change then
+      M.recent_projects = {}
+      M.read_history()
     end
-    M.recent_projects = {}
-    M.read_history()
   end)
 
   Log.debug(('(%s.setup_watch): Started history file setup watch!'):format(MODSTR))
@@ -513,9 +518,7 @@ function M.read_history()
     return
   end
 
-  if vim.g.project_history_has_watch_setup ~= 1 then
-    setup_watch()
-  end
+  setup_watch()
 
   if stat.size == 0 and not vim.tbl_isempty(M.session_projects) then
     Log.warn(('(%s.read_history): History file is empty. Defering call to `%s.write_history()`'):format(MODSTR, MODSTR))

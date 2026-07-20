@@ -1,10 +1,6 @@
 ---@module 'project._meta'
 
-local MODSTR = 'project'
 local WARN = vim.log.levels.WARN
-local ERROR = vim.log.levels.ERROR
-local Config = require('project.config')
-local Util = require('project.util')
 
 ---The `project.nvim` module.
 --- ---
@@ -40,6 +36,7 @@ local M = {}
 ---@return string|nil|? last
 ---@nodiscard
 function M.current_project(refresh)
+  local Util = require('project.util')
   Util.validate({ refresh = { refresh, { 'boolean', 'nil' }, true } })
   if refresh == nil then
     refresh = false
@@ -47,11 +44,11 @@ function M.current_project(refresh)
 
   local Core = require('project.core')
   if refresh then
-    Util.log.debug(('(%s.current_project): Refreshing current project info.'):format(MODSTR))
+    Util.log.debug('(project.current_project): Refreshing current project info.')
     return Core.get_current_project()
   end
 
-  Util.log.debug(('(%s.current_project): Not refreshing current project info.'):format(MODSTR))
+  Util.log.debug('(project.current_project): Not refreshing current project info.')
   return Core.current_project, Core.current_method, Core.last_project
 end
 
@@ -59,7 +56,7 @@ end
 ---@return string|nil|? root
 ---@nodiscard
 function M.current_root(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  require('project.util').validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
 
   local root = require('project.core').get_project_root(bufnr)
   return root
@@ -71,20 +68,25 @@ end
 --- ---
 ---@param patterns string[]|string The string or list of strings containing the matching pattern(s).
 function M.remove_root_patterns(patterns)
+  local Util = require('project.util')
   Util.validate({ patterns = { patterns, { 'string', 'table' } } })
 
+  local Config = require('project.config')
   local pats = Config.get().patterns
   if vim.g.project_setup ~= 1 then
-    error(('(%s.remove_root_patterns): `project.nvim` is not setup!'):format(MODSTR))
+    Util.log.error('(project.remove_root_patterns): `project.nvim` is not setup!')
+    error('(project.remove_root_patterns): `project.nvim` is not setup!')
   end
   if not (pats and Util.is_type('table', pats)) then
-    error(('(%s.remove_root_patterns): Config values are unaccessible!'):format(MODSTR))
+    Util.log.error('(project.remove_root_patterns): Config values are unaccessible!')
+    error('(project.remove_root_patterns): Config values are unaccessible!')
   end
 
   if Util.is_type('table', patterns) then
     ---@cast patterns string[]
     if vim.tbl_isempty(patterns) then
-      vim.notify(('(%s.remove_root_patterns): Patterns table is empty!'):format(MODSTR), ERROR)
+      Util.log.error('(project.remove_root_patterns): Patterns table is empty!')
+      vim.notify('(project.remove_root_patterns): Patterns table is empty!', vim.log.levels.ERROR)
       return
     end
     for _, pat in ipairs(patterns) do
@@ -97,11 +99,13 @@ function M.remove_root_patterns(patterns)
 
   ---@cast patterns string
   if patterns == '' then
-    vim.notify(('(%s.remove_root_patterns): Skipping empty pattern: `%s`'):format(MODSTR, patterns), WARN)
+    Util.log.warn(('(project.remove_root_patterns): Skipping empty pattern: `%s`'):format(patterns))
+    vim.notify(('(project.remove_root_patterns): Skipping empty pattern: `%s`'):format(patterns), WARN)
     return
   end
   if not vim.list_contains(pats, patterns) then
-    vim.notify(('(%s.remove_root_patterns): Skipping unavailable pattern: `%s`'):format(MODSTR, patterns), WARN)
+    Util.log.warn(('(project.remove_root_patterns): Skipping unavailable pattern: `%s`'):format(patterns))
+    vim.notify(('(project.remove_root_patterns): Skipping unavailable pattern: `%s`'):format(patterns), WARN)
     return
   end
 
@@ -123,21 +127,25 @@ end
 --- ---
 ---@param patterns string[]|string The string or list of strings containing the new pattern(s).
 function M.add_root_patterns(patterns)
+  local Util = require('project.util')
   Util.validate({ patterns = { patterns, { 'string', 'table' } } })
   if vim.g.project_setup ~= 1 then
-    error(('(%s.add_root_patterns): `project.nvim` is not setup!'):format(MODSTR))
+    Util.log.error('(project.add_root_patterns): `project.nvim` is not setup!')
+    error('(project.add_root_patterns): `project.nvim` is not setup!')
   end
+
+  local Config = require('project.config')
   local pats = Config.get().patterns
   if not (pats and Util.is_type('table', pats)) then
-    Util.log.error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
-    error(('(%s.add_root_patterns): Config values are unaccessible!'):format(MODSTR))
+    Util.log.error('(project.add_root_patterns): Config values are unaccessible!')
+    error('(project.add_root_patterns): Config values are unaccessible!')
   end
 
   if Util.is_type('string', patterns) then
     ---@cast patterns string
     if patterns == '' or vim.list_contains(pats, patterns) then
-      Util.log.warn(('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns))
-      vim.notify(('(%s.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(MODSTR, patterns), WARN)
+      Util.log.warn(('(project.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(patterns))
+      vim.notify(('(project.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(patterns), WARN)
     else
       table.insert(pats, patterns)
       Config.set('patterns', pats)
@@ -147,8 +155,8 @@ function M.add_root_patterns(patterns)
 
   ---@cast patterns string[]
   if vim.tbl_isempty(patterns) or not vim.islist(patterns) then
-    Util.log.error(('(%s.add_root_patterns): Patterns table is empty or not a list!'):format(MODSTR))
-    error(('(%s.add_root_patterns): Patterns table is empty or not a list!'):format(MODSTR))
+    Util.log.error('(project.add_root_patterns): Patterns table is empty or not a list!')
+    error('(project.add_root_patterns): Patterns table is empty or not a list!')
   end
 
   for _, pat in ipairs(patterns) do
@@ -160,14 +168,14 @@ end
 
 local Project = setmetatable(M, { ---@type Project
   __index = function(self, k)
-    if Util.mod_exists('project.' .. k) then
+    if require('project.util').mod_exists('project.' .. k) then
       return require('project.' .. k)
     end
     if k == 'delete_project' then
-      return Util.history.delete_project
+      return require('project.util').history.delete_project
     end
     if k == 'get_config' then
-      return Config.get_config
+      return require('project.config').get_config
     end
     if k == 'get_history_paths' then
       return require('project.core').get_history_paths
@@ -179,10 +187,10 @@ local Project = setmetatable(M, { ---@type Project
       return require('project.core').get_project_root
     end
     if k == 'get_recent_projects' then
-      return Util.history.get_recent_projects
+      return require('project.util').history.get_recent_projects
     end
     if k == 'rename_project' then
-      return Util.history.rename_project
+      return require('project.util').history.rename_project
     end
     if k == 'root_files' then
       return require('project.core').root_files
@@ -191,7 +199,7 @@ local Project = setmetatable(M, { ---@type Project
       return require('project.extensions')['fzf-lua'].run_fzf_lua
     end
     if k == 'setup' then
-      return Config.setup
+      return require('project.config').setup
     end
     if
       vim.list_contains({ 'delete_menu', 'open_menu', 'recents_menu', 'session_menu' }, k)

@@ -1,14 +1,13 @@
-local MODSTR = 'telescope._extensions.projects.main'
 local ERROR = vim.log.levels.ERROR
 if vim.g.project_setup ~= 1 then
-  vim.notify(('(%s): `project.nvim` is not loaded!'):format(MODSTR), ERROR)
+  vim.notify('(telescope._extensions.projects.main): `project.nvim` is not loaded!', ERROR)
   return
 end
 
 local Project = require('project')
 if not Project.util.mod_exists('telescope') then
-  Project.util.log.error(('(%s): Telescope is not installed!'):format(MODSTR))
-  vim.notify(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
+  Project.util.log.error('(telescope._extensions.projects.main): Telescope is not installed!')
+  vim.notify('(telescope._extensions.projects.main): Telescope is not installed!', ERROR)
 end
 
 local Pickers = require('telescope.pickers')
@@ -44,10 +43,9 @@ local function normal_attach(prompt_bufnr, map)
     map = { map, { 'function' } },
   })
 
-  local Keys = vim.deepcopy(Project.config.get().telescope.mappings) or {}
-
+  local Keys = Project.config.get().telescope.mappings or {}
   if not Project.util.is_type('table', Keys) or vim.tbl_isempty(Keys) then
-    Keys = vim.deepcopy(require('project.config.defaults').telescope.mappings)
+    Keys = require('project.config.defaults').telescope.mappings
   end
 
   for mode, group in pairs(Keys) do
@@ -66,8 +64,7 @@ local function normal_attach(prompt_bufnr, map)
 
   Actions.select_default:replace(function()
     if Project.config.get().telescope.disable_file_picker then
-      local entry = State.get_selected_entry()
-      Project.core.set_pwd(entry.value, 'telescope')
+      Project.core.set_pwd(State.get_selected_entry().value, 'telescope')
       return require('telescope.actions.set').select(prompt_bufnr, 'default')
     end
 
@@ -94,12 +91,12 @@ function M.projects(opts)
   opts = opts or {}
 
   if vim.g.project_telescope_loaded ~= 1 then
-    Project.util.log.error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
-    error(('(%s.projects): Telescope picker not loaded!'):format(MODSTR))
+    Project.util.log.error('(telescope._extensions.projects.main.projects): Telescope picker not loaded!')
+    error('(telescope._extensions.projects.main.projects): Telescope picker not loaded!')
   end
 
-  local Options = Project.config.get()
-  local scope = Options.scope_chdir == 'win' and 'window' or Options.scope_chdir --[[@as string]]
+  local scope_chdir = Project.config.get().scope_chdir
+  local scope = scope_chdir == 'win' and 'window' or scope_chdir --[[@as string]]
   Pickers.new(vim.tbl_deep_extend('keep', opts, M.default_opts), {
     prompt_title = ('Select Your Project (%s)'):format(Project.util.capitalize(scope)),
     results_title = 'Projects',
