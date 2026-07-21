@@ -122,7 +122,7 @@ end
 --- ---
 function D:verify_history()
   Util.validate({ history = { self.history, { 'table', 'nil' }, true } })
-  self.history = self.history or {}
+  self.history = self.history or vim.deepcopy(DEFAULTS.history)
 
   Util.validate({
     ['history.save_dir'] = { self.history.save_dir, { 'string', 'nil' }, true },
@@ -160,18 +160,17 @@ end
 --- ---
 function D:verify_scope_chdir()
   Util.validate({ scope_chdir = { self.scope_chdir, { 'string', 'nil' }, true } })
-  if self.scope_chdir and vim.list_contains({ 'global', 'tab', 'win' }, self.scope_chdir) then
-    return
-  end
 
-  Util.log.warn(('`scope_chdir` option invalid (`%s`). Reverting to default option.'):format(self.scope_chdir))
-  vim.notify(('`scope_chdir` option invalid (`%s`). Reverting to default option.'):format(self.scope_chdir), WARN)
-  self.scope_chdir = DEFAULTS.scope_chdir
+  if not (self.scope_chdir and vim.list_contains({ 'global', 'tab', 'win' }, self.scope_chdir)) then
+    Util.log.warn(('`scope_chdir` option invalid (`%s`). Reverting to default option.'):format(self.scope_chdir))
+    vim.notify(('`scope_chdir` option invalid (`%s`). Reverting to default option.'):format(self.scope_chdir), WARN)
+    self.scope_chdir = DEFAULTS.scope_chdir
+  end
 end
 
 function D:verify_datapath()
   Util.validate({ history = { self.history, { 'table', 'nil' }, true } })
-  self.history = self.history or {}
+  self.history = self.history or vim.deepcopy(DEFAULTS.history)
 
   Util.validate({ ['history.save_dir'] = { self.history.save_dir, { 'string', 'nil' }, true } })
 
@@ -200,43 +199,36 @@ function D:gen_methods()
 
   return setmetatable(methods, {
     __index = methods,
-    __newindex = function(_, _, _)
+    __newindex = function()
       vim.notify('Detection methods are immutable!', vim.log.levels.ERROR)
     end,
   })
 end
 
 function D:verify_logging()
-  local log = self.log
-  if not log or type(log) ~= 'table' then
-    self.log = vim.deepcopy(DEFAULTS.log)
-  end
+  Util.validate({ log = { self.log, { 'table', 'nil' }, true } })
+  self.log = self.log or vim.deepcopy(DEFAULTS.log)
   if self.logging ~= nil and type(self.logging) == 'boolean' then
     self.log.enabled = self.logging
     self.logging = nil ---@diagnostic disable-line:inject-field
     vim.notify(('`options.logging` is deprecated, use `options.log.enabled`!'):format(MODSTR), WARN)
   end
 
-  ---@diagnostic disable:need-check-nil
-  if not (Util.is_type('string', log.logpath) and Util.path.exists(log.logpath)) then
+  if not (Util.is_type('string', self.log.logpath) and Util.path.exists(self.log.logpath)) then
     self.log.logpath = DEFAULTS.log.logpath
   end
-  if not (Util.is_type('number', log.max_size) and log.max_size > 0) then
+  if not (Util.is_type('number', self.log.max_size) and self.log.max_size > 0) then
     self.log.max_size = DEFAULTS.log.max_size
   end
-  ---@diagnostic enable:need-check-nil
 end
 
 function D:expand_excluded()
-  if not self.exclude_dirs or type(self.exclude_dirs) ~= 'table' then
-    self.exclude_dirs = {}
-  end
-  if vim.tbl_isempty(self.exclude_dirs) then
-    return
-  end
-
-  for i, v in ipairs(self.exclude_dirs) do
-    self.exclude_dirs[i] = Util.rstrip('\\', Util.strip_slash(v))
+  Util.validate({ exclude_dirs = { self.exclude_dirs, { 'table', 'nil' }, true } })
+  self.exclude_dirs = self.exclude_dirs or vim.deepcopy(DEFAULTS.exclude_dirs)
+  if not vim.tbl_isempty(self.exclude_dirs) then
+    for i, v in ipairs(self.exclude_dirs) do
+      self.exclude_dirs[i] = Util.rstrip('\\', Util.strip_slash(v))
+    end
   end
 end
 
@@ -370,7 +362,7 @@ end
 
 function D:verify_fzf_lua()
   Util.validate({ fzf_lua = { self.fzf_lua, { 'table', 'nil' }, true } })
-  self.fzf_lua = self.fzf_lua or {}
+  self.fzf_lua = self.fzf_lua or vim.deepcopy(DEFAULTS.fzf_lua)
 
   Util.validate({
     ['fzf_lua.enabled'] = { self.fzf_lua.enabled, { 'boolean', 'nil' }, true },
