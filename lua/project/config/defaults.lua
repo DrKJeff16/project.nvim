@@ -4,6 +4,17 @@ local MODSTR = 'project.config.defaults'
 local WARN = vim.log.levels.WARN
 local Util = require('project.util')
 
+local TELESCOPE_MAPPING_OPS = {
+  'browse_project_files',
+  'change_cwd',
+  'delete_project',
+  'find_project_files',
+  'help_mappings',
+  'recent_project_files',
+  'rename_project',
+  'search_in_project_files',
+}
+
 local DEFAULTS = { ---@type ProjectConfigDefaults
   custom_projects = {},
   different_owners = { allow = false, notify = true },
@@ -77,6 +88,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
     snacks = { enabled = false, style = 'fancy' },
   },
   telescope = {
+    behavior = 'explore',
     disable_file_picker = false,
     mappings = {
       i = {
@@ -86,7 +98,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
         ['<C-n>'] = 'rename_project',
         ['<C-r>'] = 'recent_project_files',
         ['<C-s>'] = 'search_in_project_files',
-        ['<C-w>'] = 'change_working_directory',
+        ['<C-w>'] = 'change_cwd',
       },
       n = {
         R = 'rename_project',
@@ -95,7 +107,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
         f = 'find_project_files',
         r = 'recent_project_files',
         s = 'search_in_project_files',
-        w = 'change_working_directory',
+        w = 'change_cwd',
       },
     },
     prefer_file_browser = false,
@@ -142,7 +154,6 @@ function D:verify_history()
       { spaces = true }
     )
   then
-    Util.log.error('(project.nvim): Invalid chars in `history.save_file` setup option!')
     error('(project.nvim): Invalid chars in `history.save_file` setup option!')
   end
 
@@ -162,7 +173,6 @@ function D:verify_scope_chdir()
   Util.validate({ scope_chdir = { self.scope_chdir, { 'string', 'nil' }, true } })
 
   if not (self.scope_chdir and vim.list_contains({ 'global', 'tab', 'win' }, self.scope_chdir)) then
-    Util.log.warn(('`scope_chdir` option invalid (`%s`). Reverting to default option.'):format(self.scope_chdir))
     vim.notify(('`scope_chdir` option invalid (`%s`). Reverting to default option.'):format(self.scope_chdir), WARN)
     self.scope_chdir = DEFAULTS.scope_chdir
   end
@@ -175,14 +185,12 @@ function D:verify_datapath()
   Util.validate({ ['history.save_dir'] = { self.history.save_dir, { 'string', 'nil' }, true } })
 
   if self.datapath and Util.is_type('string', self.datapath) then
-    Util.log.warn(('`options.datapath` is deprecated, use `options.history.save_dir`!'):format(MODSTR))
     vim.notify(('`options.datapath` is deprecated, use `options.history.save_dir`!'):format(MODSTR), WARN)
     self.history.save_dir = self.datapath
     self.datapath = nil ---@diagnostic disable-line:inject-field
   end
 
   if not (self.history.save_dir and Util.dir_exists(self.history.save_dir)) then
-    Util.log.warn(('Invalid save_dir `%s`, reverting to default.'):format(self.history.save_dir))
     vim.notify(('Invalid save_dir `%s`, reverting to default.'):format(self.history.save_dir), WARN)
     self.history.save_dir = DEFAULTS.history.save_dir
   end
@@ -373,14 +381,57 @@ function D:verify_fzf_lua()
     self.fzf_lua.enabled = false
   end
 
-  if vim.list_contains({ 'newest', 'oldest' }, self.fzf_lua.sort) then
-    return
+  if not vim.list_contains({ 'newest', 'oldest' }, self.fzf_lua.sort) then
+    vim.notify(
+      ('`fzf_lua.sort` is not a valid value! (`%s`)\nResetting to default'):format(self.fzf_lua.sort),
+      vim.log.levels.ERROR
+    )
+    self.fzf_lua.sort = 'newest'
   end
-  vim.notify(
-    ('`fzf_lua.sort` is not a valid value! (`%s`)\nResetting to default'):format(self.fzf_lua.sort),
-    vim.log.levels.ERROR
-  )
-  self.fzf_lua.sort = 'newest'
+end
+
+function D:verify_telescope()
+  Util.validate({ telescope = { self.telescope, { 'table', 'nil' }, true } })
+  self.telescope = vim.tbl_deep_extend('keep', self.telescope, DEFAULTS.telescope)
+
+  Util.validate({
+    ['telescope.behavior'] = { self.telescope.behavior, { 'string', 'nil' }, true },
+  })
+
+  self.telescope.behavior = self.telescope.behavior or DEFAULTS.telescope.behavior
+  if not vim.list_contains({ 'explore', 'recent' }, self.telescope.behavior) then
+    vim.notify(
+      ('project.nvim - Invalid value for `telescope.behavior`: `%s`. Falling back to default value.'):format(
+        self.telescope.behavior
+      ),
+      WARN
+    )
+    self.telescope.behavior = DEFAULTS.telescope.behavior
+  end
+
+  self.telescope.mappings = vim.tbl_deep_extend('keep', self.telescope.mappings, DEFAULTS.telescope.mappings)
+  for lhs, maps in pairs(self.telescope.mappings) do
+    ---@cast lhs 'i'|'n'
+    ---@cast maps table<string, Project.Telescope.ActionNames>
+    if vim.list_contains({ 'n', 'i' }, lhs) then
+      for k, v in pairs(maps) do
+        if v == 'change_working_directory' then
+          vim.notify(
+            ("project.nvim - telescope.mappings['%s']['%s'] with a value of 'change_working_directory' is deprecated!\nUse 'change_cwd' instead!"):format(
+              lhs,
+              k
+            ),
+            WARN
+          )
+          self.telescope.mappings[lhs][k] = 'change_cwd'
+        elseif not vim.list_contains(TELESCOPE_MAPPING_OPS, v) then
+          self.telescope.mappings[lhs][k] = nil
+        end
+      end
+    else
+      self.telescope.mappings[lhs] = nil
+    end
+  end
 end
 
 ---Verify config integrity.
@@ -417,6 +468,7 @@ function D:verify()
   self:verify_owners()
   self:verify_lists()
   self:verify_fzf_lua()
+  self:verify_telescope()
 
   local keys = vim.tbl_keys(DEFAULTS) --[[@as string[]\]]
   table.insert(keys, 'on_attach')

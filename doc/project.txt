@@ -693,7 +693,7 @@ Table of Contents                                                  *project.toc*
              d           <C-d>      delete_project()
              s           <C-s>      search_in_project_files()
              r           <C-r>      recent_project_files()
-             w           <C-w>      change_working_directory()
+             w           <C-w>      change_cwd()
 
 
 ==============================================================================

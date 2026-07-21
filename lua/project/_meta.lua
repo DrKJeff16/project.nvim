@@ -16,7 +16,7 @@
 
 ---@alias Project.Telescope.ActionNames
 ---|'browse_project_files'
----|'change_working_directory'
+---|'change_cwd'
 ---|'delete_project'
 ---|'find_project_files'
 ---|'help_mappings'
@@ -206,6 +206,16 @@
 ---Table of options used for the telescope picker.
 --- ---
 ---@class (exact) ProjectOpts.Telescope
+---The behaviour of the telescope picker when selecting a project.
+---
+---The following behaviours are available:
+---
+--- - `'explore'` - Show all the files in the given project in a file picker
+--- - `'recent'` - Show the most recently opened files in a given project
+--- ---
+---Default: `'explore'`
+--- ---
+---@field behavior? 'explore'|'recent'
 ---Set this to `true` if you don't want the file picker to appear
 ---after you've selected a project.
 ---
@@ -243,6 +253,7 @@
 ---@field tilde? boolean
 
 ---@class (exact) ProjectDefaults.Telescope: ProjectOpts.Telescope
+---@field behavior 'explore'|'recent'
 ---@field disable_file_picker boolean
 ---@field mappings Project.Telescope.DefaultMappings
 ---@field prefer_file_browser boolean
@@ -580,6 +591,7 @@ function D:verify_logging() end
 function D:verify_lsp() end
 function D:verify_owners() end
 function D:verify_scope_chdir() end
+function D:verify_telescope() end
 
 ---@class (exact) Project.ConfigLoc
 ---@field bufnr integer

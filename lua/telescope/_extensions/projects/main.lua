@@ -25,7 +25,7 @@ local M = {
 
 local valid_acts = {
   'browse_project_files',
-  'change_working_directory',
+  'change_cwd',
   'delete_project',
   'find_project_files',
   'help_mappings',
@@ -63,12 +63,16 @@ local function normal_attach(prompt_bufnr, map)
   end
 
   Actions.select_default:replace(function()
-    if Project.config.get().telescope.disable_file_picker then
-      Project.core.set_pwd(State.get_selected_entry().value, 'telescope')
-      return require('telescope.actions.set').select(prompt_bufnr, 'default')
-    end
+    Project.core.set_pwd(State.get_selected_entry().value, 'telescope')
+    if Project.config.get().telescope.behavior == 'explore' then
+      if Project.config.get().telescope.disable_file_picker then
+        return require('telescope.actions.set').select(prompt_bufnr, 'default')
+      end
 
-    _Actions.find_project_files(prompt_bufnr)
+      _Actions.find_project_files(prompt_bufnr)
+    else
+      _Actions.recent_project_files(prompt_bufnr)
+    end
   end)
   return true
 end

@@ -1,14 +1,13 @@
-local MODSTR = 'telescope._extensions.projects.actions'
 local ERROR = vim.log.levels.ERROR
 if vim.g.project_setup ~= 1 then
-  vim.notify(('(%s): `project.nvim` is not loaded!'):format(MODSTR), ERROR)
+  vim.notify('(telescope._extensions.projects.actions): `project.nvim` is not loaded!', ERROR)
   return
 end
 
 local Project = require('project')
 if not Project.util.mod_exists('telescope') then
-  Project.util.log.error(('(%s): Telescope is not installed!'):format(MODSTR))
-  vim.notify(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
+  Project.util.log.error('(telescope._extensions.projects.actions): Telescope is not installed!')
+  vim.notify('(telescope._extensions.projects.actions): Telescope is not installed!', ERROR)
   return
 end
 
@@ -40,7 +39,9 @@ function M.delete_project(prompt_bufnr)
 
   if vim.tbl_isempty(entries) or not entries[1] then
     Actions.close(prompt_bufnr)
-    Project.util.log.error(('(%s.delete_project): Entry not available!'):format(MODSTR, prompt_bufnr))
+    Project.util.log.error(
+      ('(telescope._extensions.projects.actions.delete_project): Entry not available!'):format(prompt_bufnr)
+    )
     return
   end
 
@@ -52,12 +53,14 @@ function M.delete_project(prompt_bufnr)
   end
 
   Project.util.history.delete_projects(paths, true)
-  Project.util.log.debug(('(%s.delete_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
+  Project.util.log.debug(
+    ('(telescope._extensions.projects.actions.delete_project): Refreshing prompt `%s`.'):format(prompt_bufnr)
+  )
   State.get_current_picker(prompt_bufnr):refresh(
     (function()
       local results = Project.util.history.get_recent_projects()
       if Project.config.get().telescope.sort == 'newest' then
-        Project.util.log.debug(('(%s.delete_project): Sorting order to `newest`.'):format(MODSTR))
+        Project.util.log.debug('(telescope._extensions.projects.actions.delete_project): Sorting order to `newest`.')
         results = Project.util.reverse(results)
       end
       return Finders.new_table({
@@ -81,27 +84,29 @@ end
 ---@param prompt_bufnr integer
 ---@return string|nil
 ---@return boolean|nil
-function M.change_working_directory(prompt_bufnr)
+function M.change_cwd(prompt_bufnr)
   local selected_entry = State.get_selected_entry() ---@type Project.ActionEntry
   Actions.close(prompt_bufnr)
-  Project.util.log.debug(('(%s.change_working_directory): Closed prompt `%s`.'):format(MODSTR, prompt_bufnr))
+  Project.util.log.debug(
+    ('(telescope._extensions.projects.actions.change_cwd): Closed prompt `%s`.'):format(prompt_bufnr)
+  )
   if not selected_entry then
-    Project.util.log.error(('(%s.change_working_directory): Invalid entry!'):format(MODSTR))
+    Project.util.log.error('(telescope._extensions.projects.actions.change_cwd): Invalid entry!')
     return
   end
 
   local cd_successful = Project.core.set_pwd(selected_entry.value, 'telescope')
   if cd_successful then
-    Project.util.log.info(('(%s.change_working_directory): Successfully changed directory.'):format(MODSTR))
+    Project.util.log.info('(telescope._extensions.projects.actions.change_cwd): Successfully changed directory.')
   else
-    Project.util.log.error(('(%s.change_working_directory): Failed to change directory!'):format(MODSTR))
+    Project.util.log.error('(telescope._extensions.projects.actions.change_cwd): Failed to change directory!')
   end
   return selected_entry.value, cd_successful
 end
 
 ---@param prompt_bufnr integer
 function M.find_project_files(prompt_bufnr)
-  local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
+  local project_path, cd_successful = M.change_cwd(prompt_bufnr)
   if not (project_path and cd_successful) then
     return
   end
@@ -123,7 +128,7 @@ end
 
 ---@param prompt_bufnr integer
 function M.browse_project_files(prompt_bufnr)
-  local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
+  local project_path, cd_successful = M.change_cwd(prompt_bufnr)
   if not (project_path and cd_successful) then
     return
   end
@@ -145,7 +150,7 @@ end
 
 ---@param prompt_bufnr integer
 function M.search_in_project_files(prompt_bufnr)
-  local project_path, cd_successful = M.change_working_directory(prompt_bufnr)
+  local project_path, cd_successful = M.change_cwd(prompt_bufnr)
   if not (project_path and cd_successful) then
     return
   end
@@ -158,14 +163,16 @@ function M.rename_project(prompt_bufnr)
   Actions.close(prompt_bufnr)
 
   Project.popup.rename_input(Project.util.rstrip('/', vim.fn.fnamemodify(active_entry.value, ':p')))
-  Project.util.log.debug(('(%s.r ename_project): Refreshing prompt `%s`.'):format(MODSTR, prompt_bufnr))
+  Project.util.log.debug(
+    ('(telescope._extensions.projects.actions.rename_project): Refreshing prompt `%s`.'):format(prompt_bufnr)
+  )
 end
 
 ---@param prompt_bufnr integer
 function M.recent_project_files(prompt_bufnr)
-  local _, cd_successful = M.change_working_directory(prompt_bufnr)
-  if cd_successful then
-    Builtin.oldfiles({ cwd_only = true, hidden = Project.config.get().show_hidden })
+  local cwd, cd_successful = M.change_cwd(prompt_bufnr)
+  if cd_successful and cwd then
+    Builtin.oldfiles({ cwd = cwd, cwd_only = true, hidden = Project.config.get().show_hidden })
   end
 end
 

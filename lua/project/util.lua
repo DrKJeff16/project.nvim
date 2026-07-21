@@ -263,11 +263,10 @@ function M.validate(T)
       table.insert(spec, 1, name)
       vim.validate(unpack(spec))
     end
-    return
+  else
+    ---@cast T table<string, vim.validate.Spec>
+    vim.validate(T)
   end
-
-  ---@cast T vim.validate.Spec
-  vim.validate(T)
 end
 
 ---Checks whether a given path is a directory or not.

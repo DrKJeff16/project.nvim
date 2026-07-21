@@ -486,7 +486,7 @@ By default, `setup()` loads with the following options:
     --   - `find_project_files`
     --   - `recent_project_files`
     --   - `search_in_project_files`
-    --   - `change_working_directory`
+    --   - `change_cwd`
     mappings = {
       -- Normal mode
       n = {
@@ -496,7 +496,7 @@ By default, `setup()` loads with the following options:
         f = 'find_project_files',
         r = 'recent_project_files',
         s = 'search_in_project_files',
-        w = 'change_working_directory',
+        w = 'change_cwd',
       },
 
       -- Insert mode
@@ -507,7 +507,7 @@ By default, `setup()` loads with the following options:
         ['<C-n>'] = 'rename_project',
         ['<C-r>'] = 'recent_project_files',
         ['<C-s>'] = 'search_in_project_files',
-        ['<C-w>'] = 'change_working_directory',
+        ['<C-w>'] = 'change_cwd',
       },
     },
 
@@ -722,7 +722,7 @@ require('telescope').setup({
 | `n`         | `<C-n>`     | `rename_project`           |
 | `r`         | `<C-r>`     | `recent_project_files`     |
 | `s`         | `<C-s>`     | `search_in_project_files`  |
-| `w`         | `<C-w>`     | `change_working_directory` |
+| `w`         | `<C-w>`     | `change_cwd`               |
 
 _You can find the Actions in [`telescope/_extensions/projects/actions.lua`](https://github.com/DrKJeff16/project.nvim/blob/main/lua/telescope/_extensions/projects/actions.lua)_.
 
