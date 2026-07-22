@@ -9,10 +9,10 @@
     "completion": {
         "autoRequire": false,
         "callSnippet": "Replace",
-        "displayContext": 16,
+        "displayContext": 32,
         "enable": true,
         "keywordSnippet": "Replace",
-        "maxSuggestCount": 300,
+        "maxSuggestCount": 350,
         "postfix": "@",
         "requireSeparator": ".",
         "showParams": true,
@@ -32,8 +32,8 @@
         ],
         "ignoredFiles": "Opened",
         "libraryFiles": "Opened",
-        "workspaceDelay": 3000,
-        "workspaceEvent": "OnSave",
+        "workspaceDelay": 2000,
+        "workspaceEvent": "OnChange",
         "workspaceRate": 100
     },
     "format": {
@@ -108,15 +108,20 @@
     },
     "workspace": {
         "checkThirdParty": false,
+        "ignoreSubmodules": true,
+        "ignoreDir": [
+            "spec"
+        ],
         "useGitIgnore": true,
         "preloadFileSize": 10000,
         "library": [
+            "$HOME/Projects/nvim/plenary.nvim",
             "$VIMRUNTIME",
             "$XDG_DATA_HOME/nvim/lazy/fzf-lua",
             "$XDG_DATA_HOME/nvim/lazy/lualine.nvim",
             "$XDG_DATA_HOME/nvim/lazy/picker.nvim",
+            "$XDG_DATA_HOME/nvim/lazy/plenary.nvim",
             "$XDG_DATA_HOME/nvim/lazy/snacks.nvim",
-            "$HOME/Projects/nvim/plenary.nvim",
             "${3rd}/busted/library",
             "${3rd}/luv/library"
         ]
