@@ -2,13 +2,11 @@
 ---@module 'snacks'
 
 local uv = vim.uv or vim.loop
-local MODSTR = 'project.util.log'
 local TRACE = vim.log.levels.TRACE -- `0`
 local DEBUG = vim.log.levels.DEBUG -- `1`
 local INFO = vim.log.levels.INFO -- `2`
 local WARN = vim.log.levels.WARN -- `3`
 local ERROR = vim.log.levels.ERROR -- `4`
-local Config = require('project.config')
 local Path = require('project.util.path')
 local Util = require('project.util')
 
@@ -106,7 +104,7 @@ end
 ---@return fun(...: any): output: string|nil|?
 local function gen_log(lvl)
   return function(...) ---@return string|nil|? output
-    if Config.get().log.enabled then
+    if require('project.config').get().log.enabled then
       local msg = ''
       for i = 1, select('#', ...) do
         msg = format_sel(msg, select(i, ...), i ~= 1)
@@ -148,13 +146,14 @@ function M.clear_log()
 end
 
 local function timer_cb()
-  local stat = uv.fs_stat(logfile)
-  if not stat or stat.size < math.floor(Config.get().log.max_size * 1024 * 1024) then
+  local fd = uv.fs_open(logfile, 'w', Path.open_mode('644'))
+  if not fd then
     return
   end
 
-  local fd = uv.fs_open(logfile, 'w', Path.open_mode('644'))
-  if not fd then
+  local stat = uv.fs_stat(logfile)
+  if not stat or stat.size < math.floor(require('project.config').get().log.max_size * 1024 * 1024) then
+    uv.fs_close(fd)
     return
   end
 
@@ -162,11 +161,13 @@ local function timer_cb()
   uv.fs_close(fd)
 
   if ok then
-    vim.notify(('(%s.timer_cb): `%s` has been cleared!'):format(MODSTR, Util.strip_slash(logfile, ':p:~')), INFO)
-    return
+    vim.notify(('(project.util.log.timer_cb): `%s` has been cleared!'):format(Util.strip_slash(logfile, ':p:~')), INFO)
+  else
+    vim.notify(
+      ('(project.util.log.timer_cb): `%s` could not be cleared!'):format(Util.strip_slash(logfile, ':p:~')),
+      ERROR
+    )
   end
-
-  vim.notify(('(%s.timer_cb): `%s` could not be cleared!'):format(MODSTR, Util.strip_slash(logfile, ':p:~')), ERROR)
 end
 
 local function make_timer()
@@ -221,7 +222,7 @@ end
 ---@param lvl vim.log.levels
 ---@return string|nil|? written_data
 function M.write(data, lvl)
-  if not Config.get().log.enabled or vim.g.project_log_cleared == 1 then
+  if not require('project.config').get().log.enabled or vim.g.project_log_cleared == 1 then
     return
   end
 
@@ -256,7 +257,7 @@ function M.open(mode)
   Path.create_path(M.logpath)
   local dir_stat = uv.fs_stat(M.logpath)
   if not dir_stat or dir_stat.type ~= 'directory' then
-    error(('(%s.open): Projectpath stat is not valid!'):format(MODSTR))
+    error('(project.util.log.open): Projectpath stat is not valid!')
   end
 
   local stat = uv.fs_stat(logfile)
@@ -303,12 +304,12 @@ function M.open_win()
     return
   end
   if vim.g.project_log_cleared == 1 then
-    vim.notify(('(%s.open_win): Log has been cleared, try restarting.'):format(MODSTR), WARN)
-    M.debug(('(%s.open_win): Log has been cleared, try restarting.'):format(MODSTR))
+    vim.notify('(project.util.log.open_win): Log has been cleared, try restarting.', WARN)
+    M.warn('(project.util.log.open_win): Log has been cleared, try restarting.')
     return
   end
   if not Path.exists(logfile) then
-    error(('(%s.open_win): Bad logfile path!'):format(MODSTR))
+    error('(project.util.log.open_win): Bad logfile path!')
   end
 
   local stat = uv.fs_stat(logfile)

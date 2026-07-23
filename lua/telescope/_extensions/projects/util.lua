@@ -1,14 +1,13 @@
-local MODSTR = 'telescope._extensions.projects.util'
 local ERROR = vim.log.levels.ERROR
 if vim.g.project_setup ~= 1 then
-  vim.notify(('(%s): `project.nvim` is not loaded!'):format(MODSTR), ERROR)
+  vim.notify('(telescope._extensions.projects.util): `project.nvim` is not loaded!', ERROR)
   return
 end
 
 local Project = require('project')
 if not Project.util.mod_exists('telescope') then
-  Project.util.log.error(('(%s): Telescope is not installed!'):format(MODSTR))
-  vim.notify(('(%s): Telescope is not installed!'):format(MODSTR), ERROR)
+  Project.util.log.error('(telescope._extensions.projects.util): Telescope is not installed!')
+  vim.notify('(telescope._extensions.projects.util): Telescope is not installed!', ERROR)
   return
 end
 
@@ -28,7 +27,11 @@ end
 
 ---@param entry { name: string, value: string, display: function, index: integer, ordinal: string }
 function M.make_display(entry)
-  Project.util.log.debug(('(%s.make_display): Creating display. Entry values: %s'):format(MODSTR, vim.inspect(entry)))
+  Project.util.log.debug(
+    ('(telescope._extensions.projects.util.make_display): Creating display. Entry values: %s'):format(
+      vim.inspect(entry)
+    )
+  )
   return Entry_display.create({
     separator = ' ',
     items = { { width = 30 }, { remaining = true } },
@@ -37,14 +40,14 @@ end
 
 function M.create_finder()
   local sort = Project.config.get().telescope.sort
-  Project.util.log.info(('(%s.create_finder): Sorting by `%s`.'):format(MODSTR, sort))
+  Project.util.log.info(('(telescope._extensions.projects.util.create_finder): Sorting by `%s`.'):format(sort))
 
   local results = Project.util.history.get_recent_projects()
   if sort == 'newest' then
     results = Project.util.reverse(results)
   end
 
-  Project.util.log.debug(('(%s.create_finder): Returning new Finder table.'):format(MODSTR))
+  Project.util.log.debug('(telescope._extensions.projects.util.create_finder): Returning new Finder table.')
   return Finders.new_table({
     results = results,
     entry_maker = function(entry) ---@param entry ProjectHistoryEntry

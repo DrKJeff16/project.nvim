@@ -1,6 +1,5 @@
 ---@module 'project._meta'
 
-local MODSTR = 'project.popup'
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local Config = require('project.config')
@@ -137,7 +136,7 @@ function M.new(opts)
   })
 
   if vim.tbl_isempty(opts) then
-    error(('(%s.select.new): Empty args for constructor!'):format(MODSTR))
+    error('(project.popup.select.new): Empty args for constructor!')
   end
 
   ---@type Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)

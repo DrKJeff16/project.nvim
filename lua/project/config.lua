@@ -1,8 +1,6 @@
 ---@module 'project._meta'
 
 local uv = vim.uv or vim.loop
-local MODSTR = 'project.config'
-local Extensions = require('project.extensions')
 local Util = require('project.util')
 
 local float = nil ---@type Project.ConfigLoc|nil|?
@@ -84,34 +82,35 @@ function M.setup(opts)
   end
 
   if not (Util.path.datapath and Util.path.projectpath and Util.path.historyfile) then
-    error(('(%s.setup): Failed to store history path successfully!'):format(MODSTR))
+    error('(project.config.setup): Failed to store history path successfully!')
   end
 
   if options.log.enabled then
     Util.log.setup(options.log)
-    Util.log.debug(('(%s.setup): Initialized logging.'):format(MODSTR))
+    Util.log.debug('(project.config.setup): Initialized logging.')
   end
 
   if vim.g.project_setup ~= 1 then
     vim.g.project_setup = 1
-    Util.log.debug(('(%s.setup): `g:project_setup` set to `1`.'):format(MODSTR))
+    Util.log.debug('(project.config.setup): `g:project_setup` set to `1`.')
   end
 
   require('project.commands').setup()
-  Util.log.debug(('(%s.setup): User commands created.'):format(MODSTR))
+  Util.log.debug('(project.config.setup): User commands created.')
 
   require('project.core').setup()
 
+  local Extensions = require('project.extensions')
   if options.fzf_lua.enabled then
-    Util.log.debug(('(%s.setup): fzf-lua integration enabled.'):format(MODSTR))
+    Util.log.debug('(project.config.setup): fzf-lua integration enabled.')
     Extensions['fzf-lua'].setup()
   end
   if options.picker.enabled then
-    Util.log.debug(('(%s.setup): picker.nvim integration enabled.'):format(MODSTR))
+    Util.log.debug('(project.config.setup): picker.nvim integration enabled.')
     Extensions.picker.setup()
   end
   if options.snacks.enabled then
-    Util.log.debug(('(%s.setup): snacks.nvim integration enabled.'):format(MODSTR))
+    Util.log.debug('(project.config.setup): snacks.nvim integration enabled.')
     Extensions.snacks.setup(options.snacks.opts or {})
   end
 
@@ -124,7 +123,7 @@ function M.setup(opts)
     callback = function(ev)
       if options.before_attach and vim.is_callable(options.before_attach) then
         options.before_attach(ev.data.dir, ev.data.method, ev.data.bufnr)
-        Util.log.debug(('(%s.setup): Ran `before_attach` hook successfully.'):format(MODSTR))
+        Util.log.debug('(project.config.setup): Ran `before_attach` hook successfully.')
       end
     end,
   })
@@ -134,7 +133,7 @@ function M.setup(opts)
     callback = function(ev)
       if options.on_attach and vim.is_callable(options.on_attach) then
         options.on_attach(ev.data.dir, ev.data.method, ev.data.bufnr, Util.map_attach)
-        Util.log.debug(('(%s.setup): Ran `on_attach` hook successfully.'):format(MODSTR))
+        Util.log.debug('(project.config.setup): Ran `on_attach` hook successfully.')
       end
     end,
   })
@@ -144,8 +143,8 @@ end
 ---@nodiscard
 function M.get_config()
   if vim.g.project_setup ~= 1 then
-    Util.log.error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR))
-    error(('(%s.get_config): `project.nvim` is not set up!'):format(MODSTR))
+    Util.log.error('(project.config.get_config): `project.nvim` is not set up!')
+    error('(project.config.get_config): `project.nvim` is not set up!')
   end
   local exceptions = {
     'expand_excluded',

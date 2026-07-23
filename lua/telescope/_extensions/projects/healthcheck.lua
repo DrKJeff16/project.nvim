@@ -1,4 +1,3 @@
-local MODSTR = 'project.health'
 local Project = require('project')
 
 local function setup_check()
@@ -57,7 +56,7 @@ end
 return function()
   if setup_check() then
     telescope_check()
-    Project.util.log.debug(('(%s): `checkhealth` successfully called.'):format(MODSTR))
+    Project.util.log.debug('(telescope._extensions.projects.healthcheck): `checkhealth` successfully called.')
   end
 end
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

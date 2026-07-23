@@ -1,7 +1,5 @@
 ---@module 'project._meta'
 
-local MODSTR = 'project.util'
-
 ---@class Project.Util
 ---@field globtopattern Project.Util.Glob
 ---@field history Project.Util.History
@@ -439,7 +437,7 @@ function M.range(x, y, step)
   })
 
   if not M.is_int(x) then
-    error(('(%s.range): Argument `x` is not an integer: `%s`'):format(MODSTR, x))
+    error(('(project.util.range): Argument `x` is not an integer: `%s`'):format(x))
   end
 
   local range_list = {} ---@type integer[]
@@ -454,7 +452,7 @@ function M.range(x, y, step)
     end
   elseif y and not step then
     if not M.is_int(y) then
-      error(('(%s.range): Argument `y` is not an integer: `%s`'):format(MODSTR, y))
+      error(('(project.util.range): Argument `y` is not an integer: `%s`'):format(y))
     end
     step = x <= y and 1 or -1
 
@@ -464,13 +462,13 @@ function M.range(x, y, step)
     end
   elseif y and step then
     if not M.is_int({ y, step }) then
-      error(('(%s.range): Arguments `y` and/or `step` are not an integer!'):format(MODSTR))
+      error('(project.util.range): Arguments `y` and/or `step` are not an integer!')
     end
     if step == 0 then
-      error(('(%s.range): Argument `step` cannot be `0`!'):format(MODSTR))
+      error('(project.util.range): Argument `step` cannot be `0`!')
     end
     if x > y and step >= 1 then
-      error(('(%s.range): Index out of bounds!'):format(MODSTR))
+      error('(project.util.range): Index out of bounds!')
     end
     if x > y and step <= -1 then
       local p = x
@@ -484,7 +482,7 @@ function M.range(x, y, step)
       table.insert(range_list, v)
     end
   else
-    error(('(%s.range): Argument `y` is nil while `step` is not: `%s`'):format(MODSTR, step))
+    error(('(project.util.range): Argument `y` is nil while `step` is not: `%s`'):format(step))
   end
 
   table.sort(range_list)

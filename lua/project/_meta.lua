@@ -2,6 +2,7 @@
 ---@diagnostic disable:unused-local
 
 ---@module 'snacks'
+---@module 'picker'
 
 ---@alias Project.Core.ScanRoot
 ---|'all'
@@ -583,14 +584,23 @@ function D:gen_methods() end
 function D:new(opts) end
 
 function D:verify() end
+
 function D:verify_datapath() end
+
 function D:verify_fzf_lua() end
+
 function D:verify_history() end
+
 function D:verify_lists() end
+
 function D:verify_logging() end
+
 function D:verify_lsp() end
+
 function D:verify_owners() end
+
 function D:verify_scope_chdir() end
+
 function D:verify_telescope() end
 
 ---@class (exact) Project.ConfigLoc

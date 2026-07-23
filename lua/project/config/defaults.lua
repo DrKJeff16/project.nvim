@@ -1,6 +1,5 @@
 ---@module 'project._meta'
 
-local MODSTR = 'project.config.defaults'
 local WARN = vim.log.levels.WARN
 local Util = require('project.util')
 
@@ -158,7 +157,7 @@ function D:verify_history()
   end
 
   if self.historysize and Util.is_int(self.historysize, self.historysize >= 0) then
-    vim.notify(('`options.historysize` is deprecated, use `options.history.size`!'):format(MODSTR), WARN)
+    vim.notify('`options.historysize` is deprecated, use `options.history.size`!', WARN)
     self.history.size = self.historysize
     self.historysize = nil ---@diagnostic disable-line:inject-field
   end
@@ -185,7 +184,7 @@ function D:verify_datapath()
   Util.validate({ ['history.save_dir'] = { self.history.save_dir, { 'string', 'nil' }, true } })
 
   if self.datapath and Util.is_type('string', self.datapath) then
-    vim.notify(('`options.datapath` is deprecated, use `options.history.save_dir`!'):format(MODSTR), WARN)
+    vim.notify('`options.datapath` is deprecated, use `options.history.save_dir`!', WARN)
     self.history.save_dir = self.datapath
     self.datapath = nil ---@diagnostic disable-line:inject-field
   end
@@ -219,7 +218,7 @@ function D:verify_logging()
   if self.logging ~= nil and type(self.logging) == 'boolean' then
     self.log.enabled = self.logging
     self.logging = nil ---@diagnostic disable-line:inject-field
-    vim.notify(('`options.logging` is deprecated, use `options.log.enabled`!'):format(MODSTR), WARN)
+    vim.notify('`options.logging` is deprecated, use `options.log.enabled`!', WARN)
   end
 
   if not (Util.is_type('string', self.log.logpath) and Util.path.exists(self.log.logpath)) then

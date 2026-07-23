@@ -1,4 +1,3 @@
-local MODSTR = 'project.util.path'
 local ERROR = vim.log.levels.ERROR
 local uv = vim.uv or vim.loop
 local Config = require('project.config')
@@ -73,7 +72,7 @@ function M.verify_owner(dir)
   local Log = require('project.util.log')
   if Util.is_windows() then
     if vim.g.project_verify_windows_logged ~= 1 then
-      Log.info(('(%s.verify_owner): Running on a Windows system. Aborting.'):format(MODSTR))
+      Log.info('(project.util.path.verify_owner): Running on a Windows system. Aborting.')
       vim.g.project_verify_windows_logged = 1
     end
     return true
@@ -81,8 +80,8 @@ function M.verify_owner(dir)
 
   local stat = uv.fs_stat(dir)
   if not stat then
-    Log.error(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR))
-    vim.notify(("(%s.verify_owner): Directory can't be accessed!"):format(MODSTR), ERROR)
+    Log.error("(project.util.path.verify_owner): Directory can't be accessed!")
+    vim.notify("(project.util.path.verify_owner): Directory can't be accessed!", ERROR)
     return false
   end
   return stat.uid == uv.getuid()
@@ -226,7 +225,7 @@ function M.create_path(path)
   path = path or M.projectpath --[[@as string]]
 
   if not M.exists(path) then
-    require('project.util.log').debug(('(%s.create_path): Creating directory `%s`.'):format(MODSTR, path))
+    require('project.util.log').debug(('(project.util.path.create_path): Creating directory `%s`.'):format(path))
     uv.fs_mkdir(path, M.open_mode('755'))
   end
 end

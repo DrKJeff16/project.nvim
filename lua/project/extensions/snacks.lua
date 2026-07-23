@@ -1,7 +1,6 @@
 ---@module 'project._meta'
 
 local uv = vim.uv or vim.loop
-local MODSTR = 'project.extensions.snacks'
 local Util = require('project.util')
 
 ---@class Project.Extensions.Snacks
@@ -92,7 +91,7 @@ function M.pick()
         return
       end
 
-      Util.log.debug(('(%s.pick): Opening Snacks picker'):format(MODSTR))
+      Util.log.debug('(project.extensions.snacks.pick): Opening Snacks picker')
       require('snacks').picker.files({
         cwd = uv.cwd() or vim.fn.getcwd(),
         show_empty = true,

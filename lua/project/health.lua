@@ -1,6 +1,5 @@
 ---@module 'project._meta'
 
-local MODSTR = 'project.health'
 local Config = require('project.config')
 local Util = require('project.util')
 
@@ -181,7 +180,7 @@ function M.check()
   M.fzf_lua_check()
   M.recent_proj_check()
 
-  Util.log.debug(('(%s): `checkhealth` successfully called.'):format(MODSTR))
+  Util.log.debug('(project.health): `checkhealth` successfully called.')
 end
 
 return M

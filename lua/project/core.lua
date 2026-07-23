@@ -4,7 +4,6 @@
 
 ---@module 'project._meta'
 
-local MODSTR = 'project.core'
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 local uv = vim.uv or vim.loop
@@ -247,9 +246,9 @@ function M.set_pwd(dir, method, bufnr)
   end
 
   if not Util.path.verify_owner(dir) then
-    Util.log.warn(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR))
+    Util.log.warn('(project.core.set_pwd): Project is owned by a different user')
     if Config.get().different_owners.notify or not Config.get().different_owners.allow then
-      vim.notify(('(%s.set_pwd): Project is owned by a different user'):format(MODSTR), ERROR)
+      vim.notify('(project.core.set_pwd): Project is owned by a different user', ERROR)
     end
     return Config.get().different_owners.allow
   end
@@ -276,7 +275,7 @@ function M.set_pwd(dir, method, bufnr)
         or vim.fs.joinpath(Util.strip_slash(dir, ':p:h:h:t'), Util.strip_slash(dir, ':p:h:t')),
     })
     modified = true
-    Util.log.info(('(%s.set_pwd): Added project `%s` to the top of session list'):format(MODSTR, unexpand_dir))
+    Util.log.info(('(project.core.set_pwd): Added project `%s` to the top of session list'):format(unexpand_dir))
   end
 
   if bufnr then
@@ -305,8 +304,7 @@ function M.set_pwd(dir, method, bufnr)
       table.remove(Util.history.session_projects, old_pos)
       table.insert(Util.history.session_projects, 1, { path = dir, name = name })
       Util.log.debug(
-        ('(%s.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
-          MODSTR,
+        ('(project.core.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
           Util.strip_slash(unexpand_dir, ':p:~'),
           old_pos
         )
@@ -332,14 +330,14 @@ function M.set_pwd(dir, method, bufnr)
     M.current_project = dir
     M.current_method = method
     if vim.g.project_cwd_log ~= 1 then
-      Util.log.info(('(%s.set_pwd): Current directory is selected project.'):format(MODSTR))
+      Util.log.info('(project.core.set_pwd): Current directory is selected project.')
     end
     vim.g.project_cwd_log = 1
     return true
   end
 
   local scope_chdir = Config.get().scope_chdir
-  local msg = ('(%s.set_pwd):'):format(MODSTR)
+  local msg = '(project.core.set_pwd):'
   if not vim.list_contains({ 'global', 'tab', 'win' }, scope_chdir) then
     Util.log.error(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)))
     vim.notify(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)), ERROR)
@@ -375,8 +373,7 @@ function M.set_pwd(dir, method, bufnr)
     end
 
     Util.log.debug(
-      ('(%s.set_pwd): Changed directory to `%s` using method `%s`'):format(
-        MODSTR,
+      ('(project.core.set_pwd): Changed directory to `%s` using method `%s`'):format(
         Util.strip_slash(dir, ':p:~'),
         method
       )
@@ -532,10 +529,10 @@ function M.root_files(scan_what, path, prefix)
       'visible_files',
     }, scan_what)
   then
-    error(('(%s.root_files): Invalid parameter `%s`!'):format(MODSTR, scan_what))
+    error(('(project.core.root_files): Invalid parameter `%s`!'):format(scan_what))
   end
   if not Util.path.exists(path) or vim.fn.isdirectory(path) ~= 1 then
-    error(('(%s.root_files): Invalid path `%s`!'):format(MODSTR, path))
+    error(('(project.core.root_files): Invalid path `%s`!'):format(path))
   end
 
   local dir = uv.fs_scandir(path)

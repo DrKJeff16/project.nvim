@@ -1,4 +1,3 @@
-local MODSTR = 'project.extensions.fzf-lua'
 local ERROR = vim.log.levels.ERROR
 local Config = require('project.config')
 local Util = require('project.util')
@@ -11,7 +10,7 @@ function M.default(items)
   Util.validate({ items = { items, { 'table' } } })
 
   if not vim.tbl_isempty(items) then
-    Util.log.debug(('(%s.default): Running default fzf-lua action.'):format(MODSTR))
+    Util.log.debug('(project.extensions.fzf-lua.default): Running default fzf-lua action.')
     require('fzf-lua').files({
       cwd = Util.history.find_entry('recent', items[1], 'path'),
       cwd_only = true,
@@ -62,8 +61,8 @@ function M.setup()
     return
   end
   if not Util.mod_exists('fzf-lua') then
-    Util.log.error(('(%s.setup): `fzf-lua` is not installed!'):format(MODSTR))
-    vim.notify(('(%s.setup): `fzf-lua` is not installed!'):format(MODSTR), ERROR)
+    Util.log.error('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed!')
+    vim.notify('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed!', ERROR)
     return
   end
 
@@ -76,10 +75,10 @@ end
 --- ---
 function M.run_fzf_lua()
   if not Util.mod_exists('fzf-lua') then
-    Util.log.error(('(%s.run_fzf_lua): `fzf-lua` is not installed!'):format(MODSTR))
-    error(('(%s.run_fzf_lua): `fzf-lua` is not installed!'):format(MODSTR))
+    Util.log.error('(project.extensions.fzf-lua.run_fzf_lua): `fzf-lua` is not installed!')
+    error('(project.extensions.fzf-lua.run_fzf_lua): `fzf-lua` is not installed!')
   end
-  Util.log.info(('(%s.run_fzf_lua): Running `fzf_exec`.'):format(MODSTR))
+  Util.log.info('(project.extensions.fzf-lua.run_fzf_lua): Running `fzf_exec`.')
 
   local Fzf = require('fzf-lua')
   Fzf.fzf_exec(M.exec, {
