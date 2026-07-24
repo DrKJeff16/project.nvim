@@ -78,10 +78,9 @@ function M.rename_input(project)
   }, function(input)
     if not input or input == '' then
       success = false
-      return
+    else
+      success = Util.history.rename_project(project, input)
     end
-
-    success = Util.history.rename_project(project, input)
   end)
 
   return success
@@ -95,11 +94,9 @@ function M.gen_import_prompt(bang)
   end
 
   vim.ui.input({ prompt = 'Input the import file:' }, function(input) ---@param input? string
-    if not input or input == '' then
-      return
+    if input and input ~= '' then
+      Util.history.import_history_json(input, bang)
     end
-
-    Util.history.import_history_json(input, bang)
   end)
 end
 
@@ -111,16 +108,13 @@ function M.gen_export_prompt(bang)
   end
 
   vim.ui.input({ prompt = 'Input the export file:' }, function(input) ---@param input? string
-    if not input or input == '' then
-      return
+    if input and input ~= '' then
+      vim.ui.input({ prompt = 'Select your indent level (default: 0):', default = '0' }, function(indent)
+        if indent and indent ~= '' then
+          Util.history.export_history_json(input, indent, bang)
+        end
+      end)
     end
-
-    vim.ui.input({ prompt = 'Select your indent level (default: 0):', default = '0' }, function(indent)
-      if not indent or indent == '' then
-        return
-      end
-      Util.history.export_history_json(input, indent, bang)
-    end)
   end)
 end
 
@@ -144,17 +138,11 @@ function M.new(opts)
     choices = opts.choices,
     choices_list = opts.choices_list,
   }, {
-    ---@param t Project.Popup.SelectChoices
-    ---@param k string
     __index = function(t, k)
       return rawget(t, k)
     end,
-    __call = function(_, ctx) ---@param ctx? vim.api.keyset.create_user_command.command_args
-      if not ctx then
-        opts.callback()
-      else
-        opts.callback(ctx)
-      end
+    __call = function(_, ctx) ---@param ctx vim.api.keyset.create_user_command.command_args
+      opts.callback(ctx)
     end,
   })
   return T
@@ -227,10 +215,11 @@ M.delete_menu = M.new({
   choices = function(opts) ---@param opts ProjectDefaults
     local T = {} ---@type table<string, fun(name: string)>
     for _, proj in ipairs(M.delete_menu.choices_list(opts)) do
-      T[proj] = proj == 'Exit' and function() end
-        or function()
+      T[proj] = function()
+        if proj ~= 'Exit' then
           Util.history.delete_project(Util.history.find_entry('recent', proj, 'path'))
         end
+      end
     end
     return T
   end,
@@ -276,13 +265,14 @@ M.rename_menu = M.new({
   choices = function(opts) ---@param opts ProjectDefaults
     local T = {} ---@type table<string, fun(name: string)>
     for _, proj in ipairs(M.rename_menu.choices_list(opts)) do
-      T[proj] = proj == 'Exit' and function() end
-        or function(name)
+      T[proj] = function(name)
+        if proj ~= 'Exit' then
           Util.history.rename_project(
             opts.show_by_name and Util.history.find_entry('recent', proj, 'path') or proj,
             name
           )
         end
+      end
     end
     return T
   end,
