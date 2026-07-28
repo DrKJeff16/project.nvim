@@ -71,8 +71,7 @@ function M.remove_root_patterns(patterns)
   local Util = require('project.util')
   Util.validate({ patterns = { patterns, { 'string', 'table' } } })
 
-  local Config = require('project.config')
-  local pats = Config.get().patterns
+  local pats = require('project.config').get().patterns
   if vim.g.project_setup ~= 1 then
     Util.log.error('(project.remove_root_patterns): `project.nvim` is not setup!')
     error('(project.remove_root_patterns): `project.nvim` is not setup!')
@@ -118,7 +117,7 @@ function M.remove_root_patterns(patterns)
   end
   table.remove(pats, pos)
 
-  Config.set('patterns', pats)
+  require('project.config').set('patterns', pats)
 end
 
 ---Add new root patterns to `project.nvim`'s config.
@@ -201,10 +200,7 @@ local Project = setmetatable(M, { ---@type Project
     if k == 'setup' then
       return require('project.config').setup
     end
-    if
-      vim.list_contains({ 'delete_menu', 'open_menu', 'recents_menu', 'session_menu' }, k)
-      and require('project.popup')[k]
-    then
+    if vim.list_contains({ 'delete_menu', 'open_menu', 'recents_menu', 'session_menu' }, k) then
       return require('project.popup')[k]
     end
     return rawget(self, k) or nil

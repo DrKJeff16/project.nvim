@@ -593,7 +593,9 @@ function M.setup()
       vim.api.nvim_create_autocmd('BufEnter', {
         group = group,
         callback = function(ev)
-          M.on_buf_enter(ev.buf)
+          if vim.api.nvim_buf_is_valid(ev.buf) and vim.api.nvim_buf_is_loaded(ev.buf) then
+            M.on_buf_enter(ev.buf)
+          end
         end,
       })
       vim.g.project_pattern_attach = 1
@@ -602,7 +604,9 @@ function M.setup()
       vim.api.nvim_create_autocmd('LspAttach', {
         group = group,
         callback = function(ev)
-          M.on_buf_enter(ev.buf)
+          if vim.api.nvim_buf_is_valid(ev.buf) and vim.api.nvim_buf_is_loaded(ev.buf) then
+            M.on_buf_enter(ev.buf)
+          end
         end,
       })
       vim.g.project_lsp_attach = 1

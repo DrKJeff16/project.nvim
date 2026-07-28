@@ -8,6 +8,7 @@ local Project = require('project')
 if not Project.util.mod_exists('telescope') then
   Project.util.log.error('(telescope._extensions.projects.main): Telescope is not installed!')
   vim.notify('(telescope._extensions.projects.main): Telescope is not installed!', ERROR)
+  return
 end
 
 local Pickers = require('telescope.pickers')

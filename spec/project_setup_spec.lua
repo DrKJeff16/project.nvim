@@ -1,38 +1,31 @@
 local assert = require('luassert') ---@type Luassert
 
 describe('project.nvim setup', function()
-  local project ---@type Project
-  local defaults ---@type ProjectOpts
+  local defaults ---@type ProjectConfigDefaults
   local ok ---@type boolean
+  local project ---@type Project
 
   before_each(function()
     project = require('project')
+    defaults = project.config.defaults:new():_get_no_mt()
   end)
 
   it('should set default configuration', function()
     ok = pcall(project.setup)
     assert.is_true(ok)
-
-    local options = require('project.config').get():_get_no_mt()
-    defaults = project.config.defaults:new():_get_no_mt()
-    assert.are_same(defaults, options)
+    assert.are_same(defaults, require('project.config').get():_get_no_mt())
   end)
 
-  it('should merge user configuration with defaults', function()
+  it('should accept empty table as parameter', function()
     ok = pcall(project.setup, {})
     assert.is_true(ok)
-
-    local options = project.config.get():_get_no_mt()
-    defaults = project.config.defaults:new():_get_no_mt()
-    assert.are_same(defaults, options)
+    assert.are_same(defaults, project.config.get():_get_no_mt())
   end)
 
-  it('should handle nil options', function()
+  it('should handle nil parameter', function()
     ok = pcall(project.setup, nil)
     assert.is_true(ok)
-
-    local options = require('project.config').get():_get_no_mt()
-    assert.are_same(defaults, options)
+    assert.are_same(defaults, project.config.get():_get_no_mt())
   end)
 
   for _, param in ipairs({ 1, false, '', function() end }) do
@@ -45,9 +38,7 @@ describe('project.nvim setup', function()
   it('should erase any option not in the defaults', function()
     ok = pcall(project.setup, { 1, foo = 'bar' })
     assert.is_true(ok)
-
-    local options = require('project.config').get():_get_no_mt()
-    assert.are_same(defaults, options)
+    assert.are_same(defaults, project.config.get():_get_no_mt())
   end)
 end)
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

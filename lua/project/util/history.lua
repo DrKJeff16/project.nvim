@@ -68,8 +68,8 @@ function M.rename_project(path, name)
   )
   for _, c in ipairs(vim.split(name, '', { trimempty = false })) do
     if not vim.list_contains(valid_chars, c) then
-      Log.error(('(%s.rename_project): Invalid character `%s`!'):format(c))
-      vim.notify(('(%s.rename_project): Invalid character `%s`!'):format(c), ERROR)
+      Log.error(('(project.util.history.rename_project): Invalid character `%s`!'):format(c))
+      vim.notify(('(project.util.history.rename_project): Invalid character `%s`!'):format(c), ERROR)
       return false
     end
   end
@@ -230,7 +230,7 @@ function M.export_history_json(path, ind, force_name)
       stat.size ~= 0
       and vim.fn.confirm(('File exists! Do you really want to export to it?'):format(path), '&Yes\n&No', 2) ~= 1
     then
-      Log.info('(%s.delete_project): Aborting project export.')
+      Log.info('(project.util.history.export_history_json): Aborting project export.')
       return
     end
   end

@@ -1,9 +1,11 @@
 if vim.g.project_setup ~= 1 then
-  error('project.nvim` is not loaded!')
+  vim.notify('project.nvim` is not loaded!', vim.log.levels.ERORR)
+  return
 end
 if not require('project.util').mod_exists('telescope') then
   require('project').util.log.error('(telescope._extensions.projects): Telescope is not installed!')
-  error('Telescope is not installed!')
+  vim.notify('Telescope is not installed!', vim.log.levels.ERROR)
+  return
 end
 
 local projects = require('telescope._extensions.projects.main').projects

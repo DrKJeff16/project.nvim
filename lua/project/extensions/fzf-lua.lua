@@ -1,5 +1,4 @@
 local ERROR = vim.log.levels.ERROR
-local Config = require('project.config')
 local Util = require('project.util')
 
 ---@class Project.Extensions.FzfLua
@@ -9,13 +8,14 @@ local M = {}
 function M.default(items)
   Util.validate({ items = { items, { 'table' } } })
 
+  local opts = require('project.config').get()
   if not vim.tbl_isempty(items) then
     Util.log.debug('(project.extensions.fzf-lua.default): Running default fzf-lua action.')
     require('fzf-lua').files({
       cwd = Util.history.find_entry('recent', items[1], 'path'),
       cwd_only = true,
-      silent = Config.get().silent_chdir,
-      hidden = Config.get().show_hidden,
+      silent = opts.silent_chdir,
+      hidden = opts.show_hidden,
     })
   end
 end
@@ -47,17 +47,17 @@ end
 ---@param cb fun(entry?: string|number, cb?: function)
 function M.exec(cb)
   local projects = Util.history.get_recent_projects()
-  if Config.get().fzf_lua.sort == 'newest' then
+  if require('project.config').get().fzf_lua.sort == 'newest' then
     projects = Util.reverse(projects)
   end
   for _, entry in ipairs(projects) do
-    cb(Config.get().fzf_lua.show == 'names' and entry.name or entry.path)
+    cb(require('project.config').get().fzf_lua.show == 'names' and entry.name or entry.path)
   end
   cb()
 end
 
 function M.setup()
-  if not Config.get().fzf_lua.enabled then
+  if not require('project.config').get().fzf_lua.enabled then
     return
   end
   if not Util.mod_exists('fzf-lua') then
