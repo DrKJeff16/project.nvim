@@ -1,4 +1,3 @@
-local Highlight = require('lualine.highlight')
 local Project = require('project')
 
 ---@class LuaLine.Super
@@ -32,7 +31,6 @@ local Project = require('project')
 ---@field options table
 ---@field section string
 
--- local M = require('lualine_require').require('lualine.component'):extend()
 ---@class Project.LuaLine
 ---@field private __is_lualine_component boolean
 ---@field color_active_hl ColorActiveHl
@@ -66,7 +64,7 @@ function M:init(options)
   local hl_info = vim.api.nvim_get_hl(0, { name = 'Keyword' })
   local fg = hl_info.fg or nil
   local bg = hl_info.bg or nil
-  self.color_active_hl = Highlight.create_component_highlight_group(
+  self.color_active_hl = require('lualine.highlight').create_component_highlight_group(
     { fg = fg and ('#%02x'):format(fg) or nil, bg = bg and ('#%02x'):format(bg) or nil },
     'project_active',
     self.options
@@ -79,11 +77,8 @@ function M:init(options)
 end
 
 function M:update_status()
-  if not package.loaded['project'] then
-    return self.options.no_project
-  end
-
-  return Project.core.current_project and self:project_root() or self.options.no_project
+  return not package.loaded['project'] and self.options.no_project
+    or (Project.core.current_project and self:project_root() or self.options.no_project)
 end
 
 ---@return string component
