@@ -1137,6 +1137,6 @@ Show these much love!
 
 ## License
 
-[Apache-2.0](https://github.com/DrKJeff16/project.nvim/blob/main/LICENSE)
+[GNU GPLv2](https://github.com/DrKJeff16/project.nvim/blob/main/LICENSE)
 
 <!-- vim: set ts=2 sts=2 sw=2 et ai si sta: -->
