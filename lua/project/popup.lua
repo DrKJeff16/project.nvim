@@ -1,8 +1,6 @@
 ---@module 'project._meta'
 
 local ERROR = vim.log.levels.ERROR
-local WARN = vim.log.levels.WARN
-local Config = require('project.config')
 local Util = require('project.util')
 
 ---@param proj string
@@ -30,7 +28,11 @@ local function open_node(proj, only_cd, ran_cd)
     vim.g.project_nvim_cwd = proj
   end
 
-  local ls = Core.root_files(Config.get().show_hidden and 'all' or 'all_visible', proj, ran_cd and proj or nil)
+  local ls = Core.root_files(
+    require('project.config').get().show_hidden and 'all' or 'all_visible',
+    proj,
+    ran_cd and proj or nil
+  )
   table.insert(ls, 'Exit')
 
   vim.ui.select(ls, {
@@ -169,33 +171,34 @@ function M.prompt_project(input)
     end
   end
 
-  local Core = require('project.core')
-  if Core.current_project == input or vim.list_contains(Util.history.session_projects, input) then
-    vim.notify('Already added that directory!', WARN)
-    return
+  if
+    require('project.core').get_current_project() == input
+    or vim.list_contains(Util.history.get_session_projects(), input)
+  then
+    vim.notify('Already added that directory!', vim.log.levels.WARN)
+  else
+    require('project.core').set_pwd(input, 'prompt')
+    Util.history.write_history()
   end
-  Core.set_pwd(input, 'prompt')
-  Util.history.write_history()
 end
 
 M.delete_menu = M.new({
   callback = function()
-    local choices_list = M.delete_menu.choices_list(Config.get())
+    local config = require('project.config').get()
+    local choices_list = M.delete_menu.choices_list(config)
     vim.ui.select(choices_list, {
       prompt = 'Select a project to delete:',
       format_item = function(item) ---@param item string
         return (item == 'Exit' and '' or (Util.history.find_entry('session', item, 'path') and '* ' or '')) .. item
       end,
     }, function(item)
-      if not item then
-        return
+      if item then
+        if vim.list_contains(choices_list, item) and M.delete_menu.choices(config)[item] then
+          M.delete_menu.choices(config)[item]()
+        else
+          vim.notify('Bad selection!', ERROR)
+        end
       end
-      if not (vim.list_contains(choices_list, item) and M.delete_menu.choices(Config.get())[item]) then
-        vim.notify('Bad selection!', ERROR)
-        return
-      end
-
-      M.delete_menu.choices(Config.get())[item]()
     end)
   end,
   choices_list = function(opts) ---@param opts ProjectDefaults
@@ -227,25 +230,24 @@ M.delete_menu = M.new({
 
 M.rename_menu = M.new({
   callback = function()
-    local choices_list = M.rename_menu.choices_list(Config.get())
+    local config = require('project.config').get()
+    local choices_list = M.rename_menu.choices_list(config)
     vim.ui.select(choices_list, { prompt = 'Select a project to rename:' }, function(item) ---@param item string
-      if not item or item == 'Exit' then
-        return
-      end
-      if not (vim.list_contains(choices_list, item) and M.rename_menu.choices(Config.get())[item]) then
-        vim.notify('Bad selection!', ERROR)
-        return
-      end
-
-      vim.ui.input({
-        prompt = ('Input the new name for project %s'):format(
-          Config.get().show_by_name and item or Util.history.find_entry('recent', item, 'name')
-        ),
-      }, function(input)
-        if input and input ~= '' then
-          M.rename_menu.choices(Config.get())[item](input)
+      if item and item ~= 'Exit' then
+        if vim.list_contains(choices_list, item) and M.rename_menu.choices(config)[item] then
+          vim.ui.input({
+            prompt = ('Input the new name for project %s'):format(
+              config.show_by_name and item or Util.history.find_entry('recent', item, 'name')
+            ),
+          }, function(input)
+            if input and input ~= '' then
+              M.rename_menu.choices(config)[item](input)
+            end
+          end)
+        else
+          vim.notify('Bad selection!', ERROR)
         end
-      end)
+      end
     end)
   end,
   choices_list = function(opts) ---@param opts ProjectDefaults
@@ -280,28 +282,27 @@ M.rename_menu = M.new({
 
 M.recents_menu = M.new({
   callback = function()
-    local choices_list = M.recents_menu.choices_list(Config.get())
+    local config = require('project.config').get()
+    local choices_list = M.recents_menu.choices_list(config)
     vim.ui.select(choices_list, {
       prompt = 'Select a project:',
       format_item = function(item) ---@param item string
         return (item == 'Exit' and '' or (Util.history.find_entry('session', item, 'path') and '* ' or '')) .. item
       end,
     }, function(item) ---@param item string
-      if not item or item == '' then
-        return
+      if item and item ~= '' then
+        if vim.list_contains(choices_list, item) and M.recents_menu.choices(config)[item] then
+          M.recents_menu.choices(config)[item](Util.history.find_entry('recent', item, 'path'), false, false)
+        else
+          vim.notify('Bad selection!', ERROR)
+        end
       end
-      if not (vim.list_contains(choices_list, item) and M.recents_menu.choices(Config.get())[item]) then
-        vim.notify('Bad selection!', ERROR)
-        return
-      end
-
-      M.recents_menu.choices(Config.get())[item](Util.history.find_entry('recent', item, 'path'), false, false)
     end)
   end,
   choices_list = function(opts) ---@param opts ProjectDefaults
     local choices_list = {} ---@type string[]
     for _, v in ipairs(Util.history.get_recent_projects(false, true)) do
-      table.insert(choices_list, Config.get().show_by_name and v.name or v.path)
+      table.insert(choices_list, require('project.config').get().show_by_name and v.name or v.path)
     end
     if opts.telescope.sort == 'newest' then
       choices_list = Util.reverse(choices_list)
@@ -323,24 +324,21 @@ M.recents_menu = M.new({
 M.open_menu = M.new({
   callback = function(ctx)
     if ctx and ctx.fargs and not vim.tbl_isempty(ctx.fargs) then
-      if not vim.list_contains(vim.tbl_keys(M.open_menu.choices()), ctx.fargs[1]) then
-        return
+      if vim.list_contains(vim.tbl_keys(M.open_menu.choices()), ctx.fargs[1]) then
+        M.open_menu.choices()[ctx.fargs[1]](ctx)
       end
-      M.open_menu.choices()[ctx.fargs[1]](ctx)
-      return
+    else
+      local choices_list = M.open_menu.choices_list()
+      vim.ui.select(choices_list, { prompt = 'Select an operation:' }, function(item)
+        if item then
+          if vim.list_contains(choices_list, item) and M.open_menu.choices()[item] then
+            M.open_menu.choices()[item]()
+          else
+            vim.notify('Bad selection!', ERROR)
+          end
+        end
+      end)
     end
-    local choices_list = M.open_menu.choices_list()
-    vim.ui.select(choices_list, { prompt = 'Select an operation:' }, function(item)
-      if not item then
-        return
-      end
-      if not (vim.list_contains(choices_list, item) and M.open_menu.choices()[item]) then
-        vim.notify('Bad selection!', ERROR)
-        return
-      end
-
-      M.open_menu.choices()[item]()
-    end)
   end,
   choices = function()
     return { ---@type table<string, function>
@@ -431,11 +429,10 @@ M.open_menu = M.new({
     if vim.g.project_log_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'Log')
     end
-    if not exit then
-      return res_list
+    if exit then
+      table.insert(res_list, 'Exit')
     end
 
-    table.insert(res_list, 'Exit')
     return res_list
   end,
 })
@@ -447,28 +444,28 @@ M.session_menu = M.new({
       only_cd = ctx.bang
     end
 
-    local choices_list = M.session_menu.choices_list(Config.get())
+    local config = require('project.config').get()
+    local choices_list = M.session_menu.choices_list(config)
     if #choices_list == 1 then
-      vim.notify('No sessions available!', WARN)
-      return
+      vim.notify('No sessions available!', vim.log.levels.WARN)
+    else
+      vim.ui.select(choices_list, {
+        prompt = 'Select a project from your session:',
+        format_item = function(item) ---@param item string
+          return (item == 'Exit' or config.show_by_name) and item or Util.strip_slash(item, ':p:~')
+        end,
+      }, function(item) ---@param item string
+        if not item or item == '' then
+          return
+        end
+        if not (vim.list_contains(choices_list, item) and M.session_menu.choices(config)[item]) then
+          vim.notify('Bad selection!', ERROR)
+          return
+        end
+
+        M.session_menu.choices(config)[item](Util.history.find_entry('session', item, 'path'), only_cd, false)
+      end)
     end
-
-    vim.ui.select(choices_list, {
-      prompt = 'Select a project from your session:',
-      format_item = function(item) ---@param item string
-        return (item == 'Exit' or Config.get().show_by_name) and item or Util.strip_slash(item, ':p:~')
-      end,
-    }, function(item) ---@param item string
-      if not item or item == '' then
-        return
-      end
-      if not (vim.list_contains(choices_list, item) and M.session_menu.choices(Config.get())[item]) then
-        vim.notify('Bad selection!', ERROR)
-        return
-      end
-
-      M.session_menu.choices(Config.get())[item](Util.history.find_entry('session', item, 'path'), only_cd, false)
-    end)
   end,
   choices = function(opts) ---@param opts ProjectDefaults
     local choices = { ---@type table<string, fun(...: any)>
@@ -476,11 +473,7 @@ M.session_menu = M.new({
         vim.g.project_nvim_cwd = ''
       end,
     }
-    local sessions = M.session_menu.choices_list(opts)
-    if vim.tbl_isempty(sessions) then
-      return choices
-    end
-    for _, proj in ipairs(sessions) do
+    for _, proj in ipairs(M.session_menu.choices_list(opts)) do
       if proj ~= 'Exit' then
         choices[proj] = open_node
       end
@@ -489,7 +482,7 @@ M.session_menu = M.new({
   end,
   choices_list = function(opts) ---@param opts ProjectDefaults
     local choices = {} ---@type string[]
-    for i, v in ipairs(Util.history.session_projects) do
+    for i, v in ipairs(Util.history.get_session_projects()) do
       choices[i] = opts.show_by_name and v.name or v.path
     end
 

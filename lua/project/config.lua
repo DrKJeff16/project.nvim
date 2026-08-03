@@ -4,6 +4,7 @@ local uv = vim.uv or vim.loop
 local Util = require('project.util')
 
 local float = nil ---@type Project.ConfigLoc|nil|?
+local detection_methods = {} ---@type { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
 
 ---Get the default options for configuring `project`.
 --- ---
@@ -15,7 +16,6 @@ end
 
 ---@class Project.Config
 ---@field custom_projects ProjectConfigHistoryEntry[]
----@field defaults ProjectDefaults
 local M = {}
 
 local options = get_defaults():new()
@@ -36,6 +36,12 @@ function M.set(k, v)
   options[k] = v
 end
 
+---@return { [1]: 'lsp', [2]: 'pattern' }|{ [1]: 'pattern' } detection_methods
+---@nodiscard
+function M.get_detection_methods()
+  return detection_methods
+end
+
 ---The function called when running `require('project').setup()`.
 --- ---
 ---@param opts? ProjectOpts The `project.nvim` config options.
@@ -45,7 +51,7 @@ function M.setup(opts)
   local pattern_exclude = Util.globtopattern.pattern_exclude
   options = get_defaults():new(opts or {})
 
-  M.detection_methods = options:gen_methods()
+  detection_methods = options:gen_methods()
   options:expand_excluded()
   options.exclude_dirs = vim.tbl_map(pattern_exclude, options.exclude_dirs)
 

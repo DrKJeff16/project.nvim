@@ -78,7 +78,7 @@ end
 
 function M:update_status()
   return not package.loaded['project'] and self.options.no_project
-    or (Project.core.current_project and self:project_root() or self.options.no_project)
+    or (Project.core.get_current_project() and self:project_root() or self.options.no_project)
 end
 
 ---@return string component
@@ -94,7 +94,8 @@ function M:project_root()
     return msg
   end
 
-  local curr, root = Project.core.get_current_project(bufnr), Project.core.get_project_root(bufnr)
+  local curr = Project.core.get_current(bufnr)
+  local root = Project.core.get_project_root(bufnr)
   local format = (
     self.options.format and vim.list_contains({ 'short', 'full', 'full_expanded', 'name' }, self.options.format)
   )

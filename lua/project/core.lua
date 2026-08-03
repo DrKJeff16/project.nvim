@@ -4,21 +4,33 @@
 
 ---@module 'project._meta'
 
-local ERROR = vim.log.levels.ERROR
-local INFO = vim.log.levels.INFO
-local uv = vim.uv or vim.loop
-local Config = require('project.config')
 local Util = require('project.util')
 
 local per_project_bufs = {} ---@type table<string, table<string, integer[]>>
 
+local current_method = nil ---@type string|nil|?
+local current_project = nil ---@type string|nil|?
+local last_project = nil ---@type string|nil|?
+
 ---The `project.nvim` API module.
 --- ---
 ---@class Project.Core
----@field public current_method string|nil|?
----@field public current_project string|nil|?
----@field public last_project string|nil|?
 local M = {}
+
+---@return string|nil|? current_project
+function M.get_current_project()
+  return current_project
+end
+
+---@return string|nil|? current_method
+function M.get_current_method()
+  return current_method
+end
+
+---@return string|nil|? last_project
+function M.get_last_project()
+  return last_project
+end
 
 ---@return table<string, table<string, integer[]>> per_project_bufs
 function M._get_project_bufs()
@@ -42,7 +54,7 @@ function SWITCH.lsp(bufnr)
     if vim.g.project_switch_root ~= root then
       vim.g.project_switch_root = root
     end
-    if not vim.list_contains({ (uv.cwd() or vim.fn.getcwd()), vim.g.project_switch_root }, root) then
+    if not vim.list_contains({ (vim.uv.cwd() or vim.fn.getcwd()), vim.g.project_switch_root }, root) then
       Util.log.debug(('(SWITCH.lsp): found `%s` root at `%s`.'):format(lsp_name, root))
     end
     return true, root, ('"%s" lsp'):format(lsp_name)
@@ -64,7 +76,7 @@ function SWITCH.pattern(bufnr)
     if vim.g.project_switch_root ~= root then
       vim.g.project_switch_root = root
     end
-    if not vim.list_contains({ (uv.cwd() or vim.fn.getcwd()), vim.g.project_switch_root }, root) then
+    if not vim.list_contains({ (vim.uv.cwd() or vim.fn.getcwd()), vim.g.project_switch_root }, root) then
       Util.log.debug(('(SWITCH.pattern): found `%s` root at `%s`.'):format(method, root))
     end
     return true, root, method
@@ -96,7 +108,7 @@ end
 ---@overload fun(full_entry: false): last: string|nil|?
 ---@overload fun(full_entry: true): last: ProjectHistoryEntry|nil|?
 ---@nodiscard
-function M.get_last_project(full_entry)
+function M.get_last(full_entry)
   Util.validate({ full_entry = { full_entry, { 'boolean', 'nil' }, true } })
   if full_entry == nil then
     full_entry = false
@@ -107,7 +119,7 @@ function M.get_last_project(full_entry)
     return
   end
 
-  local res = #Util.history.session_projects <= 1 and recent[2] or recent[1]
+  local res = #Util.history.get_session_projects() <= 1 and recent[2] or recent[1]
   return full_entry and res or res.path
 end
 
@@ -146,18 +158,18 @@ function M.find_lsp_root(bufnr)
     return
   end
 
-  local ignore_lsp = Config.get().lsp.ignore
+  local lsp_config = require('project.config').get().lsp
   local ft = Util.optget('filetype', 'buf', bufnr)
   for _, client in ipairs(clients) do
     local filetypes = client.config.filetypes --[[@as string[]\]]
     local valid = (
       Util.is_type('table', filetypes)
       and vim.list_contains(filetypes, ft)
-      and not vim.list_contains(ignore_lsp, client.name)
+      and not vim.list_contains(lsp_config.ignore, client.name)
       and client.config.root_dir
     )
     if valid then
-      if Config.get().lsp.use_pattern_matching and Util.path.root_included(client.config.root_dir) == nil then
+      if lsp_config.use_pattern_matching and Util.path.root_included(client.config.root_dir) == nil then
         return
       end
       return client.config.root_dir, client.name
@@ -181,7 +193,7 @@ function M.find_pattern_root(bufnr_or_dir)
   elseif type(bufnr_or_dir) == 'string' then
     dir = bufnr_or_dir
   end
-  dir = vim.fn.isdirectory(dir) == 1 and dir or Util.strip_slash(dir, ':p:h') ---@type string
+  dir = vim.fn.isdirectory(dir) == 1 and dir or Util.strip_slash(dir, ':p:h')
   return Util.path.root_included(Util.is_windows() and dir:gsub('\\', '/') or dir)
 end
 
@@ -193,7 +205,7 @@ function M.valid_bt(bufnr)
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   return Util.buffer_valid(bufnr)
-    and not vim.list_contains(Config.get().disable_on.bt, Util.optget('buftype', 'buf', bufnr))
+    and not vim.list_contains(require('project.config').get().disable_on.bt, Util.optget('buftype', 'buf', bufnr))
 end
 
 function M.refresh_project_bufs()
@@ -216,14 +228,14 @@ function M.refresh_project_bufs()
   Util.history.write_history()
 
   local sessions = {} ---@type ProjectHistoryEntry[]
-  for _, session in ipairs(Util.history.session_projects) do
+  for _, session in ipairs(Util.history.get_session_projects()) do
     local proj_buf_path = session.path
     if per_project_bufs[proj_buf_path] and not vim.tbl_isempty(per_project_bufs[proj_buf_path]) then
       table.insert(sessions, session)
     end
   end
 
-  Util.history.session_projects = vim.deepcopy(sessions)
+  Util.history.set_session_projects(sessions)
 end
 
 ---@param dir? string
@@ -245,35 +257,36 @@ function M.set_pwd(dir, method, bufnr)
     return false
   end
 
+  local config = require('project.config').get()
   if not Util.path.verify_owner(dir) then
     Util.log.warn('(project.core.set_pwd): Project is owned by a different user')
-    if Config.get().different_owners.notify or not Config.get().different_owners.allow then
-      vim.notify('(project.core.set_pwd): Project is owned by a different user', ERROR)
+    if config.different_owners.notify or not config.different_owners.allow then
+      vim.notify('(project.core.set_pwd): Project is owned by a different user', vim.log.levels.ERROR)
     end
-    return Config.get().different_owners.allow
+    return config.different_owners.allow
   end
 
-  Util.history.session_projects = Util.history.session_projects or {}
+  Util.history.set_session_projects(Util.history.get_session_projects() or {})
 
   local custom_name = nil ---@type string|nil|?
-  for _, v in ipairs(Config.custom_projects) do
+  for _, v in ipairs(require('project.config').custom_projects) do
     if Util.strip_slash(v.path) == dir then
       custom_name = v.name
     end
   end
 
+  local session_projects = Util.history.get_session_projects()
   local unexpand_dir, modified = Util.strip_slash(dir, ':p:~'), false
-  if
-    not vim.tbl_contains(Util.history.session_projects, function(val)
-      return val.path == dir
-    end, { predicate = true })
-  then
-    table.insert(Util.history.session_projects, {
+  if not vim.tbl_contains(session_projects, function(val)
+    return val.path == dir
+  end, { predicate = true }) then
+    table.insert(session_projects, {
       path = dir,
       name = custom_name
         or Util.history.find_entry('recent', dir, 'name')
         or vim.fs.joinpath(Util.strip_slash(dir, ':p:h:h:t'), Util.strip_slash(dir, ':p:h:t')),
     })
+    Util.history.set_session_projects(session_projects)
     modified = true
     Util.log.info(('(project.core.set_pwd): Added project `%s` to the top of session list'):format(unexpand_dir))
   end
@@ -291,9 +304,10 @@ function M.set_pwd(dir, method, bufnr)
     M.refresh_project_bufs()
   end
 
-  if not modified and #Util.history.session_projects > 1 then
+  session_projects = Util.history.get_session_projects()
+  if not modified and #session_projects > 1 then
     local old_pos, name = nil, '' ---@type integer|nil|?, string
-    for k, v in ipairs(Util.history.session_projects) do
+    for k, v in ipairs(session_projects) do
       if v.path == dir then
         old_pos = k
         name = v.name
@@ -301,8 +315,9 @@ function M.set_pwd(dir, method, bufnr)
       end
     end
     if old_pos and old_pos ~= 1 then
-      table.remove(Util.history.session_projects, old_pos)
-      table.insert(Util.history.session_projects, 1, { path = dir, name = name })
+      table.remove(session_projects, old_pos)
+      table.insert(session_projects, 1, { path = dir, name = name })
+      Util.history.set_session_projects(session_projects)
       Util.log.debug(
         ('(project.core.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
           Util.strip_slash(unexpand_dir, ':p:~'),
@@ -326,9 +341,9 @@ function M.set_pwd(dir, method, bufnr)
     })
   end
 
-  if dir == Util.strip_slash(uv.cwd() or vim.fn.getcwd()) then
-    M.current_project = dir
-    M.current_method = method
+  if dir == Util.strip_slash(vim.uv.cwd() or vim.fn.getcwd()) then
+    current_project = dir
+    current_method = method
     if vim.g.project_cwd_log ~= 1 then
       Util.log.info('(project.core.set_pwd): Current directory is selected project.')
     end
@@ -336,11 +351,11 @@ function M.set_pwd(dir, method, bufnr)
     return true
   end
 
-  local scope_chdir = Config.get().scope_chdir
+  local scope_chdir = config.scope_chdir
   local msg = '(project.core.set_pwd):'
   if not vim.list_contains({ 'global', 'tab', 'win' }, scope_chdir) then
     Util.log.error(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)))
-    vim.notify(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)), ERROR)
+    vim.notify(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)), vim.log.levels.ERROR)
   end
 
   vim.g.project_cwd_log = 0
@@ -353,8 +368,8 @@ function M.set_pwd(dir, method, bufnr)
   msg = ('%s chdir: `%s`, method: `%s`, status: `%s`'):format(msg, dir, method, (ok and 'SUCCESS' or 'FAILED'))
 
   if ok then
-    M.current_project = dir
-    M.current_method = method
+    current_project = dir
+    current_method = method
 
     Util.log.info(msg)
 
@@ -383,8 +398,8 @@ function M.set_pwd(dir, method, bufnr)
     Util.log.error(msg)
   end
 
-  if not Config.get().silent_chdir then
-    vim.notify(msg, (ok and INFO or ERROR))
+  if not config.silent_chdir then
+    vim.notify(msg, vim.log.levels[ok and 'INFO' or 'ERROR'])
   end
   return ok
 end
@@ -400,15 +415,17 @@ end
 function M.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
-  if not Util.buffer_valid(bufnr) or vim.tbl_isempty(Config.detection_methods) then
+  local detection_methods = require('project.config').get_detection_methods()
+  if not Util.buffer_valid(bufnr) or vim.tbl_isempty(detection_methods) then
     return
   end
 
+  local config = require('project.config').get()
   local roots = {} ---@type { root: string, method_msg: string, method: string }[]
   local root, method = nil, nil ---@type string|nil|?, string|nil|?
   local ops = vim.tbl_keys(SWITCH) ---@type ('lsp'|'pattern')[]
   local success = false
-  for _, m in ipairs(Config.detection_methods) do
+  for _, m in ipairs(detection_methods) do
     if vim.list_contains(ops, m) then
       success, root, method = SWITCH[m](bufnr) ---@type boolean, string|nil|?, string|nil|?
       if success and root and method then
@@ -421,7 +438,7 @@ function M.get_project_root(bufnr)
     return
   end
 
-  if #roots == 1 or Config.get().lsp.no_fallback then
+  if #roots == 1 or config.lsp.no_fallback then
     return roots[1].root, roots[1].method_msg
   end
   if roots[1].root == roots[2].root then
@@ -442,7 +459,7 @@ end
 ---@return string|nil|? method
 ---@return string|nil|? last
 ---@nodiscard
-function M.get_current_project(bufnr)
+function M.get_current(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
   if not Util.buffer_valid(bufnr) then
@@ -450,7 +467,7 @@ function M.get_current_project(bufnr)
   end
 
   local curr, method = M.get_project_root(bufnr)
-  local last = M.get_last_project()
+  local last = M.get_last()
   return curr, method, last
 end
 
@@ -475,6 +492,7 @@ function M.on_buf_enter(bufnr)
     return
   end
 
+  local config = require('project.config').get()
   local bufname = vim.api.nvim_buf_get_name(bufnr)
   local dir = M.check_oil(bufnr) or ''
 
@@ -483,15 +501,15 @@ function M.on_buf_enter(bufnr)
   if
     not (Util.path.exists(dir) and Util.path.root_included(dir))
     or Util.path.is_excluded(dir)
-    or vim.list_contains(Config.get().disable_on.ft, Util.optget('filetype', 'buf', bufnr))
-    or vim.list_contains(Config.get().disable_on.bt, Util.optget('buftype', 'buf', bufnr))
+    or vim.list_contains(config.disable_on.ft, Util.optget('filetype', 'buf', bufnr))
+    or vim.list_contains(config.disable_on.bt, Util.optget('buftype', 'buf', bufnr))
   then
     return
   end
 
-  M.current_project, M.current_method = M.get_current_project(bufnr)
-  if M.set_pwd(M.current_project, M.current_method, bufnr) then
-    M.current_project, M.current_method, M.last_project = M.get_current_project(bufnr)
+  current_project, current_method = M.get_current(bufnr)
+  if M.set_pwd(current_project, current_method, bufnr) then
+    current_project, current_method, last_project = M.get_current(bufnr)
     Util.history.write_history()
   end
 end
@@ -510,9 +528,9 @@ function M.root_files(scan_what, path, prefix)
     prefix = { prefix, { 'string', 'nil' }, true },
   })
   if not scan_what then
-    scan_what = Config.get().show_hidden and 'all' or 'all_visible'
+    scan_what = require('project.config').get().show_hidden and 'all' or 'all_visible'
   end
-  path = (not path or path == '') and (M.get_current_project() or M.get_project_root()) or path
+  path = (not path or path == '') and (M.get_current() or M.get_project_root()) or path
   if not path then
     return
   end
@@ -535,13 +553,13 @@ function M.root_files(scan_what, path, prefix)
     error(('(project.core.root_files): Invalid path `%s`!'):format(path))
   end
 
-  local dir = uv.fs_scandir(path)
+  local dir = vim.uv.fs_scandir(path)
   if not dir then
     return
   end
 
   local files = {} ---@type string[]
-  local next, ftype = uv.fs_scandir_next(dir)
+  local next, ftype = vim.uv.fs_scandir_next(dir)
   while next do
     local is_hidden = Util.path.is_hidden(next)
     local is_type ---@type boolean
@@ -567,7 +585,7 @@ function M.root_files(scan_what, path, prefix)
     if is_type and next ~= '.git' then
       table.insert(files, prefix and vim.fs.joinpath(prefix, next) or next)
     end
-    next, ftype = uv.fs_scandir_next(dir)
+    next, ftype = vim.uv.fs_scandir_next(dir)
   end
 
   return vim.tbl_isempty(files) and nil or files
@@ -588,8 +606,10 @@ function M.setup()
     end,
   })
 
-  if not Config.get().manual_mode then
-    if vim.list_contains(Config.detection_methods, 'pattern') then
+  local config = require('project.config').get()
+  if not config.manual_mode then
+    local detection_methods = require('project.config').get_detection_methods()
+    if vim.list_contains(detection_methods, 'pattern') then
       vim.api.nvim_create_autocmd('BufEnter', {
         group = group,
         callback = function(ev)
@@ -600,7 +620,7 @@ function M.setup()
       })
       vim.g.project_pattern_attach = 1
     end
-    if vim.list_contains(Config.detection_methods, 'lsp') then
+    if vim.list_contains(detection_methods, 'lsp') then
       vim.api.nvim_create_autocmd('LspAttach', {
         group = group,
         callback = function(ev)

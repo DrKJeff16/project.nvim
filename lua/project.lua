@@ -45,11 +45,11 @@ function M.current_project(refresh)
   local Core = require('project.core')
   if refresh then
     Util.log.debug('(project.current_project): Refreshing current project info.')
-    return Core.get_current_project()
+    return Core.get_current()
   end
 
   Util.log.debug('(project.current_project): Not refreshing current project info.')
-  return Core.current_project, Core.current_method, Core.last_project
+  return Core.get_current_project(), Core.get_current_method(), Core.get_last_project()
 end
 
 ---@param bufnr? integer
@@ -180,7 +180,7 @@ local Project = setmetatable(M, { ---@type Project
       return require('project.core').get_history_paths
     end
     if k == 'get_last_project' then
-      return require('project.core').get_last_project
+      return require('project.core').get_last()
     end
     if k == 'get_project_root' then
       return require('project.core').get_project_root

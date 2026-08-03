@@ -95,14 +95,14 @@ function M.project_check()
   local Core = require('project.core')
 
   vim.health.start('Current Project')
-  local curr, method, last = Core.current_project, Core.current_method, Core.last_project
+  local curr, method, last = Core.get_current_project(), Core.get_current_method(), Core.get_last_project()
   local msg = ('Current project: `%s`\n'):format(curr and curr or 'No Current Project')
   msg = ('%sMethod used: `%s`\n'):format(msg, (method and method or 'No method available'))
   msg = ('%sLast project: `%s`'):format(msg, (last and last or 'No Last Project In History'))
   vim.health.info(msg)
 
   vim.health.start('Detection Methods')
-  local methods = Config.detection_methods
+  local methods = Config.get_detection_methods()
   msg = ''
   for k, m in ipairs(methods) do
     local str = Util.format_per_type(type(m), m)
@@ -112,7 +112,7 @@ function M.project_check()
 
   vim.health.start('Active Sessions')
   local active = vim.g.project_history_has_watch_setup == 1
-  local projects = vim.deepcopy(Util.history.session_projects)
+  local projects = Util.history.get_session_projects()
   if not active or vim.tbl_isempty(projects) then
     vim.health.warn('No active session projects!')
     return
@@ -148,7 +148,7 @@ end
 
 function M.recent_proj_check()
   vim.health.start('Recent Projects')
-  local recents = Util.reverse(Util.history.get_recent_projects(false))
+  local recents = Util.reverse(Util.history.get_recent_projects())
   if vim.tbl_isempty(recents) then
     vim.health.warn([[No projects found in history!
 

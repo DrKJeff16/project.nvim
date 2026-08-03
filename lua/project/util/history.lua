@@ -33,16 +33,35 @@ local allowed_flags = {
 
 ---@class Project.Util.History
 ---@field public historysize? integer
----Projects from previous neovim sessions.
---- ---
----@field public recent_projects ProjectHistoryEntry[]
----Projects from current neovim session.
---- ---
----@field public session_projects ProjectHistoryEntry[]
 local M = {}
 
-M.session_projects = {}
-M.recent_projects = {}
+---Projects from current neovim session.
+--- ---
+local session_projects = {} ---@type ProjectHistoryEntry[]
+
+---Projects from previous neovim sessions.
+--- ---
+local recent_projects = {} ---@type ProjectHistoryEntry[]
+
+---@return ProjectHistoryEntry[] session_projects
+---@nodiscard
+function M.get_session_projects()
+  return session_projects
+end
+
+---@param projects ProjectHistoryEntry[]
+function M.set_session_projects(projects)
+  Util.validate({ projects = { projects, { 'table' } } })
+
+  session_projects = vim.deepcopy(projects)
+end
+
+---@param projects ProjectHistoryEntry[]
+function M.set_recent_projects(projects)
+  Util.validate({ projects = { projects, { 'table' } } })
+
+  recent_projects = vim.deepcopy(projects)
+end
 
 ---@param path string
 ---@param name string
@@ -77,28 +96,28 @@ function M.rename_project(path, name)
   local renamed = false
   local recent_i = 0
   local old_name = ''
-  for i, proj in ipairs(M.recent_projects) do
+  for i, proj in ipairs(recent_projects) do
     if proj.path == path then
       recent_i = i
       break
     end
   end
   if recent_i ~= 0 then
-    old_name = M.recent_projects[recent_i].name
-    M.recent_projects[recent_i].name = name
+    old_name = recent_projects[recent_i].name
+    recent_projects[recent_i].name = name
     renamed = true
   end
 
   local session_i = 0
-  for i, proj in ipairs(M.session_projects) do
+  for i, proj in ipairs(session_projects) do
     if proj.path == path then
       session_i = i
       break
     end
   end
   if session_i ~= 0 then
-    old_name = M.session_projects[session_i].name
-    M.session_projects[session_i].name = name
+    old_name = session_projects[session_i].name
+    session_projects[session_i].name = name
     renamed = true
   end
 
@@ -145,8 +164,8 @@ function M.clear_historyfile(force)
   Log.warn('(project.util.history.clear_historyfile): History file cleared successfully.')
   vim.notify('(project.nvim): History file cleared successfully', WARN)
 
-  M.recent_projects = {}
-  M.session_projects = {}
+  recent_projects = {}
+  session_projects = {}
   vim.g.project_historyfile_cleared = 1
 end
 
@@ -330,7 +349,7 @@ function M.import_history_json(path, force_name, keep)
     return
   end
 
-  M.recent_projects = Util.reverse(hist)
+  recent_projects = Util.reverse(hist)
   M.write_history()
 
   Log.debug(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')))
@@ -354,7 +373,7 @@ function M.remove_session(session, found)
   })
 
   local new_sessions = {} ---@type ProjectHistoryEntry[]
-  for _, v in ipairs(M.session_projects) do
+  for _, v in ipairs(session_projects) do
     if v.path == session then
       found = true
     else
@@ -362,7 +381,7 @@ function M.remove_session(session, found)
     end
   end
 
-  M.session_projects = vim.deepcopy(new_sessions)
+  session_projects = vim.deepcopy(new_sessions)
   return found
 end
 
@@ -375,7 +394,7 @@ function M.remove_recent(project)
 
   local found = false
   local new_recents = {} ---@type ProjectHistoryEntry[]
-  for _, v in ipairs(M.recent_projects) do
+  for _, v in ipairs(recent_projects) do
     if v.path == project then
       found = true
     else
@@ -383,7 +402,7 @@ function M.remove_recent(project)
     end
   end
 
-  M.recent_projects = vim.deepcopy(new_recents)
+  recent_projects = vim.deepcopy(new_recents)
   return found
 end
 
@@ -405,7 +424,7 @@ function M.delete_project(project, prompt)
     Util.validate({ project_value = { project.value, { 'string' } } })
   end
 
-  if not M.recent_projects then
+  if not recent_projects then
     Log.error('(project.util.history.delete_project): `recent_projects` is `nil`, aborting.')
     vim.notify('(project.util.history.delete_project): `recent_projects` is `nil`, aborting.')
     return
@@ -478,7 +497,7 @@ function M.deserialize_history(history_data, name_data)
 
     i = i + 1
   end
-  M.recent_projects = Util.delete_duplicates(projects)
+  recent_projects = Util.delete_duplicates(projects)
 end
 
 ---Only runs once.
@@ -496,7 +515,7 @@ local function setup_watch()
 
   event:start(Path.historyfile, {}, function(err, _, events)
     if not err and events.change then
-      M.recent_projects = {}
+      recent_projects = {}
       M.read_history()
     end
   end)
@@ -519,7 +538,7 @@ function M.read_history()
 
   setup_watch()
 
-  if stat.size == 0 and not vim.tbl_isempty(M.session_projects) then
+  if stat.size == 0 and not vim.tbl_isempty(session_projects) then
     Log.warn(
       '(project.util.history.read_history): History file is empty. Defering call to `project.util.history.write_history()`'
     )
@@ -565,11 +584,11 @@ function M.get_recent_projects(paths_only, tilde)
   end
 
   local tbl = {} ---@type ProjectHistoryEntry[]
-  if M.recent_projects then
-    vim.list_extend(tbl, M.recent_projects)
-    vim.list_extend(tbl, M.session_projects)
+  if recent_projects then
+    vim.list_extend(tbl, recent_projects)
+    vim.list_extend(tbl, session_projects)
   else
-    tbl = M.session_projects
+    tbl = session_projects
   end
   tbl = Util.delete_duplicates(tbl)
 
@@ -720,11 +739,11 @@ function M.find_entry(search, value, key)
   end
 
   M.read_history()
-  if not M.recent_projects then
+  if not recent_projects then
     return
   end
 
-  for _, v in ipairs(search == 'session' and M.session_projects or M.recent_projects) do
+  for _, v in ipairs(search == 'session' and session_projects or recent_projects) do
     if (v.path == Util.strip_slash(value) or v.name == value) and v[key] then
       return v[key]
     end

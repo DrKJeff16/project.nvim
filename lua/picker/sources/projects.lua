@@ -7,7 +7,7 @@ local Project = require('project')
 ---@return ProjectPickerItem[] items
 local function gen_items(source)
   local items = {} ---@type ProjectPickerItem[]
-  local curr = Project.core.get_current_project() or ''
+  local curr = Project.core.get_current() or ''
   for i, v in ipairs(source) do
     local is_curr = v.path == curr
     local n_digits, max_n_digits = Project.util.digits(i), Project.util.digits(Project.config.get().history.size)

@@ -301,8 +301,8 @@ local function callback(ctx)
       if not Util.dir_exists(input) then
         msg = ('%s%s`%s` is not a directory!'):format(msg, msg == '' and '' or '\n', input)
       elseif
-        require('project.core').current_project ~= input
-        and not vim.tbl_contains(Util.history.session_projects, function(val) ---@param val ProjectHistoryEntry
+        require('project.core').get_current_project() ~= input
+        and not vim.tbl_contains(Util.history.get_session_projects(), function(val) ---@param val ProjectHistoryEntry
           return val.path == input
         end, { predicate = true })
       then
