@@ -496,6 +496,15 @@ Table of Contents                                                  *project.toc*
                                 picker
 
 
+    • {tilde}                   (`boolean`)
+                                Indicates whether paths in the picker
+                                should be printed as full paths (`true`)
+                                or un-expanded paths (`false`),
+                                e.g. `~/foo/bar`
+
+                                Default: `false` ~
+
+
 ------------------------------------------------------------------------------
 1.9. `ProjectOpts.Logging`                                   *ProjectOpts.Logging*
                                                         *project.logging-config*
