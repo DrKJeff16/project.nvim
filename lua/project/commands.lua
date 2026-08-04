@@ -254,7 +254,7 @@ local function callback(ctx)
     elseif ctx.fargs[1] == 'export' and #ctx.fargs <= 3 then
       Popup.gen_export_prompt()
     elseif vim.g.project_fzf_lua_loaded == 1 and ctx.fargs[1] == 'fzf-lua' and not ctx.bang then
-      require('project.extensions')['fzf-lua'].run_fzf_lua()
+      require('project.extensions')['fzf-lua'].run()
     elseif ctx.fargs[1] == 'health' and not ctx.bang then
       vim.cmd.checkhealth({ args = { 'project' }, mods = ctx.smods })
     elseif ctx.fargs[1] == 'help' and not ctx.bang then

@@ -269,7 +269,7 @@ function M.set_pwd(dir, method, bufnr)
   Util.history.set_session_projects(Util.history.get_session_projects() or {})
 
   local custom_name = nil ---@type string|nil|?
-  for _, v in ipairs(require('project.config').custom_projects) do
+  for _, v in ipairs(require('project.config').get().custom_projects) do
     if Util.strip_slash(v.path) == dir then
       custom_name = v.name
     end

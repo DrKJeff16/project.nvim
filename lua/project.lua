@@ -22,7 +22,7 @@ local WARN = vim.log.levels.WARN
 ---@field recents_menu function
 ---@field rename_project fun(path: string, name: string): success: boolean
 ---@field root_files fun(scan_what?: Project.Core.ScanRoot, path?: string, prefix?: string): files_list: string[]|nil|?
----@field run_fzf_lua function
+---@field run function
 ---@field session_menu function
 ---@field setup fun(options?: ProjectOpts)
 ---@field util Project.Util
@@ -194,8 +194,8 @@ local Project = setmetatable(M, { ---@type Project
     if k == 'root_files' then
       return require('project.core').root_files
     end
-    if k == 'run_fzf_lua' then
-      return require('project.extensions')['fzf-lua'].run_fzf_lua
+    if k == 'run' then
+      return require('project.extensions')['fzf-lua'].run
     end
     if k == 'setup' then
       return require('project.config').setup

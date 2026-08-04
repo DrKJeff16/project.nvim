@@ -1,11 +1,8 @@
 local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
 
----@class Project.Extensions.FzfLua
-local M = {}
-
 ---@param items string[]
-function M.default(items)
+local function default(items)
   Util.validate({ items = { items, { 'table' } } })
 
   local opts = require('project.config').get()
@@ -21,7 +18,7 @@ function M.default(items)
 end
 
 ---@param items string[]
-function M.delete_project(items)
+local function delete_project(items)
   Util.validate({ items = { items, { 'table' } } })
 
   local paths = {} ---@type string[]
@@ -36,7 +33,7 @@ function M.delete_project(items)
 end
 
 ---@param items string[]
-function M.rename_project(items)
+local function rename_project(items)
   Util.validate({ items = { items, { 'table' } } })
 
   for _, item in ipairs(items) do
@@ -45,7 +42,7 @@ function M.rename_project(items)
 end
 
 ---@param cb fun(entry?: string|number, cb?: function)
-function M.exec(cb)
+local function exec(cb)
   local projects = Util.history.get_recent_projects()
   if require('project.config').get().fzf_lua.sort == 'newest' then
     projects = Util.reverse(projects)
@@ -55,6 +52,9 @@ function M.exec(cb)
   end
   cb()
 end
+
+---@class Project.Extensions.FzfLua
+local M = {}
 
 function M.setup()
   if not require('project.config').get().fzf_lua.enabled then
@@ -73,23 +73,23 @@ end
 ---
 ---CREDITS: [@deathmaz](https://github.com/ahmedkhalf/project.nvim/issues/71#issuecomment-1212993659)
 --- ---
-function M.run_fzf_lua()
+function M.run()
   if not Util.mod_exists('fzf-lua') then
-    Util.log.error('(project.extensions.fzf-lua.run_fzf_lua): `fzf-lua` is not installed!')
-    error('(project.extensions.fzf-lua.run_fzf_lua): `fzf-lua` is not installed!')
+    Util.log.error('(project.extensions.fzf-lua.run): `fzf-lua` is not installed!')
+    error('(project.extensions.fzf-lua.run): `fzf-lua` is not installed!')
   end
-  Util.log.info('(project.extensions.fzf-lua.run_fzf_lua): Running `fzf_exec`.')
+  Util.log.info('(project.extensions.fzf-lua.run): Running `fzf_exec`.')
 
   local Fzf = require('fzf-lua')
-  Fzf.fzf_exec(M.exec, {
+  Fzf.fzf_exec(exec, {
     fzf_opts = { ['--multi'] = true },
     actions = {
-      default = { M.default },
-      ['ctrl-d'] = { M.delete_project, Fzf.actions.resume },
+      default = { default },
+      ['ctrl-d'] = { delete_project, Fzf.actions.resume },
       ['ctrl-n'] = {
         function(items)
           Fzf.hide()
-          M.rename_project(items)
+          rename_project(items)
           vim.api.nvim_feedkeys('i', 'n', false)
         end,
       },

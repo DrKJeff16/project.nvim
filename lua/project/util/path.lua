@@ -1,6 +1,5 @@
 local ERROR = vim.log.levels.ERROR
 local uv = vim.uv or vim.loop
-local Config = require('project.config')
 local Util = require('project.util')
 
 ---@class Project.Util.Path
@@ -92,8 +91,7 @@ end
 function M.is_excluded(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
-  local exclude_dirs = Config.get().exclude_dirs
-  for _, excluded in ipairs(exclude_dirs) do
+  for _, excluded in ipairs(require('project.config').get().exclude_dirs) do
     if dir:match(excluded) then
       return true
     end
@@ -237,12 +235,12 @@ function M.root_included(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
   while true do ---Breadth-First search
-    for _, pattern in ipairs(Config.get().patterns) do
+    for _, pattern in ipairs(require('project.config').get().patterns) do
       local excluded = false
       if pattern:sub(1, 1) == '!' then
         excluded, pattern = true, pattern:sub(2)
       end
-      for _, custom in ipairs(Config.custom_projects) do
+      for _, custom in ipairs(require('project.config').get().custom_projects) do
         if dir == custom.path then
           return dir, 'custom'
         end

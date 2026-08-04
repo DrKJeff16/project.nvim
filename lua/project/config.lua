@@ -106,18 +106,17 @@ function M.setup(opts)
 
   require('project.core').setup()
 
-  local Extensions = require('project.extensions')
   if options.fzf_lua.enabled then
     Util.log.debug('(project.config.setup): fzf-lua integration enabled.')
-    Extensions['fzf-lua'].setup()
+    require('project.extensions.fzf-lua').setup()
   end
   if options.picker.enabled then
     Util.log.debug('(project.config.setup): picker.nvim integration enabled.')
-    Extensions.picker.setup()
+    require('project.extensions.picker').setup()
   end
   if options.snacks.enabled then
     Util.log.debug('(project.config.setup): snacks.nvim integration enabled.')
-    Extensions.snacks.setup(options.snacks.opts or {})
+    require('project.extensions.snacks').setup(options.snacks.opts or {})
   end
 
   M.custom_projects = vim.deepcopy(options.custom_projects or {})
