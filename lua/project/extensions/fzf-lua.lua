@@ -1,4 +1,3 @@
-local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
 
 ---@param items string[]
@@ -57,16 +56,17 @@ end
 local M = {}
 
 function M.setup()
-  if not require('project.config').get().fzf_lua.enabled then
-    return
+  if require('project.config').get().fzf_lua.enabled then
+    if not Util.mod_exists('fzf-lua') then
+      Util.log.error('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed!')
+      vim.notify('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed!', vim.log.levels.ERROR)
+      vim.g.project_fzf_lua_loaded = 0
+    else
+      vim.g.project_fzf_lua_loaded = 1
+    end
+  else
+    vim.g.project_fzf_lua_loaded = 0
   end
-  if not Util.mod_exists('fzf-lua') then
-    Util.log.error('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed!')
-    vim.notify('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed!', ERROR)
-    return
-  end
-
-  vim.g.project_fzf_lua_loaded = 1
 end
 
 ---This runs assuming you have FZF-Lua installed!

@@ -642,7 +642,7 @@ function S.callback(ctx) end
 
 ---@class (exact) ProjectSnacksConfig
 ---@field hidden? boolean
----@field icon? { icon: string, highlight: string }
+---@field icon? { icon: string, highlight: string, match?: string }
 ---@field layout? 'default'|'select'|'vscode'
 ---@field path_icons? { match: string, icon: string, highlight: string }[]
 ---@field show? ProjectOpts.Show

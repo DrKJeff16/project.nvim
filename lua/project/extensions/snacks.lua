@@ -1,13 +1,11 @@
 ---@module 'project._meta'
 
-local uv = vim.uv or vim.loop
 local Util = require('project.util')
 
 ---@class Project.Extensions.Snacks
----@field config ProjectSnacksConfig
 local M = {}
 
-M.config = {
+local config = { ---@type ProjectSnacksConfig
   hidden = false,
   icon = { icon = ' ', highlight = 'Directory' },
   layout = 'select',
@@ -18,21 +16,20 @@ M.config = {
 }
 
 ---@return snacks.picker.finder.Item[] items
-function M.gen_items()
+---@nodiscard
+local function gen_items()
   local recents = require('project').get_recent_projects(nil, true)
-  local items = {} ---@type snacks.picker.finder.Item[]
-  if M.config.sort and M.config.sort == 'newest' then
+  if config.sort and config.sort == 'newest' then
     recents = Util.reverse(recents)
   end
 
+  local tilde = require('project.config').get().snacks.tilde
+  local items = {} ---@type snacks.picker.finder.Item[]
   for i, proj in ipairs(recents) do
-    local text = M.config.show ~= 'paths' and proj.name
-      or Util.strip_slash(proj.path, require('project.config').get().snacks.tilde and ':p:~' or nil)
-
     table.insert(items, {
       idx = i,
       score = i,
-      text = text,
+      text = config.show ~= 'paths' and proj.name or Util.strip_slash(proj.path, tilde and ':p:~' or nil),
       value = Util.strip_slash(proj.path, ':p:~'),
     })
   end
@@ -40,37 +37,39 @@ function M.gen_items()
 end
 
 ---@param display_value string
+---@return { icon: string, highlight: string, match?: string } icon
+---@return string index
 local function apply_icon(display_value)
-  for _, icon in pairs(M.config.path_icons) do
+  for _, icon in pairs(config.path_icons) do
     if display_value:find(icon.match) then
-      return icon, display_value:gsub(icon.match, '')
+      local value = display_value:gsub(icon.match, '')
+      return icon, value
     end
   end
-  return M.config.icon, display_value
+  return config.icon, display_value
 end
 
 ---@param item snacks.picker.finder.Item
+---@return snacks.picker.Highlight[] extmark
 local function format_session_item(item)
   local icon, display_value = apply_icon(item.text)
-  return { ---@type { [1]: string, [2]?: (string|string[]), virtual: boolean, field: string, resolve: fun(max_width: number):unknown[], inline: boolean }[]
+  return { ---@type snacks.picker.Highlight[]
     { icon.icon, icon.highlight },
     { display_value, 'Normal' },
   }
 end
 
 function M.pick()
-  local Core = require('project.core')
   return require('snacks').picker.pick({
     actions = {
       chdir_only = function(self, item)
         self:close()
-        Core.set_pwd(item.value, 'snacks')
+        require('project.core').set_pwd(item.value, 'snacks')
       end,
       delete_project = function(self, _)
-        local selected = self:selected({ fallback = true })
         local paths = vim.tbl_map(function(item)
           return vim.fn.expand(item.value)
-        end, selected)
+        end, self:selected({ fallback = true }))
         self:close()
         Util.history.delete_projects(paths, true)
         M.pick()
@@ -87,32 +86,30 @@ function M.pick()
     },
     confirm = function(self, item)
       self:close()
-      if not Core.set_pwd(vim.fn.expand(item.value), 'snacks') then
-        return
+      if require('project.core').set_pwd(vim.fn.expand(item.value), 'snacks') then
+        Util.log.debug('(project.extensions.snacks.pick): Opening Snacks picker')
+        require('snacks').picker.files({
+          cwd = vim.uv.cwd() or vim.fn.getcwd(),
+          show_empty = true,
+          hidden = config.hidden,
+          finder = 'files',
+          format = 'file',
+          supports_live = true,
+          auto_close = true,
+          dirs = { vim.uv.cwd() or vim.fn.getcwd() },
+          enter = true,
+        })
       end
-
-      Util.log.debug('(project.extensions.snacks.pick): Opening Snacks picker')
-      require('snacks').picker.files({
-        cwd = uv.cwd() or vim.fn.getcwd(),
-        show_empty = true,
-        hidden = M.config.hidden,
-        finder = 'files',
-        format = 'file',
-        supports_live = true,
-        auto_close = true,
-        dirs = { uv.cwd() or vim.fn.getcwd() },
-        enter = true,
-      })
     end,
     enter = true,
     format = format_session_item,
-    items = M.gen_items(),
-    layout = M.config.layout,
+    items = gen_items(),
+    layout = config.layout,
     preview = function()
       return false
     end,
     show_empty = false,
-    title = M.config.title,
+    title = config.title,
     win = {
       input = {
         keys = {
@@ -127,15 +124,14 @@ end
 
 ---@param opts? ProjectSnacksConfig
 function M.setup(opts)
-  if not Util.mod_exists('snacks') then
-    vim.notify('snacks.nvim is not installed! Aborting.', vim.log.levels.ERROR)
-    return
-  end
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  M.config = vim.tbl_deep_extend('force', M.config, opts or {})
-
-  vim.g.project_snacks_loaded = 1
+  if Util.mod_exists('snacks') then
+    config = vim.tbl_deep_extend('force', config, opts or {})
+    vim.g.project_snacks_loaded = 1
+  else
+    vim.notify('snacks.nvim is not installed! Aborting.', vim.log.levels.ERROR)
+  end
 end
 
 return M
