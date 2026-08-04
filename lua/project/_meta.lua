@@ -195,13 +195,11 @@
 --- ---
 ---@field enabled? boolean
 ---@field opts? ProjectSnacksConfig
----@field show? ProjectOpts.Show
 ---@field tilde? boolean
 
 ---@class (exact) ProjectDefaults.Snacks: ProjectOpts.Snacks
 ---@field enabled boolean
 ---@field opts ProjectSnacksConfig
----@field show ProjectOpts.Show
 ---@field tilde boolean
 
 ---Table of options used for the telescope picker.

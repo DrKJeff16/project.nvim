@@ -1,8 +1,5 @@
 ---@module 'project._meta'
 
-local WARN = vim.log.levels.WARN
-local ERROR = vim.log.levels.ERROR
-local INFO = vim.log.levels.INFO
 local Util = require('project.util')
 
 ---@param line string
@@ -281,9 +278,9 @@ local function callback(ctx)
       require('project.core').on_buf_enter(vim.api.nvim_get_current_buf())
 
       if (vim.uv.cwd() or vim.fn.getcwd()) == old_cwd and not ctx.bang then
-        vim.notify('(:Project root): Current project is already in history!', WARN)
+        vim.notify('(:Project root): Current project is already in history!', vim.log.levels.WARN)
       elseif ctx.bang then
-        vim.notify(vim.uv.cwd() or vim.fn.getcwd(), INFO)
+        vim.notify(vim.uv.cwd() or vim.fn.getcwd(), vim.log.levels.INFO)
       end
     elseif ctx.fargs[1] == 'session' then
       local fargs = vim.deepcopy(ctx.fargs)
@@ -312,14 +309,14 @@ local function callback(ctx)
         msg = ('%s%sAlready added `%s`!'):format(msg, msg == '' and '' or '\n', input)
       end
     end
-    vim.notify(msg, WARN)
+    vim.notify(msg, vim.log.levels.WARN)
   elseif ctx.fargs[1] == 'config' and ctx.bang then
-    vim.print(require('project.config').get_config(), INFO)
+    vim.print(require('project.config').get_config(), vim.log.levels.INFO)
   elseif ctx.fargs[1] == 'config' then
     require('project.config').toggle_win()
   elseif ctx.fargs[1] == 'delete' and not Util.history.get_recent_projects() then
     Util.log.error('(:Project delete): No recent projects!')
-    vim.notify('(:Project delete): No recent projects!', ERROR)
+    vim.notify('(:Project delete): No recent projects!', vim.log.levels.ERROR)
   elseif ctx.fargs[1] == 'delete' then
     local recent = Util.history.get_recent_projects()
     for i = 2, #ctx.fargs do
@@ -334,7 +331,7 @@ local function callback(ctx)
         ) or path == ''
       then
         Util.log.error(('(:Project delete): Could not delete `%s`, aborting'):format(path))
-        vim.notify(('(:Project delete): Could not delete `%s`, aborting'):format(path), ERROR)
+        vim.notify(('(:Project delete): Could not delete `%s`, aborting'):format(path), vim.log.levels.ERROR)
       elseif
         vim.tbl_contains(recent, function(val) ---@param val ProjectHistoryEntry
           Util.log.debug(('`%s` =? `%s` ==> %s'):format(path, val.path, vim.inspect(val.path == path)))
@@ -355,11 +352,11 @@ local function callback(ctx)
       if
         not vim.list_contains({ Util.strip_slash(ctx.fargs[i]), Util.strip_slash(ctx.fargs[i], ':p:~') }, ctx.fargs[i])
       then
-        vim.notify('(:Project history rename): Invalid directory!', ERROR)
+        vim.notify('(:Project history rename): Invalid directory!', vim.log.levels.ERROR)
         return
       end
       if not Popup.rename_input(ctx.fargs[i]) then
-        vim.notify(('(:Project history): Unable to rename project `%s`!'):format(ctx.fargs[i]), ERROR)
+        vim.notify(('(:Project history): Unable to rename project `%s`!'):format(ctx.fargs[i]), vim.log.levels.ERROR)
         return
       end
     end
@@ -374,7 +371,7 @@ local function callback(ctx)
   elseif ctx.fargs[1] == 'log' and ctx.fargs[2] == 'open' and not ctx.bang then
     Util.log.open_win()
   else
-    vim.notify(err_txt, WARN)
+    vim.notify(err_txt, vim.log.levels.WARN)
   end
 end
 

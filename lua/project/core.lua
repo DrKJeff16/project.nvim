@@ -7,7 +7,6 @@
 local Util = require('project.util')
 
 local per_project_bufs = {} ---@type table<string, table<string, integer[]>>
-
 local current_method = nil ---@type string|nil|?
 local current_project = nil ---@type string|nil|?
 local last_project = nil ---@type string|nil|?
@@ -115,12 +114,10 @@ function M.get_last(full_entry)
   end
 
   local recent = Util.reverse(Util.history.get_recent_projects())
-  if vim.tbl_isempty(recent) or #recent == 1 then
-    return
+  if #recent > 1 then
+    local res = #Util.history.get_session_projects() <= 1 and recent[2] or recent[1]
+    return full_entry and res or res.path
   end
-
-  local res = #Util.history.get_session_projects() <= 1 and recent[2] or recent[1]
-  return full_entry and res or res.path
 end
 
 ---@overload fun(): history_paths: HistoryPath
@@ -467,8 +464,7 @@ function M.get_current(bufnr)
   end
 
   local curr, method = M.get_project_root(bufnr)
-  local last = M.get_last()
-  return curr, method, last
+  return curr, method, M.get_last()
 end
 
 ---@param bufnr? integer
@@ -479,8 +475,7 @@ function M.get_current_project_name(bufnr)
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   if Util.buffer_valid(bufnr) then
-    local curr = M.get_project_root(bufnr)
-    return Util.history.find_entry('recent', curr, 'name')
+    return Util.history.find_entry('recent', M.get_project_root(bufnr), 'name')
   end
 end
 
@@ -499,18 +494,19 @@ function M.on_buf_enter(bufnr)
   dir = dir == '' and Util.strip_slash(bufname, ':p:h') or Util.strip_slash(dir)
   dir = Util.is_windows() and dir:gsub('\\', '/') or dir
   if
-    not (Util.path.exists(dir) and Util.path.root_included(dir))
-    or Util.path.is_excluded(dir)
-    or vim.list_contains(config.disable_on.ft, Util.optget('filetype', 'buf', bufnr))
-    or vim.list_contains(config.disable_on.bt, Util.optget('buftype', 'buf', bufnr))
+    Util.path.exists(dir)
+    and Util.path.root_included(dir)
+    and not (
+      Util.path.is_excluded(dir)
+      or vim.list_contains(config.disable_on.ft, Util.optget('filetype', 'buf', bufnr))
+      or vim.list_contains(config.disable_on.bt, Util.optget('buftype', 'buf', bufnr))
+    )
   then
-    return
-  end
-
-  current_project, current_method = M.get_current(bufnr)
-  if M.set_pwd(current_project, current_method, bufnr) then
-    current_project, current_method, last_project = M.get_current(bufnr)
-    Util.history.write_history()
+    current_project, current_method = M.get_current(bufnr)
+    if M.set_pwd(current_project, current_method, bufnr) then
+      current_project, current_method, last_project = M.get_current(bufnr)
+      Util.history.write_history()
+    end
   end
 end
 
@@ -587,7 +583,6 @@ function M.root_files(scan_what, path, prefix)
     end
     next, ftype = vim.uv.fs_scandir_next(dir)
   end
-
   return vim.tbl_isempty(files) and nil or files
 end
 
@@ -595,6 +590,7 @@ function M.setup()
   local group = vim.api.nvim_create_augroup('project.nvim', { clear = true })
   vim.api.nvim_create_autocmd('VimLeavePre', {
     group = group,
+    once = true,
     callback = function()
       Util.history.write_history()
     end,
@@ -606,8 +602,7 @@ function M.setup()
     end,
   })
 
-  local config = require('project.config').get()
-  if not config.manual_mode then
+  if not require('project.config').get().manual_mode then
     local detection_methods = require('project.config').get_detection_methods()
     if vim.list_contains(detection_methods, 'pattern') then
       vim.api.nvim_create_autocmd('BufEnter', {

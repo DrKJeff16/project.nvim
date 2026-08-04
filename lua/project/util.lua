@@ -343,22 +343,19 @@ end
 ---
 ---If the passed data is an empty table, it'll be returned as-is.
 ---
----If the data passed to the function is not a table,
----an error will be raised.
+---If the data passed to the function is not a table an error will be raised.
 --- ---
----@generic T
+---@generic T: table
 ---@param T T
 ---@return T T
 ---@nodiscard
 function M.reverse(T)
   M.validate({ T = { T, { 'table' } } })
 
-  if vim.tbl_isempty(T) or #T == 1 then
-    return T
-  end
-
-  for i = 1, math.floor(#T / 2) do
-    T[i], T[#T - i + 1] = T[#T - i + 1], T[i]
+  if vim.islist(T) and #T > 1 then
+    for i = 1, math.floor(#T / 2) do
+      T[i], T[#T - i + 1] = T[#T - i + 1], T[i]
+    end
   end
   return T
 end
@@ -369,13 +366,11 @@ end
 function M.get_dict_size(T)
   M.validate({ T = { T, { 'table' } } })
 
-  if vim.tbl_isempty(T) then
-    return 0
-  end
-
   local len = 0
-  for _ in pairs(T) do
-    len = len + 1
+  if not vim.tbl_isempty(T) then
+    for _ in pairs(T) do
+      len = len + 1
+    end
   end
   return len
 end
@@ -408,18 +403,15 @@ function M.is_int(nums, cond)
     cond = true
   end
 
-  if M.is_type('number', nums) then
-    ---@cast nums number
+  if type(nums) == 'number' then
     return nums == math.floor(nums) and nums == math.ceil(nums) and cond
   end
 
-  ---@cast nums number[]
   for _, num in ipairs(nums) do
-    if not M.is_int(num) then
+    if not M.is_int(num, cond) then
       return false
     end
   end
-
   return cond
 end
 
@@ -492,6 +484,7 @@ end
 ---Attempt to find out if given path is a hidden file.
 --- ---
 ---@param path string
+---@return boolean hidden
 ---@noiuscard
 function M.is_hidden(path)
   M.validate({ path = { path, { 'string' } } })
@@ -506,20 +499,16 @@ end
 function M.executable(exe)
   M.validate({ exe = { exe, { 'string', 'table' } } })
 
-  if M.is_type('string', exe) then
-    ---@cast exe string
+  if type(exe) == 'string' then
     return vim.fn.executable(exe) == 1
   end
 
-  ---@cast exe string[]
-  local res = false
   for _, v in ipairs(exe) do
-    res = M.executable(v)
-    if not res then
-      break
+    if not M.executable(v) then
+      return false
     end
   end
-  return res
+  return true
 end
 
 ---@generic T: table
@@ -566,36 +555,31 @@ function M.lstrip(char, str)
     return str
   end
 
-  if M.is_type('table', char) then
-    ---@cast char string[]
-    if not vim.tbl_isempty(char) then
-      for _, c in ipairs(char) do
-        if c:len() > str:len() then
-          break
-        end
-        str = M.lstrip(c, str)
+  if type(char) == 'string' then
+    if not vim.startswith(str, char) or char:len() > str:len() then
+      return str
+    end
+
+    local i, len, new_str, other = 1, str:len(), '', false
+    while i <= len and i + char:len() - 1 <= len do
+      if str:sub(i, i + char:len() - 1) ~= char and not other then
+        other = true
       end
+      if other then
+        new_str = ('%s%s'):format(new_str, str:sub(i, i))
+      end
+      i = i + 1
     end
-    return str
+    return new_str ~= '' and new_str or str
   end
 
-  ---@cast char string
-  if not vim.startswith(str, char) or char:len() > str:len() then
-    return str
-  end
-
-  ---@cast char string
-  local i, len, new_str, other = 1, str:len(), '', false
-  while i <= len and i + char:len() - 1 <= len do
-    if str:sub(i, i + char:len() - 1) ~= char and not other then
-      other = true
+  for _, c in ipairs(char) do
+    if c:len() > str:len() then
+      break
     end
-    if other then
-      new_str = ('%s%s'):format(new_str, str:sub(i, i))
-    end
-    i = i + 1
+    str = M.lstrip(c, str)
   end
-  return new_str ~= '' and new_str or str
+  return str
 end
 
 ---Right strip given a leading string (or list of strings) within a string, if any.

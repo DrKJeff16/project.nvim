@@ -1,6 +1,5 @@
 ---@module 'project._meta'
 
-local uv = vim.uv or vim.loop
 local Util = require('project.util')
 
 local float = nil ---@type Project.ConfigLoc|nil|?
@@ -78,13 +77,13 @@ function M.setup(opts)
 
   Util.path.historyfile = Util.path.join(Util.path.projectpath, options.history.save_file)
   if not Util.path.exists(Util.path.historyfile) then
-    local fd = uv.fs_open(Util.path.historyfile, 'w', Util.path.open_mode('644'))
+    local fd = vim.uv.fs_open(Util.path.historyfile, 'w', Util.path.open_mode('644'))
     if not fd then
       error('(%s.setup): Unable to create history file!')
     end
 
-    uv.fs_write(fd, { '[', ']' })
-    uv.fs_close(fd)
+    vim.uv.fs_write(fd, { '[', ']' })
+    vim.uv.fs_close(fd)
   end
 
   if not (Util.path.datapath and Util.path.projectpath and Util.path.historyfile) then
