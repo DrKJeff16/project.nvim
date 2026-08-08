@@ -1,6 +1,5 @@
 ---@module 'project._meta'
 
-local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
 
 ---@param proj string
@@ -18,7 +17,7 @@ local function open_node(proj, only_cd, ran_cd)
   local Core = require('project.core')
   if not ran_cd then
     if not Core.set_pwd(proj, 'prompt') then
-      vim.notfy('(open_node): Unsucessful `set_pwd`!', ERROR)
+      vim.notfy('(open_node): Unsucessful `set_pwd`!', vim.log.levels.ERROR)
       return
     end
     if only_cd then
@@ -160,13 +159,13 @@ function M.prompt_project(input)
   local original_input = input
   input = Util.strip_slash(input)
   if not (Util.path.exists(input) and Util.path.exists(Util.strip_slash(input, ':p:h'))) then
-    vim.notify(('Invalid path `%s`'):format(original_input), ERROR)
+    vim.notify(('Invalid path `%s`'):format(original_input), vim.log.levels.ERROR)
     return
   end
   if not Util.dir_exists(input) then
     input = Util.strip_slash(input, ':p:h')
     if not Util.dir_exists(input) then
-      vim.notify('Path is not a directory, and parent could not be retrieved!', ERROR)
+      vim.notify('Path is not a directory, and parent could not be retrieved!', vim.log.levels.ERROR)
       return
     end
   end
@@ -196,7 +195,7 @@ M.delete_menu = M.new({
         if vim.list_contains(choices_list, item) and M.delete_menu.choices(config)[item] then
           M.delete_menu.choices(config)[item]()
         else
-          vim.notify('Bad selection!', ERROR)
+          vim.notify('Bad selection!', vim.log.levels.ERROR)
         end
       end
     end)
@@ -245,7 +244,7 @@ M.rename_menu = M.new({
             end
           end)
         else
-          vim.notify('Bad selection!', ERROR)
+          vim.notify('Bad selection!', vim.log.levels.ERROR)
         end
       end
     end)
@@ -294,7 +293,7 @@ M.recents_menu = M.new({
         if vim.list_contains(choices_list, item) and M.recents_menu.choices(config)[item] then
           M.recents_menu.choices(config)[item](Util.history.find_entry('recent', item, 'path'), false, false)
         else
-          vim.notify('Bad selection!', ERROR)
+          vim.notify('Bad selection!', vim.log.levels.ERROR)
         end
       end
     end)
@@ -334,7 +333,7 @@ M.open_menu = M.new({
           if vim.list_contains(choices_list, item) and M.open_menu.choices()[item] then
             M.open_menu.choices()[item]()
           else
-            vim.notify('Bad selection!', ERROR)
+            vim.notify('Bad selection!', vim.log.levels.ERROR)
           end
         end
       end)
@@ -455,15 +454,13 @@ M.session_menu = M.new({
           return (item == 'Exit' or config.show_by_name) and item or Util.strip_slash(item, ':p:~')
         end,
       }, function(item) ---@param item string
-        if not item or item == '' then
-          return
+        if item and item ~= '' then
+          if vim.list_contains(choices_list, item) and M.session_menu.choices(config)[item] then
+            M.session_menu.choices(config)[item](Util.history.find_entry('session', item, 'path'), only_cd, false)
+          else
+            vim.notify('Bad selection!', vim.log.levels.ERROR)
+          end
         end
-        if not (vim.list_contains(choices_list, item) and M.session_menu.choices(config)[item]) then
-          vim.notify('Bad selection!', ERROR)
-          return
-        end
-
-        M.session_menu.choices(config)[item](Util.history.find_entry('session', item, 'path'), only_cd, false)
       end)
     end
   end,
