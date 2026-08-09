@@ -218,8 +218,6 @@ function M.refresh_project_bufs()
     per_project_bufs[dir] = not vim.tbl_isempty(bufnrs) and vim.deepcopy(bufnrs) or nil
   end
 
-  Util.history.write_history()
-
   local sessions = {} ---@type ProjectHistoryEntry[]
   for _, session in ipairs(Util.history.get_session_projects()) do
     local proj_buf_path = session.path
