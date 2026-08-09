@@ -274,7 +274,7 @@ function M.export_history_json(path, ind, force_name)
     return
   end
 
-  local ok, data = pcall(vim.json.encode, Util.reverse(M.get_recent_projects()), { indent = spc })
+  local ok, data = pcall(vim.json.encode, Util.reverse(M.get_recent_projects(nil, nil, false)), { indent = spc })
   if ok and data then
     uv.fs_write(fd, data)
 
@@ -571,16 +571,24 @@ end
 ---@overload fun(paths_only?: false, tilde: boolean): recents: ProjectHistoryEntry[]
 ---@overload fun(paths_only: true): recents: string[]
 ---@overload fun(paths_only: true, tilde: boolean): recents: string[]
-function M.get_recent_projects(paths_only, tilde)
+---@overload fun(paths_only: false, tilde: boolean, remove_dups: boolean): ProjectHistoryEntry[]
+---@overload fun(paths_only: false, tilde?: boolean, remove_dups: boolean): ProjectHistoryEntry[]
+---@overload fun(paths_only: true, tilde?: boolean, remove_dups: boolean): string[]
+---@overload fun(paths_only: true, tilde: boolean, remove_dups: boolean): string[]
+function M.get_recent_projects(paths_only, tilde, remove_dups)
   Util.validate({
     paths_only = { paths_only, { 'boolean', 'nil' }, true },
     tilde = { tilde, { 'boolean', 'nil' }, true },
+    remove_dups = { remove_dups, { 'boolean', 'nil' }, true },
   })
   if tilde == nil then
     tilde = false
   end
   if paths_only == nil then
     paths_only = false
+  end
+  if remove_dups == nil then
+    remove_dups = true
   end
 
   local tbl = {} ---@type ProjectHistoryEntry[]
@@ -603,7 +611,7 @@ function M.get_recent_projects(paths_only, tilde)
     end
   end
 
-  if removed then
+  if removed and remove_dups then
     Log.info('(project.util.history.get_recent_projects): An entry has been removed from history. Writing.')
     M.write_history()
   end
@@ -660,7 +668,7 @@ function M.write_history(path)
     end
   end
 
-  local res, i = M.get_recent_projects(), 1
+  local res, i = M.get_recent_projects(nil, nil, false), 1
   while i < #file_history do
     local proj = file_history[i]
     if
