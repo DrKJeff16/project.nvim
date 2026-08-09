@@ -131,10 +131,7 @@ function M.get_history_paths(path)
     projectpath = Util.path.projectpath,
     historyfile = Util.path.historyfile,
   }
-  if path and vim.list_contains(vim.tbl_keys(res), path) then
-    return Util.path[path] --[[@as string]]
-  end
-  return res
+  return (path and vim.list_contains(vim.tbl_keys(res), path)) and Util.path[path] or res
 end
 
 ---Get the LSP client for current buffer.
@@ -215,7 +212,6 @@ function M.refresh_project_bufs()
           table.insert(bufnrs[name], v)
         end
       end
-
       bufnrs[name] = not vim.tbl_isempty(bufnrs[name]) and bufnrs[name] or nil
     end
 
