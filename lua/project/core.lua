@@ -499,7 +499,6 @@ function M.on_buf_enter(bufnr)
     current_project, current_method = M.get_current(bufnr)
     if M.set_pwd(current_project, current_method, bufnr) then
       current_project, current_method, last_project = M.get_current(bufnr)
-      Util.history.write_history()
     end
   end
 end

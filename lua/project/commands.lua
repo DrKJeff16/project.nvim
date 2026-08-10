@@ -304,7 +304,6 @@ local function callback(ctx)
         end, { predicate = true })
       then
         require('project.core').set_pwd(input, 'manual')
-        Util.history.write_history()
       else
         msg = ('%s%sAlready added `%s`!'):format(msg, msg == '' and '' or '\n', input)
       end

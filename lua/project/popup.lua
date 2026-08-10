@@ -177,7 +177,6 @@ function M.prompt_project(input)
     vim.notify('Already added that directory!', vim.log.levels.WARN)
   else
     require('project.core').set_pwd(input, 'prompt')
-    Util.history.write_history()
   end
 end
 
