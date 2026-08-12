@@ -189,7 +189,6 @@ local function callback(ctx)
   table.sort(items)
 
   local err = [[Usage:
-
   :Project
   :Project health
   :Project help
