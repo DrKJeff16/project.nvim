@@ -3,6 +3,7 @@
 
 ---@param source ProjectHistoryEntry[]
 ---@return ProjectPickerItem[] items
+---@nodiscard
 local function gen_items(source)
   local Project = require('project')
   local curr = Project.core.get_current() or ''
@@ -50,7 +51,7 @@ function M.actions()
   return { ---@type table<string, fun(entry: ProjectPickerItem)>
     ['<C-d>'] = function(entry)
       require('project').util.history.delete_project(entry.value, true)
-      vim.cmd.Picker('projects')
+      vim.cmd.Picker({ args = { 'projects' } })
     end,
     ['<C-r>'] = function(entry)
       require('project').popup.rename_input(entry.value)
@@ -66,8 +67,7 @@ end
 
 ---@param entry ProjectPickerItem
 function M.default_action(entry)
-  if vim.fn.isdirectory(entry.value) == 1 then
-    require('project').core.set_pwd(entry.value, 'picker.nvim')
+  if vim.fn.isdirectory(entry.value) == 1 and require('project').core.set_pwd(entry.value, 'picker.nvim') then
     require('picker').open({ 'files' })
   end
 end

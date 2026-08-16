@@ -1,7 +1,6 @@
 ---@module 'project._meta'
 ---@module 'snacks'
 
-local uv = vim.uv or vim.loop
 local TRACE = vim.log.levels.TRACE -- `0`
 local DEBUG = vim.log.levels.DEBUG -- `1`
 local INFO = vim.log.levels.INFO -- `2`
@@ -125,7 +124,7 @@ function M.read_log()
   if not logfile then
     return
   end
-  local stat = uv.fs_stat(logfile)
+  local stat = vim.uv.fs_stat(logfile)
   if not stat then
     return
   end
@@ -134,31 +133,31 @@ function M.read_log()
     return
   end
 
-  local data = uv.fs_read(fd, stat.size, -1)
+  local data = vim.uv.fs_read(fd, stat.size, -1)
   return data
 end
 
 function M.clear_log()
-  if vim.g.project_log_loaded == 1 and uv.fs_unlink(logfile) then
+  if vim.g.project_log_loaded == 1 and vim.uv.fs_unlink(logfile) then
     vim.notify('(project.nvim): Log cleared successfully', INFO)
     vim.g.project_log_cleared = 1
   end
 end
 
 local function timer_cb()
-  local fd = uv.fs_open(logfile, 'w', Path.open_mode('644'))
+  local fd = vim.uv.fs_open(logfile, 'w', Path.open_mode('644'))
   if not fd then
     return
   end
 
-  local stat = uv.fs_stat(logfile)
+  local stat = vim.uv.fs_stat(logfile)
   if not stat or stat.size < math.floor(require('project.config').get().log.max_size * 1024 * 1024) then
-    uv.fs_close(fd)
+    vim.uv.fs_close(fd)
     return
   end
 
-  local ok = uv.fs_ftruncate(fd, 0)
-  uv.fs_close(fd)
+  local ok = vim.uv.fs_ftruncate(fd, 0)
+  vim.uv.fs_close(fd)
 
   if ok then
     vim.notify(('(project.util.log.timer_cb): `%s` has been cleared!'):format(Util.strip_slash(logfile, ':p:~')), INFO)
@@ -175,7 +174,7 @@ local function make_timer()
     return
   end
 
-  timer = uv.new_timer()
+  timer = vim.uv.new_timer()
   if not timer then
     return
   end
@@ -203,7 +202,7 @@ local function setup_watch()
     return
   end
 
-  event = uv.new_fs_event()
+  event = vim.uv.new_fs_event()
   if event then
     event:start(M.logpath, {}, function(err, _, events)
       if err or not events.change then
@@ -245,8 +244,8 @@ function M.write(data, lvl)
   }
 
   local msg = os.date(('%s  ==>  %s%s'):format('%H:%M:%S', PFX[lvl], data)) --[[@as string]]
-  uv.fs_write(fd, msg, -1)
-  uv.fs_close(fd)
+  vim.uv.fs_write(fd, msg, -1)
+  vim.uv.fs_close(fd)
   return msg
 end
 
@@ -255,13 +254,13 @@ end
 ---@return uv.fs_stat.result|nil|? stat
 function M.open(mode)
   Path.create_path(M.logpath)
-  local dir_stat = uv.fs_stat(M.logpath)
+  local dir_stat = vim.uv.fs_stat(M.logpath)
   if not dir_stat or dir_stat.type ~= 'directory' then
     error('(project.util.log.open): Projectpath stat is not valid!')
   end
 
-  local stat = uv.fs_stat(logfile)
-  local fd = uv.fs_open(logfile, mode, Path.open_mode('644'))
+  local stat = vim.uv.fs_stat(logfile)
+  local fd = vim.uv.fs_open(logfile, mode, Path.open_mode('644'))
   return fd, stat
 end
 
@@ -277,17 +276,20 @@ function M.setup(opts)
   Path.create_path(M.logpath)
 
   local fd
-  local stat = uv.fs_stat(logfile)
+  local stat = vim.uv.fs_stat(logfile)
   if not stat then
     fd = M.open('w')
-    uv.fs_close(fd)
+    vim.uv.fs_close(fd)
     fd = nil
   end
-  stat = uv.fs_stat(logfile) ---@type uv.fs_stat.result
+  stat = vim.uv.fs_stat(logfile) ---@type uv.fs_stat.result
 
   fd = M.open('a')
   local head = ('='):rep(45)
-  uv.fs_write(fd, (stat.size >= 1 and '\n' or '') .. os.date(('%s    %s    %s\n'):format(head, '%x  (%H:%M:%S)', head)))
+  vim.uv.fs_write(
+    fd,
+    (stat.size >= 1 and '\n' or '') .. os.date(('%s    %s    %s\n'):format(head, '%x  (%H:%M:%S)', head))
+  )
 
   setup_watch()
 
@@ -312,18 +314,18 @@ function M.open_win()
     error('(project.util.log.open_win): Bad logfile path!')
   end
 
-  local stat = uv.fs_stat(logfile)
+  local stat = vim.uv.fs_stat(logfile)
   if not stat then
     return
   end
 
-  local fd = uv.fs_open(logfile, 'r', Path.open_mode('644'))
+  local fd = vim.uv.fs_open(logfile, 'r', Path.open_mode('644'))
   if not fd then
     return
   end
 
-  local data = uv.fs_read(fd, stat.size)
-  uv.fs_close(fd)
+  local data = vim.uv.fs_read(fd, stat.size)
+  vim.uv.fs_close(fd)
   if not data then
     return
   end

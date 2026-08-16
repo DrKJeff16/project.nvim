@@ -1,5 +1,4 @@
-local assert = require('luassert') ---@type Luassert
-local uv = vim.uv or vim.loop
+local assert = require('luassert') --[[@as Luassert]]
 
 describe('project.nvim history', function()
   local ok ---@type boolean
@@ -26,7 +25,7 @@ describe('project.nvim history', function()
     it('should read history successfully', function()
       local fd, stat = history.open_history('r')
       assert.is_true(fd ~= nil and stat ~= nil)
-      local success = uv.fs_close(fd)
+      local success = vim.uv.fs_close(fd)
       assert.is_true(success ~= nil and success or false)
     end)
   end)

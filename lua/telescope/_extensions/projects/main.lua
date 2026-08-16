@@ -5,24 +5,21 @@ if vim.g.project_setup ~= 1 then
 end
 
 local Project = require('project')
-if not Project.util.mod_exists('telescope') then
+if not Project.util.mod_exists('telescope.init') then
   Project.util.log.error('(telescope._extensions.projects.main): Telescope is not installed!')
   vim.notify('(telescope._extensions.projects.main): Telescope is not installed!', ERROR)
   return
 end
 
-local Pickers = require('telescope.pickers')
-local Actions = require('telescope.actions')
-local State = require('telescope.actions.state')
-local telescope_config = require('telescope.config').values
 local _Actions = require('telescope._extensions.projects.actions')
-local _Util = require('telescope._extensions.projects.util')
 
 ---@class Project.Telescope.Main
-local M = {
-  --- CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
-  default_opts = { prompt_prefix = '󱎸  ' },
-}
+---CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
+--- ---
+---@field default_opts { prompt_prefix: string }
+local M = {}
+
+M.default_opts = { prompt_prefix = '󱎸  ' }
 
 local valid_acts = {
   'browse_project_files',
@@ -38,6 +35,7 @@ local valid_acts = {
 ---@param prompt_bufnr integer
 ---@param map fun(mode: string, lhs: string, rhs: string|function)
 ---@return boolean
+---@nodiscard
 local function normal_attach(prompt_bufnr, map)
   Project.util.validate({
     prompt_bufnr = { prompt_bufnr, { 'number' } },
@@ -63,10 +61,11 @@ local function normal_attach(prompt_bufnr, map)
     end
   end
 
-  Actions.select_default:replace(function()
-    Project.core.set_pwd(State.get_selected_entry().value, 'telescope')
-    if Project.config.get().telescope.behavior == 'explore' then
-      if Project.config.get().telescope.disable_file_picker then
+  require('telescope.actions').select_default:replace(function()
+    local config = Project.config.get()
+    Project.core.set_pwd(require('telescope.actions.state').get_selected_entry().value, 'telescope')
+    if config.telescope.behavior == 'explore' then
+      if config.telescope.disable_file_picker then
         return require('telescope.actions.set').select(prompt_bufnr, 'default')
       end
 
@@ -101,15 +100,18 @@ function M.projects(opts)
   end
 
   local scope_chdir = Project.config.get().scope_chdir
-  local scope = scope_chdir == 'win' and 'window' or scope_chdir --[[@as string]]
-  Pickers.new(vim.tbl_deep_extend('keep', opts, M.default_opts), {
-    prompt_title = ('Select Your Project (%s)'):format(Project.util.capitalize(scope)),
-    results_title = 'Projects',
-    finder = _Util.create_finder(),
-    previewer = false,
-    sorter = telescope_config.generic_sorter(opts),
-    attach_mappings = normal_attach,
-  }):find()
+  require('telescope.pickers')
+    .new(vim.tbl_deep_extend('keep', opts, M.default_opts), {
+      attach_mappings = normal_attach,
+      finder = require('telescope._extensions.projects.util').create_finder(),
+      previewer = false,
+      prompt_title = ('Select Your Project (%s)'):format(
+        Project.util.capitalize(scope_chdir == 'win' and 'window' or scope_chdir)
+      ),
+      results_title = 'Projects',
+      sorter = require('telescope.config').values.generic_sorter(opts),
+    })
+    :find()
 end
 
 return M

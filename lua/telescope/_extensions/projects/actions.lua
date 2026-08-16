@@ -1,29 +1,24 @@
-local ERROR = vim.log.levels.ERROR
 if vim.g.project_setup ~= 1 then
-  vim.notify('(telescope._extensions.projects.actions): `project.nvim` is not loaded!', ERROR)
+  vim.notify('(telescope._extensions.projects.actions): `project.nvim` is not loaded!', vim.log.levels.ERROR)
   return
 end
 
 local Project = require('project')
-if not Project.util.mod_exists('telescope') then
+if not Project.util.mod_exists('telescope.init') then
   Project.util.log.error('(telescope._extensions.projects.actions): Telescope is not installed!')
-  vim.notify('(telescope._extensions.projects.actions): Telescope is not installed!', ERROR)
+  vim.notify('(telescope._extensions.projects.actions): Telescope is not installed!', vim.log.levels.ERROR)
   return
 end
 
 local Telescope = require('telescope')
-local Finders = require('telescope.finders')
 local Actions = require('telescope.actions')
-local Generate = require('telescope.actions.generate')
 local Builtin = require('telescope.builtin')
 local State = require('telescope.actions.state')
-local make_display = require('telescope._extensions.projects.util').make_display
-local make_tilde = require('telescope._extensions.projects.util').make_tilde
 
 ---@class Project.Telescope.Actions
 local M = {}
 
-M.help_mappings = Generate.which_key({
+M.help_mappings = require('telescope.actions.generate').which_key({
   only_show_curret_mode = true,
   name_width = 30,
   max_height = 0.6,
@@ -63,12 +58,13 @@ function M.delete_project(prompt_bufnr)
         Project.util.log.debug('(telescope._extensions.projects.actions.delete_project): Sorting order to `newest`.')
         results = Project.util.reverse(results)
       end
-      return Finders.new_table({
+      return require('telescope.finders').new_table({
         results = results,
         entry_maker = function(value) ---@param value ProjectHistoryEntry
+          local make_tilde = require('telescope._extensions.projects.util').make_tilde
           local name = value.name
           local action_entry = { ---@class Project.ActionEntry
-            display = make_display,
+            display = require('telescope._extensions.projects.util').make_display,
             name = name,
             value = make_tilde(value.path),
             ordinal = ('%s %s'):format(name, make_tilde(value.path)),

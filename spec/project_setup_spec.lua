@@ -1,4 +1,4 @@
-local assert = require('luassert') ---@type Luassert
+local assert = require('luassert') --[[@as Luassert]]
 
 describe('project.nvim setup', function()
   local defaults ---@type ProjectConfigDefaults

@@ -51,6 +51,7 @@ end
 ---@param path string
 ---@param mods? string
 ---@return string str
+---@nodiscard
 function M.strip_slash(path, mods)
   M.validate({
     path = { path, { 'string' } },
@@ -64,6 +65,7 @@ end
 ---@param chars string
 ---@param extra_allowed? { spaces?: boolean, newlines?: boolean }
 ---@return boolean result
+---@nodiscard
 function M.only_has_chars(s, chars, extra_allowed)
   M.validate({
     s = { s, { 'string' } },
@@ -115,6 +117,7 @@ end
 ---@param list any[]
 ---@param t? type
 ---@return boolean result
+---@nodiscard
 function M.same_type_list(list, t)
   M.validate({
     list = { list, { 'table' } },
@@ -205,6 +208,7 @@ end
 
 ---@param fmt string
 ---@return boolean confirmation
+---@nodiscard
 function M.yes_no(fmt, ...)
   M.validate({ fmt = { fmt, { 'string' } } })
 
@@ -221,6 +225,7 @@ end
 
 ---@param num number
 ---@return integer n_digits
+---@nodiscard
 function M.digits(num)
   M.validate({ num = { num, { 'number' } } })
   num = num < 0 and (num * -1) or num
@@ -367,7 +372,7 @@ function M.get_dict_size(T)
   M.validate({ T = { T, { 'table' } } })
 
   local len = 0
-  if not vim.tbl_isempty(T) then
+  if not (vim.tbl_isempty(T) or vim.islist(T)) then
     for _ in pairs(T) do
       len = len + 1
     end
@@ -386,8 +391,7 @@ function M.mod_exists(mod)
   if mod == '' then
     return false
   end
-  local exists = pcall(require, mod)
-  return exists
+  return (pcall(require, mod))
 end
 
 ---@param nums number[]|number
@@ -759,6 +763,7 @@ end
 
 ---@param path string
 ---@return boolean exists
+---@nodiscard
 function M.path_exists(path)
   M.validate({ path = { path, { 'string' } } })
 
@@ -767,6 +772,7 @@ end
 
 ---@param path string
 ---@return string normalised_path
+---@nodiscard
 function M.normalise_path(path)
   M.validate({ path = { path, { 'string' } } })
 

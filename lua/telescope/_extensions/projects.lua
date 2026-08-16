@@ -2,7 +2,7 @@ if vim.g.project_setup ~= 1 then
   vim.notify('project.nvim` is not loaded!', vim.log.levels.ERORR)
   return
 end
-if not require('project.util').mod_exists('telescope') then
+if not require('project.util').mod_exists('telescope.init') then
   require('project').util.log.error('(telescope._extensions.projects): Telescope is not installed!')
   vim.notify('Telescope is not installed!', vim.log.levels.ERROR)
   return
@@ -16,10 +16,10 @@ local projects = require('telescope._extensions.projects.main').projects
 ---@field health function
 ---@field setup fun(opts?: table)
 local M = require('telescope').register_extension({
-  setup = require('telescope._extensions.projects.main').setup,
-  health = require('telescope._extensions.projects.healthcheck'),
   exports = { projects = projects },
+  health = require('telescope._extensions.projects.healthcheck'),
   projects = projects,
+  setup = require('telescope._extensions.projects.main').setup,
 })
 
 return M

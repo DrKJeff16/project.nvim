@@ -50,7 +50,7 @@ local function open_node(proj, only_cd, ran_cd)
     end
 
     item = Util.rstrip('\\', Util.strip_slash(item))
-    local stat = (vim.uv or vim.loop).fs_stat(item)
+    local stat = vim.uv.fs_stat(item)
     if not stat then
       return
     end

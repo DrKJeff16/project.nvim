@@ -17,21 +17,25 @@ local last_project = nil ---@type string|nil|?
 local M = {}
 
 ---@return string|nil|? current_project
+---@nodiscard
 function M.get_current_project()
   return current_project
 end
 
 ---@return string|nil|? current_method
+---@nodiscard
 function M.get_current_method()
   return current_method
 end
 
 ---@return string|nil|? last_project
+---@nodiscard
 function M.get_last_project()
   return last_project
 end
 
 ---@return table<string, table<string, integer[]>> per_project_bufs
+---@nodiscard
 function M._get_project_bufs()
   return per_project_bufs
 end
@@ -507,6 +511,7 @@ end
 ---@param path? string
 ---@param prefix? string
 ---@return string[]|nil|? files_list
+---@nodiscard
 function M.root_files(scan_what, path, prefix)
   if vim.g.project_setup ~= 1 then
     return

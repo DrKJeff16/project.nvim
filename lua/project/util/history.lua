@@ -3,7 +3,6 @@
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
-local uv = vim.uv or vim.loop
 local Log = require('project.util.log')
 local Path = require('project.util.path')
 local Util = require('project.util')
@@ -153,8 +152,8 @@ function M.clear_historyfile(force)
     return
   end
 
-  local success = uv.fs_write(fd, { '[', ']' })
-  uv.fs_close(fd)
+  local success = vim.uv.fs_write(fd, { '[', ']' })
+  vim.uv.fs_close(fd)
   if not success then
     Log.error('(project.util.history.clear_historyfile): Unable to clear history file!')
     vim.notify('(project.nvim): Unable to clear history file!', ERROR)
@@ -181,7 +180,7 @@ function M.open_history(mode)
 
   Path.create_path()
 
-  local dir_stat = uv.fs_stat(Path.projectpath)
+  local dir_stat = vim.uv.fs_stat(Path.projectpath)
   if not dir_stat then
     Log.error('(project.util.history.open_history): History directory unavailable!')
     error('(project.util.history.open_history): History directory unavailable!')
@@ -238,7 +237,7 @@ function M.export_history_json(path, ind, force_name)
     path = ('%s.json'):format(path)
   end
 
-  local stat = uv.fs_stat(path)
+  local stat = vim.uv.fs_stat(path)
   if stat then
     if stat.type ~= 'file' then
       Log.error(('(project.util.history.export_history_json): Target exists and is not a file! `%s`'):format(path))
@@ -276,12 +275,12 @@ function M.export_history_json(path, ind, force_name)
 
   local ok, data = pcall(vim.json.encode, Util.reverse(M.get_recent_projects(nil, nil, false)), { indent = spc })
   if ok and data then
-    uv.fs_write(fd, data)
+    vim.uv.fs_write(fd, data)
 
     Log.debug(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')))
     vim.notify(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
   end
-  uv.fs_close(fd)
+  vim.uv.fs_close(fd)
 end
 
 ---@param path string
@@ -335,7 +334,7 @@ function M.import_history_json(path, force_name, keep)
     return
   end
 
-  local data = uv.fs_read(fd, stat.size)
+  local data = vim.uv.fs_read(fd, stat.size)
   if not data or data == '' then
     Log.error(('(project.util.history.import_history_json): Data unavailable: `%s`'):format(path))
     vim.notify(('(project.util.history.import_history_json): Data unavailable: `%s`'):format(path), ERROR)
@@ -355,7 +354,7 @@ function M.import_history_json(path, force_name, keep)
   Log.debug(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')))
   vim.notify(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
 
-  if not keep and uv.fs_unlink(path) then
+  if not keep and vim.uv.fs_unlink(path) then
     Log.debug(('project.nvim - Deleted imported history file `%s`'):format(Util.strip_slash(path, ':p:~')))
     vim.notify(('project.nvim - Deleted imported history file `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
   end
@@ -507,7 +506,7 @@ local function setup_watch()
     return
   end
 
-  event = uv.new_fs_event()
+  event = vim.uv.new_fs_event()
   if not event then
     Log.warn('project.nvim - Unable to create history file setup watch!')
     return
@@ -532,7 +531,7 @@ function M.read_history()
   end
   if not stat then
     Log.error('(project.util.history.read_history): Stat for history file unavailable!')
-    uv.fs_close(fd)
+    vim.uv.fs_close(fd)
     return
   end
 
@@ -547,13 +546,11 @@ function M.read_history()
   end
 
   ---@type boolean, ProjectHistoryEntry[]|nil|?
-  local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size))
-  uv.fs_close(fd)
+  local ok, data = pcall(vim.json.decode, vim.uv.fs_read(fd, stat.size))
+  vim.uv.fs_close(fd)
   if not (ok and data) then
-    Log.error(([[
-(project.util.history.read_history): Could not decode JSON data from history file!
-(`stat.size = %s`)
-    ]]):format(stat.size))
+    Log.error(([[(project.util.history.read_history): Could not decode JSON data from history file!
+(`stat.size = %s`)]]):format(stat.size))
     return
   end
 
@@ -657,11 +654,11 @@ function M.write_history(path)
   end
 
   if ok and fd and stat then
-    local data = uv.fs_read(fd, stat.size)
-    uv.fs_close(fd)
+    local data = vim.uv.fs_read(fd, stat.size)
+    vim.uv.fs_close(fd)
     if data then
-      ok, file_history = pcall(vim.json.decode, data) ---@type boolean, ProjectHistoryEntry[]
-      if not ok then
+      ok, file_history = pcall(vim.json.decode, data) ---@type boolean, ProjectHistoryEntry[]|nil|?
+      if not (ok and file_history) then
         Log.error('(project.util.history.write_history): Unable to decode JSON data!')
         error('(project.util.history.write_history): Unable to decode JSON data!')
       end
@@ -672,10 +669,10 @@ function M.write_history(path)
   while i < #file_history do
     local proj = file_history[i]
     if
-      vim.tbl_contains(file_history, function(val)
+      vim.tbl_contains(file_history, function(val) ---@param val ProjectHistoryEntry
         return vim.deep_equal(val, proj)
       end, { predicate = true })
-      and not vim.tbl_contains(res, function(val)
+      and not vim.tbl_contains(res, function(val) ---@param val ProjectHistoryEntry
         return vim.deep_equal(val, proj)
       end, { predicate = true })
     then
@@ -688,7 +685,7 @@ function M.write_history(path)
   while i < #res do
     local proj = res[i]
     if
-      not vim.tbl_contains(file_history, function(val)
+      not vim.tbl_contains(file_history, function(val) ---@param val ProjectHistoryEntry
         return vim.deep_equal(val, proj)
       end, { predicate = true })
     then
@@ -702,7 +699,7 @@ function M.write_history(path)
   end
 
   if vim.tbl_isempty(file_history) then
-    uv.fs_close(fd)
+    vim.uv.fs_close(fd)
 
     if vim.g.project_history_no_data_notified ~= 1 then
       Log.error('(project.util.history.write_history): No data available to write!')
@@ -723,13 +720,13 @@ function M.write_history(path)
 
   local success, out = pcall(vim.json.encode, file_history) ---@type boolean, string|nil|?
   if not (success and out) then
-    uv.fs_close(fd)
+    vim.uv.fs_close(fd)
     Log.error('(project.util.history.write_history): Unable to encode JSON data!')
     error('(project.util.history.write_history): Unable to encode JSON data!')
   end
 
-  uv.fs_write(fd, out)
-  uv.fs_close(fd)
+  vim.uv.fs_write(fd, out)
+  vim.uv.fs_close(fd)
 end
 
 ---@param search 'session'|'recent'
@@ -780,39 +777,37 @@ function M.open_win()
   end
   if not stat then
     Log.error('(project.util.history.open_win): Stat for history file unavailable!')
-    uv.fs_close(fd)
+    vim.uv.fs_close(fd)
     return
   end
 
-  local ok, data = pcall(vim.json.decode, uv.fs_read(fd, stat.size)) ---@type boolean, ProjectHistoryEntry[]|nil|?
-  uv.fs_close(fd)
-  if not (ok and data) then
-    return
+  local ok, data = pcall(vim.json.decode, vim.uv.fs_read(fd, stat.size)) ---@type boolean, ProjectHistoryEntry[]|nil|?
+  vim.uv.fs_close(fd)
+  if ok and data then
+    local bufnr = vim.api.nvim_create_buf(true, true)
+    local tab = vim.api.nvim_open_tabpage(bufnr, true, { after = -1 })
+    window = { bufnr = bufnr, win = vim.api.nvim_get_current_win(), tab = tab }
+
+    local lines = {} ---@type string[]
+    for _, entry in ipairs(data) do
+      table.insert(lines, ('(%s) - %s'):format(entry.name, entry.path))
+    end
+
+    vim.api.nvim_buf_set_lines(window.bufnr, 0, 1, true, Util.reverse(lines))
+    vim.api.nvim_buf_set_name(window.bufnr, 'Project History')
+
+    Util.optset('signcolumn', 'no', 'win', window.win)
+    Util.optset('list', false, 'win', window.win)
+    Util.optset('number', false, 'win', window.win)
+    Util.optset('wrap', false, 'win', window.win)
+    Util.optset('colorcolumn', '', 'win', window.win)
+    Util.optset('filetype', '', 'buf', window.bufnr)
+    Util.optset('fileencoding', 'utf-8', 'buf', window.bufnr)
+    Util.optset('buftype', 'nowrite', 'buf', window.bufnr)
+    Util.optset('modifiable', false, 'buf', window.bufnr)
+
+    vim.keymap.set('n', 'q', M.close_win, { buffer = window.bufnr, noremap = true, silent = true })
   end
-
-  local bufnr = vim.api.nvim_create_buf(true, true)
-  local tab = vim.api.nvim_open_tabpage(bufnr, true, { after = -1 })
-  window = { bufnr = bufnr, win = vim.api.nvim_get_current_win(), tab = tab }
-
-  local lines = {} ---@type string[]
-  for _, entry in ipairs(data) do
-    table.insert(lines, ('(%s) - %s'):format(entry.name, entry.path))
-  end
-
-  vim.api.nvim_buf_set_lines(window.bufnr, 0, 1, true, Util.reverse(lines))
-  vim.api.nvim_buf_set_name(window.bufnr, 'Project History')
-
-  Util.optset('signcolumn', 'no', 'win', window.win)
-  Util.optset('list', false, 'win', window.win)
-  Util.optset('number', false, 'win', window.win)
-  Util.optset('wrap', false, 'win', window.win)
-  Util.optset('colorcolumn', '', 'win', window.win)
-  Util.optset('filetype', '', 'buf', window.bufnr)
-  Util.optset('fileencoding', 'utf-8', 'buf', window.bufnr)
-  Util.optset('buftype', 'nowrite', 'buf', window.bufnr)
-  Util.optset('modifiable', false, 'buf', window.bufnr)
-
-  vim.keymap.set('n', 'q', M.close_win, { buffer = window.bufnr, noremap = true, silent = true })
 end
 
 function M.close_win()

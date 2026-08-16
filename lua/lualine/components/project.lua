@@ -45,15 +45,15 @@ local M = require('lualine.component'):extend()
 ---@field separator? string
 
 ---@class Project.LuaLineDefaults: Project.LuaLineOpts
----@field enclose_pair { [1]?: string, [2]?: string }|nil
+---@field enclose_pair { [1]?: string, [2]?: string }|nil|?
 ---@field format 'short'|'full'|'full_expanded'|'name'
 ---@field no_project string
 ---@field separator string
 local defaults = {
-  separator = ' ',
-  no_project = '',
-  format = 'name',
   enclose_pair = nil,
+  format = 'name',
+  no_project = '',
+  separator = ' ',
 }
 
 ---@param options? Project.LuaLineOpts
@@ -87,10 +87,8 @@ function M:project_root()
   local ft = Project.util.optget('filetype', 'buf', bufnr) --[[@as string]]
   local bt = Project.util.optget('buftype', 'buf', bufnr) --[[@as string]]
   local msg = '' ---@type string
-  if
-    vim.list_contains(Project.config.get().disable_on.ft, ft)
-    or vim.list_contains(Project.config.get().disable_on.bt, bt)
-  then
+  local config = Project.config.get()
+  if vim.list_contains(config.disable_on.ft, ft) or vim.list_contains(config.disable_on.bt, bt) then
     return msg
   end
 
@@ -107,9 +105,7 @@ function M:project_root()
   end
 
   if
-    not vim.list_contains({ 'short', 'full', 'full_expanded', 'name' }, format)
-    or not (curr and root)
-    or curr ~= root
+    not (vim.list_contains({ 'short', 'full', 'full_expanded', 'name' }, format) and curr and root) or curr ~= root
   then
     msg = self.options.no_project --[[@as string]]
   elseif format == 'full_expanded' then

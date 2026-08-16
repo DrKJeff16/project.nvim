@@ -1,5 +1,4 @@
 local ERROR = vim.log.levels.ERROR
-local uv = vim.uv or vim.loop
 local Util = require('project.util')
 
 ---@class Project.Util.Path
@@ -25,18 +24,17 @@ M.is_hidden = Util.is_hidden
 ---@return integer|nil|? mode_num
 function M.open_mode(mode)
   Util.validate({ mode = { mode, { 'string' } } })
-  if mode == '' or mode:len() ~= 3 then
-    return
-  end
 
-  for _, c in ipairs(vim.split(mode, '', { trimempty = false })) do
-    local ok, cnum = pcall(tonumber, c, 10) ---@type boolean, integer|nil|?
-    if not (ok and cnum) or cnum < 0 or cnum > 7 then
-      return
+  if mode ~= '' and mode:len() == 3 then
+    for _, c in ipairs(vim.split(mode, '', { trimempty = false })) do
+      local ok, cnum = pcall(tonumber, c, 10) ---@type boolean, integer|nil|?
+      if not (ok and cnum) or cnum < 0 or cnum > 7 then
+        return
+      end
     end
-  end
 
-  return tonumber(mode, 8)
+    return tonumber(mode, 8)
+  end
 end
 
 ---@param path string
@@ -51,10 +49,9 @@ function M.open_file(path, flags, mode)
     mode = { mode, { 'number', 'nil' }, true },
   })
   mode = (mode and Util.is_int(mode)) and mode or M.open_mode('644')
+
   if M.exists(path) then
-    local stat = uv.fs_stat(path)
-    local fd = uv.fs_open(path, flags, mode)
-    return fd, stat
+    return (vim.uv.fs_open(path, flags, mode)), (vim.uv.fs_stat(path))
   end
 end
 
@@ -77,17 +74,18 @@ function M.verify_owner(dir)
     return true
   end
 
-  local stat = uv.fs_stat(dir)
+  local stat = vim.uv.fs_stat(dir)
   if not stat then
     Log.error("(project.util.path.verify_owner): Directory can't be accessed!")
     vim.notify("(project.util.path.verify_owner): Directory can't be accessed!", ERROR)
     return false
   end
-  return stat.uid == uv.getuid()
+  return stat.uid == vim.uv.getuid()
 end
 
 ---@param dir string
 ---@return boolean excluded
+---@nodiscard
 function M.is_excluded(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
@@ -116,7 +114,7 @@ end
 function M.get_parent(path_str)
   Util.validate({ path_str = { path_str, { 'string' } } })
 
-  local parent = path_str:match('^(.*)/') ---@type string
+  local parent = path_str:match('^(.*)/') --[[@as string]]
   return parent ~= '' and parent or '/'
 end
 
@@ -126,10 +124,10 @@ function M.get_files(file_dir)
 
   M.last_dir_cache = file_dir
   M.curr_dir_cache = {}
-  local dir = uv.fs_scandir(file_dir)
+  local dir = vim.uv.fs_scandir(file_dir)
   if dir then
     while true do
-      local file = uv.fs_scandir_next(dir)
+      local file = vim.uv.fs_scandir_next(dir)
       if not file then
         return
       end
@@ -224,7 +222,7 @@ function M.create_path(path)
 
   if not M.exists(path) then
     require('project.util.log').debug(('(project.util.path.create_path): Creating directory `%s`.'):format(path))
-    uv.fs_mkdir(path, M.open_mode('755'))
+    vim.uv.fs_mkdir(path, M.open_mode('755'))
   end
 end
 
@@ -294,13 +292,13 @@ function M.setup(save_dir, save_file)
 
   M.historyfile = M.join(M.projectpath, save_file)
   if not M.exists(M.historyfile) then
-    local fd = uv.fs_open(M.historyfile, 'w', M.open_mode('644'))
+    local fd = vim.uv.fs_open(M.historyfile, 'w', M.open_mode('644'))
     if not fd then
       error('(%s.setup): Unable to create history file!')
     end
 
-    uv.fs_write(fd, { '[', ']' })
-    uv.fs_close(fd)
+    vim.uv.fs_write(fd, { '[', ']' })
+    vim.uv.fs_close(fd)
   end
 end
 
