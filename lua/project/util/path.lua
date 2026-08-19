@@ -232,13 +232,14 @@ end
 function M.root_included(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
+  local config = require('project.config').get()
   while true do ---Breadth-First search
-    for _, pattern in ipairs(require('project.config').get().patterns) do
+    for _, pattern in ipairs(config.patterns) do
       local excluded = false
       if pattern:sub(1, 1) == '!' then
         excluded, pattern = true, pattern:sub(2)
       end
-      for _, custom in ipairs(require('project.config').get().custom_projects) do
+      for _, custom in ipairs(config.custom_projects) do
         if dir == custom.path then
           return dir, 'custom'
         end

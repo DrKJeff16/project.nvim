@@ -43,11 +43,12 @@ end
 ---@param cb fun(entry?: string|number, cb?: function)
 local function exec(cb)
   local projects = Util.history.get_recent_projects()
-  if require('project.config').get().fzf_lua.sort == 'newest' then
+  local config = require('project.config').get()
+  if config.fzf_lua.sort == 'newest' then
     projects = Util.reverse(projects)
   end
   for _, entry in ipairs(projects) do
-    cb(require('project.config').get().fzf_lua.show == 'names' and entry.name or entry.path)
+    cb(config.fzf_lua.show == 'names' and entry.name or entry.path)
   end
   cb()
 end
