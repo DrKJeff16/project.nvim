@@ -2,7 +2,6 @@
 
 [![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/DrKJeff16)[![Last Commit](https://img.shields.io/github/last-commit/DrKJeff16/project.nvim.svg)](https://github.com/DrKJeff16/project.nvim/commits/main/)[![LICENSE](https://img.shields.io/github/license/DrKJeff16/project.nvim)](https://github.com/DrKJeff16/project.nvim/blob/main/LICENSE)[![Issues](https://img.shields.io/github/issues/DrKJeff16/project.nvim)](https://github.com/DrKJeff16/project.nvim/issues)[![GitHub Release](https://img.shields.io/github/v/release/DrKJeff16/project.nvim?sort=date&display_name=release)](https://github.com/DrKJeff16/project.nvim/releases/latest)
 
-- [**Breaking Changes**](https://github.com/DrKJeff16/project.nvim/wiki/Breaking-Changes)
 - [**LuaRocks Page**](https://luarocks.org/modules/drkjeff16/project.nvim)
 - [**Wiki**](https://github.com/DrKJeff16/project.nvim/wiki)
 - [**Credits**](https://github.com/DrKJeff16/project.nvim/blob/main/CREDITS.md)
