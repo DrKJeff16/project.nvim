@@ -1,5 +1,21 @@
 # Changelog
 
+## [v6.0.2-1](https://github.com/DrKJeff16/project.nvim/tree/v6.0.2-1) (2026-08-22)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v6.0.1-1...v6.0.2-1)
+
+## [v6.0.1-1](https://github.com/DrKJeff16/project.nvim/tree/v6.0.1-1) (2026-08-10)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v6.0.0-1...v6.0.1-1)
+
+**Implemented enhancements:**
+
+- fix\(core\): remove `write_history()` from `refresh_project_bufs()` [\#78](https://github.com/DrKJeff16/project.nvim/pull/78) ([DrKJeff16](https://github.com/DrKJeff16))
+
+**Fixed bugs:**
+
+- \[BUG\] Infinite recursion crash between `write_history()` and `refresh_project_bufs()` [\#77](https://github.com/DrKJeff16/project.nvim/issues/77)
+
 ## [v6.0.0-1](https://github.com/DrKJeff16/project.nvim/tree/v6.0.0-1) (2026-07-30)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v5.3.0-1...v6.0.0-1)
