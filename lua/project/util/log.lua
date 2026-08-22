@@ -15,6 +15,8 @@ local window = nil ---@type Project.Util.Log.Win|nil|?
 local logfile = nil ---@type string|nil|?
 local snacks_enabled = false ---@type boolean
 local snacks_style = 'fancy' ---@type ProjectLog.Snacks.Style
+local logpath = nil ---@type string|nil|?
+local full_data = nil ---@type string|nil|?
 
 ---@enum ProjectLog.Snacks.Levels
 local snacks_levels = { [DEBUG] = 'debug', [INFO] = 'info', [WARN] = 'warn', [ERROR] = 'error' }
@@ -45,6 +47,11 @@ end
 
 ---@class Project.Util.Log
 local M = {}
+
+---@return string|nil|? logfile
+function M.get_logfile()
+  return logfile
+end
 
 ---@class Project.Util.Log.Backtrace
 ---@field debug fun(...: any)
@@ -121,38 +128,41 @@ M.warn = gen_log(WARN)
 
 ---@return string|nil|? data
 function M.read_log()
-  if not logfile then
+  if not (logpath and logfile) then
     return
   end
-  local stat = vim.uv.fs_stat(logfile)
-  if not stat then
-    return
-  end
+
   local fd = M.open('r')
   if not fd then
     return
   end
 
-  local data = vim.uv.fs_read(fd, stat.size, -1)
+  local stat = vim.uv.fs_stat(logfile)
+  if not stat then
+    vim.uv.fs_close(fd)
+    return
+  end
+
+  local data = vim.uv.fs_read(fd, stat.size)
+  vim.uv.fs_close(fd)
   return data
 end
 
 function M.clear_log()
-  if vim.g.project_log_loaded == 1 and vim.uv.fs_unlink(logfile) then
+  if vim.g.project_log_loaded == 1 and (vim.uv.fs_unlink(logfile)) then
     vim.notify('(project.nvim): Log cleared successfully', INFO)
     vim.g.project_log_cleared = 1
   end
 end
 
 local function timer_cb()
-  local fd = vim.uv.fs_open(logfile, 'w', Path.open_mode('644'))
-  if not fd then
+  local stat = vim.uv.fs_stat(logfile)
+  if not stat or stat.size < math.floor(require('project.config').get().log.max_size * 1024 * 1024) then
     return
   end
 
-  local stat = vim.uv.fs_stat(logfile)
-  if not stat or stat.size < math.floor(require('project.config').get().log.max_size * 1024 * 1024) then
-    vim.uv.fs_close(fd)
+  local fd = vim.uv.fs_open(logfile, 'w', Path.open_mode('644'))
+  if not fd then
     return
   end
 
@@ -184,13 +194,12 @@ local function make_timer()
   local group = vim.api.nvim_create_augroup('project.nvim.log', { clear = true })
   vim.api.nvim_create_autocmd({ 'VimLeavePre' }, {
     group = group,
+    once = true,
     callback = function()
-      if not (timer and timer:is_active()) then
-        return
+      if timer and not timer:is_active() then
+        timer:stop()
+        timer = nil
       end
-
-      timer:stop()
-      timer = nil
     end,
   })
 end
@@ -198,23 +207,23 @@ end
 ---Only runs once.
 --- ---
 local function setup_watch()
-  if vim.g.project_log_has_watch_setup == 1 and event then
+  if vim.g.project_log_has_watch_setup == 1 and event or not (logpath and logfile) then
     return
   end
 
   event = vim.uv.new_fs_event()
-  if event then
-    event:start(M.logpath, {}, function(err, _, events)
-      if err or not events.change then
-        return
-      end
-
-      M.read_log()
-    end)
-
-    make_timer()
-    vim.g.project_log_has_watch_setup = 1
+  if not event then
+    return
   end
+
+  event:start(logfile, {}, function(err, _, events)
+    if not err and events.change then
+      full_data = M.read_log()
+    end
+  end)
+
+  make_timer()
+  vim.g.project_log_has_watch_setup = 1
 end
 
 ---@param data string
@@ -244,24 +253,28 @@ function M.write(data, lvl)
   }
 
   local msg = os.date(('%s  ==>  %s%s'):format('%H:%M:%S', PFX[lvl], data)) --[[@as string]]
-  vim.uv.fs_write(fd, msg, -1)
+  vim.uv.fs_write(fd, msg)
   vim.uv.fs_close(fd)
   return msg
 end
 
----@param mode uv.fs_open.flags
+---@param flags uv.fs_open.flags
 ---@return integer|nil|? fd
 ---@return uv.fs_stat.result|nil|? stat
-function M.open(mode)
-  Path.create_path(M.logpath)
-  local dir_stat = vim.uv.fs_stat(M.logpath)
+function M.open(flags)
+  if not (logpath and logfile) then
+    return
+  end
+
+  if not Path.exists({ logpath, logfile }) then
+    Path.create_path(logpath)
+  end
+  local dir_stat = vim.uv.fs_stat(logpath)
   if not dir_stat or dir_stat.type ~= 'directory' then
     error('(project.util.log.open): Projectpath stat is not valid!')
   end
 
-  local stat = vim.uv.fs_stat(logfile)
-  local fd = vim.uv.fs_open(logfile, mode, Path.open_mode('644'))
-  return fd, stat
+  return (vim.uv.fs_open(logfile, flags, Path.open_mode('644'))), (vim.uv.fs_stat(logfile))
 end
 
 ---@param opts ProjectDefaults.Logging
@@ -271,34 +284,39 @@ function M.setup(opts)
     return
   end
 
-  M.logpath = opts.logpath
-  logfile = vim.fs.joinpath(M.logpath, 'project.log')
-  Path.create_path(M.logpath)
+  logpath = opts.logpath
+  logfile = vim.fs.joinpath(logpath, 'project.log')
+
+  if not Path.exists(logpath) then
+    Path.create_path(logpath)
+  end
 
   local fd
   local stat = vim.uv.fs_stat(logfile)
   if not stat then
     fd = M.open('w')
-    vim.uv.fs_close(fd)
-    fd = nil
+    if fd then
+      vim.uv.fs_close(fd)
+      fd = nil
+    end
   end
-  stat = vim.uv.fs_stat(logfile) ---@type uv.fs_stat.result
 
-  fd = M.open('a')
   local head = ('='):rep(45)
-  vim.uv.fs_write(
-    fd,
-    (stat.size >= 1 and '\n' or '') .. os.date(('%s    %s    %s\n'):format(head, '%x  (%H:%M:%S)', head))
-  )
+  fd, stat = M.open('a')
+  if fd and stat then
+    vim.uv.fs_write(
+      fd,
+      os.date(('%s%s    %s    %s\n'):format((stat.size >= 1 and '\n' or ''), head, '%x  (%H:%M:%S)', head))
+    )
+    setup_watch()
 
-  setup_watch()
+    if opts.snacks.enabled then
+      snacks_enabled = true
+      gen_snacks_backtrace()
+    end
 
-  if opts.snacks.enabled then
-    snacks_enabled = true
-    gen_snacks_backtrace()
+    vim.g.project_log_loaded = 1
   end
-
-  vim.g.project_log_loaded = 1
 end
 
 function M.open_win()

@@ -761,13 +761,27 @@ function M.format_per_type(t, data, sep, constraints)
   return msg
 end
 
----@param path string
+---@param path_or_paths string[]|string
 ---@return boolean exists
 ---@nodiscard
-function M.path_exists(path)
-  M.validate({ path = { path, { 'string' } } })
+function M.path_exists(path_or_paths)
+  M.validate({ path_or_paths = { path_or_paths, { 'string', 'table' } } })
 
-  return M.dir_exists(path) or vim.fn.filereadable(path) == 1
+  if type(path_or_paths) == 'string' then
+    return M.dir_exists(path_or_paths) or vim.fn.filereadable(path_or_paths) == 1
+  end
+
+  if not vim.islist(path_or_paths) then
+    -- TODO: Add error message
+    return false
+  end
+
+  for _, path in ipairs(path_or_paths) do
+    if not M.path_exists(path) then
+      return false
+    end
+  end
+  return true
 end
 
 ---@param path string

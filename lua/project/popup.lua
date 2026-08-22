@@ -288,12 +288,14 @@ M.recents_menu = M.new({
         return (item == 'Exit' and '' or (Util.history.find_entry('session', item, 'path') and '* ' or '')) .. item
       end,
     }, function(item) ---@param item string
-      if item and item ~= '' then
-        if vim.list_contains(choices_list, item) and M.recents_menu.choices(config)[item] then
-          M.recents_menu.choices(config)[item](Util.history.find_entry('recent', item, 'path'), false, false)
-        else
-          vim.notify('Bad selection!', vim.log.levels.ERROR)
-        end
+      if not item or item == '' then
+        return
+      end
+
+      if vim.list_contains(choices_list, item) and M.recents_menu.choices(config)[item] then
+        M.recents_menu.choices(config)[item](Util.history.find_entry('recent', item, 'path'), false, false)
+      else
+        vim.notify('Bad selection!', vim.log.levels.ERROR)
       end
     end)
   end,
@@ -328,12 +330,14 @@ M.open_menu = M.new({
     else
       local choices_list = M.open_menu.choices_list()
       vim.ui.select(choices_list, { prompt = 'Select an operation:' }, function(item)
-        if item then
-          if vim.list_contains(choices_list, item) and M.open_menu.choices()[item] then
-            M.open_menu.choices()[item]()
-          else
-            vim.notify('Bad selection!', vim.log.levels.ERROR)
-          end
+        if not item then
+          return
+        end
+
+        if vim.list_contains(choices_list, item) and M.open_menu.choices()[item] then
+          M.open_menu.choices()[item]()
+        else
+          vim.notify('Bad selection!', vim.log.levels.ERROR)
         end
       end)
     end
@@ -368,7 +372,7 @@ M.open_menu = M.new({
         vim.cmd.Project('import')
       end,
       Help = function()
-        vim.cmd.help('project.txt')
+        vim.cmd.Project('help')
       end,
       Checkhealth = function()
         vim.cmd.Project('health')
@@ -453,12 +457,14 @@ M.session_menu = M.new({
           return (item == 'Exit' or config.show_by_name) and item or Util.strip_slash(item, ':p:~')
         end,
       }, function(item) ---@param item string
-        if item and item ~= '' then
-          if vim.list_contains(choices_list, item) and M.session_menu.choices(config)[item] then
-            M.session_menu.choices(config)[item](Util.history.find_entry('session', item, 'path'), only_cd, false)
-          else
-            vim.notify('Bad selection!', vim.log.levels.ERROR)
-          end
+        if not item or item == '' then
+          return
+        end
+
+        if vim.list_contains(choices_list, item) and M.session_menu.choices(config)[item] then
+          M.session_menu.choices(config)[item](Util.history.find_entry('session', item, 'path'), only_cd, false)
+        else
+          vim.notify('Bad selection!', vim.log.levels.ERROR)
         end
       end)
     end
