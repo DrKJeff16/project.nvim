@@ -2,6 +2,16 @@
 
 local Util = require('project.util')
 
+---@param cmd string
+---@param ... string
+---@return function
+local function exec_cmd(cmd, ...)
+  local args = { ... }
+  return function()
+    vim.cmd[cmd]({ args = args })
+  end
+end
+
 ---@param proj string
 ---@param only_cd boolean
 ---@param ran_cd boolean
@@ -57,7 +67,7 @@ local function open_node(proj, only_cd, ran_cd)
 
     if stat.type == 'file' then
       vim.g.project_nvim_cwd = ''
-      vim.cmd.edit(item)
+      exec_cmd('edit', item)()
     elseif stat.type == 'directory' then
       vim.g.project_nvim_cwd = item
       open_node(item, false, ran_cd)
@@ -122,12 +132,12 @@ end
 ---@param opts Project.Popup.SelectChoices
 ---@return Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args) selector
 ---@nodiscard
-function M.new(opts)
+local function new_popup(opts)
   Util.validate({
     opts = { opts, { 'table' } },
-    opts_choices = { opts.choices, { 'function' } },
-    opts_choices_list = { opts.choices_list, { 'function' } },
-    opts_callback = { opts.callback, { 'function' } },
+    ['opts.choices'] = { opts.choices, { 'function' } },
+    ['opts.choices_list'] = { opts.choices_list, { 'function' } },
+    ['opts.callback'] = { opts.callback, { 'function' } },
   })
 
   if vim.tbl_isempty(opts) then
@@ -180,7 +190,7 @@ function M.prompt_project(input)
   end
 end
 
-M.delete_menu = M.new({
+M.delete_menu = new_popup({
   callback = function()
     local config = require('project.config').get()
     local choices_list = M.delete_menu.choices_list(config)
@@ -190,12 +200,14 @@ M.delete_menu = M.new({
         return (item == 'Exit' and '' or (Util.history.find_entry('session', item, 'path') and '* ' or '')) .. item
       end,
     }, function(item)
-      if item then
-        if vim.list_contains(choices_list, item) and M.delete_menu.choices(config)[item] then
-          M.delete_menu.choices(config)[item]()
-        else
-          vim.notify('Bad selection!', vim.log.levels.ERROR)
-        end
+      if not item or item == '' then
+        return
+      end
+
+      if vim.list_contains(choices_list, item) and M.delete_menu.choices(config)[item] then
+        M.delete_menu.choices(config)[item]()
+      else
+        vim.notify('Bad selection!', vim.log.levels.ERROR)
       end
     end)
   end,
@@ -226,25 +238,27 @@ M.delete_menu = M.new({
   end,
 })
 
-M.rename_menu = M.new({
+M.rename_menu = new_popup({
   callback = function()
     local config = require('project.config').get()
     local choices_list = M.rename_menu.choices_list(config)
     vim.ui.select(choices_list, { prompt = 'Select a project to rename:' }, function(item) ---@param item string
-      if item and item ~= 'Exit' then
-        if vim.list_contains(choices_list, item) and M.rename_menu.choices(config)[item] then
-          vim.ui.input({
-            prompt = ('Input the new name for project %s'):format(
-              config.show_by_name and item or Util.history.find_entry('recent', item, 'name')
-            ),
-          }, function(input)
-            if input and input ~= '' then
-              M.rename_menu.choices(config)[item](input)
-            end
-          end)
-        else
-          vim.notify('Bad selection!', vim.log.levels.ERROR)
-        end
+      if not item and item == 'Exit' then
+        return
+      end
+
+      if vim.list_contains(choices_list, item) and M.rename_menu.choices(config)[item] then
+        vim.ui.input({
+          prompt = ('Input the new name for project %s'):format(
+            config.show_by_name and item or Util.history.find_entry('recent', item, 'name')
+          ),
+        }, function(input)
+          if input and input ~= '' then
+            M.rename_menu.choices(config)[item](input)
+          end
+        end)
+      else
+        vim.notify('Bad selection!', vim.log.levels.ERROR)
       end
     end)
   end,
@@ -278,7 +292,7 @@ M.rename_menu = M.new({
   end,
 })
 
-M.recents_menu = M.new({
+M.recents_menu = new_popup({
   callback = function()
     local config = require('project.config').get()
     local choices_list = M.recents_menu.choices_list(config)
@@ -321,16 +335,19 @@ M.recents_menu = M.new({
   end,
 })
 
-M.open_menu = M.new({
+M.open_menu = new_popup({
   callback = function(ctx)
-    if ctx and ctx.fargs and not vim.tbl_isempty(ctx.fargs) then
-      if vim.list_contains(vim.tbl_keys(M.open_menu.choices()), ctx.fargs[1]) then
-        M.open_menu.choices()[ctx.fargs[1]](ctx)
-      end
+    if
+      ctx
+      and ctx.fargs
+      and not vim.tbl_isempty(ctx.fargs)
+      and vim.list_contains(vim.tbl_keys(M.open_menu.choices()), ctx.fargs[1])
+    then
+      M.open_menu.choices()[ctx.fargs[1]](ctx)
     else
       local choices_list = M.open_menu.choices_list()
       vim.ui.select(choices_list, { prompt = 'Select an operation:' }, function(item)
-        if not item then
+        if not item or item == '' then
           return
         end
 
@@ -344,54 +361,22 @@ M.open_menu = M.new({
   end,
   choices = function()
     return { ---@type table<string, function>
-      Session = function()
-        vim.cmd.Project('session')
-      end,
-      New = function()
-        vim.cmd.Project('add')
-      end,
-      Recents = function()
-        vim.cmd.Project('recents')
-      end,
-      Delete = function()
-        vim.cmd.Project('delete')
-      end,
-      Rename = function()
-        vim.cmd.Project({ args = { 'history', 'rename' } })
-      end,
-      Config = function()
-        vim.cmd.Project('config')
-      end,
-      Historyfile = function()
-        vim.cmd.Project('history')
-      end,
-      Export = function()
-        vim.cmd.Project('export')
-      end,
-      Import = function()
-        vim.cmd.Project('import')
-      end,
-      Help = function()
-        vim.cmd.Project('help')
-      end,
-      Checkhealth = function()
-        vim.cmd.Project('health')
-      end,
-      Picker = vim.g.project_picker_loaded ~= 1 and nil or function()
-        vim.cmd.Project('picker')
-      end,
-      Snacks = vim.g.project_snacks_loaded ~= 1 and nil or function()
-        vim.cmd.Project('snacks')
-      end,
-      Telescope = vim.g.project_telescope_loaded ~= 1 and nil or function()
-        vim.cmd.Project('telescope')
-      end,
-      FzfLua = vim.g.project_fzf_lua_loaded ~= 1 and nil or function()
-        vim.cmd.Project('fzf-lua')
-      end,
-      Log = vim.g.project_log_loaded ~= 1 and nil or function()
-        vim.cmd.Project({ args = { 'log', 'toggle' } })
-      end,
+      Session = exec_cmd('Project', 'session'),
+      New = exec_cmd('Project', 'add'),
+      Recents = exec_cmd('Project', 'recents'),
+      Delete = exec_cmd('Project', 'delete'),
+      Rename = exec_cmd('Project', 'history', 'rename'),
+      Config = exec_cmd('Project', 'config'),
+      Historyfile = exec_cmd('Project', 'history'),
+      Export = exec_cmd('Project', 'export'),
+      Import = exec_cmd('Project', 'import'),
+      Help = exec_cmd('Project', 'help'),
+      Checkhealth = exec_cmd('Project', 'health'),
+      Picker = vim.g.project_picker_loaded ~= 1 and nil or exec_cmd('Project', 'picker'),
+      Snacks = vim.g.project_snacks_loaded ~= 1 and nil or exec_cmd('Project', 'snacks'),
+      Telescope = vim.g.project_telescope_loaded ~= 1 and nil or exec_cmd('Project', 'telescope'),
+      FzfLua = vim.g.project_fzf_lua_loaded ~= 1 and nil or exec_cmd('Project', 'fzf-lua'),
+      Log = vim.g.project_log_loaded ~= 1 and nil or exec_cmd('Project', 'log', 'toggle'),
       Exit = function() end,
     }
   end,
@@ -439,7 +424,7 @@ M.open_menu = M.new({
   end,
 })
 
-M.session_menu = M.new({
+M.session_menu = new_popup({
   callback = function(ctx)
     local only_cd = false
     if ctx then
