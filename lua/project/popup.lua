@@ -8,7 +8,7 @@ local Util = require('project.util')
 local function exec_cmd(cmd, ...)
   local args = { ... }
   return function()
-    vim.cmd[cmd]({ args = args })
+    pcall(vim.cmd[cmd], { args = args })
   end
 end
 
@@ -119,13 +119,15 @@ function M.gen_export_prompt(bang)
   end
 
   vim.ui.input({ prompt = 'Input the export file:' }, function(input) ---@param input? string
-    if input and input ~= '' then
-      vim.ui.input({ prompt = 'Select your indent level (default: 0):', default = '0' }, function(indent)
-        if indent and indent ~= '' then
-          Util.history.export_history_json(input, indent, bang)
-        end
-      end)
+    if not input or input == '' then
+      return
     end
+
+    vim.ui.input({ prompt = 'Select your indent level (default: 0):', default = '0' }, function(indent)
+      if indent and indent ~= '' then
+        Util.history.export_history_json(input, indent, bang)
+      end
+    end)
   end)
 end
 
@@ -145,10 +147,7 @@ local function new_popup(opts)
   end
 
   ---@type Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)
-  local T = setmetatable({
-    choices = opts.choices,
-    choices_list = opts.choices_list,
-  }, {
+  local T = setmetatable({ choices = opts.choices, choices_list = opts.choices_list }, {
     __index = function(t, k)
       return rawget(t, k)
     end,
@@ -243,7 +242,7 @@ M.rename_menu = new_popup({
     local config = require('project.config').get()
     local choices_list = M.rename_menu.choices_list(config)
     vim.ui.select(choices_list, { prompt = 'Select a project to rename:' }, function(item) ---@param item string
-      if not item and item == 'Exit' then
+      if not item or item == 'Exit' then
         return
       end
 
