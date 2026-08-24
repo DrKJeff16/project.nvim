@@ -12,8 +12,8 @@ local projects = require('telescope._extensions.projects.main').projects
 
 ---@class TelescopeProjects
 ---@field exports { projects: fun(opts?: table) }
----@field projects fun(opts?: table)
 ---@field health function
+---@field projects fun(opts?: table)
 ---@field setup fun(opts?: table)
 local M = require('telescope').register_extension({
   exports = { projects = projects },

@@ -33,8 +33,7 @@ end
 ---@param line string
 ---@return string[] items
 local function completion(_, line)
-  ---@type string[], string[]
-  local args, items = vim.split(line, '%s+', { trimempty = false }), {}
+  local args, items = vim.split(line, '%s+', { trimempty = false }), {} ---@type string[], string[]
   if args[1]:sub(-1) == '!' and #args == 1 then
     return items
   end
@@ -164,8 +163,8 @@ local function callback(ctx)
     'delete',
     'export',
     'health',
-    'history',
     'help',
+    'history',
     'import',
     'recents',
     'root',
