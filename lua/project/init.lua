@@ -155,7 +155,8 @@ function M.add_root_patterns(patterns)
   ---@cast patterns string[]
   if vim.tbl_isempty(patterns) or not vim.islist(patterns) then
     Util.log.error('(project.add_root_patterns): Patterns table is empty or not a list!')
-    error('(project.add_root_patterns): Patterns table is empty or not a list!')
+    vim.notify('(project.add_root_patterns): Patterns table is empty or not a list!', vim.log.levels.ERROR)
+    return
   end
 
   for _, pat in ipairs(patterns) do
@@ -171,7 +172,7 @@ local Project = setmetatable(M, { ---@type Project
       return require('project.' .. k)
     end
     if k == 'delete_project' then
-      return require('project.util').history.delete_project
+      return require('project.util.history').delete_project
     end
     if k == 'get_config' then
       return require('project.config').get_config
@@ -186,16 +187,16 @@ local Project = setmetatable(M, { ---@type Project
       return require('project.core').get_project_root
     end
     if k == 'get_recent_projects' then
-      return require('project.util').history.get_recent_projects
+      return require('project.util.history').get_recent_projects
     end
     if k == 'rename_project' then
-      return require('project.util').history.rename_project
+      return require('project.util.history').rename_project
     end
     if k == 'root_files' then
       return require('project.core').root_files
     end
     if k == 'run_fzf_lua' then
-      return require('project.extensions')['fzf-lua'].run
+      return require('project.extensions.fzf-lua').run
     end
     if k == 'setup' then
       return require('project.config').setup

@@ -7,7 +7,7 @@ local M = {}
 
 ---@return boolean setup_called
 ---@nodiscard
-function M.setup_check()
+local function setup_check()
   vim.health.start('Setup')
   if not vim.g.project_setup == 1 then
     vim.health.error('`setup()` has not been called!')
@@ -48,7 +48,7 @@ If you wish to disable this warning, set `g:project_disable_win32_warning` to `1
   return true
 end
 
-function M.options_check()
+local function options_check()
   vim.health.start('Configuration')
   local Options = require('project.config').get()
   if Util.is_type('table', Options) then
@@ -68,7 +68,7 @@ function M.options_check()
   end
 end
 
-function M.history_check()
+local function history_check()
   vim.health.start('History')
   local P = { ---@type Project.HistoryPath[]
     { name = 'datapath', type = 'directory', path = Util.path.datapath },
@@ -89,7 +89,7 @@ function M.history_check()
   end
 end
 
-function M.project_check()
+local function project_check()
   local Core = require('project.core')
 
   vim.health.start('Current Project')
@@ -120,7 +120,7 @@ function M.project_check()
   end
 end
 
-function M.logging_check()
+local function logging_check()
   vim.health.start('Log')
   if require('project.config').get().log.enabled and vim.g.project_log_loaded == 1 then
     vim.health.ok('Logging enabled!')
@@ -130,7 +130,7 @@ function M.logging_check()
   end
 end
 
-function M.fzf_lua_check()
+local function fzf_lua_check()
   vim.health.start('`fzf-lua` Integration')
   if require('project.config').get().fzf_lua.enabled and vim.g.project_fzf_lua_loaded == 1 then
     vim.health.ok('`fzf-lua` integration enabled!')
@@ -140,7 +140,7 @@ function M.fzf_lua_check()
   end
 end
 
-function M.recent_proj_check()
+local function recent_proj_check()
   vim.health.start('Recent Projects')
   local recents = Util.reverse(Util.history.get_recent_projects())
   if not vim.tbl_isempty(recents) then
@@ -165,13 +165,13 @@ end
 ---This is called when running `:checkhealth project`.
 --- ---
 function M.check()
-  if M.setup_check() then
-    M.project_check()
-    M.history_check()
-    M.options_check()
-    M.logging_check()
-    M.fzf_lua_check()
-    M.recent_proj_check()
+  if setup_check() then
+    project_check()
+    history_check()
+    options_check()
+    logging_check()
+    fzf_lua_check()
+    recent_proj_check()
 
     Util.log.debug('(project.health): `checkhealth` successfully called.')
   end

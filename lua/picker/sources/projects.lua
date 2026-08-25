@@ -1,11 +1,12 @@
 ---@module 'picker'
 ---@module 'project'
 
+local Project = require('project')
+
 ---@param source ProjectHistoryEntry[]
 ---@return ProjectPickerItem[] items
 ---@nodiscard
 local function gen_items(source)
-  local Project = require('project')
   local curr = Project.core.get_current() or ''
   local items = {} ---@type ProjectPickerItem[]
   for i, v in ipairs(source) do
@@ -39,9 +40,9 @@ local M = {}
 
 ---@return ProjectPickerItem[] items
 function M.get()
-  local recents = require('project').get_recent_projects()
-  if require('project').config.get().picker.sort == 'newest' then
-    recents = require('project').util.reverse(recents)
+  local recents = Project.get_recent_projects()
+  if Project.config.get().picker.sort == 'newest' then
+    recents = Project.util.reverse(recents)
   end
   return gen_items(recents)
 end
@@ -50,14 +51,13 @@ end
 function M.actions()
   return { ---@type table<string, fun(entry: ProjectPickerItem)>
     ['<C-d>'] = function(entry)
-      require('project').util.history.delete_project(entry.value, true)
+      Project.util.history.delete_project(entry.value, true)
       vim.cmd.Picker({ args = { 'projects' } })
     end,
     ['<C-r>'] = function(entry)
-      require('project').popup.rename_input(entry.value)
+      Project.popup.rename_input(entry.value)
     end,
     ['<C-w>'] = function(entry)
-      local Project = require('project')
       if Project.util.yes_no('Change cwd to `%s`?', Project.util.strip_slash(entry.value, ':p:~')) then
         Project.core.set_pwd(entry.value, 'picker.nvim')
       end
@@ -67,7 +67,7 @@ end
 
 ---@param entry ProjectPickerItem
 function M.default_action(entry)
-  if vim.fn.isdirectory(entry.value) == 1 and require('project').core.set_pwd(entry.value, 'picker.nvim') then
+  if vim.fn.isdirectory(entry.value) == 1 and Project.core.set_pwd(entry.value, 'picker.nvim') then
     require('picker').open({ 'files' })
   end
 end
