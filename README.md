@@ -21,21 +21,23 @@ extend it and address issues.
 
 You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16/project.nvim/blob/main/EXAMPLES.md).
 
+---
+
 ## Features
 
-- Automatically sets the `cwd` to the project root directory using pattern matching (LSP optionally)
-- Projects can be assigned a name (`:Project history rename [...]`)
+- Automatically sets the current working directory to the project root directory using pattern matching (LSP optionally)
+- Projects can be assigned a name ([`:Project history rename [...]`](#project-history-clearrename-pathtoproject-pathtoproject))
 - Users can define custom project roots, see [Custom Projects](#custom-projects)
 - Users can control whether to run this or not by filetype/buftype
 - Functional `checkhealth` hook (`:checkhealth project`)
 - Vim help documentation ([`:h project.txt`](https://github.com/DrKJeff16/project.nvim/blob/main/doc/project.txt))
 - Logging capabilities
 - Natively supports `.nvim.lua` files
-- `vim.ui` menu support
+- `vim.ui` menu support (`:Project`)
 - Supports [`oil.nvim`](https://github.com/stevearc/oil.nvim) buffers
 - [Lualine Integration](#lualine)
-- [Telescope Integration](#telescope) `:Telescope projects`
-- [`fzf-lua` Integration](#projectfzf)
+- [Telescope Integration](#telescope) (`:Telescope projects`)
+- [`fzf-lua` Integration](#project-fzf-lua)
 - [`nvim-tree` Integration](#nvim-tree)
 - [`neo-tree` Integration](#neo-tree)
 - [`mini.starter` Integration](#ministarter)
@@ -61,10 +63,6 @@ You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16
 - [Usage](#usage)
   - [Extra Operations](#extra-operations)
 - [API](#api)
-  - [`get_project_root()`](#get_project_root)
-  - [`get_recent_projects()`](#get_recent_projects)
-  - [`get_config()`](#get_config)
-  - [`get_history_paths()`](#get_history_paths)
 - [Utils](#utils)
 - [Troubleshooting](#troubleshooting)
   - [History File Not Created](#history-file-not-created)
@@ -828,21 +826,21 @@ See [_`commands.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/p
 
 You also have the following subcommands:
 
--  `:Project[!] add [/path/to/project [/path/to/project [...]]]`:
+#### `:Project[!] add [/path/to/project [/path/to/project [...]]]`
 
 If no other args are passed, you'll be prompted to input any directory to be saved
 to your project history (adding a `!` will set the prompt to your cwd).
 
 If one or more args are passed, you will not be prompted (the arguments must be valid paths).
 
--  `:Project[!] config`:
+#### `:Project[!] config`:
 
 Will toggle a floating window with your current config.
 To exit the window you can either press `q` in normal mode or by runnning `:Project config` again.
 
 You can also print the output instead by running `:Project! config`.
 
-- `:Project[!] delete [/path/to/project [...]]`:
+#### `:Project[!] delete [/path/to/project [...]]`
 
 If no arguments are given, a popup with a list of your current projects will be opened.
 
@@ -855,7 +853,7 @@ In that case, invalid args will be ignored.
 
 If there's a successful deletion, you'll recieve a notification denoting success.
 
-- `:Project[!] export [/path/to/file[.json] [<INT>]\]`
+#### `:Project[!] export [/path/to/file[.json] [<INT>]\]`
 
 > [!WARNING]
 > **_Use this subcommand with caution, as you may overwrite your files if doing something reckless!_**
@@ -871,7 +869,7 @@ Example usage:
 :Project! export b 12 " The output file will be `b`, with a tab size of 12
 ```
 
-- `:Project fzf-lua`
+#### `:Project fzf-lua`
 
 > [!IMPORTANT]
 > **This command works ONLY if you have `fzf-lua` installed and loaded
@@ -889,11 +887,11 @@ Mappings:
 See [_`extensions/fzf-lua.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/extensions/fzf-lua.lua)
 for more info.
 
-- `:Project health`
+#### `:Project health`
 
 Simply runs `:checkhealth project`.
 
-- `:Project[!] history [clear|rename [/path/to/project [/path/to/project] [...]\]\]`
+#### `:Project[!] history [clear|rename [/path/to/project [/path/to/project] [...]\]\]`
 
 If the command is called without any extra arguments it'll toggle the `project.nvim` history file
 in a new tab, which can be exited by pressing `q` in Normal Mode.
@@ -915,7 +913,7 @@ Usage:
 :Project history rename [/path/to/project [...]] " (NEEDS MIGRATION) Will rename the specified projects
 ```
 
-- `:Project[!] import [/path/to/file[.json]\]`
+#### `:Project[!] import [/path/to/file[.json]\]`
 
 Allows you to retrieve any previously exported project history (through `:Project export`).
 
@@ -931,7 +929,7 @@ Example usage:
 :Project! import b " Will be treated as `b`
 ```
 
-- `:Project log [clear|close|open|toggle]`
+#### `:Project log [clear|close|open|toggle]`
 
 > [!IMPORTANT]
 > This command will not be available unless you set `log.enabled = true` in your setup.
@@ -946,7 +944,7 @@ Handles the `project.nvim` log file. The valid arguments are:
 :Project log toggle    " Toggles the Log Window
 ```
 
-- `:Project[!] picker`
+#### `:Project[!] picker`
 
 > [!IMPORTANT]
 > **This command works ONLY if you have `picker.nvim` installed and `picker.enabled` set to `true`.**
@@ -956,11 +954,11 @@ Runs `project.nvim` through `picker.nvim`.
 If a bang is passed (`:Project! picker`) and you don't already have `picker.hidden` set to `true`,
 then a selected project will show hidden files.
 
-- `:Project recents`
+#### `:Project recents`
 
 Will open a UI window showing you the list of your recently used projects.
 
-- `:Project[!] root`
+#### `:Project[!] root`
 
 > [!NOTE]
 > Useful if you have set `manual_mode` to `true` in your setup.
@@ -977,7 +975,7 @@ If successful, the command will execute the following code:
 :lua require('project.core').on_buf_enter()
 ```
 
-- `:Project[!] session`
+#### `:Project[!] session`
 
 > [!IMPORTANT]
 > **This command requires `fd` to be installed for it to work!**
@@ -1004,7 +1002,7 @@ This is an alias for:
 require('project.extensions.snacks').pick()
 ```
 
-- `:Project telescope`
+#### `:Project telescope`
 
 > [!IMPORTANT]
 > **This command works ONLY if you have `telescope.nvim` installed and loaded**
@@ -1018,7 +1016,10 @@ This is a shortcut for `:Telescope projects`.
 
 The API can be found in [_`core.lua`_](https://github.com/DrKJeff16/project.nvim/blob/main/lua/project/core.lua).
 
-### `get_project_root()`
+<ul>
+<li>
+<details>
+<summary><code>get_project_root()</code></summary>
 
 `get_project_root()` is an API utility for finding out about the current project's root, if any:
 
@@ -1027,7 +1028,11 @@ The API can be found in [_`core.lua`_](https://github.com/DrKJeff16/project.nvim
 local root, lsp_or_method = require('project').get_project_root()
 ```
 
-### `get_recent_projects()`
+</details>
+</li>
+<li>
+<details>
+<summary><code>get_recent_projects()</code></summary>
 
 You can get a list of recent projects by running the code below:
 
@@ -1039,7 +1044,11 @@ vim.notify(vim.inspect(recent_projects))
 Where `get_recent_projects()` returns either an empty table `{}`
 or a string array `{ '/path/to/project1', ... }`.
 
-### `get_config()`
+</details>
+</li>
+<li>
+<details>
+<summary><code>get_config()</code></summary>
 
 **If** `setup()` **has been called**, it returns a table containing the currently set options.
 Otherwise it will return `nil`.
@@ -1054,7 +1063,11 @@ vim.notify(vim.inspect(config))
 vim.print(config)
 ```
 
-### `get_history_paths()`
+</details>
+</li>
+<li>
+<details>
+<summary><code>get_history_paths()</code></summary>
 
 If no valid args are passed to this function, it will return the following dictionary:
 
@@ -1079,6 +1092,10 @@ vim.print(get_history_paths('projectpath'))
 -- The path to where `project` saves its recent projects history
 vim.print(get_history_paths('historyfile'))
 ```
+
+</details>
+</li>
+</ul>
 
 ---
 
