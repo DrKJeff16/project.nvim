@@ -1,5 +1,4 @@
 ---@meta
----@diagnostic disable:unused-local
 
 ---@module 'snacks'
 ---@module 'picker'
@@ -83,11 +82,14 @@
 ---|fun(paths_only: true): recents: string[]
 ---|fun(paths_only: true, tilde: boolean): recents: string[]
 
----@alias ProjectAttachMapCb (fun(mode_or_maps: Modes, lhs: string, rhs: string|function, opts: vim.keymap.set.Opts)|fun(mode_or_maps: table<Modes, { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>))
+---@alias ProjectAttachMapCb
+---|(fun(maps: table<Modes, { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>))
+---|(fun(mode: Modes, lhs: string, rhs: string|function, opts: vim.keymap.set.Opts))
+
 ---@alias Modes 'V'|'i'|'n'|'o'|'t'|'v'|'x'
 ---@alias ProjectLog.Snacks.Style 'compact'|'fancy'|'minimal'
----@alias ProjectOpts.Show 'names'|'paths'
 ---@alias ProjectOpts.ScopeChdir 'global'|'tab'|'win'
+---@alias ProjectOpts.Show 'names'|'paths'
 ---@alias ProjectOpts.Sort 'newest'|'oldest'
 ---@alias ProjectPaths 'datapath'|'historyfile'|'projectpath'
 
@@ -565,41 +567,22 @@
 
 ---@class (exact) ProjectDefaults: ProjectConfigDefaults
 ---@field __index ProjectDefaults|fun(self: ProjectDefaults, key: string|integer): value: any
-local D = {}
-
 ---Get active setup options without a metatable associated.
 --- ---
----@return ProjectConfigDefaults opts
-function D:_get_no_mt() end
-
-function D:expand_excluded() end
-
----@return { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' } methods
-function D:gen_methods() end
-
----@param opts? ProjectOpts
----@return ProjectDefaults defaults
-function D:new(opts) end
-
-function D:verify() end
-
-function D:verify_datapath() end
-
-function D:verify_fzf_lua() end
-
-function D:verify_history() end
-
-function D:verify_lists() end
-
-function D:verify_logging() end
-
-function D:verify_lsp() end
-
-function D:verify_owners() end
-
-function D:verify_scope_chdir() end
-
-function D:verify_telescope() end
+---@field _get_no_mt fun(self: ProjectDefaults): opts: ProjectConfigDefaults
+---@field expand_excluded fun(self: ProjectDefaults)
+---@field gen_methods fun(self: ProjectDefaults): (methods: { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' })
+---@field new fun(self: ProjectDefaults, opts?: ProjectOpts): defaults: ProjectDefaults
+---@field verify fun(self: ProjectDefaults)
+---@field verify_datapath fun(self: ProjectDefaults)
+---@field verify_fzf_lua fun(self: ProjectDefaults)
+---@field verify_history fun(self: ProjectDefaults)
+---@field verify_lists fun(self: ProjectDefaults)
+---@field verify_logging fun(self: ProjectDefaults)
+---@field verify_lsp fun(self: ProjectDefaults)
+---@field verify_owners fun(self: ProjectDefaults)
+---@field verify_scope_chdir fun(self: ProjectDefaults)
+---@field verify_telescope fun(self: ProjectDefaults)
 
 ---@class (exact) Project.ConfigLoc
 ---@field bufnr integer
@@ -610,20 +593,22 @@ function D:verify_telescope() end
 ---@field path string
 ---@field type string
 
+---@alias Project.Popup.SelectChoices.Callback
+---|(fun())
+---|(fun(ctx: vim.api.keyset.create_user_command.command_args))
+
+---@alias Project.Popup.SelectChoices.ChoicesList
+---|(fun(opts_or_exit?: ProjectDefaults|boolean): choices: string[])
+---|(fun(opts?: ProjectDefaults, exit: boolean): choices: string[])
+
+---@alias Project.Popup.SelectChoices.Choices
+---|(fun(opts_or_exit?: ProjectDefaults|boolean): choices_dict: table<string, fun(...?: any)>)
+---|(fun(opts?: ProjectDefaults, exit: boolean): choices_dict: table<string, fun(...?: any)>)
+
 ---@class Project.Popup.SelectChoices
-local S = {}
-
----@overload fun(opts?: ProjectDefaults): choices_dict: table<string, fun(...?: any)>
----@overload fun(opts?: ProjectDefaults, exit: boolean): choices_dict: table<string, fun(...?: any)>
-function S.choices(opts, exit) end
-
----@overload fun(opts?: ProjectDefaults): choices: string[]
----@overload fun(opts?: ProjectDefaults, exit: boolean): choices: string[]
-function S.choices_list(opts, exit) end
-
----@overload fun()
----@overload fun(ctx: vim.api.keyset.create_user_command.command_args)
-function S.callback(ctx) end
+---@field callback Project.Popup.SelectChoices.Callback
+---@field choices Project.Popup.SelectChoices.Choices
+---@field choices_list Project.Popup.SelectChoices.ChoicesList
 
 ---Non-legacy validation spec (>=v0.11).
 --- ---

@@ -152,20 +152,19 @@ function M.clear_historyfile(force)
     return
   end
 
-  local success = vim.uv.fs_write(fd, { '[', ']' })
+  local success = (vim.uv.fs_write(fd, { '[', ']' }))
   vim.uv.fs_close(fd)
-  if not success then
+  if success then
+    Log.warn('(project.util.history.clear_historyfile): History file cleared successfully.')
+    vim.notify('(project.nvim): History file cleared successfully', WARN)
+
+    recent_projects = {}
+    session_projects = {}
+    vim.g.project_historyfile_cleared = 1
+  else
     Log.error('(project.util.history.clear_historyfile): Unable to clear history file!')
     vim.notify('(project.nvim): Unable to clear history file!', ERROR)
-    return
   end
-
-  Log.warn('(project.util.history.clear_historyfile): History file cleared successfully.')
-  vim.notify('(project.nvim): History file cleared successfully', WARN)
-
-  recent_projects = {}
-  session_projects = {}
-  vim.g.project_historyfile_cleared = 1
 end
 
 ---@param mode uv.fs_open.flags
@@ -180,8 +179,7 @@ function M.open_history(mode)
 
   Path.create_path()
 
-  local dir_stat = vim.uv.fs_stat(Path.projectpath)
-  if not dir_stat then
+  if not (vim.uv.fs_stat(Path.projectpath)) then
     Log.error('(project.util.history.open_history): History directory unavailable!')
     error('(project.util.history.open_history): History directory unavailable!')
   end
@@ -237,7 +235,7 @@ function M.export_history_json(path, ind, force_name)
     path = ('%s.json'):format(path)
   end
 
-  local stat = vim.uv.fs_stat(path)
+  local stat = (vim.uv.fs_stat(path))
   if stat then
     if stat.type ~= 'file' then
       Log.error(('(project.util.history.export_history_json): Target exists and is not a file! `%s`'):format(path))
@@ -334,7 +332,7 @@ function M.import_history_json(path, force_name, keep)
     return
   end
 
-  local data = vim.uv.fs_read(fd, stat.size)
+  local data = (vim.uv.fs_read(fd, stat.size))
   if not data or data == '' then
     Log.error(('(project.util.history.import_history_json): Data unavailable: `%s`'):format(path))
     vim.notify(('(project.util.history.import_history_json): Data unavailable: `%s`'):format(path), ERROR)
@@ -506,7 +504,7 @@ local function setup_watch()
     return
   end
 
-  event = vim.uv.new_fs_event()
+  event = (vim.uv.new_fs_event())
   if not event then
     Log.warn('project.nvim - Unable to create history file setup watch!')
     return
@@ -546,7 +544,7 @@ function M.read_history()
   end
 
   ---@type boolean, ProjectHistoryEntry[]|nil|?
-  local ok, data = pcall(vim.json.decode, vim.uv.fs_read(fd, stat.size))
+  local ok, data = pcall(vim.json.decode, (vim.uv.fs_read(fd, stat.size)))
   vim.uv.fs_close(fd)
   if not (ok and data) then
     Log.error(([[(project.util.history.read_history): Could not decode JSON data from history file!
@@ -658,7 +656,7 @@ function M.write_history(path)
   end
 
   if ok and fd and stat then
-    local data = vim.uv.fs_read(fd, stat.size)
+    local data = (vim.uv.fs_read(fd, stat.size))
     vim.uv.fs_close(fd)
     if data then
       ok, file_history = pcall(vim.json.decode, data) ---@type boolean, ProjectHistoryEntry[]|nil|?
@@ -785,7 +783,7 @@ function M.open_win()
     return
   end
 
-  local ok, data = pcall(vim.json.decode, vim.uv.fs_read(fd, stat.size)) ---@type boolean, ProjectHistoryEntry[]|nil|?
+  local ok, data = pcall(vim.json.decode, (vim.uv.fs_read(fd, stat.size))) ---@type boolean, ProjectHistoryEntry[]|nil|?
   vim.uv.fs_close(fd)
   if ok and data then
     local bufnr = vim.api.nvim_create_buf(true, true)

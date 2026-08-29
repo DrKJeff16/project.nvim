@@ -74,7 +74,7 @@ function M.verify_owner(dir)
     return true
   end
 
-  local stat = vim.uv.fs_stat(dir)
+  local stat = (vim.uv.fs_stat(dir))
   if not stat then
     Log.error("(project.util.path.verify_owner): Directory can't be accessed!")
     vim.notify("(project.util.path.verify_owner): Directory can't be accessed!", ERROR)
@@ -124,10 +124,10 @@ function M.get_files(file_dir)
 
   M.last_dir_cache = file_dir
   M.curr_dir_cache = {}
-  local dir = vim.uv.fs_scandir(file_dir)
+  local dir = (vim.uv.fs_scandir(file_dir))
   if dir then
     while true do
-      local file = vim.uv.fs_scandir_next(dir)
+      local file = (vim.uv.fs_scandir_next(dir))
       if not file then
         return
       end
@@ -221,8 +221,12 @@ function M.create_path(path)
   path = path or M.projectpath --[[@as string]]
 
   if not M.exists(path) then
-    require('project.util.log').debug(('(project.util.path.create_path): Creating directory `%s`.'):format(path))
-    vim.uv.fs_mkdir(path, M.open_mode('755'))
+    local Log = require('project.util.log')
+    Log.debug(('(project.util.path.create_path): Creating directory `%s`.'):format(path))
+    if not (vim.uv.fs_mkdir(path, M.open_mode('755'))) then
+      Log.error(('(project.util.path.create_path): Unable to create diretory: `%s`'):format(path))
+      vim.notify(('(project.util.path.create_path): Unable to create diretory: `%s`'):format(path), ERROR)
+    end
   end
 end
 
@@ -293,7 +297,7 @@ function M.setup(save_dir, save_file)
 
   M.historyfile = M.join(M.projectpath, save_file)
   if not M.exists(M.historyfile) then
-    local fd = vim.uv.fs_open(M.historyfile, 'w', M.open_mode('644'))
+    local fd = (vim.uv.fs_open(M.historyfile, 'w', M.open_mode('644')))
     if not fd then
       error('(%s.setup): Unable to create history file!')
     end

@@ -8,7 +8,9 @@ local Util = require('project.util')
 local function exec_cmd(cmd, ...)
   local args = { ... }
   return function()
-    pcall(vim.cmd[cmd], { args = args })
+    if vim.cmd[cmd] then
+      pcall(vim.cmd[cmd], { args = args })
+    end
   end
 end
 
@@ -213,7 +215,7 @@ M.delete_menu = new_popup({
       end
     end)
   end,
-  choices_list = function(opts) ---@param opts ProjectDefaults
+  choices_list = function(opts)
     local recents ---@type string[]
     if opts.show_by_name then
       recents = {} ---@type string[]
@@ -227,7 +229,7 @@ M.delete_menu = new_popup({
     table.insert(recents, 'Exit')
     return recents
   end,
-  choices = function(opts) ---@param opts ProjectDefaults
+  choices = function(opts)
     local T = {} ---@type table<string, fun(name: string)>
     for _, proj in ipairs(M.delete_menu.choices_list(opts)) do
       T[proj] = function()
@@ -264,7 +266,7 @@ M.rename_menu = new_popup({
       end
     end)
   end,
-  choices_list = function(opts) ---@param opts ProjectDefaults
+  choices_list = function(opts)
     local recents = Util.reverse(Util.history.get_recent_projects(true, true))
     if opts.show_by_name then
       recents = {}
@@ -276,7 +278,7 @@ M.rename_menu = new_popup({
     table.insert(recents, 'Exit')
     return recents
   end,
-  choices = function(opts) ---@param opts ProjectDefaults
+  choices = function(opts)
     local T = {} ---@type table<string, fun(name: string)>
     for _, proj in ipairs(M.rename_menu.choices_list(opts)) do
       T[proj] = function(name)
@@ -313,7 +315,7 @@ M.recents_menu = new_popup({
       end
     end)
   end,
-  choices_list = function(opts) ---@param opts ProjectDefaults
+  choices_list = function(opts)
     local choices_list = {} ---@type string[]
     for _, v in ipairs(Util.history.get_recent_projects(false, true)) do
       table.insert(choices_list, require('project.config').get().show_by_name and v.name or v.path)
@@ -324,7 +326,7 @@ M.recents_menu = new_popup({
     table.insert(choices_list, 'Exit')
     return choices_list
   end,
-  choices = function(opts) ---@param opts ProjectDefaults
+  choices = function(opts)
     local choices = {} ---@type table<string, fun(proj: string, only_cd: boolean, ran_cd: boolean)>
     for _, s in ipairs(M.recents_menu.choices_list(opts)) do
       choices[s] = s ~= 'Exit' and open_node or function()
@@ -336,7 +338,7 @@ M.recents_menu = new_popup({
 })
 
 M.open_menu = new_popup({
-  callback = function(ctx) ---@param ctx vim.api.keyset.create_user_command.command_args
+  callback = function(ctx)
     if
       ctx
       and ctx.fargs
@@ -380,8 +382,6 @@ M.open_menu = new_popup({
       Exit = function() end,
     }
   end,
-  ---@param exit? boolean
-  ---@return string[] choices
   choices_list = function(exit)
     Util.validate({ exit = { exit, { 'boolean', 'nil' }, true } })
     if exit == nil then
@@ -424,7 +424,7 @@ M.open_menu = new_popup({
 })
 
 M.session_menu = new_popup({
-  callback = function(ctx) ---@param ctx vim.api.keyset.create_user_command.command_args
+  callback = function(ctx)
     local only_cd = false
     if ctx then
       only_cd = ctx.bang
@@ -453,7 +453,7 @@ M.session_menu = new_popup({
       end)
     end
   end,
-  choices = function(opts) ---@param opts ProjectDefaults
+  choices = function(opts)
     local choices = { ---@type table<string, fun(...: any)>
       Exit = function()
         vim.g.project_nvim_cwd = ''
@@ -466,7 +466,7 @@ M.session_menu = new_popup({
     end
     return choices
   end,
-  choices_list = function(opts) ---@param opts ProjectDefaults
+  choices_list = function(opts)
     local choices = {} ---@type string[]
     for i, v in ipairs(Util.history.get_session_projects()) do
       choices[i] = opts.show_by_name and v.name or v.path
