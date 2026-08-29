@@ -86,7 +86,7 @@ function M.rename_input(project)
   local success = true
   vim.ui.input({
     prompt = ('Input the new name for project %s'):format(Util.history.find_entry('recent', project, 'name')),
-  }, function(input)
+  }, function(input) ---@param input? string
     if not input or input == '' then
       success = false
     else
@@ -123,7 +123,10 @@ function M.gen_export_prompt(bang)
       return
     end
 
-    vim.ui.input({ prompt = 'Select your indent level (default: 0):', default = '0' }, function(indent)
+    vim.ui.input({
+      default = '0',
+      prompt = 'Select your indent level (default: 0):',
+    }, function(indent) ---@param indent? string
       if indent and indent ~= '' then
         Util.history.export_history_json(input, indent, bang)
       end
@@ -198,7 +201,7 @@ M.delete_menu = new_popup({
       format_item = function(item) ---@param item string
         return (item == 'Exit' and '' or (Util.history.find_entry('session', item, 'path') and '* ' or '')) .. item
       end,
-    }, function(item)
+    }, function(item) ---@param item? string
       if not item or item == '' then
         return
       end
@@ -251,7 +254,7 @@ M.rename_menu = new_popup({
           prompt = ('Input the new name for project %s'):format(
             config.show_by_name and item or Util.history.find_entry('recent', item, 'name')
           ),
-        }, function(input)
+        }, function(input) ---@param input? string
           if input and input ~= '' then
             M.rename_menu.choices(config)[item](input)
           end
@@ -262,14 +265,12 @@ M.rename_menu = new_popup({
     end)
   end,
   choices_list = function(opts) ---@param opts ProjectDefaults
-    local recents ---@type string[]
+    local recents = Util.reverse(Util.history.get_recent_projects(true, true))
     if opts.show_by_name then
       recents = {}
       for _, v in ipairs(Util.reverse(Util.history.get_recent_projects())) do
         table.insert(recents, v.name)
       end
-    else
-      recents = Util.reverse(Util.history.get_recent_projects(true, true))
     end
 
     table.insert(recents, 'Exit')
@@ -335,7 +336,7 @@ M.recents_menu = new_popup({
 })
 
 M.open_menu = new_popup({
-  callback = function(ctx)
+  callback = function(ctx) ---@param ctx vim.api.keyset.create_user_command.command_args
     if
       ctx
       and ctx.fargs
@@ -418,13 +419,12 @@ M.open_menu = new_popup({
     if exit then
       table.insert(res_list, 'Exit')
     end
-
     return res_list
   end,
 })
 
 M.session_menu = new_popup({
-  callback = function(ctx)
+  callback = function(ctx) ---@param ctx vim.api.keyset.create_user_command.command_args
     local only_cd = false
     if ctx then
       only_cd = ctx.bang

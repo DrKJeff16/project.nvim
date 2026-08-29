@@ -73,22 +73,23 @@ local function completion(_, line)
   if #args >= 3 then
     if
       not vim.list_contains(items, args[2])
-      or vim.list_contains({
-        'config',
-        'fzf-lua',
-        'health',
-        'help',
-        'picker',
-        'recents',
-        'root',
-        'session',
-        'snacks',
-        'telescope',
-      }, args[2])
+      or vim.list_contains(
+        { 'config', 'fzf-lua', 'health', 'help', 'picker', 'recents', 'root', 'snacks', 'telescope' },
+        args[2]
+      )
     then
       return {}
     end
 
+    if args[2] == 'session' and #args == 3 then
+      for _, comp in ipairs({ 'clear' }) do
+        if vim.startswith(comp, args[3]) then
+          table.insert(res, comp)
+        end
+      end
+      table.sort(res)
+      return res
+    end
     if args[2] == 'log' and #args == 3 then
       for _, comp in ipairs({ 'clear', 'close', 'open', 'toggle' }) do
         if vim.startswith(comp, args[3]) then
@@ -307,6 +308,8 @@ local function callback(ctx)
       end
     end
     vim.notify(msg, vim.log.levels.WARN)
+  elseif ctx.fargs[1] == 'session' and ctx.fargs[2] == 'clear' and not ctx.bang then
+    Util.history.clear_session()
   elseif ctx.fargs[1] == 'config' and ctx.bang then
     vim.print(require('project.config').get_config(), vim.log.levels.INFO)
   elseif ctx.fargs[1] == 'config' then

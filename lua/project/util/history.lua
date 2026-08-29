@@ -624,6 +624,10 @@ function M.get_recent_projects(paths_only, tilde, remove_dups)
   return Util.dedup(recents, 'name')
 end
 
+function M.clear_session()
+  session_projects = {}
+end
+
 ---Write projects to history file.
 --- ---
 ---@param path? string
