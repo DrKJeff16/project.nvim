@@ -24,29 +24,29 @@ Table of Contents                                                  *project.toc*
 
 
 1. Setup                                                         |project.setup|
-    1.1. `ProjectOpts`                                               |ProjectOpts|
-    1.2. `ProjectOpts.LSP`                                       |ProjectOpts.LSP|
-    1.3. `ProjectOpts.History`                               |ProjectOpts.History|
-    1.4. `ProjectOpts.DifferentOwners`               |ProjectOpts.DifferentOwners|
-    1.5. `ProjectOpts.Telescope`                           |ProjectOpts.Telescope|
-    1.6. `ProjectOpts.FzfLua`                                 |ProjectOpts.FzfLua|
-    1.7. `ProjectOpts.Picker`                                 |ProjectOpts.Picker|
-    1.8. `ProjectOpts.Snacks`                                 |ProjectOpts.Snacks|
-    1.9. `ProjectOpts.Logging`                               |ProjectOpts.Logging|
-2. Pattern Matching                                   |project.pattern-matching|
-3. Lualine                                                     |project.lualine|
-4. Nvim Tree                                                 |project.nvim-tree|
-5. Neo Tree                                                   |project.neo-tree|
-6. Telescope                                                 |project.telescope|
-    6.1. Telescope Mappings                             |project.telescope.maps|
-7. The `:Project` command                                               |:Project|
-8. API                                                             |project.api|
-    8.1. `get_project_root()`                         |project.get_project_root()|
-    8.2. `get_recent_projects()`                   |project.get_recent_projects()|
-    8.3. `get_config()`                                     |project.get_config()|
-    8.4. `get_history_paths()`                       |project.get_history_paths()|
-9. Util                                                           |project.util|
-10. Troubleshooting                                    |project.troubleshooting|
+    1.1. `ProjectOpts` ............................................. |ProjectOpts|
+    1.2. `ProjectOpts.LSP` ..................................... |ProjectOpts.LSP|
+    1.3. `ProjectOpts.History` ............................. |ProjectOpts.History|
+    1.4. `ProjectOpts.DifferentOwners` ............. |ProjectOpts.DifferentOwners|
+    1.5. `ProjectOpts.Telescope` ......................... |ProjectOpts.Telescope|
+    1.6. `ProjectOpts.FzfLua` ............................... |ProjectOpts.FzfLua|
+    1.7. `ProjectOpts.Picker` ............................... |ProjectOpts.Picker|
+    1.8. `ProjectOpts.Snacks` ............................... |ProjectOpts.Snacks|
+    1.9. `ProjectOpts.Logging` ............................. |ProjectOpts.Logging|
+2. Pattern Matching ................................. |project.pattern-matching|
+3. Lualine ................................................... |project.lualine|
+4. Nvim Tree ............................................... |project.nvim-tree|
+5. Neo Tree ................................................. |project.neo-tree|
+6. Telescope ............................................... |project.telescope|
+    6.1. Telescope Mappings ........................... |project.telescope.maps|
+7. The `:Project` command ............................................. |:Project|
+8. API ........................................................... |project.api|
+    8.1. `get_project_root()` ....................... |project.get_project_root()|
+    8.2. `get_recent_projects()` ................. |project.get_recent_projects()|
+    8.3. `get_config()` ................................... |project.get_config()|
+    8.4. `get_history_paths()` ..................... |project.get_history_paths()|
+9. Util ......................................................... |project.util|
+10. Troubleshooting .................................. |project.troubleshooting|
 
 
 ==============================================================================
