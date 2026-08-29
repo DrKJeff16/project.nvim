@@ -1,5 +1,17 @@
 local Util = require('project.util')
 
+---@param cb fun(entry?: string|number, cb?: function)
+local function session_projects(cb)
+  local projects = Util.history.get_session_projects()
+  local config = require('project.config').get()
+  if config.fzf_lua.sort == 'newest' then
+    projects = Util.reverse(projects)
+  end
+  for _, entry in ipairs(projects) do
+    cb(config.fzf_lua.show == 'names' and entry.name or entry.path)
+  end
+end
+
 ---@param items string[]
 local function default(items)
   Util.validate({ items = { items, { 'table' } } })
@@ -70,6 +82,36 @@ function M.setup()
   end
 end
 
+function M.run_sessions()
+  if not Util.mod_exists('fzf-lua') then
+    Util.log.error('(project.extensions.fzf-lua.run_sessions): `fzf-lua` is not installed!')
+    error('(project.extensions.fzf-lua.run_sessions): `fzf-lua` is not installed!')
+  end
+  Util.log.info('(project.extensions.fzf-lua.run_sessions): Running `fzf_exec`.')
+
+  local Fzf = require('fzf-lua')
+  Fzf.fzf_exec(session_projects, {
+    fzf_opts = { ['--multi'] = true },
+    actions = {
+      default = { default },
+      ['ctrl-d'] = { delete_project },
+      ['ctrl-s'] = {
+        function()
+          Fzf.hide()
+          M.run()
+        end,
+      },
+      ['ctrl-n'] = {
+        function(items)
+          Fzf.hide()
+          rename_project(items)
+          vim.api.nvim_feedkeys('i', 'n', false)
+        end,
+      },
+    },
+  })
+end
+
 ---This runs assuming you have FZF-Lua installed!
 ---
 ---CREDITS: [@deathmaz](https://github.com/ahmedkhalf/project.nvim/issues/71#issuecomment-1212993659)
@@ -86,7 +128,13 @@ function M.run()
     fzf_opts = { ['--multi'] = true },
     actions = {
       default = { default },
-      ['ctrl-d'] = { delete_project, Fzf.actions.resume },
+      ['ctrl-d'] = { delete_project },
+      ['ctrl-s'] = {
+        function()
+          Fzf.hide()
+          M.run_sessions()
+        end,
+      },
       ['ctrl-n'] = {
         function(items)
           Fzf.hide()
