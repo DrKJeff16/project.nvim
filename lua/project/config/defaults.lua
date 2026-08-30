@@ -78,6 +78,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
       'packer',
       'picker-prompt',
       'qf',
+      'snacks_picker_input',
     },
   },
   history = { save_dir = vim.fn.stdpath('data'), save_file = 'project_history.json', size = 100 },
