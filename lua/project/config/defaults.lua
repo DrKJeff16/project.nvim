@@ -1,4 +1,5 @@
 ---@module 'project._meta'
+---@diagnostic disable:inject-field,missing-fields
 
 local WARN = vim.log.levels.WARN
 local Util = require('project.util')
@@ -48,6 +49,8 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
     '.nvim.lua',
     '.neoconf.json',
     'neoconf.json',
+    '.stylua.toml',
+    'stylua.toml',
   },
   before_attach = nil,
   on_attach = nil,
@@ -119,7 +122,6 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
   },
 }
 
----@diagnostic disable-next-line:missing-fields
 local D = {} ---@type ProjectDefaults
 
 D.__index = function(self, k)
@@ -162,7 +164,7 @@ function D:verify_history()
   if self.historysize and Util.is_int(self.historysize, self.historysize >= 0) then
     vim.notify('`options.historysize` is deprecated, use `options.history.size`!', WARN)
     self.history.size = self.historysize
-    self.historysize = nil ---@diagnostic disable-line:inject-field
+    self.historysize = nil
   end
 end
 
@@ -186,10 +188,10 @@ function D:verify_datapath()
 
   Util.validate({ ['history.save_dir'] = { self.history.save_dir, { 'string', 'nil' }, true } })
 
-  if self.datapath and Util.is_type('string', self.datapath) then
+  if self.datapath and type(self.datapath) == 'string' then
     vim.notify('`options.datapath` is deprecated, use `options.history.save_dir`!', WARN)
     self.history.save_dir = self.datapath
-    self.datapath = nil ---@diagnostic disable-line:inject-field
+    self.datapath = nil
   end
 
   if not (self.history.save_dir and Util.dir_exists(self.history.save_dir)) then
@@ -220,14 +222,14 @@ function D:verify_logging()
   self.log = self.log or vim.deepcopy(DEFAULTS.log)
   if self.logging ~= nil and type(self.logging) == 'boolean' then
     self.log.enabled = self.logging
-    self.logging = nil ---@diagnostic disable-line:inject-field
+    self.logging = nil
     vim.notify('`options.logging` is deprecated, use `options.log.enabled`!', WARN)
   end
 
-  if not (Util.is_type('string', self.log.logpath) and Util.path.exists(self.log.logpath)) then
+  if type(self.log.logpath) ~= 'string' or not Util.path.exists(self.log.logpath) then
     self.log.logpath = DEFAULTS.log.logpath
   end
-  if not (Util.is_type('number', self.log.max_size) and self.log.max_size > 0) then
+  if type(self.log.max_size) ~= 'number' or self.log.max_size <= 0 then
     self.log.max_size = DEFAULTS.log.max_size
   end
 end
@@ -247,17 +249,17 @@ function D:verify_lsp()
   if self.use_lsp ~= nil then
     vim.notify('`use_lsp` is deprecated! Use `lsp.enabled` instead.', WARN)
     self.lsp.enabled = self.use_lsp
-    self.use_lsp = nil ---@diagnostic disable-line:inject-field
+    self.use_lsp = nil
   end
   if self.allow_patterns_for_lsp ~= nil then
     vim.notify('`allow_patterns_for_lsp` is deprecated! Use `lsp.use_pattern_matching` instead.', WARN)
     self.lsp.use_pattern_matching = self.allow_patterns_for_lsp
-    self.allow_patterns_for_lsp = nil ---@diagnostic disable-line:inject-field
+    self.allow_patterns_for_lsp = nil
   end
   if self.ignore_lsp and type(self.ignore_lsp) == 'table' then
     vim.notify('`ignore_lsp` is deprecated! Use `lsp.ignore` instead.', WARN)
     self.lsp.ignore = vim.deepcopy(self.ignore_lsp)
-    self.ignore_lsp = nil ---@diagnostic disable-line:inject-field
+    self.ignore_lsp = nil
   end
 end
 
@@ -266,7 +268,7 @@ function D:verify_owners()
   if self.allow_different_owners ~= nil and type(self.allow_different_owners) == 'boolean' then
     vim.notify('`allow_different_owners` is deprecated! Use `different_owners.allow` instead.', WARN)
     self.different_owners.allow = self.allow_different_owners
-    self.allow_different_owners = nil ---@diagnostic disable-line:inject-field
+    self.allow_different_owners = nil
   end
   if self.different_owners.allow == nil then
     self.different_owners.allow = false
@@ -280,11 +282,7 @@ function D:verify_lists()
   local i, found, n = 1, {}, 1 ---@type integer, string[], 1|-1
   self.patterns = self.patterns or vim.deepcopy(DEFAULTS.patterns)
   while i <= #self.patterns and i > 0 do
-    if
-      not Util.is_type('string', self.patterns[i])
-      or self.patterns[i] == ''
-      or vim.list_contains(found, self.patterns[i])
-    then
+    if type(self.patterns[i]) ~= 'string' or self.patterns[i] == '' or vim.list_contains(found, self.patterns[i]) then
       table.remove(self.patterns, i)
       n = -1
     else
@@ -304,7 +302,7 @@ function D:verify_lists()
   self.disable_on.ft = self.disable_on.ft or vim.deepcopy(DEFAULTS.disable_on.ft)
   i, found = 1, {}
   while i <= #self.disable_on.ft and i > 0 do
-    if not Util.is_type('string', self.disable_on.ft[i]) or self.disable_on.ft[i] == '' then
+    if type(self.disable_on.ft[i]) ~= 'string' or self.disable_on.ft[i] == '' then
       table.remove(self.disable_on.ft, i)
       n = -1
     else
@@ -313,16 +311,14 @@ function D:verify_lists()
     end
     i = i + n
   end
-  if vim.tbl_isempty(self.disable_on.ft) then
-    self.disable_on.ft = vim.deepcopy(DEFAULTS.disable_on.ft)
-  else
-    self.disable_on.ft = Util.dedup(self.disable_on.ft)
-  end
+
+  self.disable_on.ft = vim.tbl_isempty(self.disable_on.ft) and vim.deepcopy(DEFAULTS.disable_on.ft)
+    or Util.dedup(self.disable_on.ft)
 
   self.disable_on.bt = self.disable_on.bt or vim.deepcopy(DEFAULTS.disable_on.bt)
   i, found = 1, {}
   while i <= #self.disable_on.bt and i > 0 do
-    if not Util.is_type('string', self.disable_on.bt[i]) or self.disable_on.bt[i] == '' then
+    if type(self.disable_on.bt[i]) ~= 'string' or self.disable_on.bt[i] == '' then
       table.remove(self.disable_on.bt, i)
       n = -1
     else
@@ -331,16 +327,14 @@ function D:verify_lists()
     end
     i = i + n
   end
-  if vim.tbl_isempty(self.disable_on.bt) then
-    self.disable_on.bt = vim.deepcopy(DEFAULTS.disable_on.bt)
-  else
-    self.disable_on.bt = Util.dedup(self.disable_on.bt)
-  end
+
+  self.disable_on.bt = vim.tbl_isempty(self.disable_on.bt) and vim.deepcopy(DEFAULTS.disable_on.bt)
+    or Util.dedup(self.disable_on.bt)
 
   i, found = 1, {}
   while i <= #self.exclude_dirs and i > 0 do
     if
-      not Util.is_type('string', self.exclude_dirs[i])
+      type(self.exclude_dirs[i]) ~= 'string'
       or self.exclude_dirs[i] == ''
       or vim.list_contains(found, self.exclude_dirs[i])
     then
@@ -356,7 +350,7 @@ function D:verify_lists()
   i, found = 1, {}
   while i <= #self.lsp.ignore and i > 0 do
     if
-      not Util.is_type('string', self.lsp.ignore[i])
+      type(self.lsp.ignore[i]) ~= 'string'
       or self.lsp.ignore[i] == ''
       or vim.list_contains(found, self.exclude_dirs[i])
     then
@@ -506,13 +500,12 @@ function D:verify()
     self.custom_projects = vim.deepcopy(custom_projects)
   end
 
-  if self.detection_methods then ---@diagnostic disable-line:undefined-field
+  if self.detection_methods then
     vim.notify('(project.nvim): `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.', WARN)
   end
 end
 
 function D:_get_no_mt()
-  ---@diagnostic disable-next-line:missing-fields
   local opts = {} ---@type ProjectConfigDefaults
   for _, k in pairs(vim.tbl_keys(self)) do
     ---@cast k string
