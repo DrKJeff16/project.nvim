@@ -59,90 +59,83 @@ local function completion(_, line)
   local res = {} ---@type string[]
   if #args == 2 then
     if args[2] == '' then
-      return items
-    end
-
-    for _, item in ipairs(items) do
-      if vim.startswith(item, args[2]) then
-        table.insert(res, item)
-      end
-    end
-    table.sort(res)
-    return res
-  end
-  if #args >= 3 then
-    if
-      not vim.list_contains(items, args[2])
-      or vim.list_contains(
-        { 'config', 'fzf-lua', 'health', 'help', 'picker', 'recents', 'root', 'snacks', 'telescope' },
-        args[2]
-      )
-    then
-      return {}
-    end
-
-    if args[2] == 'session' and #args == 3 then
-      for _, comp in ipairs({ 'clear' }) do
-        if vim.startswith(comp, args[3]) then
-          table.insert(res, comp)
+      res = items
+    else
+      for _, item in ipairs(items) do
+        if vim.startswith(item, args[2]) then
+          table.insert(res, item)
         end
       end
-      table.sort(res)
-      return res
     end
-    if args[2] == 'log' and #args == 3 then
+  elseif
+    #args >= 3 and not vim.list_contains(items, args[2])
+    or vim.list_contains(
+      { 'config', 'fzf-lua', 'health', 'help', 'picker', 'recents', 'root', 'snacks', 'telescope' },
+      args[2]
+    )
+  then
+    res = {}
+  elseif #args >= 3 then
+    if args[2] == 'session' and #args == 3 then
+      if vim.startswith('clear', args[3]) then
+        table.insert(res, 'clear')
+      end
+    elseif args[2] == 'log' and #args == 3 then
       for _, comp in ipairs({ 'clear', 'close', 'open', 'toggle' }) do
         if vim.startswith(comp, args[3]) then
           table.insert(res, comp)
         end
       end
-      table.sort(res)
-      return res
-    end
-    if args[2] == 'add' then
-      return vim.tbl_map(function(value) ---@param value string
-        return vim.fn.fnamemodify(value, ':p:~')
+    elseif args[2] == 'add' then
+      ---@type string[]
+      local comps = vim.tbl_map(function(value) ---@param value string
+        return Util.strip_slash(value, ':p:~')
       end, vim.fn.getcompletion(args[#args], 'dir', true))
-    end
-    if args[2] == 'delete' or (#args >= 4 and args[2] == 'history' and args[3] == 'rename') then
+
+      for _, comp in ipairs(comps) do
+        local found = false
+        for i = 3, #args do
+          if args[i] == comp then
+            found = true
+            break
+          end
+        end
+        if not found then
+          table.insert(res, comp)
+        end
+      end
+    elseif args[2] == 'delete' or (#args >= 4 and args[2] == 'history' and args[3] == 'rename') then
       table.remove(args, 1)
-      return complete_items(_, table.concat(args, ' '))
-    end
-    if args[2] == 'history' and #args == 3 then
+      res = complete_items(_, table.concat(args, ' '))
+    elseif args[2] == 'history' and #args == 3 then
       for _, choice in ipairs({ 'clear', 'rename' }) do
         if vim.startswith(choice, args[3]) then
           table.insert(res, choice)
         end
       end
-      return res
-    end
-    if args[2] == 'export' then
-      if #args == 3 then
-        return vim.fn.getcompletion(args[3], 'file', true)
+    elseif vim.list_contains({ 'import', 'export' }, args[2]) and #args == 3 then
+      res = vim.fn.getcompletion(args[3], 'file', true)
+    elseif args[2] == 'export' and #args == 4 then
+      ---@type string[]
+      local nums = vim.tbl_map(function(value) ---@param value integer
+        return tostring(value)
+      end, Util.range(0, 32, 2))
+      if args[4] == '' then
+        return nums
       end
 
-      if #args == 4 then
-        ---@type string[]
-        local nums = vim.tbl_map(function(value) ---@param value integer
-          return tostring(value)
-        end, Util.range(0, 32, 2))
-        if args[4] == '' then
-          return nums
+      for _, num in ipairs(nums) do
+        if vim.startswith(num, args[4]) then
+          table.insert(res, num)
         end
-
-        for _, num in ipairs(nums) do
-          if vim.startswith(num, args[4]) then
-            table.insert(res, num)
-          end
-        end
-        return res
       end
-    end
-    if args[2] == 'import' and #args == 3 then
-      return vim.fn.getcompletion(args[3], 'file', true)
     end
   end
-  return {}
+
+  if #res > 0 then
+    table.sort(res)
+  end
+  return res
 end
 
 ---@param ctx vim.api.keyset.create_user_command.command_args
@@ -200,7 +193,7 @@ local function callback(ctx)
   :Project[!] history [clear|rename [/path/to/project [/path/to/project] [...]\]\]
   :Project[!] import [/path/to/file[.json]\]
   :Project[!] root
-  :Project[!] session]]
+  :Project[!] session [clear]\]]
 
   if vim.g.project_log_loaded == 1 then
     err = ('%s\n  :Project log [clear|close|open|toggle]'):format(err)
