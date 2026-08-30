@@ -24,9 +24,13 @@ local WARN = vim.log.levels.WARN
 ---@field root_files fun(scan_what?: Project.Core.ScanRoot, path?: string, prefix?: string): files_list: string[]|nil|?
 ---@field run_fzf_lua function
 ---@field session_menu function
----@field setup fun(options?: ProjectOpts)
 ---@field util Project.Util
 local M = {}
+
+---@param opts? ProjectOpts
+function M.setup(opts)
+  require('project.config').setup(opts)
+end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
@@ -140,8 +144,7 @@ function M.add_root_patterns(patterns)
     error('(project.add_root_patterns): Config values are unaccessible!')
   end
 
-  if Util.is_type('string', patterns) then
-    ---@cast patterns string
+  if type(patterns) == 'string' then
     if patterns == '' or vim.list_contains(pats, patterns) then
       Util.log.warn(('(project.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(patterns))
       vim.notify(('(project.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(patterns), WARN)
@@ -149,20 +152,15 @@ function M.add_root_patterns(patterns)
       table.insert(pats, patterns)
       Config.set('patterns', pats)
     end
-    return
-  end
-
-  ---@cast patterns string[]
-  if vim.tbl_isempty(patterns) or not vim.islist(patterns) then
+  elseif not vim.tbl_isempty(patterns) and vim.islist(patterns) then
+    for _, pat in ipairs(patterns) do
+      if type(pat) == 'string' then
+        M.add_root_patterns(pat)
+      end
+    end
+  else
     Util.log.error('(project.add_root_patterns): Patterns table is empty or not a list!')
     vim.notify('(project.add_root_patterns): Patterns table is empty or not a list!', vim.log.levels.ERROR)
-    return
-  end
-
-  for _, pat in ipairs(patterns) do
-    if Util.is_type('string', pat) then
-      M.add_root_patterns(pat)
-    end
   end
 end
 
@@ -198,10 +196,7 @@ local Project = setmetatable(M, { ---@type Project
     if k == 'run_fzf_lua' then
       return require('project.extensions.fzf-lua').run
     end
-    if k == 'setup' then
-      return require('project.config').setup
-    end
-    if vim.list_contains({ 'delete_menu', 'open_menu', 'recents_menu', 'session_menu' }, k) then
+    if require('project.popup')[k] then
       return require('project.popup')[k]
     end
     return rawget(self, k) or nil
