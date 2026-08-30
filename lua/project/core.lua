@@ -125,16 +125,28 @@ function M.get_last(full_entry)
 end
 
 ---@overload fun(): history_paths: HistoryPath
----@overload fun(path: ProjectPaths): history_paths: string
+---@overload fun(path: nil, tilde?: boolean): history_paths: HistoryPath
+---@overload fun(path: ProjectPaths, tilde?: boolean): history_paths: string
 ---@nodiscard
-function M.get_history_paths(path)
-  Util.validate({ path = { path, { 'string', 'nil' }, true } })
+function M.get_history_paths(path, tilde)
+  Util.validate({
+    path = { path, { 'string', 'nil' }, true },
+    tilde = { tilde, { 'boolean', 'nil' }, true },
+  })
+  if tilde == nil then
+    tilde = false
+  end
 
   local res = { ---@type HistoryPath
     datapath = Util.path.datapath,
     projectpath = Util.path.projectpath,
     historyfile = Util.path.historyfile,
   }
+  if tilde then
+    res = vim.tbl_map(function(item)
+      return Util.strip_slash(item, ':p:~')
+    end, vim.deepcopy(res))
+  end
   return (path and vim.list_contains(vim.tbl_keys(res), path)) and Util.path[path] or res
 end
 
@@ -416,12 +428,10 @@ function M.get_project_root(bufnr)
   end
 
   local config = require('project.config').get()
-  local roots = {} ---@type { root: string, method_msg: string, method: string }[]
-  local root, method = nil, nil ---@type string|nil|?, string|nil|?
-  local ops = vim.tbl_keys(SWITCH) ---@type ('lsp'|'pattern')[]
+  local root, method, roots = nil, nil, {} ---@type string|nil|?, string|nil|?, { root: string, method_msg: string, method: string }[]
   local success = false
   for _, m in ipairs(detection_methods) do
-    if vim.list_contains(ops, m) then
+    if vim.list_contains(vim.tbl_keys(SWITCH), m) then
       success, root, method = SWITCH[m](bufnr) ---@type boolean, string|nil|?, string|nil|?
       if success and root and method then
         table.insert(roots, { root = root, method_msg = method, method = m })
