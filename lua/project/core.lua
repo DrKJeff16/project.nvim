@@ -99,12 +99,10 @@ function M.check_oil(bufnr)
   local dir ---@type string|nil|?
 
   ---SOURCE: https://github.com/cosmicbuffalo/root_swapper.nvim/blob/main/lua/root_swapper.lua
-  dir = (ok and oil and oil.get_current_dir) and oil.get_current_dir(bufnr) or bufname:gsub('^oil://', '')
-
+  dir = (ok and oil and oil.get_current_dir) and oil.get_current_dir(bufnr) or bufname:gsub('^oil://', '') --[[@as string|nil|?]]
   if dir then
-    dir = Util.strip_slash(dir)
+    return Util.strip_slash(dir)
   end
-  return dir
 end
 
 ---@overload fun(): last: string|nil|?
@@ -124,8 +122,8 @@ function M.get_last(full_entry)
   end
 end
 
----@overload fun(): history_paths: HistoryPath
----@overload fun(path: nil, tilde?: boolean): history_paths: HistoryPath
+---@overload fun(): history_paths: ProjectHistoryPath
+---@overload fun(path: nil, tilde?: boolean): history_paths: ProjectHistoryPath
 ---@overload fun(path: ProjectPaths, tilde?: boolean): history_paths: string
 ---@nodiscard
 function M.get_history_paths(path, tilde)
@@ -137,12 +135,13 @@ function M.get_history_paths(path, tilde)
     tilde = false
   end
 
-  local res = { ---@type HistoryPath
+  local res = { ---@type ProjectHistoryPath
     datapath = Util.path.datapath,
     projectpath = Util.path.projectpath,
     historyfile = Util.path.historyfile,
   }
   if tilde then
+    ---@type ProjectHistoryPath
     res = vim.tbl_map(function(item)
       return Util.strip_slash(item, ':p:~')
     end, vim.deepcopy(res))
@@ -196,15 +195,14 @@ function M.find_pattern_root(bufnr_or_dir)
 
   local dir = '' ---@type string
   if not bufnr_or_dir or type(bufnr_or_dir) == 'number' then
-    bufnr_or_dir = (bufnr_or_dir and Util.is_int(bufnr_or_dir, bufnr_or_dir >= 0)) and bufnr_or_dir
-      or vim.api.nvim_get_current_buf()
+    bufnr_or_dir = bufnr_or_dir or vim.api.nvim_get_current_buf() --[[@as integer]]
 
     dir = M.check_oil(bufnr_or_dir) or vim.api.nvim_buf_get_name(bufnr_or_dir)
-  elseif type(bufnr_or_dir) == 'string' then
+  elseif bufnr_or_dir and type(bufnr_or_dir) == 'string' then
     dir = bufnr_or_dir
   end
   dir = vim.fn.isdirectory(dir) == 1 and dir or Util.strip_slash(dir, ':p:h')
-  return Util.path.root_included(Util.is_windows() and dir:gsub('\\', '/') or dir)
+  return Util.path.root_included(Util.is_windows() and (dir:gsub('\\', '/')) or dir)
 end
 
 ---@param bufnr? integer
@@ -214,8 +212,8 @@ function M.valid_bt(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
-  return Util.buffer_valid(bufnr)
-    and not vim.list_contains(require('project.config').get().disable_on.bt, Util.optget('buftype', 'buf', bufnr))
+  local config = require('project.config').get()
+  return Util.buffer_valid(bufnr) and not vim.list_contains(config.disable_on.bt, Util.optget('buftype', 'buf', bufnr))
 end
 
 function M.refresh_project_bufs()
@@ -231,7 +229,7 @@ function M.refresh_project_bufs()
       bufnrs[name] = not vim.tbl_isempty(bufnrs[name]) and bufnrs[name] or nil
     end
 
-    per_project_bufs[dir] = not vim.tbl_isempty(bufnrs) and vim.deepcopy(bufnrs) or nil
+    per_project_bufs[dir] = vim.tbl_isempty(bufnrs) and nil or vim.deepcopy(bufnrs)
   end
 
   local sessions = {} ---@type ProjectHistoryEntry[]
@@ -274,10 +272,9 @@ function M.set_pwd(dir, method, bufnr)
   end
 
   Util.history.set_session_projects(Util.history.get_session_projects() or {})
-
   local custom_name = nil ---@type string|nil|?
   for _, v in ipairs(config.custom_projects) do
-    if Util.strip_slash(v.path) == dir then
+    if Util.strip_slash(v.path) == dir and v.name then
       custom_name = v.name
     end
   end
@@ -304,7 +301,7 @@ function M.set_pwd(dir, method, bufnr)
       per_project_bufs[dir] = { [buf_name] = { bufnr } }
     elseif not per_project_bufs[dir][buf_name] then
       per_project_bufs[dir][buf_name] = { bufnr }
-    elseif not vim.tbl_contains(per_project_bufs[dir][buf_name], bufnr) then
+    elseif not vim.list_contains(per_project_bufs[dir][buf_name], bufnr) then
       table.insert(per_project_bufs[dir][buf_name], bufnr)
     end
 
@@ -342,9 +339,9 @@ function M.set_pwd(dir, method, bufnr)
     }))
   then
     vim.api.nvim_exec_autocmds('User', {
+      data = { dir = dir, method = method, bufnr = bufnr },
       group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
       pattern = 'ProjectAttachPre',
-      data = { dir = dir, method = method, bufnr = bufnr },
     })
   end
 
@@ -443,10 +440,7 @@ function M.get_project_root(bufnr)
     return
   end
 
-  if #roots == 1 or config.lsp.no_fallback then
-    return roots[1].root, roots[1].method_msg
-  end
-  if roots[1].root == roots[2].root then
+  if (#roots == 1 or config.lsp.no_fallback) or (#roots > 1 and roots[1].root == roots[2].root) then
     return roots[1].root, roots[1].method_msg
   end
 
@@ -467,12 +461,11 @@ end
 function M.get_current(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
-  if not Util.buffer_valid(bufnr) then
-    return
-  end
 
-  local curr, method = M.get_project_root(bufnr)
-  return curr, method, M.get_last()
+  if Util.buffer_valid(bufnr) then
+    local curr, method = M.get_project_root(bufnr)
+    return curr, method, M.get_last()
+  end
 end
 
 ---@param bufnr? integer

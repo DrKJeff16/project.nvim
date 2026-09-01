@@ -67,7 +67,7 @@
 ---|'var'
 
 ---@alias Project.Core.GetHistoryPaths
----|fun(): history_paths: HistoryPath
+---|fun(): history_paths: ProjectHistoryPath
 ---|fun(path: ProjectPaths): history_paths: string
 
 ---@alias Project.Core.GetLastProject
@@ -105,7 +105,7 @@
 ---@field tab integer
 ---@field win integer
 
----@class (exact) HistoryPath
+---@class (exact) ProjectHistoryPath
 ---@field datapath string
 ---@field historyfile string
 ---@field projectpath string
