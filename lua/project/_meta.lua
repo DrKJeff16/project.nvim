@@ -566,12 +566,12 @@
 ---@field telescope ProjectDefaults.Telescope
 
 ---@class (exact) ProjectDefaults: ProjectConfigDefaults
----@field __index ProjectDefaults|fun(self: ProjectDefaults, key: string|integer): value: any
+---@field __index fun(self: ProjectDefaults, key: string|integer): value: any
 ---Get active setup options without a metatable associated.
 --- ---
 ---@field _get_no_mt fun(self: ProjectDefaults): opts: ProjectConfigDefaults
 ---@field expand_excluded fun(self: ProjectDefaults)
----@field gen_methods fun(self: ProjectDefaults): (methods: { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' })
+---@field gen_methods fun(self: ProjectDefaults): methods: { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }|{ [1]: 'lsp' }|{ [1]: 'pattern', [2]: 'lsp' }
 ---@field new fun(self: ProjectDefaults, opts?: ProjectOpts): defaults: ProjectDefaults
 ---@field verify fun(self: ProjectDefaults)
 ---@field verify_datapath fun(self: ProjectDefaults)

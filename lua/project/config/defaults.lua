@@ -71,6 +71,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
       'TelescopeResults',
       'alpha',
       'checkhealth',
+      'dropbar_menu',
       'fzf',
       'lazy',
       'log',
@@ -124,7 +125,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
 
 local D = {} ---@type ProjectDefaults
 
-D.__index = function(self, k)
+function D.__index(self, k)
   if not rawget(self, k) then
     return getmetatable(self)[k]
   end
@@ -162,7 +163,7 @@ function D:verify_history()
   end
 
   if self.historysize and Util.is_int(self.historysize, self.historysize >= 0) then
-    vim.notify('`options.historysize` is deprecated, use `options.history.size`!', WARN)
+    vim.notify('project.nvim - `historysize` is deprecated, use `history.size` instead', WARN)
     self.history.size = self.historysize
     self.historysize = nil
   end
@@ -177,7 +178,10 @@ function D:verify_scope_chdir()
   Util.validate({ scope_chdir = { self.scope_chdir, { 'string', 'nil' }, true } })
 
   if not (self.scope_chdir and vim.list_contains({ 'global', 'tab', 'win' }, self.scope_chdir)) then
-    vim.notify(('`scope_chdir` option invalid (`%s`). Reverting to default option.'):format(self.scope_chdir), WARN)
+    vim.notify(
+      ('project.nvim - Invalid `scope_chdir` value (`%s`). Reverting to default option.'):format(self.scope_chdir),
+      WARN
+    )
     self.scope_chdir = DEFAULTS.scope_chdir
   end
 end
@@ -189,19 +193,17 @@ function D:verify_datapath()
   Util.validate({ ['history.save_dir'] = { self.history.save_dir, { 'string', 'nil' }, true } })
 
   if self.datapath and type(self.datapath) == 'string' then
-    vim.notify('`options.datapath` is deprecated, use `options.history.save_dir`!', WARN)
+    vim.notify('project.nvim - `datapath` is deprecated, use `history.save_dir`!', WARN)
     self.history.save_dir = self.datapath
     self.datapath = nil
   end
 
   if not (self.history.save_dir and Util.dir_exists(self.history.save_dir)) then
-    vim.notify(('Invalid save_dir `%s`, reverting to default.'):format(self.history.save_dir), WARN)
+    vim.notify(('project.nvim - Invalid save_dir `%s`, reverting to default.'):format(self.history.save_dir), WARN)
     self.history.save_dir = DEFAULTS.history.save_dir
   end
 end
 
----@return { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' } methods
----@nodiscard
 function D:gen_methods()
   self:verify_lsp()
   local methods = { 'pattern' } ---@type { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
@@ -212,7 +214,7 @@ function D:gen_methods()
   return setmetatable(methods, {
     __index = methods,
     __newindex = function()
-      vim.notify('Detection methods are immutable!', vim.log.levels.ERROR)
+      vim.notify('project.nvim - Detection methods are immutable!', vim.log.levels.ERROR)
     end,
   })
 end
@@ -223,7 +225,7 @@ function D:verify_logging()
   if self.logging ~= nil and type(self.logging) == 'boolean' then
     self.log.enabled = self.logging
     self.logging = nil
-    vim.notify('`options.logging` is deprecated, use `options.log.enabled`!', WARN)
+    vim.notify('project.nvim - `logging` is deprecated, use `log.enabled`!', WARN)
   end
 
   if type(self.log.logpath) ~= 'string' or not Util.path.exists(self.log.logpath) then
@@ -247,17 +249,17 @@ end
 function D:verify_lsp()
   self.lsp = self.lsp and vim.tbl_deep_extend('keep', self.lsp, DEFAULTS.lsp) or DEFAULTS.lsp
   if self.use_lsp ~= nil then
-    vim.notify('`use_lsp` is deprecated! Use `lsp.enabled` instead.', WARN)
+    vim.notify('project.nvim - `use_lsp` is deprecated! Use `lsp.enabled` instead.', WARN)
     self.lsp.enabled = self.use_lsp
     self.use_lsp = nil
   end
   if self.allow_patterns_for_lsp ~= nil then
-    vim.notify('`allow_patterns_for_lsp` is deprecated! Use `lsp.use_pattern_matching` instead.', WARN)
+    vim.notify('project.nvim - `allow_patterns_for_lsp` is deprecated! Use `lsp.use_pattern_matching` instead.', WARN)
     self.lsp.use_pattern_matching = self.allow_patterns_for_lsp
     self.allow_patterns_for_lsp = nil
   end
   if self.ignore_lsp and type(self.ignore_lsp) == 'table' then
-    vim.notify('`ignore_lsp` is deprecated! Use `lsp.ignore` instead.', WARN)
+    vim.notify('project.nvim - `ignore_lsp` is deprecated! Use `lsp.ignore` instead.', WARN)
     self.lsp.ignore = vim.deepcopy(self.ignore_lsp)
     self.ignore_lsp = nil
   end
@@ -266,7 +268,7 @@ end
 function D:verify_owners()
   self.different_owners = self.different_owners or {}
   if self.allow_different_owners ~= nil and type(self.allow_different_owners) == 'boolean' then
-    vim.notify('`allow_different_owners` is deprecated! Use `different_owners.allow` instead.', WARN)
+    vim.notify('project.nvim - `allow_different_owners` is deprecated! Use `different_owners.allow` instead.', WARN)
     self.different_owners.allow = self.allow_different_owners
     self.allow_different_owners = nil
   end
@@ -291,14 +293,9 @@ function D:verify_lists()
     end
     i = i + n
   end
-  if vim.tbl_isempty(self.patterns) then
-    self.patterns = vim.deepcopy(DEFAULTS.patterns)
-  else
-    self.patterns = Util.dedup(self.patterns)
-  end
+  self.patterns = Util.dedup(vim.tbl_isempty(self.patterns) and DEFAULTS.patterns or self.patterns)
 
   self.disable_on = self.disable_on or vim.deepcopy(DEFAULTS.disable_on)
-
   self.disable_on.ft = self.disable_on.ft or vim.deepcopy(DEFAULTS.disable_on.ft)
   i, found = 1, {}
   while i <= #self.disable_on.ft and i > 0 do
@@ -311,9 +308,7 @@ function D:verify_lists()
     end
     i = i + n
   end
-
-  self.disable_on.ft = vim.tbl_isempty(self.disable_on.ft) and vim.deepcopy(DEFAULTS.disable_on.ft)
-    or Util.dedup(self.disable_on.ft)
+  self.disable_on.ft = Util.dedup(vim.tbl_isempty(self.disable_on.ft) and DEFAULTS.disable_on.ft or self.disable_on.ft)
 
   self.disable_on.bt = self.disable_on.bt or vim.deepcopy(DEFAULTS.disable_on.bt)
   i, found = 1, {}
@@ -327,9 +322,7 @@ function D:verify_lists()
     end
     i = i + n
   end
-
-  self.disable_on.bt = vim.tbl_isempty(self.disable_on.bt) and vim.deepcopy(DEFAULTS.disable_on.bt)
-    or Util.dedup(self.disable_on.bt)
+  self.disable_on.bt = Util.dedup(vim.tbl_isempty(self.disable_on.bt) and DEFAULTS.disable_on.bt or self.disable_on.bt)
 
   i, found = 1, {}
   while i <= #self.exclude_dirs and i > 0 do
@@ -379,7 +372,7 @@ function D:verify_fzf_lua()
 
   if not vim.list_contains({ 'newest', 'oldest' }, self.fzf_lua.sort) then
     vim.notify(
-      ('`fzf_lua.sort` is not a valid value! (`%s`)\nResetting to default'):format(self.fzf_lua.sort),
+      ('project.nvim - `fzf_lua.sort` is not a valid value! (`%s`)\nResetting to default'):format(self.fzf_lua.sort),
       vim.log.levels.ERROR
     )
     self.fzf_lua.sort = 'newest'
@@ -469,10 +462,9 @@ function D:verify()
   local keys = vim.tbl_keys(DEFAULTS) --[[@as string[]\]]
   table.insert(keys, 'on_attach')
   table.insert(keys, 'before_attach')
-  keys = Util.dedup(keys)
 
   for k in pairs(self) do
-    if not vim.list_contains(keys, k) then
+    if not vim.list_contains(Util.dedup(keys), k) then
       self[k] = nil
     end
   end
@@ -501,7 +493,7 @@ function D:verify()
   end
 
   if self.detection_methods then
-    vim.notify('(project.nvim): `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.', WARN)
+    vim.notify('project.nvim - `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.', WARN)
   end
 end
 
@@ -517,7 +509,8 @@ end
 function D:new(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  return setmetatable(vim.tbl_deep_extend('keep', opts or {}, DEFAULTS), D)
+  local obj = setmetatable(vim.tbl_deep_extend('force', DEFAULTS, opts or {}), D) --[[@as ProjectDefaults]]
+  return obj
 end
 
 return D
