@@ -245,6 +245,9 @@ By default, `setup()` loads with the following options:
 
 ```lua
 {
+  -- If `false` then `git` will not be used to retrieve the current project's root
+  use_git = true,
+
   -- Runs before right before changing the project directory
   ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
   before_attach = nil,

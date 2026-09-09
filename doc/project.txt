@@ -254,6 +254,15 @@ Table of Contents                                                  *project.toc*
                                 See |ProjectOpts.Telescope| for more details
 
 
+    • {use_git}                 (`boolean`)
+                                If `false` then `git` will not be used to
+                                retrieve your current repository root.
+                                This option will not make a difference
+                                if `git` is not installed
+
+                                Default: `true` ~
+
+
 ------------------------------------------------------------------------------
 1.2. `ProjectOpts.LSP`                                           *ProjectOpts.LSP*
                                                             *project.lsp-config*

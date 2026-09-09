@@ -3,7 +3,7 @@
 local Util = require('project.util')
 
 local float = nil ---@type Project.ConfigLoc|nil|?
-local detection_methods = {} ---@type { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
+local detection_methods = {} ---@type ('lsp'|'pattern'|'git')[]
 
 ---Get the default options for configuring `project`.
 --- ---
@@ -35,7 +35,7 @@ function M.set(k, v)
   options[k] = v
 end
 
----@return { [1]: 'lsp', [2]: 'pattern' }|{ [1]: 'pattern' } detection_methods
+---@return ('lsp'|'pattern'|'git')[] detection_methods
 ---@nodiscard
 function M.get_detection_methods()
   return detection_methods
@@ -47,12 +47,11 @@ end
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  local pattern_exclude = Util.globtopattern.pattern_exclude
   options = get_defaults():new(opts or {})
 
   detection_methods = options:gen_methods()
   options:expand_excluded()
-  options.exclude_dirs = vim.tbl_map(pattern_exclude, options.exclude_dirs)
+  options.exclude_dirs = vim.tbl_map(Util.globtopattern.pattern_exclude, options.exclude_dirs)
 
   options:verify()
 

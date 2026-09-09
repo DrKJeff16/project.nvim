@@ -61,6 +61,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
   show_hidden = false,
   exclude_dirs = {},
   silent_chdir = true,
+  use_git = true,
   scope_chdir = 'global',
   disable_on = {
     bt = { 'help', 'nofile', 'nowrite', 'terminal' },
@@ -206,9 +207,12 @@ end
 
 function D:gen_methods()
   self:verify_lsp()
-  local methods = { 'pattern' } ---@type { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }
+  local methods = { 'pattern' } ---@type ('git'|'lsp'|'pattern')[]
   if self.lsp.enabled then
     table.insert(methods, 1, 'lsp')
+  end
+  if self.use_git then
+    table.insert(methods, 1, 'git')
   end
 
   return setmetatable(methods, {
@@ -447,6 +451,7 @@ function D:verify()
     silent_chdir = { self.silent_chdir, { 'boolean', 'nil' }, true },
     snacks = { self.snacks, { 'table', 'nil' }, true },
     telescope = { self.telescope, { 'table', 'nil' }, true },
+    use_git = { self.use_git, { 'boolean', 'nil' }, true },
   })
 
   self:verify_history()
