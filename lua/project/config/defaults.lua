@@ -211,7 +211,7 @@ function D:gen_methods()
   -- TODO: Figure out the best order for detection methods, or outright make it customizable again,
   -- though the latter WILL require a chunk of the code to be refactored!
   local methods = { 'pattern' } ---@type ('git'|'lsp'|'pattern')[]
-  if self.use_git then
+  if self.use_git and Util.executable('git') then
     table.insert(methods, 1, 'git')
   end
   if self.lsp.enabled then

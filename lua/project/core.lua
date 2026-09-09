@@ -46,14 +46,13 @@ end
 ---@nodiscard
 function M.find_git_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  if vim.fn.executable('git') ~= 1 then
+  if not Util.executable('git') then
     return
   end
 
   local root = nil ---@type string|nil|?
-  local obj = vim
-    .system({ 'git', 'rev-parse', '--show-toplevel' }, { cwd = vim.uv.cwd() or vim.fn.getcwd(nil, nil, bufnr), text = true })
-    :wait(60000)
+  local cmd = vim.split('git rev-parse --show-toplevel', ' ', { trimempty = true })
+  local obj = vim.system(cmd, { cwd = vim.uv.cwd() or vim.fn.getcwd(nil, nil, bufnr), text = true }):wait()
   if obj.code == 0 and obj.stdout then
     root = vim.split(obj.stdout, '\n', { trimempty = true })[1]
   end
