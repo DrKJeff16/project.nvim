@@ -207,12 +207,15 @@ end
 
 function D:gen_methods()
   self:verify_lsp()
+
+  -- TODO: Figure out the best order for detection methods, or outright make it customizable again,
+  -- though the latter WILL require a chunk of the code to be refactored!
   local methods = { 'pattern' } ---@type ('git'|'lsp'|'pattern')[]
-  if self.lsp.enabled then
-    table.insert(methods, 1, 'lsp')
-  end
   if self.use_git then
     table.insert(methods, 1, 'git')
+  end
+  if self.lsp.enabled then
+    table.insert(methods, 1, 'lsp')
   end
 
   return setmetatable(methods, {
