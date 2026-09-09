@@ -484,18 +484,36 @@
 --- ---
 ---@field patterns? string[]
 ---Hook to run after attaching to a new project.
----**_This only runs if the directory changes successfully._**
 ---
----It recieves `dir` and, optionally,
----the `method` used to change directory.
+---It receives the following parameters:
+---
+---
+--- - `dir` - The root of the current project
+--- - `method` - The method used for detecting the current project root
+--- - `bufnr` - Optionally, the number for the buffer where the project root was detected
+--- - `map` - Optionally, a function that accepts a dictionary with the following structure:
+---  ```lua
+---  -- Lua
+---  map(maps: table<'V'|'i'|'n'|'o'|'t'|'v'|'x', { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>)
+---  ```
+---  Or:
+---  ```lua
+---  -- Lua
+---  map(mode: 'V'|'i'|'n'|'o'|'t'|'v'|'x', lhs: string, rhs: string|function, opts: vim.keymap.set.Opts)
+---  ```
+---
+------
+---
+---**_THIS FUNCTION WILL ONLY RUN IF THE DIRECTORY CHANGE WAS SUCCESSFUL._**
 ---
 ---Set to `nil` to disable.
 ---
+--- ---
 ---CREDITS: @danilevy1212
 --- ---
 ---Default: `nil`
 --- ---
----@field on_attach? nil|fun(dir: string, method: string, bufnr?: integer, map: ProjectAttachMapCb)
+---@field on_attach? nil|fun(dir: string, method: string, bufnr?: integer, map?: ProjectAttachMapCb)
 ---Table of options used for the `picker.nvim` integration
 --- ---
 ---@field picker? ProjectOpts.Picker
@@ -541,6 +559,12 @@
 ---Table of options used for the telescope picker.
 --- ---
 ---@field telescope? ProjectOpts.Telescope
+---If `true`, the root of the project will be derived from the current Git project,
+---assuming your CWD is in a Git repository. If not, other detection methods will be attempted.
+--- ---
+---Default: `true`
+--- ---
+---@field use_git? boolean
 
 ---@class (exact) ProjectConfigDefaults: ProjectOpts
 ---@field before_attach nil|fun(target_dir: string, method: string, bufnr?: integer)
@@ -564,6 +588,7 @@
 ---@field silent_chdir boolean
 ---@field snacks ProjectDefaults.Snacks
 ---@field telescope ProjectDefaults.Telescope
+---@field use_git boolean
 
 ---@class (exact) ProjectDefaults: ProjectConfigDefaults
 ---@field __index fun(self: ProjectDefaults, key: string|integer): value: any
@@ -571,7 +596,7 @@
 --- ---
 ---@field _get_no_mt fun(self: ProjectDefaults): opts: ProjectConfigDefaults
 ---@field expand_excluded fun(self: ProjectDefaults)
----@field gen_methods fun(self: ProjectDefaults): methods: { [1]: 'pattern' }|{ [1]: 'lsp', [2]: 'pattern' }|{ [1]: 'lsp' }|{ [1]: 'pattern', [2]: 'lsp' }
+---@field gen_methods fun(self: ProjectDefaults): methods: ('lsp'|'git'|'pattern')[]
 ---@field new fun(self: ProjectDefaults, opts?: ProjectOpts): defaults: ProjectDefaults
 ---@field verify fun(self: ProjectDefaults)
 ---@field verify_datapath fun(self: ProjectDefaults)

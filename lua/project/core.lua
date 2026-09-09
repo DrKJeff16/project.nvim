@@ -40,8 +40,46 @@ function M.get_per_project_bufs()
   return per_project_bufs
 end
 
+---@param bufnr? integer
+---@return string|nil|? dir
+---@return string|nil|? name
+---@nodiscard
+function M.find_git_root(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  if vim.fn.executable('git') ~= 1 then
+    return
+  end
+
+  local root = nil ---@type string|nil|?
+  local obj = vim
+    .system({ 'git', 'rev-parse', '--show-toplevel' }, { cwd = vim.uv.cwd() or vim.fn.getcwd(nil, nil, bufnr), text = true })
+    :wait(60000)
+  if obj.code == 0 and obj.stdout then
+    root = vim.split(obj.stdout, '\n', { trimempty = true })[1]
+  end
+  if root and root ~= '' then
+    return Util.strip_slash(root), 'git'
+  end
+end
+
 ---@class ProjectRootSwitch
 local SWITCH = {}
+
+---@param bufnr? integer
+---@return boolean success
+---@return string|nil|? root
+---@return string|nil|? method
+---@nodiscard
+function SWITCH.git(bufnr)
+  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+
+  local root, method = M.find_git_root(bufnr)
+  if root and method then
+    return true, root, method
+  end
+  return false
+end
 
 ---@param bufnr? integer
 ---@return boolean success
@@ -52,8 +90,8 @@ function SWITCH.lsp(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
-  local root, lsp_name = M.find_lsp_root(bufnr or vim.api.nvim_get_current_buf())
-  if root then
+  local root, lsp_name = M.find_lsp_root(bufnr)
+  if root and lsp_name then
     if vim.g.project_switch_root ~= root then
       vim.g.project_switch_root = root
     end
@@ -605,7 +643,7 @@ function M.setup()
 
   if not require('project.config').get().manual_mode then
     local detection_methods = require('project.config').get_detection_methods()
-    if vim.list_contains(detection_methods, 'pattern') then
+    if vim.list_contains(detection_methods, 'pattern') or vim.list_contains(detection_methods, 'git') then
       vim.api.nvim_create_autocmd('BufEnter', {
         group = group,
         callback = function(ev)

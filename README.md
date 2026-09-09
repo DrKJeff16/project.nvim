@@ -25,6 +25,7 @@ You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16
 
 ## Features
 
+- **(NEW!)** Supports project root detection using `git`
 - Automatically sets the current working directory to the project root directory using pattern matching (LSP optionally)
 - Projects can be assigned a name ([`:Project history rename [...]`](#project-history-clearrename-pathtoproject-pathtoproject))
 - Users can define custom project roots, see [Custom Projects](#custom-projects)
@@ -245,6 +246,9 @@ By default, `setup()` loads with the following options:
 
 ```lua
 {
+  -- If `false` then `git` will not be used to retrieve the current project's root
+  use_git = true,
+
   -- Runs before right before changing the project directory
   ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
   before_attach = nil,
