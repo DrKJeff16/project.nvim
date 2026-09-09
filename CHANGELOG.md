@@ -1,5 +1,13 @@
 # Changelog
 
+## [v6.2.0-1](https://github.com/DrKJeff16/project.nvim/tree/v6.2.0-1) (2026-09-09)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v6.1.0-1...v6.2.0-1)
+
+**Implemented enhancements:**
+
+- feat!: add setup option to calculate the root using `git` [\#79](https://github.com/DrKJeff16/project.nvim/pull/79) ([DrKJeff16](https://github.com/DrKJeff16))
+
 ## [v6.1.0-1](https://github.com/DrKJeff16/project.nvim/tree/v6.1.0-1) (2026-08-30)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v6.0.2-1...v6.1.0-1)
