@@ -231,10 +231,14 @@ function M.create_path(path)
 end
 
 ---@param dir string
+---@param mtd? 'pattern'|'lsp'|'git'
 ---@return string|nil|? dir
 ---@return string|nil|? pattern
-function M.root_included(dir)
-  Util.validate({ dir = { dir, { 'string' } } })
+function M.root_included(dir, mtd)
+  Util.validate({
+    dir = { dir, { 'string' } },
+    mtd = { mtd, { 'string', 'nil' }, true },
+  })
 
   local config = require('project.config').get()
   while true do ---Breadth-First search
@@ -245,13 +249,26 @@ function M.root_included(dir)
       end
       for _, custom in ipairs(config.custom_projects) do
         if dir == custom.path then
-          return dir, 'custom'
+          if
+            dir == custom.path
+            and (
+              custom.method
+              and (not vim.list_contains({ 'pattern', 'lsp', 'git' }, custom.method) or mtd ~= custom.method)
+            )
+          then
+            return
+          end
+          if dir == custom.path then
+            return dir, custom.method or 'custom'
+          end
         end
       end
-      if M.match(dir, pattern) then
-        if not excluded then
-          return dir, ('pattern %s'):format(pattern)
-        end
+
+      local match = M.match(dir, pattern)
+      if match and not excluded then
+        return dir, ('pattern %s'):format(pattern)
+      end
+      if match then
         break
       end
     end

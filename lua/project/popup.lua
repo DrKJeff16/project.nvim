@@ -46,10 +46,13 @@ local function open_node(proj, only_cd, ran_cd)
     vim.g.project_nvim_cwd = proj
   end
 
+  local config = require('project.config').get()
+  local custom = Core.find_custom_project(proj)
   local ls = Core.root_files(
-    require('project.config').get().show_hidden and 'all' or 'all_visible',
+    config.show_hidden and 'all' or 'all_visible',
     proj,
-    ran_cd and proj or nil
+    ran_cd and proj or nil,
+    (custom ~= nil and custom.method ~= nil) and custom.method or nil
   )
   if not ls then
     return

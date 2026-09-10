@@ -16,6 +16,18 @@ local last_project = nil ---@type string|nil|?
 ---@class Project.Core
 local M = {}
 
+---@param name_or_path string
+---@return ProjectConfigHistoryEntry|nil|? custom_project
+function M.find_custom_project(name_or_path)
+  Util.validate({ name_or_path = { name_or_path, { 'string' } } })
+
+  for _, proj in ipairs(require('project.config').get().custom_projects) do
+    if vim.list_contains({ proj.name, proj.path }, name_or_path) then
+      return proj
+    end
+  end
+end
+
 ---@return string|nil|? current_project
 ---@nodiscard
 function M.get_current_project()
@@ -41,12 +53,17 @@ function M.get_per_project_bufs()
 end
 
 ---@param bufnr? integer
+---@param mtd? 'pattern'|'lsp'|'git'
 ---@return string|nil|? dir
 ---@return string|nil|? name
 ---@nodiscard
-function M.find_git_root(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  if not Util.executable('git') then
+function M.find_git_root(bufnr, mtd)
+  Util.validate({
+    bufnr = { bufnr, { 'number', 'nil' }, true },
+    mtd = { mtd, { 'string', 'nil' }, true },
+  })
+  mtd = mtd or 'git'
+  if not Util.executable('git') or mtd ~= 'git' then
     return
   end
 
@@ -57,7 +74,7 @@ function M.find_git_root(bufnr)
     root = vim.split(obj.stdout, '\n', { trimempty = true })[1]
   end
   if root and root ~= '' then
-    return Util.strip_slash(root), 'git'
+    return Util.strip_slash(root), mtd
   end
 end
 
@@ -65,15 +82,24 @@ end
 local SWITCH = {}
 
 ---@param bufnr? integer
+---@param mtd? 'pattern'|'lsp'|'git'
 ---@return boolean success
 ---@return string|nil|? root
 ---@return string|nil|? method
 ---@nodiscard
-function SWITCH.git(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+function SWITCH.git(bufnr, mtd)
+  Util.validate({
+    bufnr = { bufnr, { 'number', 'nil' }, true },
+    mtd = { mtd, { 'string', 'nil' }, true },
+  })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+  mtd = mtd or 'git'
 
-  local root, method = M.find_git_root(bufnr)
+  if mtd ~= 'git' then
+    return false
+  end
+
+  local root, method = M.find_git_root(bufnr, mtd)
   if root and method then
     return true, root, method
   end
@@ -81,15 +107,20 @@ function SWITCH.git(bufnr)
 end
 
 ---@param bufnr? integer
+---@param mtd? 'pattern'|'lsp'|'git'
 ---@return boolean success
 ---@return string|nil|? root
 ---@return string|nil|? method
 ---@nodiscard
-function SWITCH.lsp(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+function SWITCH.lsp(bufnr, mtd)
+  Util.validate({
+    bufnr = { bufnr, { 'number', 'nil' }, true },
+    mtd = { mtd, { 'string', 'nil' }, true },
+  })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+  mtd = mtd or 'lsp'
 
-  local root, lsp_name = M.find_lsp_root(bufnr)
+  local root, lsp_name = M.find_lsp_root(bufnr, mtd)
   if root and lsp_name then
     if vim.g.project_switch_root ~= root then
       vim.g.project_switch_root = root
@@ -103,13 +134,18 @@ function SWITCH.lsp(bufnr)
 end
 
 ---@param bufnr? integer
+---@param mtd? 'pattern'|'git'|'lsp'
 ---@return boolean success
 ---@return string|nil|? root
 ---@return string|nil|? method
 ---@nodiscard
-function SWITCH.pattern(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+function SWITCH.pattern(bufnr, mtd)
+  Util.validate({
+    bufnr = { bufnr, { 'number', 'nil' }, true },
+    mtd = { mtd, { 'string', 'nil' }, true },
+  })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+  mtd = mtd or 'pattern'
 
   local root, method = M.find_pattern_root(bufnr or vim.api.nvim_get_current_buf())
   if not (root and method) then
@@ -193,12 +229,21 @@ end
 ---Otherwise, nothing is returned.
 --- ---
 ---@param bufnr? integer
+---@param mtd? 'pattern'|'lsp'|'git'
 ---@return string|nil|? dir
 ---@return string|nil|? name
 ---@nodiscard
-function M.find_lsp_root(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+function M.find_lsp_root(bufnr, mtd)
+  Util.validate({
+    bufnr = { bufnr, { 'number', 'nil' }, true },
+    mtd = { mtd, { 'string', 'nil' }, true },
+  })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+  mtd = (mtd and vim.list_contains({ 'pattern', 'lsp', 'git' }, mtd)) and mtd or 'lsp'
+
+  if mtd ~= 'lsp' then
+    return
+  end
 
   local clients = vim.lsp.get_clients({ bufnr = bufnr })
   if vim.tbl_isempty(clients) then
@@ -225,11 +270,20 @@ function M.find_lsp_root(bufnr)
 end
 
 ---@param bufnr_or_dir? integer|string
+---@param mtd? 'pattern'|'lsp'|'git'
 ---@return string|nil|? dir_res
 ---@return string|nil|? method
 ---@nodiscard
-function M.find_pattern_root(bufnr_or_dir)
-  Util.validate({ bufnr_or_dir = { bufnr_or_dir, { 'number', 'string', 'nil' }, true } })
+function M.find_pattern_root(bufnr_or_dir, mtd)
+  Util.validate({
+    bufnr_or_dir = { bufnr_or_dir, { 'number', 'string', 'nil' }, true },
+    mtd = { mtd, { 'string', 'nil' }, true },
+  })
+  mtd = mtd or 'pattern'
+
+  if mtd ~= 'pattern' then
+    return
+  end
 
   local dir = '' ---@type string
   if not bufnr_or_dir or type(bufnr_or_dir) == 'number' then
@@ -239,7 +293,7 @@ function M.find_pattern_root(bufnr_or_dir)
     dir = bufnr_or_dir
   end
   dir = vim.fn.isdirectory(dir) == 1 and dir or Util.strip_slash(dir, ':p:h')
-  return Util.path.root_included(Util.is_windows() and (dir:gsub('\\', '/')) or dir)
+  return Util.path.root_included(Util.is_windows() and (dir:gsub('\\', '/')) or dir, mtd)
 end
 
 ---@param bufnr? integer
@@ -450,12 +504,18 @@ end
 ---If no project root is found, nothing will be returned.
 --- ---
 ---@param bufnr? integer
+---@param mtd? 'pattern'|'lsp'|'git'
 ---@return string|nil|? root
 ---@return string|nil|? method
 ---@nodiscard
-function M.get_project_root(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+function M.get_project_root(bufnr, mtd)
+  Util.validate({
+    bufnr = { bufnr, { 'number', 'nil' }, true },
+    mtd = { mtd, { 'string', 'nil' }, true },
+  })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+  mtd = (mtd and vim.list_contains({ 'pattern', 'lsp', 'git' }, mtd)) and mtd or nil
+
   local detection_methods = require('project.config').get_detection_methods()
   if not Util.buffer_valid(bufnr) or vim.tbl_isempty(detection_methods) then
     return
@@ -464,11 +524,18 @@ function M.get_project_root(bufnr)
   local config = require('project.config').get()
   local root, method, roots = nil, nil, {} ---@type string|nil|?, string|nil|?, { root: string, method_msg: string, method: string }[]
   local success = false
-  for _, m in ipairs(detection_methods) do
-    if vim.list_contains(vim.tbl_keys(SWITCH), m) then
-      success, root, method = SWITCH[m](bufnr) ---@type boolean, string|nil|?, string|nil|?
-      if success and root and method then
-        table.insert(roots, { root = root, method_msg = method, method = m })
+  if mtd then
+    success, root, method = SWITCH[mtd](bufnr, mtd)
+    if success and root and method then
+      table.insert(roots, { method = mtd, method_msg = method, root = root })
+    end
+  else
+    for _, m in ipairs(detection_methods) do
+      if SWITCH[m] then
+        success, root, method = SWITCH[m](bufnr) ---@type boolean, string|nil|?, string|nil|?
+        if success and root and method then
+          table.insert(roots, { method = m, method_msg = method, root = root })
+        end
       end
     end
   end
@@ -491,16 +558,21 @@ end
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
 ---@param bufnr? integer
+---@param mtd? 'pattern'|'lsp'|'git'
 ---@return string|nil|? curr
 ---@return string|nil|? method
 ---@return string|nil|? last
 ---@nodiscard
-function M.get_current(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+function M.get_current(bufnr, mtd)
+  Util.validate({
+    bufnr = { bufnr, { 'number', 'nil' }, true },
+    mtd = { mtd, { 'string', 'nil' }, true },
+  })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+  mtd = (mtd and vim.list_contains({ 'pattern', 'lsp', 'git' }, mtd)) and mtd or nil
 
   if Util.buffer_valid(bufnr) then
-    local curr, method = M.get_project_root(bufnr)
+    local curr, method = M.get_project_root(bufnr, mtd)
     return curr, method, M.get_last()
   end
 end
@@ -508,12 +580,16 @@ end
 ---@param bufnr? integer
 ---@return string|nil|? name
 ---@nodiscard
-function M.get_current_project_name(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
+function M.get_current_project_name(bufnr, mtd)
+  Util.validate({
+    bufnr = { bufnr, { 'number', 'nil' }, true },
+    mtd = { mtd, { 'string', 'nil' }, true },
+  })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+  mtd = (mtd and vim.list_contains({ 'pattern', 'lsp', 'git' }, mtd)) and mtd or nil
 
   if Util.buffer_valid(bufnr) then
-    return Util.history.find_entry('recent', M.get_project_root(bufnr), 'name')
+    return Util.history.find_entry('recent', M.get_project_root(bufnr, mtd), 'name')
   end
 end
 
@@ -541,8 +617,13 @@ function M.on_buf_enter(bufnr)
     )
   then
     current_project, current_method = M.get_current(bufnr)
+    local custom = M.find_custom_project(current_project)
+    if custom and custom.method then
+      current_project, current_method = M.get_current(bufnr, custom.method)
+    end
     if M.set_pwd(current_project, current_method, bufnr) then
-      current_project, current_method, last_project = M.get_current(bufnr)
+      current_project, current_method, last_project =
+        M.get_current(bufnr, (custom and custom.method) and custom.method or nil)
     end
   end
 end
@@ -550,9 +631,10 @@ end
 ---@param scan_what? Project.Core.ScanRoot
 ---@param path? string
 ---@param prefix? string
+---@param mtd? 'pattern'|'git'|'lsp'
 ---@return string[]|nil|? files_list
 ---@nodiscard
-function M.root_files(scan_what, path, prefix)
+function M.root_files(scan_what, path, prefix, mtd)
   if vim.g.project_setup ~= 1 then
     return
   end
@@ -560,11 +642,13 @@ function M.root_files(scan_what, path, prefix)
     scan_what = { scan_what, { 'string', 'nil' }, true },
     path = { path, { 'string', 'nil' }, true },
     prefix = { prefix, { 'string', 'nil' }, true },
+    mtd = { mtd, { 'string', 'nil' }, true },
   })
   if not scan_what then
     scan_what = require('project.config').get().show_hidden and 'all' or 'all_visible'
   end
-  path = (not path or path == '') and (M.get_current() or M.get_project_root()) or path
+  path = (not path or path == '') and (M.get_current(nil, mtd) or M.get_project_root(nil, mtd)) or path
+  mtd = (mtd and vim.list_contains({ 'pattern', 'lsp', 'git' }, mtd)) and mtd or nil
   if not path then
     return
   end
@@ -617,7 +701,7 @@ function M.root_files(scan_what, path, prefix)
       is_type = vim.list_contains({ 'file', 'directory' }, ftype)
     end
     if is_type and next ~= '.git' then
-      table.insert(files, prefix and vim.fs.joinpath(prefix, next) or next)
+      table.insert(files, prefix and Util.path.join(prefix, next) or next)
     end
     next, ftype = vim.uv.fs_scandir_next(dir)
   end

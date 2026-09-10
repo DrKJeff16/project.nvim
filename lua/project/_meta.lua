@@ -96,6 +96,7 @@
 ---@class (exact) ProjectHistoryEntry
 ---@field name string
 ---@field path string
+---@field method? 'pattern'|'lsp'|'git'
 
 ---@class (exact) ProjectConfigHistoryEntry: ProjectHistoryEntry
 ---@field name? string
