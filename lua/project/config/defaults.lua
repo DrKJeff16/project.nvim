@@ -496,7 +496,6 @@ function D:verify()
         })
       end
     end
-
     self.custom_projects = vim.deepcopy(custom_projects)
   end
 
@@ -507,7 +506,7 @@ end
 
 function D:_get_no_mt()
   local opts = {} ---@type ProjectConfigDefaults
-  for _, k in pairs(vim.tbl_keys(self)) do
+  for _, k in ipairs(vim.tbl_keys(self)) do
     ---@cast k string
     opts[k] = rawget(self, k)
   end

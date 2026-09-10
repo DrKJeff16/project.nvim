@@ -10,29 +10,34 @@ local detection_methods = {} ---@type ('lsp'|'pattern'|'git')[]
 ---@return ProjectDefaults defaults
 ---@nodiscard
 local function get_defaults()
-  return require('project.config.defaults')
+  return require('project.config.defaults'):new()
 end
 
----@class Project.Config
----@field custom_projects ProjectConfigHistoryEntry[]
-local M = {}
+local options = get_defaults()
 
-local options = get_defaults():new()
+---@class Project.Config
+local M = {}
 
 ---@return ProjectDefaults options
 function M.get()
   return options
 end
 
----@param k string
----@param v any
+---@param k string|table<string, any>
+---@param v? any
 function M.set(k, v)
-  Util.validate({ k = { k, { 'string' } } })
-  if not get_defaults():new()[k] then
-    return
-  end
+  Util.validate({ k = { k, { 'string', 'table' } } })
 
-  options[k] = v
+  local dfts = get_defaults()
+  if type(k) == 'string' and dfts[k] then
+    options[k] = v
+  elseif type(k) == 'table' then
+    for key, val in pairs(k) do
+      if dfts[key] then
+        options[key] = val
+      end
+    end
+  end
 end
 
 ---@return ('lsp'|'pattern'|'git')[] detection_methods
@@ -56,16 +61,18 @@ function M.setup(opts)
   options:verify()
 
   ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/111
-  vim.o.autochdir = options.enable_autochdir
+  if options.enable_autochdir ~= nil then
+    vim.o.autochdir = options.enable_autochdir
+  end
 
   Util.path.datapath = options.history.save_dir
   Util.path.projectpath = Util.path.join(options.history.save_dir, 'project_nvim')
 
   -- WARN: THIS GOES FIRST!!!!
-  if vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 and not Util.path.exists(Util.path.projectpath) then
-    Util.path.datapath = get_defaults():new():_get_no_mt().history.save_dir
+  if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
+    Util.path.datapath = get_defaults():_get_no_mt().history.save_dir
     Util.path.projectpath = Util.path.join(Util.path.projectpath, 'project_nvim')
-    if vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 and not Util.path.exists(Util.path.projectpath) then
+    if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
       error('(%s.setup): Unable to create history directory!')
     end
   end
@@ -116,8 +123,6 @@ function M.setup(opts)
     Util.log.debug('(project.config.setup): snacks.nvim integration enabled.')
     require('project.extensions.snacks').setup(options.snacks.opts or {})
   end
-
-  M.custom_projects = vim.deepcopy(options.custom_projects or {})
 
   local group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = true })
   vim.api.nvim_create_autocmd('User', {

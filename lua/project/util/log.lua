@@ -285,7 +285,7 @@ function M.setup(opts)
   end
 
   logpath = opts.logpath
-  logfile = vim.fs.joinpath(logpath, 'project.log')
+  logfile = Path.join(logpath, 'project.log')
 
   if not Path.exists(logpath) then
     Path.create_path(logpath)

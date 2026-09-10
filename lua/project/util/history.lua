@@ -563,13 +563,16 @@ end
 
 ---@overload fun(): recents: ProjectHistoryEntry[]
 ---@overload fun(paths_only: false): recents: ProjectHistoryEntry[]
----@overload fun(paths_only?: false, tilde: boolean): recents: ProjectHistoryEntry[]
----@overload fun(paths_only: true): recents: string[]
----@overload fun(paths_only: true, tilde: boolean): recents: string[]
 ---@overload fun(paths_only: false, tilde: boolean, remove_dups: boolean): ProjectHistoryEntry[]
 ---@overload fun(paths_only: false, tilde?: boolean, remove_dups: boolean): ProjectHistoryEntry[]
----@overload fun(paths_only: true, tilde?: boolean, remove_dups: boolean): string[]
+---@overload fun(paths_only: nil, tilde: boolean): recents: ProjectHistoryEntry[]
+---@overload fun(paths_only: nil, tilde: nil, remove_dups: boolean): recents: ProjectHistoryEntry[]
+---@overload fun(paths_only: true): recents: string[]
+---@overload fun(paths_only: true, tilde: boolean): recents: string[]
 ---@overload fun(paths_only: true, tilde: boolean, remove_dups: boolean): string[]
+---@overload fun(paths_only: true, tilde: nil, remove_dups: boolean): recents: string[]
+---@overload fun(paths_only: true, tilde?: boolean, remove_dups: boolean): string[]
+---@overload fun(paths_only?: false, tilde: boolean): recents: ProjectHistoryEntry[]
 function M.get_recent_projects(paths_only, tilde, remove_dups)
   Util.validate({
     paths_only = { paths_only, { 'boolean', 'nil' }, true },
@@ -633,7 +636,7 @@ function M.write_history(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
   local config = require('project.config').get()
   path = Util.strip_slash(
-    path or Path.historyfile or vim.fs.joinpath(config.history.save_dir, 'project_nvim', config.history.save_file)
+    path or Path.historyfile or Path.join(config.history.save_dir, 'project_nvim', config.history.save_file)
   )
 
   if not Path.exists(path) and vim.fn.writefile({ '[', ']' }, path) ~= 0 then
@@ -679,7 +682,7 @@ function M.write_history(path)
       end, { predicate = true })
     then
       table.remove(file_history, i)
-      i = i > 1 and i - 1 or i
+      i = i + (i > 1 and -1 or 0)
     else
       i = i + 1
     end

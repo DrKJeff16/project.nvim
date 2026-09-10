@@ -269,6 +269,7 @@ function M.root_included(dir)
 end
 
 ---@param ... string
+---@return string joined_path
 function M.join(...)
   return vim.fs.joinpath(...)
 end

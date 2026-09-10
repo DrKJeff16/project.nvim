@@ -112,16 +112,17 @@ function SWITCH.pattern(bufnr)
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
   local root, method = M.find_pattern_root(bufnr or vim.api.nvim_get_current_buf())
-  if root then
-    if vim.g.project_switch_root ~= root then
-      vim.g.project_switch_root = root
-    end
-    if not vim.list_contains({ (vim.uv.cwd() or vim.fn.getcwd()), vim.g.project_switch_root }, root) then
-      Util.log.debug(('(SWITCH.pattern): found `%s` root at `%s`.'):format(method, root))
-    end
-    return true, root, method
+  if not (root and method) then
+    return false
   end
-  return false
+
+  if vim.g.project_switch_root ~= root then
+    vim.g.project_switch_root = root
+  end
+  if not vim.list_contains({ (vim.uv.cwd() or vim.fn.getcwd()), vim.g.project_switch_root }, root) then
+    Util.log.debug(('(SWITCH.pattern): found `%s` root at `%s`.'):format(method, root))
+  end
+  return true, root, method
 end
 
 ---@param bufnr? integer
@@ -215,7 +216,7 @@ function M.find_lsp_root(bufnr)
       and client.config.root_dir
     )
     if valid then
-      if lsp_config.use_pattern_matching and Util.path.root_included(client.config.root_dir) == nil then
+      if lsp_config.use_pattern_matching and not Util.path.root_included(client.config.root_dir) then
         return
       end
       return client.config.root_dir, client.name
@@ -232,8 +233,7 @@ function M.find_pattern_root(bufnr_or_dir)
 
   local dir = '' ---@type string
   if not bufnr_or_dir or type(bufnr_or_dir) == 'number' then
-    bufnr_or_dir = bufnr_or_dir or vim.api.nvim_get_current_buf() --[[@as integer]]
-
+    bufnr_or_dir = bufnr_or_dir or vim.api.nvim_get_current_buf()
     dir = M.check_oil(bufnr_or_dir) or vim.api.nvim_buf_get_name(bufnr_or_dir)
   elseif bufnr_or_dir and type(bufnr_or_dir) == 'string' then
     dir = bufnr_or_dir
@@ -325,7 +325,7 @@ function M.set_pwd(dir, method, bufnr)
       path = dir,
       name = custom_name
         or Util.history.find_entry('recent', dir, 'name')
-        or vim.fs.joinpath(Util.strip_slash(dir, ':p:h:h:t'), Util.strip_slash(dir, ':p:h:t')),
+        or Util.path.join(Util.strip_slash(dir, ':p:h:h:t'), Util.strip_slash(dir, ':p:h:t')),
     })
     Util.history.set_session_projects(session_projects)
     modified = true
