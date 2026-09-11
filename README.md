@@ -1,11 +1,9 @@
 # project.nvim [![Mentioned in Awesome Neovim](https://awesome.re/mentioned-badge.svg)](https://github.com/rockerBOO/awesome-neovim)
 
-[![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/DrKJeff16)[![Last Commit](https://img.shields.io/github/last-commit/DrKJeff16/project.nvim.svg)](https://github.com/DrKJeff16/project.nvim/commits/main/)[![LICENSE](https://img.shields.io/github/license/DrKJeff16/project.nvim)](https://github.com/DrKJeff16/project.nvim/blob/main/LICENSE)[![Issues](https://img.shields.io/github/issues/DrKJeff16/project.nvim)](https://github.com/DrKJeff16/project.nvim/issues)[![GitHub Release](https://img.shields.io/github/v/release/DrKJeff16/project.nvim?sort=date&display_name=release)](https://github.com/DrKJeff16/project.nvim/releases/latest)
-
-- [**LuaRocks Page**](https://luarocks.org/modules/drkjeff16/project.nvim)
-- [**Wiki**](https://github.com/DrKJeff16/project.nvim/wiki)
-- [**Credits**](https://github.com/DrKJeff16/project.nvim/blob/main/CREDITS.md)
-- [**Discussions**](https://github.com/DrKJeff16/project.nvim/discussions)
+[![Maintenance](https://img.shields.io/maintenance/yes/2090?style=flat-square)](#)
+[![Neovim >=0.11](https://img.shields.io/badge/Neovim-%3E%3D0.11-supported?logo=neovim&logoColor=white&style=flat-square&color=47782F&labelColor=0D5186&logoColor=0D5186)](https://neovim.io)
+[![Last GitHub Release](https://img.shields.io/github/v/release/DrKJeff16/project.nvim?sort=date&display_name=release&logo=github)](https://github.com/DrKJeff16/project.nvim/releases/latest)
+[![LuaRocks](https://img.shields.io/luarocks/v/drkjeff16/project.nvim?style=flat-square&logo=lua&logoColor=white&labelColor=000080)](https://luarocks.org/modules/drkjeff16/project.nvim)
 
 https://github.com/user-attachments/assets/0e10c4e8-f930-47a0-9058-956622e8f547
 

@@ -51,6 +51,10 @@ local function open_node(proj, only_cd, ran_cd)
     proj,
     ran_cd and proj or nil
   )
+  if not ls then
+    return
+  end
+
   table.insert(ls, 'Exit')
 
   vim.ui.select(ls, {
@@ -302,7 +306,8 @@ M.recents_menu = new_popup({
         return
       end
 
-      if vim.list_contains(choices_list, item) and M.recents_menu.choices(config)[item] then
+      local choice = M.recents_menu.choices(config)[item]
+      if vim.list_contains(choices_list, item) and choice then
         M.recents_menu.choices(config)[item](find_entry('recent', item, 'path'), false, false)
       else
         vim.notify('Bad selection!', vim.log.levels.ERROR)
@@ -347,8 +352,9 @@ M.open_menu = new_popup({
           return
         end
 
-        if vim.list_contains(choices_list, item) and M.open_menu.choices()[item] then
-          M.open_menu.choices()[item]()
+        local choice = M.open_menu.choices()[item]
+        if vim.list_contains(choices_list, item) and choice then
+          choice()
         else
           vim.notify('Bad selection!', vim.log.levels.ERROR)
         end
