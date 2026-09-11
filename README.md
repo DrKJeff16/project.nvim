@@ -1,23 +1,20 @@
-# project.nvim [![Mentioned in Awesome Neovim](https://awesome.re/mentioned-badge.svg)](https://github.com/rockerBOO/awesome-neovim)
+# project.nvim
 
+[![Mentioned in Awesome Neovim](https://awesome.re/mentioned-badge.svg)](https://github.com/rockerBOO/awesome-neovim#project)
 [![Maintenance](https://img.shields.io/maintenance/yes/2090?style=flat-square)](#)
 [![Neovim >=0.11](https://img.shields.io/badge/Neovim-%3E%3D0.11-supported?logo=neovim&logoColor=white&style=flat-square&color=47782F&labelColor=0D5186&logoColor=0D5186)](https://neovim.io)
 [![Last GitHub Release](https://img.shields.io/github/v/release/DrKJeff16/project.nvim?sort=date&display_name=release&logo=github)](https://github.com/DrKJeff16/project.nvim/releases/latest)
-[![LuaRocks](https://img.shields.io/luarocks/v/drkjeff16/project.nvim?style=flat-square&logo=lua&logoColor=white&labelColor=000080)](https://luarocks.org/modules/drkjeff16/project.nvim)
+[![Last LuaRocks Release](https://img.shields.io/luarocks/v/drkjeff16/project.nvim?style=flat-square&logo=lua&logoColor=white&labelColor=000080)](https://luarocks.org/modules/drkjeff16/project.nvim)
 
-https://github.com/user-attachments/assets/0e10c4e8-f930-47a0-9058-956622e8f547
+`project.nvim` is a [Neovim](https://neovim.io/) plugin to automatically set your current working directory (`cwd`)
+to the current project root. It allows users to navigate through, rename, _"bookmark"_ and/or discard
+their projects, all stored in a JSON history file, stored wherever you choose.
 
-`project.nvim` is a [Neovim](https://github.com/neovim/neovim) plugin written in Lua that automatically sets your `cwd`
-to the current project root, and also allows you to manage, access and selectively include
-your projects in a history file.
-
-This plugin allows you to navigate through, rename, _"bookmark"_ and/or discard your projects,
-according to your needs.
-
-This was originally forked from [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim/pull/158). Ever since I decided to
-extend it and address issues.
+This plugin is an improved, actively maintained, up-to-date fork of [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim).
 
 You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16/project.nvim/blob/main/EXAMPLES.md).
+
+https://github.com/user-attachments/assets/0e10c4e8-f930-47a0-9058-956622e8f547
 
 ---
 
@@ -31,17 +28,22 @@ You can check some sample videos in [`EXAMPLES.md`](https://github.com/DrKJeff16
 - Functional `checkhealth` hook (`:checkhealth project`)
 - Vim help documentation ([`:h project.txt`](https://github.com/DrKJeff16/project.nvim/blob/main/doc/project.txt))
 - Logging capabilities
-- Natively supports `.nvim.lua` files
+- Natively supports `.nvim.lua` files, and more
 - `vim.ui` menu support (`:Project`)
-- Supports [`oil.nvim`](https://github.com/stevearc/oil.nvim) buffers
-- [Lualine Integration](#lualine)
-- [Telescope Integration](#telescope) (`:Telescope projects`)
-- [`fzf-lua` Integration](#project-fzf-lua)
-- [`nvim-tree` Integration](#nvim-tree)
-- [`neo-tree` Integration](#neo-tree)
-- [`mini.starter` Integration](#ministarter)
-- [`picker.nvim` Integration](#pickernvim)
-- [`snacks.nvim` Integration](#snacksnvim)
+
+### Integrations
+
+This plugin supports the following plugins:
+
+- [`oil.nvim`](https://github.com/stevearc/oil.nvim)
+- `lualine.nvim` ([Read More](#lualine))
+- `telescope.nvim` ([Read More](#telescope))
+- `fzf-lua` ([Read More](#project-fzf-lua))
+- `nvim-tree.lua` ([Read More](#nvim-tree))
+- `neo-tree` ([Read More](#neo-tree))
+- `mini.starter` ([Read More](#ministarter))
+- `picker.nvim` ([Read More](#pickernvim))
+- `snacks.nvim` ([Read More](#snacksnvim))
 
 ---
 
