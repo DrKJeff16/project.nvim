@@ -2,42 +2,36 @@ local assert = require('luassert') --[[@as Luassert]]
 
 describe('project.nvim setup', function()
   local defaults ---@type ProjectConfigDefaults
-  local ok ---@type boolean
   local project ---@type Project
 
   before_each(function()
     project = require('project')
-    defaults = project.config.defaults:new():_get_no_mt()
+    defaults = project.config.get_defaults():_get_no_mt()
   end)
 
   it('should set default configuration', function()
-    ok = pcall(project.setup)
-    assert.is_true(ok)
+    assert.is_true((pcall(project.setup)))
     assert.are_same(defaults, require('project.config').get():_get_no_mt())
   end)
 
   it('should accept empty table as parameter', function()
-    ok = pcall(project.setup, {})
-    assert.is_true(ok)
+    assert.is_true((pcall(project.setup, {})))
     assert.are_same(defaults, project.config.get():_get_no_mt())
   end)
 
   it('should handle nil parameter', function()
-    ok = pcall(project.setup, nil)
-    assert.is_true(ok)
+    assert.is_true((pcall(project.setup, nil)))
     assert.are_same(defaults, project.config.get():_get_no_mt())
   end)
 
   for _, param in ipairs({ 1, false, '', function() end }) do
     it(('should throw error when called with param of type %s'):format(type(param)), function()
-      ok = pcall(project.setup, param)
-      assert.is_false(ok)
+      assert.is_false((pcall(project.setup, param)))
     end)
   end
 
   it('should erase any option not in the defaults', function()
-    ok = pcall(project.setup, { 1, foo = 'bar' })
-    assert.is_true(ok)
+    assert.is_true((pcall(project.setup, { 1, foo = 'bar' })))
     assert.are_same(defaults, project.config.get():_get_no_mt())
   end)
 end)

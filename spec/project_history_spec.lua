@@ -1,7 +1,6 @@
 local assert = require('luassert') --[[@as Luassert]]
 
 describe('project.nvim history', function()
-  local ok ---@type boolean
   local history ---@type Project.Util.History
   before_each(function()
     package.loaded['project'] = nil
@@ -12,13 +11,11 @@ describe('project.nvim history', function()
 
   describe('opening', function()
     it('should throw error with wrong flag', function()
-      ok = pcall(history.open_history, '')
-      assert.is_false(ok)
+      assert.is_false((pcall(history.open_history, '')))
     end)
     for _, t in ipairs({ function() end, true }) do
       it(('should throw error with flag of type %s'):format(type(t)), function()
-        ok = pcall(history.open_history, t)
-        assert.is_false(ok)
+        assert.is_false((pcall(history.open_history, t)))
       end)
     end
 
@@ -31,21 +28,16 @@ describe('project.nvim history', function()
   end)
   describe('writing', function()
     it('should write to non-existant file in valid directory', function()
-      ok = pcall(history.write_history, './test.json')
-      assert.is_true(ok)
-
-      ok = pcall(os.execute, 'rm -f ./test.json')
-      assert.is_true(ok)
+      assert.is_true((pcall(history.write_history, './test.json')))
+      assert.is_true((pcall(os.execute, 'rm -f ./test.json')))
     end)
 
     it('should throw error when writing to invalid path', function()
-      ok = pcall(history.write_history, './a/test.json')
-      assert.is_false(ok)
+      assert.is_false((pcall(history.write_history, './a/test.json')))
     end)
 
     it('should handle nil options', function()
-      ok = pcall(history.write_history, nil)
-      assert.is_true(ok)
+      assert.is_true((pcall(history.write_history, nil)))
     end)
   end)
 end)

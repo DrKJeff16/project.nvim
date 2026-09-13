@@ -5,18 +5,18 @@ local Util = require('project.util')
 local float = nil ---@type Project.ConfigLoc|nil|?
 local detection_methods = {} ---@type ('lsp'|'pattern'|'git')[]
 
+---@class Project.Config
+local M = {}
+
 ---Get the default options for configuring `project`.
 --- ---
 ---@return ProjectDefaults defaults
 ---@nodiscard
-local function get_defaults()
+function M.get_defaults()
   return require('project.config.defaults'):new()
 end
 
-local options = get_defaults()
-
----@class Project.Config
-local M = {}
+local options = M.get_defaults()
 
 ---@return ProjectDefaults options
 function M.get()
@@ -28,7 +28,7 @@ end
 function M.set(k, v)
   Util.validate({ k = { k, { 'string', 'table' } } })
 
-  local dfts = get_defaults()
+  local dfts = M.get_defaults()
   if type(k) == 'string' and dfts[k] then
     options[k] = v
   elseif type(k) == 'table' then
@@ -52,7 +52,7 @@ end
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  options = get_defaults():new(opts or {})
+  options = M.get_defaults():new(opts or {})
 
   detection_methods = options:gen_methods()
   options:expand_excluded()
@@ -70,7 +70,7 @@ function M.setup(opts)
 
   -- WARN: THIS GOES FIRST!!!!
   if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
-    Util.path.datapath = get_defaults():_get_no_mt().history.save_dir
+    Util.path.datapath = M.get_defaults():_get_no_mt().history.save_dir
     Util.path.projectpath = Util.path.join(Util.path.projectpath, 'project_nvim')
     if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
       error('(%s.setup): Unable to create history directory!')

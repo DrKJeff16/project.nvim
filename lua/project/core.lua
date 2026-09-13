@@ -200,25 +200,19 @@ function M.find_lsp_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
-  local clients = vim.lsp.get_clients({ bufnr = bufnr })
-  if vim.tbl_isempty(clients) then
-    return
-  end
-
   local lsp_config = require('project.config').get().lsp
   local ft = Util.optget('filetype', 'buf', bufnr)
-  for _, client in ipairs(clients) do
-    local filetypes = client.config.filetypes --[[@as string[]\]]
+  for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
     local valid = (
-      Util.is_type('table', filetypes)
-      and vim.list_contains(filetypes, ft)
+      type(client.config.filetypes) == 'table'
+      and vim.list_contains(client.config.filetypes, ft)
       and not vim.list_contains(lsp_config.ignore, client.name)
       and client.config.root_dir
     )
-    if valid then
-      if lsp_config.use_pattern_matching and not Util.path.root_included(client.config.root_dir) then
-        return
-      end
+    if valid and lsp_config.use_pattern_matching and not Util.path.root_included(client.config.root_dir) then
+      return
+    end
+    if valid and (not lsp_config.use_pattern_matching or Util.path.root_included(client.config.root_dir)) then
       return client.config.root_dir, client.name
     end
   end
@@ -249,8 +243,8 @@ function M.valid_bt(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
-  local config = require('project.config').get()
-  return Util.buffer_valid(bufnr) and not vim.list_contains(config.disable_on.bt, Util.optget('buftype', 'buf', bufnr))
+  return Util.buffer_valid(bufnr)
+    and not vim.list_contains(require('project.config').get().disable_on.bt, Util.optget('buftype', 'buf', bufnr))
 end
 
 function M.refresh_project_bufs()
@@ -263,16 +257,14 @@ function M.refresh_project_bufs()
           table.insert(bufnrs[name], v)
         end
       end
-      bufnrs[name] = not vim.tbl_isempty(bufnrs[name]) and bufnrs[name] or nil
+      bufnrs[name] = vim.tbl_isempty(bufnrs[name]) and nil or bufnrs[name]
     end
-
     per_project_bufs[dir] = vim.tbl_isempty(bufnrs) and nil or vim.deepcopy(bufnrs)
   end
 
   local sessions = {} ---@type ProjectHistoryEntry[]
   for _, session in ipairs(Util.history.get_session_projects()) do
-    local proj_buf_path = session.path
-    if per_project_bufs[proj_buf_path] and not vim.tbl_isempty(per_project_bufs[proj_buf_path]) then
+    if per_project_bufs[session.path] and not vim.tbl_isempty(per_project_bufs[session.path]) then
       table.insert(sessions, session)
     end
   end
@@ -332,7 +324,7 @@ function M.set_pwd(dir, method, bufnr)
     Util.log.info(('(project.core.set_pwd): Added project `%s` to the top of session list'):format(unexpand_dir))
   end
 
-  if bufnr then
+  if bufnr and vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr) then
     local buf_name = Util.strip_slash(vim.api.nvim_buf_get_name(bufnr))
     if not per_project_bufs[dir] then
       per_project_bufs[dir] = { [buf_name] = { bufnr } }
@@ -341,7 +333,6 @@ function M.set_pwd(dir, method, bufnr)
     elseif not vim.list_contains(per_project_bufs[dir][buf_name], bufnr) then
       table.insert(per_project_bufs[dir][buf_name], bufnr)
     end
-
     M.refresh_project_bufs()
   end
 
