@@ -9,6 +9,15 @@ local ERROR = vim.log.levels.ERROR -- `4`
 local Path = require('project.util.path')
 local Util = require('project.util')
 
+---@enum Project.Util.Log.Prefix
+local PFX = {
+  [DEBUG] = '[DEBUG] ',
+  [ERROR] = '[ERROR] ',
+  [INFO] = '[INFO]  ',
+  [TRACE] = '[TRACE] ',
+  [WARN] = '[WARN]  ',
+}
+
 local timer = nil ---@type uv.uv_timer_t|nil|?
 local event = nil ---@type uv.uv_fs_event_t|nil|?
 local window = nil ---@type Project.Util.Log.Win|nil|?
@@ -16,7 +25,6 @@ local logfile = nil ---@type string|nil|?
 local snacks_enabled = false ---@type boolean
 local snacks_style = 'fancy' ---@type ProjectLog.Snacks.Style
 local logpath = nil ---@type string|nil|?
-local full_data = nil ---@type string|nil|?
 
 ---@enum ProjectLog.Snacks.Levels
 local snacks_levels = { [DEBUG] = 'debug', [INFO] = 'info', [WARN] = 'warn', [ERROR] = 'error' }
@@ -216,12 +224,6 @@ local function setup_watch()
     return
   end
 
-  event:start(logfile, {}, function(err, _, events)
-    if not err and events.change then
-      full_data = M.read_log()
-    end
-  end)
-
   make_timer()
   vim.g.project_log_has_watch_setup = 1
 end
@@ -243,14 +245,6 @@ function M.write(data, lvl)
   if not fd then
     return
   end
-
-  local PFX = {
-    [TRACE] = '[TRACE] ',
-    [DEBUG] = '[DEBUG] ',
-    [INFO] = '[INFO]  ',
-    [WARN] = '[WARN]  ',
-    [ERROR] = '[ERROR] ',
-  }
 
   local msg = os.date(('%s  ==>  %s%s'):format('%H:%M:%S', PFX[lvl], data)) --[[@as string]]
   vim.uv.fs_write(fd, msg)
@@ -332,42 +326,42 @@ function M.open_win()
     error('(project.util.log.open_win): Bad logfile path!')
   end
 
-  local stat = vim.uv.fs_stat(logfile)
-  if not stat then
-    return
-  end
-
   local fd = vim.uv.fs_open(logfile, 'r', Path.open_mode('644'))
   if not fd then
     return
   end
 
-  local data = vim.uv.fs_read(fd, stat.size)
-  vim.uv.fs_close(fd)
-  if not data then
+  local stat = vim.uv.fs_stat(logfile)
+  if not stat then
+    vim.uv.fs_close(fd)
     return
   end
 
-  local bufnr = vim.api.nvim_create_buf(true, true)
-  local tab = vim.api.nvim_open_tabpage(bufnr, true, { after = -1 })
-  local win = vim.api.nvim_get_current_win()
+  local data = vim.uv.fs_read(fd, stat.size)
+  vim.uv.fs_close(fd)
+  if data then
+    local bufnr = vim.api.nvim_create_buf(true, true)
+    window = {
+      bufnr = bufnr,
+      tab = vim.api.nvim_open_tabpage(bufnr, true, { after = -1 }),
+      win = vim.api.nvim_get_current_win(),
+    }
 
-  window = { win = win, bufnr = bufnr, tab = tab }
+    vim.api.nvim_buf_set_name(window.bufnr, 'Project Log')
+    vim.api.nvim_buf_set_lines(window.bufnr, 0, -1, true, vim.split(data, '\n', { plain = true, trimempty = false }))
 
-  vim.api.nvim_buf_set_name(bufnr, 'Project Log')
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, vim.split(data, '\n', { plain = true, trimempty = false }))
+    Util.optset('signcolumn', 'no', 'win', window.win)
+    Util.optset('list', false, 'win', window.win)
+    Util.optset('number', false, 'win', window.win)
+    Util.optset('wrap', false, 'win', window.win)
+    Util.optset('colorcolumn', '', 'win', window.win)
+    Util.optset('filetype', 'log', 'buf', window.bufnr)
+    Util.optset('fileencoding', 'utf-8', 'buf', window.bufnr)
+    Util.optset('buftype', 'nowrite', 'buf', window.bufnr)
+    Util.optset('modifiable', false, 'buf', window.bufnr)
 
-  Util.optset('signcolumn', 'no', 'win', win)
-  Util.optset('list', false, 'win', win)
-  Util.optset('number', false, 'win', win)
-  Util.optset('wrap', false, 'win', win)
-  Util.optset('colorcolumn', '', 'win', win)
-  Util.optset('filetype', 'log', 'buf', bufnr)
-  Util.optset('fileencoding', 'utf-8', 'buf', bufnr)
-  Util.optset('buftype', 'nowrite', 'buf', bufnr)
-  Util.optset('modifiable', false, 'buf', bufnr)
-
-  vim.keymap.set('n', 'q', M.close_win, { buffer = bufnr })
+    vim.keymap.set('n', 'q', M.close_win, { buffer = window.bufnr })
+  end
 end
 
 function M.close_win()

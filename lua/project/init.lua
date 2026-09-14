@@ -166,40 +166,54 @@ end
 
 local Project = setmetatable(M, { ---@type Project
   __index = function(self, k)
+    local raw = rawget(self, k) or nil
+    if raw then
+      return raw
+    end
     if require('project.util').mod_exists('project.' .. k) then
+      rawset(self, k, require('project.' .. k))
       return require('project.' .. k)
     end
     if k == 'delete_project' then
+      rawset(self, k, require('project.util.history').delete_project)
       return require('project.util.history').delete_project
     end
     if k == 'get_config' then
+      rawset(self, k, require('project.config').get_config)
       return require('project.config').get_config
     end
     if k == 'get_history_paths' then
+      rawset(self, k, require('project.core').get_history_paths)
       return require('project.core').get_history_paths
     end
     if k == 'get_last_project' then
+      rawset(self, k, require('project.core').get_last)
       return require('project.core').get_last
     end
     if k == 'get_project_root' then
+      rawset(self, k, require('project.core').get_project_root)
       return require('project.core').get_project_root
     end
     if k == 'get_recent_projects' then
+      rawset(self, k, require('project.util.history').get_recent_projects)
       return require('project.util.history').get_recent_projects
     end
     if k == 'rename_project' then
+      rawset(self, k, require('project.util.history').rename_project)
       return require('project.util.history').rename_project
     end
     if k == 'root_files' then
+      rawset(self, k, require('project.core').root_files)
       return require('project.core').root_files
     end
     if k == 'run_fzf_lua' then
+      rawset(self, k, require('project.extensions.fzf-lua').run)
       return require('project.extensions.fzf-lua').run
     end
     if require('project.popup')[k] then
+      rawset(self, k, require('project.popup')[k])
       return require('project.popup')[k]
     end
-    return rawget(self, k) or nil
   end,
 })
 

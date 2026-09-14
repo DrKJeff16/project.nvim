@@ -3,8 +3,13 @@
 ---@field picker Project.Extensions.Picker
 ---@field snacks Project.Extensions.Snacks
 local M = setmetatable({}, {
-  __index = function(_, k)
+  __index = function(self, k)
+    local raw = rawget(self, k) or nil
+    if raw then
+      return raw
+    end
     if require('project.util').mod_exists('project.extensions.' .. k) then
+      rawset(self, k, require('project.extensions.' .. k))
       return require('project.extensions.' .. k)
     end
   end,

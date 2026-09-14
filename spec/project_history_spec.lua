@@ -1,18 +1,16 @@
 local assert = require('luassert') --[[@as Luassert]]
 
 describe('project.nvim history', function()
-  local history ---@type Project.Util.History
-  before_each(function()
-    package.loaded['project'] = nil
-    require('project').setup()
+  package.loaded['project'] = nil
+  require('project').setup()
 
-    history = require('project.util.history')
-  end)
+  local history = require('project.util.history')
 
   describe('opening', function()
     it('should throw error with wrong flag', function()
       assert.is_false((pcall(history.open_history, '')))
     end)
+
     for _, t in ipairs({ function() end, true }) do
       it(('should throw error with flag of type %s'):format(type(t)), function()
         assert.is_false((pcall(history.open_history, t)))

@@ -7,6 +7,7 @@ local Log = require('project.util.log')
 local Path = require('project.util.path')
 local Util = require('project.util')
 
+local historysize ---@type integer
 local event = nil ---@type uv.uv_fs_event_t|nil|?
 local window = nil ---@type Project.HistoryWin|nil|?
 local allowed_flags = {
@@ -31,7 +32,6 @@ local allowed_flags = {
 }
 
 ---@class Project.Util.History
----@field public historysize? integer
 local M = {}
 
 ---Projects from current neovim session.
@@ -644,11 +644,10 @@ function M.write_history(path)
     error('(project.util.history.write_history): History file unavailable!')
   end
 
-  local historysize = 100
   if config.history and config.history.size then
     historysize = config.history.size
   end
-  M.historysize = historysize >= 0 and historysize or 100
+  historysize = historysize >= 0 and historysize or 100
 
   local file_history = {} ---@type ProjectHistoryEntry[]
   local ok, fd, stat ---@type boolean, integer|nil|?, uv.fs_stat.result|nil|?
@@ -659,7 +658,7 @@ function M.write_history(path)
   end
 
   if ok and fd and stat then
-    local data = (vim.uv.fs_read(fd, stat.size))
+    local data = vim.uv.fs_read(fd, stat.size)
     vim.uv.fs_close(fd)
     if data then
       ok, file_history = pcall(vim.json.decode, data) ---@type boolean, ProjectHistoryEntry[]|nil|?
@@ -688,10 +687,9 @@ function M.write_history(path)
     end
   end
   while i < #res do
-    local proj = res[i]
     if
       not vim.tbl_contains(file_history, function(val) ---@param val ProjectHistoryEntry
-        return vim.deep_equal(val, proj)
+        return vim.deep_equal(val, res[i])
       end, { predicate = true })
     then
       table.insert(file_history, i)
@@ -699,25 +697,21 @@ function M.write_history(path)
     i = i + 1
   end
 
-  if M.historysize and M.historysize > 0 then
-    file_history = #res > M.historysize and vim.list_slice(res, #res - M.historysize, #res) or res
+  if historysize and historysize > 0 then
+    file_history = #res > historysize and vim.list_slice(res, #res - historysize, #res) or res
   end
 
-  if vim.tbl_isempty(file_history) then
+  if #file_history == 0 then
     vim.uv.fs_close(fd)
-
     if vim.g.project_history_no_data_notified ~= 1 then
       Log.error('(project.util.history.write_history): No data available to write!')
+      vim.notify('(project.util.history.write_history): No data available to write!', ERROR)
       vim.g.project_history_no_data_notified = 1
     end
     return
   end
 
-  if path == Path.historyfile then
-    fd = M.open_history('w')
-  else
-    fd = Path.open_file(path, 'w')
-  end
+  fd = path == Path.historyfile and M.open_history('w') or Path.open_file(path, 'w')
   if not fd then
     Log.error('(project.util.history.write_history): File restricted!')
     error('(project.util.history.write_history): File restricted!')

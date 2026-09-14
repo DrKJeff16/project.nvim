@@ -42,8 +42,7 @@ end
 local function apply_icon(display_value)
   for _, icon in pairs(config.path_icons) do
     if display_value:find(icon.match) then
-      local value = display_value:gsub(icon.match, '')
-      return icon, value
+      return icon, (display_value:gsub(icon.match, ''))
     end
   end
   return config.icon, display_value

@@ -771,17 +771,17 @@ function M.path_exists(path_or_paths)
     return M.dir_exists(path_or_paths) or vim.fn.filereadable(path_or_paths) == 1
   end
 
-  if not vim.islist(path_or_paths) then
-    -- TODO: Add error message
-    return false
+  if vim.islist(path_or_paths) then
+    for _, path in ipairs(path_or_paths) do
+      if not M.path_exists(path) then
+        return false
+      end
+    end
+    return true
   end
 
-  for _, path in ipairs(path_or_paths) do
-    if not M.path_exists(path) then
-      return false
-    end
-  end
-  return true
+  require('project.util.log').error('(project.util.path_exists): Table passed to this function is not list-like!')
+  return false
 end
 
 ---@param path string
@@ -796,10 +796,14 @@ end
 
 local Util = setmetatable(M, { ---@type Project.Util
   __index = function(self, k)
+    local raw = rawget(self, k) or nil
+    if raw then
+      return raw
+    end
     if M.mod_exists('project.util.' .. k) then
+      rawset(self, k, require('project.util.' .. k))
       return require('project.util.' .. k)
     end
-    return rawget(self, k) or nil
   end,
 })
 

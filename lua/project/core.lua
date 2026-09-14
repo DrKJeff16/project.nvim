@@ -464,17 +464,14 @@ function M.get_project_root(bufnr)
     end
   end
 
-  if vim.tbl_isempty(roots) then
-    return
-  end
-
-  if (#roots == 1 or config.lsp.no_fallback) or (#roots > 1 and roots[1].root == roots[2].root) then
-    return roots[1].root, roots[1].method_msg
-  end
-
-  for _, tbl in ipairs(roots) do
-    if tbl.method == 'pattern' then
-      return tbl.root, tbl.method_msg
+  if #roots > 0 then
+    if (#roots == 1 or config.lsp.no_fallback) or (#roots > 1 and roots[1].root == roots[2].root) then
+      return roots[1].root, roots[1].method_msg
+    end
+    for _, tbl in ipairs(roots) do
+      if tbl.method == 'pattern' then
+        return tbl.root, tbl.method_msg
+      end
     end
   end
 end
@@ -579,40 +576,38 @@ function M.root_files(scan_what, path, prefix)
   end
 
   local dir = vim.uv.fs_scandir(path)
-  if not dir then
-    return
-  end
-
-  local files = {} ---@type string[]
-  local next, ftype = vim.uv.fs_scandir_next(dir)
-  while next do
-    local is_hidden = Util.path.is_hidden(next)
-    local is_type ---@type boolean
-    if scan_what == 'all_files' then
-      is_type = ftype == 'file'
-    elseif scan_what == 'visible_files' then
-      is_type = ftype == 'file' and not is_hidden
-    elseif scan_what == 'hidden_files' then
-      is_type = ftype == 'file' and is_hidden
-    elseif scan_what == 'all_directories' then
-      is_type = ftype == 'directory'
-    elseif scan_what == 'visible_directories' then
-      is_type = ftype == 'directory' and not is_hidden
-    elseif scan_what == 'hidden_directories' then
-      is_type = ftype == 'directory' and is_hidden
-    elseif scan_what == 'all_visible' then
-      is_type = vim.list_contains({ 'file', 'directory' }, ftype) and not is_hidden
-    elseif scan_what == 'all_hidden' then
-      is_type = vim.list_contains({ 'file', 'directory' }, ftype) and is_hidden
-    elseif scan_what == 'all' then
-      is_type = vim.list_contains({ 'file', 'directory' }, ftype)
+  if dir then
+    local files = {} ---@type string[]
+    local next, ftype = vim.uv.fs_scandir_next(dir)
+    while next do
+      local is_hidden = Util.path.is_hidden(next)
+      local is_type ---@type boolean
+      if scan_what == 'all_files' then
+        is_type = ftype == 'file'
+      elseif scan_what == 'visible_files' then
+        is_type = ftype == 'file' and not is_hidden
+      elseif scan_what == 'hidden_files' then
+        is_type = ftype == 'file' and is_hidden
+      elseif scan_what == 'all_directories' then
+        is_type = ftype == 'directory'
+      elseif scan_what == 'visible_directories' then
+        is_type = ftype == 'directory' and not is_hidden
+      elseif scan_what == 'hidden_directories' then
+        is_type = ftype == 'directory' and is_hidden
+      elseif scan_what == 'all_visible' then
+        is_type = vim.list_contains({ 'file', 'directory' }, ftype) and not is_hidden
+      elseif scan_what == 'all_hidden' then
+        is_type = vim.list_contains({ 'file', 'directory' }, ftype) and is_hidden
+      elseif scan_what == 'all' then
+        is_type = vim.list_contains({ 'file', 'directory' }, ftype)
+      end
+      if is_type and next ~= '.git' then
+        table.insert(files, prefix and vim.fs.joinpath(prefix, next) or next)
+      end
+      next, ftype = vim.uv.fs_scandir_next(dir)
     end
-    if is_type and next ~= '.git' then
-      table.insert(files, prefix and vim.fs.joinpath(prefix, next) or next)
-    end
-    next, ftype = vim.uv.fs_scandir_next(dir)
+    return #files == 0 and nil or files
   end
-  return vim.tbl_isempty(files) and nil or files
 end
 
 function M.setup()

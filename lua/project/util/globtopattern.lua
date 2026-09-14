@@ -1,16 +1,11 @@
 local Util = require('project.util')
 
----Credits for this module goes to [David Manura](https://github.com/davidm/lua-glob-pattern).
---- ---
----@class Project.Util.Glob
-local M = {}
-
 ---Escape pattern char.
 --- ---
 ---@param char string
 ---@param c string
 ---@return string escaped_char
-function M.escape(char, c)
+local function escape(char, c)
   Util.validate({
     char = { char, { 'string' } },
     c = { c, { 'string' } },
@@ -27,7 +22,7 @@ end
 ---@return string char
 ---@return string pattern
 ---@return integer i
-function M.unescape(glob, char, pattern, i)
+local function unescape(glob, char, pattern, i)
   Util.validate({
     glob = { glob, { 'string' } },
     char = { char, { 'string' } },
@@ -57,7 +52,7 @@ end
 ---@return string char
 ---@return string pattern
 ---@return integer i
-function M.charset_end(glob, char, pattern, i)
+local function charset_end(glob, char, pattern, i)
   Util.validate({
     glob = { glob, { 'string' } },
     char = { char, { 'string' } },
@@ -73,7 +68,7 @@ function M.charset_end(glob, char, pattern, i)
     if char == ']' then
       return true, char, ('%s]'):format(pattern), i
     end
-    un, char, pattern, i = M.unescape(glob, char, pattern, i)
+    un, char, pattern, i = unescape(glob, char, pattern, i)
     if not un then
       return true, char, pattern, i
     end
@@ -84,11 +79,10 @@ function M.charset_end(glob, char, pattern, i)
       return false, char, '[^]', i
     end
     if char == ']' then
-      return true, char, ('%s%s]'):format(pattern, M.escape(c1, char)), i
+      return true, char, ('%s%s]'):format(pattern, escape(c1, char)), i
     end
     if char ~= '-' then
-      pattern = ('%s%s'):format(pattern, M.escape(c1, char))
-      i = i - 1 -- put back
+      pattern, i = ('%s%s'):format(pattern, escape(c1, char)), i - 1
     else
       i = i + 1
       char = glob:sub(i, i)
@@ -96,13 +90,13 @@ function M.charset_end(glob, char, pattern, i)
         return false, char, '[^]', i
       end
       if char == ']' then
-        return true, char, ('%s%s'):format(pattern, M.escape(c1, char)) .. '%-]', i
+        return true, char, ('%s%s'):format(pattern, escape(c1, char)) .. '%-]', i
       end
-      un, char, pattern, i = M.unescape(glob, char, pattern, i)
+      un, char, pattern, i = unescape(glob, char, pattern, i)
       if not un then
         return true, char, pattern, i
       end
-      pattern = ('%s%s-%s'):format(pattern, M.escape(c1, char), M.escape(char, char))
+      pattern = ('%s%s-%s'):format(pattern, escape(c1, char), escape(char, char))
     end
     i = i + 1
     char = glob:sub(i, i)
@@ -119,7 +113,7 @@ end
 ---@return string char
 ---@return string pattern
 ---@return integer i
-function M.charset(glob, char, pattern, i)
+local function charset(glob, char, pattern, i)
   Util.validate({
     glob = { glob, { 'string' } },
     char = { char, { 'string' } },
@@ -137,21 +131,24 @@ function M.charset(glob, char, pattern, i)
     i = i + 1
     char = glob:sub(i, i)
     if char ~= ']' then
-      pattern = ('%s[^'):format(pattern)
-      chs_end, char, pattern, i = M.charset_end(glob, char, pattern, i)
+      chs_end, char, pattern, i = charset_end(glob, char, ('%s[^'):format(pattern), i)
       if not chs_end then
         return false, char, pattern, i
       end
     end
   else
-    pattern = ('%s['):format(pattern)
-    chs_end, char, pattern, i = M.charset_end(glob, char, pattern, i)
+    chs_end, char, pattern, i = charset_end(glob, char, ('%s['):format(pattern), i)
     if not chs_end then
       return false, char, pattern, i
     end
   end
   return true, char, pattern, i
 end
+
+---Credits for this module goes to [David Manura](https://github.com/davidm/lua-glob-pattern).
+--- ---
+---@class Project.Util.Glob
+local M = {}
 
 ---Some useful references:
 --- - [`apr_fnmatch`](http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html)
@@ -161,9 +158,7 @@ end
 function M.globtopattern(glob)
   Util.validate({ glob = { glob, { 'string' } } })
 
-  local pattern = '^'
-  local i = 0
-  local char = ''
+  local pattern, i, char = '^', 0, ''
   while true do
     local chs = false
     i = i + 1
@@ -176,7 +171,7 @@ function M.globtopattern(glob)
     elseif char == '*' then
       pattern = ('%s.*'):format(pattern)
     elseif char == '[' then
-      chs, char, pattern, i = M.charset(glob, char, pattern, i)
+      chs, char, pattern, i = charset(glob, char, pattern, i)
       if not chs then
         return pattern
       end
@@ -188,7 +183,7 @@ function M.globtopattern(glob)
           return ('%s\\$'):format(pattern)
         end
       end
-      pattern = ('%s%s'):format(pattern, M.escape(char, char))
+      pattern = ('%s%s'):format(pattern, escape(char, char))
     end
   end
 end
@@ -198,10 +193,11 @@ end
 function M.pattern_exclude(pattern)
   Util.validate({ pattern = { pattern, { 'string' } } })
 
-  if vim.startswith(pattern, '~/') then
-    pattern = ('%s%s%s'):format(vim.fn.expand('~'), Util.is_windows() and '\\' or '/', pattern:sub(3, pattern:len()))
-  end
-  return M.globtopattern(pattern)
+  return M.globtopattern(
+    vim.startswith(pattern, '~/')
+        and ('%s%s%s'):format(vim.fn.expand('~'), Util.is_windows() and '\\' or '/', pattern:sub(3, pattern:len()))
+      or pattern
+  )
 end
 
 return M

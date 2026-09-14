@@ -73,19 +73,19 @@ function M.setup(opts)
     Util.path.datapath = M.get_defaults():_get_no_mt().history.save_dir
     Util.path.projectpath = Util.path.join(Util.path.projectpath, 'project_nvim')
     if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
-      error('(%s.setup): Unable to create history directory!')
+      error('(project.config.setup): Unable to create history directory!')
     end
   end
 
   if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
-    error('(%s.setup): Unable to create history subdirectory!')
+    error('(project.config.setup): Unable to create history subdirectory!')
   end
 
   Util.path.historyfile = Util.path.join(Util.path.projectpath, options.history.save_file)
   if not Util.path.exists(Util.path.historyfile) then
     local fd = vim.uv.fs_open(Util.path.historyfile, 'w', Util.path.open_mode('644'))
     if not fd then
-      error('(%s.setup): Unable to create history file!')
+      error('(project.config.setup): Unable to create history file!')
     end
 
     vim.uv.fs_write(fd, { '[', ']' })
@@ -247,10 +247,14 @@ end
 
 local Config = setmetatable(M, { ---@type Project.Config
   __index = function(self, k)
+    local raw = rawget(self, k) or nil
+    if raw then
+      return raw
+    end
     if Util.mod_exists('project.config.' .. k) then
+      rawset(self, k, require('project.config.' .. k))
       return require('project.config.' .. k)
     end
-    return rawget(self, k) or nil
   end,
 })
 
