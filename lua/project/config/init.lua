@@ -154,26 +154,8 @@ function M.get_config()
     Util.log.error('(project.config.get_config): `project.nvim` is not set up!')
     error('(project.config.get_config): `project.nvim` is not set up!')
   end
-  local exceptions = {
-    'expand_excluded',
-    'gen_methods',
-    'new',
-    'verify',
-    'verify_datapath',
-    'verify_fzf_lua',
-    'verify_history',
-    'verify_lists',
-    'verify_logging',
-    'verify_lsp',
-    'verify_owners',
-    'verify_scope_chdir',
-  }
-  local opts = {} ---@type ProjectOpts
-  for k, v in pairs(options) do
-    if not vim.list_contains(exceptions, k) then
-      opts[k] = v
-    end
-  end
+  local opts = options:_get_no_mt()
+  table.sort(opts)
   return vim.inspect(opts)
 end
 
@@ -212,27 +194,26 @@ function M.open_win()
     zindex = 30,
   })
 
-  Util.optset('signcolumn', 'no', 'win', win)
-  Util.optset('list', false, 'win', win)
-  Util.optset('number', false, 'win', win)
-  Util.optset('wrap', false, 'win', win)
-  Util.optset('colorcolumn', '', 'win', win)
-  Util.optset('filetype', '', 'buf', bufnr)
-  Util.optset('fileencoding', 'utf-8', 'buf', bufnr)
-  Util.optset('buftype', 'nowrite', 'buf', bufnr)
-  Util.optset('modifiable', false, 'buf', bufnr)
-
-  vim.keymap.set('n', 'q', M.close_win, { buffer = bufnr })
-  vim.keymap.set('n', '<Esc>', M.close_win, { buffer = bufnr })
-
   float = { bufnr = bufnr, win = win }
+
+  Util.optset('signcolumn', 'no', 'win', float.win)
+  Util.optset('list', false, 'win', float.win)
+  Util.optset('number', false, 'win', float.win)
+  Util.optset('wrap', false, 'win', float.win)
+  Util.optset('colorcolumn', '', 'win', float.win)
+  Util.optset('filetype', '', 'buf', float.bufnr)
+  Util.optset('fileencoding', 'utf-8', 'buf', float.bufnr)
+  Util.optset('buftype', 'nowrite', 'buf', float.bufnr)
+  Util.optset('modifiable', false, 'buf', float.bufnr)
+
+  vim.keymap.set('n', 'q', M.close_win, { buffer = float.bufnr })
+  vim.keymap.set('n', '<Esc>', M.close_win, { buffer = float.bufnr })
 end
 
 function M.close_win()
   if float then
     pcall(vim.api.nvim_buf_delete, float.bufnr, { force = true })
     pcall(vim.api.nvim_win_close, float.win, true)
-
     float = nil
   end
 end
