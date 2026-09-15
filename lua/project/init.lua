@@ -62,8 +62,7 @@ end
 function M.current_root(bufnr)
   require('project.util').validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
 
-  local root = require('project.core').get_project_root(bufnr)
-  return root
+  return (require('project.core').get_project_root(bufnr))
 end
 
 ---Removes specific root patterns from `project.nvim`'s config.
