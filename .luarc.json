@@ -91,8 +91,10 @@
     "workspace.preloadFileSize": 10000,
     "workspace.library": [
         "$HOME/Projects/nvim/plenary.nvim",
+        "$HOME/Projects/nvim/spinner.nvim",
         "$VIMRUNTIME",
         "$XDG_DATA_HOME/nvim/lazy/fzf-lua",
+        "$XDG_DATA_HOME/nvim/lazy/spinner.nvim",
         "$XDG_DATA_HOME/nvim/lazy/lualine.nvim",
         "$XDG_DATA_HOME/nvim/lazy/picker.nvim",
         "$XDG_DATA_HOME/nvim/lazy/plenary.nvim",

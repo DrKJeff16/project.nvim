@@ -124,6 +124,10 @@ function M.setup(opts)
     require('project.extensions.snacks').setup(options.snacks.opts or {})
   end
 
+  if options.spinner.enabled then
+    require('project.util.spinner').setup(options.spinner.kind)
+  end
+
   local group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = true })
   vim.api.nvim_create_autocmd('User', {
     pattern = 'ProjectAttachPre',
