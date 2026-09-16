@@ -20,7 +20,8 @@ https://github.com/user-attachments/assets/0e10c4e8-f930-47a0-9058-956622e8f547
 
 ## Features
 
-- **(NEW!)** Supports project root detection using `git`
+- **(NEW!)** Integration with [xieyonn/spinner.nvim](https://github.com/xieyonn/spinner.nvim)
+- Supports project root detection using `git`
 - Automatically sets the current working directory to the project root directory using pattern matching (LSP optionally)
 - Projects can be assigned a name ([`:Project history rename [...]`](#project-history-clearrename-pathtoproject-pathtoproject))
 - Users can define custom project roots, see [Custom Projects](#custom-projects)
@@ -76,18 +77,19 @@ This plugin supports the following plugins:
 
 Requirements:
 
-- Neovim >= `v0.11`
-- [`fd`](https://github.com/sharkdp/fd) **(REQUIRED FOR SESSION MANAGEMENT)**
-- [`ibhagwan/fzf-lua`](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
-  - [`wsdjeg/picker.nvim`](https://github.com/wsdjeg/picker.nvim) **(OPTIONAL, RECOMMENDED)**
-- [`nvim-telescope/telescope.nvim`](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
-  - [`nvim-lua/plenary.nvim`](https://github.com/nvim-lua/plenary.nvim)
-  - [`nvim-telescope/telescope-file-browser.nvim`](https://github.com/nvim-telescope/telescope-file-browser.nvim)
-
-If you want to add instructions for your plugin manager of preference
-please raise a [**_BLANK ISSUE_**](https://github.com/DrKJeff16/project.nvim/issues/new?template=BLANK_ISSUE).
+- Neovim `>=v0.11`
+- [fd](https://github.com/sharkdp/fd) **(REQUIRED FOR SESSION MANAGEMENT)**
+- [ibhagwan/fzf-lua](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
+  - [wsdjeg/picker.nvim](https://github.com/wsdjeg/picker.nvim) **(OPTIONAL, RECOMMENDED)**
+- [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
+  - [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
+  - [nvim-telescope/telescope-file-browser.nvim](https://github.com/nvim-telescope/telescope-file-browser.nvim)
+- [xieyonn/spinner.nvim](https://github.com/xieyonn/spinner.nvim) **(OPTIONAL, NEEDED FOR SPINNER INTEGRATION)**
 
 Use any plugin manager of your choosing.
+
+> [!IMPORTANT]
+> If you want to add instructions for your plugin manager of preference please raise a [blank issue](https://github.com/DrKJeff16/project.nvim/issues/new?template=BLANK_ISSUE).
 
 <details>
 <summary>vim-plug</summary>
@@ -97,9 +99,10 @@ if has('nvim-0.11')
   Plug 'DrKJeff16/project.nvim'
 
   " OPTIONAL
-  Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-lua/plenary.nvim'
+  Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-lua/plenary.nvim' | Plug 'nvim-telescope/telescope-file-browser.nvim'
   Plug 'wsdjeg/picker.nvim'
   Plug 'ibhagwan/fzf-lua'
+  Plug 'xieyonn/spinner.nvim'
 
   lua << EOF
   require('project').setup()
@@ -122,6 +125,7 @@ endif
     'wsdjeg/picker.nvim',
     'folke/snacks.nvim',
     'ibhagwan/fzf-lua',
+    'xieyonn/spinner.nvim',
   },
   opts = {},
 }
@@ -138,6 +142,7 @@ If you wish to lazy-load this plugin:
     'wsdjeg/picker.nvim',
     'folke/snacks.nvim',
     'ibhagwan/fzf-lua',
+    'xieyonn/spinner.nvim',
   },
   opts = {},
 }
@@ -157,6 +162,7 @@ require('pckr').add({
       'wsdjeg/picker.nvim',
       'folke/snacks.nvim',
       'ibhagwan/fzf-lua',
+      'xieyonn/spinner.nvim',
     },
     config = function()
       require('project').setup()
@@ -179,6 +185,7 @@ require('plug').add({
       'wsdjeg/picker.nvim',
       'folke/snacks.nvim',
       'ibhagwan/fzf-lua',
+      'xieyonn/spinner.nvim',
     },
     config = function()
       require('project').setup()
@@ -202,6 +209,7 @@ paq({
   'wsdjeg/picker.nvim',
   'folke/snacks.nvim',
   'ibhagwan/fzf-lua',
+  'xieyonn/spinner.nvim',
 })
 ```
 
@@ -246,8 +254,13 @@ By default, `setup()` loads with the following options:
 
 ```lua
 {
-  -- If `false` then `git` will not be used to retrieve the current project's root
+  -- If `false` then `git` will not be used to retrieve the current project's root.
+  -- If `git` is not found, this will be ignored if enabled!
   use_git = true,
+
+  -- Options for integration with `xieyonn/spinner.nvim`.
+  -- Needs https://github.com/xieyonn/spinner.nvim or this will be ignored!
+  spinner = { enabled = false, kind = 'cursor' },
 
   -- Runs before right before changing the project directory
   ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
@@ -263,40 +276,21 @@ By default, `setup()` loads with the following options:
   ---|fun(mode_or_maps: table<'n'|'i'|'v'|'V'|'t'|'o'|'x', { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>)
   on_attach = function(dir, method, bufnr, map)
     -- You can map a single key (ALWAYS BUFFER LOCAL AUTOMATICALLY):
-    map(
-      'n',
-      '<leader>pS',
-      function()
-        vim.cmd.Project('session')
-      end,
-      { desc = 'Project Session' }
-    )
+    map('n', '<leader>pS', '<CMD>Project session<CR>', { desc = 'Project Session' })
 
     -- Or multiple keys, in multiple modes (ALWAYS BUFFER LOCAL AUTOMATICALLY):
     map({
       -- Normal mode
       n = {
-        ['<leader>pR'] = {
-          function()
-            vim.cmd.Project('recents')
-          end,
-          { desc = 'Recent Projects' },
-        },
-        ['<leader>pS'] = {
-          function()
-            vim.cmd.Project('session')
-          end,
-          { desc = 'Project Session' },
-        },
+        ['<leader>pR'] = { '<CMD>Project recents<CR>', { desc = 'Recent Projects' } },
+        ['<leader>pS'] = { '<CMD>Project session<CR>', { desc = 'Project Session' } },
       },
 
       -- Insert mode
       i = {
-        ['<A-p>'] = { ':Project<CR>', { desc = 'Project UI' } },
+        ['<A-p>'] = { '<Esc>:Project<CR>', { desc = 'Project UI' } },
       }
     })
-
-    -- ...
   end,
 
   lsp = {
