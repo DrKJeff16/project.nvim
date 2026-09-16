@@ -19,11 +19,12 @@ local VALID_KINDS = {
   'window-title',
 }
 
+---@return string id
 local function gen_random_id()
   local a, z, A, Z = ('a'):byte(), ('z'):byte(), ('A'):byte(), ('Z'):byte()
   local min, max = math.min(a, z, A, Z), math.max(a, z, A, Z)
   local byte ---@type integer
-  local id = ''
+  local id = '' ---@type string
   while id == '' or vim.list_contains(vim.tbl_keys(all_spinners), id) do
     id = ''
     for _ = 0, MAX_LEN do
@@ -37,33 +38,69 @@ local function gen_random_id()
   return id
 end
 
+---@param id string
+local function close_spinner(id)
+  if all_spinners[id] then
+    all_spinners[id] = nil
+  end
+end
+
 ---@class Project.Util.SpinnerObj: Project.Util.SpinnerOpts
 ---@field id string
 ---@field kind 'cmdline'|'cursor'|'extmark'|'statusline'|'tabline'|'winbar'|'window-footer'|'window-title'
+---@field paused boolean
+---@field running boolean
 local S = {}
 
 function S:start()
-  require('spinner').start(self.id)
+  if not self.running then
+    require('spinner').start(self.id)
+    self.paused = false
+    self.running = true
+  end
+end
+
+function S:render()
+  if self.running then
+    require('spinner').render(self.id)
+  end
 end
 
 function S:stop()
-  require('spinner').stop(self.id)
+  if self.running then
+    require('spinner').stop(self.id)
+    self.paused = false
+    self.running = false
+  end
 end
 
 function S:reset()
-  require('spinner').reset(self.id)
+  if self.running then
+    require('spinner').reset(self.id)
+    self.paused = false
+    self.running = false
+  end
 end
 
 function S:fail()
   require('spinner').fail(self.id)
+  close_spinner(self.id)
 end
 
 function S:pause()
-  require('spinner').pause(self.id)
+  if not self.paused and self.running then
+    require('spinner').pause(self.id)
+    self.paused = true
+  end
 end
 
 ---@class Project.Util.Spinner
 local M = {}
+
+---@return table<string, Project.Util.SpinnerObj> all_spinners
+function M.get_all_spinners()
+  return all_spinners
+end
 
 ---@param kind? 'cmdline'|'cursor'|'extmark'|'statusline'|'tabline'|'winbar'|'window-footer'|'window-title'
 function M.setup(kind)
