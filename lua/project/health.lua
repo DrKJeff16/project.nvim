@@ -51,40 +51,48 @@ end
 local function options_check()
   vim.health.start('Configuration')
   local Options = require('project.config').get()
-  if Util.is_type('table', Options) then
-    table.sort(Options)
-    for k, v in pairs(Options) do
-      local constraints = nil ---@type string[]|nil|?
-      if k == 'scope_chdir' then
-        constraints = { 'global', 'tab', 'win' }
-      end
-
-      local str, warning = Util.format_per_type(type(v), v, nil, constraints)
-      local func = warning and vim.health.warn or vim.health.ok
-      func((' - `%s`: %s'):format(k, str))
+  table.sort(Options)
+  for k, v in pairs(Options) do
+    local constraints = nil ---@type string[]|nil|?
+    if k == 'scope_chdir' then
+      constraints = { 'global', 'tab', 'win' }
     end
+
+    local str, warning = Util.format_per_type(type(v), v, nil, constraints)
+    local func = warning and vim.health.warn or vim.health.ok
+    func((' - `%s`: %s'):format(k, str))
+  end
+end
+
+local function spinner_check()
+  vim.health.start('Spinner Integration')
+  vim.health.info('Note: Any warnings in this section are not cause of trouble unless explicitly stated otherwise!\n')
+  if not Util.mod_exists('spinner') then
+    vim.health.warn('`xieyonn/spinner.nvim` is not installed.')
   else
-    vim.health.error('The config table is missing!')
+    vim.health.ok('`xieyonn/spinner.nvim` is installed.')
+    if require('project.config').get().spinner.enabled and vim.g.project_spinner_loaded == 1 then
+      vim.health.ok('Spinner integration is enabled.')
+    else
+      vim.health.warn('Spinner integration is disabled.')
+    end
   end
 end
 
 local function history_check()
   vim.health.start('History')
-  local P = { ---@type Project.HistoryPath[]
+  for _, v in ipairs({
     { name = 'datapath', type = 'directory', path = Util.path.datapath },
     { name = 'projectpath', type = 'directory', path = Util.path.projectpath },
     { name = 'historyfile', type = 'file', path = Util.path.historyfile },
-  }
-  for _, v in ipairs(P) do
+  }) do
     local stat = vim.uv.fs_stat(v.path)
-    if stat then
-      if stat.type ~= v.type then
-        vim.health.error(('%s: `%s` is not of type `%s`!'):format(v.name, v.path, v.type))
-      else
-        vim.health.info(('%s: `%s`'):format(v.name, v.path))
-      end
+    if stat and stat.type ~= v.type then
+      vim.health.error(('%s: `%s` is not of type `%s`!'):format(v.name, v.path, v.type))
+    elseif stat and stat.type == v.type then
+      vim.health.ok(('%s: `%s`'):format(v.name, v.path))
     else
-      vim.health.error(('%s: `%s` is missing or not readable!'):format(v.name, v.path))
+      vim.health.error(("%s: `%s` is missing or can't be read!"):format(v.name, v.path))
     end
   end
 end
@@ -94,39 +102,42 @@ local function project_check()
 
   vim.health.start('Current Project')
   local curr, method, last = Core.get_current_project(), Core.get_current_method(), Core.get_last_project()
-  local msg = ('Current project: `%s`\n'):format(curr and curr or 'No Current Project')
-  msg = ('%sMethod used: `%s`\n'):format(msg, (method and method or 'No method available'))
-  msg = ('%sLast project: `%s`'):format(msg, (last and last or 'No Last Project In History'))
-  vim.health.info(msg)
+  vim.health.info(
+    ('Current project: `%s`\nMethod used: `%s`\nLast project: `%s`'):format(
+      curr or 'No current project!',
+      method or 'No method available!',
+      last or 'No last project in history!'
+    )
+  )
 
   vim.health.start('Detection Methods')
-  local methods = require('project.config').get_detection_methods()
-  msg = ''
-  for k, m in ipairs(methods) do
-    local str = Util.format_per_type(type(m), m)
-    msg = ('%s\n[`%d`]: %s'):format(msg, k, str)
+  local msg = ''
+  for k, m in ipairs(require('project.config').get_detection_methods()) do
+    msg = ('%s\n[`%d`]: %s'):format(msg, k, Util.format_per_type(type(m), m))
   end
-  vim.health.info(msg)
+
+  if msg ~= '' then
+    vim.health.info(msg)
+  end
 
   vim.health.start('Active Sessions')
   local projects = Util.history.get_session_projects()
-  if vim.g.project_history_has_watch_setup == 1 and not vim.tbl_isempty(projects) then
+  if vim.g.project_history_has_watch_setup == 1 and #projects > 0 then
     for k, v in ipairs(Util.dedup(projects, 'name')) do
-      local index = tostring(k)
-      vim.health.info(('%d. `%s`\n   %spath: `%s`'):format(index, v.name, (' '):rep(index:len() - 1), v.path))
+      vim.health.info(('%d. `%s`\n   %spath: `%s`'):format(k, v.name, (' '):rep(tostring(k):len() - 1), v.path))
     end
   else
-    vim.health.warn('No active session projects!')
+    vim.health.warn('No active session projects.')
   end
 end
 
 local function logging_check()
   vim.health.start('Log')
   if require('project.config').get().log.enabled and vim.g.project_log_loaded == 1 then
-    vim.health.ok('Logging enabled!')
-    vim.health.ok('`:Project log` user command available!')
+    vim.health.ok('Logging enabled.')
+    vim.health.ok('`:Project log` user command available.')
   else
-    vim.health.ok('Logging disabled. This does not represent an issue necessarily!')
+    vim.health.ok('Logging disabled.')
   end
 end
 
@@ -143,11 +154,10 @@ end
 local function recent_proj_check()
   vim.health.start('Recent Projects')
   local recents = Util.reverse(Util.history.get_recent_projects())
-  if not vim.tbl_isempty(recents) then
+  if #recents > 0 then
     for i, project in ipairs(recents) do
-      local index = tostring(i)
       vim.health.info(
-        ('%d. `%s`\n   %spath: `%s`'):format(index, project.name, (' '):rep(index:len() - 1), project.path)
+        ('%d. `%s`\n   %spath: `%s`'):format(i, project.name, (' '):rep(tostring(i):len() - 1), project.path)
       )
     end
   else
@@ -167,11 +177,12 @@ end
 function M.check()
   if setup_check() then
     project_check()
-    history_check()
-    options_check()
     logging_check()
+    spinner_check()
     fzf_lua_check()
+    history_check()
     recent_proj_check()
+    options_check()
 
     Util.log.debug('(project.health): `checkhealth` successfully called.')
   end

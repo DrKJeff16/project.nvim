@@ -152,6 +152,26 @@
 ---@field allow boolean
 ---@field notify boolean
 
+---Options for integration with `xieyonn/spinner.nvim`.
+--- ---
+---@class (exact) ProjectOpts.Spinner
+---Whether to enable support for `xieyonn/spinner.nvim` (MUST BE INSTALLED OR THE INTEGRATION WON'T WORK).
+--- ---
+---Default: `false`
+--- ---
+---@field enabled? boolean
+---The default spinner kind to use.
+---
+---Read the documentation for `xieyonn/spinner.nvim` to see which one suits your interests best.
+--- ---
+---Default: `'cursor'`
+--- ---
+---@field kind? 'cmdline'|'cursor'|'extmark'|'statusline'|'tabline'|'winbar'|'window-footer'|'window-title'
+
+---@class (exact) ProjectDefaults.Spinner: ProjectOpts.Spinner
+---@field enabled boolean
+---@field kind 'cmdline'|'cursor'|'extmark'|'statusline'|'tabline'|'winbar'|'window-footer'|'window-title'
+
 ---Table of options used for history management.
 --- ---
 ---@class (exact) ProjectOpts.History
@@ -556,6 +576,9 @@
 ---Table of options used for the `snacks.nvim` picker.
 --- ---
 ---@field snacks? ProjectOpts.Snacks
+---Options for integration with `xieyonn/spinner.nvim`.
+--- ---
+---@field spinner? ProjectOpts.Spinner
 ---Table of options used for the telescope picker.
 --- ---
 ---@field telescope? ProjectOpts.Telescope
@@ -587,6 +610,7 @@
 ---@field show_hidden boolean
 ---@field silent_chdir boolean
 ---@field snacks ProjectDefaults.Snacks
+---@field spinner ProjectDefaults.Spinner
 ---@field telescope ProjectDefaults.Telescope
 ---@field use_git boolean
 

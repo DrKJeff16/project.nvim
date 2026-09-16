@@ -5,6 +5,7 @@
 ---@field history Project.Util.History
 ---@field log Project.Util.Log
 ---@field path Project.Util.Path
+---@field spinner Project.Util.Spinner
 local M = {}
 
 ---@overload fun(mode_or_maps: Modes, lhs: string, rhs: string|function, opts: vim.keymap.set.Opts)

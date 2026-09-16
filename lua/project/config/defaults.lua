@@ -19,6 +19,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
   custom_projects = {},
   different_owners = { allow = false, notify = true },
   picker = { enabled = false, hidden = false, show = 'paths', sort = 'newest' },
+  spinner = { enabled = false, kind = 'cursor' },
   snacks = {
     enabled = false,
     opts = {
@@ -453,6 +454,7 @@ function D:verify()
     show_hidden = { self.show_hidden, { 'boolean', 'nil' }, true },
     silent_chdir = { self.silent_chdir, { 'boolean', 'nil' }, true },
     snacks = { self.snacks, { 'table', 'nil' }, true },
+    spinner = { self.spinner, { 'table', 'nil' }, true },
     telescope = { self.telescope, { 'table', 'nil' }, true },
     use_git = { self.use_git, { 'boolean', 'nil' }, true },
   })
@@ -516,8 +518,7 @@ end
 function D:new(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  local obj = setmetatable(vim.tbl_deep_extend('force', DEFAULTS, opts or {}), D) --[[@as ProjectDefaults]]
-  return obj
+  return setmetatable(vim.tbl_deep_extend('force', DEFAULTS, opts or {}), D) --[[@as ProjectDefaults]]
 end
 
 return D

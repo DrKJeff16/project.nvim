@@ -292,10 +292,21 @@ function M.set_pwd(dir, method, bufnr)
   end
 
   local config = require('project.config').get()
+  local spinner = nil ---@type Project.Util.SpinnerObj|nil|?
+  if config.spinner and vim.g.project_spinner_loaded == 1 then
+    spinner = require('project.util.spinner').new()
+  end
+  if spinner then
+    spinner:start()
+  end
+
   if not Util.path.verify_owner(dir) then
     Util.log.warn('(project.core.set_pwd): Project is owned by a different user')
     if config.different_owners.notify or not config.different_owners.allow then
       vim.notify('(project.core.set_pwd): Project is owned by a different user', vim.log.levels.ERROR)
+    end
+    if spinner then
+      spinner:stop()
     end
     return config.different_owners.allow
   end
@@ -379,6 +390,11 @@ function M.set_pwd(dir, method, bufnr)
     if vim.g.project_cwd_log ~= 1 then
       Util.log.info('(project.core.set_pwd): Current directory is selected project.')
     end
+
+    if spinner then
+      spinner:stop()
+    end
+
     vim.g.project_cwd_log = 1
     return true
   end
@@ -386,8 +402,13 @@ function M.set_pwd(dir, method, bufnr)
   local scope_chdir = config.scope_chdir
   local msg = '(project.core.set_pwd):'
   if not vim.list_contains({ 'global', 'tab', 'win' }, scope_chdir) then
+    if spinner then
+      spinner:stop()
+    end
+
     Util.log.error(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)))
     vim.notify(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)), vim.log.levels.ERROR)
+    return false
   end
 
   vim.g.project_cwd_log = 0
@@ -433,6 +454,10 @@ function M.set_pwd(dir, method, bufnr)
   if not config.silent_chdir then
     vim.notify(msg, vim.log.levels[ok and 'INFO' or 'ERROR'])
   end
+  if spinner then
+    spinner:stop()
+  end
+
   return ok
 end
 

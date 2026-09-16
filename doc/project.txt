@@ -29,10 +29,11 @@ Table of Contents                                                  *project.toc*
     1.3. `ProjectOpts.History` ............................. |ProjectOpts.History|
     1.4. `ProjectOpts.DifferentOwners` ............. |ProjectOpts.DifferentOwners|
     1.5. `ProjectOpts.Telescope` ......................... |ProjectOpts.Telescope|
-    1.6. `ProjectOpts.FzfLua` ............................... |ProjectOpts.FzfLua|
-    1.7. `ProjectOpts.Picker` ............................... |ProjectOpts.Picker|
-    1.8. `ProjectOpts.Snacks` ............................... |ProjectOpts.Snacks|
-    1.9. `ProjectOpts.Logging` ............................. |ProjectOpts.Logging|
+    1.6. `ProjectOpts.Spinner` ............................. |ProjectOpts.Spinner|
+    1.7. `ProjectOpts.FzfLua` ............................... |ProjectOpts.FzfLua|
+    1.8. `ProjectOpts.Picker` ............................... |ProjectOpts.Picker|
+    1.9. `ProjectOpts.Snacks` ............................... |ProjectOpts.Snacks|
+    1.10. `ProjectOpts.Logging` ............................ |ProjectOpts.Logging|
 2. Pattern Matching ................................. |project.pattern-matching|
 3. Lualine ................................................... |project.lualine|
 4. Nvim Tree ............................................... |project.nvim-tree|
@@ -247,6 +248,13 @@ Table of Contents                                                  *project.toc*
                                 See |ProjectOpts.Snacks| for more details
 
 
+    • {spinner}                 (|ProjectOpts.Spinner|)
+                                Table of options used for integration with
+                                `spinner.nvim`.
+
+                                See |ProjectOpts.Spinner| for more details
+
+
     • {telescope}               (|ProjectOpts.Telescope|)
                                 Table of options used for the telescope
                                 picker.
@@ -424,7 +432,39 @@ Table of Contents                                                  *project.toc*
 
 
 ------------------------------------------------------------------------------
-1.6. `ProjectOpts.FzfLua`                                     *ProjectOpts.FzfLua*
+1.6. `ProjectOpts.Spinner`                                   *ProjectOpts.Spinner*
+                                                        *project.spinner-config*
+
+
+    • {enabled}                 (`boolean`)
+                                Enables integration with `xieyonn/spinner.nvim`.
+
+                                The aforementioned plugin must be installed,
+                                otherwise this will be ignored
+
+                                Default: `false` ~
+
+
+    • {kind}                    (`string`)
+                                The default kind to pass to `spinner.nvim`.
+                                Accepted values are:
+                                  - `'cmdline'`
+                                  - `'cursor'`
+                                  - `'extmark'`
+                                  - `'statusline'`
+                                  - `'tabline'`
+                                  - `'winbar'`
+                                  - `'window-footer'`
+                                  - `'window-title'`
+
+                                Read the documentation for `spinner.nvim`
+                                to see what does each kind look like
+
+                                Default: `'cursor'` ~
+
+
+------------------------------------------------------------------------------
+1.7. `ProjectOpts.FzfLua`                                     *ProjectOpts.FzfLua*
                                                         *project.fzf-lua-config*
 
 
@@ -455,7 +495,7 @@ Table of Contents                                                  *project.toc*
 
 
 ------------------------------------------------------------------------------
-1.7. `ProjectOpts.Picker`                                     *ProjectOpts.Picker*
+1.8. `ProjectOpts.Picker`                                     *ProjectOpts.Picker*
                                                          *project.picker-config*
 
 
@@ -487,7 +527,7 @@ Table of Contents                                                  *project.toc*
 
 
 ------------------------------------------------------------------------------
-1.8. `ProjectOpts.Snacks`                                     *ProjectOpts.Snacks*
+1.9. `ProjectOpts.Snacks`                                     *ProjectOpts.Snacks*
                                                          *project.snacks-config*
 
 
@@ -515,7 +555,7 @@ Table of Contents                                                  *project.toc*
 
 
 ------------------------------------------------------------------------------
-1.9. `ProjectOpts.Logging`                                   *ProjectOpts.Logging*
+1.10. `ProjectOpts.Logging`                                  *ProjectOpts.Logging*
                                                         *project.logging-config*
 
 
