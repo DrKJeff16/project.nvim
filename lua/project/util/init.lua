@@ -498,22 +498,37 @@ function M.is_hidden(path)
   return components[#components]:match('^' .. (M.is_windows() and '_' or '%.') .. '.*$') ~= nil
 end
 
----@param exe string[]|string
----@return boolean is_executable
+---@overload fun(exe: string[]|string): is_executable: boolean
+---@overload fun(exe: string[], opts: { fail_if_missing?: boolean }): is_executable: boolean
 ---@nodiscard
-function M.executable(exe)
-  M.validate({ exe = { exe, { 'string', 'table' } } })
+function M.executable(exe, opts)
+  M.validate({
+    exe = { exe, { 'string', 'table' } },
+    opts = { opts, { 'table', 'nil' }, true },
+  })
+  opts = opts or {}
+
+  M.validate({ ['opts.fail_if_missing'] = { opts.fail_if_missing, { 'boolean', 'nil' }, true } })
+  if opts.fail_if_missing == nil then
+    opts.fail_if_missing = false
+  end
 
   if type(exe) == 'string' then
     return vim.fn.executable(exe) == 1
   end
 
+  local res = false ---@type boolean
   for _, v in ipairs(exe) do
-    if not M.executable(v) then
-      return false
+    if opts.fail_if_missing and not M.executable(v) then
+      res = false
+      break
+    end
+    if not opts.fail_if_missing and M.executable(v) then
+      res = true
+      break
     end
   end
-  return true
+  return res
 end
 
 ---@generic T: table
