@@ -154,10 +154,24 @@ function M.get_last(full_entry)
     full_entry = false
   end
 
+  if not current_project then
+    return
+  end
+
+  local session = Util.history.get_session_projects()
   local recent = Util.reverse(Util.history.get_recent_projects())
-  if #recent > 1 then
-    local res = #Util.history.get_session_projects() <= 1 and recent[2] or recent[1]
-    return full_entry and res or res.path
+  local tbl = #session >= 2 and session or (#recent >= 2 and recent or nil) ---@type ProjectHistoryEntry[]|nil|?
+  if tbl then
+    local idx = nil ---@type integer|nil|?
+    for i = 1, #tbl do
+      if current_project ~= tbl[i].path then
+        idx = i
+        break
+      end
+    end
+    if idx then
+      return full_entry and tbl[idx] or tbl[idx].path
+    end
   end
 end
 
@@ -228,12 +242,12 @@ function M.find_pattern_root(bufnr_or_dir)
 
   local dir = '' ---@type string
   if not bufnr_or_dir or type(bufnr_or_dir) == 'number' then
-    bufnr_or_dir = bufnr_or_dir or vim.api.nvim_get_current_buf()
+    bufnr_or_dir = bufnr_or_dir or vim.api.nvim_get_current_buf() --[[@as integer]]
     dir = M.check_oil(bufnr_or_dir) or vim.api.nvim_buf_get_name(bufnr_or_dir)
   elseif bufnr_or_dir and type(bufnr_or_dir) == 'string' then
     dir = bufnr_or_dir
   end
-  dir = vim.fn.isdirectory(dir) == 1 and dir or Util.strip_slash(dir, ':p:h')
+  dir = vim.fn.isdirectory(dir) ~= 1 and Util.strip_slash(dir, ':p:h') or dir
   return Util.path.root_included(Util.is_windows() and (dir:gsub('\\', '/')) or dir)
 end
 
@@ -320,21 +334,31 @@ function M.set_pwd(dir, method, bufnr)
     end
   end
 
-  local session_projects = Util.history.get_session_projects()
-  local unexpand_dir, modified = Util.strip_slash(dir, ':p:~'), false
+  local session_projects, unexpand_dir = Util.history.get_session_projects(), Util.strip_slash(dir, ':p:~')
   if not vim.tbl_contains(session_projects, function(val)
     return val.path == dir
   end, { predicate = true }) then
-    table.insert(session_projects, {
-      path = dir,
+    table.insert(session_projects, 1, {
       name = custom_name
         or Util.history.find_entry('recent', dir, 'name')
         or Util.path.join(Util.strip_slash(dir, ':p:h:h:t'), Util.strip_slash(dir, ':p:h:t')),
+      path = dir,
     })
-    Util.history.set_session_projects(session_projects)
-    modified = true
-    Util.log.info(('(project.core.set_pwd): Added project `%s` to the top of session list'):format(unexpand_dir))
+    Util.log.debug(('(project.core.set_pwd): Added project `%s` to the top of session list'):format(unexpand_dir))
+  elseif #session_projects > 1 then
+    local idx = Util.history.find_entry('session', dir, 'index')
+    if idx then
+      local proj = table.remove(session_projects, idx) --[[@as ProjectHistoryEntry]]
+      table.insert(session_projects, 1, proj)
+      Util.log.debug(
+        ('(project.core.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
+          Util.strip_slash(unexpand_dir, ':p:~'),
+          idx
+        )
+      )
+    end
   end
+  Util.history.set_session_projects(session_projects)
 
   if bufnr and vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr) then
     local buf_name = Util.strip_slash(vim.api.nvim_buf_get_name(bufnr))
@@ -348,35 +372,12 @@ function M.set_pwd(dir, method, bufnr)
     M.refresh_project_bufs()
   end
 
-  session_projects = Util.history.get_session_projects()
-  if not modified and #session_projects > 1 then
-    local old_pos, name = nil, '' ---@type integer|nil|?, string
-    for k, v in ipairs(session_projects) do
-      if v.path == dir then
-        old_pos = k
-        name = v.name
-        break
-      end
-    end
-    if old_pos and old_pos ~= 1 then
-      table.remove(session_projects, old_pos)
-      table.insert(session_projects, 1, { path = dir, name = name })
-      Util.history.set_session_projects(session_projects)
-      Util.log.debug(
-        ('(project.core.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
-          Util.strip_slash(unexpand_dir, ':p:~'),
-          old_pos
-        )
-      )
-    end
-  end
-
   if
-    not vim.tbl_isempty(vim.api.nvim_get_autocmds({
+    #vim.api.nvim_get_autocmds({
       event = 'User',
       group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
       pattern = { 'ProjectAttachPre' },
-    }))
+    }) > 0
   then
     vim.api.nvim_exec_autocmds('User', {
       data = { dir = dir, method = method, bufnr = bufnr },

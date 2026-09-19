@@ -728,28 +728,29 @@ function M.write_history(path)
   vim.uv.fs_close(fd)
 end
 
----@param search 'session'|'recent'
----@param value string
----@param key 'path'|'name'
----@return string|nil|? entry_field
+---@overload fun(search: 'session'|'recent', value: string, key: 'patth'|'name'): entry_field: string|nil|?
+---@overload fun(search: 'session'|'recent', value: string, key: 'index'): entry_field: integer|nil|?
 function M.find_entry(search, value, key)
   Util.validate({
     search = { search, { 'string' } },
     value = { value, { 'string' } },
     key = { key, { 'string' } },
   })
-  if not (vim.list_contains({ 'recent', 'session' }, search) and vim.list_contains({ 'path', 'name' }, key)) then
-    return
-  end
+  if vim.list_contains({ 'recent', 'session' }, search) and vim.list_contains({ 'path', 'name', 'index' }, key) then
+    M.read_history()
 
-  M.read_history()
-  if not recent_projects then
-    return
-  end
-
-  for _, v in ipairs(search == 'session' and session_projects or recent_projects) do
-    if (v.path == Util.strip_slash(value) or v.name == value) and v[key] then
-      return v[key]
+    if key == 'index' then
+      for i, v in ipairs(search == 'session' and session_projects or recent_projects) do
+        if (v.path == Util.strip_slash(value) or v.name == value) and v[key] then
+          return i
+        end
+      end
+    else
+      for _, v in ipairs(search == 'session' and session_projects or recent_projects) do
+        if (v.path == Util.strip_slash(value) or v.name == value) and v[key] then
+          return v[key]
+        end
+      end
     end
   end
 end

@@ -90,16 +90,17 @@
     "workspace.useGitIgnore": true,
     "workspace.preloadFileSize": 10000,
     "workspace.library": [
+        "$VIMRUNTIME",
+        "${3rd}/busted/library",
+        "${3rd}/luv/library",
         "$HOME/Projects/nvim/plenary.nvim",
         "$HOME/Projects/nvim/spinner.nvim",
-        "$VIMRUNTIME",
         "$XDG_DATA_HOME/nvim/lazy/fzf-lua",
-        "$XDG_DATA_HOME/nvim/lazy/spinner.nvim",
         "$XDG_DATA_HOME/nvim/lazy/lualine.nvim",
+        "$XDG_DATA_HOME/nvim/lazy/oil.nvim",
         "$XDG_DATA_HOME/nvim/lazy/picker.nvim",
         "$XDG_DATA_HOME/nvim/lazy/plenary.nvim",
         "$XDG_DATA_HOME/nvim/lazy/snacks.nvim",
-        "${3rd}/busted/library",
-        "${3rd}/luv/library"
+        "$XDG_DATA_HOME/nvim/lazy/spinner.nvim"
     ]
 }

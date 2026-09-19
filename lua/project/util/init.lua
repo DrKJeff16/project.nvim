@@ -49,9 +49,8 @@ function M.buffer_valid(bufnr)
   return vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr)
 end
 
----@param path string
----@param mods? string
----@return string|nil|? stripped_path
+---@overload fun(path: nil, mods?: string)
+---@overload fun(path: string, mods?: string): stripped_path: string
 ---@nodiscard
 function M.strip_slash(path, mods)
   M.validate({
