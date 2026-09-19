@@ -128,17 +128,30 @@ function SWITCH.pattern(bufnr)
 end
 
 ---@param bufnr? integer
+---@param directory? string
 ---@return string|nil|? dir
 ---@nodiscard
-function M.check_oil(bufnr)
-  Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+function M.check_oil(bufnr, directory)
+  Util.validate({
+    bufnr = { bufnr, { 'number', 'nil' }, true },
+    directory = { directory, { 'string', 'nil' }, true },
+  })
 
-  local bufname = vim.api.nvim_buf_get_name(bufnr)
   local ok, oil = pcall(require, 'oil')
+  if not (ok and oil) then
+    return bufnr and vim.api.nvim_buf_get_name(bufnr) or (directory and directory or nil)
+  end
 
-  ---SOURCE: https://github.com/cosmicbuffalo/root_swapper.nvim/blob/main/lua/root_swapper.lua
-  local dir = (ok and oil and oil.get_current_dir) and oil.get_current_dir(bufnr) or bufname:gsub('^oil://', '') --[[@as string|nil|?]]
+  local dir = nil ---@type string|nil|?
+  if bufnr then
+    bufnr = Util.is_int(bufnr, bufnr >= 0) and bufnr or vim.api.nvim_get_current_buf()
+    ---SOURCE: https://github.com/cosmicbuffalo/root_swapper.nvim/blob/main/lua/root_swapper.lua
+    dir = (ok and oil and oil.get_current_dir) and oil.get_current_dir(bufnr)
+      or vim.api.nvim_buf_get_name(bufnr):gsub('^oil://', '')
+  elseif directory then
+    dir = directory:gsub('^oil://', '')
+  end
+
   if dir then
     return Util.strip_slash(dir)
   end
@@ -245,7 +258,7 @@ function M.find_pattern_root(bufnr_or_dir)
     bufnr_or_dir = bufnr_or_dir or vim.api.nvim_get_current_buf() --[[@as integer]]
     dir = M.check_oil(bufnr_or_dir) or vim.api.nvim_buf_get_name(bufnr_or_dir)
   elseif bufnr_or_dir and type(bufnr_or_dir) == 'string' then
-    dir = bufnr_or_dir
+    dir = M.check_oil(nil, bufnr_or_dir) or bufnr_or_dir
   end
   dir = vim.fn.isdirectory(dir) ~= 1 and Util.strip_slash(dir, ':p:h') or dir
   return Util.path.root_included(Util.is_windows() and (dir:gsub('\\', '/')) or dir)
