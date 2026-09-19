@@ -1,5 +1,17 @@
 # Changelog
 
+## [v6.3.1-1](https://github.com/DrKJeff16/project.nvim/tree/v6.3.1-1) (2026-09-19)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v6.3.0-1...v6.3.1-1)
+
+## [v6.3.0-1](https://github.com/DrKJeff16/project.nvim/tree/v6.3.0-1) (2026-09-16)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v6.2.1-1...v6.3.0-1)
+
+**Implemented enhancements:**
+
+- feat\(spinner\): add support for spinner.nvim [\#80](https://github.com/DrKJeff16/project.nvim/pull/80) ([DrKJeff16](https://github.com/DrKJeff16))
+
 ## [v6.2.1-1](https://github.com/DrKJeff16/project.nvim/tree/v6.2.1-1) (2026-09-12)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v6.2.0-1...v6.2.1-1)
