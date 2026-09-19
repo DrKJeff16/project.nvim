@@ -136,10 +136,9 @@ function M.check_oil(bufnr)
 
   local bufname = vim.api.nvim_buf_get_name(bufnr)
   local ok, oil = pcall(require, 'oil')
-  local dir ---@type string|nil|?
 
   ---SOURCE: https://github.com/cosmicbuffalo/root_swapper.nvim/blob/main/lua/root_swapper.lua
-  dir = (ok and oil and oil.get_current_dir) and oil.get_current_dir(bufnr) or bufname:gsub('^oil://', '') --[[@as string|nil|?]]
+  local dir = (ok and oil and oil.get_current_dir) and oil.get_current_dir(bufnr) or bufname:gsub('^oil://', '') --[[@as string|nil|?]]
   if dir then
     return Util.strip_slash(dir)
   end

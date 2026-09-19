@@ -8,17 +8,15 @@ if not require('project.util').mod_exists('telescope.init') then
   return
 end
 
-local projects = require('telescope._extensions.projects.main').projects
-
 ---@class TelescopeProjects
 ---@field exports { projects: fun(opts?: table) }
 ---@field health function
 ---@field projects fun(opts?: table)
 ---@field setup fun(opts?: table)
 local M = require('telescope').register_extension({
-  exports = { projects = projects },
+  exports = { projects = require('telescope._extensions.projects.main').projects },
   health = require('telescope._extensions.projects.healthcheck'),
-  projects = projects,
+  projects = require('telescope._extensions.projects.main').projects,
   setup = require('telescope._extensions.projects.main').setup,
 })
 

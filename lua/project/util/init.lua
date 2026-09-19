@@ -51,15 +51,16 @@ end
 
 ---@param path string
 ---@param mods? string
----@return string str
+---@return string|nil|? stripped_path
 ---@nodiscard
 function M.strip_slash(path, mods)
   M.validate({
-    path = { path, { 'string' } },
+    path = { path, { 'string', 'nil' }, true },
     mods = { mods, { 'string', 'nil' }, true },
   })
-
-  return M.rstrip(M.is_windows() and '\\' or '/', vim.fn.fnamemodify(path, (mods and mods ~= '') and mods or ':p'))
+  return path
+      and (M.rstrip(M.is_windows() and '\\' or '/', vim.fn.fnamemodify(path, (mods and mods ~= '') and mods or ':p')))
+    or nil
 end
 
 ---@param s string
@@ -125,19 +126,20 @@ function M.same_type_list(list, t)
     t = { t, { 'string', 'nil' }, true },
   })
   if t and not vim.list_contains({ 'boolean', 'userdata', 'string', 'function', 'number', 'thread', 'table' }, t) then
-    error(('(%s.same_type_list): Invalid type `%s`'):format(t))
+    error(('(project.util.same_type_list): Invalid type `%s`'):format(t))
   end
-  if vim.tbl_isempty(list) or not vim.islist(list) then
+  if not vim.islist(list) then
     return false
   end
 
+  local res = false
   for _, v in ipairs(list) do
-    t = t or type(v)
-    if not M.is_type(t, v) then
-      return false
+    res = M.is_type(t or type(v), v)
+    if not res then
+      break
     end
   end
-  return true
+  return res
 end
 
 ---@overload fun(option: string|vim.wo|vim.bo, param: 'scope', param_value: 'local'|'global'): value: any

@@ -43,7 +43,7 @@ local function normal_attach(prompt_bufnr, map)
   })
 
   local Keys = Project.config.get().telescope.mappings or {}
-  if not Project.util.is_type('table', Keys) or vim.tbl_isempty(Keys) then
+  if type(Keys) ~= 'table' or vim.tbl_isempty(Keys) then
     Keys = require('project.config.defaults').telescope.mappings
   end
 
@@ -64,11 +64,11 @@ local function normal_attach(prompt_bufnr, map)
   require('telescope.actions').select_default:replace(function()
     local config = Project.config.get()
     Project.core.set_pwd(require('telescope.actions.state').get_selected_entry().value, 'telescope')
-    if config.telescope.behavior == 'explore' then
-      if config.telescope.disable_file_picker then
-        return require('telescope.actions.set').select(prompt_bufnr, 'default')
-      end
 
+    if config.telescope.behavior == 'explore' and config.telescope.disable_file_picker then
+      return require('telescope.actions.set').select(prompt_bufnr, 'default')
+    end
+    if config.telescope.behavior == 'explore' then
       _Actions.find_project_files(prompt_bufnr)
     else
       _Actions.recent_project_files(prompt_bufnr)

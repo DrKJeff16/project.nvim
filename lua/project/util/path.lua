@@ -149,7 +149,6 @@ function M.open_mode(mode)
         return
       end
     end
-
     return tonumber(mode, 8)
   end
 end

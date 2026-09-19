@@ -1,13 +1,12 @@
-local ERROR = vim.log.levels.ERROR
 if vim.g.project_setup ~= 1 then
-  vim.notify('(telescope._extensions.projects.util): `project.nvim` is not loaded!', ERROR)
+  vim.notify('(telescope._extensions.projects.util): `project.nvim` is not loaded!', vim.log.levels.ERROR)
   return
 end
 
 local Project = require('project')
 if not Project.util.mod_exists('telescope.init') then
   Project.util.log.error('(telescope._extensions.projects.util): Telescope is not installed!')
-  vim.notify('(telescope._extensions.projects.util): Telescope is not installed!', ERROR)
+  vim.notify('(telescope._extensions.projects.util): Telescope is not installed!', vim.log.levels.ERROR)
   return
 end
 
@@ -29,32 +28,23 @@ function M.make_display(entry)
   Project.util.validate({ entry = { entry, { 'table' } } })
 
   return require('telescope.pickers.entry_display').create({
-    separator = ' ',
     items = { { width = 30 }, { remaining = true } },
-  })({
-    entry.name,
-    { entry.value, 'Comment' },
-  })
+    separator = ' ',
+  })({ entry.name, { entry.value, 'Comment' } })
 end
 
 function M.create_finder()
   local sort = Project.config.get().telescope.sort
-
   local results = Project.util.history.get_recent_projects()
-  if sort == 'newest' then
-    results = Project.util.reverse(results)
-  end
-
   Project.util.log.debug(('(telescope._extensions.projects.util.create_finder): Sorting by `%s`.'):format(sort))
-  Project.util.log.debug('(telescope._extensions.projects.util.create_finder): Returning new Finder table.')
   return require('telescope.finders').new_table({
-    results = results,
+    results = sort == 'newest' and Project.util.reverse(results) or results,
     entry_maker = function(entry) ---@param entry ProjectHistoryEntry
       return {
         display = M.make_display,
         name = entry.name,
-        value = M.make_tilde(entry.path),
         ordinal = ('%s %s'):format(entry.name, M.make_tilde(entry.path)),
+        value = M.make_tilde(entry.path),
       }
     end,
   })
