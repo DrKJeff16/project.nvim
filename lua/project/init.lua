@@ -84,13 +84,12 @@ function M.remove_root_patterns(patterns)
     error('(project.remove_root_patterns): Config values are unaccessible!')
   end
 
-  if Util.is_type('table', patterns) then
-    ---@cast patterns string[]
-    if vim.tbl_isempty(patterns) then
-      Util.log.error('(project.remove_root_patterns): Patterns table is empty!')
-      vim.notify('(project.remove_root_patterns): Patterns table is empty!', vim.log.levels.ERROR)
-      return
-    end
+  if type(patterns) == 'table' and #patterns == 0 then
+    Util.log.error('(project.remove_root_patterns): Patterns table is empty!')
+    vim.notify('(project.remove_root_patterns): Patterns table is empty!', vim.log.levels.ERROR)
+    return
+  end
+  if type(patterns) == 'table' then
     for _, pat in ipairs(patterns) do
       if Util.is_type('string', pat) then
         M.remove_root_patterns(pat)
@@ -99,28 +98,24 @@ function M.remove_root_patterns(patterns)
     return
   end
 
-  ---@cast patterns string
   if patterns == '' then
     Util.log.warn(('(project.remove_root_patterns): Skipping empty pattern: `%s`'):format(patterns))
     vim.notify(('(project.remove_root_patterns): Skipping empty pattern: `%s`'):format(patterns), WARN)
-    return
-  end
-  if not vim.list_contains(pats, patterns) then
+  elseif not vim.list_contains(pats, patterns) then
     Util.log.warn(('(project.remove_root_patterns): Skipping unavailable pattern: `%s`'):format(patterns))
     vim.notify(('(project.remove_root_patterns): Skipping unavailable pattern: `%s`'):format(patterns), WARN)
-    return
-  end
-
-  local pos = 1
-  for i, pat in ipairs(pats) do
-    if pat == patterns then
-      pos = i
-      break
+  else
+    local pos = 1
+    for i, pat in ipairs(pats) do
+      if pat == patterns then
+        pos = i
+        break
+      end
     end
-  end
-  table.remove(pats, pos)
+    table.remove(pats, pos)
 
-  require('project.config').set('patterns', pats)
+    require('project.config').set('patterns', pats)
+  end
 end
 
 ---Add new root patterns to `project.nvim`'s config.
@@ -151,7 +146,7 @@ function M.add_root_patterns(patterns)
       table.insert(pats, patterns)
       Config.set('patterns', pats)
     end
-  elseif not vim.tbl_isempty(patterns) and vim.islist(patterns) then
+  elseif not #patterns > 0 and vim.islist(patterns) then
     for _, pat in ipairs(patterns) do
       if type(pat) == 'string' then
         M.add_root_patterns(pat)

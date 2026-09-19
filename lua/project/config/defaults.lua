@@ -239,10 +239,8 @@ end
 function D:expand_excluded()
   Util.validate({ exclude_dirs = { self.exclude_dirs, { 'table', 'nil' }, true } })
   self.exclude_dirs = self.exclude_dirs or vim.deepcopy(DEFAULTS.exclude_dirs)
-  if not vim.tbl_isempty(self.exclude_dirs) then
-    for i, v in ipairs(self.exclude_dirs) do
-      self.exclude_dirs[i] = Util.rstrip('\\', Util.strip_slash(v))
-    end
+  for i, v in ipairs(self.exclude_dirs) do
+    self.exclude_dirs[i] = Util.rstrip('\\', Util.strip_slash(v))
   end
 end
 
@@ -293,10 +291,10 @@ function D:verify_lists()
     end
     i = i + n
   end
-  self.patterns = Util.dedup(vim.tbl_isempty(self.patterns) and DEFAULTS.patterns or self.patterns)
+  self.patterns = Util.dedup(#self.patterns > 0 and self.patterns or DEFAULTS.patterns)
 
   self.disable_on = self.disable_on or vim.deepcopy(DEFAULTS.disable_on)
-  self.disable_on.ft = self.disable_on.ft or vim.deepcopy(DEFAULTS.disable_on.ft)
+  self.disable_on.ft = Util.dedup(self.disable_on.ft or DEFAULTS.disable_on.ft)
   i, found = 1, {}
   while i <= #self.disable_on.ft and i > 0 do
     if type(self.disable_on.ft[i]) ~= 'string' or self.disable_on.ft[i] == '' then
@@ -308,9 +306,9 @@ function D:verify_lists()
     end
     i = i + n
   end
-  self.disable_on.ft = Util.dedup(vim.tbl_isempty(self.disable_on.ft) and DEFAULTS.disable_on.ft or self.disable_on.ft)
+  self.disable_on.ft = Util.dedup(#self.disable_on.ft > 0 and self.disable_on.ft or DEFAULTS.disable_on.ft)
 
-  self.disable_on.bt = self.disable_on.bt or vim.deepcopy(DEFAULTS.disable_on.bt)
+  self.disable_on.bt = Util.dedup(self.disable_on.bt or DEFAULTS.disable_on.bt)
   i, found = 1, {}
   while i <= #self.disable_on.bt and i > 0 do
     if type(self.disable_on.bt[i]) ~= 'string' or self.disable_on.bt[i] == '' then
@@ -322,7 +320,7 @@ function D:verify_lists()
     end
     i = i + n
   end
-  self.disable_on.bt = Util.dedup(vim.tbl_isempty(self.disable_on.bt) and DEFAULTS.disable_on.bt or self.disable_on.bt)
+  self.disable_on.bt = Util.dedup(#self.disable_on.bt > 0 and self.disable_on.bt or DEFAULTS.disable_on.bt)
 
   i, found = 1, {}
   while i <= #self.exclude_dirs and i > 0 do
@@ -471,11 +469,10 @@ function D:verify()
     end
   end
 
-  if self.custom_projects and not vim.tbl_isempty(self.custom_projects) then
-    if not vim.islist(self.custom_projects) then
-      error(('`custom_projects` is not list-like:\n`%s`'):format(vim.inspect(self.custom_projects)))
-    end
-
+  if self.custom_proects and not vim.islist(self.custom_projects) then
+    error(('`custom_projects` is not list-like:\n`%s`'):format(vim.inspect(self.custom_projects)))
+  end
+  if self.custom_projects and #self.custom_projects > 0 then
     local custom_projects = {} ---@type ProjectConfigHistoryEntry[]
     for k, v in ipairs(self.custom_projects) do
       Util.validate({

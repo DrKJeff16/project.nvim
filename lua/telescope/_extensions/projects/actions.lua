@@ -28,9 +28,9 @@ function M.delete_project(prompt_bufnr)
   local State = require('telescope.actions.state')
   local picker = State.get_current_picker(prompt_bufnr)
   local multi = picker:get_multi_selection() ---@type Project.ActionEntry[]
-  local entries = #multi > 0 and multi or { State.get_selected_entry() }
+  local entries = #multi > 0 and multi or { State.get_selected_entry() } --[[@as Project.ActionEntry[]\]]
 
-  if vim.tbl_isempty(entries) or not entries[1] then
+  if #entries == 0 or not entries[1] then
     require('telescope.actions').close(prompt_bufnr)
     Project.util.log.error(
       ('(telescope._extensions.projects.actions.delete_project): Entry not available!'):format(prompt_bufnr)
@@ -59,13 +59,14 @@ function M.delete_project(prompt_bufnr)
       return require('telescope.finders').new_table({
         results = results,
         entry_maker = function(value) ---@param value ProjectHistoryEntry
-          local make_tilde = require('telescope._extensions.projects.util').make_tilde
-          local name = value.name
           local action_entry = { ---@class Project.ActionEntry
             display = require('telescope._extensions.projects.util').make_display,
-            name = name,
-            value = make_tilde(value.path),
-            ordinal = ('%s %s'):format(name, make_tilde(value.path)),
+            name = value.name,
+            ordinal = ('%s %s'):format(
+              value.name,
+              require('telescope._extensions.projects.util').make_tilde(value.path)
+            ),
+            value = require('telescope._extensions.projects.util').make_tilde(value.path),
           }
           return action_entry
         end,
@@ -76,8 +77,8 @@ function M.delete_project(prompt_bufnr)
 end
 
 ---@param prompt_bufnr integer
----@return string|nil
----@return boolean|nil
+---@return string|nil|? value
+---@return boolean|nil|? success
 function M.change_cwd(prompt_bufnr)
   local selected_entry = require('telescope.actions.state').get_selected_entry() --[[@as Project.ActionEntry]]
   require('telescope.actions').close(prompt_bufnr)

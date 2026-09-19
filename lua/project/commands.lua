@@ -141,7 +141,7 @@ end
 ---@param ctx vim.api.keyset.create_user_command.command_args
 local function callback(ctx)
   local Popup = require('project.popup')
-  if vim.tbl_isempty(ctx.fargs) and not ctx.bang then
+  if #ctx.fargs == 0 and not ctx.bang then
     Popup.open_menu(ctx)
     return
   end

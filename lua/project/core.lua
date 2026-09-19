@@ -285,14 +285,14 @@ function M.refresh_project_bufs()
           table.insert(bufnrs[name], v)
         end
       end
-      bufnrs[name] = vim.tbl_isempty(bufnrs[name]) and nil or bufnrs[name]
+      bufnrs[name] = #bufnrs[name] > 0 and bufnrs[name] or nil
     end
     per_project_bufs[dir] = vim.tbl_isempty(bufnrs) and nil or vim.deepcopy(bufnrs)
   end
 
   local sessions = {} ---@type ProjectHistoryEntry[]
   for _, session in ipairs(Util.history.get_session_projects()) do
-    if per_project_bufs[session.path] and not vim.tbl_isempty(per_project_bufs[session.path]) then
+    if per_project_bufs[session.path] and #per_project_bufs[session.path] > 0 then
       table.insert(sessions, session)
     end
   end
@@ -400,22 +400,19 @@ function M.set_pwd(dir, method, bufnr)
   end
 
   if dir == Util.strip_slash(vim.uv.cwd() or vim.fn.getcwd()) then
-    current_project = dir
-    current_method = method
+    current_project, current_method = dir, method
     if vim.g.project_cwd_log ~= 1 then
       Util.log.info('(project.core.set_pwd): Current directory is selected project.')
+      vim.g.project_cwd_log = 1
     end
 
     if spinner then
       spinner:stop()
     end
-
-    vim.g.project_cwd_log = 1
     return true
   end
 
-  local scope_chdir = config.scope_chdir
-  local msg = '(project.core.set_pwd):'
+  local scope_chdir, msg = config.scope_chdir, '(project.core.set_pwd):'
   if not vim.list_contains({ 'global', 'tab', 'win' }, scope_chdir) then
     if spinner then
       spinner:stop()
@@ -436,17 +433,16 @@ function M.set_pwd(dir, method, bufnr)
   msg = ('%s chdir: `%s`, method: `%s`, status: `%s`'):format(msg, dir, method, (ok and 'SUCCESS' or 'FAILED'))
 
   if ok then
-    current_project = dir
-    current_method = method
+    current_project, current_method = dir, method
 
     Util.log.info(msg)
 
     if
-      not vim.tbl_isempty(vim.api.nvim_get_autocmds({
+      #vim.api.nvim_get_autocmds({
         event = 'User',
         group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
         pattern = { 'ProjectAttachPost' },
-      }))
+      }) > 0
     then
       vim.api.nvim_exec_autocmds('User', {
         group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
@@ -472,7 +468,6 @@ function M.set_pwd(dir, method, bufnr)
   if spinner then
     spinner:stop()
   end
-
   return ok
 end
 
@@ -488,7 +483,7 @@ function M.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
   local detection_methods = require('project.config').get_detection_methods()
-  if not Util.buffer_valid(bufnr) or vim.tbl_isempty(detection_methods) then
+  if not Util.buffer_valid(bufnr) or #detection_methods == 0 then
     return
   end
 
@@ -504,14 +499,16 @@ function M.get_project_root(bufnr)
     end
   end
 
-  if #roots > 0 then
-    if (#roots == 1 or config.lsp.no_fallback) or (#roots > 1 and roots[1].root == roots[2].root) then
-      return roots[1].root, roots[1].method_msg
-    end
-    for _, tbl in ipairs(roots) do
-      if tbl.method == 'pattern' then
-        return tbl.root, tbl.method_msg
-      end
+  if #roots == 0 then
+    return
+  end
+
+  if (#roots == 1 or config.lsp.no_fallback) or (#roots > 1 and roots[1].root == roots[2].root) then
+    return roots[1].root, roots[1].method_msg
+  end
+  for _, tbl in ipairs(roots) do
+    if tbl.method == 'pattern' then
+      return tbl.root, tbl.method_msg
     end
   end
 end

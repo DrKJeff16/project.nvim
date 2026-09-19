@@ -17,7 +17,7 @@ local function default(items)
   Util.validate({ items = { items, { 'table' } } })
 
   local opts = require('project.config').get()
-  if not vim.tbl_isempty(items) then
+  if #items > 0 then
     Util.log.debug('(project.extensions.fzf-lua.default): Running default fzf-lua action.')
     require('fzf-lua').files({
       cwd = Util.history.find_entry('recent', items[1], 'path'),

@@ -150,7 +150,7 @@ local function new_popup(opts)
   })
 
   if vim.tbl_isempty(opts) then
-    error('(project.popup.select.new): Empty args for constructor!')
+    error('(project.popup.new_popup): Empty args for constructor!')
   end
 
   ---@type Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)
@@ -341,7 +341,7 @@ M.open_menu = new_popup({
     if
       ctx
       and ctx.fargs
-      and not vim.tbl_isempty(ctx.fargs)
+      and #ctx.fargs > 0
       and vim.list_contains(vim.tbl_keys(M.open_menu.choices()), ctx.fargs[1])
     then
       M.open_menu.choices()[ctx.fargs[1]](ctx)
