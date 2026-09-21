@@ -158,6 +158,9 @@ end
 
 function M.clear_log()
   if vim.g.project_log_loaded == 1 and (vim.uv.fs_unlink(logfile)) then
+    if window then
+      M.close_win()
+    end
     vim.notify('(project.nvim): Log cleared successfully', INFO)
     vim.g.project_log_cleared = 1
   end
