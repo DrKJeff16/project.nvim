@@ -61,7 +61,9 @@ end
 function M.set_recent_projects(projects)
   Util.validate({ projects = { projects, { 'table' } } })
 
-  recent_projects = vim.deepcopy(projects)
+  for k, proj in ipairs(projects) do
+    recent_projects[k] = proj
+  end
 end
 
 ---@param path string
