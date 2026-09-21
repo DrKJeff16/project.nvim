@@ -36,11 +36,11 @@ local M = {}
 
 ---Projects from current neovim session.
 --- ---
-local session_projects = {} ---@type ProjectHistoryEntry[]
+local session_projects ---@type ProjectHistoryEntry[]
 
 ---Projects from previous neovim sessions.
 --- ---
-local recent_projects = {} ---@type ProjectHistoryEntry[]
+local recent_projects ---@type ProjectHistoryEntry[]
 
 ---@return ProjectHistoryEntry[] session_projects
 ---@nodiscard
@@ -52,7 +52,9 @@ end
 function M.set_session_projects(projects)
   Util.validate({ projects = { projects, { 'table' } } })
 
-  session_projects = vim.deepcopy(projects)
+  for k, proj in ipairs(projects) do
+    session_projects[k] = proj
+  end
 end
 
 ---@param projects ProjectHistoryEntry[]
@@ -158,8 +160,7 @@ function M.clear_historyfile(force)
     Log.warn('(project.util.history.clear_historyfile): History file cleared successfully.')
     vim.notify('(project.nvim): History file cleared successfully', WARN)
 
-    recent_projects = {}
-    session_projects = {}
+    recent_projects, session_projects = {}, {}
     vim.g.project_historyfile_cleared = 1
   else
     Log.error('(project.util.history.clear_historyfile): Unable to clear history file!')
@@ -739,17 +740,9 @@ function M.find_entry(search, value, key)
   if vim.list_contains({ 'recent', 'session' }, search) and vim.list_contains({ 'path', 'name', 'index' }, key) then
     M.read_history()
 
-    if key == 'index' then
-      for i, v in ipairs(search == 'session' and session_projects or recent_projects) do
-        if (v.path == Util.strip_slash(value) or v.name == value) and v[key] then
-          return i
-        end
-      end
-    else
-      for _, v in ipairs(search == 'session' and session_projects or recent_projects) do
-        if (v.path == Util.strip_slash(value) or v.name == value) and v[key] then
-          return v[key]
-        end
+    for i, v in ipairs(search == 'session' and session_projects or recent_projects) do
+      if (v.path == Util.strip_slash(value) or v.name == value) and v[key] then
+        return key == 'index' and i or v[key]
       end
     end
   end
@@ -824,6 +817,11 @@ function M.toggle_win()
   else
     M.close_win()
   end
+end
+
+function M.setup()
+  session_projects = session_projects or {}
+  recent_projects = recent_projects or {}
 end
 
 return M

@@ -106,6 +106,8 @@ function M.setup(opts)
     Util.log.debug('(project.config.setup): `g:project_setup` set to `1`.')
   end
 
+  require('project.util.history').setup()
+
   require('project.commands').setup()
   Util.log.debug('(project.config.setup): User commands created.')
 

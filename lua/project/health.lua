@@ -121,7 +121,7 @@ local function project_check()
 
   vim.health.start('Active Sessions')
   local projects = Util.history.get_session_projects()
-  if vim.g.project_history_has_watch_setup == 1 and #projects > 0 then
+  if #projects > 0 then
     for k, v in ipairs(Util.dedup(projects, 'name')) do
       vim.health.info(('%d. `%s`\n   %spath: `%s`'):format(k, v.name, (' '):rep(tostring(k):len() - 1), v.path))
     end

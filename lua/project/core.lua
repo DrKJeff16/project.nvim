@@ -183,6 +183,7 @@ function M.get_last(full_entry)
       end
     end
     if idx then
+      last_project = tbl[idx].path
       return full_entry and tbl[idx] or tbl[idx].path
     end
   end
@@ -339,7 +340,6 @@ function M.set_pwd(dir, method, bufnr)
     return config.different_owners.allow
   end
 
-  Util.history.set_session_projects(Util.history.get_session_projects() or {})
   local custom_name = nil ---@type string|nil|?
   for _, v in ipairs(config.custom_projects) do
     if Util.strip_slash(v.path) == dir and v.name then
@@ -347,7 +347,8 @@ function M.set_pwd(dir, method, bufnr)
     end
   end
 
-  local session_projects, unexpand_dir = Util.history.get_session_projects(), Util.strip_slash(dir, ':p:~')
+  local session_projects = Util.history.get_session_projects()
+  local unexpand_dir = Util.strip_slash(dir, ':p:~')
   if not vim.tbl_contains(session_projects, function(val)
     return val.path == dir
   end, { predicate = true }) then
@@ -358,10 +359,11 @@ function M.set_pwd(dir, method, bufnr)
       path = dir,
     })
     Util.log.debug(('(project.core.set_pwd): Added project `%s` to the top of session list'):format(unexpand_dir))
-  elseif #session_projects > 1 then
+  elseif #session_projects >= 1 then
     local idx = Util.history.find_entry('session', dir, 'index')
     if idx then
-      local proj = table.remove(session_projects, idx) --[[@as ProjectHistoryEntry]]
+      local proj = vim.deepcopy(session_projects[idx])
+      table.remove(session_projects, idx)
       table.insert(session_projects, 1, proj)
       Util.log.debug(
         ('(project.core.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
