@@ -811,6 +811,16 @@ function M.normalise_path(path)
   return M.is_windows() and (normalised_path:sub(1, 1):lower() .. normalised_path:sub(2)) or normalised_path
 end
 
+---@generic T: table, V
+---@param t T
+---@param k string|integer
+---@param v V
+---@return V v
+function M.rawset(t, k, v)
+  rawset(t, k, v)
+  return v
+end
+
 local Util = setmetatable(M, { ---@type Project.Util
   __index = function(self, k)
     local raw = rawget(self, k) or nil
@@ -818,8 +828,7 @@ local Util = setmetatable(M, { ---@type Project.Util
       return raw
     end
     if M.mod_exists('project.util.' .. k) then
-      rawset(self, k, require('project.util.' .. k))
-      return require('project.util.' .. k)
+      return M.rawset(self, k, require('project.util.' .. k))
     end
   end,
 })
