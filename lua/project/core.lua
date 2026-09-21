@@ -323,7 +323,7 @@ function M.set_pwd(dir, method, bufnr)
   local config = require('project.config').get()
   local spinner = nil ---@type Project.Util.SpinnerObj|nil|?
   if config.spinner and vim.g.project_spinner_loaded == 1 then
-    spinner = require('project.util.spinner').new()
+    spinner = Util.spinner.new()
   end
   if spinner then
     spinner:start()

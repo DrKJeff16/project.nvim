@@ -127,7 +127,7 @@ function M.setup(opts)
   end
 
   if options.spinner.enabled then
-    require('project.util.spinner').setup(options.spinner.kind)
+    Util.spinner.setup(options.spinner.kind)
   end
 
   local group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = true })
