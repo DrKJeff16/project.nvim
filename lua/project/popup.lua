@@ -234,11 +234,10 @@ M.delete_menu = new_popup({
   choices = function(opts)
     local T = {} ---@type table<string, fun(name: string)>
     for _, proj in ipairs(M.delete_menu.choices_list(opts)) do
-      T[proj] = function()
-        if proj ~= 'Exit' then
+      T[proj] = proj == 'Exit' and function() end
+        or function()
           Util.history.delete_project(find_entry('recent', proj, 'path'))
         end
-      end
     end
     return T
   end,
