@@ -79,12 +79,11 @@ Requirements:
 
 - Neovim `>=v0.11`
 - [fd](https://github.com/sharkdp/fd) **(REQUIRED FOR SESSION MANAGEMENT)**
-- [ibhagwan/fzf-lua](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
-  - [wsdjeg/picker.nvim](https://github.com/wsdjeg/picker.nvim) **(OPTIONAL, RECOMMENDED)**
-- [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
-  - [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
-  - [nvim-telescope/telescope-file-browser.nvim](https://github.com/nvim-telescope/telescope-file-browser.nvim)
 - [xieyonn/spinner.nvim](https://github.com/xieyonn/spinner.nvim) **(OPTIONAL, NEEDED FOR SPINNER INTEGRATION)**
+- [ibhagwan/fzf-lua](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
+- [wsdjeg/picker.nvim](https://github.com/wsdjeg/picker.nvim) **(OPTIONAL, RECOMMENDED)**
+- [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
+  - [nvim-telescope/telescope-file-browser.nvim](https://github.com/nvim-telescope/telescope-file-browser.nvim) **(OPTIONAL DEPENDENCY)**
 
 Use any plugin manager of your choosing.
 
