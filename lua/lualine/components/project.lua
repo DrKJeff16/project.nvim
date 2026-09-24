@@ -49,12 +49,7 @@ local M = require('lualine.component'):extend()
 ---@field format 'short'|'full'|'full_expanded'|'name'
 ---@field no_project string
 ---@field separator string
-local defaults = {
-  enclose_pair = nil,
-  format = 'name',
-  no_project = '',
-  separator = ' ',
-}
+local defaults = { enclose_pair = nil, format = 'name', no_project = '', separator = ' ' }
 
 ---@param options? Project.LuaLineOpts
 function M:init(options)
@@ -62,8 +57,7 @@ function M:init(options)
   self.options = vim.tbl_deep_extend('force', defaults, self.options or {})
 
   local hl_info = vim.api.nvim_get_hl(0, { name = 'Keyword' })
-  local fg = hl_info.fg or nil
-  local bg = hl_info.bg or nil
+  local bg, fg = hl_info.bg or nil, hl_info.fg or nil
   self.color_active_hl = require('lualine.highlight').create_component_highlight_group(
     { fg = fg and ('#%02x'):format(fg) or nil, bg = bg and ('#%02x'):format(bg) or nil },
     'project_active',
@@ -84,16 +78,15 @@ end
 ---@return string component
 function M:project_root()
   local bufnr = vim.api.nvim_get_current_buf()
-  local ft = Project.util.optget('filetype', 'buf', bufnr) --[[@as string]]
-  local bt = Project.util.optget('buftype', 'buf', bufnr) --[[@as string]]
-  local msg = '' ---@type string
+  local msg = ''
   local config = Project.config.get()
-  if vim.list_contains(config.disable_on.ft, ft) or vim.list_contains(config.disable_on.bt, bt) then
+  if
+    vim.list_contains(config.disable_on.ft, Project.util.optget('filetype', 'buf', bufnr))
+    or vim.list_contains(config.disable_on.bt, Project.util.optget('buftype', 'buf', bufnr))
+  then
     return msg
   end
 
-  local curr = Project.core.get_current(bufnr)
-  local root = Project.core.get_project_root(bufnr)
   local format = (
     self.options.format and vim.list_contains({ 'short', 'full', 'full_expanded', 'name' }, self.options.format)
   )
@@ -104,10 +97,11 @@ function M:project_root()
     return self.options.no_project
   end
 
+  local curr, root = Project.core.get_current(bufnr), Project.core.get_project_root(bufnr)
   if
     not (vim.list_contains({ 'short', 'full', 'full_expanded', 'name' }, format) and curr and root) or curr ~= root
   then
-    msg = self.options.no_project --[[@as string]]
+    msg = self.options.no_project
   elseif format == 'full_expanded' then
     msg = Project.util.strip_slash(curr)
   elseif format == 'full' then
@@ -118,7 +112,6 @@ function M:project_root()
   if format == 'short' or not msg and msg ~= self.options.no_project then
     msg = Project.util.strip_slash(curr, ':p:h:t')
   end
-
   if self.options.enclose_pair then
     msg = (self.options.enclose_pair[1] or '') .. msg .. (self.options.enclose_pair[2] or '')
   end

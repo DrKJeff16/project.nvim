@@ -10,27 +10,23 @@ local function gen_items(source)
   local curr = Project.core.get_current() or ''
   local items = {} ---@type ProjectPickerItem[]
   for i, v in ipairs(source) do
-    local is_curr = v.path == curr
     local n_digits, max_n_digits = Project.util.digits(i), Project.util.digits(Project.config.get().history.size)
     local path = ('%d. %s'):format(
       i,
-      (is_curr and '*' or '') .. (' '):rep(max_n_digits - n_digits - (is_curr and 1 or 0))
+      (v.path == curr and '*' or '') .. (' '):rep(max_n_digits - n_digits - (v.path == curr and 1 or 0))
     )
-
-    if Project.config.get().picker.show == 'names' then
-      path = ('%s %s'):format(path, v.name)
-    else
-      path = ('%s %s'):format(path, Project.util.strip_slash(v.path, ':p:~'))
-    end
+    path = ('%s %s'):format(
+      path,
+      Project.config.get().picker.show == 'names' and v.name or Project.util.strip_slash(v.path, ':p:~')
+    )
     local hl = { { 0, n_digits + 1, 'Number' } } ---@type ProjectPickerItem.Hl[]
-    if is_curr then
+    if v.path == curr then
       table.insert(hl, { n_digits + 2, n_digits + 3, 'Special' })
       table.insert(hl, { n_digits + 4, path:len(), 'String' })
     else
       table.insert(hl, { n_digits + 2, path:len(), 'String' })
     end
-
-    table.insert(items, { value = Project.util.strip_slash(v.path), str = path, highlight = hl })
+    table.insert(items, { highlight = hl, str = path, value = Project.util.strip_slash(v.path) })
   end
   return items
 end
@@ -41,10 +37,7 @@ local M = {}
 ---@return ProjectPickerItem[] items
 function M.get()
   local recents = Project.get_recent_projects()
-  if Project.config.get().picker.sort == 'newest' then
-    recents = Project.util.reverse(recents)
-  end
-  return gen_items(recents)
+  return gen_items(Project.config.get().picker.sort == 'newest' and Project.util.reverse(recents) or recents)
 end
 
 ---@return table<string, fun(entry: ProjectPickerItem)> actions

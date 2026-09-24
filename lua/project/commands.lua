@@ -1,7 +1,5 @@
 ---@module 'project._meta'
 
-local Util = require('project.util')
-
 ---@param line string
 ---@return string[] items
 local function complete_items(_, line)
@@ -10,6 +8,7 @@ local function complete_items(_, line)
     return {}
   end
 
+  local Util = require('project.util')
   local recents = {} ---@type string[]
   for _, v in ipairs(Util.reverse(Util.history.get_recent_projects(true, true))) do
     if not vim.list_contains(args, v) then
@@ -56,15 +55,14 @@ local function completion(_, line)
   end
   table.sort(items)
 
+  local Util = require('project.util')
   local res = {} ---@type string[]
-  if #args == 2 then
-    if args[2] == '' then
-      res = items
-    else
-      for _, item in ipairs(items) do
-        if vim.startswith(item, args[2]) then
-          table.insert(res, item)
-        end
+  if #args == 2 and args[2] == '' then
+    res = items
+  elseif #args == 2 then
+    for _, item in ipairs(items) do
+      if vim.startswith(item, args[2]) then
+        table.insert(res, item)
       end
     end
   elseif
@@ -76,10 +74,8 @@ local function completion(_, line)
   then
     res = {}
   elseif #args >= 3 then
-    if args[2] == 'session' and #args == 3 then
-      if vim.startswith('clear', args[3]) then
-        table.insert(res, 'clear')
-      end
+    if args[2] == 'session' and #args == 3 and vim.startswith('clear', args[3]) then
+      table.insert(res, 'clear')
     elseif args[2] == 'log' and #args == 3 then
       for _, comp in ipairs({ 'clear', 'close', 'open', 'toggle' }) do
         if vim.startswith(comp, args[3]) then
@@ -87,12 +83,12 @@ local function completion(_, line)
         end
       end
     elseif args[2] == 'add' then
-      ---@type string[]
-      local comps = vim.tbl_map(function(value) ---@param value string
-        return Util.strip_slash(value, ':p:~')
-      end, vim.fn.getcompletion(args[#args], 'dir', true))
-
-      for _, comp in ipairs(comps) do
+      for _, comp in
+        ipairs(vim.tbl_map(function(value) ---@param value string
+          return Util.strip_slash(value, ':p:~')
+        end, vim.fn.getcompletion(args[#args], 'dir', true)))
+      do
+        ---@cast comp string
         local found = false
         for i = 3, #args do
           if args[i] == comp then
@@ -121,20 +117,18 @@ local function completion(_, line)
         return tostring(value)
       end, Util.range(0, 32, 2))
       if args[4] == '' then
-        return nums
-      end
-
-      for _, num in ipairs(nums) do
-        if vim.startswith(num, args[4]) then
-          table.insert(res, num)
+        res = nums
+      else
+        for _, num in ipairs(nums) do
+          if vim.startswith(num, args[4]) then
+            table.insert(res, num)
+          end
         end
       end
     end
   end
 
-  if #res > 0 then
-    table.sort(res)
-  end
+  table.sort(res)
   return res
 end
 
@@ -146,40 +140,9 @@ local function callback(ctx)
     return
   end
 
-  -- HACK: Open help/checkhealth on a new tab by default
-  if not (ctx.smods.horizontal or ctx.smods.vertical) then
+  if not (ctx.smods.horizontal or ctx.smods.vertical) then -- HACK: Open help/checkhealth on a new tab by default
     ctx.smods.tab = vim.api.nvim_get_current_tabpage()
   end
-
-  local items = { ---@type string[]
-    'add',
-    'config',
-    'delete',
-    'export',
-    'health',
-    'help',
-    'history',
-    'import',
-    'recents',
-    'root',
-    'session',
-  }
-  if vim.g.project_fzf_lua_loaded == 1 then
-    table.insert(items, 'fzf-lua')
-  end
-  if vim.g.project_log_loaded == 1 then
-    table.insert(items, 'log')
-  end
-  if vim.g.project_picker_loaded == 1 then
-    table.insert(items, 'picker')
-  end
-  if vim.g.project_telescope_loaded == 1 then
-    table.insert(items, 'telescope')
-  end
-  if vim.g.project_snacks_loaded == 1 then
-    table.insert(items, 'snacks')
-  end
-  table.sort(items)
 
   local err = [[Usage:
   :Project
@@ -211,26 +174,28 @@ local function callback(ctx)
     err = ('%s\n  :Project telescope'):format(err)
   end
 
-  local err_txt = table.concat(vim.split(err, '\n', { trimempty = false }), '\n')
-  local msg = ''
-  local no_args_passed = {
-    'add',
-    'delete',
-    'export',
-    'fzf-lua',
-    'health',
-    'help',
-    'history',
-    'import',
-    'log',
-    'picker',
-    'recents',
-    'root',
-    'session',
-    'snacks',
-    'telescope',
-  }
-  if #ctx.fargs == 1 and vim.list_contains(no_args_passed, ctx.fargs[1]) then
+  local Util = require('project.util')
+  local err_txt, msg = table.concat(vim.split(err, '\n', { trimempty = false }), '\n'), ''
+  if
+    #ctx.fargs == 1
+    and vim.list_contains({
+      'add',
+      'delete',
+      'export',
+      'fzf-lua',
+      'health',
+      'help',
+      'history',
+      'import',
+      'log',
+      'picker',
+      'recents',
+      'root',
+      'session',
+      'snacks',
+      'telescope',
+    }, ctx.fargs[1])
+  then
     if ctx.fargs[1] == 'add' then
       vim.ui.input({
         completion = 'dir',
@@ -277,7 +242,7 @@ local function callback(ctx)
     elseif ctx.fargs[1] == 'session' then
       local fargs = vim.deepcopy(ctx.fargs)
       table.remove(fargs, 1)
-      ctx.fargs = vim.deepcopy(fargs)
+      ctx.fargs = fargs
       Popup.session_menu(ctx)
     elseif vim.g.project_snacks_loaded == 1 and ctx.fargs[1] == 'snacks' and not ctx.bang then
       require('project.extensions').snacks.pick()
