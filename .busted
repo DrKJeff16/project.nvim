@@ -9,6 +9,6 @@ return {
     coverage = false,
   },
   default = {
-    output = 'utfTerminal',
+    output = 'gtest',
   },
 }
