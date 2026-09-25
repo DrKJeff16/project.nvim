@@ -222,17 +222,26 @@ end
 function D:verify_logging()
   Util.validate({ log = { self.log, { 'table', 'nil' }, true } })
   self.log = self.log or vim.deepcopy(DEFAULTS.log)
+
+  Util.validate({
+    ['log.enabled'] = { self.log.enabled, { 'boolean', 'nil' }, true },
+    ['log.logpath'] = { self.log.logpath, { 'string', 'nil' }, true },
+    ['log.max_size'] = { self.log.max_size, { 'number', 'nil' }, true },
+    ['log.snacks'] = { self.log.snacks, { 'table', 'nil' }, true },
+  })
+
+  if self.log.enabled == nil then
+    self.log.enabled = false
+  end
+  self.log.max_size = (self.log.max_size and self.log.max_size > 0) and self.log.max_size or DEFAULTS.log.max_size
+  self.log.snacks = vim.tbl_deep_extend('force', DEFAULTS.log.snacks, self.log.snacks or {})
+  self.log.logpath = (self.log.logpath and Util.path.exists(self.log.logpath)) and self.log.logpath
+    or DEFAULTS.log.logpath
+
   if self.logging ~= nil and type(self.logging) == 'boolean' then
     self.log.enabled = self.logging
     self.logging = nil
     vim.notify('project.nvim - `logging` is deprecated, use `log.enabled`!', WARN)
-  end
-
-  if type(self.log.logpath) ~= 'string' or not Util.path.exists(self.log.logpath) then
-    self.log.logpath = DEFAULTS.log.logpath
-  end
-  if type(self.log.max_size) ~= 'number' or self.log.max_size <= 0 then
-    self.log.max_size = DEFAULTS.log.max_size
   end
 end
 
