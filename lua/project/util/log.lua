@@ -25,6 +25,8 @@ local logfile = nil ---@type string|nil|?
 local snacks_enabled = false ---@type boolean
 local snacks_style = 'fancy' ---@type ProjectLog.Snacks.Style
 local logpath = nil ---@type string|nil|?
+local debug_level = vim.log.levels.INFO ---@type 0|1|2|3|4|5
+local debug_mode = false ---@type boolean
 
 ---@enum ProjectLog.Snacks.Levels
 local snacks_levels = { [DEBUG] = 'debug', [INFO] = 'info', [WARN] = 'warn', [ERROR] = 'error' }
@@ -114,7 +116,7 @@ local function gen_snacks_backtrace()
   end
 end
 
----@param lvl vim.log.levels
+---@param lvl 0|1|2|3|4|5
 ---@return fun(...: any): output: string|nil|?
 local function gen_log(lvl)
   return function(...) ---@return string|nil|? output
@@ -123,6 +125,7 @@ local function gen_log(lvl)
       for i = 1, select('#', ...) do
         msg = format_sel(msg, select(i, ...), i ~= 1)
       end
+
       return M.write(('%s\n'):format(msg), lvl)
     end
   end
@@ -232,7 +235,7 @@ local function setup_watch()
 end
 
 ---@param data string
----@param lvl vim.log.levels
+---@param lvl 0|1|2|3|4|5
 ---@return string|nil|? written_data
 function M.write(data, lvl)
   if not require('project.config').get().log.enabled or vim.g.project_log_cleared == 1 then
@@ -252,6 +255,13 @@ function M.write(data, lvl)
   local msg = os.date(('%s  ==>  %s%s'):format('%H:%M:%S', PFX[lvl], data)) --[[@as string]]
   vim.uv.fs_write(fd, msg)
   vim.uv.fs_close(fd)
+
+  if debug_mode and lvl >= debug_level then
+    vim.schedule(function()
+      vim.notify(msg, lvl)
+    end)
+  end
+
   return msg
 end
 
@@ -281,7 +291,7 @@ function M.setup(opts)
     return
   end
 
-  logpath = opts.logpath
+  logpath, debug_mode, debug_level = opts.logpath, opts.debug, opts.debug_level
   logfile = Path.join(logpath, 'project.log')
 
   if not Path.exists(logpath) then

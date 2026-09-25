@@ -298,8 +298,19 @@
 ---Options for logging utility.
 --- ---
 ---@class (exact) ProjectOpts.Logging
----If `true`, it enables logging in the same directory in which your
----history file is stored.
+---WARNING: VERY NOISY, ENABLE AT YOUR DISCRETION!
+---
+---If `true`, logging messages will be show as notifications.
+--- ---
+---Default: `false`
+--- ---
+---@field debug? boolean
+---If debug mode is enabled, set the minimum level at which debug notifications are shown.
+--- ---
+---Default: `vim.log.levels.INFO`
+--- ---
+---@field debug_level? 0|1|2|3|4|5
+---If `true`, it enables logging in the same directory in which your history file is stored.
 --- ---
 ---Default: `false`
 --- ---
@@ -321,6 +332,8 @@
 ---@field snacks? ProjectOpts.Logging.Snacks
 
 ---@class (exact) ProjectDefaults.Logging: ProjectOpts.Logging
+---@field debug boolean
+---@field debug_level 0|1|2|3|4|5
 ---@field enabled boolean
 ---@field logpath string
 ---@field max_size number
