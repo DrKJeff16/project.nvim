@@ -1,10 +1,20 @@
 local assert = require('luassert') --[[@as Luassert]]
+local setup_opts = {
+  log = {
+    debug = true,
+    debug_level = vim.log.levels.DEBUG,
+    enabled = true,
+    logpath = require('project.util').strip_slash('.'),
+  },
+}
 
 describe('project.nvim history', function()
-  package.loaded['project'] = nil
-  require('project').setup()
-
-  local history = require('project.util.history')
+  local history ---@type Project.Util.History
+  before_each(function()
+    package.loaded['project'] = nil
+    require('project').setup(setup_opts)
+    history = require('project.util.history')
+  end)
 
   describe('opening', function()
     it('should throw error with wrong flag', function()

@@ -48,6 +48,8 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
   history = { save_dir = vim.fn.stdpath('data'), save_file = 'project_history.json', size = 100 },
   log = {
     enabled = false,
+    debug = false,
+    debug_level = vim.log.levels.INFO,
     logpath = vim.fn.stdpath('state'),
     max_size = 1.1,
     snacks = { enabled = false, style = 'fancy' },
@@ -224,19 +226,28 @@ function D:verify_logging()
   self.log = self.log or vim.deepcopy(DEFAULTS.log)
 
   Util.validate({
+    ['log.debug'] = { self.log.debug, { 'boolean', 'nil' }, true },
+    ['log.debug_level'] = { self.log.debug_level, { 'number', 'nil' }, true },
     ['log.enabled'] = { self.log.enabled, { 'boolean', 'nil' }, true },
     ['log.logpath'] = { self.log.logpath, { 'string', 'nil' }, true },
     ['log.max_size'] = { self.log.max_size, { 'number', 'nil' }, true },
     ['log.snacks'] = { self.log.snacks, { 'table', 'nil' }, true },
   })
 
+  if self.log.debug == nil then
+    self.log.debug = false
+  end
   if self.log.enabled == nil then
     self.log.enabled = false
   end
+
   self.log.max_size = (self.log.max_size and self.log.max_size > 0) and self.log.max_size or DEFAULTS.log.max_size
   self.log.snacks = vim.tbl_deep_extend('force', DEFAULTS.log.snacks, self.log.snacks or {})
   self.log.logpath = (self.log.logpath and Util.path.exists(self.log.logpath)) and self.log.logpath
     or DEFAULTS.log.logpath
+  self.log.debug_level = (self.log.debug_level and vim.tbl_contains(vim.log.levels, self.log.debug_level))
+      and self.log.debug_level
+    or DEFAULTS.log.debug_level
 
   if self.logging ~= nil and type(self.logging) == 'boolean' then
     self.log.enabled = self.logging
