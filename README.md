@@ -98,7 +98,7 @@ if has('nvim-0.11')
   Plug 'DrKJeff16/project.nvim'
 
   " OPTIONAL
-  Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-lua/plenary.nvim' | Plug 'nvim-telescope/telescope-file-browser.nvim'
+  Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-telescope/telescope-file-browser.nvim'
   Plug 'wsdjeg/picker.nvim'
   Plug 'ibhagwan/fzf-lua'
   Plug 'xieyonn/spinner.nvim'
@@ -117,10 +117,7 @@ endif
 {
   'DrKJeff16/project.nvim',
   dependencies = { -- OPTIONAL. Choose any of the following
-    {
-      'nvim-telescope/telescope.nvim',
-      dependencies = { 'nvim-lua/plenary.nvim' },
-    },
+    'nvim-telescope/telescope.nvim',
     'wsdjeg/picker.nvim',
     'folke/snacks.nvim',
     'ibhagwan/fzf-lua',
@@ -137,7 +134,7 @@ If you wish to lazy-load this plugin:
   'DrKJeff16/project.nvim',
   cmd = { 'Project' }, -- Lazy-load by commands
   dependencies = { -- OPTIONAL. Choose any of the following
-    { 'nvim-telescope/telescope.nvim', dependencies = { 'nvim-lua/plenary.nvim' } },
+    'nvim-telescope/telescope.nvim',
     'wsdjeg/picker.nvim',
     'folke/snacks.nvim',
     'ibhagwan/fzf-lua',
@@ -156,7 +153,6 @@ require('pckr').add({
   {
     'DrKJeff16/project.nvim',
     requires = { -- OPTIONAL. Choose any of the following
-      'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope.nvim',
       'wsdjeg/picker.nvim',
       'folke/snacks.nvim',
@@ -203,7 +199,6 @@ paq({
   'DrKJeff16/project.nvim',
 
    -- OPTIONAL. Choose any of the following
-  'nvim-lua/plenary.nvim',
   'nvim-telescope/telescope.nvim',
   'wsdjeg/picker.nvim',
   'folke/snacks.nvim',
@@ -214,11 +209,33 @@ paq({
 
 </details>
 <details>
-<summary>vim.pack</summary>
+<summary><a href = "https://github.com/zuqini/zpack.nvim">zpack.nvim</a></summary>
+
+```lua
+return {
+  'DrKJeff16/project.nvim',
+  version = 'main',
+  dependencies = { -- OPTIONAL
+    'nvim-telescope/telescope.nvim',
+    'wsdjeg/picker.nvim',
+    'folke/snacks.nvim',
+    'ibhagwan/fzf-lua',
+    'xieyonn/spinner.nvim',
+  },
+  opts = {},
+  config = function(_, opts)
+    require('project').setup(opts)
+  end,
+}
+```
+
+</details>
+<details>
+<summary><code>vim.pack</code></summary>
 
 ```lua
 vim.pack.add({
-  'https://github.com/DrKJeff16/project.nvim',
+  { src = 'https://github.com/DrKJeff16/project.nvim' },
 })
 ```
 
