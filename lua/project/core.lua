@@ -71,9 +71,10 @@ local SWITCH = {}
 ---@nodiscard
 function SWITCH.git(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
-  local root, method = M.find_git_root(bufnr)
+  local root, method =
+    M.find_git_root((bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf())
+
   if root and method then
     return true, root, method
   end
@@ -87,16 +88,12 @@ end
 ---@nodiscard
 function SWITCH.lsp(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
-  local root, lsp_name = M.find_lsp_root(bufnr)
+  local root, lsp_name =
+    M.find_lsp_root((bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf())
+
   if root and lsp_name then
-    if vim.g.project_switch_root ~= root then
-      vim.g.project_switch_root = root
-    end
-    if not vim.list_contains({ (vim.uv.cwd() or vim.fn.getcwd()), vim.g.project_switch_root }, root) then
-      Util.log.debug(('(SWITCH.lsp): found `%s` root at `%s`.'):format(lsp_name, root))
-    end
+    vim.g.project_switch_root = root
     return true, root, ('"%s" lsp'):format(lsp_name)
   end
   return false
@@ -109,20 +106,15 @@ end
 ---@nodiscard
 function SWITCH.pattern(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-  bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
 
-  local root, method = M.find_pattern_root(bufnr or vim.api.nvim_get_current_buf())
-  if not (root and method) then
-    return false
-  end
+  local root, method =
+    M.find_pattern_root((bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf())
 
-  if vim.g.project_switch_root ~= root then
+  if root and method then
     vim.g.project_switch_root = root
+    return true, root, method
   end
-  if not vim.list_contains({ (vim.uv.cwd() or vim.fn.getcwd()), vim.g.project_switch_root }, root) then
-    Util.log.debug(('(SWITCH.pattern): found `%s` root at `%s`.'):format(method, root))
-  end
-  return true, root, method
+  return false
 end
 
 ---@param bufnr? integer
@@ -254,7 +246,9 @@ function M.find_pattern_root(bufnr_or_dir)
 
   local dir = '' ---@type string
   if not bufnr_or_dir or type(bufnr_or_dir) == 'number' then
-    bufnr_or_dir = bufnr_or_dir or vim.api.nvim_get_current_buf() --[[@as integer]]
+    bufnr_or_dir = (bufnr_or_dir and Util.is_int(bufnr_or_dir, bufnr_or_dir >= 0)) and bufnr_or_dir
+      or vim.api.nvim_get_current_buf() --[[@as integer]]
+
     dir = M.check_oil(bufnr_or_dir) or vim.api.nvim_buf_get_name(bufnr_or_dir)
   elseif bufnr_or_dir and type(bufnr_or_dir) == 'string' then
     dir = M.check_oil(nil, bufnr_or_dir) or bufnr_or_dir

@@ -78,26 +78,23 @@ function M.remove_root_patterns(patterns)
     Util.log.error('(project.remove_root_patterns): `project.nvim` is not setup!')
     error('(project.remove_root_patterns): `project.nvim` is not setup!')
   end
-  if not (pats and Util.is_type('table', pats)) then
+  if not pats or type(pats) ~= 'table' then
     Util.log.error('(project.remove_root_patterns): Config values are unaccessible!')
     error('(project.remove_root_patterns): Config values are unaccessible!')
   end
 
-  if type(patterns) == 'table' and #patterns == 0 then
-    Util.log.error('(project.remove_root_patterns): Patterns table is empty!')
-    vim.notify('(project.remove_root_patterns): Patterns table is empty!', vim.log.levels.ERROR)
-    return
-  end
   if type(patterns) == 'table' then
-    for _, pat in ipairs(patterns) do
-      if Util.is_type('string', pat) then
-        M.remove_root_patterns(pat)
+    if #patterns == 0 then
+      Util.log.error('(project.remove_root_patterns): Patterns table is empty!')
+      vim.notify('(project.remove_root_patterns): Patterns table is empty!', vim.log.levels.ERROR)
+    else
+      for _, pat in ipairs(patterns) do
+        if Util.is_type('string', pat) then
+          M.remove_root_patterns(pat)
+        end
       end
     end
-    return
-  end
-
-  if patterns == '' then
+  elseif patterns == '' then
     Util.log.warn(('(project.remove_root_patterns): Skipping empty pattern: `%s`'):format(patterns))
     vim.notify(('(project.remove_root_patterns): Skipping empty pattern: `%s`'):format(patterns), WARN)
   elseif not vim.list_contains(pats, patterns) then
@@ -131,7 +128,7 @@ function M.add_root_patterns(patterns)
 
   local Config = require('project.config')
   local pats = Config.get().patterns
-  if not (pats and Util.is_type('table', pats)) then
+  if not pats or type(pats) ~= 'table' then
     Util.log.error('(project.add_root_patterns): Config values are unaccessible!')
     error('(project.add_root_patterns): Config values are unaccessible!')
   end
