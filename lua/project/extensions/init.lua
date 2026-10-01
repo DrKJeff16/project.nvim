@@ -1,5 +1,6 @@
 ---@class Project.Extensions
 ---@field ['fzf-lua'] Project.Extensions.FzfLua
+---@field mini Project.Extensions.MiniPick
 ---@field picker Project.Extensions.Picker
 ---@field snacks Project.Extensions.Snacks
 local M = setmetatable({}, {
