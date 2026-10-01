@@ -13,13 +13,15 @@ repos:
       - id: make_lint
         name: Run StyLua
         language: system
-        entry: "make lint"
-        files: (lua|test|spec)/.*lua$
+        entry: |
+          make lint
+        files: (lua|spec)/.*lua$
         verbose: true
       - id: make_check
         name: Run Selene
         language: system
-        entry: "make check"
+        entry: |
+          make check
         files: lua/.*lua$
         verbose: true
       - id: make_docs
