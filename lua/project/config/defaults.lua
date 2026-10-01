@@ -32,6 +32,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
       'fzf',
       'lazy',
       'log',
+      'minipick',
       'ministarter',
       'neo-tree',
       'notify',
@@ -45,6 +46,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
   enable_autochdir = false,
   exclude_dirs = {},
   fzf_lua = { enabled = false, show = 'paths', sort = 'newest' },
+  mini = { enabled = false, show = 'paths', sort = 'newest', tilde = false },
   history = { save_dir = vim.fn.stdpath('data'), save_file = 'project_history.json', size = 100 },
   log = {
     enabled = false,
@@ -456,6 +458,7 @@ function D:verify()
     log = { self.log, { 'table', 'nil' }, true },
     lsp = { self.lsp, { 'table', 'nil' }, true },
     manual_mode = { self.manual_mode, { 'boolean', 'nil' }, true },
+    mini = { self.mini, { 'table', 'nil' }, true },
     on_attach = { self.on_attach, { 'function', 'nil' }, true },
     patterns = { self.patterns, { 'table', 'nil' }, true },
     picker = { self.picker, { 'table', 'nil' }, true },

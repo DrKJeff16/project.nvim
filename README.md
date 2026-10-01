@@ -20,7 +20,7 @@ https://github.com/user-attachments/assets/0e10c4e8-f930-47a0-9058-956622e8f547
 
 ## Features
 
-- **(NEW!)** Integration with [xieyonn/spinner.nvim](https://github.com/xieyonn/spinner.nvim)
+- Integration with [xieyonn/spinner.nvim](https://github.com/xieyonn/spinner.nvim)
 - Supports project root detection using `git`
 - Automatically sets the current working directory to the project root directory using pattern matching (LSP optionally)
 - Projects can be assigned a name ([`:Project history rename [...]`](#project-history-clearrename-pathtoproject-pathtoproject))
@@ -43,6 +43,7 @@ This plugin supports the following plugins:
 - `nvim-tree.lua` ([Read More](#nvim-tree))
 - `neo-tree` ([Read More](#neo-tree))
 - `mini.starter` ([Read More](#ministarter))
+- `mini.pick`
 - `picker.nvim` ([Read More](#pickernvim))
 - `snacks.nvim` ([Read More](#snacksnvim))
 
@@ -82,6 +83,7 @@ Requirements:
 - [xieyonn/spinner.nvim](https://github.com/xieyonn/spinner.nvim) **(OPTIONAL, NEEDED FOR SPINNER INTEGRATION)**
 - [ibhagwan/fzf-lua](https://github.com/ibhagwan/fzf-lua) **(OPTIONAL, RECOMMENDED)**
 - [wsdjeg/picker.nvim](https://github.com/wsdjeg/picker.nvim) **(OPTIONAL, RECOMMENDED)**
+- [nvim-mini/mini.pick](https://nvim-mini.org/mini.nvim/readmes/mini-pick) **(OPTIONAL, RECOMMENDED)**
 - [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) **(OPTIONAL, RECOMMENDED)**
   - [nvim-telescope/telescope-file-browser.nvim](https://github.com/nvim-telescope/telescope-file-browser.nvim) **(OPTIONAL DEPENDENCY)**
 
@@ -99,6 +101,8 @@ if has('nvim-0.11')
 
   " OPTIONAL
   Plug 'nvim-telescope/telescope.nvim' | Plug 'nvim-telescope/telescope-file-browser.nvim'
+  Plug 'folke/snacks.nvim'
+  Plug 'nvim-mini/mini.pick'
   Plug 'wsdjeg/picker.nvim'
   Plug 'ibhagwan/fzf-lua'
   Plug 'xieyonn/spinner.nvim'
@@ -120,6 +124,7 @@ endif
     'nvim-telescope/telescope.nvim',
     'wsdjeg/picker.nvim',
     'folke/snacks.nvim',
+    'nvim-mini/mini.pick',
     'ibhagwan/fzf-lua',
     'xieyonn/spinner.nvim',
   },
@@ -137,6 +142,7 @@ If you wish to lazy-load this plugin:
     'nvim-telescope/telescope.nvim',
     'wsdjeg/picker.nvim',
     'folke/snacks.nvim',
+    'nvim-mini/mini.pick',
     'ibhagwan/fzf-lua',
     'xieyonn/spinner.nvim',
   },
@@ -156,6 +162,7 @@ require('pckr').add({
       'nvim-telescope/telescope.nvim',
       'wsdjeg/picker.nvim',
       'folke/snacks.nvim',
+      'nvim-mini/mini.pick',
       'ibhagwan/fzf-lua',
       'xieyonn/spinner.nvim',
     },
@@ -175,10 +182,10 @@ require('plug').add({
   {
     'DrKJeff16/project.nvim',
     depends = { -- OPTIONAL
-      'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope.nvim',
       'wsdjeg/picker.nvim',
       'folke/snacks.nvim',
+      'nvim-mini/mini.pick',
       'ibhagwan/fzf-lua',
       'xieyonn/spinner.nvim',
     },
@@ -202,6 +209,7 @@ paq({
   'nvim-telescope/telescope.nvim',
   'wsdjeg/picker.nvim',
   'folke/snacks.nvim',
+  'nvim-mini/mini.pick',
   'ibhagwan/fzf-lua',
   'xieyonn/spinner.nvim',
 })
@@ -219,6 +227,7 @@ return {
     'nvim-telescope/telescope.nvim',
     'wsdjeg/picker.nvim',
     'folke/snacks.nvim',
+    'nvim-mini/mini.pick',
     'ibhagwan/fzf-lua',
     'xieyonn/spinner.nvim',
   },
@@ -404,6 +413,22 @@ By default, `setup()` loads with the following options:
     logpath = vim.fn.stdpath('state'),
   },
 
+  mini = {
+    -- Enable mini.pick picker integration
+    enabled = false,
+
+    -- Sort directories by the newest or oldest
+    ---@type 'newest'|'oldest'
+    sort = 'newest',
+
+    -- Show project entries either by their path (`'paths'`) or their custom name (`'names'`)
+    ---@type 'paths'|'names'
+    show = 'paths',
+
+    -- Whether to show directories in an un-expanded fashion (`/home/user/...`) or not (`~/...`)
+    tilde = false,
+  },
+
   snacks = {
     -- Enable snacks.nvim picker integration
     enabled = false,
@@ -472,6 +497,7 @@ By default, `setup()` loads with the following options:
       'checkhealth',
       'lazy',
       'log',
+      'minipick',
       'ministarter',
       'neo-tree',
       'notify',

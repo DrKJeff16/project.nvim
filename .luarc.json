@@ -97,6 +97,7 @@
         "$HOME/Projects/nvim/spinner.nvim",
         "$XDG_DATA_HOME/nvim/lazy/fzf-lua",
         "$XDG_DATA_HOME/nvim/lazy/lualine.nvim",
+        "$XDG_DATA_HOME/nvim/lazy/mini.pick",
         "$XDG_DATA_HOME/nvim/lazy/oil.nvim",
         "$XDG_DATA_HOME/nvim/lazy/picker.nvim",
         "$XDG_DATA_HOME/nvim/lazy/plenary.nvim",

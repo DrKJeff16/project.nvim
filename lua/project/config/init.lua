@@ -126,6 +126,8 @@ function M.setup(opts)
     require('project.extensions.snacks').setup(options.snacks.opts or {})
   end
 
+  require('project.extensions.mini').setup(options.mini)
+
   if options.spinner.enabled then
     Util.spinner.setup(options.spinner.kind)
   end

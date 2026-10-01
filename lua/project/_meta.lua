@@ -369,6 +369,30 @@
 ---@field show ProjectOpts.Show
 ---@field sort ProjectOpts.Sort
 
+---Table of options used for `mini.pick` integration
+--- ---
+---@class (exact) ProjectOpts.Mini: ProjectOpts.FzfLua
+---Determines whether the `mini.pick` integration is enabled.
+---
+---If `mini.pick` is not installed, this won't make a difference.
+--- ---
+---Default: `false`
+--- ---
+---@field enabled? boolean
+---@field show? ProjectOpts.Show
+---Determines whether the newest projects come first (`'newest'`), or the oldest (`'oldest'`).
+--- ---
+---Default: `'newest'`
+--- ---
+---@field sort? ProjectOpts.Sort
+---@field tilde? boolean
+
+---@class (exact) ProjectDefaults.Mini: ProjectOpts.Mini
+---@field enabled boolean
+---@field show ProjectOpts.Show
+---@field sort ProjectOpts.Sort
+---@field tilde boolean
+
 ---Table of options used for `fzf-lua` integration
 --- ---
 ---@class (exact) ProjectOpts.FzfLua
@@ -380,8 +404,7 @@
 --- ---
 ---@field enabled? boolean
 ---@field show? ProjectOpts.Show
----Determines whether the newest projects come first (`'newest'`),
----or the oldest (`'oldest'`).
+---Determines whether the newest projects come first (`'newest'`), or the oldest (`'oldest'`).
 --- ---
 ---Default: `'newest'`
 --- ---
@@ -509,6 +532,7 @@
 ---Default: `false`
 --- ---
 ---@field manual_mode? boolean
+---@field mini? ProjectOpts.Mini
 ---All the patterns used to detect the project's root directory.
 ---
 ---See `:h project.nvim-pattern-matching`.
@@ -614,6 +638,7 @@
 ---@field log ProjectDefaults.Logging
 ---@field lsp ProjectDefaults.LSP
 ---@field manual_mode boolean
+---@field mini ProjectDefaults.Mini
 ---@field on_attach nil|fun(dir: string, method: string, bufnr?: integer, map: ProjectAttachMapCb)
 ---@field patterns string[]
 ---@field picker ProjectDefaults.Picker
