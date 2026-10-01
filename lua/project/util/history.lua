@@ -78,8 +78,7 @@ function M.rename_project(path, name)
     return false
   end
 
-  path = Util.strip_slash(path)
-  name = Util.strip(' ', name)
+  path, name = Util.strip_slash(path), Util.strip(' ', name)
 
   local valid_chars = Util.dedup(
     vim.split(
@@ -96,9 +95,7 @@ function M.rename_project(path, name)
     end
   end
 
-  local renamed = false
-  local recent_i = 0
-  local old_name = ''
+  local renamed, recent_i, old_name = false, 0, ''
   for i, proj in ipairs(recent_projects) do
     if proj.path == path then
       recent_i = i
@@ -175,7 +172,7 @@ end
 ---@return uv.fs_stat.result|nil|? stat
 function M.open_history(mode)
   Util.validate({ mode = { mode, { 'string', 'number' } } })
-  if Util.is_type('string', mode) and not vim.list_contains(allowed_flags, mode) then
+  if type(mode) == 'string' and not vim.list_contains(allowed_flags, mode) then
     Log.error(('(project.util.history.open_history): Invalid flag `%s`!'):format(mode))
     error(('(project.util.history.open_history): Invalid flag `%s`!'):format(mode))
   end
@@ -190,7 +187,6 @@ function M.open_history(mode)
     Log.error('(project.util.history.open_history): History file unavailable!')
     error('(project.util.history.open_history): History file unavailable!')
   end
-
   return Path.open_file(Path.historyfile, mode)
 end
 
@@ -207,8 +203,7 @@ function M.export_history_json(path, ind, force_name)
   if force_name == nil then
     force_name = false
   end
-  if Util.is_type('string', ind) then
-    ---@cast ind string
+  if type(ind) == 'string' then
     ind = math.floor(Path.open_mode(ind))
   end
 
@@ -419,8 +414,7 @@ function M.delete_project(project, prompt)
     prompt = false
   end
 
-  ---@cast project Project.ActionEntry
-  if Util.is_type('table', project) then
+  if type(project) == 'table' then
     Util.validate({ project_value = { project.value, { 'string' } } })
   end
 
@@ -430,14 +424,10 @@ function M.delete_project(project, prompt)
     return
   end
 
-  ---@cast project string|Project.ActionEntry
   local proj = type(project) == 'string' and project or project.value
   if prompt and vim.fn.confirm(("Delete '%s' from project list?"):format(proj), '&Yes\n&No', 2) ~= 1 then
     Log.info('(project.util.history.delete_project): Aborting project deletion.')
-    return
-  end
-
-  if M.remove_session(proj, M.remove_recent(proj)) then
+  elseif M.remove_session(proj, M.remove_recent(proj)) then
     Log.info(('(project.util.history.delete_project): Deleting project `%s`.'):format(proj))
     vim.notify(('(project.util.history.delete_project): Deleting project `%s`.'):format(proj), INFO)
     M.write_history()
@@ -461,12 +451,17 @@ function M.delete_projects(projects, prompt)
     prompt = false
   end
 
-  if prompt then
-    local msg = ('Delete %d project(s) from history?\n\n%s\n'):format(#projects, table.concat(projects, '\n'))
-    if vim.fn.confirm(msg, '&Yes\n&No', 2) ~= 1 then
-      Log.info('(project.util.history.delete_projects): Aborting project deletion.')
-      return false
-    end
+  if
+    prompt
+    and vim.fn.confirm(
+        ('Delete %d project(s) from history?\n\n%s\n'):format(#projects, table.concat(projects, '\n')),
+        '&Yes\n&No',
+        2
+      )
+      ~= 1
+  then
+    Log.info('(project.util.history.delete_projects): Aborting project deletion.')
+    return false
   end
 
   for _, path in ipairs(projects) do
@@ -494,7 +489,6 @@ function M.deserialize_history(history_data, name_data)
     then
       table.insert(projects, { path = s, name = name_data[i] })
     end
-
     i = i + 1
   end
   recent_projects = Util.delete_duplicates(projects)
@@ -507,21 +501,20 @@ local function setup_watch()
     return
   end
 
-  event = (vim.uv.new_fs_event())
-  if not event then
+  event = vim.uv.new_fs_event()
+  if event then
+    event:start(Path.historyfile, {}, function(err, _, events)
+      if not err and events.change then
+        recent_projects = {}
+        M.read_history()
+      end
+    end)
+
+    Log.debug('(project.util.history.setup_watch): Started history file setup watch!')
+    vim.g.project_history_has_watch_setup = 1
+  else
     Log.warn('project.nvim - Unable to create history file setup watch!')
-    return
   end
-
-  event:start(Path.historyfile, {}, function(err, _, events)
-    if not err and events.change then
-      recent_projects = {}
-      M.read_history()
-    end
-  end)
-
-  Log.debug('(project.util.history.setup_watch): Started history file setup watch!')
-  vim.g.project_history_has_watch_setup = 1
 end
 
 function M.read_history()
@@ -549,19 +542,17 @@ function M.read_history()
   ---@type boolean, ProjectHistoryEntry[]|nil|?
   local ok, data = pcall(vim.json.decode, (vim.uv.fs_read(fd, stat.size)))
   vim.uv.fs_close(fd)
-  if not (ok and data) then
+  if ok and data then
+    local data_str, name_list = '', {} ---@type string, string[]
+    for _, v in ipairs(data) do
+      data_str = ('%s%s%s'):format(data_str, data_str == '' and '' or '\n', v.path)
+      table.insert(name_list, v.name)
+    end
+    M.deserialize_history(data_str, name_list)
+  else
     Log.error(([[(project.util.history.read_history): Could not decode JSON data from history file!
 (`stat.size = %s`)]]):format(stat.size))
-    return
   end
-
-  local data_str, name_list = '', {} ---@type string, string[]
-  for _, v in ipairs(data) do
-    data_str = ('%s%s%s'):format(data_str, data_str == '' and '' or '\n', v.path)
-    table.insert(name_list, v.name)
-  end
-
-  M.deserialize_history(data_str, name_list)
 end
 
 ---@overload fun(): recents: ProjectHistoryEntry[]
@@ -647,10 +638,7 @@ function M.write_history(path)
     error('(project.util.history.write_history): History file unavailable!')
   end
 
-  if config.history and config.history.size then
-    historysize = config.history.size
-  end
-  historysize = historysize >= 0 and historysize or 100
+  historysize = (config.history and config.history.size and config.history.size >= 0) and config.history.size or 100
 
   local file_history = {} ---@type ProjectHistoryEntry[]
   local ok, fd, stat ---@type boolean, integer|nil|?, uv.fs_stat.result|nil|?
@@ -741,7 +729,6 @@ function M.find_entry(search, value, key)
   })
   if vim.list_contains({ 'recent', 'session' }, search) and vim.list_contains({ 'path', 'name', 'index' }, key) then
     M.read_history()
-
     for i, v in ipairs(search == 'session' and session_projects or recent_projects) do
       if (v.path == Util.strip_slash(value) or v.name == value) and v[key] then
         return key == 'index' and i or v[key]
@@ -822,8 +809,7 @@ function M.toggle_win()
 end
 
 function M.setup()
-  session_projects = session_projects or {}
-  recent_projects = recent_projects or {}
+  session_projects, recent_projects = session_projects or {}, recent_projects or {}
 end
 
 return M

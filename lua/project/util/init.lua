@@ -96,23 +96,27 @@ function M.only_has_chars(s, chars, extra_allowed)
       table.insert(ch_list, v)
     end
   end
-  if vim.tbl_isempty(ch_list) then
-    return false
-  end
 
-  if extra_allowed.spaces then
-    table.insert(ch_list, ' ')
-  end
-  if extra_allowed.newlines then
-    table.insert(ch_list, '\n')
-  end
+  local res = true
+  if #ch_list == 0 then
+    res = false
+  else
+    if extra_allowed.spaces then
+      table.insert(ch_list, ' ')
+    end
+    if extra_allowed.newlines then
+      table.insert(ch_list, '\n')
+    end
 
-  for _, c in ipairs(vim.split(s, '', { trimempty = false })) do
-    if not vim.list_contains(ch_list, c) then
-      return false
+    res = true
+    for _, c in ipairs(vim.split(s, '', { trimempty = false })) do
+      if not vim.list_contains(ch_list, c) then
+        res = false
+        break
+      end
     end
   end
-  return true
+  return res
 end
 
 ---@param list any[]
@@ -618,22 +622,18 @@ function M.rstrip(char, str)
     return str
   end
 
-  if M.is_type('table', char) then
-    ---@cast char string[]
-    if not vim.tbl_isempty(char) then
-      for _, c in ipairs(char) do
-        if c:len() > str:len() then
-          break
-        end
-        str = M.rstrip(c, str)
+  if type(char) == 'table' and #char > 0 then
+    for _, c in ipairs(char) do
+      if c:len() > str:len() then
+        break
       end
+      str = M.rstrip(c, str)
     end
-    return str
+  elseif type(char) == 'string' then
+    str = (not vim.startswith(str:reverse(), char) or char:len() > str:len()) and str
+      or M.lstrip(char, str:reverse()):reverse()
   end
-
-  ---@cast char string
-  return (not vim.startswith(str:reverse(), char) or char:len() > str:len()) and str
-    or M.lstrip(char, str:reverse()):reverse()
+  return str
 end
 
 ---Strip given a leading string (or list of strings) within a string, if any, bidirectionally.
@@ -651,12 +651,9 @@ function M.strip(char, str)
     return str
   end
 
-  if M.is_type('string', char) then
-    return M.rstrip(char, M.lstrip(char, str))
-  end
-
-  ---@cast char string[]
-  if not vim.tbl_isempty(char) then
+  if type(char) == 'string' then
+    str = M.rstrip(char, M.lstrip(char, str))
+  elseif #char > 0 then
     for _, c in ipairs(char) do
       if c:len() > str:len() then
         break
@@ -693,30 +690,23 @@ function M.dedup(T, key)
   local names, NT = {}, {}
   for k, v in pairs(T) do
     local not_dup = false
-    if M.is_type('table', v) then
-      if not key then
-        not_dup = not vim.tbl_contains(NT, function(val)
-          return vim.deep_equal(val, v)
-        end, { predicate = true })
-      else
-        not_dup = not vim.tbl_contains(names, function(val)
-          return vim.deep_equal(val, v[key])
-        end, { predicate = true })
-        if not_dup then
-          table.insert(names, v[key])
-        end
-      end
-    else
+    if (type(v) == 'table' and not key) or type(v) ~= 'table' then
       not_dup = not vim.tbl_contains(NT, function(val)
         return vim.deep_equal(val, v)
       end, { predicate = true })
-    end
-    if not_dup then
-      if list then
-        table.insert(NT, v)
-      else
-        NT[k] = v
+    elseif type(v) == 'table' and key then
+      not_dup = not vim.tbl_contains(names, function(val)
+        return vim.deep_equal(val, v[key])
+      end, { predicate = true })
+      if not_dup then
+        table.insert(names, v[key])
       end
+    end
+
+    if not_dup and list then
+      table.insert(NT, v)
+    elseif not_dup then
+      NT[k] = v
     end
   end
 
@@ -737,8 +727,7 @@ function M.format_per_type(t, data, sep, constraints)
     sep = { sep, { 'string', 'nil' }, true },
     constraints = { constraints, { 'table', 'nil' }, true },
   })
-  sep = sep or ''
-  constraints = constraints or nil
+  sep, constraints = sep or '', constraints or nil
 
   if t == 'string' then
     local res = ('%s`"%s"`'):format(sep, data)
@@ -767,9 +756,8 @@ function M.format_per_type(t, data, sep, constraints)
 
   sep = ('%s '):format(sep)
   for k, v in pairs(data) do
-    k = M.is_type('number', k) and ('[%s]'):format(tostring(k)) or k
-    msg = ('%s\n%s`%s`: '):format(msg, sep, k)
-    if M.is_type('string', v) then
+    msg = ('%s\n%s`%s`: '):format(msg, sep, type(k) == 'number' and ('[%d]'):format(k) or k)
+    if type(v) == 'string' then
       msg = ('%s`"%s"`'):format(msg, v)
     else
       msg = ('%s%s'):format(msg, M.format_per_type(type(v), v, sep))

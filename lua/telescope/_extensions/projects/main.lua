@@ -54,7 +54,7 @@ local function normal_attach(prompt_bufnr, map)
       group[mode == 'n' and '?' or '<C-?>'] = 'help_mappings'
       for lhs, act in pairs(group) do
         local rhs = vim.list_contains(valid_acts, act) and _Actions[act] or false ---@type function|false
-        if rhs and vim.is_callable(rhs) and Project.util.is_type('string', lhs) then
+        if rhs and vim.is_callable(rhs) and type(lhs) == 'string' then
           map(mode, lhs, rhs)
         end
       end

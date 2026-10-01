@@ -35,7 +35,7 @@ local function telescope_check()
   vim.health.ok('`projects` picker extension loaded')
 
   local opts_telescope = Project.config.get().telescope
-  if not Project.util.is_type('table', opts_telescope) then
+  if type(opts_telescope) ~= 'table' then
     vim.health.warn('`projects` does not have telescope options set up')
     return
   end
@@ -43,7 +43,7 @@ local function telescope_check()
   for k, v in pairs(opts_telescope) do
     local str, warning = Project.util.format_per_type(type(v), v)
     str = ('`%s`: %s'):format(k, str)
-    if Project.util.is_type('boolean', warning) and warning then
+    if type(warning) == 'boolean' and warning then
       vim.health.warn(str)
     else
       vim.health.ok(str)
