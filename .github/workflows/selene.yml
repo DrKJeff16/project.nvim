@@ -1,28 +1,26 @@
 name: Selene Lint
 on:
   push:
+    branches:
+      - main
     paths:
       - ".github/workflows/selene.yml"
-      - "lua/project.lua"
       - "lua/project/*.lua"
       - "lua/project/*.lua"
-      - "lua/project/config/defaults.lua"
-      - "lua/project/extensions/fzf-lua.lua"
+      - "lua/project/config/*.lua"
+      - "lua/project/extensions/*.lua"
       - "lua/project/utils/*.lua"
-      - "lua/telescope/_extensions/*.lua"
       - "lua/telescope/_extensions/projects/*.lua"
       - "selene.toml"
       - "vim.yml"
   pull_request:
     paths:
       - ".github/workflows/selene.yml"
-      - "lua/project.lua"
       - "lua/project/*.lua"
       - "lua/project/*.lua"
-      - "lua/project/config/defaults.lua"
-      - "lua/project/extensions/fzf-lua.lua"
+      - "lua/project/config/*.lua"
+      - "lua/project/extensions/*.lua"
       - "lua/project/utils/*.lua"
-      - "lua/telescope/_extensions/*.lua"
       - "lua/telescope/_extensions/projects/*.lua"
       - "selene.toml"
       - "vim.yml"
@@ -33,7 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
       - name: Lint Lua code with Selene
-        uses: AlejandroSuero/selene-linter-action@v1.0.0
+        uses: AlejandroSuero/selene-linter-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --display-style=quiet lua
