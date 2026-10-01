@@ -89,7 +89,7 @@ function M.remove_root_patterns(patterns)
       vim.notify('(project.remove_root_patterns): Patterns table is empty!', vim.log.levels.ERROR)
     else
       for _, pat in ipairs(patterns) do
-        if Util.is_type('string', pat) then
+        if type(pat) == 'string' then
           M.remove_root_patterns(pat)
         end
       end

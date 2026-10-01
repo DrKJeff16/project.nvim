@@ -453,14 +453,10 @@ M.session_menu = new_popup({
     end
   end,
   choices = function(opts)
-    local choices = { ---@type table<string, fun(...: any)>
-      Exit = function()
-        vim.g.project_nvim_cwd = ''
-      end,
-    }
+    local choices = {} ---@type table<string, fun(...: any)>
     for _, proj in ipairs(M.session_menu.choices_list(opts)) do
-      if proj ~= 'Exit' then
-        choices[proj] = open_node
+      choices[proj] = proj ~= 'Exit' and open_node or function()
+        vim.g.project_nvim_cwd = ''
       end
     end
     return choices
