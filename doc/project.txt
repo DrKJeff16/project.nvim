@@ -31,10 +31,9 @@ Table of Contents                                                  *project.toc*
     1.5. `ProjectOpts.Telescope` ......................... |ProjectOpts.Telescope|
     1.6. `ProjectOpts.Spinner` ............................. |ProjectOpts.Spinner|
     1.7. `ProjectOpts.FzfLua` ............................... |ProjectOpts.FzfLua|
-    1.8. `ProjectOpts.Mini` ................................... |ProjectOpts.Mini|
-    1.9. `ProjectOpts.Picker` ............................... |ProjectOpts.Picker|
-    1.10. `ProjectOpts.Snacks` .............................. |ProjectOpts.Snacks|
-    1.11. `ProjectOpts.Logging` ............................ |ProjectOpts.Logging|
+    1.8. `ProjectOpts.Picker` ............................... |ProjectOpts.Picker|
+    1.9. `ProjectOpts.Snacks` ............................... |ProjectOpts.Snacks|
+    1.10. `ProjectOpts.Logging` ............................ |ProjectOpts.Logging|
 2. Pattern Matching ................................. |project.pattern-matching|
 3. Lualine ................................................... |project.lualine|
 4. Nvim Tree ............................................... |project.nvim-tree|
@@ -165,13 +164,6 @@ Table of Contents                                                  *project.toc*
                                 (see |ProjectRoot|)
 
                                 Default: `false` ~
-
-
-    • {mini}                    (|ProjectOpts.Mini|)
-                                Table of options used for integration with
-                                |MiniPick|
-
-                                See |ProjectOpts.Mini| for more details
 
 
     • {on_attach}               (`nil|function`)
@@ -489,34 +481,7 @@ Table of Contents                                                  *project.toc*
                                 projects either by name (`'names'`)
                                 or path (`'paths'`)
 
-                                Default: `'paths'` ~
-
-
-    • {sort}                    (`'newest'|'oldest'`)
-                                Determines whether the newest projects
-                                come first (`'newest'`), or the oldest
-                                (`'oldest'`)
-
-                                Default: `'newest'` ~
-
-
-------------------------------------------------------------------------------
-1.8. `ProjectOpts.Mini`                                         *ProjectOpts.Mini*
-                                                      *project.mini.pick-config*
-
-
-    • {enabled}                 (`boolean`)
-                                Determines whether the `mini.pick` integration
-                                is enabled. If `mini.pick` is not installed
-                                this won't make a difference
-
-                                Default: `false` ~
-
-
-    • {show}                    (`'names'|'paths'`)
-                                Sets whether the picker shows the
-                                projects either by name (`'names'`)
-                                or path (`'paths'`)
+                                MIGRATED HISTORY ONLY! ~
 
                                 Default: `'paths'` ~
 
@@ -529,17 +494,8 @@ Table of Contents                                                  *project.toc*
                                 Default: `'newest'` ~
 
 
-    • {tilde}                   (`boolean`)
-                                Indicates whether paths in the picker
-                                should be printed as full paths (`true`)
-                                or un-expanded paths (`false`),
-                                e.g. `~/foo/bar`
-
-                                Default: `false` ~
-
-
 ------------------------------------------------------------------------------
-1.9. `ProjectOpts.Picker`                                     *ProjectOpts.Picker*
+1.8. `ProjectOpts.Picker`                                     *ProjectOpts.Picker*
                                                          *project.picker-config*
 
 
@@ -557,6 +513,8 @@ Table of Contents                                                  *project.toc*
                                 projects either by name (`'names'`)
                                 or path (`'paths'`)
 
+                                MIGRATED HISTORY ONLY! ~
+
                                 Default: `'paths'` ~
 
 
@@ -569,7 +527,7 @@ Table of Contents                                                  *project.toc*
 
 
 ------------------------------------------------------------------------------
-1.10. `ProjectOpts.Snacks`                                    *ProjectOpts.Snacks*
+1.9. `ProjectOpts.Snacks`                                     *ProjectOpts.Snacks*
                                                          *project.snacks-config*
 
 
@@ -597,7 +555,7 @@ Table of Contents                                                  *project.toc*
 
 
 ------------------------------------------------------------------------------
-1.11. `ProjectOpts.Logging`                                  *ProjectOpts.Logging*
+1.10. `ProjectOpts.Logging`                                  *ProjectOpts.Logging*
                                                         *project.logging-config*
 
 

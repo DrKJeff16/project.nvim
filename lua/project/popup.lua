@@ -376,7 +376,6 @@ M.open_menu = new_popup({
       Rename = exec_cmd('Project', nil, 'history', 'rename'),
       Session = exec_cmd('Project', nil, 'session'),
       ['fzf-lua Picker'] = vim.g.project_fzf_lua_loaded ~= 1 and nil or exec_cmd('Project', nil, 'fzf-lua'),
-      ['mini.pick Picker'] = vim.g.project_mini_pick_loaded ~= 1 and nil or exec_cmd('Project', nil, 'mini'),
       ['picker.nvim Picker'] = vim.g.project_picker_loaded ~= 1 and nil or exec_cmd('Project', nil, 'picker'),
       ['snacks.nvim Picker'] = vim.g.project_snacks_loaded ~= 1 and nil or exec_cmd('Project', nil, 'snacks'),
       ['telescope.nvim Picker'] = vim.g.project_telescope_loaded ~= 1 and nil or exec_cmd('Project', nil, 'telescope'),
@@ -401,20 +400,17 @@ M.open_menu = new_popup({
       'Import',
       'Help',
     }
-    if vim.g.project_fzf_lua_loaded == 1 then
-      table.insert(res_list, #res_list - 5, 'fzf-lua Picker')
-    end
     if vim.g.project_snacks_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'snacks.nvim Picker')
-    end
-    if vim.g.project_mini_pick_loaded == 1 then
-      table.insert(res_list, #res_list - 5, 'mini.pick Picker')
     end
     if vim.g.project_picker_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'picker.nvim Picker')
     end
     if vim.g.project_telescope_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'telescope.nvim Picker')
+    end
+    if vim.g.project_fzf_lua_loaded == 1 then
+      table.insert(res_list, #res_list - 5, 'fzf-lua Picker')
     end
     if vim.g.project_log_loaded == 1 then
       table.insert(res_list, #res_list - 5, 'Log')

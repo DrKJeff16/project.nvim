@@ -53,9 +53,6 @@ local function completion(_, line)
   if vim.g.project_snacks_loaded == 1 then
     table.insert(items, 'snacks')
   end
-  if vim.g.project_mini_pick_loaded == 1 then
-    table.insert(items, 'mini')
-  end
   table.sort(items)
 
   local Util = require('project.util')
@@ -71,7 +68,7 @@ local function completion(_, line)
   elseif
     #args >= 3 and not vim.list_contains(items, args[2])
     or vim.list_contains(
-      { 'config', 'fzf-lua', 'health', 'help', 'mini', 'picker', 'recents', 'root', 'snacks', 'telescope' },
+      { 'config', 'fzf-lua', 'health', 'help', 'picker', 'recents', 'root', 'snacks', 'telescope' },
       args[2]
     )
   then
@@ -170,9 +167,6 @@ local function callback(ctx)
   if vim.g.project_picker_loaded == 1 then
     err = ('%s\n  :Project[!] picker'):format(err)
   end
-  if vim.g.project_mini_pick_loaded == 1 then
-    err = ('%s\n  :Project mini'):format(err)
-  end
   if vim.g.project_snacks_loaded == 1 then
     err = ('%s\n  :Project snacks'):format(err)
   end
@@ -194,7 +188,6 @@ local function callback(ctx)
       'history',
       'import',
       'log',
-      'mini',
       'picker',
       'recents',
       'root',
@@ -216,8 +209,6 @@ local function callback(ctx)
       Popup.gen_export_prompt()
     elseif vim.g.project_fzf_lua_loaded == 1 and ctx.fargs[1] == 'fzf-lua' and not ctx.bang then
       require('project.extensions')['fzf-lua'].run()
-    elseif vim.g.project_mini_pick_loaded == 1 and ctx.fargs[1] == 'mini' and not ctx.bang then
-      require('project.extensions').mini.run()
     elseif ctx.fargs[1] == 'health' and not ctx.bang then
       vim.cmd.checkhealth({ args = { 'project' }, mods = ctx.smods })
     elseif ctx.fargs[1] == 'help' and not ctx.bang then
