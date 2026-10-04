@@ -60,7 +60,11 @@ end
 
 ---@param entry ProjectPickerItem
 function M.default_action(entry)
-  if vim.fn.isdirectory(entry.value) == 1 and Project.core.set_pwd(entry.value, 'picker.nvim') then
+  if
+    vim.g.project_picker_loaded == 1
+    and vim.fn.isdirectory(entry.value) == 1
+    and Project.core.set_pwd(entry.value, 'picker.nvim')
+  then
     require('picker').open({ 'files' })
   end
 end
