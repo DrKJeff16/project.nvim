@@ -1,4 +1,5 @@
 ---@module 'project._meta'
+---@module 'snacks'
 
 local Util = require('project.util')
 
@@ -18,7 +19,7 @@ local config = { ---@type ProjectSnacksConfig
 ---@return snacks.picker.finder.Item[] items
 ---@nodiscard
 local function gen_items()
-  local recents = require('project').get_recent_projects(nil, true)
+  local recents = Util.history.get_recent_projects(nil, true)
   if config.sort and config.sort == 'newest' then
     recents = Util.reverse(recents)
   end
@@ -65,7 +66,7 @@ function M.pick()
         self:close()
         require('project.core').set_pwd(item.value, 'snacks')
       end,
-      delete_project = function(self, _)
+      delete_project = function(self)
         local paths = vim.tbl_map(function(item)
           return vim.fn.expand(item.value)
         end, self:selected({ fallback = true }))
@@ -87,15 +88,16 @@ function M.pick()
       self:close()
       if require('project.core').set_pwd(vim.fn.expand(item.value), 'snacks') then
         Util.log.debug('(project.extensions.snacks.pick): Opening Snacks picker')
+        local cwd = vim.uv.cwd() or vim.fn.getcwd()
         require('snacks').picker.files({
-          cwd = vim.uv.cwd() or vim.fn.getcwd(),
+          cwd = cwd,
           show_empty = true,
           hidden = config.hidden,
           finder = 'files',
           format = 'file',
           supports_live = true,
           auto_close = true,
-          dirs = { vim.uv.cwd() or vim.fn.getcwd() },
+          dirs = { cwd },
           enter = true,
         })
       end
