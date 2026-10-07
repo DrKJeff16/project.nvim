@@ -236,7 +236,16 @@ return {
 ```lua
 vim.pack.add({
   { src = 'https://github.com/DrKJeff16/project.nvim' },
+
+  -- OPTIONAL
+  { src = 'nvim-telescope/telescope.nvim' },
+  { src = 'wsdjeg/picker.nvim' },
+  { src = 'folke/snacks.nvim' },
+  { src = 'ibhagwan/fzf-lua' },
+  { src = 'xieyonn/spinner.nvim' },
 })
+
+require('project').setup()
 ```
 
 </details>
