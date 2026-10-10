@@ -323,7 +323,7 @@ function M.set_pwd(dir, method, bufnr)
 
   if not Util.path.verify_owner(dir) then
     Util.log.warn('(project.core.set_pwd): Project is owned by a different user')
-    if config.different_owners.notify or not config.different_owners.allow then
+    if config.different_owners.notify then
       vim.notify('(project.core.set_pwd): Project is owned by a different user', vim.log.levels.ERROR)
     end
     if spinner then
