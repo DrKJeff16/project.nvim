@@ -175,13 +175,15 @@ function M.prompt_project(input)
   local original_input = input
   input = strip_slash(input)
   if not (Util.path.exists(input) and Util.path.exists(strip_slash(input, ':p:h'))) then
-    vim.notify(('Invalid path `%s`'):format(original_input), vim.log.levels.ERROR)
+    Util.log.notify_error(('(project.popup.prompt_project): Invalid path `%s`'):format(original_input))
     return
   end
   if not Util.dir_exists(input) then
     input = strip_slash(input, ':p:h')
     if not Util.dir_exists(input) then
-      vim.notify('Path is not a directory, and parent could not be retrieved!', vim.log.levels.ERROR)
+      Util.log.notify_error(
+        '(project.popup.prompt_project): Path is not a directory, and parent could not be retrieved!'
+      )
       return
     end
   end
@@ -190,7 +192,7 @@ function M.prompt_project(input)
     require('project.core').get_current_project() == input
     or vim.list_contains(Util.history.get_session_projects(), input)
   then
-    vim.notify('Already added that directory!', vim.log.levels.WARN)
+    Util.log.notify_warn('(project.popup.prompt_project): Already added that directory!')
   else
     require('project.core').set_pwd(input, 'prompt')
   end
@@ -213,7 +215,7 @@ M.delete_menu = new_popup({
       if vim.list_contains(choices_list, item) and M.delete_menu.choices(config)[item] then
         M.delete_menu.choices(config)[item]()
       else
-        vim.notify('Bad selection!', vim.log.levels.ERROR)
+        Util.log.notify_error('(project.popup.delete_menu): Bad selection!')
       end
     end)
   end,
@@ -263,7 +265,7 @@ M.rename_menu = new_popup({
           end
         end)
       else
-        vim.notify('Bad selection!', vim.log.levels.ERROR)
+        Util.log.notify_error('(project.popup.rename_menu): Bad selection!')
       end
     end)
   end,
@@ -309,7 +311,7 @@ M.recents_menu = new_popup({
       if vim.list_contains(choices_list, item) and choice then
         M.recents_menu.choices(config)[item](find_entry('recent', item, 'path'), false, false)
       else
-        vim.notify('Bad selection!', vim.log.levels.ERROR)
+        Util.log.notify_error('(project.popup.recents_menu): Bad selection!')
       end
     end)
   end,
@@ -355,7 +357,7 @@ M.open_menu = new_popup({
         if vim.list_contains(choices_list, item) and choice then
           choice()
         else
-          vim.notify('Bad selection!', vim.log.levels.ERROR)
+          Util.log.notify_error('(project.popup.open_menu): Bad selection!')
         end
       end)
     end
@@ -432,25 +434,26 @@ M.session_menu = new_popup({
     local config = require('project.config').get()
     local choices_list = M.session_menu.choices_list(config)
     if #choices_list == 1 then
-      vim.notify('No sessions available!', vim.log.levels.WARN)
-    else
-      vim.ui.select(choices_list, {
-        prompt = 'Select a project from your session:',
-        format_item = function(item) ---@param item string
-          return (item == 'Exit' or config.show_by_name) and item or strip_slash(item, ':p:~')
-        end,
-      }, function(item) ---@param item string
-        if not item or item == '' then
-          return
-        end
-
-        if vim.list_contains(choices_list, item) and M.session_menu.choices(config)[item] then
-          M.session_menu.choices(config)[item](find_entry('session', item, 'path'), only_cd, false)
-        else
-          vim.notify('Bad selection!', vim.log.levels.ERROR)
-        end
-      end)
+      Util.log.notify_warn('(project.popup.session_menu): No sessions available!')
+      return
     end
+
+    vim.ui.select(choices_list, {
+      prompt = 'Select a project from your session:',
+      format_item = function(item) ---@param item string
+        return (item == 'Exit' or config.show_by_name) and item or strip_slash(item, ':p:~')
+      end,
+    }, function(item) ---@param item string
+      if not item or item == '' then
+        return
+      end
+
+      if vim.list_contains(choices_list, item) and M.session_menu.choices(config)[item] then
+        M.session_menu.choices(config)[item](find_entry('session', item, 'path'), only_cd, false)
+      else
+        Util.log.notify_error('(project.popup.session_menu): Bad selection!')
+      end
+    end)
   end,
   choices = function(opts)
     local choices = {} ---@type table<string, fun(...: any)>

@@ -192,8 +192,7 @@ function M.verify_owner(dir)
 
   local stat = vim.uv.fs_stat(dir)
   if not stat then
-    Log.error("(project.util.path.verify_owner): Directory can't be accessed!")
-    vim.notify("(project.util.path.verify_owner): Directory can't be accessed!", ERROR)
+    Log.notify_error("(project.util.path.verify_owner): Directory can't be accessed!")
     return false
   end
   return stat.uid == vim.uv.getuid()
@@ -222,8 +221,7 @@ function M.create_path(path)
     local Log = require('project.util.log')
     Log.debug(('(project.util.path.create_path): Creating directory `%s`.'):format(path))
     if not (vim.uv.fs_mkdir(path, M.open_mode('755'))) then
-      Log.error(('(project.util.path.create_path): Unable to create diretory: `%s`'):format(path))
-      vim.notify(('(project.util.path.create_path): Unable to create diretory: `%s`'):format(path), ERROR)
+      Log.notify_error(('(project.util.path.create_path): Unable to create diretory: `%s`'):format(path))
     end
   end
 end

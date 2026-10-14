@@ -6,8 +6,7 @@ local M = {}
 
 function M.setup()
   if not Util.mod_exists('picker') then
-    Util.log.error('(project.extensions.picker.setup): picker.nvim is not installed!')
-    vim.notify('(project.extensions.picker.setup): picker.nvim is not installed!', vim.log.levels.ERROR)
+    Util.log.notify_error('(project.extensions.picker.setup): picker.nvim is not installed!')
   else
     vim.g.project_picker_loaded = 1
   end

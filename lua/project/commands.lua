@@ -235,7 +235,7 @@ local function callback(ctx)
       require('project.core').on_buf_enter(vim.api.nvim_get_current_buf())
 
       if (vim.uv.cwd() or vim.fn.getcwd()) == old_cwd and not ctx.bang then
-        vim.notify('(:Project root): Current project is already in history!', vim.log.levels.WARN)
+        Util.notify_warn('(:Project root): Current project is already in history!')
       elseif ctx.bang then
         vim.notify(vim.uv.cwd() or vim.fn.getcwd(), vim.log.levels.INFO)
       end
@@ -273,8 +273,7 @@ local function callback(ctx)
   elseif ctx.fargs[1] == 'config' then
     require('project.config').toggle_win()
   elseif ctx.fargs[1] == 'delete' and not Util.history.get_recent_projects() then
-    Util.log.error('(:Project delete): No recent projects!')
-    vim.notify('(:Project delete): No recent projects!', vim.log.levels.ERROR)
+    Util.log.notify_error('(:Project delete): No recent projects!')
   elseif ctx.fargs[1] == 'delete' then
     local recent = Util.history.get_recent_projects()
     for i = 2, #ctx.fargs do
@@ -288,8 +287,7 @@ local function callback(ctx)
           end, { predicate = true })
         ) or path == ''
       then
-        Util.log.error(('(:Project delete): Could not delete `%s`, aborting'):format(path))
-        vim.notify(('(:Project delete): Could not delete `%s`, aborting'):format(path), vim.log.levels.ERROR)
+        Util.log.notify_error(('(:Project delete): Could not delete `%s`, aborting'):format(path))
       elseif
         vim.tbl_contains(recent, function(val) ---@param val ProjectHistoryEntry
           Util.log.debug(('`%s` =? `%s` ==> %s'):format(path, val.path, vim.inspect(val.path == path)))
@@ -310,11 +308,11 @@ local function callback(ctx)
       if
         not vim.list_contains({ Util.strip_slash(ctx.fargs[i]), Util.strip_slash(ctx.fargs[i], ':p:~') }, ctx.fargs[i])
       then
-        vim.notify('(:Project history rename): Invalid directory!', vim.log.levels.ERROR)
+        Util.log.notify_error('(:Project history rename): Invalid directory!')
         return
       end
       if not Popup.rename_input(ctx.fargs[i]) then
-        vim.notify(('(:Project history): Unable to rename project `%s`!'):format(ctx.fargs[i]), vim.log.levels.ERROR)
+        Util.log.notify_error(('(:Project history): Unable to rename project `%s`!'):format(ctx.fargs[i]))
         return
       end
     end

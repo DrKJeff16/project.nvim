@@ -131,7 +131,7 @@ function M.setup(opts)
     config = vim.tbl_deep_extend('force', config, opts or {})
     vim.g.project_snacks_loaded = 1
   else
-    vim.notify('snacks.nvim is not installed! Aborting.', vim.log.levels.ERROR)
+    Util.log.notify_error('(project.extensions.snacks.setup): snacks.nvim is not installed! Aborting.')
   end
 end
 

@@ -5,8 +5,7 @@ end
 
 local Project = require('project')
 if not Project.util.mod_exists('telescope.init') then
-  Project.util.log.error('(telescope._extensions.projects.util): Telescope is not installed!')
-  vim.notify('(telescope._extensions.projects.util): Telescope is not installed!', vim.log.levels.ERROR)
+  Project.util.log.notify_error('(telescope._extensions.projects.util): Telescope is not installed!')
   return
 end
 

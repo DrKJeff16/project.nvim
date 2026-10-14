@@ -89,8 +89,7 @@ function M.rename_project(path, name)
   )
   for _, c in ipairs(vim.split(name, '', { trimempty = false })) do
     if not vim.list_contains(valid_chars, c) then
-      Log.error(('(project.util.history.rename_project): Invalid character `%s`!'):format(c))
-      vim.notify(('(project.util.history.rename_project): Invalid character `%s`!'):format(c), ERROR)
+      Log.notify_error(('(project.util.history.rename_project): Invalid character `%s`!'):format(c))
       return false
     end
   end
@@ -122,9 +121,7 @@ function M.rename_project(path, name)
   end
 
   if renamed then
-    vim.notify(('(project.util.history.rename_project): Renamed from `%s` to `%s`!'):format(old_name, name), INFO)
-    Log.debug(('(project.util.history.rename_project): Renamed from `%s` to `%s`!'):format(old_name, name))
-
+    Log.notify_debug(('(project.util.history.rename_project): Renamed from `%s` to `%s`!'):format(old_name, name))
     M.write_history()
   end
   return renamed
@@ -148,22 +145,19 @@ function M.clear_historyfile(force)
 
   local fd = Path.open_file(Path.historyfile, 'w')
   if not fd then
-    Log.error('(project.util.history.clear_historyfile): Unable to clear history file!')
-    vim.notify('(project.nvim): Unable to clear history file!', ERROR)
+    Log.notify_error('(project.util.history.clear_historyfile): Unable to clear history file!')
     return
   end
 
   local success = (vim.uv.fs_write(fd, { '[', ']' }))
   vim.uv.fs_close(fd)
   if success then
-    Log.warn('(project.util.history.clear_historyfile): History file cleared successfully.')
-    vim.notify('(project.nvim): History file cleared successfully', WARN)
+    Log.notify_warn('(project.util.history.clear_historyfile): History file cleared successfully.')
 
     recent_projects, session_projects = {}, {}
     vim.g.project_historyfile_cleared = 1
   else
-    Log.error('(project.util.history.clear_historyfile): Unable to clear history file!')
-    vim.notify('(project.nvim): Unable to clear history file!', ERROR)
+    Log.notify_error('(project.util.history.clear_historyfile): Unable to clear history file!')
   end
 end
 
@@ -208,8 +202,7 @@ function M.export_history_json(path, ind, force_name)
   end
 
   if vim.g.project_setup ~= 1 then
-    Log.error('(project.util.history.export_history_json): `project.nvim` has not been configured!')
-    vim.notify('(project.util.history.export_history_json): `project.nvim` has not been configured!', ERROR)
+    Log.notify_error('(project.util.history.export_history_json): `project.nvim` has not been configured!')
     return
   end
 
@@ -256,16 +249,14 @@ function M.export_history_json(path, ind, force_name)
       return
     end
     if vim.fn.writefile({ '[]' }, path) ~= 0 then
-      Log.error('(project.util.history.export_history_json): File restricted!')
-      vim.notify('(project.util.history.export_history_json): File restricted!', ERROR)
+      Log.notify_error('(project.util.history.export_history_json): File restricted!')
       return
     end
   end
 
   local fd = Path.open_file(path, 'w')
   if not fd then
-    Log.error(('(project.util.history.export_history_json): File restricted! `%s`'):format(path))
-    vim.notify(('(project.util.history.export_history_json): File restricted! `%s`'):format(path), ERROR)
+    Log.notify_error(('(project.util.history.export_history_json): File restricted! `%s`'):format(path))
     return
   end
 
@@ -273,8 +264,7 @@ function M.export_history_json(path, ind, force_name)
   if ok and data then
     vim.uv.fs_write(fd, data)
 
-    Log.debug(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')))
-    vim.notify(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
+    Log.notify_debug(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')))
   end
   vim.uv.fs_close(fd)
 end
@@ -296,20 +286,17 @@ function M.import_history_json(path, force_name, keep)
   end
 
   if vim.g.project_setup ~= 1 then
-    Log.error('(project.util.history.import_history_json): `project.nvim` has not been configured!')
-    vim.notify('(project.util.history.import_history_json): `project.nvim` has not been configured!', ERROR)
+    Log.notify_error('(project.util.history.import_history_json): `project.nvim` has not been configured!')
     return
   end
 
   path = Util.strip(' ', path)
   if path == '' then
-    Log.error(('(project.util.history.import_history_json): File does not exist! `%s`'):format(path))
-    vim.notify(('(project.util.history.import_history_json): File does not exist! `%s`'):format(path), ERROR)
+    Log.notify_error(('(project.util.history.import_history_json): File does not exist! `%s`'):format(path))
     return
   end
   if vim.fn.isdirectory(path) == 1 then
-    Log.error(('(project.util.history.import_history_json): Target is a directory! `%s`'):format(path))
-    vim.notify(('(project.util.history.import_history_json): Target is a directory! `%s`'):format(path), ERROR)
+    Log.notify_error(('(project.util.history.import_history_json): Target is a directory! `%s`'):format(path))
     return
   end
 
@@ -320,39 +307,33 @@ function M.import_history_json(path, force_name, keep)
 
   local fd, stat = Path.open_file(path, 'r')
   if not fd then
-    Log.error(('(project.util.history.import_history_json): File is restricted: `%s`'):format(path))
-    vim.notify(('(project.util.history.import_history_json): File is restricted: `%s`'):format(path), ERROR)
+    Log.notify_error(('(project.util.history.import_history_json): File is restricted: `%s`'):format(path))
     return
   end
   if not stat then
-    Log.error(('(project.util.history.import_history_json): File stat unavailable: `%s`'):format(path))
-    vim.notify(('(project.util.history.import_history_json): File stat unavailable: `%s`'):format(path), ERROR)
+    Log.notify_error(('(project.util.history.import_history_json): File stat unavailable: `%s`'):format(path))
     return
   end
 
   local data = (vim.uv.fs_read(fd, stat.size))
   if not data or data == '' then
-    Log.error(('(project.util.history.import_history_json): Data unavailable: `%s`'):format(path))
-    vim.notify(('(project.util.history.import_history_json): Data unavailable: `%s`'):format(path), ERROR)
+    Log.notify_error(('(project.util.history.import_history_json): Data unavailable: `%s`'):format(path))
     return
   end
 
   local ok, hist = pcall(vim.json.decode, data, {}) ---@type boolean, ProjectHistoryEntry[]|nil|?
   if not (ok and hist) then
-    Log.error(('(project.util.history.import_history_json): JSON decoding failed: `%s`'):format(path))
-    vim.notify(('(project.util.history.import_history_json): JSON decoding failed: `%s`'):format(path), ERROR)
+    Log.notify_error(('(project.util.history.import_history_json): JSON decoding failed: `%s`'):format(path))
     return
   end
 
   recent_projects = Util.reverse(hist)
   M.write_history()
 
-  Log.debug(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')))
-  vim.notify(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
+  Log.notify_debug(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')))
 
   if not keep and vim.uv.fs_unlink(path) then
-    Log.debug(('project.nvim - Deleted imported history file `%s`'):format(Util.strip_slash(path, ':p:~')))
-    vim.notify(('project.nvim - Deleted imported history file `%s`'):format(Util.strip_slash(path, ':p:~')), INFO)
+    Log.notify_debug(('project.nvim - Deleted imported history file `%s`'):format(Util.strip_slash(path, ':p:~')))
   end
 end
 
@@ -419,8 +400,7 @@ function M.delete_project(project, prompt)
   end
 
   if not recent_projects then
-    Log.error('(project.util.history.delete_project): `recent_projects` is `nil`, aborting.')
-    vim.notify('(project.util.history.delete_project): `recent_projects` is `nil`, aborting.')
+    Log.notify_error('(project.util.history.delete_project): `recent_projects` is `nil`, aborting.')
     return
   end
 
@@ -428,8 +408,7 @@ function M.delete_project(project, prompt)
   if prompt and vim.fn.confirm(("Delete '%s' from project list?"):format(proj), '&Yes\n&No', 2) ~= 1 then
     Log.info('(project.util.history.delete_project): Aborting project deletion.')
   elseif M.remove_session(proj, M.remove_recent(proj)) then
-    Log.info(('(project.util.history.delete_project): Deleting project `%s`.'):format(proj))
-    vim.notify(('(project.util.history.delete_project): Deleting project `%s`.'):format(proj), INFO)
+    Log.notify_info(('(project.util.history.delete_project): Deleting project `%s`.'):format(proj))
     M.write_history()
   end
 end
@@ -695,8 +674,7 @@ function M.write_history(path)
   if #file_history == 0 then
     vim.uv.fs_close(fd)
     if vim.g.project_history_no_data_notified ~= 1 then
-      Log.error('(project.util.history.write_history): No data available to write!')
-      vim.notify('(project.util.history.write_history): No data available to write!', ERROR)
+      Log.notify_error('(project.util.history.write_history): No data available to write!')
       vim.g.project_history_no_data_notified = 1
     end
     return
@@ -742,13 +720,11 @@ function M.open_win()
     return
   end
   if not Path.historyfile then
-    Log.error('(project.util.history.open_win): History file not available!')
-    vim.notify('(project.util.history.open_win): History file not available!', ERROR)
+    Log.notify_error('(project.util.history.open_win): History file not available!')
     return
   end
   if not Path.exists(Path.historyfile) then
-    Log.error('(project.util.history.open_win): Bad historyfile path!')
-    vim.notify('(project.util.history.open_win): Bad historyfile path!', ERROR)
+    Log.notify_error('(project.util.history.open_win): Bad historyfile path!')
     return
   end
 

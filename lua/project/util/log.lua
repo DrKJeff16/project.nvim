@@ -9,6 +9,13 @@ local ERROR = vim.log.levels.ERROR -- `4`
 local Path = require('project.util.path')
 local Util = require('project.util')
 
+---@class Project.Util.Log.Backtrace
+---@field debug fun(...: any)
+---@field error fun(...: any)
+---@field info fun(...: any)
+---@field trace fun(...: any)
+---@field warn fun(...: any)
+
 ---@enum Project.Util.Log.Prefix
 local PFX = {
   [DEBUG] = '[DEBUG] ',
@@ -55,49 +62,75 @@ local function format_sel(msg, sel, space)
   return msg
 end
 
+---@param ... any
+local function fallback_error(...)
+  local msg = ''
+  for i = 1, select('#', ...) do
+    msg = format_sel(msg, select(i, ...), i ~= 1)
+  end
+  error(msg)
+end
+
 ---@class Project.Util.Log
+---@field backtrace Project.Util.Log.Backtrace|fun(lvl: 0|1|2|3|4, ...: any)
+---@field debug fun(...: any): output: string|nil|?
+---@field error fun(...: any): output: string|nil|?
+---@field info fun(...: any): output: string|nil|?
+---@field notify_debug fun(...: any): output: string|nil|?
+---@field notify_error fun(...: any): output: string|nil|?
+---@field notify_info fun(...: any): output: string|nil|?
+---@field notify_trace fun(...: any): output: string|nil|?
+---@field notify_warn fun(...: any): output: string|nil|?
+---@field trace fun(...: any): output: string|nil|?
+---@field warn fun(...: any): output: string|nil|?
 local M = {}
+
+---@overload fun(lvl: 0|1|2|3|4|5): cb: fun(...: any): output: string|nil|?
+---@overload fun(lvl: 0|1|2|3|4|5, notify: boolean): cb: fun(...: any): output: string|nil|?
+local function gen_log(lvl, notify)
+  Util.validate({
+    lvl = { lvl, { 'number' }, true },
+    notify = { notify, { 'boolean', 'nil' }, true },
+  })
+  if notify == nil then
+    notify = false
+  end
+
+  return function(...) ---@return string|nil|? output
+    local msg = ''
+    for i = 1, select('#', ...) do
+      msg = format_sel(msg, select(i, ...), i ~= 1)
+    end
+
+    msg = ('%s\n'):format(msg)
+    if notify then
+      vim.notify(msg, lvl)
+    end
+    if vim.g.project_log_loaded == 1 then
+      return M.write(msg, lvl)
+    end
+  end
+end
+
+M.backtrace = {}
+M.debug = gen_log(DEBUG)
+M.error = gen_log(ERROR)
+M.info = gen_log(INFO)
+M.notify_debug = gen_log(DEBUG, true)
+M.notify_error = gen_log(ERROR, true)
+M.notify_info = gen_log(INFO, true)
+M.notify_trace = gen_log(TRACE, true)
+M.notify_warn = gen_log(WARN, true)
+M.trace = gen_log(TRACE)
+M.warn = gen_log(WARN)
 
 ---@return string|nil|? logfile
 function M.get_logfile()
   return logfile
 end
 
----@class Project.Util.Log.Backtrace
----@field debug fun(...: any)
----@field error fun(...: any)
----@field info fun(...: any)
----@field trace fun(...: any)
----@field warn fun(...: any)
----@overload fun(lvl: 0|1|2|3|4, ...: any)
-M.backtrace = setmetatable({}, {
-  ---@param self Project.Util.Log.Backtrace
-  ---@param lvl 0|1|2|3|4
-  __call = function(self, lvl, ...)
-    Util.validate({ lvl = { lvl, { 'number' } } })
-    lvl = vim.list_contains({ DEBUG, INFO, WARN, TRACE, ERROR }, lvl) and lvl or INFO
-
-    self[lvl](...)
-  end,
-})
-
-local function fallback_error(...)
-  local msg = ''
-  for i = 1, select('#', ...) do
-    msg = format_sel(msg, select(i, ...), i ~= 1)
-  end
-
-  error(msg)
-end
-
-M.backtrace.debug = fallback_error
-M.backtrace.error = fallback_error
-M.backtrace.info = fallback_error
-M.backtrace.trace = fallback_error
-M.backtrace.warn = fallback_error
-
 local function gen_snacks_backtrace()
-  if not (snacks_enabled and _G.Snacks) then
+  if not (snacks_enabled and package.loaded['snacks'] and _G.Snacks) then
     return
   end
 
@@ -115,27 +148,6 @@ local function gen_snacks_backtrace()
     end
   end
 end
-
----@param lvl 0|1|2|3|4|5
----@return fun(...: any): output: string|nil|?
-local function gen_log(lvl)
-  return function(...) ---@return string|nil|? output
-    if require('project.config').get().log.enabled then
-      local msg = ''
-      for i = 1, select('#', ...) do
-        msg = format_sel(msg, select(i, ...), i ~= 1)
-      end
-
-      return M.write(('%s\n'):format(msg), lvl)
-    end
-  end
-end
-
-M.debug = gen_log(DEBUG)
-M.error = gen_log(ERROR)
-M.info = gen_log(INFO)
-M.trace = gen_log(TRACE)
-M.warn = gen_log(WARN)
 
 ---@return string|nil|? data
 function M.read_log()
@@ -199,23 +211,21 @@ local function make_timer()
   end
 
   timer = vim.uv.new_timer()
-  if not timer then
-    return
+  if timer then
+    timer:start(10000, 900000, vim.schedule_wrap(timer_cb))
+
+    local group = vim.api.nvim_create_augroup('project.nvim.log', { clear = true })
+    vim.api.nvim_create_autocmd({ 'VimLeavePre' }, {
+      group = group,
+      once = true,
+      callback = function()
+        if timer and not timer:is_active() then
+          timer:stop()
+          timer = nil
+        end
+      end,
+    })
   end
-
-  timer:start(10000, 900000, vim.schedule_wrap(timer_cb))
-
-  local group = vim.api.nvim_create_augroup('project.nvim.log', { clear = true })
-  vim.api.nvim_create_autocmd({ 'VimLeavePre' }, {
-    group = group,
-    once = true,
-    callback = function()
-      if timer and not timer:is_active() then
-        timer:stop()
-        timer = nil
-      end
-    end,
-  })
 end
 
 ---Only runs once.
@@ -238,7 +248,7 @@ end
 ---@param lvl 0|1|2|3|4|5
 ---@return string|nil|? written_data
 function M.write(data, lvl)
-  if not require('project.config').get().log.enabled or vim.g.project_log_cleared == 1 then
+  if vim.g.project_log_loaded ~= 1 or vim.g.project_log_cleared == 1 then
     return
   end
 
@@ -248,21 +258,19 @@ function M.write(data, lvl)
   })
 
   local fd = M.open('a')
-  if not fd then
-    return
+  if fd then
+    local msg = os.date(('%s  ==>  %s%s'):format('%H:%M:%S', PFX[lvl], data)) --[[@as string]]
+    vim.uv.fs_write(fd, msg)
+    vim.uv.fs_close(fd)
+
+    if debug_mode and lvl >= debug_level then
+      vim.schedule(function()
+        vim.notify(msg, lvl)
+      end)
+    end
+
+    return msg
   end
-
-  local msg = os.date(('%s  ==>  %s%s'):format('%H:%M:%S', PFX[lvl], data)) --[[@as string]]
-  vim.uv.fs_write(fd, msg)
-  vim.uv.fs_close(fd)
-
-  if debug_mode and lvl >= debug_level then
-    vim.schedule(function()
-      vim.notify(msg, lvl)
-    end)
-  end
-
-  return msg
 end
 
 ---@param flags uv.fs_open.flags
@@ -317,12 +325,29 @@ function M.setup(opts)
     )
     setup_watch()
 
+    vim.g.project_log_loaded = 1
+
+    M.backtrace = setmetatable({}, {
+      ---@param self Project.Util.Log.Backtrace
+      ---@param lvl 0|1|2|3|4
+      __call = function(self, lvl, ...)
+        Util.validate({ lvl = { lvl, { 'number' } } })
+        lvl = vim.list_contains({ DEBUG, INFO, WARN, TRACE, ERROR }, lvl) and lvl or INFO
+
+        self[lvl](...)
+      end,
+    })
+
+    M.backtrace.debug = fallback_error
+    M.backtrace.error = fallback_error
+    M.backtrace.info = fallback_error
+    M.backtrace.trace = fallback_error
+    M.backtrace.warn = fallback_error
+
     if opts.snacks.enabled then
       snacks_enabled = true
       gen_snacks_backtrace()
     end
-
-    vim.g.project_log_loaded = 1
   end
 end
 
@@ -331,8 +356,7 @@ function M.open_win()
     return
   end
   if vim.g.project_log_cleared == 1 then
-    vim.notify('(project.util.log.open_win): Log has been cleared, try restarting.', WARN)
-    M.warn('(project.util.log.open_win): Log has been cleared, try restarting.')
+    M.notify_warn('(project.util.log.open_win): Log has been cleared, try restarting.')
     return
   end
   if not Path.exists(logfile) then

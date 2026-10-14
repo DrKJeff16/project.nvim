@@ -324,7 +324,7 @@ function M.set_pwd(dir, method, bufnr)
   if not Util.path.verify_owner(dir) then
     Util.log.warn('(project.core.set_pwd): Project is owned by a different user')
     if config.different_owners.notify then
-      vim.notify('(project.core.set_pwd): Project is owned by a different user', vim.log.levels.ERROR)
+      Util.log.notify_error('(project.core.set_pwd): Project is owned by a different user')
     end
     if spinner then
       spinner:stop()
@@ -412,8 +412,7 @@ function M.set_pwd(dir, method, bufnr)
       spinner:stop()
     end
 
-    Util.log.error(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)))
-    vim.notify(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)), vim.log.levels.ERROR)
+    Util.log.notify_error(('%s INVALID value for `scope_chdir`: `%s`'):format(msg, vim.inspect(scope_chdir)))
     return false
   end
 
@@ -457,7 +456,7 @@ function M.set_pwd(dir, method, bufnr)
   end
 
   if not config.silent_chdir then
-    vim.notify(msg, vim.log.levels[ok and 'INFO' or 'ERROR'])
+    (ok and Util.log.notify_info or Util.log.notify_error)(msg)
   end
   if spinner then
     spinner:stop()

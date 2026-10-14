@@ -85,8 +85,7 @@ function M.remove_root_patterns(patterns)
 
   if type(patterns) == 'table' then
     if #patterns == 0 then
-      Util.log.error('(project.remove_root_patterns): Patterns table is empty!')
-      vim.notify('(project.remove_root_patterns): Patterns table is empty!', vim.log.levels.ERROR)
+      Util.log.notify_error('(project.remove_root_patterns): Patterns table is empty!')
     else
       for _, pat in ipairs(patterns) do
         if type(pat) == 'string' then
@@ -95,11 +94,9 @@ function M.remove_root_patterns(patterns)
       end
     end
   elseif patterns == '' then
-    Util.log.warn(('(project.remove_root_patterns): Skipping empty pattern: `%s`'):format(patterns))
-    vim.notify(('(project.remove_root_patterns): Skipping empty pattern: `%s`'):format(patterns), WARN)
+    Util.log.notify_warn(('(project.remove_root_patterns): Skipping empty pattern: `%s`'):format(patterns))
   elseif not vim.list_contains(pats, patterns) then
-    Util.log.warn(('(project.remove_root_patterns): Skipping unavailable pattern: `%s`'):format(patterns))
-    vim.notify(('(project.remove_root_patterns): Skipping unavailable pattern: `%s`'):format(patterns), WARN)
+    Util.log.notify_warn(('(project.remove_root_patterns): Skipping unavailable pattern: `%s`'):format(patterns))
   else
     local pos = 1
     for i, pat in ipairs(pats) do
@@ -135,8 +132,7 @@ function M.add_root_patterns(patterns)
 
   if type(patterns) == 'string' then
     if patterns == '' or vim.list_contains(pats, patterns) then
-      Util.log.warn(('(project.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(patterns))
-      vim.notify(('(project.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(patterns), WARN)
+      Util.log.notify_warn(('(project.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(patterns))
     else
       table.insert(pats, patterns)
       Config.set('patterns', pats)
@@ -148,8 +144,7 @@ function M.add_root_patterns(patterns)
       end
     end
   else
-    Util.log.error('(project.add_root_patterns): Patterns table is empty or not a list!')
-    vim.notify('(project.add_root_patterns): Patterns table is empty or not a list!', vim.log.levels.ERROR)
+    Util.log.notify_error('(project.add_root_patterns): Patterns table is empty or not a list!')
   end
 end
 

@@ -71,8 +71,7 @@ local M = {}
 function M.setup()
   if require('project.config').get().fzf_lua.enabled then
     if not Util.mod_exists('fzf-lua') then
-      Util.log.error('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed!')
-      vim.notify('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed!', vim.log.levels.ERROR)
+      Util.log.notify_error('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed!')
       vim.g.project_fzf_lua_loaded = 0
     else
       vim.g.project_fzf_lua_loaded = 1
