@@ -5,7 +5,7 @@ local Util = require('project.util')
 local M = {}
 
 function M.setup()
-  if not Util.mod_exists('picker') then
+  if not Util.mod_exists('picker', true) then
     Util.log.notify_error('(project.extensions.picker.setup): picker.nvim is not installed!')
   else
     vim.g.project_picker_loaded = 1

@@ -238,7 +238,7 @@ local Config = setmetatable(M, { ---@type Project.Config
     if raw then
       return raw
     end
-    if Util.mod_exists('project.config.' .. k) then
+    if Util.mod_exists('project.config.' .. k, true) then
       return Util.rawset(self, k, require('project.config.' .. k))
     end
   end,

@@ -66,7 +66,7 @@ end
 local function spinner_check()
   vim.health.start('Spinner Integration')
   vim.health.info('Note: Any warnings in this section are not cause of trouble unless explicitly stated otherwise!\n')
-  if not Util.mod_exists('spinner') then
+  if not Util.mod_exists('spinner', true) then
     vim.health.warn('`xieyonn/spinner.nvim` is not installed.')
   else
     vim.health.ok('`xieyonn/spinner.nvim` is installed.')

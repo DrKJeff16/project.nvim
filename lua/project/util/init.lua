@@ -388,14 +388,20 @@ end
 
 ---Checks if module `mod` exists to be imported.
 --- ---
----@param mod string The `require()` argument to be checked
----@return boolean exists A boolean indicating whether the module exists or not
+---@overload fun(mod: string): exists: boolean
+---@overload fun(mod: string, legacy: boolean): exists: boolean
 ---@nodiscard
-function M.mod_exists(mod)
-  M.validate({ mod = { mod, { 'string' } } })
+function M.mod_exists(mod, legacy)
+  M.validate({
+    mod = { mod, { 'string' } },
+    legacy = { legacy, { 'boolean', 'nil' }, true },
+  })
+  if legacy == nil then
+    legacy = false
+  end
 
-  if mod == '' then
-    return false
+  if not legacy then
+    return package.loaded[mod] ~= nil
   end
   return (pcall(require, mod))
 end
@@ -815,7 +821,7 @@ local Util = setmetatable(M, { ---@type Project.Util
     if raw then
       return raw
     end
-    if M.mod_exists('project.util.' .. k) then
+    if M.mod_exists('project.util.' .. k, true) then
       return M.rawset(self, k, require('project.util.' .. k))
     end
   end,

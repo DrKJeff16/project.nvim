@@ -25,7 +25,7 @@ end
 
 local function telescope_check()
   if not Project.util.mod_exists('telescope') then
-    vim.health.error('`telescope.nvim` is not installed!')
+    vim.health.error('`telescope.nvim` is not loaded!')
     return
   end
   if not require('telescope').extensions.projects then

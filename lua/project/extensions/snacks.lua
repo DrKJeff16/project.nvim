@@ -59,79 +59,81 @@ local function format_session_item(item)
   }
 end
 
+---@return snacks.Picker|nil|? picker
 function M.pick()
-  return require('snacks').picker.pick({
-    actions = {
-      chdir_only = function(self, item)
-        self:close()
-        require('project.core').set_pwd(item.value, 'snacks')
-      end,
-      delete_project = function(self)
-        local paths = vim.tbl_map(function(item)
-          return vim.fn.expand(item.value)
-        end, self:selected({ fallback = true }))
-        self:close()
-        Util.history.delete_projects(paths, true)
-        M.pick()
-      end,
-      rename_project = function(self, item)
-        self:close()
-        vim.api.nvim_feedkeys('i', 'n', false)
+  return not _G.Snacks and nil
+    or _G.Snacks.picker.pick({
+      actions = {
+        chdir_only = function(self, item)
+          self:close()
+          require('project.core').set_pwd(item.value, 'snacks')
+        end,
+        delete_project = function(self)
+          local paths = vim.tbl_map(function(item)
+            return vim.fn.expand(item.value)
+          end, self:selected({ fallback = true }))
+          self:close()
+          Util.history.delete_projects(paths, true)
+          M.pick()
+        end,
+        rename_project = function(self, item)
+          self:close()
+          vim.api.nvim_feedkeys('i', 'n', false)
 
-        require('project.popup').rename_input(
-          vim.fn.expand(item.value),
-          Util.history.find_entry('recent', item.value, 'name')
-        )
+          require('project.popup').rename_input(
+            vim.fn.expand(item.value),
+            Util.history.find_entry('recent', item.value, 'name')
+          )
+        end,
+      },
+      confirm = function(self, item)
+        self:close()
+        if require('project.core').set_pwd(vim.fn.expand(item.value), 'snacks') then
+          Util.log.debug('(project.extensions.snacks.pick): Opening Snacks picker')
+          local cwd = vim.uv.cwd() or vim.fn.getcwd()
+          _G.Snacks.picker.files({
+            cwd = cwd,
+            show_empty = true,
+            hidden = config.hidden,
+            finder = 'files',
+            format = 'file',
+            supports_live = true,
+            auto_close = true,
+            dirs = { cwd },
+            enter = true,
+          })
+        end
       end,
-    },
-    confirm = function(self, item)
-      self:close()
-      if require('project.core').set_pwd(vim.fn.expand(item.value), 'snacks') then
-        Util.log.debug('(project.extensions.snacks.pick): Opening Snacks picker')
-        local cwd = vim.uv.cwd() or vim.fn.getcwd()
-        require('snacks').picker.files({
-          cwd = cwd,
-          show_empty = true,
-          hidden = config.hidden,
-          finder = 'files',
-          format = 'file',
-          supports_live = true,
-          auto_close = true,
-          dirs = { cwd },
-          enter = true,
-        })
-      end
-    end,
-    enter = true,
-    format = format_session_item,
-    items = gen_items(),
-    layout = config.layout,
-    preview = function()
-      return false
-    end,
-    show_empty = false,
-    title = config.title,
-    win = {
-      input = {
-        keys = {
-          ['<C-d>'] = { 'delete_project', mode = { 'n', 'i' }, desc = 'Delete project(s)' },
-          ['<C-r>'] = { 'rename_project', mode = { 'n', 'i' }, desc = 'Rename a project' },
-          ['<C-w>'] = { 'chdir_only', mode = { 'n', 'i' }, desc = 'Change working directory' },
+      enter = true,
+      format = format_session_item,
+      items = gen_items(),
+      layout = config.layout,
+      preview = function()
+        return false
+      end,
+      show_empty = false,
+      title = config.title,
+      win = {
+        input = {
+          keys = {
+            ['<C-d>'] = { 'delete_project', mode = { 'n', 'i' }, desc = 'Delete project(s)' },
+            ['<C-r>'] = { 'rename_project', mode = { 'n', 'i' }, desc = 'Rename a project' },
+            ['<C-w>'] = { 'chdir_only', mode = { 'n', 'i' }, desc = 'Change working directory' },
+          },
         },
       },
-    },
-  })
+    })
 end
 
 ---@param opts? ProjectSnacksConfig
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  if Util.mod_exists('snacks') then
+  if Util.mod_exists('snacks', true) then
     config = vim.tbl_deep_extend('force', config, opts or {})
     vim.g.project_snacks_loaded = 1
   else
-    Util.log.notify_error('(project.extensions.snacks.setup): snacks.nvim is not installed! Aborting.')
+    Util.log.notify_error('(project.extensions.snacks.setup): snacks.nvim is not installed!')
   end
 end
 

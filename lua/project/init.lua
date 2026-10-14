@@ -154,7 +154,7 @@ local Project = setmetatable(M, { ---@type Project
     if raw then
       return raw
     end
-    if Util.mod_exists('project.' .. k) then
+    if Util.mod_exists('project.' .. k, true) then
       return Util.rawset(self, k, require('project.' .. k))
     end
     if k == 'delete_project' then

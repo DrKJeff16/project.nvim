@@ -107,7 +107,7 @@ function M.setup(kind)
   if vim.g.project_spinner_loaded == 1 then
     return
   end
-  if not Util.mod_exists('spinner') then
+  if not Util.mod_exists('spinner', true) then
     vim.g.project_spinner_loaded = 0
     return
   end

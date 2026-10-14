@@ -8,7 +8,7 @@ local M = setmetatable({}, {
     if raw then
       return raw
     end
-    if require('project.util').mod_exists('project.extensions.' .. k) then
+    if require('project.util').mod_exists('project.extensions.' .. k, true) then
       return require('project.util').rawset(self, k, require('project.extensions.' .. k))
     end
   end,
