@@ -122,10 +122,7 @@ local DEFAULTS = { ---@type ProjectConfigDefaults
 local D = {} ---@type ProjectDefaults
 
 function D.__index(self, k)
-  if not rawget(self, k) then
-    return getmetatable(self)[k]
-  end
-  return rawget(self, k)
+  return Util.get(self, k) or getmetatable(self)[k]
 end
 
 ---Checks the `historysize` option.
@@ -157,12 +154,6 @@ function D:verify_history()
   then
     error('(project.nvim): Invalid chars in `history.save_file` setup option!')
   end
-
-  if self.historysize and Util.is_int(self.historysize, self.historysize >= 0) then
-    vim.notify('project.nvim - `historysize` is deprecated, use `history.size` instead', WARN)
-    self.history.size = self.historysize
-    self.historysize = nil
-  end
 end
 
 ---Checks the `scope_chdir` option.
@@ -188,12 +179,6 @@ function D:verify_datapath()
 
   Util.validate({ ['history.save_dir'] = { self.history.save_dir, { 'string', 'nil' }, true } })
 
-  if self.datapath and type(self.datapath) == 'string' then
-    vim.notify('project.nvim - `datapath` is deprecated, use `history.save_dir`!', WARN)
-    self.history.save_dir = self.datapath
-    self.datapath = nil
-  end
-
   if not (self.history.save_dir and Util.dir_exists(self.history.save_dir)) then
     vim.notify(('project.nvim - Invalid save_dir `%s`, reverting to default.'):format(self.history.save_dir), WARN)
     self.history.save_dir = DEFAULTS.history.save_dir
@@ -213,12 +198,12 @@ function D:gen_methods()
     table.insert(methods, 1, 'lsp')
   end
 
-  return setmetatable(methods, {
-    __index = methods,
+  setmetatable(methods, {
     __newindex = function()
       vim.notify('project.nvim - Detection methods are immutable!', vim.log.levels.ERROR)
     end,
   })
+  return methods
 end
 
 function D:verify_logging()
@@ -248,12 +233,6 @@ function D:verify_logging()
   self.log.debug_level = (self.log.debug_level and vim.tbl_contains(vim.log.levels, self.log.debug_level))
       and self.log.debug_level
     or DEFAULTS.log.debug_level
-
-  if self.logging ~= nil and type(self.logging) == 'boolean' then
-    self.log.enabled = self.logging
-    self.logging = nil
-    vim.notify('project.nvim - `logging` is deprecated, use `log.enabled`!', WARN)
-  end
 end
 
 function D:expand_excluded()
@@ -266,30 +245,10 @@ end
 
 function D:verify_lsp()
   self.lsp = self.lsp and vim.tbl_deep_extend('keep', self.lsp, DEFAULTS.lsp) or DEFAULTS.lsp
-  if self.use_lsp ~= nil then
-    vim.notify('project.nvim - `use_lsp` is deprecated! Use `lsp.enabled` instead.', WARN)
-    self.lsp.enabled = self.use_lsp
-    self.use_lsp = nil
-  end
-  if self.allow_patterns_for_lsp ~= nil then
-    vim.notify('project.nvim - `allow_patterns_for_lsp` is deprecated! Use `lsp.use_pattern_matching` instead.', WARN)
-    self.lsp.use_pattern_matching = self.allow_patterns_for_lsp
-    self.allow_patterns_for_lsp = nil
-  end
-  if self.ignore_lsp and type(self.ignore_lsp) == 'table' then
-    vim.notify('project.nvim - `ignore_lsp` is deprecated! Use `lsp.ignore` instead.', WARN)
-    self.lsp.ignore = vim.deepcopy(self.ignore_lsp)
-    self.ignore_lsp = nil
-  end
 end
 
 function D:verify_owners()
   self.different_owners = self.different_owners or {}
-  if self.allow_different_owners ~= nil and type(self.allow_different_owners) == 'boolean' then
-    vim.notify('project.nvim - `allow_different_owners` is deprecated! Use `different_owners.allow` instead.', WARN)
-    self.different_owners.allow = self.allow_different_owners
-    self.allow_different_owners = nil
-  end
   if self.different_owners.allow == nil then
     self.different_owners.allow = false
   end
@@ -422,16 +381,7 @@ function D:verify_telescope()
     ---@cast maps table<string, Project.Telescope.ActionNames>
     if vim.list_contains({ 'n', 'i' }, lhs) then
       for k, v in pairs(maps) do
-        if v == 'change_working_directory' then
-          vim.notify(
-            ("project.nvim - telescope.mappings['%s']['%s'] with a value of 'change_working_directory' is deprecated!\nUse 'change_cwd' instead!"):format(
-              lhs,
-              k
-            ),
-            WARN
-          )
-          self.telescope.mappings[lhs][k] = 'change_cwd'
-        elseif not vim.list_contains(TELESCOPE_MAPPING_OPS, v) then
+        if not vim.list_contains(TELESCOPE_MAPPING_OPS, v) then
           self.telescope.mappings[lhs][k] = nil
         end
       end
@@ -509,17 +459,13 @@ function D:verify()
     end
     self.custom_projects = vim.deepcopy(custom_projects)
   end
-
-  if self.detection_methods then
-    vim.notify('project.nvim - `detection_methods` has been deprecated!\nUse `lsp.enabled` instead.', WARN)
-  end
 end
 
 function D:_get_no_mt()
   local opts = {} ---@type ProjectConfigDefaults
   for _, k in ipairs(vim.tbl_keys(self)) do
     ---@cast k string
-    opts[k] = rawget(self, k)
+    opts[k] = Util.get(self, k)
   end
   return opts
 end
@@ -527,7 +473,9 @@ end
 function D:new(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  return setmetatable(vim.tbl_deep_extend('force', DEFAULTS, opts or {}), D) --[[@as ProjectDefaults]]
+  local obj = vim.tbl_deep_extend('force', DEFAULTS, opts or {}) --[[@as ProjectDefaults]]
+  setmetatable(obj, D)
+  return obj
 end
 
 return D

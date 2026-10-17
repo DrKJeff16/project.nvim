@@ -8,6 +8,35 @@
 ---@field spinner Project.Util.Spinner
 local M = {}
 
+---@generic T: table, F
+---@param t T
+---@param k any
+---@param fallback F
+---@return F fallback
+local function get(t, k, fallback)
+  return M.get(t, k, function()
+    return M.rawset(t, k, fallback)
+  end, true)
+end
+
+setmetatable(M, {
+  __index = function(self, k)
+    local raw = M.get(self, k)
+    if raw then
+      return raw
+    end
+
+    if type(k) ~= 'string' then
+      return
+    end
+
+    ---@cast k string
+    if M.mod_exists('project.util.' .. k, true) then
+      return get(self, k, require('project.util.' .. k))
+    end
+  end,
+})
+
 ---@overload fun(mode_or_maps: Modes, lhs: string, rhs: string|function, opts: vim.keymap.set.Opts)
 ---@overload fun(mode_or_maps: table<Modes, { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>)
 function M.map_attach(mode_or_maps, lhs, rhs, opts)
@@ -791,7 +820,7 @@ function M.path_exists(path_or_paths)
     return true
   end
 
-  require('project.util.log').error('(project.util.path_exists): Table passed to this function is not list-like!')
+  M.log.error('(project.util.path_exists): Table passed to this function is not list-like!')
   return false
 end
 
@@ -815,17 +844,36 @@ function M.rawset(t, k, v)
   return v
 end
 
-local Util = setmetatable(M, { ---@type Project.Util
-  __index = function(self, k)
-    local raw = rawget(self, k) or nil
-    if raw then
+---@generic T: table, F, K, V
+---@param t T<K, V>
+---@param k K
+---@param fallback F|fun(): raw: F
+---@param is_rawset boolean
+---@return F|V?
+---@overload fun(t: T<K, V>, k: K): raw: V?
+---@overload fun(t: T<K, V>, k: K, fallback: F): raw: F|V
+---@overload fun(t: T<K, V>, k: K, fallback: F, is_rawset: false): raw: F|V
+---@overload fun(t: T<K, V>, k: K, fallback: (fun(): raw: F), is_rawset: true): raw: F|V
+function M.get(t, k, fallback, is_rawset)
+  if is_rawset == nil then
+    is_rawset = false
+  end
+
+  if k ~= nil then
+    local raw = rawget(t, k) or nil --[[@as unknown|nil|?]]
+    if raw ~= nil or fallback == nil then
       return raw
     end
-    if M.mod_exists('project.util.' .. k, true) then
-      return M.rawset(self, k, require('project.util.' .. k))
-    end
-  end,
-})
 
-return Util
+    if is_rawset then
+      ---@cast fallback fun(): any
+      local _, res = pcall(fallback)
+      return res
+    end
+    ---@cast fallback any
+    return fallback
+  end
+end
+
+return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

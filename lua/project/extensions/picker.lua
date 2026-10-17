@@ -1,8 +1,36 @@
 local Util = require('project.util')
 
+---@generic T: table, F
+---@param t T
+---@param k any
+---@param fallback F
+---@return F fallback
+local function get(t, k, fallback)
+  return Util.get(t, k, function()
+    return Util.rawset(t, k, fallback)
+  end, true)
+end
+
 ---@class Project.Extensions.Picker
 ---@field source Picker.Sources.Projects
 local M = {}
+
+setmetatable(M, {
+  __index = function(self, k)
+    local raw = Util.get(self, k)
+    if raw then
+      return raw
+    end
+
+    if type(k) ~= 'string' then
+      return
+    end
+
+    if k == 'source' then
+      return get(self, k, require('picker.sources.projects'))
+    end
+  end,
+})
 
 function M.setup()
   if not Util.mod_exists('picker', true) then
@@ -12,18 +40,5 @@ function M.setup()
   end
 end
 
-local Picker = setmetatable(M, { ---@type Project.Extensions.Picker
-  __index = function(self, k)
-    local raw = rawget(self, k) or nil
-    if raw then
-      return raw
-    end
-
-    if k == 'source' then
-      return Util.rawset(self, k, require('picker.sources.projects'))
-    end
-  end,
-})
-
-return Picker
+return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

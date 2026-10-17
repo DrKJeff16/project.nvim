@@ -6,14 +6,43 @@ local float = nil ---@type Project.ConfigLoc|nil|?
 local detection_methods = {} ---@type ('lsp'|'pattern'|'git')[]
 
 ---@class Project.Config
+---@field defaults ProjectDefaults
 local M = {}
+
+---@generic T: table, F
+---@param t T
+---@param k any
+---@param fallback F
+---@return F fallback
+local function get(t, k, fallback)
+  return Util.get(t, k, function()
+    return Util.rawset(t, k, fallback)
+  end, true)
+end
+
+setmetatable(M, {
+  __index = function(self, k) ---@param self Project.Config
+    local raw = Util.get(self, k)
+    if raw then
+      return raw
+    end
+
+    if type(k) ~= 'string' then
+      return
+    end
+
+    if Util.mod_exists('project.config.' .. k, true) then
+      return get(self, k, require('project.config.' .. k))
+    end
+  end,
+})
 
 ---Get the default options for configuring `project`.
 --- ---
 ---@return ProjectDefaults defaults
 ---@nodiscard
 function M.get_defaults()
-  return require('project.config.defaults'):new()
+  return M.defaults:new()
 end
 
 local options = M.get_defaults()
@@ -106,24 +135,25 @@ function M.setup(opts)
     Util.log.debug('(project.config.setup): `g:project_setup` set to `1`.')
   end
 
-  require('project.util.history').setup()
+  Util.history.setup()
 
   require('project.commands').setup()
   Util.log.debug('(project.config.setup): User commands created.')
 
   require('project.core').setup()
 
+  local Extensions = require('project.extensions')
   if options.fzf_lua.enabled then
     Util.log.debug('(project.config.setup): fzf-lua integration enabled.')
-    require('project.extensions.fzf-lua').setup()
+    Extensions['fzf-lua'].setup()
   end
   if options.picker.enabled then
     Util.log.debug('(project.config.setup): picker.nvim integration enabled.')
-    require('project.extensions.picker').setup()
+    Extensions.picker.setup()
   end
   if options.snacks.enabled then
     Util.log.debug('(project.config.setup): snacks.nvim integration enabled.')
-    require('project.extensions.snacks').setup(options.snacks.opts or {})
+    Extensions.snacks.setup(options.snacks.opts or {})
   end
 
   if options.spinner.enabled then
@@ -232,17 +262,5 @@ function M.toggle_win()
   end
 end
 
-local Config = setmetatable(M, { ---@type Project.Config
-  __index = function(self, k)
-    local raw = rawget(self, k) or nil
-    if raw then
-      return raw
-    end
-    if Util.mod_exists('project.config.' .. k, true) then
-      return Util.rawset(self, k, require('project.config.' .. k))
-    end
-  end,
-})
-
-return Config
+return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

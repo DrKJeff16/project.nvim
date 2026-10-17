@@ -154,9 +154,10 @@ local function new_popup(opts)
   end
 
   ---@type Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)
-  local T = setmetatable({ choices = opts.choices, choices_list = opts.choices_list }, {
+  local T = { choices = opts.choices, choices_list = opts.choices_list }
+  setmetatable(T, {
     __index = function(t, k)
-      return rawget(t, k)
+      return Util.get(t, k)
     end,
     __call = function(_, ctx) ---@param ctx vim.api.keyset.create_user_command.command_args
       opts.callback(ctx)

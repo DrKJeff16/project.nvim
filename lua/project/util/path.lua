@@ -1,8 +1,18 @@
-local ERROR = vim.log.levels.ERROR
 local Util = require('project.util')
 
 local last_dir_cache = '' ---@type string
 local curr_dir_cache = {} ---@type string[]
+
+---@generic T: table, F
+---@param t T
+---@param k any
+---@param fallback F
+---@return F fallback
+local function get(t, k, fallback)
+  return Util.get(t, k, function()
+    return Util.rawset(t, k, fallback)
+  end, true)
+end
 
 ---@param path_str string
 ---@return string parent
@@ -136,6 +146,29 @@ end
 --- ---
 ---@field projectpath? string
 local M = {}
+
+setmetatable(M, {
+  __index = function(self, k)
+    local raw = Util.get(self, k) or nil
+    if raw then
+      return raw
+    end
+
+    if type(k) ~= 'string' then
+      return
+    end
+
+    if k == 'exists' then
+      return get(self, k, Util.path_exists)
+    end
+    if k == 'is_hidden' then
+      return get(self, k, Util.is_hidden)
+    end
+    if k == 'join' then
+      return get(self, k, vim.fs.joinpath)
+    end
+  end,
+})
 
 ---@param mode string
 ---@return integer|nil|? mode_num
@@ -310,27 +343,5 @@ function M.setup(save_dir, save_file)
   end
 end
 
-local Path = setmetatable(M, { ---@type Project.Util.Path
-  __index = function(self, k)
-    local raw = rawget(self, k) or nil
-    if raw then
-      return raw
-    end
-
-    if k == 'exists' then
-      rawset(self, k, Util.path_exists)
-      return Util.path_exists
-    end
-    if k == 'is_hidden' then
-      rawset(self, k, Util.is_hidden)
-      return Util.is_hidden
-    end
-    if k == 'join' then
-      rawset(self, k, vim.fs.joinpath)
-      return vim.fs.joinpath
-    end
-  end,
-})
-
-return Path
+return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:
