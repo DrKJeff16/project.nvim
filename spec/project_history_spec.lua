@@ -16,6 +16,10 @@ describe('project.nvim history', function()
     history = require('project.util.history')
   end)
 
+  after_each(function()
+    pcall(os.remove, require('project').util.log.get_logfile())
+  end)
+
   describe('opening', function()
     it('should throw error with wrong flag', function()
       assert.is_false((pcall(history.open_history, '')))
