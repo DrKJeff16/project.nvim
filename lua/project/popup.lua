@@ -152,10 +152,8 @@ local function new_popup(opts)
   if vim.tbl_isempty(opts) then
     error('(project.popup.new_popup): Empty args for constructor!')
   end
-
   ---@type Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)
-  local T = { choices = opts.choices, choices_list = opts.choices_list }
-  setmetatable(T, {
+  return setmetatable({ choices = opts.choices, choices_list = opts.choices_list }, {
     __index = function(t, k)
       return Util.get(t, k)
     end,
@@ -163,7 +161,6 @@ local function new_popup(opts)
       opts.callback(ctx)
     end,
   })
-  return T
 end
 
 ---@param input? string
@@ -189,13 +186,11 @@ function M.prompt_project(input)
     end
   end
 
-  if
-    require('project.core').get_current_project() == input
-    or vim.list_contains(Util.history.get_session_projects(), input)
-  then
+  local Core = require('project.core')
+  if Core.get_current_project() == input or vim.list_contains(Util.history.get_session_projects(), input) then
     Util.log.notify_warn('(project.popup.prompt_project): Already added that directory!')
   else
-    require('project.core').set_pwd(input, 'prompt')
+    Core.set_pwd(input, 'prompt')
   end
 end
 

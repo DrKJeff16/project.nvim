@@ -1,5 +1,13 @@
 ---@module 'project._meta'
 
+if vim.g.project_command_created == 1 then
+  return
+end
+
+vim.g.project_command_created = 1
+
+local Util = require('project.util')
+
 ---@param line string
 ---@return string[] items
 local function complete_items(_, line)
@@ -8,7 +16,6 @@ local function complete_items(_, line)
     return {}
   end
 
-  local Util = require('project.util')
   local recents = {} ---@type string[]
   for _, v in ipairs(Util.reverse(Util.history.get_recent_projects(true, true))) do
     if not vim.list_contains(args, v) then
@@ -55,7 +62,6 @@ local function completion(_, line)
   end
   table.sort(items)
 
-  local Util = require('project.util')
   local res = {} ---@type string[]
   if #args == 2 and args[2] == '' then
     res = items
@@ -112,10 +118,9 @@ local function completion(_, line)
     elseif vim.list_contains({ 'import', 'export' }, args[2]) and #args == 3 then
       res = vim.fn.getcompletion(args[3], 'file', true)
     elseif args[2] == 'export' and #args == 4 then
-      ---@type string[]
       local nums = vim.tbl_map(function(value) ---@param value integer
         return tostring(value)
-      end, Util.range(0, 32, 2))
+      end, Util.range(0, 32, 2)) --[[@as string[]\]]
       if args[4] == '' then
         res = nums
       else
@@ -157,7 +162,6 @@ local function callback(ctx)
   :Project[!] import [/path/to/file[.json]\]
   :Project[!] root
   :Project[!] session [clear]\]]
-
   if vim.g.project_log_loaded == 1 then
     err = ('%s\n  :Project log [clear|close|open|toggle]'):format(err)
   end
@@ -174,28 +178,28 @@ local function callback(ctx)
     err = ('%s\n  :Project telescope'):format(err)
   end
 
-  local Util = require('project.util')
+  local Config = require('project.config')
+  local Core = require('project.core')
+  local Extensions = require('project.extensions')
   local err_txt, msg = table.concat(vim.split(err, '\n', { trimempty = false }), '\n'), ''
-  if
-    #ctx.fargs == 1
-    and vim.list_contains({
-      'add',
-      'delete',
-      'export',
-      'fzf-lua',
-      'health',
-      'help',
-      'history',
-      'import',
-      'log',
-      'picker',
-      'recents',
-      'root',
-      'session',
-      'snacks',
-      'telescope',
-    }, ctx.fargs[1])
-  then
+  local first_args = {
+    'add',
+    'delete',
+    'export',
+    'fzf-lua',
+    'health',
+    'help',
+    'history',
+    'import',
+    'log',
+    'picker',
+    'recents',
+    'root',
+    'session',
+    'snacks',
+    'telescope',
+  }
+  if #ctx.fargs == 1 and vim.list_contains(first_args, ctx.fargs[1]) then
     if ctx.fargs[1] == 'add' then
       vim.ui.input({
         completion = 'dir',
@@ -208,7 +212,7 @@ local function callback(ctx)
     elseif ctx.fargs[1] == 'export' and #ctx.fargs <= 3 then
       Popup.gen_export_prompt()
     elseif vim.g.project_fzf_lua_loaded == 1 and ctx.fargs[1] == 'fzf-lua' and not ctx.bang then
-      require('project.extensions')['fzf-lua'].run()
+      Extensions['fzf-lua'].run()
     elseif ctx.fargs[1] == 'health' and not ctx.bang then
       vim.cmd.checkhealth({ args = { 'project' }, mods = ctx.smods })
     elseif ctx.fargs[1] == 'help' and not ctx.bang then
@@ -221,7 +225,7 @@ local function callback(ctx)
       Util.log.toggle_win()
     elseif vim.g.project_picker_loaded == 1 and ctx.fargs[1] == 'picker' then
       local cmd = { 'rg', '--files', '--ignore', '--text', '--glob', '!.git/' }
-      if ctx.bang or require('project.config').get().picker.hidden then
+      if ctx.bang or Config.get().picker.hidden then
         table.insert(cmd, '--hidden')
       end
       require('picker.sources.files').set({ cmd = cmd })
@@ -232,7 +236,7 @@ local function callback(ctx)
       Popup.recents_menu()
     elseif ctx.fargs[1] == 'root' then
       local old_cwd = vim.uv.cwd() or vim.fn.getcwd()
-      require('project.core').on_buf_enter(vim.api.nvim_get_current_buf())
+      Core.on_buf_enter(vim.api.nvim_get_current_buf())
 
       if (vim.uv.cwd() or vim.fn.getcwd()) == old_cwd and not ctx.bang then
         Util.notify_warn('(:Project root): Current project is already in history!')
@@ -245,7 +249,7 @@ local function callback(ctx)
       ctx.fargs = fargs
       Popup.session_menu(ctx)
     elseif vim.g.project_snacks_loaded == 1 and ctx.fargs[1] == 'snacks' and not ctx.bang then
-      require('project.extensions').snacks.pick()
+      Extensions.snacks.pick()
     elseif vim.g.project_telescope_loaded == 1 and ctx.fargs[1] == 'telescope' and not ctx.bang then
       vim.cmd.Telescope('projects')
     end
@@ -255,12 +259,12 @@ local function callback(ctx)
       if not Util.dir_exists(input) then
         msg = ('%s%s`%s` is not a directory!'):format(msg, msg == '' and '' or '\n', input)
       elseif
-        require('project.core').get_current_project() ~= input
+        Core.get_current_project() ~= input
         and not vim.tbl_contains(Util.history.get_session_projects(), function(val) ---@param val ProjectHistoryEntry
           return val.path == input
         end, { predicate = true })
       then
-        require('project.core').set_pwd(input, 'manual')
+        Core.set_pwd(input, 'manual')
       else
         msg = ('%s%sAlready added `%s`!'):format(msg, msg == '' and '' or '\n', input)
       end
@@ -269,9 +273,9 @@ local function callback(ctx)
   elseif ctx.fargs[1] == 'session' and ctx.fargs[2] == 'clear' and not ctx.bang then
     Util.history.clear_session()
   elseif ctx.fargs[1] == 'config' and ctx.bang then
-    vim.print(require('project.config').get_config(), vim.log.levels.INFO)
+    vim.print(Config.get_config(), vim.log.levels.INFO)
   elseif ctx.fargs[1] == 'config' then
-    require('project.config').toggle_win()
+    Config.toggle_win()
   elseif ctx.fargs[1] == 'delete' and not Util.history.get_recent_projects() then
     Util.log.notify_error('(:Project delete): No recent projects!')
   elseif ctx.fargs[1] == 'delete' then
@@ -331,19 +335,12 @@ local function callback(ctx)
   end
 end
 
----@class Project.Commands
-local M = {}
+vim.api.nvim_create_user_command(
+  'Project',
+  callback,
+  { bang = true, bar = true, complete = completion, desc = 'The project.nvim user commad', force = true, nargs = '*' }
+)
 
-function M.setup()
-  vim.api.nvim_create_user_command('Project', callback, {
-    bang = true,
-    bar = true,
-    complete = completion,
-    desc = 'The project.nvim user commad',
-    force = true,
-    nargs = '*',
-  })
-end
+Util.log.debug('(project.config.setup): User commands created.')
 
-return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

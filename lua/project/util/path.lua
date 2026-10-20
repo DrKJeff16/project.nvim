@@ -67,13 +67,15 @@ local function has(dir, identifier)
     get_files(dir)
   end
 
-  local pattern = require('project.util.globtopattern').globtopattern(identifier)
+  local pattern = Util.globtopattern(identifier)
+  local result = false
   for _, file in ipairs(curr_dir_cache) do
     if file:match(pattern) then
-      return true
+      result = true
+      break
     end
   end
-  return false
+  return result
 end
 
 ---@param dir string
@@ -214,10 +216,9 @@ end
 function M.verify_owner(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
-  local Log = require('project.util.log')
   if Util.is_windows() then
     if vim.g.project_verify_windows_logged ~= 1 then
-      Log.info('(project.util.path.verify_owner): Running on a Windows system. Aborting.')
+      Util.log.info('(project.util.path.verify_owner): Running on a Windows system. Aborting.')
       vim.g.project_verify_windows_logged = 1
     end
     return true
@@ -225,7 +226,7 @@ function M.verify_owner(dir)
 
   local stat = vim.uv.fs_stat(dir)
   if not stat then
-    Log.notify_error("(project.util.path.verify_owner): Directory can't be accessed!")
+    Util.log.notify_error("(project.util.path.verify_owner): Directory can't be accessed!")
     return false
   end
   return stat.uid == vim.uv.getuid()
@@ -251,10 +252,9 @@ function M.create_path(path)
   path = path or M.projectpath --[[@as string]]
 
   if not Util.path_exists(path) then
-    local Log = require('project.util.log')
-    Log.debug(('(project.util.path.create_path): Creating directory `%s`.'):format(path))
+    Util.log.debug(('(project.util.path.create_path): Creating directory `%s`.'):format(path))
     if not (vim.uv.fs_mkdir(path, M.open_mode('755'))) then
-      Log.notify_error(('(project.util.path.create_path): Unable to create diretory: `%s`'):format(path))
+      Util.log.notify_error(('(project.util.path.create_path): Unable to create diretory: `%s`'):format(path))
     end
   end
 end
@@ -317,7 +317,6 @@ function M.setup(save_dir, save_file)
     error('(project.util.path.setup): Unable to create history subdirectory!')
   end
 
-  local Log = require('project.util.log')
   M.historyfile = vim.fs.joinpath(M.projectpath, save_file)
   if not Util.path_exists(M.historyfile) then
     local fd, err, err_name
@@ -326,7 +325,7 @@ function M.setup(save_dir, save_file)
       local msg = not (err and err_name) and '(project.util.path.setup): Unable to create history file!'
         or ('(project.util.path.setup): `%s` - %s'):format(err_name, err)
 
-      Log.error(msg)
+      Util.log.error(msg)
       error(msg)
     end
 
@@ -337,7 +336,7 @@ function M.setup(save_dir, save_file)
       local msg = not (err and err_name) and '(project.util.path): Unable to write contents to empty history file!'
         or ('(project.util.path.setup): `%s` - %s'):format(err_name, err)
 
-      Log.error(msg)
+      Util.log.error(msg)
       error(msg)
     end
   end

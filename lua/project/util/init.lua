@@ -1,7 +1,7 @@
 ---@module 'project._meta'
 
 ---@class Project.Util
----@field globtopattern Project.Util.Glob
+---@field globtopattern Project.Util.Glob|fun(glob: string): pattern: string
 ---@field history Project.Util.History
 ---@field log Project.Util.Log
 ---@field path Project.Util.Path
@@ -20,8 +20,8 @@ local function get(t, k, fallback)
 end
 
 setmetatable(M, {
-  __index = function(self, k)
-    local raw = M.get(self, k)
+  __index = function(self, k) ---@param self Project.Util
+    local raw = self.get(self, k)
     if raw then
       return raw
     end
@@ -31,7 +31,7 @@ setmetatable(M, {
     end
 
     ---@cast k string
-    if M.mod_exists('project.util.' .. k, true) then
+    if self.mod_exists('project.util.' .. k, true) then
       return get(self, k, require('project.util.' .. k))
     end
   end,

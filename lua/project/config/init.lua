@@ -137,9 +137,6 @@ function M.setup(opts)
 
   Util.history.setup()
 
-  require('project.commands').setup()
-  Util.log.debug('(project.config.setup): User commands created.')
-
   require('project.core').setup()
 
   local Extensions = require('project.extensions')

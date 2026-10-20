@@ -475,12 +475,13 @@ end
 function M.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
-  local detection_methods = require('project.config').get_detection_methods()
+  local Config = require('project.config')
+  local detection_methods = Config.get_detection_methods()
   if not Util.buffer_valid(bufnr) or #detection_methods == 0 then
     return
   end
 
-  local config = require('project.config').get()
+  local config = Config.get()
   local root, method, roots = nil, nil, {} ---@type string|nil|?, string|nil|?, { root: string, method_msg: string, method: string }[]
   local success = false
   for _, m in ipairs(detection_methods) do
@@ -656,8 +657,9 @@ function M.setup()
     end,
   })
 
-  if not require('project.config').get().manual_mode then
-    local detection_methods = require('project.config').get_detection_methods()
+  local Config = require('project.config')
+  if not Config.get().manual_mode then
+    local detection_methods = Config.get_detection_methods()
     if vim.list_contains(detection_methods, 'pattern') or vim.list_contains(detection_methods, 'git') then
       vim.api.nvim_create_autocmd('BufEnter', {
         group = group,

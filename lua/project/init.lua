@@ -1,12 +1,13 @@
 ---@module 'project._meta'
 
+local Util = require('project.util')
+
 ---@generic T: table, F
 ---@param t T
 ---@param k any
 ---@param fallback F
 ---@return F fallback
 local function get(t, k, fallback)
-  local Util = require('project.util')
   return Util.get(t, k, function()
     return Util.rawset(t, k, fallback)
   end, true)
@@ -15,7 +16,6 @@ end
 ---The `project.nvim` module.
 --- ---
 ---@class Project
----@field commands Project.Commands
 ---@field config Project.Config
 ---@field core Project.Core
 ---@field delete_menu function
@@ -39,9 +39,8 @@ local M = {}
 
 setmetatable(M, {
   __index = function(self, k) ---@param self Project
-    local Util = require('project.util')
     local raw = Util.get(self, k)
-    if raw then
+    if raw ~= nil then
       return raw
     end
 
@@ -86,10 +85,7 @@ setmetatable(M, {
   end,
 })
 
----@param opts? ProjectOpts
-function M.setup(opts)
-  M.config.setup(opts)
-end
+M.setup = M.config.setup
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---

@@ -148,52 +148,56 @@ end
 ---Credits for this module goes to [David Manura](https://github.com/davidm/lua-glob-pattern).
 --- ---
 ---@class Project.Util.Glob
-local M = {}
+---@field pattern_exclude fun(pattern: string): pattern: string
 
----Some useful references:
---- - [`apr_fnmatch`](http://apr.apache.org/docs/apr/1.3/group__apr__fnmatch.html)
---- ---
----@param glob string
----@return string pattern
-function M.globtopattern(glob)
-  Util.validate({ glob = { glob, { 'string' } } })
+local M = {} ---@type Project.Util.Glob|fun(glob: string): pattern: string
 
-  local pattern, i, char = '^', 0, ''
-  while true do
-    local chs = false
-    i = i + 1
-    char = glob:sub(i, i)
-    if char:len() == 0 then
-      return ('%s$'):format(pattern)
-    end
-    if char == '?' then
-      pattern = ('%s.'):format(pattern)
-    elseif char == '*' then
-      pattern = ('%s.*'):format(pattern)
-    elseif char == '[' then
-      chs, char, pattern, i = charset(glob, char, pattern, i)
-      if not chs then
-        return pattern
+setmetatable(M, {
+  __index = function(self, k)
+    return Util.get(self, k)
+  end,
+  ---@param glob string
+  ---@return string pattern
+  __call = function(_, glob)
+    Util.validate({ glob = { glob, { 'string' } } })
+
+    local pattern, char, i = '^', '', 0
+    while true do
+      i = i + 1
+      char = glob:sub(i, i)
+      if char:len() == 0 then
+        return ('%s$'):format(pattern)
       end
-    else
-      if char == '\\' then
-        i = i + 1
-        char = glob:sub(i, i)
-        if char:len() == 0 then
-          return ('%s\\$'):format(pattern)
+      if char == '?' then
+        pattern = ('%s.'):format(pattern)
+      elseif char == '*' then
+        pattern = ('%s.*'):format(pattern)
+      elseif char == '[' then
+        local chs ---@type boolean
+        chs, char, pattern, i = charset(glob, char, pattern, i)
+        if not chs then
+          return pattern
         end
+      else
+        if char == '\\' then
+          i = i + 1
+          char = glob:sub(i, i)
+          if char:len() == 0 then
+            return ('%s\\$'):format(pattern)
+          end
+        end
+        pattern = ('%s%s'):format(pattern, escape(char, char))
       end
-      pattern = ('%s%s'):format(pattern, escape(char, char))
     end
-  end
-end
+  end,
+})
 
 ---@param pattern string
 ---@return string pattern
 function M.pattern_exclude(pattern)
   Util.validate({ pattern = { pattern, { 'string' } } })
 
-  return M.globtopattern(
+  return M(
     vim.startswith(pattern, '~/')
         and ('%s%s%s'):format(vim.fn.expand('~'), Util.is_windows() and '\\' or '/', pattern:sub(3, pattern:len()))
       or pattern
