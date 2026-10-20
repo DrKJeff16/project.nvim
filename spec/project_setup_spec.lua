@@ -5,13 +5,29 @@ describe('project.nvim setup', function()
   local project ---@type Project
 
   before_each(function()
+    package.loaded['project'] = nil
+    package.loaded['project.config'] = nil
+    package.loaded['project.config.defaults'] = nil
+    package.loaded['project.core'] = nil
+    package.loaded['project.extensions'] = nil
+    package.loaded['project.extensions.fzf-lua'] = nil
+    package.loaded['project.extensions.picker'] = nil
+    package.loaded['project.extensions.snacks'] = nil
+    package.loaded['project.popup'] = nil
+    package.loaded['project.util'] = nil
+    package.loaded['project.util.globtopattern'] = nil
+    package.loaded['project.util.history'] = nil
+    package.loaded['project.util.log'] = nil
+    package.loaded['project.util.path'] = nil
+    package.loaded['project.util.spinner'] = nil
+
     project = require('project')
     defaults = project.config.get_defaults():_get_no_mt()
   end)
 
   it('should set default configuration', function()
     assert.is_true((pcall(project.setup)))
-    assert.are_same(defaults, require('project.config').get():_get_no_mt())
+    assert.are_same(defaults, project.config.get():_get_no_mt())
   end)
 
   it('should accept empty table as parameter', function()
