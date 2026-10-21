@@ -6,6 +6,9 @@
 [![Last GitHub Release](https://img.shields.io/github/v/release/DrKJeff16/project.nvim?sort=date&display_name=release&logo=github)](https://github.com/DrKJeff16/project.nvim/releases/latest)
 [![Last LuaRocks Release](https://img.shields.io/luarocks/v/drkjeff16/project.nvim?style=flat-square&logo=lua&logoColor=white&labelColor=000080)](https://luarocks.org/modules/drkjeff16/project.nvim)
 
+> [!IMPORTANT]
+> **This plugin is not using AI for development.**
+
 `project.nvim` is a [Neovim](https://neovim.io/) plugin to automatically set your current working directory (`cwd`)
 to the current project root. It allows users to navigate through, rename, _"bookmark"_ and/or discard
 their projects, all stored in a JSON history file, stored wherever you choose.
