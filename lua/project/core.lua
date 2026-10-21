@@ -293,16 +293,24 @@ function M.refresh_project_bufs()
   Util.history.set_session_projects(sessions)
 end
 
----@param dir? string
----@param method? string
----@param bufnr? integer
+---@param opts { dir: string, method: string, bufnr?: integer, dry_run?: boolean }
 ---@return boolean success
-function M.set_pwd(dir, method, bufnr)
+function M.set_pwd(opts)
+  Util.validate({ opts = { opts, { 'table' } } })
+  opts = opts or {}
+
   Util.validate({
-    dir = { dir, { 'string', 'nil' }, true },
-    method = { method, { 'string', 'nil' }, true },
-    bufnr = { bufnr, { 'number', 'nil' }, true },
+    ['opts.dir'] = { opts.dir, { 'string', 'nil' }, true },
+    ['opts.method'] = { opts.method, { 'string', 'nil' }, true },
+    ['opts.bufnr'] = { opts.bufnr, { 'number', 'nil' }, true },
+    ['opts.dry_run'] = { opts.dry_run, { 'boolean', 'nil' }, true },
   })
+
+  local dir, method, bufnr, dry_run = opts.dir, opts.method, opts.bufnr, opts.dry_run
+  if dry_run == nil then
+    dry_run = false
+  end
+
   if not (dir and method) then
     return false
   end
@@ -341,33 +349,37 @@ function M.set_pwd(dir, method, bufnr)
 
   local session_projects = Util.history.get_session_projects()
   local unexpand_dir = Util.strip_slash(dir, ':p:~')
-  if not vim.tbl_contains(session_projects, function(val)
-    return val.path == dir
-  end, { predicate = true }) then
-    table.insert(session_projects, 1, {
-      name = custom_name
-        or Util.history.find_entry('recent', dir, 'name')
-        or Util.path.join(Util.strip_slash(dir, ':p:h:h:t'), Util.strip_slash(dir, ':p:h:t')),
-      path = dir,
-    })
-    Util.log.debug(('(project.core.set_pwd): Added project `%s` to the top of session list'):format(unexpand_dir))
-  elseif #session_projects >= 1 then
-    local idx = Util.history.find_entry('session', dir, 'index')
-    if idx then
-      local proj = vim.deepcopy(session_projects[idx])
-      table.remove(session_projects, idx)
-      table.insert(session_projects, 1, proj)
-      Util.log.debug(
-        ('(project.core.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
-          Util.strip_slash(unexpand_dir, ':p:~'),
-          idx
+  if not dry_run then
+    if
+      not vim.tbl_contains(session_projects, function(val)
+        return val.path == dir
+      end, { predicate = true })
+    then
+      table.insert(session_projects, 1, {
+        name = custom_name
+          or Util.history.find_entry('recent', dir, 'name')
+          or Util.path.join(Util.strip_slash(dir, ':p:h:h:t'), Util.strip_slash(dir, ':p:h:t')),
+        path = dir,
+      })
+      Util.log.debug(('(project.core.set_pwd): Added project `%s` to the top of session list'):format(unexpand_dir))
+    elseif #session_projects >= 1 then
+      local idx = Util.history.find_entry('session', dir, 'index')
+      if idx then
+        local proj = vim.deepcopy(session_projects[idx])
+        table.remove(session_projects, idx)
+        table.insert(session_projects, 1, proj)
+        Util.log.debug(
+          ('(project.core.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
+            Util.strip_slash(unexpand_dir, ':p:~'),
+            idx
+          )
         )
-      )
+      end
     end
+    Util.history.set_session_projects(session_projects)
   end
-  Util.history.set_session_projects(session_projects)
 
-  if bufnr and vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr) then
+  if not dry_run and bufnr and vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr) then
     local buf_name = Util.strip_slash(vim.api.nvim_buf_get_name(bufnr))
     if not per_project_bufs[dir] then
       per_project_bufs[dir] = { [buf_name] = { bufnr } }
@@ -379,22 +391,23 @@ function M.set_pwd(dir, method, bufnr)
     M.refresh_project_bufs()
   end
 
+  local group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false })
   if
-    #vim.api.nvim_get_autocmds({
-      event = 'User',
-      group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
-      pattern = { 'ProjectAttachPre' },
-    }) > 0
+    not dry_run
+    and #vim.api.nvim_get_autocmds({ event = 'User', group = group, pattern = { 'ProjectAttachPre' } }) > 0
   then
     vim.api.nvim_exec_autocmds('User', {
       data = { dir = dir, method = method, bufnr = bufnr },
-      group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
+      group = group,
       pattern = 'ProjectAttachPre',
     })
   end
 
-  if dir == Util.strip_slash(vim.uv.cwd() or vim.fn.getcwd()) then
-    current_project, current_method = dir, method
+  local old_cwd = Util.strip_slash(vim.uv.cwd() or vim.fn.getcwd())
+  if dir == Util.strip_slash(old_cwd) then
+    if not dry_run then
+      current_project, current_method = dir, method
+    end
     if vim.g.project_cwd_log ~= 1 then
       Util.log.info('(project.core.set_pwd): Current directory is selected project.')
       vim.g.project_cwd_log = 1
@@ -417,28 +430,28 @@ function M.set_pwd(dir, method, bufnr)
   end
 
   vim.g.project_cwd_log = 0
-  local ok = pcall(
-    scope_chdir == 'global' and vim.api.nvim_set_current_dir
-      or (scope_chdir == 'tab' and vim.cmd.tchdir or (scope_chdir == 'win' and vim.cmd.lchdir)),
-    dir
-  )
+  local chdir = scope_chdir == 'global' and vim.api.nvim_set_current_dir
+    or (scope_chdir == 'tab' and vim.cmd.tchdir or (scope_chdir == 'win' and vim.cmd.lchdir))
+  local ok = pcall(chdir, dir)
+  if dry_run then
+    pcall(chdir, old_cwd)
+  end
 
   msg = ('%s chdir: `%s`, method: `%s`, status: `%s`'):format(msg, dir, method, (ok and 'SUCCESS' or 'FAILED'))
 
   if ok then
-    current_project, current_method = dir, method
+    if not dry_run then
+      current_project, current_method = dir, method
+    end
 
     Util.log.info(msg)
 
     if
-      #vim.api.nvim_get_autocmds({
-        event = 'User',
-        group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
-        pattern = { 'ProjectAttachPost' },
-      }) > 0
+      not dry_run
+      and #vim.api.nvim_get_autocmds({ event = 'User', group = group, pattern = { 'ProjectAttachPost' } }) > 0
     then
       vim.api.nvim_exec_autocmds('User', {
-        group = vim.api.nvim_create_augroup('project.nvim-attach', { clear = false }),
+        group = group,
         pattern = 'ProjectAttachPost',
         data = { dir = dir, method = method, bufnr = bufnr },
       })
@@ -450,7 +463,10 @@ function M.set_pwd(dir, method, bufnr)
         method
       )
     )
-    Util.history.write_history()
+
+    if not dry_run then
+      Util.history.write_history()
+    end
   else
     Util.log.error(msg)
   end
@@ -560,7 +576,7 @@ function M.on_buf_enter(bufnr)
     )
   then
     current_project, current_method = M.get_current(bufnr)
-    if M.set_pwd(current_project, current_method, bufnr) then
+    if M.set_pwd({ dir = current_project, method = current_method, bufnr = bufnr }) then
       current_project, current_method, last_project = M.get_current(bufnr)
     end
   end

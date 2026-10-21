@@ -82,6 +82,8 @@
 ---|fun(paths_only: true): recents: string[]
 ---|fun(paths_only: true, tilde: boolean): recents: string[]
 
+---@alias Project.CoreSetPwd fun(opts: { dir: string, method: string, bufnr?: integer, dry_run?: boolean }): success: boolean
+
 ---@alias ProjectAttachMapCb
 ---|(fun(maps: table<Modes, { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>))
 ---|(fun(mode: Modes, lhs: string, rhs: string|function, opts: vim.keymap.set.Opts))

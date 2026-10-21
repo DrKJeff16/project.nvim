@@ -66,7 +66,7 @@ function M.pick()
       actions = {
         chdir_only = function(self, item)
           self:close()
-          require('project.core').set_pwd(item.value, 'snacks')
+          require('project.core').set_pwd({ dir = item.value, method = 'snacks' })
         end,
         delete_project = function(self)
           local paths = vim.tbl_map(function(item)
@@ -88,7 +88,7 @@ function M.pick()
       },
       confirm = function(self, item)
         self:close()
-        if require('project.core').set_pwd(vim.fn.expand(item.value), 'snacks') then
+        if require('project.core').set_pwd({ dir = vim.fn.expand(item.value), method = 'snacks' }) then
           Util.log.debug('(project.extensions.snacks.pick): Opening Snacks picker')
           local cwd = vim.uv.cwd() or vim.fn.getcwd()
           _G.Snacks.picker.files({

@@ -89,7 +89,7 @@ function M.change_cwd(prompt_bufnr)
     return
   end
 
-  local cd_successful = Project.core.set_pwd(selected_entry.value, 'telescope')
+  local cd_successful = Project.core.set_pwd({ dir = selected_entry.value, method = 'telescope' })
   if cd_successful then
     Project.util.log.debug('(telescope._extensions.projects.actions.change_cwd): Successfully changed directory.')
   else

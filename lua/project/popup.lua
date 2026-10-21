@@ -35,8 +35,8 @@ local function open_node(proj, only_cd, ran_cd)
 
   local Core = require('project.core')
   if not ran_cd then
-    if not Core.set_pwd(proj, 'prompt') then
-      vim.notfy('(open_node): Unsucessful `set_pwd`!', vim.log.levels.ERROR)
+    if not Core.set_pwd({ dir = proj, method = 'prompt' }) then
+      Util.log.notify_error('(project.popup.open_node): Unsucessful `set_pwd()`!')
       return
     end
     if only_cd then
@@ -190,7 +190,7 @@ function M.prompt_project(input)
   if Core.get_current_project() == input or vim.list_contains(Util.history.get_session_projects(), input) then
     Util.log.notify_warn('(project.popup.prompt_project): Already added that directory!')
   else
-    Core.set_pwd(input, 'prompt')
+    Core.set_pwd({ dir = input, method = 'prompt' })
   end
 end
 

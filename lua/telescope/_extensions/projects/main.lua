@@ -62,7 +62,7 @@ local function normal_attach(prompt_bufnr, map)
 
   require('telescope.actions').select_default:replace(function()
     local config = Project.config.get()
-    Project.core.set_pwd(require('telescope.actions.state').get_selected_entry().value, 'telescope')
+    Project.core.set_pwd({ dir = require('telescope.actions.state').get_selected_entry().value, method = 'telescope' })
 
     if config.telescope.behavior == 'explore' and config.telescope.disable_file_picker then
       return require('telescope.actions.set').select(prompt_bufnr, 'default')

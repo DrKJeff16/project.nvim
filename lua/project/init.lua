@@ -18,6 +18,11 @@ end
 ---@class Project
 ---@field config Project.Config
 ---@field core Project.Core
+---Returns the project root, as well as the method used.
+---
+---If no project root is found, nothing will be returned.
+--- ---
+---@field current_root fun(bufnr?: integer): root: string|nil|?, method: string|nil|?
 ---@field delete_menu function
 ---@field delete_project fun(project: string|Project.ActionEntry, prompt?: boolean)
 ---@field extensions Project.Extensions
@@ -34,6 +39,8 @@ end
 ---@field root_files fun(scan_what?: Project.Core.ScanRoot, path?: string, prefix?: string): files_list: string[]|nil|?
 ---@field run_fzf_lua function
 ---@field session_menu function
+---@field set_pwd Project.CoreSetPwd
+---@field setup fun(opts?: ProjectOpts)
 ---@field util Project.Util
 local M = {}
 
@@ -51,6 +58,10 @@ setmetatable(M, {
     ---@cast k string
     if Util.mod_exists('project.' .. k, true) then
       return get(self, k, require('project.' .. k))
+    end
+
+    if k == 'current_root' then
+      return get(self, k, self.core.get_project_root)
     end
     if k == 'delete_project' then
       return get(self, k, self.util.history.delete_project)
@@ -79,13 +90,17 @@ setmetatable(M, {
     if k == 'run_fzf_lua' then
       return get(self, k, self.extensions['fzf-lua'].run)
     end
+    if k == 'set_pwd' then
+      return get(self, k, self.core.set_pwd)
+    end
+    if k == 'setup' then
+      return get(self, k, self.config.setup)
+    end
     if self.popup[k] then
       return get(self, k, self.popup[k])
     end
   end,
 })
-
-M.setup = M.config.setup
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
@@ -109,15 +124,6 @@ function M.current_project(refresh)
   return M.core.get_current_project(), M.core.get_current_method(), M.core.get_last_project()
 end
 
----@param bufnr? integer
----@return string|nil|? root
----@nodiscard
-function M.current_root(bufnr)
-  M.util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
-
-  return (M.core.get_project_root(bufnr))
-end
-
 ---Removes specific root patterns from `project.nvim`'s config.
 ---
 ---Invalid values will raise a warning!
@@ -136,14 +142,12 @@ function M.remove_root_patterns(patterns)
     error('(project.remove_root_patterns): Config values are unaccessible!')
   end
 
-  if type(patterns) == 'table' then
-    if #patterns == 0 then
-      M.util.log.notify_error('(project.remove_root_patterns): Patterns table is empty!')
-    else
-      for _, pat in ipairs(patterns) do
-        if type(pat) == 'string' then
-          M.remove_root_patterns(pat)
-        end
+  if type(patterns) == 'table' and #patterns == 0 then
+    M.util.log.notify_error('(project.remove_root_patterns): Patterns table is empty!')
+  elseif type(patterns) == 'table' then
+    for _, pat in ipairs(patterns) do
+      if type(pat) == 'string' then
+        M.remove_root_patterns(pat)
       end
     end
   elseif patterns == '' then

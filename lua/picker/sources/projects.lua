@@ -52,7 +52,7 @@ function M.actions()
     end,
     ['<C-w>'] = function(entry)
       if Project.util.yes_no('Change cwd to `%s`?', Project.util.strip_slash(entry.value, ':p:~')) then
-        Project.core.set_pwd(entry.value, 'picker.nvim')
+        Project.core.set_pwd({ dir = entry.value, method = 'picker.nvim' })
       end
     end,
   }
@@ -63,7 +63,7 @@ function M.default_action(entry)
   if
     vim.g.project_picker_loaded == 1
     and vim.fn.isdirectory(entry.value) == 1
-    and Project.core.set_pwd(entry.value, 'picker.nvim')
+    and Project.core.set_pwd({ dir = entry.value, method = 'picker.nvim' })
   then
     require('picker').open({ 'files' })
   end

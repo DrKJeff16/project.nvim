@@ -75,6 +75,7 @@ end
 ---@field backtrace Project.Util.Log.Backtrace|fun(lvl: 0|1|2|3|4, ...: any)
 ---@field debug fun(...: any): output: string|nil|?
 ---@field error fun(...: any): output: string|nil|?
+---@field gen_error fun(...: any)
 ---@field info fun(...: any): output: string|nil|?
 ---@field notify_debug fun(...: any): output: string|nil|?
 ---@field notify_error fun(...: any): output: string|nil|?
@@ -86,12 +87,19 @@ end
 local M = {}
 
 ---@overload fun(lvl: 0|1|2|3|4|5): cb: fun(...: any): output: string|nil|?
----@overload fun(lvl: 0|1|2|3|4|5, notify: boolean): cb: fun(...: any): output: string|nil|?
-local function gen_log(lvl, notify)
+---@overload fun(lvl: 0|1|2|3|4|5, is_error: false): cb: fun(...: any): output: string|nil|?
+---@overload fun(lvl: 0|1|2|3|4|5, is_error: true): cb: fun(...: any)
+---@overload fun(lvl: 0|1|2|3|4|5, is_error: false, notify: boolean): cb: fun(...: any): output: string|nil|?
+---@overload fun(lvl: 0|1|2|3|4|5, is_error: true, notify: boolean): cb: fun(...: any)
+local function gen_log(lvl, is_error, notify)
   Util.validate({
     lvl = { lvl, { 'number' }, true },
+    is_error = { is_error, { 'boolean', 'nil' }, true },
     notify = { notify, { 'boolean', 'nil' }, true },
   })
+  if is_error == nil then
+    is_error = false
+  end
   if notify == nil then
     notify = false
   end
@@ -106,21 +114,29 @@ local function gen_log(lvl, notify)
     if notify then
       vim.notify(msg, lvl)
     end
+    local output = nil ---@type string|nil|?
     if vim.g.project_log_loaded == 1 then
-      return M.write(msg, lvl)
+      output = M.write(msg, lvl)
     end
+
+    if is_error then
+      error(msg)
+    end
+
+    return output
   end
 end
 
 M.backtrace = {}
 M.debug = gen_log(DEBUG)
 M.error = gen_log(ERROR)
+M.gen_error = gen_log(ERROR, true)
 M.info = gen_log(INFO)
-M.notify_debug = gen_log(DEBUG, true)
-M.notify_error = gen_log(ERROR, true)
-M.notify_info = gen_log(INFO, true)
-M.notify_trace = gen_log(TRACE, true)
-M.notify_warn = gen_log(WARN, true)
+M.notify_debug = gen_log(DEBUG, false, true)
+M.notify_error = gen_log(ERROR, false, true)
+M.notify_info = gen_log(INFO, false, true)
+M.notify_trace = gen_log(TRACE, false, true)
+M.notify_warn = gen_log(WARN, false, true)
 M.trace = gen_log(TRACE)
 M.warn = gen_log(WARN)
 
@@ -327,7 +343,7 @@ function M.setup(opts)
 
     vim.g.project_log_loaded = 1
 
-    M.backtrace = setmetatable({}, {
+    setmetatable(M.backtrace, {
       ---@param self Project.Util.Log.Backtrace
       ---@param lvl 0|1|2|3|4
       __call = function(self, lvl, ...)

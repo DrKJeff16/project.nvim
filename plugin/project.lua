@@ -264,7 +264,7 @@ local function callback(ctx)
           return val.path == input
         end, { predicate = true })
       then
-        Core.set_pwd(input, 'manual')
+        Core.set_pwd({ dir = input, method = 'manual' })
       else
         msg = ('%s%sAlready added `%s`!'):format(msg, msg == '' and '' or '\n', input)
       end
