@@ -23,7 +23,7 @@ end
 setmetatable(M, {
   __index = function(self, k) ---@param self Project.Config
     local raw = Util.get(self, k)
-    if raw then
+    if raw ~= nil then
       return raw
     end
 

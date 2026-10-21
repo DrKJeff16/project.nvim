@@ -152,7 +152,7 @@ local M = {}
 setmetatable(M, {
   __index = function(self, k)
     local raw = Util.get(self, k) or nil
-    if raw then
+    if raw ~= nil then
       return raw
     end
 

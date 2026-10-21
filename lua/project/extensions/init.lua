@@ -20,7 +20,7 @@ local M = {}
 setmetatable(M, {
   __index = function(self, k) ---@param self Project.Extensions
     local raw = Util.get(self, k)
-    if raw then
+    if raw ~= nil then
       return raw
     end
 

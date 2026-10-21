@@ -633,7 +633,7 @@ function M.root_files(scan_what, path, prefix)
         is_type = vim.list_contains({ 'file', 'directory' }, ftype)
       end
       if is_type and next ~= '.git' then
-        table.insert(files, prefix and vim.fs.joinpath(prefix, next) or next)
+        table.insert(files, prefix and Util.path.join(prefix, next) or next)
       end
       next, ftype = vim.uv.fs_scandir_next(dir)
     end
