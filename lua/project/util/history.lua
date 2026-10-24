@@ -424,11 +424,12 @@ function M.delete_projects(projects, prompt)
     projects = { projects, { 'table' } },
     prompt = { prompt, { 'boolean', 'nil' }, true },
   })
-  if vim.tbl_isempty(projects) then
-    return false
-  end
   if prompt == nil then
     prompt = false
+  end
+
+  if #projects == 0 then
+    return false
   end
 
   if
@@ -613,9 +614,8 @@ function M.write_history(path)
     path or Path.historyfile or Path.join(config.history.save_dir, 'project_nvim', config.history.save_file)
   )
 
-  if not Path.exists(path) and vim.fn.writefile({ '[', ']' }, path) ~= 0 then
-    Log.error('(project.util.history.write_history): History file unavailable!')
-    error('(project.util.history.write_history): History file unavailable!')
+  if not Path.exists(path) then
+    assert(vim.fn.writefile({ '[', ']' }, path) == 0, '(project.util.history.write_history): History file unavailable!')
   end
 
   historysize = (config.history and config.history.size and config.history.size >= 0) and config.history.size or 100
@@ -639,10 +639,7 @@ function M.write_history(path)
     )
 
     ok, file_history = pcall(vim.json.decode, data) ---@type boolean, ProjectHistoryEntry[]|nil|?
-    if not (ok and file_history) then
-      Log.error('(project.util.history.write_history): Unable to decode JSON data!')
-      error('(project.util.history.write_history): Unable to decode JSON data!')
-    end
+    assert(ok and file_history, '(project.util.history.write_history): Unable to decode JSON data!')
   end
 
   local res, i = M.get_recent_projects(nil, nil, false), 1

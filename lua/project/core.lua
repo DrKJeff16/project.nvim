@@ -602,8 +602,8 @@ function M.root_files(scan_what, path, prefix)
   if not path then
     return
   end
-  if
-    not vim.list_contains({
+  assert(
+    vim.list_contains({
       'all',
       'all_directories',
       'all_files',
@@ -613,13 +613,13 @@ function M.root_files(scan_what, path, prefix)
       'hidden_files',
       'visible_directories',
       'visible_files',
-    }, scan_what)
-  then
-    error(('(project.core.root_files): Invalid parameter `%s`!'):format(scan_what))
-  end
-  if not Util.path.exists(path) or vim.fn.isdirectory(path) ~= 1 then
-    error(('(project.core.root_files): Invalid path `%s`!'):format(path))
-  end
+    }, scan_what),
+    ('(project.core.root_files): Invalid parameter `%s`!'):format(scan_what)
+  )
+  assert(
+    Util.path.exists(path) and vim.fn.isdirectory(path) == 1,
+    ('(project.core.root_files): Invalid path `%s`!'):format(path)
+  )
 
   local dir = vim.uv.fs_scandir(path)
   if dir then

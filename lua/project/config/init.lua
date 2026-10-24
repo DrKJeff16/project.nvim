@@ -101,29 +101,33 @@ function M.setup(opts)
   if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
     Util.path.datapath = M.get_defaults():_get_no_mt().history.save_dir
     Util.path.projectpath = Util.path.join(Util.path.projectpath, 'project_nvim')
-    if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
-      error('(project.config.setup): Unable to create history directory!')
+    if not Util.path.exists(Util.path.projectpath) then
+      assert(
+        vim.fn.mkdir(Util.path.projectpath, 'p') == 1,
+        '(project.config.setup): Unable to create history directory!'
+      )
     end
   end
 
-  if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
-    error('(project.config.setup): Unable to create history subdirectory!')
+  if not Util.path.exists(Util.path.projectpath) then
+    assert(
+      vim.fn.mkdir(Util.path.projectpath, 'p') == 1,
+      '(project.config.setup): Unable to create history subdirectory!'
+    )
   end
 
   Util.path.historyfile = Util.path.join(Util.path.projectpath, options.history.save_file)
   if not Util.path.exists(Util.path.historyfile) then
-    local fd = vim.uv.fs_open(Util.path.historyfile, 'w', Util.path.open_mode('644'))
-    if not fd then
-      error('(project.config.setup): Unable to create history file!')
-    end
-
-    vim.uv.fs_write(fd, { '[', ']' })
-    vim.uv.fs_close(fd)
+    local fd =
+      assert(vim.uv.fs_open(Util.path.historyfile, 'w', Util.path.open_mode('644')), 'Unable to create history file')
+    assert(vim.uv.fs_write(fd, { '[', ']' }), 'Unable to write to history file')
+    assert(vim.uv.fs_close(fd), 'Unable to close descriptor for history file')
   end
 
-  if not (Util.path.datapath and Util.path.projectpath and Util.path.historyfile) then
-    error('(project.config.setup): Failed to store history path successfully!')
-  end
+  assert(
+    Util.path.datapath and Util.path.projectpath and Util.path.historyfile,
+    '(project.config.setup): Failed to store history path successfully!'
+  )
 
   if options.log.enabled then
     Util.log.setup(options.log)
@@ -183,10 +187,7 @@ end
 ---@return string config
 ---@nodiscard
 function M.get_config()
-  if vim.g.project_setup ~= 1 then
-    Util.log.error('(project.config.get_config): `project.nvim` is not set up!')
-    error('(project.config.get_config): `project.nvim` is not set up!')
-  end
+  assert(vim.g.project_setup == 1, '(project.config.get_config): `project.nvim` is not set up!')
   local opts = options:_get_no_mt()
   table.sort(opts)
   return vim.inspect(opts)

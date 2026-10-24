@@ -145,15 +145,14 @@ function D:verify_history()
       and self.history.size
     or DEFAULTS.history.size
 
-  if
-    not Util.only_has_chars(
+  assert(
+    Util.only_has_chars(
       self.history.save_file,
       'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_.',
       { spaces = true }
-    )
-  then
-    error('(project.nvim): Invalid chars in `history.save_file` setup option!')
-  end
+    ),
+    '(project.nvim): Invalid chars in `history.save_file` setup option!'
+  )
 end
 
 ---Checks the `scope_chdir` option.
@@ -430,8 +429,7 @@ function D:verify()
   self:verify_telescope()
 
   local keys = vim.tbl_keys(DEFAULTS) --[[@as string[]\]]
-  table.insert(keys, 'on_attach')
-  table.insert(keys, 'before_attach')
+  vim.list_extend(keys, { 'on_attach', 'before_attach' })
 
   for k in pairs(self) do
     if not vim.list_contains(Util.dedup(keys), k) then
@@ -439,8 +437,11 @@ function D:verify()
     end
   end
 
-  if self.custom_proects and not vim.islist(self.custom_projects) then
-    error(('`custom_projects` is not list-like:\n`%s`'):format(vim.inspect(self.custom_projects)))
+  if self.custom_proects then
+    assert(
+      vim.islist(self.custom_projects),
+      ('`custom_projects` is not list-like:\n`%s`'):format(vim.inspect(self.custom_projects))
+    )
   end
   if self.custom_projects and #self.custom_projects > 0 then
     local custom_projects = {} ---@type ProjectConfigHistoryEntry[]
@@ -464,7 +465,6 @@ end
 function D:_get_no_mt()
   local opts = {} ---@type ProjectConfigDefaults
   for _, k in ipairs(vim.tbl_keys(self)) do
-    ---@cast k string
     opts[k] = Util.get(self, k)
   end
   return opts

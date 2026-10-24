@@ -130,17 +130,12 @@ end
 --- ---
 ---@param patterns string[]|string The string or list of strings containing the matching pattern(s).
 function M.remove_root_patterns(patterns)
+  assert(vim.g.project_setup ~= 1, '(project.remove_root_patterns): `project.nvim` is not setup!')
+
   M.util.validate({ patterns = { patterns, { 'string', 'table' } } })
 
   local pats = M.config.get().patterns
-  if vim.g.project_setup ~= 1 then
-    M.util.log.error('(project.remove_root_patterns): `project.nvim` is not setup!')
-    error('(project.remove_root_patterns): `project.nvim` is not setup!')
-  end
-  if not pats or type(pats) ~= 'table' then
-    M.util.log.error('(project.remove_root_patterns): Config values are unaccessible!')
-    error('(project.remove_root_patterns): Config values are unaccessible!')
-  end
+  assert(pats and type(pats) == 'table', '(project.remove_root_patterns): Config values are unaccessible!')
 
   if type(patterns) == 'table' and #patterns == 0 then
     M.util.log.notify_error('(project.remove_root_patterns): Patterns table is empty!')
@@ -174,17 +169,12 @@ end
 --- ---
 ---@param patterns string[]|string The string or list of strings containing the new pattern(s).
 function M.add_root_patterns(patterns)
+  assert(vim.g.project_setup == 1, '(project.add_root_patterns): `project.nvim` is not setup!')
+
   M.util.validate({ patterns = { patterns, { 'string', 'table' } } })
-  if vim.g.project_setup ~= 1 then
-    M.util.log.error('(project.add_root_patterns): `project.nvim` is not setup!')
-    error('(project.add_root_patterns): `project.nvim` is not setup!')
-  end
 
   local pats = M.config.get().patterns
-  if not pats or type(pats) ~= 'table' then
-    M.util.log.error('(project.add_root_patterns): Config values are unaccessible!')
-    error('(project.add_root_patterns): Config values are unaccessible!')
-  end
+  assert(pats and type(pats) == 'table', '(project.add_root_patterns): Config values are unaccessible!')
 
   if type(patterns) == 'string' then
     if patterns == '' or vim.list_contains(pats, patterns) then

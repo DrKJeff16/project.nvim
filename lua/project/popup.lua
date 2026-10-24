@@ -149,9 +149,8 @@ local function new_popup(opts)
     ['opts.callback'] = { opts.callback, { 'function' } },
   })
 
-  if vim.tbl_isempty(opts) then
-    error('(project.popup.new_popup): Empty args for constructor!')
-  end
+  assert(not vim.tbl_isempty(opts), '(project.popup.new_popup): Empty args for constructor!')
+
   ---@type Project.Popup.SelectChoices|fun(ctx?: vim.api.keyset.create_user_command.command_args)
   return setmetatable({ choices = opts.choices, choices_list = opts.choices_list }, {
     __index = function(t, k)

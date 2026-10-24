@@ -90,13 +90,13 @@ end
 --- ---
 ---@param opts? table
 function M.projects(opts)
+  assert(
+    vim.g.project_telescope_loaded == 1,
+    '(telescope._extensions.projects.main.projects): Telescope picker not loaded!'
+  )
+
   Project.util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
-
-  if vim.g.project_telescope_loaded ~= 1 then
-    Project.util.log.error('(telescope._extensions.projects.main.projects): Telescope picker not loaded!')
-    error('(telescope._extensions.projects.main.projects): Telescope picker not loaded!')
-  end
 
   local scope_chdir = Project.config.get().scope_chdir
   require('telescope.pickers')

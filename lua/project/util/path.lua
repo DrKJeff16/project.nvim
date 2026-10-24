@@ -306,15 +306,15 @@ function M.setup(save_dir, save_file)
 
   if vim.fn.mkdir(save_dir, 'p') ~= 1 and not Util.path_exists(save_dir) then
     save_dir = Defaults:_get_no_mt().history.save_dir
-    if vim.fn.mkdir(save_dir, 'p') ~= 1 and not Util.path_exists(save_dir) then
-      error('(project.util.path.setup): Unable to create history directory!')
+    if not Util.path_exists(save_dir) then
+      assert(vim.fn.mkdir(save_dir, 'p') == 1, '(project.util.path.setup): Unable to create history directory!')
     end
   end
 
   M.datapath = save_dir
   M.projectpath = vim.fs.joinpath(save_dir, 'project_nvim')
-  if not Util.path_exists(M.projectpath) and vim.fn.mkdir(M.projectpath, 'p') ~= 1 then
-    error('(project.util.path.setup): Unable to create history subdirectory!')
+  if not Util.path_exists(M.projectpath) then
+    assert(vim.fn.mkdir(M.projectpath, 'p') == 1, '(project.util.path.setup): Unable to create history subdirectory!')
   end
 
   M.historyfile = vim.fs.joinpath(M.projectpath, save_file)

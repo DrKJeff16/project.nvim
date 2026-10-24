@@ -362,12 +362,10 @@ function M.open_win()
     return
   end
   if vim.g.project_log_cleared == 1 then
-    M.notify_warn('(project.util.log.open_win): Log has been cleared, try restarting.')
+    M.notify_warn('(project.util.log.open_win): Log has been cleared, try restarting')
     return
   end
-  if not Path.exists(logfile) then
-    error('(project.util.log.open_win): Bad logfile path!')
-  end
+  assert(Path.exists(logfile), '(project.util.log.open_win): Bad logfile path')
 
   local fd = vim.uv.fs_open(logfile, 'r', Path.open_mode('644'))
   if not fd then
