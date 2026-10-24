@@ -91,7 +91,7 @@ local function completion(_, line)
     elseif args[2] == 'add' then
       for _, comp in
         ipairs(vim.tbl_map(function(value) ---@param value string
-          return Util.strip_slash(value, ':p:~')
+          return Util.strip_slash(value, ':~')
         end, vim.fn.getcompletion(args[#args], 'dir', true)))
       do
         ---@cast comp string
@@ -203,8 +203,7 @@ local function callback(ctx)
     if ctx.fargs[1] == 'add' then
       vim.ui.input({
         completion = 'dir',
-        default = ctx.bang and Util.strip_slash(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()), ':p:h')
-          or nil,
+        default = ctx.bang and Util.strip_slash(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()), ':h') or nil,
         prompt = 'Input a valid path to the project:',
       }, Popup.prompt_project)
     elseif ctx.fargs[1] == 'delete' then
@@ -310,7 +309,7 @@ local function callback(ctx)
   elseif ctx.fargs[1] == 'history' and #ctx.fargs > 2 and ctx.fargs[2] == 'rename' then
     for i = 3, #ctx.fargs, 1 do
       if
-        not vim.list_contains({ Util.strip_slash(ctx.fargs[i]), Util.strip_slash(ctx.fargs[i], ':p:~') }, ctx.fargs[i])
+        not vim.list_contains({ Util.strip_slash(ctx.fargs[i]), Util.strip_slash(ctx.fargs[i], ':~') }, ctx.fargs[i])
       then
         Util.log.notify_error('(:Project history rename): Invalid directory!')
         return

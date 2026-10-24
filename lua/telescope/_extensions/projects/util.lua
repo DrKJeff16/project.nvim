@@ -18,7 +18,7 @@ local M = {}
 function M.make_tilde(s)
   Project.util.validate({ s = { s, { 'string' } } })
 
-  return Project.util.strip_slash(s, Project.config.get().telescope.tilde and ':p:~' or nil)
+  return Project.util.strip_slash(s, Project.config.get().telescope.tilde and ':~' or nil)
 end
 
 ---@param entry { name: string, value: string, display: function, index: integer, ordinal: string }

@@ -30,8 +30,8 @@ local function gen_items()
     table.insert(items, {
       idx = i,
       score = i,
-      text = config.show ~= 'paths' and proj.name or Util.strip_slash(proj.path, tilde and ':p:~' or nil),
-      value = Util.strip_slash(proj.path, ':p:~'),
+      text = config.show ~= 'paths' and proj.name or Util.strip_slash(proj.path, tilde and ':~' or nil),
+      value = Util.strip_slash(proj.path, ':~'),
     })
   end
   return items

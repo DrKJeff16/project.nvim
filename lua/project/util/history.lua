@@ -166,20 +166,21 @@ end
 ---@return uv.fs_stat.result|nil|? stat
 function M.open_history(mode)
   Util.validate({ mode = { mode, { 'string', 'number' } } })
-  if type(mode) == 'string' and not vim.list_contains(allowed_flags, mode) then
-    Log.error(('(project.util.history.open_history): Invalid flag `%s`!'):format(mode))
-    error(('(project.util.history.open_history): Invalid flag `%s`!'):format(mode))
+  if type(mode) == 'string' then
+    assert(
+      vim.list_contains(allowed_flags, mode),
+      ('(project.util.history.open_history): Invalid flag `%s`!'):format(mode)
+    )
   end
 
   Path.create_path()
 
-  if not (vim.uv.fs_stat(Path.projectpath)) then
-    Log.error('(project.util.history.open_history): History directory unavailable!')
-    error('(project.util.history.open_history): History directory unavailable!')
-  end
-  if not Path.exists(Path.historyfile) and vim.fn.writefile({ '[', ']' }, Path.historyfile) == -1 then
-    Log.error('(project.util.history.open_history): History file unavailable!')
-    error('(project.util.history.open_history): History file unavailable!')
+  assert(vim.uv.fs_stat(Path.projectpath), '(project.util.history.open_history): History directory unavailable!')
+  if not Path.exists(Path.historyfile) then
+    assert(
+      vim.fn.writefile({ '[', ']' }, Path.historyfile) ~= -1,
+      '(project.util.history.open_history): History file unavailable!'
+    )
   end
   return Path.open_file(Path.historyfile, mode)
 end
@@ -212,14 +213,11 @@ function M.export_history_json(path, ind, force_name)
   end
 
   path = Util.strip(' ', path)
-  if path == '' then
-    Log.error(('(project.util.history.export_history_json): File does not exist! `%s`'):format(path))
-    error(('(project.util.history.export_history_json): File does not exist! `%s`'):format(path))
-  end
-  if vim.fn.isdirectory(path) == 1 then
-    Log.error(('(project.util.history.export_history_json): Target is a directory! `%s`'):format(path))
-    error(('(project.util.history.export_history_json): Target is a directory! `%s`'):format(path))
-  end
+  assert(path ~= '', ('(project.util.history.export_history_json): File does not exist! `%s`'):format(path))
+  assert(
+    vim.fn.isdirectory(path) == 0,
+    ('(project.util.history.export_history_json): Target is a directory! `%s`'):format(path)
+  )
 
   path = Util.strip_slash(path)
   if path:sub(-5) ~= '.json' and not force_name then
@@ -262,11 +260,17 @@ function M.export_history_json(path, ind, force_name)
 
   local ok, data = pcall(vim.json.encode, Util.reverse(M.get_recent_projects(nil, nil, false)), { indent = spc })
   if ok and data then
-    vim.uv.fs_write(fd, data)
+    assert(
+      vim.uv.fs_write(fd, data),
+      '(project.util.history.export_history_json): Unable to write JSON data to target file'
+    )
 
-    Log.notify_debug(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':p:~')))
+    Log.notify_debug(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':~')))
   end
-  vim.uv.fs_close(fd)
+  assert(
+    vim.uv.fs_close(fd),
+    '(project.util.history.export_history_json): Unable to close file descriptor for target JSON file'
+  )
 end
 
 ---@param path string
@@ -291,14 +295,11 @@ function M.import_history_json(path, force_name, keep)
   end
 
   path = Util.strip(' ', path)
-  if path == '' then
-    Log.notify_error(('(project.util.history.import_history_json): File does not exist! `%s`'):format(path))
-    return
-  end
-  if vim.fn.isdirectory(path) == 1 then
-    Log.notify_error(('(project.util.history.import_history_json): Target is a directory! `%s`'):format(path))
-    return
-  end
+  assert(path ~= '', ('(project.util.history.import_history_json): File does not exist! `%s`'):format(path))
+  assert(
+    vim.fn.isdirectory(path) == 0,
+    ('(project.util.history.import_history_json): Target is a directory! `%s`'):format(path)
+  )
 
   if path:sub(-5) ~= '.json' and not force_name then
     path = ('%s.json'):format(path)
@@ -330,10 +331,10 @@ function M.import_history_json(path, force_name, keep)
   recent_projects = Util.reverse(hist)
   M.write_history()
 
-  Log.notify_debug(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':p:~')))
+  Log.notify_debug(('project.nvim - Imported history from `%s`'):format(Util.strip_slash(path, ':~')))
 
   if not keep and vim.uv.fs_unlink(path) then
-    Log.notify_debug(('project.nvim - Deleted imported history file `%s`'):format(Util.strip_slash(path, ':p:~')))
+    Log.notify_debug(('project.nvim - Deleted imported history file `%s`'):format(Util.strip_slash(path, ':~')))
   end
 end
 
@@ -504,13 +505,13 @@ function M.read_history()
   end
   if not stat then
     Log.error('(project.util.history.read_history): Stat for history file unavailable!')
-    vim.uv.fs_close(fd)
+    assert(vim.uv.fs_close(fd), '(project.util.history.read_history): Unable to close file descriptor for history file')
     return
   end
 
   setup_watch()
 
-  if stat.size == 0 and not vim.tbl_isempty(session_projects) then
+  if stat.size == 0 and #session_projects > 0 then
     Log.warn(
       '(project.util.history.read_history): History file is empty. Defering call to `project.util.history.write_history()`'
     )
@@ -520,7 +521,7 @@ function M.read_history()
 
   ---@type boolean, ProjectHistoryEntry[]|nil|?
   local ok, data = pcall(vim.json.decode, (vim.uv.fs_read(fd, stat.size)))
-  vim.uv.fs_close(fd)
+  assert(vim.uv.fs_close(fd), '(project.util.history.read_history): Unable to close file descriptor for history file')
   if ok and data then
     local data_str, name_list = '', {} ---@type string, string[]
     for _, v in ipairs(data) do
@@ -591,7 +592,7 @@ function M.get_recent_projects(paths_only, tilde, remove_dups)
   for i, v in ipairs(tbl) do
     local dir = v.path
     if Util.dir_exists(dir) then
-      dir = Util.strip_slash(dir, tilde and ':p:~' or nil)
+      dir = Util.strip_slash(dir, tilde and ':~' or nil)
       table.insert(recents, paths_only and dir or { path = dir, name = tbl[i].name })
     end
   end
@@ -628,14 +629,19 @@ function M.write_history(path)
   end
 
   if ok and fd and stat then
-    local data = vim.uv.fs_read(fd, stat.size)
-    vim.uv.fs_close(fd)
-    if data then
-      ok, file_history = pcall(vim.json.decode, data) ---@type boolean, ProjectHistoryEntry[]|nil|?
-      if not (ok and file_history) then
-        Log.error('(project.util.history.write_history): Unable to decode JSON data!')
-        error('(project.util.history.write_history): Unable to decode JSON data!')
-      end
+    local data = assert(
+      vim.uv.fs_read(fd, stat.size),
+      '(project.util.history.write_history): Unable to read data from history file'
+    )
+    assert(
+      vim.uv.fs_close(fd),
+      '(project.util.history.write_history): Unable to close file descriptor for history file'
+    )
+
+    ok, file_history = pcall(vim.json.decode, data) ---@type boolean, ProjectHistoryEntry[]|nil|?
+    if not (ok and file_history) then
+      Log.error('(project.util.history.write_history): Unable to decode JSON data!')
+      error('(project.util.history.write_history): Unable to decode JSON data!')
     end
   end
 
@@ -680,21 +686,23 @@ function M.write_history(path)
     return
   end
 
-  fd = path == Path.historyfile and M.open_history('w') or Path.open_file(path, 'w')
-  if not fd then
-    Log.error('(project.util.history.write_history): File restricted!')
-    error('(project.util.history.write_history): File restricted!')
-  end
+  fd = assert(
+    path == Path.historyfile and M.open_history('w') or Path.open_file(path, 'w'),
+    '(project.util.history.write_history): File restricted!'
+  )
 
   local success, out = pcall(vim.json.encode, file_history) ---@type boolean, string|nil|?
   if not (success and out) then
-    vim.uv.fs_close(fd)
+    assert(
+      vim.uv.fs_close(fd),
+      '(project.util.history.write_history): Unable to close file descriptor for history file'
+    )
     Log.error('(project.util.history.write_history): Unable to encode JSON data!')
     error('(project.util.history.write_history): Unable to encode JSON data!')
   end
 
-  vim.uv.fs_write(fd, out)
-  vim.uv.fs_close(fd)
+  assert(vim.uv.fs_write(fd, out), '(project.util.history.write_history): Unable to write to history file')
+  assert(vim.uv.fs_close(fd), '(project.util.history.write_history): Unable to close file descriptor for history file')
 end
 
 ---@overload fun(search: 'session'|'recent', value: string, key: 'patth'|'name'): entry_field: string|nil|?

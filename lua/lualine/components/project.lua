@@ -105,12 +105,12 @@ function M:project_root()
   elseif format == 'full_expanded' then
     msg = Project.util.strip_slash(curr)
   elseif format == 'full' then
-    msg = Project.util.strip_slash(curr, ':p:~')
+    msg = Project.util.strip_slash(curr, ':~')
   elseif format == 'name' then
     msg = Project.util.history.find_entry('recent', curr, 'name') or self.options.no_project --[[@as string]]
   end
   if format == 'short' or not msg and msg ~= self.options.no_project then
-    msg = Project.util.strip_slash(curr, ':p:h:t')
+    msg = Project.util.strip_slash(curr, ':t')
   end
   if self.options.enclose_pair then
     msg = (self.options.enclose_pair[1] or '') .. msg .. (self.options.enclose_pair[2] or '')

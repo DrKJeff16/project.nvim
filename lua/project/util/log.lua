@@ -119,10 +119,7 @@ local function gen_log(lvl, is_error, notify)
       output = M.write(msg, lvl)
     end
 
-    if is_error then
-      error(msg)
-    end
-
+    assert(not is_error, msg)
     return output
   end
 end
@@ -177,13 +174,11 @@ function M.read_log()
   end
 
   local stat = vim.uv.fs_stat(logfile)
-  if not stat then
-    vim.uv.fs_close(fd)
-    return
+  local data = nil ---@type string|nil|?
+  if stat then
+    data = assert((vim.uv.fs_read(fd, stat.size)), '(project.util.log.read_log): Unable to read logfile')
   end
-
-  local data = vim.uv.fs_read(fd, stat.size)
-  vim.uv.fs_close(fd)
+  assert(vim.uv.fs_close(fd), '(project.util.log.read_log): Unable to close file descriptor for logfile')
   return data
 end
 
@@ -203,22 +198,21 @@ local function timer_cb()
     return
   end
 
-  local fd = vim.uv.fs_open(logfile, 'w', Path.open_mode('644'))
-  if not fd then
-    return
-  end
-
+  local fd = assert(
+    vim.uv.fs_open(logfile, 'w', Path.open_mode('644')),
+    ('(project.util.log.timer_cb): Unable to open logfile: `%s`'):format(logfile)
+  )
   local ok = vim.uv.fs_ftruncate(fd, 0)
-  vim.uv.fs_close(fd)
-
   if ok then
-    vim.notify(('(project.util.log.timer_cb): `%s` has been cleared!'):format(Util.strip_slash(logfile, ':p:~')), INFO)
+    vim.notify(('(project.util.log.timer_cb): `%s` has been cleared!'):format(Util.strip_slash(logfile, ':~')), INFO)
   else
     vim.notify(
-      ('(project.util.log.timer_cb): `%s` could not be cleared!'):format(Util.strip_slash(logfile, ':p:~')),
+      ('(project.util.log.timer_cb): `%s` could not be cleared!'):format(Util.strip_slash(logfile, ':~')),
       ERROR
     )
   end
+
+  assert(vim.uv.fs_close(fd), '(project.util.log.timer_cb): Unable to close file descriptor for logfile')
 end
 
 local function make_timer()
@@ -226,22 +220,20 @@ local function make_timer()
     return
   end
 
-  timer = vim.uv.new_timer()
-  if timer then
-    timer:start(10000, 900000, vim.schedule_wrap(timer_cb))
+  timer = assert(vim.uv.new_timer(), '(project.util.log.make_timer): Unable to create timer')
 
-    local group = vim.api.nvim_create_augroup('project.nvim.log', { clear = true })
-    vim.api.nvim_create_autocmd({ 'VimLeavePre' }, {
-      group = group,
-      once = true,
-      callback = function()
-        if timer and not timer:is_active() then
-          timer:stop()
-          timer = nil
-        end
-      end,
-    })
-  end
+  timer:start(10000, 900000, vim.schedule_wrap(timer_cb))
+
+  vim.api.nvim_create_autocmd({ 'VimLeavePre' }, {
+    group = vim.api.nvim_create_augroup('project.nvim.log', { clear = true }),
+    once = true,
+    callback = function()
+      if timer and not timer:is_active() then
+        timer:stop()
+        timer = nil
+      end
+    end,
+  })
 end
 
 ---Only runs once.
@@ -251,10 +243,7 @@ local function setup_watch()
     return
   end
 
-  event = vim.uv.new_fs_event()
-  if not event then
-    return
-  end
+  event = assert(vim.uv.new_fs_event(), '(project.util.log.setup_watch): Unable to create fs event')
 
   make_timer()
   vim.g.project_log_has_watch_setup = 1
@@ -276,8 +265,6 @@ function M.write(data, lvl)
   local fd = M.open('a')
   if fd then
     local msg = os.date(('%s  ==>  %s%s'):format('%H:%M:%S', PFX[lvl], data)) --[[@as string]]
-    vim.uv.fs_write(fd, msg)
-    vim.uv.fs_close(fd)
 
     if debug_mode and lvl >= debug_level then
       vim.schedule(function()
@@ -285,6 +272,8 @@ function M.write(data, lvl)
       end)
     end
 
+    assert(vim.uv.fs_write(fd, msg), '(project.util.log.write): Unable to write data to logfile')
+    assert(vim.uv.fs_close(fd), '(project.util.log.write): Unable to close file descriptor for logfile')
     return msg
   end
 end
@@ -300,10 +289,11 @@ function M.open(flags)
   if not Path.exists({ logpath, logfile }) then
     Path.create_path(logpath)
   end
-  local dir_stat = vim.uv.fs_stat(logpath)
-  if not dir_stat or dir_stat.type ~= 'directory' then
-    error('(project.util.log.open): Projectpath stat is not valid!')
-  end
+  local dir_stat = assert(
+    vim.uv.fs_stat(logpath),
+    ('(project.util.log.open): Unable to get stats for the logfile directory: `%s`'):format(logpath)
+  )
+  assert(dir_stat.type == 'directory', '(project.util.log.open): Projectpath stat is not valid!')
 
   return (vim.uv.fs_open(logfile, flags, Path.open_mode('644'))), (vim.uv.fs_stat(logfile))
 end

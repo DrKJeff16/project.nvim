@@ -78,17 +78,20 @@ function M.buffer_valid(bufnr)
   return vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr)
 end
 
----@overload fun(path: nil, mods?: string)
----@overload fun(path: string, mods?: string): stripped_path: string
+---@param path string
+---@param mods string
+---@return string stripped_path
+---@overload fun(path: string): stripped_path: string
 ---@nodiscard
 function M.strip_slash(path, mods)
   M.validate({
     path = { path, { 'string', 'nil' }, true },
     mods = { mods, { 'string', 'nil' }, true },
   })
-  return path
-      and (M.rstrip(M.is_windows() and '\\' or '/', vim.fn.fnamemodify(path, (mods and mods ~= '') and mods or ':p')))
-    or nil
+
+  local slash = M.is_windows() and '\\' or '/'
+  path = M.rstrip(slash, vim.fn.fnamemodify(path, ':p'))
+  return M.rstrip(slash, vim.fn.fnamemodify(path, (mods and mods ~= '') and mods or ':p'))
 end
 
 ---@param s string
@@ -149,24 +152,27 @@ function M.only_has_chars(s, chars, extra_allowed)
 end
 
 ---@param list any[]
----@param t? type
+---@param t type
 ---@return boolean result
 ---@nodiscard
 function M.same_type_list(list, t)
   M.validate({
     list = { list, { 'table' } },
-    t = { t, { 'string', 'nil' }, true },
+    t = { t, { 'string' } },
   })
-  if t and not vim.list_contains({ 'boolean', 'userdata', 'string', 'function', 'number', 'thread', 'table' }, t) then
-    error(('(project.util.same_type_list): Invalid type `%s`'):format(t))
-  end
+
+  assert(
+    t ~= nil and vim.list_contains({ 'boolean', 'userdata', 'string', 'function', 'number', 'thread', 'table' }, t),
+    ('(project.util.same_type_list): Invalid type `%s`'):format(t)
+  )
+
   if not vim.islist(list) then
     return false
   end
 
   local res = false
   for _, v in ipairs(list) do
-    res = M.is_type(t or type(v), v)
+    res = type(v) == t
     if not res then
       break
     end
@@ -174,9 +180,9 @@ function M.same_type_list(list, t)
   return res
 end
 
----@overload fun(option: string|vim.wo|vim.bo, param: 'scope', param_value: 'local'|'global'): value: any
----@overload fun(option: string|vim.wo|vim.bo, param: 'ft', param_value: string): value: any
----@overload fun(option: string|vim.wo|vim.bo, param: 'buf'|'win', param_value: integer): value: any
+---@overload fun(option: string|vim.wo|vim.bo, param: 'scope', param_value: 'local'|'global'): value: unknown
+---@overload fun(option: string|vim.wo|vim.bo, param: 'ft', param_value: string): value: unknown
+---@overload fun(option: string|vim.wo|vim.bo, param: 'buf'|'win', param_value: integer): value: unknown
 ---@nodiscard
 function M.optget(option, param, param_value)
   M.validate({
@@ -184,23 +190,25 @@ function M.optget(option, param, param_value)
     param = { param, { 'string' } },
     param_value = { param_value, { 'string', 'number', 'nil' }, true },
   })
-  if not vim.list_contains({ 'scope', 'ft', 'buf', 'win' }, param) then
-    error(('Bad parameter: `%s`\nCan only accept `scope`, `ft`, `buf` or `win`!'):format(vim.inspect(param)))
-  end
+  assert(
+    vim.list_contains({ 'scope', 'ft', 'buf', 'win' }, param),
+    ('Bad parameter: `%s`\nCan only accept `scope`, `ft`, `buf` or `win`!'):format(vim.inspect(param))
+  )
   if param == 'scope' then
     param_value = param_value or 'local'
-    if not vim.list_contains({ 'global', 'local' }, param_value) then
-      error(('Bad param value `%s`\nCan only accept `global` or `local`!'):format(vim.inspect(param_value)))
-    end
+    assert(
+      vim.list_contains({ 'global', 'local' }, param_value),
+      ('Bad param value `%s`\nCan only accept `global` or `local`!'):format(vim.inspect(param_value))
+    )
   end
-  if param == 'ft' and (not param_value or type(param_value) ~= 'string') then
-    error('Missing/bad value for `ft` parameter!')
+  if param == 'ft' then
+    assert(param_value ~= nil and type(param_value) == 'string', 'Missing/bad value for `ft` parameter!')
   end
-  if
-    vim.list_contains({ 'win', 'buf' }, param)
-    and not (param_value and type(param_value) == 'number' and M.is_int(param_value, param_value >= 0))
-  then
-    error('Missing/bad value for `win`/`buf` parameter!')
+  if vim.list_contains({ 'win', 'buf' }, param) then
+    assert(
+      param_value ~= nil and type(param_value) == 'number' and M.is_int(param_value, param_value >= 0),
+      'Missing/bad value for `win`/`buf` parameter!'
+    )
   end
 
   return vim.api.nvim_get_option_value(option, { [param] = param_value })
@@ -215,27 +223,27 @@ function M.optset(option, value, param, param_value)
     param = { param, { 'string' } },
     param_value = { param_value, { 'string', 'number', 'nil' }, true },
   })
-  if value == nil then
-    error('Empty option value is unacceptable!')
-  end
-  if not vim.list_contains({ 'scope', 'ft', 'buf', 'win' }, param) then
-    error(('Bad parameter: `%s`\nCan only accept `scope`, `ft`, `buf` or `win`!'):format(vim.inspect(param)))
-  end
+  assert(value ~= nil, 'Empty option value is unacceptable!')
+  assert(
+    vim.list_contains({ 'scope', 'ft', 'buf', 'win' }, param),
+    ('Bad parameter: `%s`\nCan only accept `scope`, `ft`, `buf` or `win`!'):format(vim.inspect(param))
+  )
 
   if param == 'scope' then
     param_value = param_value or 'local'
-    if not vim.list_contains({ 'global', 'local' }, param_value) then
-      error(('Bad param value `%s`\nCan only accept `global` or `local`!'):format(vim.inspect(param_value)))
-    end
+    assert(
+      vim.list_contains({ 'global', 'local' }, param_value),
+      ('Bad param value `%s`\nCan only accept `global` or `local`!'):format(vim.inspect(param_value))
+    )
   end
-  if param == 'ft' and (not param_value or type(param_value) ~= 'string') then
-    error('Missing/bad value for `ft` parameter!')
+  if param == 'ft' then
+    assert(param_value ~= nil and type(param_value) == 'string', 'Missing/bad value for `ft` parameter!')
   end
-  if
-    vim.list_contains({ 'win', 'buf' }, param)
-    and not (param_value and type(param_value) == 'number' and M.is_int(param_value, param_value >= 0))
-  then
-    error('Missing/bad value for `win`/`buf` parameter!')
+  if vim.list_contains({ 'win', 'buf' }, param) then
+    assert(
+      param_value ~= nil and type(param_value) == 'number' and M.is_int(param_value, param_value >= 0),
+      'Missing/bad value for `win`/`buf` parameter!'
+    )
   end
 
   vim.api.nvim_set_option_value(option, value, { [param] = param_value })
@@ -473,14 +481,11 @@ function M.range(x, y, step)
     step = { step, { 'number', 'nil' }, true },
   })
 
-  if not M.is_int(x) then
-    error(('(project.util.range): Argument `x` is not an integer: `%s`'):format(x))
-  end
+  assert(M.is_int(x), ('(project.util.range): Argument `x` is not an integer: `%s`'):format(x))
 
   local range_list = {} ---@type integer[]
   if not (y or step) then
-    y = x
-    x = 1
+    y, x = x, 1
     step = x <= y and 1 or -1
 
     table.insert(range_list, x)
@@ -488,9 +493,7 @@ function M.range(x, y, step)
       table.insert(range_list, v)
     end
   elseif y and not step then
-    if not M.is_int(y) then
-      error(('(project.util.range): Argument `y` is not an integer: `%s`'):format(y))
-    end
+    assert(M.is_int(y), ('(project.util.range): Argument `y` is not an integer: `%s`'):format(y))
     step = x <= y and 1 or -1
 
     table.insert(range_list, x)
@@ -498,20 +501,15 @@ function M.range(x, y, step)
       table.insert(range_list, v)
     end
   elseif y and step then
-    if not M.is_int({ y, step }) then
-      error('(project.util.range): Arguments `y` and/or `step` are not an integer!')
-    end
-    if step == 0 then
-      error('(project.util.range): Argument `step` cannot be `0`!')
-    end
-    if x > y and step >= 1 then
-      error('(project.util.range): Index out of bounds!')
-    end
-    if x > y and step <= -1 then
-      local p = x
-      x = y
-      y = p
-      step = step * -1
+    assert(M.is_int({ y, step }), '(project.util.range): Arguments `y` and/or `step` are not an integer!')
+    assert(step ~= 0, '(project.util.range): Argument `step` cannot be `0`!')
+    if x > y then
+      assert(step >= 1, '(project.util.range): Index out of bounds!')
+
+      if step <= -1 then
+        x, y = y, x
+        step = step * -1
+      end
     end
 
     table.insert(range_list, x)
@@ -703,8 +701,7 @@ end
 ---
 ---If table is empty, it'll just return it as-is.
 ---
----If the data passed to the function is not a table,
----an error will be raised.
+---If the data passed to the function is not a table, an error will be raised.
 --- ---
 ---@generic T: table
 ---@param T T

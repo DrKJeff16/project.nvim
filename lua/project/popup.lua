@@ -64,7 +64,7 @@ local function open_node(proj, only_cd, ran_cd)
         return item
       end
 
-      item = strip_slash(item, ':p:~')
+      item = strip_slash(item, ':~')
       return item .. (vim.fn.isdirectory(vim.fn.expand(item)) == 1 and (Util.is_windows() and '\\' or '/') or '')
     end,
   }, function(item) ---@param item string
@@ -172,12 +172,12 @@ function M.prompt_project(input)
 
   local original_input = input
   input = strip_slash(input)
-  if not (Util.path.exists(input) and Util.path.exists(strip_slash(input, ':p:h'))) then
+  if not (Util.path.exists(input) and Util.path.exists(strip_slash(input, ':h'))) then
     Util.log.notify_error(('(project.popup.prompt_project): Invalid path `%s`'):format(original_input))
     return
   end
   if not Util.dir_exists(input) then
-    input = strip_slash(input, ':p:h')
+    input = strip_slash(input, ':h')
     if not Util.dir_exists(input) then
       Util.log.notify_error(
         '(project.popup.prompt_project): Path is not a directory, and parent could not be retrieved!'
@@ -437,7 +437,7 @@ M.session_menu = new_popup({
     vim.ui.select(choices_list, {
       prompt = 'Select a project from your session:',
       format_item = function(item) ---@param item string
-        return (item == 'Exit' or config.show_by_name) and item or strip_slash(item, ':p:~')
+        return (item == 'Exit' or config.show_by_name) and item or strip_slash(item, ':~')
       end,
     }, function(item) ---@param item string
       if not item or item == '' then

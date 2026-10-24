@@ -17,7 +17,7 @@ local function gen_items(source)
     )
     path = ('%s %s'):format(
       path,
-      Project.config.get().picker.show == 'names' and v.name or Project.util.strip_slash(v.path, ':p:~')
+      Project.config.get().picker.show == 'names' and v.name or Project.util.strip_slash(v.path, ':~')
     )
     local hl = { { 0, n_digits + 1, 'Number' } } ---@type ProjectPickerItem.Hl[]
     if v.path == curr then
@@ -51,7 +51,7 @@ function M.actions()
       Project.popup.rename_input(entry.value)
     end,
     ['<C-w>'] = function(entry)
-      if Project.util.yes_no('Change cwd to `%s`?', Project.util.strip_slash(entry.value, ':p:~')) then
+      if Project.util.yes_no('Change cwd to `%s`?', Project.util.strip_slash(entry.value, ':~')) then
         Project.core.set_pwd({ dir = entry.value, method = 'picker.nvim' })
       end
     end,

@@ -198,10 +198,9 @@ function M.get_history_paths(path, tilde)
     historyfile = Util.path.historyfile,
   }
   if tilde then
-    ---@type ProjectHistoryPath
     res = vim.tbl_map(function(item)
-      return Util.strip_slash(item, ':p:~')
-    end, vim.deepcopy(res))
+      return Util.strip_slash(item, ':~')
+    end, vim.deepcopy(res)) --[[@as ProjectHistoryPath]]
   end
   return (path and vim.list_contains(vim.tbl_keys(res), path)) and Util.path[path] or res
 end
@@ -253,7 +252,7 @@ function M.find_pattern_root(bufnr_or_dir)
   elseif bufnr_or_dir and type(bufnr_or_dir) == 'string' then
     dir = M.check_oil(nil, bufnr_or_dir) or bufnr_or_dir
   end
-  dir = vim.fn.isdirectory(dir) ~= 1 and Util.strip_slash(dir, ':p:h') or dir
+  dir = vim.fn.isdirectory(dir) ~= 1 and Util.strip_slash(dir, ':h') or dir
   return Util.path.root_included(Util.is_windows() and (dir:gsub('\\', '/')) or dir)
 end
 
@@ -316,7 +315,7 @@ function M.set_pwd(opts)
   end
 
   dir = Util.strip_slash(dir)
-  if not Util.path.exists(dir) then
+  if not Util.path.exists(dir) or Util.path.is_excluded(dir) then
     return false
   end
 
@@ -348,7 +347,7 @@ function M.set_pwd(opts)
   end
 
   local session_projects = Util.history.get_session_projects()
-  local unexpand_dir = Util.strip_slash(dir, ':p:~')
+  local unexpand_dir = Util.strip_slash(dir, ':~')
   if not dry_run then
     if
       not vim.tbl_contains(session_projects, function(val)
@@ -358,7 +357,7 @@ function M.set_pwd(opts)
       table.insert(session_projects, 1, {
         name = custom_name
           or Util.history.find_entry('recent', dir, 'name')
-          or Util.path.join(Util.strip_slash(dir, ':p:h:h:t'), Util.strip_slash(dir, ':p:h:t')),
+          or Util.path.join(Util.strip_slash(dir, ':h:t'), Util.strip_slash(dir, ':t')),
         path = dir,
       })
       Util.log.debug(('(project.core.set_pwd): Added project `%s` to the top of session list'):format(unexpand_dir))
@@ -370,7 +369,7 @@ function M.set_pwd(opts)
         table.insert(session_projects, 1, proj)
         Util.log.debug(
           ('(project.core.set_pwd): Moved project `%s` from `%d` to the top of session list'):format(
-            Util.strip_slash(unexpand_dir, ':p:~'),
+            Util.strip_slash(unexpand_dir, ':~'),
             idx
           )
         )
@@ -459,7 +458,7 @@ function M.set_pwd(opts)
 
     Util.log.debug(
       ('(project.core.set_pwd): Changed directory to `%s` using method `%s`'):format(
-        Util.strip_slash(dir, ':p:~'),
+        Util.strip_slash(dir, ':~'),
         method
       )
     )
@@ -564,7 +563,7 @@ function M.on_buf_enter(bufnr)
   local bufname = vim.api.nvim_buf_get_name(bufnr)
   local dir = M.check_oil(bufnr) or ''
 
-  dir = dir == '' and Util.strip_slash(bufname, ':p:h') or Util.strip_slash(dir)
+  dir = dir == '' and Util.strip_slash(bufname, ':h') or Util.strip_slash(dir)
   dir = Util.is_windows() and dir:gsub('\\', '/') or dir
   if
     Util.path.exists(dir)
