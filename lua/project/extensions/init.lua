@@ -1,11 +1,10 @@
-local Util = require('project.util')
-
 ---@generic T: table, F
 ---@param t T
 ---@param k any
 ---@param fallback F
 ---@return F fallback
 local function get(t, k, fallback)
+  local Util = require('project.util')
   return Util.get(t, k, function()
     return Util.rawset(t, k, fallback)
   end, true)
@@ -19,6 +18,7 @@ local M = {}
 
 setmetatable(M, {
   __index = function(self, k) ---@param self Project.Extensions
+    local Util = require('project.util')
     local raw = Util.get(self, k)
     if raw ~= nil then
       return raw
@@ -28,7 +28,8 @@ setmetatable(M, {
       return
     end
 
-    if Util.mod_exists('project.extensions.' .. k, true) then
+    ---@cast k string
+    if Util.mod_exists('project.extensions.' .. k, true) and k ~= 'init' then
       return get(self, k, require('project.extensions.' .. k))
     end
   end,

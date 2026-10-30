@@ -27,17 +27,18 @@ end
 local function get_files(file_dir)
   Util.validate({ file_dir = { file_dir, { 'string' } } })
 
-  last_dir_cache = file_dir
-  curr_dir_cache = {}
-  local dir = (vim.uv.fs_scandir(file_dir))
-  if dir then
-    while true do
-      local file = (vim.uv.fs_scandir_next(dir))
-      if not file then
-        return
-      end
-      table.insert(curr_dir_cache, file)
+  last_dir_cache, curr_dir_cache = file_dir, {}
+  local dir = vim.uv.fs_scandir(file_dir)
+  if not dir then
+    return
+  end
+
+  while true do
+    local file = vim.uv.fs_scandir_next(dir)
+    if not file then
+      break
     end
+    table.insert(curr_dir_cache, file)
   end
 end
 
@@ -160,6 +161,7 @@ setmetatable(M, {
       return
     end
 
+    ---@cast k string
     if k == 'exists' then
       return get(self, k, Util.path_exists)
     end
@@ -216,20 +218,14 @@ end
 function M.verify_owner(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
-  if Util.is_windows() then
-    if vim.g.project_verify_windows_logged ~= 1 then
-      Util.log.info('(project.util.path.verify_owner): Running on a Windows system. Aborting.')
-      vim.g.project_verify_windows_logged = 1
-    end
-    return true
+  local res = true ---@type boolean
+  if Util.is_windows() and vim.g.project_verify_windows_logged ~= 1 then
+    Util.log.info('(project.util.path.verify_owner): Running on a Windows system, aborting verification')
+    vim.g.project_verify_windows_logged = 1
+  elseif not Util.is_windows() then
+    res = assert(vim.uv.fs_stat(dir), 'Directory cannot be accessed').uid == vim.uv.getuid()
   end
-
-  local stat = vim.uv.fs_stat(dir)
-  if not stat then
-    Util.log.notify_error("(project.util.path.verify_owner): Directory can't be accessed!")
-    return false
-  end
-  return stat.uid == vim.uv.getuid()
+  return res
 end
 
 ---@param dir string
@@ -238,12 +234,14 @@ end
 function M.is_excluded(dir)
   Util.validate({ dir = { dir, { 'string' } } })
 
+  local res = false
   for _, excluded in ipairs(require('project.config').get().exclude_dirs) do
     if dir:match(excluded) then
-      return true
+      res = true
+      break
     end
   end
-  return false
+  return res
 end
 
 ---@param path string|nil|?
@@ -252,9 +250,11 @@ function M.create_path(path)
   path = path or M.projectpath --[[@as string]]
 
   if not Util.path_exists(path) then
-    Util.log.debug(('(project.util.path.create_path): Creating directory `%s`.'):format(path))
-    if not (vim.uv.fs_mkdir(path, M.open_mode('755'))) then
-      Util.log.notify_error(('(project.util.path.create_path): Unable to create diretory: `%s`'):format(path))
+    Util.log.debug(('(project.util.path.create_path): Attempting to create directory: `%s`'):format(path))
+    if Util.vim_has('nvim-0.13') then
+      vim.fs.mkdir(path, { mode = M.open_mode('755'), parents = true })
+    else
+      assert(vim.fn.mkdir(path, 'p') == 1, ('Unable to create diretory: `%s`'):format(path))
     end
   end
 end
@@ -289,7 +289,7 @@ function M.root_included(dir)
     local parent = get_parent(dir)
     --- CREDITS: @pidgeon777 (https://github.com/ahmedkhalf/project.nvim/issues/187)
     if parent == dir or (Util.is_windows() and parent:match('^%a:$') ~= nil) then
-      return
+      break
     end
     dir = parent
   end
@@ -319,26 +319,9 @@ function M.setup(save_dir, save_file)
 
   M.historyfile = vim.fs.joinpath(M.projectpath, save_file)
   if not Util.path_exists(M.historyfile) then
-    local fd, err, err_name
-    fd, err, err_name = vim.uv.fs_open(M.historyfile, 'w', M.open_mode('644')) --[[@as integer]]
-    if not fd then
-      local msg = not (err and err_name) and '(project.util.path.setup): Unable to create history file!'
-        or ('(project.util.path.setup): `%s` - %s'):format(err_name, err)
-
-      Util.log.error(msg)
-      error(msg)
-    end
-
-    local success
-    success, err, err_name = vim.uv.fs_write(fd, { '[', ']' })
-    vim.uv.fs_close(fd)
-    if not success then
-      local msg = not (err and err_name) and '(project.util.path): Unable to write contents to empty history file!'
-        or ('(project.util.path.setup): `%s` - %s'):format(err_name, err)
-
-      Util.log.error(msg)
-      error(msg)
-    end
+    local fd = assert(vim.uv.fs_open(M.historyfile, 'w', M.open_mode('644')), 'Unable to create history file')
+    assert(vim.uv.fs_write(fd, { '[', ']' }), 'Unable to write contents to empty history file')
+    assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
   end
 end
 

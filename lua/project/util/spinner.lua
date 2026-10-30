@@ -127,12 +127,14 @@ function M.setup(kind)
   vim.g.project_spinner_loaded = 1
 end
 
----@param T? Project.Util.SpinnerOpts
+---@param T Project.Util.SpinnerOpts
 ---@return Project.Util.SpinnerObj|nil|? obj
+---@overload fun(): obj: Project.Util.SpinnerObj|nil|?
 function M.new(T)
   if vim.g.project_spinner_loaded == 1 then
     Util.validate({ T = { T, { 'table', 'nil' }, true } })
     T = T or {}
+
     Util.validate({
       ['T.id'] = { T.id, { 'string', 'nil' }, true },
       ['T.kind'] = { T.kind, { 'string', 'nil' }, true },
@@ -142,7 +144,8 @@ function M.new(T)
     local kind = (T.kind and vim.list_contains(VALID_KINDS, T.kind)) and T.kind or (default_kind or 'cursor')
     require('spinner').config(id, { kind = kind })
 
-    local obj = setmetatable({ id = id, kind = kind }, { __index = S }) --[[@as Project.Util.SpinnerObj]]
+    local obj = { id = id, kind = kind } ---@type Project.Util.SpinnerObj
+    setmetatable(obj, { __index = S })
     all_spinners[obj.id] = obj
     return obj
   end
