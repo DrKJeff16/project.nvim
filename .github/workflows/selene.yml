@@ -5,23 +5,13 @@ on:
       - main
     paths:
       - ".github/workflows/selene.yml"
-      - "lua/project/*.lua"
-      - "lua/project/*.lua"
-      - "lua/project/config/*.lua"
-      - "lua/project/extensions/*.lua"
-      - "lua/project/utils/*.lua"
-      - "lua/telescope/_extensions/projects/*.lua"
+      - "lua/**.lua"
       - "selene.toml"
       - "vim.yml"
   pull_request:
     paths:
       - ".github/workflows/selene.yml"
-      - "lua/project/*.lua"
-      - "lua/project/*.lua"
-      - "lua/project/config/*.lua"
-      - "lua/project/extensions/*.lua"
-      - "lua/project/utils/*.lua"
-      - "lua/telescope/_extensions/projects/*.lua"
+      - "lua/**.lua"
       - "selene.toml"
       - "vim.yml"
 jobs:
