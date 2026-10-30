@@ -658,16 +658,20 @@
 ---@field type string
 
 ---@alias Project.Popup.SelectChoices.Callback
----|(fun())
----|(fun(ctx: vim.api.keyset.create_user_command.command_args))
+---|(fun(self: Project.Popup.SelectChoices))
+---|(fun(self: Project.Popup.SelectChoices, ctx: vim.api.keyset.create_user_command.command_args))
 
 ---@alias Project.Popup.SelectChoices.ChoicesList
----|(fun(opts_or_exit?: ProjectDefaults|boolean): choices: string[])
----|(fun(opts?: ProjectDefaults, exit: boolean): choices: string[])
+---|(fun(self: Project.Popup.SelectChoices): choices: string[])
+---|(fun(self: Project.Popup.SelectChoices, opts_or_exit: ProjectDefaults|boolean): choices: string[])
+---|(fun(self: Project.Popup.SelectChoices, opts: nil, exit: boolean): choices: string[])
+---|(fun(self: Project.Popup.SelectChoices, opts: ProjectDefaults, exit: boolean): choices: string[])
 
 ---@alias Project.Popup.SelectChoices.Choices
----|(fun(opts_or_exit?: ProjectDefaults|boolean): choices_dict: table<string, fun(...?: any)>)
----|(fun(opts?: ProjectDefaults, exit: boolean): choices_dict: table<string, fun(...?: any)>)
+---|(fun(self: Project.Popup.SelectChoices): choices_dict: table<string, fun(...?: any)>)
+---|(fun(self: Project.Popup.SelectChoices, opts_or_exit: ProjectDefaults|boolean): choices_dict: table<string, fun(...?: any)>)
+---|(fun(self: Project.Popup.SelectChoices, opts: nil, exit: boolean): choices_dict: table<string, fun(...?: any)>)
+---|(fun(self: Project.Popup.SelectChoices, opts: ProjectDefaults, exit: boolean): choices_dict: table<string, fun(...?: any)>)
 
 ---@class Project.Popup.SelectChoices
 ---@field callback Project.Popup.SelectChoices.Callback
