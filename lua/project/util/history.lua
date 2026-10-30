@@ -1,8 +1,5 @@
 ---@module 'project._meta'
 
-local ERROR = vim.log.levels.ERROR
-local WARN = vim.log.levels.WARN
-local INFO = vim.log.levels.INFO
 local Log = require('project.util.log')
 local Path = require('project.util.path')
 local Util = require('project.util')
@@ -74,6 +71,7 @@ function M.rename_project(path, name)
     path = { path, { 'string' } },
     name = { name, { 'string' } },
   })
+
   if vim.list_contains({ name, path }, '') then
     return false
   end
@@ -89,7 +87,7 @@ function M.rename_project(path, name)
   )
   for _, c in ipairs(vim.split(name, '', { trimempty = false })) do
     if not vim.list_contains(valid_chars, c) then
-      Log.notify_error(('(project.util.history.rename_project): Invalid character `%s`!'):format(c))
+      Log.notify_error(('(project.util.history.rename_project): Invalid character `%s`'):format(c))
       return false
     end
   end
@@ -114,6 +112,7 @@ function M.rename_project(path, name)
       break
     end
   end
+
   if session_i ~= 0 then
     old_name = session_projects[session_i].name
     session_projects[session_i].name = name
@@ -127,7 +126,8 @@ function M.rename_project(path, name)
   return renamed
 end
 
----@param force? boolean
+---@param force boolean
+---@overload fun()
 function M.clear_historyfile(force)
   Util.validate({ force = { force, { 'boolean', 'nil' }, true } })
   if force == nil then
@@ -136,28 +136,17 @@ function M.clear_historyfile(force)
 
   if vim.g.project_historyfile_cleared == 1 and not force then
     Log.info('(project.util.history.clear_historyfile): Already cleared. Aborting.')
-    return
-  end
-  if not force and vim.fn.confirm('Are you sure you want to clear the project history?', '&Yes\n&No', 2) ~= 1 then
+  elseif not force and vim.fn.confirm('Are you sure you want to clear the project history?', '&Yes\n&No', 2) ~= 1 then
     Log.info('(project.util.history.clear_historyfile): Aborting.')
-    return
-  end
+  else
+    local fd = assert(Path.open_file(Path.historyfile, 'w'), 'Unable to open history file')
+    assert(vim.uv.fs_write(fd, { '[', ']' }), 'Unable to clear history file')
+    assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
 
-  local fd = Path.open_file(Path.historyfile, 'w')
-  if not fd then
-    Log.notify_error('(project.util.history.clear_historyfile): Unable to clear history file!')
-    return
-  end
-
-  local success = (vim.uv.fs_write(fd, { '[', ']' }))
-  vim.uv.fs_close(fd)
-  if success then
     Log.notify_warn('(project.util.history.clear_historyfile): History file cleared successfully.')
 
     recent_projects, session_projects = {}, {}
     vim.g.project_historyfile_cleared = 1
-  else
-    Log.notify_error('(project.util.history.clear_historyfile): Unable to clear history file!')
   end
 end
 
@@ -175,12 +164,13 @@ function M.open_history(mode)
 
   Path.create_path()
 
-  assert(vim.uv.fs_stat(Path.projectpath), '(project.util.history.open_history): History directory unavailable!')
   if not Path.exists(Path.historyfile) then
-    assert(
-      vim.fn.writefile({ '[', ']' }, Path.historyfile) ~= -1,
-      '(project.util.history.open_history): History file unavailable!'
+    local fd = assert(
+      vim.uv.fs_open(Path.historyfile, 'w', tonumber('644')),
+      ('Unable to open history file: `%s`'):format(Path.historyfile)
     )
+    assert(vim.uv.fs_write(fd, '[]'), 'Unable to write to empty history file')
+    assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
   end
   return Path.open_file(Path.historyfile, mode)
 end
@@ -224,13 +214,9 @@ function M.export_history_json(path, ind, force_name)
     path = ('%s.json'):format(path)
   end
 
-  local stat = (vim.uv.fs_stat(path))
+  local stat = vim.uv.fs_stat(path)
   if stat then
-    if stat.type ~= 'file' then
-      Log.error(('(project.util.history.export_history_json): Target exists and is not a file! `%s`'):format(path))
-      error(('(project.util.history.export_history_json): Target exists and is not a file! `%s`'):format(path))
-    end
-
+    assert(stat.type == 'file', ('Target exists and is not a file: `%s`'):format(path))
     if
       stat.size ~= 0
       and vim.fn.confirm(('File exists! Do you really want to export to it?'):format(path), '&Yes\n&No', 2) ~= 1
@@ -242,35 +228,23 @@ function M.export_history_json(path, ind, force_name)
 
   M.write_history()
 
+  local fd ---@type integer
   if not Path.exists(path) then
     if Util.dir_exists(path) then
       return
     end
-    if vim.fn.writefile({ '[]' }, path) ~= 0 then
-      Log.notify_error('(project.util.history.export_history_json): File restricted!')
-      return
-    end
+    fd = assert(vim.uv.fs_open(path, 'w', Path.open_mode('644')), ('Unable to open export file: `%s`'):format(path))
+    assert(vim.uv.fs_write(fd, '[]'), ('Unable to write to export file: `%s`'):format(path))
+    assert(vim.uv.fs_close(fd), ('Unable to close file descriptor for export file: `%s`'):format(path))
   end
 
-  local fd = Path.open_file(path, 'w')
-  if not fd then
-    Log.notify_error(('(project.util.history.export_history_json): File restricted! `%s`'):format(path))
-    return
-  end
-
+  fd = assert(Path.open_file(path, 'w'), ('File restricted: `%s`'):format(path))
   local ok, data = pcall(vim.json.encode, Util.reverse(M.get_recent_projects(nil, nil, false)), { indent = spc })
   if ok and data then
-    assert(
-      vim.uv.fs_write(fd, data),
-      '(project.util.history.export_history_json): Unable to write JSON data to target file'
-    )
-
+    assert(vim.uv.fs_write(fd, data), ('Unable to write JSON data to target file: `%s`'):format(path))
     Log.notify_debug(('project.nvim - Exported history to `%s`'):format(Util.strip_slash(path, ':~')))
   end
-  assert(
-    vim.uv.fs_close(fd),
-    '(project.util.history.export_history_json): Unable to close file descriptor for target JSON file'
-  )
+  assert(vim.uv.fs_close(fd), ('Unable to close file descriptor for target JSON file: `%s`'):format(path))
 end
 
 ---@param path string
@@ -307,26 +281,20 @@ function M.import_history_json(path, force_name, keep)
   path = Util.strip_slash(path)
 
   local fd, stat = Path.open_file(path, 'r')
-  if not fd then
-    Log.notify_error(('(project.util.history.import_history_json): File is restricted: `%s`'):format(path))
-    return
-  end
+  assert(fd, ('File is restricted: `%s`'):format(path))
   if not stat then
     Log.notify_error(('(project.util.history.import_history_json): File stat unavailable: `%s`'):format(path))
     return
   end
 
-  local data = (vim.uv.fs_read(fd, stat.size))
-  if not data or data == '' then
+  local data = assert(vim.uv.fs_read(fd, stat.size), ('Data unavailable: `%s`'):format(path))
+  if data == '' then
     Log.notify_error(('(project.util.history.import_history_json): Data unavailable: `%s`'):format(path))
     return
   end
 
   local ok, hist = pcall(vim.json.decode, data, {}) ---@type boolean, ProjectHistoryEntry[]|nil|?
-  if not (ok and hist) then
-    Log.notify_error(('(project.util.history.import_history_json): JSON decoding failed: `%s`'):format(path))
-    return
-  end
+  assert(ok and hist, ('JSON decoding failed: `%s`'):format(path))
 
   recent_projects = Util.reverse(hist)
   M.write_history()
