@@ -1,9 +1,21 @@
 name: Run Tests
 on:
   push:
+    paths:
+      - ".busted"
+      - ".github/workflows/tests.yml"
+      - "Makefile"
+      - "lua/**.lua"
+      - "spec/**.lua"
     branches:
       - main
   pull_request:
+    paths:
+      - ".busted"
+      - ".github/workflows/tests.yml"
+      - "Makefile"
+      - "lua/**.lua"
+      - "spec/**.lua"
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -23,13 +35,16 @@ jobs:
       - name: Install LuaRocks
         uses: leafo/gh-actions-luarocks@v6.1.0
       - name: Install nlua
-        run: luarocks install nlua
+        run: |
+          luarocks install nlua
       - name: Install busted
-        run: luarocks install busted
+        run: |
+          luarocks install busted
       - name: Setup Neovim
         uses: rhysd/action-setup-vim@v1.6.1
         with:
           neovim: true
           version: ${{ matrix.neovim_version }}
       - name: Run tests with busted
-        run: busted
+        run: |
+          busted
