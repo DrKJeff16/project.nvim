@@ -1,5 +1,13 @@
 # Changelog
 
+## [v6.5.0-1](https://github.com/DrKJeff16/project.nvim/tree/v6.5.0-1) (2026-10-30)
+
+[Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v6.4.1-1...v6.5.0-1)
+
+**Fixed bugs:**
+
+- \[BUG\] Iritating different owners notifications [\#82](https://github.com/DrKJeff16/project.nvim/issues/82)
+
 ## [v6.4.1-1](https://github.com/DrKJeff16/project.nvim/tree/v6.4.1-1) (2026-09-29)
 
 [Full Changelog](https://github.com/DrKJeff16/project.nvim/compare/v6.4.0-1...v6.4.1-1)
