@@ -38,6 +38,17 @@ local debug_mode = false ---@type boolean
 ---@enum ProjectLog.Snacks.Levels
 local snacks_levels = { [DEBUG] = 'debug', [INFO] = 'info', [WARN] = 'warn', [ERROR] = 'error' }
 
+---@generic T: table, F
+---@param t T
+---@param k any
+---@param fallback F
+---@return F fallback
+local function get(t, k, fallback)
+  return Util.get(t, k, function()
+    return Util.rawset(t, k, fallback)
+  end, true)
+end
+
 ---@param msg string
 ---@param sel any
 ---@param space? boolean
@@ -85,6 +96,19 @@ end
 ---@field trace fun(...: any): output: string|nil|?
 ---@field warn fun(...: any): output: string|nil|?
 local M = {}
+
+setmetatable(M, {
+  __index = function(self, k)
+    local raw = Util.get(self, k)
+    if raw ~= nil then
+      return raw
+    end
+
+    if type(k) ~= 'string' then
+      return
+    end
+  end,
+})
 
 ---@overload fun(lvl: 0|1|2|3|4|5): cb: fun(...: any): output: string|nil|?
 ---@overload fun(lvl: 0|1|2|3|4|5, is_error: false): cb: fun(...: any): output: string|nil|?

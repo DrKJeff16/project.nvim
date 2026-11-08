@@ -6,7 +6,7 @@ end
 
 vim.g.project_command_created = 1
 
-local Util = require('project.util')
+local Project = require('project')
 
 ---@param line string
 ---@return string[] items
@@ -16,21 +16,22 @@ local function complete_items(_, line)
     return {}
   end
 
+  local recent = Project.util.history.get_recent_projects(true, true)
   local recents = {} ---@type string[]
-  for _, v in ipairs(Util.reverse(Util.history.get_recent_projects(true, true))) do
-    if not vim.list_contains(args, v) then
-      table.insert(recents, v)
+  for i = #recent, 1, -1 do
+    if not vim.list_contains(args, recent[i]) then
+      table.insert(recents, recent[i])
     end
   end
 
-  if args[#args] == '' then
-    return recents
-  end
-
   local res = {} ---@type string[]
-  for _, recent in ipairs(recents) do
-    if vim.startswith(recent, args[#args]) then
-      table.insert(res, recent)
+  if args[#args] == '' then
+    res = recents
+  else
+    for _, r in ipairs(recents) do
+      if vim.startswith(r, args[#args]) then
+        table.insert(res, r)
+      end
     end
   end
   return res
@@ -79,55 +80,52 @@ local function completion(_, line)
     )
   then
     res = {}
-  elseif #args >= 3 then
-    if args[2] == 'session' and #args == 3 and vim.startswith('clear', args[3]) then
-      table.insert(res, 'clear')
-    elseif args[2] == 'log' and #args == 3 then
-      for _, comp in ipairs({ 'clear', 'close', 'open', 'toggle' }) do
-        if vim.startswith(comp, args[3]) then
-          table.insert(res, comp)
+  elseif #args == 3 and args[2] == 'session' and vim.startswith('clear', args[3]) then
+    table.insert(res, 'clear')
+  elseif #args == 3 and args[2] == 'log' then
+    for _, comp in ipairs({ 'clear', 'close', 'open', 'toggle' }) do
+      if vim.startswith(comp, args[3]) then
+        table.insert(res, comp)
+      end
+    end
+  elseif #args >= 3 and args[2] == 'add' then
+    for _, comp in
+      ipairs(vim.tbl_map(function(value) ---@param value string
+        return Project.util.strip_slash(value, ':~')
+      end, vim.fn.getcompletion(args[#args], 'dir', true)))
+    do
+      local found = false
+      for i = 3, #args do
+        if args[i] == comp then
+          found = true
+          break
         end
       end
-    elseif args[2] == 'add' then
-      for _, comp in
-        ipairs(vim.tbl_map(function(value) ---@param value string
-          return Util.strip_slash(value, ':~')
-        end, vim.fn.getcompletion(args[#args], 'dir', true)))
-      do
-        ---@cast comp string
-        local found = false
-        for i = 3, #args do
-          if args[i] == comp then
-            found = true
-            break
-          end
-        end
-        if not found then
-          table.insert(res, comp)
-        end
+      if not found then
+        table.insert(res, comp)
       end
-    elseif args[2] == 'delete' or (#args >= 4 and args[2] == 'history' and args[3] == 'rename') then
-      table.remove(args, 1)
-      res = complete_items(_, table.concat(args, ' '))
-    elseif args[2] == 'history' and #args == 3 then
-      for _, choice in ipairs({ 'clear', 'rename' }) do
-        if vim.startswith(choice, args[3]) then
-          table.insert(res, choice)
-        end
+    end
+  elseif (#args >= 3 and args[2] == 'delete') or (#args >= 4 and args[2] == 'history' and args[3] == 'rename') then
+    table.remove(args, 1)
+    res = complete_items(_, table.concat(args, ' '))
+  elseif #args == 3 and args[2] == 'history' then
+    for _, choice in ipairs({ 'clear', 'rename' }) do
+      if vim.startswith(choice, args[3]) then
+        table.insert(res, choice)
       end
-    elseif vim.list_contains({ 'import', 'export' }, args[2]) and #args == 3 then
-      res = vim.fn.getcompletion(args[3], 'file', true)
-    elseif args[2] == 'export' and #args == 4 then
-      local nums = vim.tbl_map(function(value) ---@param value integer
-        return tostring(value)
-      end, Util.range(0, 32, 2)) --[[@as string[]\]]
-      if args[4] == '' then
-        res = nums
-      else
-        for _, num in ipairs(nums) do
-          if vim.startswith(num, args[4]) then
-            table.insert(res, num)
-          end
+    end
+  elseif #args == 3 and vim.list_contains({ 'import', 'export' }, args[2]) then
+    res = vim.fn.getcompletion(args[3], 'file', true)
+  elseif #args == 4 and args[2] == 'export' then
+    local nums = vim.tbl_map(function(value) ---@param value integer
+      return tostring(value)
+    end, Project.util.range(0, 32, 2)) --[[@as string[]\]]
+    if args[4] == '' then
+      res = nums
+    else
+      for _, num in ipairs(nums) do
+        if vim.startswith(num, args[4]) then
+          table.insert(res, num)
         end
       end
     end
@@ -139,9 +137,8 @@ end
 
 ---@param ctx vim.api.keyset.create_user_command.command_args
 local function callback(ctx)
-  local Popup = require('project.popup')
   if #ctx.fargs == 0 and not ctx.bang then
-    Popup.open_menu(ctx)
+    Project.popup.open_menu(ctx)
     return
   end
 
@@ -178,168 +175,163 @@ local function callback(ctx)
     err = ('%s\n  :Project telescope'):format(err)
   end
 
-  local Config = require('project.config')
-  local Core = require('project.core')
-  local Extensions = require('project.extensions')
   local err_txt, msg = table.concat(vim.split(err, '\n', { trimempty = false }), '\n'), ''
-  local first_args = {
-    'add',
-    'delete',
-    'export',
-    'fzf-lua',
-    'health',
-    'help',
-    'history',
-    'import',
-    'log',
-    'picker',
-    'recents',
-    'root',
-    'session',
-    'snacks',
-    'telescope',
-  }
-  if #ctx.fargs == 1 and vim.list_contains(first_args, ctx.fargs[1]) then
-    if ctx.fargs[1] == 'add' then
-      vim.ui.input({
-        completion = 'dir',
-        default = ctx.bang and Util.strip_slash(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()), ':h') or nil,
-        prompt = 'Input a valid path to the project:',
-      }, Popup.prompt_project)
-    elseif ctx.fargs[1] == 'delete' then
-      Popup.delete_menu()
-    elseif ctx.fargs[1] == 'export' and #ctx.fargs <= 3 then
-      Popup.gen_export_prompt()
-    elseif vim.g.project_fzf_lua_loaded == 1 and ctx.fargs[1] == 'fzf-lua' and not ctx.bang then
-      Extensions['fzf-lua'].run()
-    elseif ctx.fargs[1] == 'health' and not ctx.bang then
-      vim.cmd.checkhealth({ args = { 'project' }, mods = ctx.smods })
-    elseif ctx.fargs[1] == 'help' and not ctx.bang then
-      vim.cmd.help({ args = { 'project.txt' }, mods = ctx.smods })
-    elseif ctx.fargs[1] == 'history' then
-      Util.history.toggle_win()
-    elseif ctx.fargs[1] == 'import' then
-      Popup.gen_import_prompt()
-    elseif ctx.fargs[1] == 'log' and not ctx.bang then
-      Util.log.toggle_win()
-    elseif vim.g.project_picker_loaded == 1 and ctx.fargs[1] == 'picker' then
-      local cmd = { 'rg', '--files', '--ignore', '--text', '--glob', '!.git/' }
-      if ctx.bang or Config.get().picker.hidden then
-        table.insert(cmd, '--hidden')
-      end
-      require('picker.sources.files').set({ cmd = cmd })
-
-      Util.log.debug('(:Project picker): Opening `picker.nvim` picker.')
-      require('picker').open({ 'projects' })
-    elseif ctx.fargs[1] == 'recents' then
-      Popup.recents_menu()
-    elseif ctx.fargs[1] == 'root' then
-      local old_cwd = vim.uv.cwd() or vim.fn.getcwd()
-      Core.on_buf_enter(vim.api.nvim_get_current_buf())
-
-      if (vim.uv.cwd() or vim.fn.getcwd()) == old_cwd and not ctx.bang then
-        Util.notify_warn('(:Project root): Current project is already in history!')
-      elseif ctx.bang then
-        vim.notify(vim.uv.cwd() or vim.fn.getcwd(), vim.log.levels.INFO)
-      end
-    elseif ctx.fargs[1] == 'session' then
-      local fargs = vim.deepcopy(ctx.fargs)
-      table.remove(fargs, 1)
-      ctx.fargs = fargs
-      Popup.session_menu(ctx)
-    elseif vim.g.project_snacks_loaded == 1 and ctx.fargs[1] == 'snacks' and not ctx.bang then
-      Extensions.snacks.pick()
-    elseif vim.g.project_telescope_loaded == 1 and ctx.fargs[1] == 'telescope' and not ctx.bang then
-      vim.cmd.Telescope('projects')
+  if #ctx.fargs == 1 and ctx.fargs[1] == 'add' then
+    vim.ui.input({
+      completion = 'dir',
+      default = ctx.bang and Project.util.strip_slash(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()), ':h')
+        or nil,
+      prompt = 'Input a valid path to the project:',
+    }, Project.popup.prompt_project)
+  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'delete' then
+    Project.popup.delete_menu()
+  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'export' then
+    Project.popup.gen_export_prompt()
+  elseif #ctx.fargs == 1 and vim.g.project_fzf_lua_loaded == 1 and ctx.fargs[1] == 'fzf-lua' and not ctx.bang then
+    Project.extensions['fzf-lua'].run()
+  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'health' and not ctx.bang then
+    vim.cmd.checkhealth({ args = { 'project' }, mods = ctx.smods })
+  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'help' and not ctx.bang then
+    vim.cmd.help({ args = { 'project.txt' }, mods = ctx.smods })
+  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'history' then
+    Project.util.history.toggle_win()
+  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'import' then
+    Project.popup.gen_import_prompt()
+  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'log' and not ctx.bang then
+    Project.util.log.toggle_win()
+  elseif #ctx.fargs == 1 and vim.g.project_picker_loaded == 1 and ctx.fargs[1] == 'picker' then
+    local cmd = { 'rg', '--files', '--ignore', '--text', '--glob', '!.git/' }
+    if ctx.bang or Project.config.get().picker.hidden then
+      table.insert(cmd, '--hidden')
     end
+    require('picker.sources.files').set({ cmd = cmd })
+
+    Project.util.log.debug('(:Project picker): Opening `picker.nvim` picker.')
+    require('picker').open({ 'projects' })
+  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'recents' then
+    Project.popup.recents_menu()
+  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'root' then
+    local old_cwd = vim.uv.cwd() or vim.fn.getcwd()
+    Project.core.on_buf_enter(vim.api.nvim_get_current_buf())
+
+    if (vim.uv.cwd() or vim.fn.getcwd()) == old_cwd and not ctx.bang then
+      Project.util.log.notify_warn('(:Project root): Current project is already in history!')
+    elseif ctx.bang then
+      vim.notify(vim.uv.cwd() or vim.fn.getcwd(), vim.log.levels.INFO)
+    end
+  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'session' then
+    local fargs = vim.deepcopy(ctx.fargs)
+    table.remove(fargs, 1)
+    ctx.fargs = fargs
+    Project.popup.session_menu(ctx)
+  elseif #ctx.fargs == 1 and vim.g.project_snacks_loaded == 1 and ctx.fargs[1] == 'snacks' and not ctx.bang then
+    Project.extensions.snacks.pick()
+  elseif #ctx.fargs == 1 and vim.g.project_telescope_loaded == 1 and ctx.fargs[1] == 'telescope' and not ctx.bang then
+    vim.cmd.Telescope('projects')
   elseif ctx.fargs[1] == 'add' then
     for i = 2, #ctx.fargs do
-      local input = Util.strip_slash(ctx.fargs[i])
-      if not Util.dir_exists(input) then
+      local input = Project.util.strip_slash(ctx.fargs[i])
+      if not Project.util.dir_exists(input) then
         msg = ('%s%s`%s` is not a directory!'):format(msg, msg == '' and '' or '\n', input)
       elseif
-        Core.get_current_project() ~= input
-        and not vim.tbl_contains(Util.history.get_session_projects(), function(val) ---@param val ProjectHistoryEntry
-          return val.path == input
-        end, { predicate = true })
+        Project.core.get_current_project() ~= input
+        and not vim.tbl_contains(
+          Project.util.history.get_session_projects(),
+          function(val) ---@param val ProjectHistoryEntry
+            return val.path == input
+          end,
+          { predicate = true }
+        )
       then
-        Core.set_pwd({ dir = input, method = 'manual' })
+        Project.core.set_pwd({ dir = input, method = 'manual' })
       else
         msg = ('%s%sAlready added `%s`!'):format(msg, msg == '' and '' or '\n', input)
       end
     end
     vim.notify(msg, vim.log.levels.WARN)
   elseif ctx.fargs[1] == 'session' and ctx.fargs[2] == 'clear' and not ctx.bang then
-    Util.history.clear_session()
+    Project.util.history.clear_session()
   elseif ctx.fargs[1] == 'config' and ctx.bang then
-    vim.print(Config.get_config(), vim.log.levels.INFO)
+    vim.print(Project.config.get_config(), vim.log.levels.INFO)
   elseif ctx.fargs[1] == 'config' then
-    Config.toggle_win()
-  elseif ctx.fargs[1] == 'delete' and not Util.history.get_recent_projects() then
-    Util.log.notify_error('(:Project delete): No recent projects!')
+    Project.config.toggle_win()
+  elseif ctx.fargs[1] == 'delete' and not Project.util.history.get_recent_projects() then
+    Project.util.log.notify_error('(:Project delete): No recent projects!')
   elseif ctx.fargs[1] == 'delete' then
-    local recent = Util.history.get_recent_projects()
+    local recent = Project.util.history.get_recent_projects()
     for i = 2, #ctx.fargs do
-      local path = Util.strip_slash(ctx.fargs[i])
+      local path = Project.util.strip_slash(ctx.fargs[i])
       if
         not (
           ctx.bang
           or vim.tbl_contains(recent, function(val) ---@param val ProjectHistoryEntry
-            Util.log.debug(('`%s` =? `%s` ==> %s'):format(path, val.path, vim.inspect(val.path == path)))
+            Project.util.log.debug(('`%s` =? `%s` ==> %s'):format(path, val.path, vim.inspect(val.path == path)))
             return val.path == path
           end, { predicate = true })
         ) or path == ''
       then
-        Util.log.notify_error(('(:Project delete): Could not delete `%s`, aborting'):format(path))
+        Project.util.log.notify_error(('(:Project delete): Could not delete `%s`, aborting'):format(path))
       elseif
         vim.tbl_contains(recent, function(val) ---@param val ProjectHistoryEntry
-          Util.log.debug(('`%s` =? `%s` ==> %s'):format(path, val.path, vim.inspect(val.path == path)))
+          Project.util.log.debug(('`%s` =? `%s` ==> %s'):format(path, val.path, vim.inspect(val.path == path)))
           return val.path == path
         end, { predicate = true })
       then
-        Util.history.delete_project(path)
+        Project.util.history.delete_project(path)
       end
     end
   elseif ctx.fargs[1] == 'export' and #ctx.fargs <= 3 then
-    Util.history.export_history_json(ctx.fargs[2], #ctx.fargs == 3 and tonumber(ctx.fargs[3], 10) or nil, ctx.bang)
+    Project.util.history.export_history_json(
+      ctx.fargs[2],
+      #ctx.fargs == 3 and tonumber(ctx.fargs[3], 10) or nil,
+      ctx.bang
+    )
   elseif ctx.fargs[1] == 'history' and #ctx.fargs == 2 and ctx.fargs[2] == 'clear' then
-    Util.history.clear_historyfile(ctx.bang)
+    Project.util.history.clear_historyfile(ctx.bang)
   elseif ctx.fargs[1] == 'history' and #ctx.fargs == 2 and ctx.fargs[2] == 'rename' then
-    Popup.rename_menu()
+    Project.popup.rename_menu()
   elseif ctx.fargs[1] == 'history' and #ctx.fargs > 2 and ctx.fargs[2] == 'rename' then
     for i = 3, #ctx.fargs, 1 do
       if
-        not vim.list_contains({ Util.strip_slash(ctx.fargs[i]), Util.strip_slash(ctx.fargs[i], ':~') }, ctx.fargs[i])
+        not vim.list_contains(
+          { Project.util.strip_slash(ctx.fargs[i]), Project.util.strip_slash(ctx.fargs[i], ':~') },
+          ctx.fargs[i]
+        )
       then
-        Util.log.notify_error('(:Project history rename): Invalid directory!')
+        Project.util.log.notify_error('(:Project history rename): Invalid directory!')
         return
       end
-      if not Popup.rename_input(ctx.fargs[i]) then
-        Util.log.notify_error(('(:Project history): Unable to rename project `%s`!'):format(ctx.fargs[i]))
+      if not Project.popup.rename_input(ctx.fargs[i]) then
+        Project.util.log.notify_error(('(:Project history): Unable to rename project `%s`!'):format(ctx.fargs[i]))
         return
       end
     end
   elseif ctx.fargs[1] == 'import' then
-    Util.history.import_history_json(ctx.fargs[2], ctx.bang)
+    Project.util.history.import_history_json(ctx.fargs[2], ctx.bang)
   elseif ctx.fargs[1] == 'log' and ctx.fargs[2] == 'toggle' and not ctx.bang then
-    Util.log.toggle_win()
+    Project.util.log.toggle_win()
   elseif ctx.fargs[1] == 'log' and ctx.fargs[2] == 'clear' and not ctx.bang then
-    Util.log.clear_log()
+    Project.util.log.clear_log()
   elseif ctx.fargs[1] == 'log' and ctx.fargs[2] == 'close' and not ctx.bang then
-    Util.log.close_win()
+    Project.util.log.close_win()
   elseif ctx.fargs[1] == 'log' and ctx.fargs[2] == 'open' and not ctx.bang then
-    Util.log.open_win()
+    Project.util.log.open_win()
   else
     vim.notify(err_txt, vim.log.levels.WARN)
   end
 end
 
-vim.api.nvim_create_user_command(
-  'Project',
-  callback,
-  { bang = true, bar = true, complete = completion, desc = 'The project.nvim user commad', force = true, nargs = '*' }
-)
+vim.api.nvim_create_user_command('Project', callback, {
+  bang = true,
+  bar = true,
+  complete = completion,
+  desc = 'The project.nvim user commad',
+  force = true,
+  nargs = '*',
+})
 
-Util.log.debug('(project.config.setup): User commands created.')
+vim.schedule(function()
+  Project.util.log.debug('User commands created')
+end)
 
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:
