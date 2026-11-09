@@ -41,6 +41,8 @@ end
 ---@return { icon: string, highlight: string, match?: string } icon
 ---@return string index
 local function apply_icon(display_value)
+  Util.validate({ display_value = { display_value, { 'string' } } })
+
   for _, icon in pairs(config.path_icons) do
     if display_value:find(icon.match) then
       return icon, (display_value:gsub(icon.match, ''))
@@ -52,6 +54,8 @@ end
 ---@param item snacks.picker.finder.Item
 ---@return snacks.picker.Highlight[] extmark
 local function format_session_item(item)
+  Util.validate({ item = { item, { 'table' } } })
+
   local icon, display_value = apply_icon(item.text)
   return { ---@type snacks.picker.Highlight[]
     { icon.icon, icon.highlight },
@@ -127,14 +131,11 @@ end
 
 ---@param opts? ProjectSnacksConfig
 function M.setup(opts)
+  assert(Util.mod_exists('snacks', true), 'snacks.nvim is not installed')
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  if Util.mod_exists('snacks', true) then
-    config = vim.tbl_deep_extend('force', config, opts or {})
-    vim.g.project_snacks_loaded = 1
-  else
-    Util.log.notify_error('(project.extensions.snacks.setup): snacks.nvim is not installed!')
-  end
+  config = vim.tbl_deep_extend('force', config, opts or {})
+  vim.g.project_snacks_loaded = 1
 end
 
 return M

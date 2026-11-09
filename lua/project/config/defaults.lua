@@ -151,7 +151,7 @@ function D:verify_history()
       'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_.',
       { spaces = true }
     ),
-    '(project.nvim): Invalid chars in `history.save_file` setup option!'
+    'Invalid chars in `history.save_file` setup option'
   )
 end
 
@@ -199,7 +199,7 @@ function D:gen_methods()
 
   setmetatable(methods, {
     __newindex = function()
-      vim.notify('project.nvim - Detection methods are immutable!', vim.log.levels.ERROR)
+      error('project.nvim - Detection methods are immutable!')
     end,
   })
   return methods

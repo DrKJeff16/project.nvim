@@ -16,8 +16,7 @@ local M = {}
 
 setmetatable(M, {
   __index = function(self, k)
-    local Util = require('project.util')
-    local raw = Util.get(self, k)
+    local raw = require('project.util').get(self, k)
     if raw ~= nil then
       return raw
     end

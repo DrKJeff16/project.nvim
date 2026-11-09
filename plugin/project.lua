@@ -197,8 +197,6 @@ local function callback(ctx)
     Project.util.history.toggle_win()
   elseif #ctx.fargs == 1 and ctx.fargs[1] == 'import' then
     Project.popup.gen_import_prompt()
-  elseif #ctx.fargs == 1 and ctx.fargs[1] == 'log' and not ctx.bang then
-    Project.util.log.toggle_win()
   elseif #ctx.fargs == 1 and vim.g.project_picker_loaded == 1 and ctx.fargs[1] == 'picker' then
     local cmd = { 'rg', '--files', '--ignore', '--text', '--glob', '!.git/' }
     if ctx.bang or Project.config.get().picker.hidden then
@@ -308,7 +306,7 @@ local function callback(ctx)
     end
   elseif ctx.fargs[1] == 'import' then
     Project.util.history.import_history_json(ctx.fargs[2], ctx.bang)
-  elseif ctx.fargs[1] == 'log' and ctx.fargs[2] == 'toggle' and not ctx.bang then
+  elseif ctx.fargs[1] == 'log' and (#ctx.fargs == 1 or ctx.fargs[2] == 'toggle') and not ctx.bang then
     Project.util.log.toggle_win()
   elseif ctx.fargs[1] == 'log' and ctx.fargs[2] == 'clear' and not ctx.bang then
     Project.util.log.clear_log()
