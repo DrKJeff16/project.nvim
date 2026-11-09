@@ -145,7 +145,7 @@ function M.gen_export_prompt(bang)
 end
 
 ---@param opts Project.Popup.SelectChoices
----@return Project.Popup.SelectChoices|fun()|fun(ctx?: vim.api.keyset.create_user_command.command_args) selector
+---@return Project.Popup.SelectChoices|fun()|fun(ctx: vim.api.keyset.create_user_command.command_args) selector
 ---@nodiscard
 local function new_popup(opts)
   validate({
@@ -155,7 +155,7 @@ local function new_popup(opts)
     ['opts.callback'] = { opts.callback, { 'function' } },
   })
 
-  assert(not vim.tbl_isempty(opts), '(project.popup.new_popup): Empty args for constructor')
+  assert(not vim.tbl_isempty(opts), 'Empty args for constructor')
 
   local obj = { ---@type Project.Popup.SelectChoices|fun()|fun(ctx: vim.api.keyset.create_user_command.command_args)
     choices = function(self, options, exit)
@@ -214,7 +214,7 @@ M.delete_menu = new_popup({
     }, function(item) ---@param item? string
       if item and item ~= '' then
         local choice = self:choices(config)[item]
-        assert(vim.list_contains(choices_list, item) and choice ~= nil, '(project.popup.delete_menu): Bad selection')
+        assert(vim.list_contains(choices_list, item) and choice ~= nil, 'Bad selection')
         choice()
       end
     end)
@@ -257,7 +257,7 @@ M.rename_menu = new_popup({
       end
 
       local choice = self:choices(config)[item]
-      assert(vim.list_contains(choices_list, item) and choice ~= nil, '(project.popup.rename_menu): Bad selection')
+      assert(vim.list_contains(choices_list, item) and choice ~= nil, 'Bad selection')
       vim.ui.input({
         prompt = ('Input the new name for project %s'):format(
           config.show_by_name and item or find_entry('recent', item, 'name')
@@ -309,7 +309,7 @@ M.recents_menu = new_popup({
     }, function(item) ---@param item string
       if item and item ~= '' then
         local choice = self:choices(config)[item]
-        assert(vim.list_contains(choices_list, item) and choice ~= nil, '(project.popup.recents_menu): Bad selection')
+        assert(vim.list_contains(choices_list, item) and choice ~= nil, 'Bad selection')
         choice(find_entry('recent', item, 'path'), false, false)
       end
     end)
@@ -347,7 +347,7 @@ M.open_menu = new_popup({
       vim.ui.select(choices_list, { prompt = 'Select an operation:' }, function(item)
         if item and item ~= '' then
           local choice = self:choices()[item]
-          assert(vim.list_contains(choices_list, item) and choice ~= nil, '(project.popup.open_menu): Bad selection')
+          assert(vim.list_contains(choices_list, item) and choice ~= nil, 'Bad selection')
           choice()
         end
       end)
@@ -425,7 +425,7 @@ M.session_menu = new_popup({
     local config = require('project.config').get()
     local choices_list = self:choices_list(config)
 
-    assert(#choices_list > 1, '(project.popup.session_menu): No sessions available')
+    assert(#choices_list > 1, 'No sessions available')
 
     vim.ui.select(choices_list, {
       prompt = 'Select a project from your session:',
@@ -435,7 +435,7 @@ M.session_menu = new_popup({
     }, function(item) ---@param item string
       if item and item ~= '' then
         local choice = self:choices(config)[item]
-        assert(vim.list_contains(choices_list, item) and choice ~= nil, '(project.popup.session_menu): Bad selection')
+        assert(vim.list_contains(choices_list, item) and choice ~= nil, 'Bad selection')
         choice(find_entry('session', item, 'path'), only_cd, false)
       end
     end)
