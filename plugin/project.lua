@@ -202,9 +202,8 @@ local function callback(ctx)
     if ctx.bang or Project.config.get().picker.hidden then
       table.insert(cmd, '--hidden')
     end
-    require('picker.sources.files').set({ cmd = cmd })
-
     Project.util.log.debug('(:Project picker): Opening `picker.nvim` picker.')
+    require('picker.sources.files').set({ cmd = cmd })
     require('picker').open({ 'projects' })
   elseif #ctx.fargs == 1 and ctx.fargs[1] == 'recents' then
     Project.popup.recents_menu()
