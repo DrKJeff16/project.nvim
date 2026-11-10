@@ -93,6 +93,7 @@
         "$VIMRUNTIME",
         "${3rd}/busted/library",
         "${3rd}/luv/library",
+        "$HOME/Projects/nvim/picker.nvim",
         "$HOME/Projects/nvim/plenary.nvim",
         "$HOME/Projects/nvim/spinner.nvim",
         "$XDG_DATA_HOME/nvim/lazy/fzf-lua",

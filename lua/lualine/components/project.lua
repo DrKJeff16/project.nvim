@@ -1,5 +1,3 @@
-local Project = require('project')
-
 ---@class LuaLine.Super
 ---@field private _reset_components function
 ---@field apply_highlights function
@@ -53,6 +51,10 @@ local defaults = { enclose_pair = nil, format = 'name', no_project = '', separat
 
 ---@param options? Project.LuaLineOpts
 function M:init(options)
+  if not package.loaded['project'] or vim.g.project_setup ~= 1 then
+    return
+  end
+
   M.super.init(self, options)
   self.options = vim.tbl_deep_extend('force', defaults, self.options or {})
 
@@ -65,21 +67,20 @@ function M:init(options)
   )
 
   if vim.g.project_lualine_logged ~= 1 then
-    Project.util.log.debug('(lualine.components.project:init): lualine.nvim integration enabled.')
+    require('project').util.log.debug('(lualine.components.project:init): lualine.nvim integration enabled.')
     vim.g.project_lualine_logged = 1
   end
 end
 
 function M:update_status()
   return not package.loaded['project'] and self.options.no_project
-    or (Project.core.get_current_project() and self:project_root() or self.options.no_project)
+    or (require('project').core.get_current_project() and self:project_root() or self.options.no_project)
 end
 
 ---@return string component
 function M:project_root()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local msg = ''
-  local config = Project.config.get()
+  local Project = require('project')
+  local bufnr, msg, config = vim.api.nvim_get_current_buf(), '', Project.config.get()
   if
     vim.list_contains(config.disable_on.ft, Project.util.optget('filetype', 'buf', bufnr))
     or vim.list_contains(config.disable_on.bt, Project.util.optget('buftype', 'buf', bufnr))
@@ -93,7 +94,7 @@ function M:project_root()
       and self.options.format
     or 'short'
 
-  if not Project.core.get_project_root(vim.api.nvim_get_current_buf()) then
+  if not Project.core.get_project_root(bufnr) then
     return self.options.no_project
   end
 

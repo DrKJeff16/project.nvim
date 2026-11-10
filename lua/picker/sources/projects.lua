@@ -1,5 +1,4 @@
 ---@module 'picker'
----@module 'project'
 
 local Project = require('project')
 
@@ -21,8 +20,7 @@ local function gen_items(source)
     )
     local hl = { { 0, n_digits + 1, 'Number' } } ---@type ProjectPickerItem.Hl[]
     if v.path == curr then
-      table.insert(hl, { n_digits + 2, n_digits + 3, 'Special' })
-      table.insert(hl, { n_digits + 4, path:len(), 'String' })
+      vim.list_extend(hl, { { n_digits + 2, n_digits + 3, 'Special' }, { n_digits + 4, path:len(), 'String' } })
     else
       table.insert(hl, { n_digits + 2, path:len(), 'String' })
     end
