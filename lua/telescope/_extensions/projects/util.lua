@@ -1,13 +1,7 @@
-if vim.g.project_setup ~= 1 then
-  vim.notify('(telescope._extensions.projects.util): `project.nvim` is not loaded!', vim.log.levels.ERROR)
-  return
-end
+assert(vim.g.project_setup == 1, '`project.nvim` is not loaded!')
 
 local Project = require('project')
-if not Project.util.mod_exists('telescope') then
-  Project.util.log.notify_error('(telescope._extensions.projects.util): Telescope is not loaded!')
-  return
-end
+assert(Project.util.mod_exists('telescope'), 'Telescope is not loaded')
 
 ---@class Project.Telescope.Util
 local M = {}

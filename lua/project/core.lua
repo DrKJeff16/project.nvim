@@ -40,16 +40,24 @@ function M.get_per_project_bufs()
   return per_project_bufs
 end
 
----@param bufnr? integer
+---@param bufnr integer
 ---@return string|nil|? dir
 ---@return string|nil|? name
+---@overload fun(): dir: string|nil|?, name: string|nil|?
 ---@nodiscard
 function M.find_git_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
 
   if Util.executable('git') then
     local obj = vim
-      .system({ 'git', 'rev-parse', '--show-toplevel' }, { cwd = vim.uv.cwd() or vim.fn.getcwd(nil, nil, bufnr), text = true })
+      .system({ 'git', 'rev-parse', '--show-toplevel' }, {
+        cwd = vim.uv.cwd() or vim.fn.getcwd(
+          nil,
+          nil,
+          (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
+        ),
+        text = true,
+      })
       :wait()
     local root = (obj.code == 0 and obj.stdout)
         and Util.strip_slash(vim.split(obj.stdout, '\n', { trimempty = true })[1])
@@ -64,10 +72,11 @@ end
 ---@class ProjectRootSwitch
 local SWITCH = {}
 
----@param bufnr? integer
+---@param bufnr integer
 ---@return boolean success
 ---@return string|nil|? root
 ---@return string|nil|? method
+---@overload fun(): success: boolean, root: string|nil|?, method: string|nil|?
 ---@nodiscard
 function SWITCH.git(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -81,10 +90,11 @@ function SWITCH.git(bufnr)
   return false
 end
 
----@param bufnr? integer
+---@param bufnr integer
 ---@return boolean success
 ---@return string|nil|? root
 ---@return string|nil|? method
+---@overload fun(): success: boolean, root: string|nil|?, method: string|nil|?
 ---@nodiscard
 function SWITCH.lsp(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -99,10 +109,11 @@ function SWITCH.lsp(bufnr)
   return false
 end
 
----@param bufnr? integer
+---@param bufnr integer
 ---@return boolean success
 ---@return string|nil|? root
 ---@return string|nil|? method
+---@overload fun(): success: boolean, root: string|nil|?, method: string|nil|?
 ---@nodiscard
 function SWITCH.pattern(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -117,9 +128,12 @@ function SWITCH.pattern(bufnr)
   return false
 end
 
----@param bufnr? integer
----@param directory? string
+---@param bufnr integer
+---@param directory string
 ---@return string|nil|? dir
+---@overload fun(): dir: string|nil|?
+---@overload fun(bufnr: integer): dir: string|nil|?
+---@overload fun(bufnr: nil, directory: string): dir: string|nil|?
 ---@nodiscard
 function M.check_oil(bufnr, directory)
   Util.validate({
@@ -180,8 +194,9 @@ function M.get_last(full_entry)
 end
 
 ---@overload fun(): history_paths: ProjectHistoryPath
----@overload fun(path: nil, tilde?: boolean): history_paths: ProjectHistoryPath
----@overload fun(path: ProjectPaths, tilde?: boolean): history_paths: string
+---@overload fun(path: ProjectPaths): history_paths: string
+---@overload fun(path: nil, tilde: boolean): history_paths: ProjectHistoryPath
+---@overload fun(path: ProjectPaths, tilde: boolean): history_paths: string
 ---@nodiscard
 function M.get_history_paths(path, tilde)
   Util.validate({
@@ -210,9 +225,10 @@ end
 ---If successful, returns a tuple of two `string` results.
 ---Otherwise, nothing is returned.
 --- ---
----@param bufnr? integer
+---@param bufnr integer
 ---@return string|nil|? dir
 ---@return string|nil|? name
+---@overload fun(): dir: string|nil|?, name: string|nil|?
 ---@nodiscard
 function M.find_lsp_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -236,9 +252,10 @@ function M.find_lsp_root(bufnr)
   end
 end
 
----@param bufnr_or_dir? integer|string
+---@param bufnr_or_dir integer|string
 ---@return string|nil|? dir_res
 ---@return string|nil|? method
+---@overload fun(): dir_res: string|nil|?, method: string|nil|?
 ---@nodiscard
 function M.find_pattern_root(bufnr_or_dir)
   Util.validate({ bufnr_or_dir = { bufnr_or_dir, { 'number', 'string', 'nil' }, true } })
@@ -256,8 +273,9 @@ function M.find_pattern_root(bufnr_or_dir)
   return Util.path.root_included(Util.is_windows() and (dir:gsub('\\', '/')) or dir)
 end
 
----@param bufnr? integer
+---@param bufnr integer
 ---@return boolean valid
+---@overload fun(): valid: boolean
 ---@nodiscard
 function M.valid_bt(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -483,9 +501,10 @@ end
 ---
 ---If no project root is found, nothing will be returned.
 --- ---
----@param bufnr? integer
+---@param bufnr integer
 ---@return string|nil|? root
 ---@return string|nil|? method
+---@overload fun(): root: string|nil|?, method: string|nil|?
 ---@nodiscard
 function M.get_project_root(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -524,10 +543,11 @@ end
 
 ---CREDITS: https://github.com/ahmedkhalf/project.nvim/pull/149
 --- ---
----@param bufnr? integer
+---@param bufnr integer
 ---@return string|nil|? curr
 ---@return string|nil|? method
 ---@return string|nil|? last
+---@overload fun(): curr: string|nil|?, method: string|nil|?, last: string|nil|?
 ---@nodiscard
 function M.get_current(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -539,8 +559,9 @@ function M.get_current(bufnr)
   end
 end
 
----@param bufnr? integer
+---@param bufnr integer
 ---@return string|nil|? name
+---@overload fun(): name: string|nil|?
 ---@nodiscard
 function M.get_current_project_name(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
@@ -551,7 +572,8 @@ function M.get_current_project_name(bufnr)
   end
 end
 
----@param bufnr? integer
+---@param bufnr integer
+---@overload fun()
 function M.on_buf_enter(bufnr)
   Util.validate({ bufnr = { bufnr, { 'number', 'nil' }, true } })
   bufnr = (bufnr and Util.is_int(bufnr, bufnr >= 0)) and bufnr or vim.api.nvim_get_current_buf()
@@ -581,10 +603,17 @@ function M.on_buf_enter(bufnr)
   end
 end
 
----@param scan_what? Project.Core.ScanRoot
----@param path? string
----@param prefix? string
+---@param scan_what Project.Core.ScanRoot
+---@param path string
+---@param prefix string
 ---@return string[]|nil|? files_list
+---@overload fun(): files_list: string[]|nil|?
+---@overload fun(scan_what: Project.Core.ScanRoot): files_list: string[]|nil|?
+---@overload fun(scan_what: Project.Core.ScanRoot, path: string): files_list: string[]|nil|?
+---@overload fun(scan_what: nil, path: string): files_list: string[]|nil|?
+---@overload fun(scan_what: nil, path: string, prefix: string): files_list: string[]|nil|?
+---@overload fun(scan_what: nil, path: nil, prefix: string): files_list: string[]|nil|?
+---@overload fun(scan_what: Project.Core.ScanRoot, path: nil, prefix: string): files_list: string[]|nil|?
 ---@nodiscard
 function M.root_files(scan_what, path, prefix)
   if vim.g.project_setup ~= 1 then

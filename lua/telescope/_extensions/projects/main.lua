@@ -1,16 +1,7 @@
-local ERROR = vim.log.levels.ERROR
-if vim.g.project_setup ~= 1 then
-  vim.notify('(telescope._extensions.projects.main): `project.nvim` is not loaded!', ERROR)
-  return
-end
+assert(vim.g.project_setup == 1, '`project.nvim` is not loaded')
 
 local Project = require('project')
-if not Project.util.mod_exists('telescope') then
-  Project.util.log.notify_error('(telescope._extensions.projects.main): Telescope is not loaded!')
-  return
-end
-
-local _Actions = require('telescope._extensions.projects.actions')
+assert(Project.util.mod_exists('telescope'), 'Telescope is not loaded')
 
 ---@class Project.Telescope.Main
 ---CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
@@ -46,6 +37,7 @@ local function normal_attach(prompt_bufnr, map)
     Keys = require('project.config.defaults').telescope.mappings
   end
 
+  local _Actions = require('telescope._extensions.projects.actions')
   for mode, group in pairs(Keys) do
     ---@cast group table<string, Project.Telescope.ActionNames>
     ---@cast mode 'i'|'n'
@@ -61,22 +53,21 @@ local function normal_attach(prompt_bufnr, map)
   end
 
   require('telescope.actions').select_default:replace(function()
-    local config = Project.config.get()
     Project.core.set_pwd({ dir = require('telescope.actions.state').get_selected_entry().value, method = 'telescope' })
 
+    local config = Project.config.get()
     if config.telescope.behavior == 'explore' and config.telescope.disable_file_picker then
       return require('telescope.actions.set').select(prompt_bufnr, 'default')
     end
-    if config.telescope.behavior == 'explore' then
-      _Actions.find_project_files(prompt_bufnr)
-    else
-      _Actions.recent_project_files(prompt_bufnr)
-    end
+    (config.telescope.behavior == 'explore' and _Actions.find_project_files or _Actions.recent_project_files)(
+      prompt_bufnr
+    )
   end)
   return true
 end
 
----@param opts? table
+---@param opts table
+---@overload fun()
 function M.setup(opts)
   Project.util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
@@ -88,7 +79,8 @@ end
 ---
 ---CREDITS: https://github.com/ldfwbebp/project.nvim/commit/954b8371aa1e517f0d47d48b49373d2365cc92d3
 --- ---
----@param opts? table
+---@param opts table
+---@overload fun()
 function M.projects(opts)
   assert(
     vim.g.project_telescope_loaded == 1,
