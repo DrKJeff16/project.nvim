@@ -619,28 +619,25 @@ function M.write_history(path)
     file_history = #res > historysize and vim.list_slice(res, #res - historysize, #res) or res
   end
 
-  if #file_history == 0 then
-    if vim.g.project_history_no_data_notified ~= 1 then
-      Log.notify_error('(project.util.history.write_history): No data available to write')
-      vim.g.project_history_no_data_notified = 1
+  if #file_history == 0 and vim.g.project_history_no_data_notified ~= 1 then
+    Log.notify_error('(project.util.history.write_history): No data available to write')
+    vim.g.project_history_no_data_notified = 1
+  elseif #file_history > 0 then
+    ok, fd = pcall(unpack(path == Path.historyfile and { M.open_history, 'w' } or { Path.open_file, path, 'w' }))
+    assert(ok and fd ~= nil, 'Unable to open historyfile for writing')
+
+    local success, out = pcall(vim.json.encode, file_history) ---@type boolean, string|nil|?
+    if not (success and out) then
+      assert(
+        vim.uv.fs_close(fd),
+        '(project.util.history.write_history): Unable to close file descriptor for history file'
+      )
+      Log.error('(project.util.history.write_history): Unable to encode JSON data')
+      error('(project.util.history.write_history): Unable to encode JSON data')
     end
-    assert(vim.uv.fs_close(fd), 'Unable to close file descriptor')
-    return
+
+    assert(vim.uv.fs_write(fd, out), 'Unable to write to history file')
   end
-
-  fd = assert(path == Path.historyfile and M.open_history('w') or Path.open_file(path, 'w'), 'File restricted')
-
-  local success, out = pcall(vim.json.encode, file_history) ---@type boolean, string|nil|?
-  if not (success and out) then
-    assert(
-      vim.uv.fs_close(fd),
-      '(project.util.history.write_history): Unable to close file descriptor for history file'
-    )
-    Log.error('(project.util.history.write_history): Unable to encode JSON data')
-    error('(project.util.history.write_history): Unable to encode JSON data')
-  end
-
-  assert(vim.uv.fs_write(fd, out), 'Unable to write to history file')
   assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
 end
 
