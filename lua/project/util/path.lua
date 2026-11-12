@@ -192,9 +192,10 @@ end
 
 ---@param path string
 ---@param flags uv.fs_open.flags
----@param mode? integer
+---@param mode integer
 ---@return integer|nil|? fd
 ---@return uv.fs_stat.result|nil|? stat
+---@overload fun(path: string, flags: uv.fs_open.flags): fd: integer|nil|?, stat: uv.fs_stat.result|nil|?
 function M.open_file(path, flags, mode)
   Util.validate({
     path = { path, { 'string' } },
@@ -244,7 +245,8 @@ function M.is_excluded(dir)
   return res
 end
 
----@param path string|nil|?
+---@param path string
+---@overload fun()
 function M.create_path(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
   path = path or M.projectpath --[[@as string]]

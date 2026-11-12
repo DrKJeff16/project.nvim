@@ -96,8 +96,9 @@ end
 
 ---@param s string
 ---@param chars string
----@param extra_allowed? { spaces?: boolean, newlines?: boolean }
+---@param extra_allowed { spaces?: boolean, newlines?: boolean }
 ---@return boolean result
+---@overload fun(s: string, chars: string): result: boolean
 ---@nodiscard
 function M.only_has_chars(s, chars, extra_allowed)
   M.validate({
@@ -330,9 +331,12 @@ function M.dir_exists(dir)
 end
 
 ---@param str string
----@param use_dot? boolean
----@param triggers? string[]
+---@param use_dot boolean
+---@param triggers string[]
 ---@return string new_str
+---@overload fun(str: string): new_str: string
+---@overload fun(str: string, use_dot: boolean): new_str: string
+---@overload fun(str: string, use_dot: nil, triggers: string[]): new_str: string
 ---@nodiscard
 function M.capitalize(str, use_dot, triggers)
   M.validate({
@@ -444,8 +448,9 @@ function M.mod_exists(mod, legacy)
 end
 
 ---@param nums number[]|number
----@param cond? boolean
+---@param cond boolean
 ---@return boolean int
+---@overload fun(nums: number[]|number): int: boolean
 ---@nodiscard
 function M.is_int(nums, cond)
   M.validate({
@@ -705,8 +710,9 @@ end
 --- ---
 ---@generic T: table
 ---@param T T
----@param key? string|integer
+---@param key any
 ---@return T NT
+---@overload fun(T: T): NT: T
 ---@nodiscard
 function M.dedup(T, key)
   M.validate({
@@ -748,10 +754,13 @@ end
 ---@generic T
 ---@param t type
 ---@param data T
----@param sep? string
----@param constraints? string[]
----@return string
----@return boolean|nil|?
+---@param sep string
+---@param constraints string[]
+---@return string str
+---@return true|nil|? skip
+---@overload fun(t: type, data: T): str: string, skip: true|nil|?
+---@overload fun(t: type, data: T, sep: string): str: string, skip: true|nil|?
+---@overload fun(t: type, data: T, sep: nil, constraints: string[]): str: string, skip: true|nil|?
 ---@nodiscard
 function M.format_per_type(t, data, sep, constraints)
   M.validate({
@@ -763,7 +772,7 @@ function M.format_per_type(t, data, sep, constraints)
 
   if t == 'string' then
     local res = ('%s`"%s"`'):format(sep, data)
-    if not M.is_type('table', constraints) or constraints and vim.list_contains(constraints, data) then
+    if type(constraints) ~= 'table' or constraints and vim.list_contains(constraints, data) then
       return res
     end
     return res, true

@@ -53,7 +53,8 @@ function M.get()
 end
 
 ---@param k string|table<string, any>
----@param v? any
+---@param v any
+---@overload fun(k: string|table<string, any>)
 function M.set(k, v)
   Util.validate({ k = { k, { 'string', 'table' } } })
 
@@ -77,7 +78,8 @@ end
 
 ---The function called when running `require('project').setup()`.
 --- ---
----@param opts? ProjectOpts The `project.nvim` config options.
+---@param opts ProjectOpts The `project.nvim` config options.
+---@overload fun()
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 

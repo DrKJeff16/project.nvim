@@ -102,7 +102,8 @@ function M.get_all_spinners()
   return all_spinners
 end
 
----@param kind? 'cmdline'|'cursor'|'extmark'|'statusline'|'tabline'|'winbar'|'window-footer'|'window-title'
+---@param kind 'cmdline'|'cursor'|'extmark'|'statusline'|'tabline'|'winbar'|'window-footer'|'window-title'
+---@overload fun()
 function M.setup(kind)
   if vim.g.project_spinner_loaded == 1 then
     return

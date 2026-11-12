@@ -1,14 +1,13 @@
 local Util = require('project.util')
 
----@param cb fun(entry?: string|number, cb?: function)
-local function session_projects(cb)
-  local projects = Util.history.get_session_projects()
+---@param callback fun()|fun(entry: string|number)|fun(entry: nil, cb: function)|fun(entry: string|number, cb: function)
+local function session_projects(callback)
+  Util.validate({ callback, { 'function' } })
+
   local config = require('project.config').get().fzf_lua
-  if config.sort == 'newest' then
-    projects = Util.reverse(projects)
-  end
-  for _, entry in ipairs(projects) do
-    cb(config.show == 'names' and entry.name or entry.path)
+  local projects = Util.history.get_session_projects()
+  for _, entry in ipairs(config.sort == 'newest' and Util.reverse(projects) or projects) do
+    callback(config.show == 'names' and entry.name or entry.path)
   end
 end
 
@@ -52,17 +51,14 @@ local function rename_project(items)
   end
 end
 
----@param cb fun(entry?: string|number, cb?: function)
-local function exec(cb)
-  local projects = Util.history.get_recent_projects()
+---@param callback fun()|fun(entry: string|number)|fun(entry: nil, cb: function)|fun(entry: string|number, cb: function)
+local function exec(callback)
   local config = require('project.config').get().fzf_lua
-  if config.sort == 'newest' then
-    projects = Util.reverse(projects)
+  local projects = Util.history.get_recent_projects()
+  for _, entry in ipairs(config.sort == 'newest' and Util.reverse(projects) or projects) do
+    callback(config.show == 'names' and entry.name or entry.path)
   end
-  for _, entry in ipairs(projects) do
-    cb(config.show == 'names' and entry.name or entry.path)
-  end
-  cb()
+  callback()
 end
 
 ---@class Project.Extensions.FzfLua

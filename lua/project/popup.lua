@@ -1,9 +1,6 @@
 ---@module 'project._meta'
 
 local Util = require('project.util')
-local find_entry = Util.history.find_entry
-local strip_slash = Util.strip_slash
-local validate = Util.validate
 
 ---@param cmd string
 ---@param mods table
@@ -13,7 +10,7 @@ local validate = Util.validate
 ---@overload fun(cmd: string, mods: table): command: function
 ---@overload fun(cmd: string, mods: nil, ...: string): command: function
 local function exec_cmd(cmd, mods, ...)
-  validate({
+  Util.validate({
     cmd = { cmd, { 'string' } },
     mods = { mods, { 'table', 'nil' }, true },
   })
@@ -28,18 +25,18 @@ end
 ---@param only_cd boolean
 ---@param ran_cd boolean
 local function open_node(proj, only_cd, ran_cd)
-  validate({
+  Util.validate({
     proj = { proj, { 'string' } },
     only_cd = { only_cd, { 'boolean' } },
     ran_cd = { ran_cd, { 'boolean' } },
   })
 
-  proj = strip_slash(proj)
+  proj = Util.strip_slash(proj)
 
   local Core = require('project.core')
   if not ran_cd then
     if not Core.set_pwd({ dir = proj, method = 'prompt' }) then
-      Util.log.notify_error('(project.popup.open_node): Unsucessful `set_pwd()`!')
+      Util.log.error('(project.popup.open_node): Unsucessful `set_pwd()` call')
       return
     end
     if only_cd then
@@ -64,7 +61,7 @@ local function open_node(proj, only_cd, ran_cd)
     prompt = 'Select a file:',
     format_item = function(item) ---@param item string
       if item ~= 'Exit' then
-        item = strip_slash(item, ':~')
+        item = Util.strip_slash(item, ':~')
         item = item .. (vim.fn.isdirectory(vim.fn.expand(item)) == 1 and (Util.is_windows() and '\\' or '/') or '')
       end
       return item
@@ -74,7 +71,7 @@ local function open_node(proj, only_cd, ran_cd)
       return
     end
 
-    item = Util.rstrip('\\', strip_slash(item))
+    item = Util.rstrip('\\', Util.strip_slash(item))
 
     local stat = assert(vim.uv.fs_stat(item), ('Unable to retrieve stats for `%s`'):format(item))
     if stat.type == 'file' then
@@ -93,11 +90,11 @@ local M = {}
 ---@param project string
 ---@return boolean success
 function M.rename_input(project)
-  validate({ project = { project, { 'string' } } })
+  Util.validate({ project = { project, { 'string' } } })
 
   local success = true
   vim.ui.input(
-    { prompt = ('Name For Project `%s`'):format(find_entry('recent', project, 'name')) },
+    { prompt = ('Name For Project `%s`'):format(Util.history.find_entry('recent', project, 'name')) },
     function(input) ---@param input? string
       success = (input and input ~= '') and Util.history.rename_project(project, input) or false
     end
@@ -108,7 +105,7 @@ end
 ---@param bang boolean
 ---@overload fun()
 function M.gen_import_prompt(bang)
-  validate({ bang = { bang, { 'boolean', 'nil' }, true } })
+  Util.validate({ bang = { bang, { 'boolean', 'nil' }, true } })
   if bang == nil then
     bang = false
   end
@@ -123,7 +120,7 @@ end
 ---@param bang boolean
 ---@overload fun()
 function M.gen_export_prompt(bang)
-  validate({ bang = { bang, { 'boolean', 'nil' }, true } })
+  Util.validate({ bang = { bang, { 'boolean', 'nil' }, true } })
   if bang == nil then
     bang = false
   end
@@ -148,7 +145,7 @@ end
 ---@return Project.Popup.SelectChoices|fun()|fun(ctx: vim.api.keyset.create_user_command.command_args) selector
 ---@nodiscard
 local function new_popup(opts)
-  validate({
+  Util.validate({
     opts = { opts, { 'table' } },
     ['opts.choices'] = { opts.choices, { 'function' } },
     ['opts.choices_list'] = { opts.choices_list, { 'function' } },
@@ -175,22 +172,23 @@ local function new_popup(opts)
   return obj
 end
 
----@param input? string
+---@param input string
+---@overload fun()
 function M.prompt_project(input)
-  validate({ input = { input, { 'string', 'nil' }, true } })
+  Util.validate({ input = { input, { 'string', 'nil' }, true } })
   if not input or input == '' then
     return
   end
 
   local original_input = input
-  input = strip_slash(input)
+  input = Util.strip_slash(input)
   assert(
-    Util.path.exists(input) and Util.path.exists(strip_slash(input, ':h')),
+    Util.path.exists(input) and Util.path.exists(Util.strip_slash(input, ':h')),
     ('Invalid path `%s`'):format(original_input)
   )
 
   if not Util.dir_exists(input) then
-    input = strip_slash(input, ':h')
+    input = Util.strip_slash(input, ':h')
     assert(Util.dir_exists(input), 'Path is not a directory, and parent could not be retrieved')
   end
 
@@ -209,7 +207,7 @@ M.delete_menu = new_popup({
     vim.ui.select(choices_list, {
       prompt = 'Select a project to delete:',
       format_item = function(item) ---@param item string
-        return (item == 'Exit' and '' or (find_entry('session', item, 'path') and '* ' or '')) .. item
+        return (item == 'Exit' and '' or (Util.history.find_entry('session', item, 'path') and '* ' or '')) .. item
       end,
     }, function(item) ---@param item? string
       if item and item ~= '' then
@@ -240,7 +238,7 @@ M.delete_menu = new_popup({
     for _, proj in ipairs(self:choices_list(opts)) do
       T[proj] = proj == 'Exit' and function() end
         or function()
-          Util.history.delete_project(find_entry('recent', proj, 'path'))
+          Util.history.delete_project(Util.history.find_entry('recent', proj, 'path'))
         end
     end
     return T
@@ -260,7 +258,7 @@ M.rename_menu = new_popup({
       assert(vim.list_contains(choices_list, item) and choice ~= nil, 'Bad selection')
       vim.ui.input({
         prompt = ('Input the new name for project %s'):format(
-          config.show_by_name and item or find_entry('recent', item, 'name')
+          config.show_by_name and item or Util.history.find_entry('recent', item, 'name')
         ),
       }, function(input) ---@param input? string
         if input and input ~= '' then
@@ -290,7 +288,10 @@ M.rename_menu = new_popup({
     for _, proj in ipairs(self:choices_list(opts)) do
       T[proj] = proj == 'Exit' and function() end
         or function(name)
-          Util.history.rename_project(opts.show_by_name and find_entry('recent', proj, 'path') or proj, name)
+          Util.history.rename_project(
+            opts.show_by_name and Util.history.find_entry('recent', proj, 'path') or proj,
+            name
+          )
         end
     end
     return T
@@ -304,13 +305,13 @@ M.recents_menu = new_popup({
     vim.ui.select(choices_list, {
       prompt = 'Select a project:',
       format_item = function(item) ---@param item string
-        return (item == 'Exit' and '' or (find_entry('session', item, 'path') and '* ' or '')) .. item
+        return (item == 'Exit' and '' or (Util.history.find_entry('session', item, 'path') and '* ' or '')) .. item
       end,
     }, function(item) ---@param item string
       if item and item ~= '' then
         local choice = self:choices(config)[item]
         assert(vim.list_contains(choices_list, item) and choice ~= nil, 'Bad selection')
-        choice(find_entry('recent', item, 'path'), false, false)
+        choice(Util.history.find_entry('recent', item, 'path'), false, false)
       end
     end)
   end,
@@ -354,7 +355,7 @@ M.open_menu = new_popup({
     end
   end,
   choices = function(_)
-    return { ---@type table<string, function>
+    return { ---@type table<string, fun(...?: any)>
       Checkhealth = exec_cmd('Project', { vertical = true }, 'health'),
       Config = exec_cmd('Project', nil, 'config'),
       Delete = exec_cmd('Project', nil, 'delete'),
@@ -375,7 +376,7 @@ M.open_menu = new_popup({
     }
   end,
   choices_list = function(_, exit)
-    validate({ exit = { exit, { 'boolean', 'nil' }, true } })
+    Util.validate({ exit = { exit, { 'boolean', 'nil' }, true } })
     if exit == nil then
       exit = true
     end
@@ -430,13 +431,13 @@ M.session_menu = new_popup({
     vim.ui.select(choices_list, {
       prompt = 'Select a project from your session:',
       format_item = function(item) ---@param item string
-        return (item == 'Exit' or config.show_by_name) and item or strip_slash(item, ':~')
+        return (item == 'Exit' or config.show_by_name) and item or Util.strip_slash(item, ':~')
       end,
     }, function(item) ---@param item string
       if item and item ~= '' then
         local choice = self:choices(config)[item]
         assert(vim.list_contains(choices_list, item) and choice ~= nil, 'Bad selection')
-        choice(find_entry('session', item, 'path'), only_cd, false)
+        choice(Util.history.find_entry('session', item, 'path'), only_cd, false)
       end
     end)
   end,

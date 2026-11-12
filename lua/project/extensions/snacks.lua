@@ -129,7 +129,8 @@ function M.pick()
     })
 end
 
----@param opts? ProjectSnacksConfig
+---@param opts ProjectSnacksConfig
+---@overload fun()
 function M.setup(opts)
   assert(Util.mod_exists('snacks', true), 'snacks.nvim is not installed')
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })

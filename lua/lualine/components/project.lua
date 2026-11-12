@@ -49,7 +49,8 @@ local M = require('lualine.component'):extend()
 ---@field separator string
 local defaults = { enclose_pair = nil, format = 'name', no_project = '', separator = ' ' }
 
----@param options? Project.LuaLineOpts
+---@param options Project.LuaLineOpts
+---@overload fun(self: Project.LuaLine)
 function M:init(options)
   if not package.loaded['project'] or vim.g.project_setup ~= 1 then
     return

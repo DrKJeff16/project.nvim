@@ -38,21 +38,12 @@ local debug_mode = false ---@type boolean
 ---@enum ProjectLog.Snacks.Levels
 local snacks_levels = { [DEBUG] = 'debug', [INFO] = 'info', [WARN] = 'warn', [ERROR] = 'error' }
 
----@generic T: table, F
----@param t T
----@param k any
----@param fallback F
----@return F fallback
-local function get(t, k, fallback)
-  return Util.get(t, k, function()
-    return Util.rawset(t, k, fallback)
-  end, true)
-end
-
 ---@param msg string
 ---@param sel any
----@param space? boolean
+---@param space boolean
 ---@return string msg
+---@overload fun(msg: string, sel: any): msg: string
+---@nodiscard
 local function format_sel(msg, sel, space)
   Util.validate({
     msg = { msg, { 'string' } },

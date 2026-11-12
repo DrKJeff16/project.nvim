@@ -173,8 +173,11 @@ function M.open_history(mode)
 end
 
 ---@param path string
----@param ind? integer|string
----@param force_name? boolean
+---@param ind integer|string
+---@param force_name boolean
+---@overload fun(path: string)
+---@overload fun(path: string, ind: integer|string)
+---@overload fun(path: string, ind: nil, force_name: boolean)
 function M.export_history_json(path, ind, force_name)
   Util.validate({
     path = { path, { 'string' } },
@@ -242,8 +245,11 @@ function M.export_history_json(path, ind, force_name)
 end
 
 ---@param path string
----@param force_name? boolean
----@param keep? boolean
+---@param force_name boolean
+---@param keep boolean
+---@overload fun(path: string)
+---@overload fun(path: string, force_name: boolean)
+---@overload fun(path: string, force_name: nil, keep: boolean)
 function M.import_history_json(path, force_name, keep)
   Util.validate({
     path = { path, { 'string' } },
@@ -342,7 +348,8 @@ end
 ---Deletes a project string, or a Telescope Entry type.
 --- ---
 ---@param project string|Project.ActionEntry
----@param prompt? boolean
+---@param prompt boolean
+---@overload fun(project: string|Project.ActionEntry)
 function M.delete_project(project, prompt)
   Util.validate({
     project = { project, { 'string', 'table' } },
@@ -373,8 +380,9 @@ end
 ---Deletes multiple projects with a single confirmation prompt.
 --- ---
 ---@param projects string[] List of project paths to delete
----@param prompt? boolean Whether to prompt before deletion (default false)
+---@param prompt boolean Whether to prompt before deletion (default false)
 ---@return boolean deleted Whether any projects were deleted
+---@overload fun(projects: string[]): deleted: boolean
 function M.delete_projects(projects, prompt)
   Util.validate({
     projects = { projects, { 'table' } },
@@ -549,7 +557,8 @@ end
 
 ---Write projects to history file.
 --- ---
----@param path? string
+---@param path string
+---@overload fun()
 function M.write_history(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
   local config = require('project.config').get()
