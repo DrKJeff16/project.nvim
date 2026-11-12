@@ -100,35 +100,29 @@ function M.setup(opts)
   Util.path.projectpath = Util.path.join(options.history.save_dir, 'project_nvim')
 
   -- WARN: THIS GOES FIRST!!!!
-  if not Util.path.exists(Util.path.projectpath) and vim.fn.mkdir(Util.path.projectpath, 'p') ~= 1 then
+  if not (Util.path.exists(Util.path.projectpath) or pcall(Util.path.mkdir, Util.path.projectpath, nil, true)) ~= 1 then
     Util.path.datapath = M.get_defaults():_get_no_mt().history.save_dir
     Util.path.projectpath = Util.path.join(Util.path.projectpath, 'project_nvim')
     if not Util.path.exists(Util.path.projectpath) then
-      assert(
-        vim.fn.mkdir(Util.path.projectpath, 'p') == 1,
-        '(project.config.setup): Unable to create history directory!'
-      )
+      assert(pcall(Util.path.mkdir, Util.path.projectpath, nil, true), 'Unable to create history directory')
     end
   end
 
   if not Util.path.exists(Util.path.projectpath) then
-    assert(
-      vim.fn.mkdir(Util.path.projectpath, 'p') == 1,
-      '(project.config.setup): Unable to create history subdirectory!'
-    )
+    assert(pcall(Util.path.mkdir, Util.path.projectpath, nil, true), 'Unable to create history subdirectories')
   end
 
   Util.path.historyfile = Util.path.join(Util.path.projectpath, options.history.save_file)
   if not Util.path.exists(Util.path.historyfile) then
     local fd =
       assert(vim.uv.fs_open(Util.path.historyfile, 'w', Util.path.open_mode('644')), 'Unable to create history file')
-    assert(vim.uv.fs_write(fd, { '[', ']' }), 'Unable to write to history file')
+    assert(vim.uv.fs_write(fd, '[]'), 'Unable to write to history file')
     assert(vim.uv.fs_close(fd), 'Unable to close descriptor for history file')
   end
 
   assert(
     Util.path.datapath and Util.path.projectpath and Util.path.historyfile,
-    '(project.config.setup): Failed to store history path successfully!'
+    'Failed to store history path successfully!'
   )
 
   if options.log.enabled then

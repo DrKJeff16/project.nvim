@@ -217,15 +217,9 @@ local function timer_cb()
     vim.uv.fs_open(logfile, 'w', Path.open_mode('644')),
     ('(project.util.log.timer_cb): Unable to open logfile: `%s`'):format(logfile)
   )
-  local ok = vim.uv.fs_ftruncate(fd, 0)
-  if ok then
-    vim.notify(('(project.util.log.timer_cb): `%s` has been cleared!'):format(Util.strip_slash(logfile, ':~')), INFO)
-  else
-    vim.notify(
-      ('(project.util.log.timer_cb): `%s` could not be cleared!'):format(Util.strip_slash(logfile, ':~')),
-      ERROR
-    )
-  end
+  assert(vim.uv.fs_ftruncate(fd, 0), ('`%s` could not be cleared'):format(Util.strip_slash(logfile, ':~')))
+
+  vim.notify(('(project.util.log.timer_cb): `%s` has been cleared'):format(Util.strip_slash(logfile, ':~')), INFO)
 
   assert(vim.uv.fs_close(fd), '(project.util.log.timer_cb): Unable to close file descriptor for logfile')
 end
@@ -304,11 +298,9 @@ function M.open(flags)
   if not Path.exists({ logpath, logfile }) then
     Path.create_path(logpath)
   end
-  local dir_stat = assert(
-    vim.uv.fs_stat(logpath),
-    ('(project.util.log.open): Unable to get stats for the logfile directory: `%s`'):format(logpath)
-  )
-  assert(dir_stat.type == 'directory', '(project.util.log.open): Projectpath stat is not valid!')
+  local dir_stat =
+    assert(vim.uv.fs_stat(logpath), ('Unable to get stats for the logfile directory: `%s`'):format(logpath))
+  assert(dir_stat.type == 'directory', 'Projectpath stat is not valid')
 
   return (vim.uv.fs_open(logfile, flags, Path.open_mode('644'))), (vim.uv.fs_stat(logfile))
 end
@@ -332,7 +324,7 @@ function M.setup(opts)
   if not stat then
     fd = M.open('w')
     if fd then
-      vim.uv.fs_close(fd)
+      assert(vim.uv.fs_close(fd), 'Unable to close descriptor')
       fd = nil
     end
   end
@@ -340,9 +332,12 @@ function M.setup(opts)
   local head = ('='):rep(45)
   fd, stat = M.open('a')
   if fd and stat then
-    vim.uv.fs_write(
-      fd,
-      os.date(('%s%s    %s    %s\n'):format((stat.size >= 1 and '\n' or ''), head, '%x  (%H:%M:%S)', head))
+    assert(
+      vim.uv.fs_write(
+        fd,
+        os.date(('%s%s    %s    %s\n'):format((stat.size >= 1 and '\n' or ''), head, '%x  (%H:%M:%S)', head))
+      ),
+      'Unable to write data to logfile'
     )
     setup_watch()
 
@@ -382,42 +377,37 @@ function M.open_win()
   end
   assert(Path.exists(logfile), '(project.util.log.open_win): Bad logfile path')
 
-  local fd = vim.uv.fs_open(logfile, 'r', Path.open_mode('644'))
-  if not fd then
-    return
-  end
-
+  local fd = assert(vim.uv.fs_open(logfile, 'r', Path.open_mode('644')), 'Unable to open logfile')
   local stat = vim.uv.fs_stat(logfile)
   if not stat then
-    vim.uv.fs_close(fd)
+    assert(vim.uv.fs_close(fd), 'Unable to close file descriptor')
     return
   end
 
-  local data = vim.uv.fs_read(fd, stat.size)
-  vim.uv.fs_close(fd)
-  if data then
-    local bufnr = vim.api.nvim_create_buf(true, true)
-    window = {
-      bufnr = bufnr,
-      tab = vim.api.nvim_open_tabpage(bufnr, true, { after = -1 }),
-      win = vim.api.nvim_get_current_win(),
-    }
+  local data = assert(vim.uv.fs_read(fd, stat.size), 'Unable to read logfile')
+  assert(vim.uv.fs_close(fd), 'Unable to close file descriptor')
 
-    vim.api.nvim_buf_set_name(window.bufnr, 'Project Log')
-    vim.api.nvim_buf_set_lines(window.bufnr, 0, -1, true, vim.split(data, '\n', { plain = true, trimempty = false }))
+  local bufnr = vim.api.nvim_create_buf(true, true)
+  window = {
+    bufnr = bufnr,
+    tab = vim.api.nvim_open_tabpage(bufnr, true, { after = -1 }),
+    win = vim.api.nvim_get_current_win(),
+  }
 
-    Util.optset('signcolumn', 'no', 'win', window.win)
-    Util.optset('list', false, 'win', window.win)
-    Util.optset('number', false, 'win', window.win)
-    Util.optset('wrap', false, 'win', window.win)
-    Util.optset('colorcolumn', '', 'win', window.win)
-    Util.optset('filetype', 'log', 'buf', window.bufnr)
-    Util.optset('fileencoding', 'utf-8', 'buf', window.bufnr)
-    Util.optset('buftype', 'nowrite', 'buf', window.bufnr)
-    Util.optset('modifiable', false, 'buf', window.bufnr)
+  vim.api.nvim_buf_set_name(window.bufnr, 'Project Log')
+  vim.api.nvim_buf_set_lines(window.bufnr, 0, -1, true, vim.split(data, '\n', { trimempty = false }))
 
-    vim.keymap.set('n', 'q', M.close_win, { buffer = window.bufnr })
-  end
+  Util.optset('signcolumn', 'no', 'win', window.win)
+  Util.optset('list', false, 'win', window.win)
+  Util.optset('number', false, 'win', window.win)
+  Util.optset('wrap', false, 'win', window.win)
+  Util.optset('colorcolumn', '', 'win', window.win)
+  Util.optset('filetype', 'log', 'buf', window.bufnr)
+  Util.optset('fileencoding', 'utf-8', 'buf', window.bufnr)
+  Util.optset('buftype', 'nowrite', 'buf', window.bufnr)
+  Util.optset('modifiable', false, 'buf', window.bufnr)
+
+  vim.keymap.set('n', 'q', M.close_win, { buffer = window.bufnr })
 end
 
 function M.close_win()
@@ -430,11 +420,7 @@ end
 
 function M.toggle_win()
   if vim.g.project_log_loaded == 1 then
-    if not window then
-      M.open_win()
-    else
-      M.close_win()
-    end
+    (window and M.close_win or M.open_win)()
   end
 end
 

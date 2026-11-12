@@ -1,7 +1,6 @@
-local Util = require('project.util')
+local last_dir_cache, curr_dir_cache = '', {} ---@type string, string[]
 
-local last_dir_cache = '' ---@type string
-local curr_dir_cache = {} ---@type string[]
+local Util = require('project.util')
 
 ---@generic T: table, F
 ---@param t T
@@ -29,16 +28,14 @@ local function get_files(file_dir)
 
   last_dir_cache, curr_dir_cache = file_dir, {}
   local dir = vim.uv.fs_scandir(file_dir)
-  if not dir then
-    return
-  end
-
-  while true do
-    local file = vim.uv.fs_scandir_next(dir)
-    if not file then
-      break
+  if dir then
+    while true do
+      local file = vim.uv.fs_scandir_next(dir)
+      if not file then
+        break
+      end
+      table.insert(curr_dir_cache, file)
     end
-    table.insert(curr_dir_cache, file)
   end
 end
 
@@ -68,8 +65,7 @@ local function has(dir, identifier)
     get_files(dir)
   end
 
-  local pattern = Util.globtopattern(identifier)
-  local result = false
+  local pattern, result = Util.globtopattern(identifier), false
   for _, file in ipairs(curr_dir_cache) do
     if file:match(pattern) then
       result = true
@@ -90,11 +86,12 @@ local function sub(dir, identifier)
   })
 
   local path_str = get_parent(dir)
-  local current
+  local current ---@type string
   while true do
     if is(path_str, identifier) then
       return true
     end
+
     current, path_str = path_str, get_parent(path_str)
     if current == path_str then
       return false
@@ -125,8 +122,7 @@ local function match(dir, pattern)
     pattern = { pattern, { 'string' } },
   })
 
-  local SWITCH = { ['='] = is, ['>'] = child, ['^'] = sub }
-  local first_char = pattern:sub(1, 1)
+  local SWITCH, first_char = { ['='] = is, ['>'] = child, ['^'] = sub }, pattern:sub(1, 1)
   for char, case in pairs(SWITCH) do
     if first_char == char then
       return case(dir, pattern:sub(2))
@@ -202,10 +198,10 @@ function M.open_file(path, flags, mode)
     flags = { flags, { 'string', 'number' } },
     mode = { mode, { 'number', 'nil' }, true },
   })
-  mode = (mode and Util.is_int(mode)) and mode or M.open_mode('644')
 
-  if Util.path_exists(path) then
-    return (vim.uv.fs_open(path, flags, mode)), (vim.uv.fs_stat(path))
+  if M.exists(path) then
+    return (vim.uv.fs_open(path, flags, (mode and Util.is_int(mode)) and mode or M.open_mode('644'))),
+      (vim.uv.fs_stat(path))
   end
 end
 
@@ -251,13 +247,9 @@ function M.create_path(path)
   Util.validate({ path = { path, { 'string', 'nil' }, true } })
   path = path or M.projectpath --[[@as string]]
 
-  if not Util.path_exists(path) then
+  if not M.exists(path) then
     Util.log.debug(('(project.util.path.create_path): Attempting to create directory: `%s`'):format(path))
-    if Util.vim_has('nvim-0.13') then
-      vim.fs.mkdir(path, { mode = M.open_mode('755'), parents = true })
-    else
-      assert(vim.fn.mkdir(path, 'p') == 1, ('Unable to create diretory: `%s`'):format(path))
-    end
+    assert(pcall(M.mkdir, path), ('Unable to create diretory: `%s`'):format(path))
   end
 end
 
@@ -280,16 +272,18 @@ function M.root_included(dir)
           return dir, 'custom'
         end
       end
-      if match(dir, pattern) then
-        if not excluded then
-          return dir, ('pattern %s'):format(pattern)
-        end
+
+      local matches = match(dir, pattern)
+      if not matches then
         break
+      end
+      if not excluded then
+        return dir, ('pattern %s'):format(pattern)
       end
     end
 
-    local parent = get_parent(dir)
     --- CREDITS: @pidgeon777 (https://github.com/ahmedkhalf/project.nvim/issues/187)
+    local parent = get_parent(dir)
     if parent == dir or (Util.is_windows() and parent:match('^%a:$') ~= nil) then
       break
     end
@@ -297,30 +291,51 @@ function M.root_included(dir)
   end
 end
 
+---@param path string
+---@param mode integer
+---@param parents boolean
+---@overload fun(path: string)
+---@overload fun(path: string, mode: integer)
+---@overload fun(path: string, mode: nil, parents: boolean)
+function M.mkdir(path, mode, parents)
+  Util.validate({
+    path = { path, { 'string' } },
+    mode = { mode, { 'number', 'nil' }, true },
+    parents = { parents, { 'boolean', 'nil' }, true },
+  })
+  if parents == nil then
+    parents = true
+  end
+
+  if Util.vim_has('nvim-0.13') and vim.fs and vim.fs.mkdir then
+    vim.fs.mkdir(path, { mode = mode or M.open_mode('755') or tonumber('755', 8), parents = parents })
+  else
+    vim.fn.mkdir(path, parents and 'p' or nil)
+  end
+end
+
 ---@param save_dir string
 ---@param save_file string
 function M.setup(save_dir, save_file)
-  local Defaults = require('project.config.defaults')
   Util.validate({
     save_dir = { save_dir, { 'string' } },
     save_file = { save_file, { 'string' } },
   })
 
-  if vim.fn.mkdir(save_dir, 'p') ~= 1 and not Util.path_exists(save_dir) then
-    save_dir = Defaults:_get_no_mt().history.save_dir
-    if not Util.path_exists(save_dir) then
-      assert(vim.fn.mkdir(save_dir, 'p') == 1, '(project.util.path.setup): Unable to create history directory!')
+  if not (M.exists(save_dir) or pcall(M.mkdir, save_dir)) then
+    save_dir = require('project.config.defaults'):_get_no_mt().history.save_dir
+    if not M.exists(save_dir) then
+      assert(pcall(M.mkdir, save_dir), 'Unable to create history directory')
     end
   end
 
-  M.datapath = save_dir
-  M.projectpath = vim.fs.joinpath(save_dir, 'project_nvim')
-  if not Util.path_exists(M.projectpath) then
-    assert(vim.fn.mkdir(M.projectpath, 'p') == 1, '(project.util.path.setup): Unable to create history subdirectory!')
+  M.datapath, M.projectpath = save_dir, vim.fs.joinpath(save_dir, 'project_nvim')
+  if not M.exists(M.projectpath) then
+    assert(pcall(M.mkdir, M.projectpath), 'Unable to create history subdirectories')
   end
 
   M.historyfile = vim.fs.joinpath(M.projectpath, save_file)
-  if not Util.path_exists(M.historyfile) then
+  if not M.exists(M.historyfile) then
     local fd = assert(vim.uv.fs_open(M.historyfile, 'w', M.open_mode('644')), 'Unable to create history file')
     assert(vim.uv.fs_write(fd, { '[', ']' }), 'Unable to write contents to empty history file')
     assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
