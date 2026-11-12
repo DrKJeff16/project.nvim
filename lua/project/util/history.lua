@@ -572,14 +572,13 @@ function M.write_history(path)
 
   historysize = (config.history and config.history.size and config.history.size >= 0) and config.history.size or 100
 
-  local file_history = {} ---@type ProjectHistoryEntry[]
-  local ok, fd, stat ---@type boolean, integer|nil|?, uv.fs_stat.result|nil|?
-  if path == Path.historyfile then
-    ok, fd, stat = pcall(M.open_history, 'r')
-  else
-    ok, fd, stat = pcall(Path.open_file, path, 'r')
-  end
+  ---@type boolean, integer|nil|?, uv.fs_stat.result|nil|?
+  local ok, fd, stat = pcall(unpack(path == Path.historyfile and {
+    M.open_history,
+    'r',
+  } or { Path.open_file, path, 'r' }))
 
+  local file_history = {} ---@type ProjectHistoryEntry[]
   if ok and fd and stat then
     local data = assert(vim.uv.fs_read(fd, stat.size), 'Unable to read data from history file')
     assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
