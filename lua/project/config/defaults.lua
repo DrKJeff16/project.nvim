@@ -437,7 +437,7 @@ function D:verify()
     end
   end
 
-  if self.custom_proects then
+  if self.custom_projects then
     assert(
       vim.islist(self.custom_projects),
       ('`custom_projects` is not list-like:\n`%s`'):format(vim.inspect(self.custom_projects))

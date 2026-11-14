@@ -359,20 +359,20 @@ function M.delete_project(project, prompt)
     prompt = false
   end
 
+  local value ---@type string
   if type(project) == 'table' then
     Util.validate({ project_value = { project.value, { 'string' } } })
+    value = project.value
+  elseif type(project) == 'string' then
+    value = project
   end
 
-  if not recent_projects then
-    Log.notify_error('(project.util.history.delete_project): `recent_projects` is `nil`, aborting.')
-    return
-  end
-
-  local proj = type(project) == 'string' and project or project.value
-  if prompt and vim.fn.confirm(("Delete '%s' from project list?"):format(proj), '&Yes\n&No', 2) ~= 1 then
-    Log.info('(project.util.history.delete_project): Aborting project deletion.')
-  elseif M.remove_session(proj, M.remove_recent(proj)) then
-    Log.notify_info(('(project.util.history.delete_project): Deleting project `%s`.'):format(proj))
+  if #recent_projects == 0 then
+    Log.notify_error('(project.util.history.delete_project): `recent_projects` is empty, aborting')
+  elseif prompt and vim.fn.confirm(("Delete '%s' from project list?"):format(value), '&Yes\n&No', 2) ~= 1 then
+    Log.info('(project.util.history.delete_project): Aborting project deletion')
+  elseif M.remove_session(value, M.remove_recent(value)) then
+    Log.notify_info(('(project.util.history.delete_project): Deleting project `%s`'):format(value))
     M.write_history()
   end
 end

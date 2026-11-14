@@ -102,7 +102,7 @@ function M.setup(opts)
   -- WARN: THIS GOES FIRST!!!!
   if not (Util.path.exists(Util.path.projectpath) or pcall(Util.path.mkdir, Util.path.projectpath, nil, true)) ~= 1 then
     Util.path.datapath = M.get_defaults():_get_no_mt().history.save_dir
-    Util.path.projectpath = Util.path.join(Util.path.projectpath, 'project_nvim')
+    Util.path.projectpath = Util.path.join(Util.path.datapath, 'project_nvim')
     if not Util.path.exists(Util.path.projectpath) then
       assert(pcall(Util.path.mkdir, Util.path.projectpath, nil, true), 'Unable to create history directory')
     end
