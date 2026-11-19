@@ -689,7 +689,7 @@ function M.setup()
     group = group,
     once = true,
     callback = function()
-      Util.history.write_history()
+      pcall(Util.history.write_history)
     end,
   })
   vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
