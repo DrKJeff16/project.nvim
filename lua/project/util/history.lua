@@ -637,8 +637,8 @@ function M.write_history(path)
     end
 
     assert(vim.uv.fs_write(fd, out), 'Unable to write to history file')
+    assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
   end
-  assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
 end
 
 ---@overload fun(search: 'session'|'recent', value: string, key: 'patth'|'name'): entry_field: string|nil|?
