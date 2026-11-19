@@ -171,24 +171,22 @@ function M.get_last(full_entry)
     full_entry = false
   end
 
-  if not current_project then
-    return
-  end
-
-  local session = Util.history.get_session_projects()
-  local recent = Util.reverse(Util.history.get_recent_projects())
-  local tbl = #session >= 2 and session or (#recent >= 2 and recent or nil) ---@type ProjectHistoryEntry[]|nil|?
-  if tbl then
-    local idx = nil ---@type integer|nil|?
-    for i = 1, #tbl do
-      if current_project ~= tbl[i].path then
-        idx = i
-        break
+  if current_project then
+    local session = Util.history.get_session_projects()
+    local recent = Util.reverse(Util.history.get_recent_projects())
+    local tbl = #session >= 2 and session or (#recent >= 2 and recent or nil) ---@type ProjectHistoryEntry[]|nil|?
+    if tbl then
+      local idx = nil ---@type integer|nil|?
+      for i = 1, #tbl do
+        if current_project ~= tbl[i].path then
+          idx = i
+          break
+        end
       end
-    end
-    if idx then
-      last_project = tbl[idx].path
-      return full_entry and tbl[idx] or tbl[idx].path
+      if idx then
+        last_project = tbl[idx].path
+        return full_entry and tbl[idx] or tbl[idx].path
+      end
     end
   end
 end

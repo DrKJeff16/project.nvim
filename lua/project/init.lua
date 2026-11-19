@@ -1,13 +1,12 @@
 ---@module 'project._meta'
 
-local Util = require('project.util')
-
 ---@generic T: table, F
 ---@param t T
 ---@param k any
 ---@param fallback F
 ---@return F fallback
 local function get(t, k, fallback)
+  local Util = require('project.util')
   return Util.get(t, k, function()
     return Util.rawset(t, k, fallback)
   end, true)
@@ -46,6 +45,7 @@ local M = {}
 
 setmetatable(M, {
   __index = function(self, k) ---@param self Project
+    local Util = require('project.util')
     local raw = Util.get(self, k)
     if raw ~= nil then
       return raw
@@ -117,37 +117,35 @@ function M.current_project(refresh)
   end
 
   if refresh then
-    M.util.log.debug('(project.current_project): Refreshing current project info.')
+    M.util.log.debug('(project.current_project): Refreshing current project info')
     return M.core.get_current()
   end
 
-  M.util.log.debug('(project.current_project): Not refreshing current project info.')
+  M.util.log.debug('(project.current_project): Not refreshing current project info')
   return M.core.get_current_project(), M.core.get_current_method(), M.core.get_last_project()
 end
 
 ---Removes specific root patterns from `project.nvim`'s config.
 ---
----Invalid values will raise a warning!
+---Invalid values will raise a warning.
 --- ---
 ---@param patterns string[]|string The string or list of strings containing the matching pattern(s).
 function M.remove_root_patterns(patterns)
-  assert(vim.g.project_setup ~= 1, '(project.remove_root_patterns): `project.nvim` is not setup!')
+  assert(vim.g.project_setup ~= 1, '`project.nvim` is not setup')
 
   M.util.validate({ patterns = { patterns, { 'string', 'table' } } })
 
   local pats = M.config.get().patterns
-  assert(pats and type(pats) == 'table', '(project.remove_root_patterns): Config values are unaccessible!')
+  assert(pats and type(pats) == 'table', 'Config values are unaccessible')
 
-  if type(patterns) == 'table' and #patterns == 0 then
-    M.util.log.notify_error('(project.remove_root_patterns): Patterns table is empty!')
-  elseif type(patterns) == 'table' then
+  if type(patterns) == 'table' then
     for _, pat in ipairs(patterns) do
       if type(pat) == 'string' then
         M.remove_root_patterns(pat)
       end
     end
   elseif patterns == '' then
-    M.util.log.notify_warn(('(project.remove_root_patterns): Skipping empty pattern: `%s`'):format(patterns))
+    M.util.log.notify_warn('(project.remove_root_patterns): Skipping empty pattern')
   elseif not vim.list_contains(pats, patterns) then
     M.util.log.notify_warn(('(project.remove_root_patterns): Skipping unavailable pattern: `%s`'):format(patterns))
   else
@@ -170,30 +168,25 @@ end
 --- ---
 ---@param patterns string[]|string The string or list of strings containing the new pattern(s).
 function M.add_root_patterns(patterns)
-  assert(vim.g.project_setup == 1, '(project.add_root_patterns): `project.nvim` is not setup!')
+  assert(vim.g.project_setup == 1, '`project.nvim` is not setup')
 
   M.util.validate({ patterns = { patterns, { 'string', 'table' } } })
 
   local pats = M.config.get().patterns
-  assert(pats and type(pats) == 'table', '(project.add_root_patterns): Config values are unaccessible!')
+  assert(pats and type(pats) == 'table', 'Config values are unaccessible')
 
-  if type(patterns) == 'string' then
-    if patterns == '' or vim.list_contains(pats, patterns) then
-      M.util.log.notify_warn(
-        ('(project.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(patterns)
-      )
-    else
-      table.insert(pats, patterns)
-      M.config.set('patterns', pats)
-    end
-  elseif not #patterns > 0 and vim.islist(patterns) then
+  if type(patterns) == 'string' and patterns == '' or vim.list_contains(pats, patterns) then
+    M.util.log.notify_warn(('(project.add_root_patterns): Ignoring empty or duplicate pattern: `%s`'):format(patterns))
+  elseif type(patterns) == 'string' and patterns ~= '' and not vim.list_contains(pats, patterns) then
+    table.insert(pats, patterns)
+    M.config.set('patterns', pats)
+  else
+    assert(vim.islist(patterns), 'Patterns table is not a list')
     for _, pat in ipairs(patterns) do
       if type(pat) == 'string' then
         M.add_root_patterns(pat)
       end
     end
-  else
-    M.util.log.notify_error('(project.add_root_patterns): Patterns table is empty or not a list!')
   end
 end
 
