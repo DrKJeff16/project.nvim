@@ -164,7 +164,7 @@ function M.same_type_list(list, t)
 
   assert(
     t ~= nil and vim.list_contains({ 'boolean', 'userdata', 'string', 'function', 'number', 'thread', 'table' }, t),
-    ('(project.util.same_type_list): Invalid type `%s`'):format(t)
+    ('Invalid type `%s`'):format(t)
   )
 
   if not vim.islist(list) then
@@ -486,7 +486,7 @@ function M.range(x, y, step)
     step = { step, { 'number', 'nil' }, true },
   })
 
-  assert(M.is_int(x), ('(project.util.range): Argument `x` is not an integer: `%s`'):format(x))
+  assert(M.is_int(x), ('Argument `x` is not an integer: `%s`'):format(x))
 
   local range_list = {} ---@type integer[]
   if not (y or step) then
@@ -498,7 +498,7 @@ function M.range(x, y, step)
       table.insert(range_list, v)
     end
   elseif y and not step then
-    assert(M.is_int(y), ('(project.util.range): Argument `y` is not an integer: `%s`'):format(y))
+    assert(M.is_int(y), ('Argument `y` is not an integer: `%s`'):format(y))
     step = x <= y and 1 or -1
 
     table.insert(range_list, x)
@@ -506,10 +506,10 @@ function M.range(x, y, step)
       table.insert(range_list, v)
     end
   elseif y and step then
-    assert(M.is_int({ y, step }), '(project.util.range): Arguments `y` and/or `step` are not an integer!')
-    assert(step ~= 0, '(project.util.range): Argument `step` cannot be `0`!')
+    assert(M.is_int({ y, step }), 'Arguments `y` and/or `step` are not an integer')
+    assert(step ~= 0, 'Argument `step` cannot be `0`')
     if x > y then
-      assert(step >= 1, '(project.util.range): Index out of bounds!')
+      assert(step >= 1, 'Index out of bounds')
 
       if step <= -1 then
         x, y = y, x
@@ -522,7 +522,7 @@ function M.range(x, y, step)
       table.insert(range_list, v)
     end
   else
-    error(('(project.util.range): Argument `y` is nil while `step` is not: `%s`'):format(step))
+    error(('Argument `y` is nil while `step` is not: `%s`'):format(step))
   end
 
   table.sort(range_list)

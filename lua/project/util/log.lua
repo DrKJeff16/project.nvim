@@ -191,9 +191,9 @@ function M.read_log()
   local stat = vim.uv.fs_stat(logfile)
   local data = nil ---@type string|nil|?
   if stat then
-    data = assert((vim.uv.fs_read(fd, stat.size)), '(project.util.log.read_log): Unable to read logfile')
+    data = assert((vim.uv.fs_read(fd, stat.size)), 'Unable to read logfile')
   end
-  assert(vim.uv.fs_close(fd), '(project.util.log.read_log): Unable to close file descriptor for logfile')
+  assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for logfile')
   return data
 end
 
@@ -213,15 +213,13 @@ local function timer_cb()
     return
   end
 
-  local fd = assert(
-    vim.uv.fs_open(logfile, 'w', Path.open_mode('644')),
-    ('(project.util.log.timer_cb): Unable to open logfile: `%s`'):format(logfile)
-  )
+  local fd =
+    assert(vim.uv.fs_open(logfile, 'w', Path.open_mode('644')), ('Unable to open logfile: `%s`'):format(logfile))
   assert(vim.uv.fs_ftruncate(fd, 0), ('`%s` could not be cleared'):format(Util.strip_slash(logfile, ':~')))
 
   vim.notify(('(project.util.log.timer_cb): `%s` has been cleared'):format(Util.strip_slash(logfile, ':~')), INFO)
 
-  assert(vim.uv.fs_close(fd), '(project.util.log.timer_cb): Unable to close file descriptor for logfile')
+  assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for logfile')
 end
 
 local function make_timer()
@@ -229,7 +227,7 @@ local function make_timer()
     return
   end
 
-  timer = assert(vim.uv.new_timer(), '(project.util.log.make_timer): Unable to create timer')
+  timer = assert(vim.uv.new_timer(), 'Unable to create timer')
 
   timer:start(10000, 900000, vim.schedule_wrap(timer_cb))
 
@@ -252,7 +250,7 @@ local function setup_watch()
     return
   end
 
-  event = assert(vim.uv.new_fs_event(), '(project.util.log.setup_watch): Unable to create fs event')
+  event = assert(vim.uv.new_fs_event(), 'Unable to create fs event')
 
   make_timer()
   vim.g.project_log_has_watch_setup = 1
@@ -281,8 +279,8 @@ function M.write(data, lvl)
       end)
     end
 
-    assert(vim.uv.fs_write(fd, msg), '(project.util.log.write): Unable to write data to logfile')
-    assert(vim.uv.fs_close(fd), '(project.util.log.write): Unable to close file descriptor for logfile')
+    assert(vim.uv.fs_write(fd, msg), 'Unable to write data to logfile')
+    assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for logfile')
     return msg
   end
 end
@@ -375,7 +373,7 @@ function M.open_win()
     M.notify_warn('(project.util.log.open_win): Log has been cleared, try restarting')
     return
   end
-  assert(Path.exists(logfile), '(project.util.log.open_win): Bad logfile path')
+  assert(Path.exists(logfile), 'Bad logfile path')
 
   local fd = assert(vim.uv.fs_open(logfile, 'r', Path.open_mode('644')), 'Unable to open logfile')
   local stat = vim.uv.fs_stat(logfile)

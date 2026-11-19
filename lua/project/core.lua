@@ -641,12 +641,9 @@ function M.root_files(scan_what, path, prefix)
       'visible_directories',
       'visible_files',
     }, scan_what),
-    ('(project.core.root_files): Invalid parameter `%s`!'):format(scan_what)
+    ('Invalid parameter: `%s`'):format(scan_what)
   )
-  assert(
-    Util.path.exists(path) and vim.fn.isdirectory(path) == 1,
-    ('(project.core.root_files): Invalid path `%s`!'):format(path)
-  )
+  assert(Util.path.exists(path) and vim.fn.isdirectory(path) == 1, ('Invalid path: `%s`'):format(path))
 
   local dir = vim.uv.fs_scandir(path)
   if dir then

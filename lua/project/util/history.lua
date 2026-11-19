@@ -628,12 +628,9 @@ function M.write_history(path)
 
     local success, out = pcall(vim.json.encode, file_history) ---@type boolean, string|nil|?
     if not (success and out) then
-      assert(
-        vim.uv.fs_close(fd),
-        '(project.util.history.write_history): Unable to close file descriptor for history file'
-      )
+      assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
       Log.error('(project.util.history.write_history): Unable to encode JSON data')
-      error('(project.util.history.write_history): Unable to encode JSON data')
+      error('Unable to encode JSON data')
     end
 
     assert(vim.uv.fs_write(fd, out), 'Unable to write to history file')
