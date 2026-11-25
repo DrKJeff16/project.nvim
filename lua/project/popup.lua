@@ -243,7 +243,7 @@ M.delete_menu = new_popup({
     end
     return T
   end,
-})
+}) --[[@as fun()]]
 
 M.rename_menu = new_popup({
   callback = function(self)
@@ -296,7 +296,7 @@ M.rename_menu = new_popup({
     end
     return T
   end,
-})
+}) --[[@as fun()]]
 
 M.recents_menu = new_popup({
   callback = function(self)
@@ -337,7 +337,7 @@ M.recents_menu = new_popup({
     end
     return choices
   end,
-})
+}) --[[@as fun()]]
 
 M.open_menu = new_popup({
   callback = function(self, ctx)
@@ -414,7 +414,7 @@ M.open_menu = new_popup({
     end
     return res_list
   end,
-})
+}) --[[@as fun(ctx: vim.api.keyset.create_user_command.command_args)]]
 
 M.session_menu = new_popup({
   callback = function(self, ctx)
@@ -461,7 +461,7 @@ M.session_menu = new_popup({
     table.insert(choices, 'Exit')
     return choices
   end,
-})
+}) --[[@as fun(ctx: vim.api.keyset.create_user_command.command_args)]]
 
 return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

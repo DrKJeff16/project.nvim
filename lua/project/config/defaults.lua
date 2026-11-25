@@ -188,7 +188,7 @@ function D:gen_methods()
   self:verify_lsp()
 
   -- TODO: Figure out the best order for detection methods, or outright make it customizable again,
-  -- though the latter WILL require a chunk of the code to be refactored!
+  -- though the latter WILL require a chunk of the code to be refactored
   local methods = { 'pattern' } ---@type ('git'|'lsp'|'pattern')[]
   if self.use_git and Util.executable('git') then
     table.insert(methods, 1, 'git')
@@ -199,7 +199,7 @@ function D:gen_methods()
 
   setmetatable(methods, {
     __newindex = function()
-      error('project.nvim - Detection methods are immutable!')
+      error('project.nvim - Detection methods are immutable')
     end,
   })
   return methods
@@ -348,7 +348,7 @@ function D:verify_fzf_lua()
 
   if not vim.list_contains({ 'newest', 'oldest' }, self.fzf_lua.sort) then
     vim.notify(
-      ('project.nvim - `fzf_lua.sort` is not a valid value! (`%s`)\nResetting to default'):format(self.fzf_lua.sort),
+      ('project.nvim - `fzf_lua.sort` is not a valid value: `%s`\nResetting to default'):format(self.fzf_lua.sort),
       vim.log.levels.ERROR
     )
     self.fzf_lua.sort = 'newest'

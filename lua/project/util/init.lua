@@ -31,7 +31,7 @@ setmetatable(M, {
     end
 
     ---@cast k string
-    if self.mod_exists('project.util.' .. k, true) then
+    if self.mod_exists('project.util.' .. k, true) and k ~= 'init' then
       return get(self, k, require('project.util.' .. k))
     end
   end,

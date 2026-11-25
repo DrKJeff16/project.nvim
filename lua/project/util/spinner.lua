@@ -55,8 +55,7 @@ local S = {}
 function S:start()
   if not self.running then
     require('spinner').start(self.id)
-    self.paused = false
-    self.running = true
+    self.paused, self.running = false, true
   end
 end
 
@@ -69,16 +68,14 @@ end
 function S:stop()
   if self.running then
     require('spinner').stop(self.id)
-    self.paused = false
-    self.running = false
+    self.paused, self.running = false, false
   end
 end
 
 function S:reset()
   if self.running then
     require('spinner').reset(self.id)
-    self.paused = false
-    self.running = false
+    self.paused, self.running = false, false
   end
 end
 

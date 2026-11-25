@@ -2,15 +2,12 @@
 
 local Util = require('project.util')
 
----@class Project.Health
-local M = {}
-
 ---@return boolean setup_called
 ---@nodiscard
 local function setup_check()
   vim.health.start('Setup')
   if not vim.g.project_setup == 1 then
-    vim.health.error('`setup()` has not been called!')
+    vim.health.error('`setup()` has not been called')
     return false
   end
 
@@ -143,10 +140,10 @@ end
 local function fzf_lua_check()
   vim.health.start('`fzf-lua` Integration')
   if require('project.config').get().fzf_lua.enabled and vim.g.project_fzf_lua_loaded == 1 then
-    vim.health.ok('`fzf-lua` integration enabled!')
-    vim.health.ok('`:Project fzf-lua` user command available!')
+    vim.health.ok('`fzf-lua` integration enabled.')
+    vim.health.ok('`:Project fzf-lua` user command available.')
   else
-    vim.health.warn('`fzf-lua` integration is disabled. This does not represent an issue necessarily!')
+    vim.health.warn('`fzf-lua` integration is disabled. This does not represent an issue necessarily.')
   end
 end
 
@@ -170,6 +167,9 @@ If this keeps appearing, though, check your config
 and submit an issue if pertinent.]])
   end
 end
+
+---@class Project.Health
+local M = {}
 
 ---This is called when running `:checkhealth project`.
 --- ---

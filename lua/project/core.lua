@@ -11,34 +11,60 @@ local current_method = nil ---@type string|nil|?
 local current_project = nil ---@type string|nil|?
 local last_project = nil ---@type string|nil|?
 
+---@generic T: table, F
+---@param t T
+---@param k any
+---@param fallback F
+---@return F fallback
+local function get(t, k, fallback)
+  return Util.get(t, k, function()
+    return Util.rawset(t, k, fallback)
+  end, true)
+end
+
 ---The `project.nvim` API module.
 --- ---
 ---@class Project.Core
+---@field get_current_method fun(): current_method: string|nil|?
+---@field get_current_project fun(): current_project: string|nil|?
+---@field get_last_project fun(): last_project: string|nil|?
+---@field get_per_project_bufs fun(): per_project_bufs: table<string, table<string, integer[]>>
 local M = {}
 
----@return string|nil|? current_project
----@nodiscard
-function M.get_current_project()
-  return current_project
-end
+setmetatable(M, {
+  __index = function(self, k)
+    local raw = Util.get(self, k)
+    if raw ~= nil then
+      return raw
+    end
 
----@return string|nil|? current_method
----@nodiscard
-function M.get_current_method()
-  return current_method
-end
+    if type(k) ~= 'string' then
+      return
+    end
 
----@return string|nil|? last_project
----@nodiscard
-function M.get_last_project()
-  return last_project
-end
-
----@return table<string, table<string, integer[]>> per_project_bufs
----@nodiscard
-function M.get_per_project_bufs()
-  return per_project_bufs
-end
+    ---@cast k string
+    if k == 'get_current_project' then
+      return get(self, k, function()
+        return current_project
+      end)
+    end
+    if k == 'get_current_method' then
+      return get(self, k, function()
+        return current_method
+      end)
+    end
+    if k == 'get_last_project' then
+      return get(self, k, function()
+        return last_project
+      end)
+    end
+    if k == 'get_per_project_bufs' then
+      return get(self, k, function()
+        return per_project_bufs
+      end)
+    end
+  end,
+})
 
 ---@param bufnr integer
 ---@return string|nil|? dir
@@ -143,7 +169,7 @@ function M.check_oil(bufnr, directory)
 
   local ok, oil = pcall(require, 'oil')
   if not (ok and oil) then
-    return bufnr and vim.api.nvim_buf_get_name(bufnr) or (directory and directory or nil)
+    return bufnr and vim.api.nvim_buf_get_name(bufnr) or (directory or nil)
   end
 
   local dir = nil ---@type string|nil|?
@@ -466,9 +492,9 @@ function M.set_pwd(opts)
       and #vim.api.nvim_get_autocmds({ event = 'User', group = group, pattern = { 'ProjectAttachPost' } }) > 0
     then
       vim.api.nvim_exec_autocmds('User', {
+        data = { dir = dir, method = method, bufnr = bufnr },
         group = group,
         pattern = 'ProjectAttachPost',
-        data = { dir = dir, method = method, bufnr = bufnr },
       })
     end
 
@@ -614,9 +640,8 @@ end
 ---@overload fun(scan_what: Project.Core.ScanRoot, path: nil, prefix: string): files_list: string[]|nil|?
 ---@nodiscard
 function M.root_files(scan_what, path, prefix)
-  if vim.g.project_setup ~= 1 then
-    return
-  end
+  assert(vim.g.project_setup == 1, 'project.nvim has not been configured')
+
   Util.validate({
     scan_what = { scan_what, { 'string', 'nil' }, true },
     path = { path, { 'string', 'nil' }, true },

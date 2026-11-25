@@ -71,7 +71,7 @@ function M.setup()
   end
 
   if not Util.mod_exists('fzf-lua', true) then
-    Util.log.notify_error('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed!')
+    Util.log.notify_error('(project.extensions.fzf-lua.setup): `fzf-lua` is not installed')
     vim.g.project_fzf_lua_loaded = 0
   else
     vim.g.project_fzf_lua_loaded = 1
@@ -106,14 +106,14 @@ function M.run_sessions()
   })
 end
 
----This runs assuming you have FZF-Lua installed!
+---This runs assuming you have FZF-Lua installed.
 ---
 ---CREDITS: [@deathmaz](https://github.com/ahmedkhalf/project.nvim/issues/71#issuecomment-1212993659)
 --- ---
 function M.run()
-  assert(Util.mod_exists('fzf-lua', true), '`fzf-lua` is not installed!')
+  assert(Util.mod_exists('fzf-lua', true), '`fzf-lua` is not installed')
 
-  Util.log.info('(project.extensions.fzf-lua.run): Running `fzf_exec`.')
+  Util.log.info('(project.extensions.fzf-lua.run): Running `fzf_exec`')
 
   local Fzf = require('fzf-lua')
   Fzf.fzf_exec(exec, {

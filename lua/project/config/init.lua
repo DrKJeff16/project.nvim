@@ -122,7 +122,7 @@ function M.setup(opts)
 
   assert(
     Util.path.datapath and Util.path.projectpath and Util.path.historyfile,
-    'Failed to store history path successfully!'
+    'Failed to store history path successfully'
   )
 
   if options.log.enabled then
@@ -183,7 +183,7 @@ end
 ---@return string config
 ---@nodiscard
 function M.get_config()
-  assert(vim.g.project_setup == 1, '(project.config.get_config): `project.nvim` is not set up!')
+  assert(vim.g.project_setup == 1, '`project.nvim` is not set up')
   local opts = options:_get_no_mt()
   table.sort(opts)
   return vim.inspect(opts)
