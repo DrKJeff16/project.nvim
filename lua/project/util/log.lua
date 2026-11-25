@@ -183,11 +183,7 @@ function M.read_log()
     return
   end
 
-  local fd = M.open('r')
-  if not fd then
-    return
-  end
-
+  local fd = assert(M.open('r'), 'Unable to open logfile')
   local stat = vim.uv.fs_stat(logfile)
   local data = nil ---@type string|nil|?
   if stat then
@@ -213,12 +209,10 @@ local function timer_cb()
     return
   end
 
-  local fd =
-    assert(vim.uv.fs_open(logfile, 'w', Path.open_mode('644')), ('Unable to open logfile: `%s`'):format(logfile))
+  local fd = assert(Path.open_file(logfile, Path.open_mode('644')), ('Unable to open logfile: `%s`'):format(logfile))
   assert(vim.uv.fs_ftruncate(fd, 0), ('`%s` could not be cleared'):format(Util.strip_slash(logfile, ':~')))
 
   vim.notify(('(project.util.log.timer_cb): `%s` has been cleared'):format(Util.strip_slash(logfile, ':~')), INFO)
-
   assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for logfile')
 end
 
@@ -375,13 +369,12 @@ function M.open_win()
   end
   assert(Path.exists(logfile), 'Bad logfile path')
 
-  local fd = assert(vim.uv.fs_open(logfile, 'r', Path.open_mode('644')), 'Unable to open logfile')
   local stat = vim.uv.fs_stat(logfile)
   if not stat then
-    assert(vim.uv.fs_close(fd), 'Unable to close file descriptor')
     return
   end
 
+  local fd = assert(vim.uv.fs_open(logfile, 'r', Path.open_mode('644')), 'Unable to open logfile')
   local data = assert(vim.uv.fs_read(fd, stat.size), 'Unable to read logfile')
   assert(vim.uv.fs_close(fd), 'Unable to close file descriptor')
 

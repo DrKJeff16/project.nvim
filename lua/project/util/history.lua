@@ -140,7 +140,7 @@ function M.clear_historyfile(force)
     Log.info('(project.util.history.clear_historyfile): Aborting.')
   else
     local fd = assert(Path.open_file(Path.historyfile, 'w'), 'Unable to open history file')
-    assert(vim.uv.fs_write(fd, { '[', ']' }), 'Unable to clear history file')
+    assert(vim.uv.fs_write(fd, '[]'), 'Unable to clear history file')
     assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
 
     Log.notify_warn('(project.util.history.clear_historyfile): History file cleared successfully.')
@@ -162,10 +162,7 @@ function M.open_history(mode)
   Path.create_path()
 
   if not Path.exists(Path.historyfile) then
-    local fd = assert(
-      vim.uv.fs_open(Path.historyfile, 'w', tonumber('644')),
-      ('Unable to open history file: `%s`'):format(Path.historyfile)
-    )
+    local fd = assert(vim.uv.fs_open(Path.historyfile, 'w', tonumber('644')), 'Unable to open history file')
     assert(vim.uv.fs_write(fd, '[]'), 'Unable to write to empty history file')
     assert(vim.uv.fs_close(fd), 'Unable to close file descriptor for history file')
   end
